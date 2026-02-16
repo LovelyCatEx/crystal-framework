@@ -1,0 +1,66 @@
+name: springboot-template
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - template_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - template_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=master@lovelycatv.com
+      - PGADMIN_DEFAULT_PASSWORD=master@lovelycatv.com
+      - PGADMIN_CONFIG_SERVER_MODE=True
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=True
+    ports:
+      - "5050:80"
+    volumes:
+      - template_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - template_network
+
+  redis:
+    image: redis:8.2
+    container_name: redis
+    command: redis-server --requirepass $REDIS_PASSWORD
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - template_redis_data:/data
+    restart: unless-stopped
+    networks:
+      - template_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  template_postgres_data:
+  template_pgadmin_data:
+  template_redis_data:
+
+networks:
+  template_network:
+    driver: bridge

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: springboot-template
+  r2dbc:
+    url: r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    pool:
+      initial-size: 20
+      max-size: 40
+      max-idle-time: 30m
+      validation-query: SELECT 1
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.r2dbc: DEBUG
