@@ -3,7 +3,9 @@ package com.lovelycatv.template.springboot.shared.service.mail
 import org.springframework.mail.javamail.JavaMailSender
 
 interface MailService {
-    fun getJavaMailSender(): JavaMailSender
+    fun refreshInstance()
 
-    fun sendMail(to: String, subject: String, content: String)
+    suspend fun getJavaMailSender(): JavaMailSender
+
+    suspend fun sendMail(to: String, subject: String, content: String)
 }

@@ -2,7 +2,9 @@ package com.lovelycatv.template.springboot.system.entity
 
 import com.lovelycatv.template.springboot.shared.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
+@Table("system_settings")
 class SystemSettingsEntity(
     id: Long = 0,
     @Column(value = "config_key")
