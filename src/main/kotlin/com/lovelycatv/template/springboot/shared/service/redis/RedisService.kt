@@ -1,13 +1,6 @@
 package com.lovelycatv.template.springboot.shared.service.redis
 
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
-import org.springframework.data.redis.core.ReactiveGeoOperations
-import org.springframework.data.redis.core.ReactiveHashOperations
-import org.springframework.data.redis.core.ReactiveHyperLogLogOperations
-import org.springframework.data.redis.core.ReactiveListOperations
-import org.springframework.data.redis.core.ReactiveSetOperations
-import org.springframework.data.redis.core.ReactiveValueOperations
-import org.springframework.data.redis.core.ReactiveZSetOperations
+import org.springframework.data.redis.core.*
 import reactor.core.publisher.Mono
 import java.time.Duration
 
@@ -16,29 +9,27 @@ interface RedisService {
 
     fun removeKey(vararg key: String): Mono<Long>
 
-    fun <T> opsForValue(): ReactiveValueOperations<String, T>
+    fun <T: Any> opsForValue(): ReactiveValueOperations<String, T>
 
-    fun <T> get(key: String): Mono<T?>
+    fun <T: Any> get(key: String): Mono<T>
 
-    fun <T> set(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T: Any> set(key: String, value: T, duration: Duration? = null): Mono<Boolean>
 
-    fun <T> setIfAbsent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T: Any> setIfAbsent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
 
-    fun <T> setIfPresent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T: Any> setIfPresent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
 
-    fun <T> setBit(key: String, offset: Long, value: Boolean): Mono<Boolean>
+    fun <T: Any> setBit(key: String, offset: Long, value: Boolean): Mono<Boolean>
 
-    fun <K, V> opsForHash(): ReactiveHashOperations<String, K, V>
+    fun <K: Any, V: Any> opsForHash(): ReactiveHashOperations<String, K, V>
 
-    fun <T> opsForList(): ReactiveListOperations<String, T>
+    fun <T: Any> opsForList(): ReactiveListOperations<String, T>
 
-    fun <T> opsForSet(): ReactiveSetOperations<String, T>
+    fun <T: Any> opsForSet(): ReactiveSetOperations<String, T>
 
-    fun <T> opsForZSet(): ReactiveZSetOperations<String, T>
+    fun <T: Any> opsForZSet(): ReactiveZSetOperations<String, T>
 
-    fun <T> opsForGeo(): ReactiveGeoOperations<String, T>
+    fun <T: Any> opsForGeo(): ReactiveGeoOperations<String, T>
 
-    fun <T> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T>
-
-    fun <T> toKVStore(clazz: Class<T>): ExpiringKVStore<String, T>
+    fun <T: Any> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T>
 }

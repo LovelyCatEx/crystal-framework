@@ -4,6 +4,7 @@ import com.lovelycatv.template.springboot.rbac.entity.UserRoleEntity
 import com.lovelycatv.template.springboot.rbac.repository.UserRoleRepository
 import com.lovelycatv.template.springboot.rbac.service.UserRoleService
 import com.lovelycatv.template.springboot.shared.utils.awaitListWithTimeout
+import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
 
 @Service

@@ -14,14 +14,14 @@ class RedisConfig {
     fun reactiveRedisTemplate(
         reactiveRedisConnectionFactory: ReactiveRedisConnectionFactory,
         // objectMapper: tools.jackson.databind.ObjectMapper,
-    ): ReactiveRedisTemplate<String, Any?> {
+    ): ReactiveRedisTemplate<String, Any> {
         val stringSerializer = RedisSerializer.string()
 
         val jsonSerializer = JacksonJsonRedisSerializer(Any::class.java)
         // val jsonSerializer = GenericJacksonJsonRedisSerializer(objectMapper)
 
         val serializationContext = RedisSerializationContext
-            .newSerializationContext<String, Any?>()
+            .newSerializationContext<String, Any>()
             .key(stringSerializer)
             .value(jsonSerializer)
             .hashKey(stringSerializer)

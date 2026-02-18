@@ -7,7 +7,9 @@ spring:
       initial-size: 20
       max-size: 40
       max-idle-time: 30m
-      validation-query: SELECT 1
+#      validation-query: SELECT 1
+    properties:
+      preferQueryMode: simple
   data:
     redis:
       host: ${REDIS_HOST}
@@ -19,3 +21,4 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.r2dbc: DEBUG
+    io.r2dbc.postgresql: DEBUG

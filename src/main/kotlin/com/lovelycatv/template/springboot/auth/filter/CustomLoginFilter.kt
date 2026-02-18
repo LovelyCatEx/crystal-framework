@@ -14,6 +14,8 @@ import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.utils.JwtUtil
 import com.lovelycatv.template.springboot.shared.utils.toJSONString
+import com.lovelycatv.template.springboot.user.entity.UserEntity
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -33,14 +35,13 @@ class CustomLoginFilter(
         )
 
         setServerAuthenticationConverter { exchange ->
-            exchange.formData
-                .cache()
+           exchange.formData
                 .handle { params, sink ->
                     val username = params["username"]
                     val password = params["password"]
 
                     if (username == null || password == null) {
-                        sink.error(BusinessException("Username or password is missing"))
+                        sink.error(BusinessException("username or password is missing"))
                         return@handle
                     }
 
@@ -52,21 +53,25 @@ class CustomLoginFilter(
         }
 
         setAuthenticationSuccessHandler { exchange, authentication ->
-            println("${authentication.principal.toJSONString()}")
             val data = LoginSuccessResponseData().apply {
                 token = JwtUtil.buildJwtToken(
                     signKey = "SpringBootTemplate",
                     authorities = authentication.authorities,
                     authentication = authentication,
                     expiration = 7 * 24 * 3600 * 1000L
-                )
+                ) {
+                    val principal = authentication.principal as UserEntity
+
+                    this.claim("userId", principal.id.toString())
+                }
+
                 expiresIn = 7 * 24 * 3600 * 1000L
             }
 
             exchange.exchange.response.statusCode = HttpStatus.OK
             exchange.exchange.response.writeWith(
                 exchange.exchange.response.bufferFactory().wrap(
-                    data.toJSONString().toByteArray()
+                    ApiResponse.success(data).toJSONString().toByteArray()
                 ).toMono()
             )
         }

@@ -1,6 +1,7 @@
 package com.lovelycatv.template.springboot.user.service
 
 import com.lovelycatv.template.springboot.shared.service.BaseService
+import com.lovelycatv.template.springboot.user.controller.vo.UserProfileVO
 import com.lovelycatv.template.springboot.user.entity.UserEntity
 import com.lovelycatv.template.springboot.user.repository.UserRepository
 import com.lovelycatv.template.springboot.user.service.result.UserRbacQueryResult
@@ -16,5 +17,11 @@ interface UserService : BaseService<UserRepository, UserEntity, Long>, ReactiveU
 
     suspend fun requestRegisterEmailConfirmationCode(email: String)
 
+    suspend fun resetPassword(email: String, emailCode: String, newPassword: String)
+
+    suspend fun requestResetPasswordEmailConfirmationCode(email: String)
+
     suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult
+
+    suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
 }

@@ -11,4 +11,6 @@ interface UserRepository : ReactiveCrudRepository<UserEntity, Long> {
         username: String,
         email: String
     ): Mono<UserEntity>
+
+    fun findByEmail(email: String): Mono<UserEntity>
 }
