@@ -15,18 +15,24 @@ import reactor.core.publisher.Mono
 interface UserPermissionRepository : R2dbcRepository<UserPermissionEntity, Long> {
     fun id(id: Long): MutableList<UserPermissionEntity>
 
+    @Query("SELECT * FROM user_permissions LIMIT :limit OFFSET :offset")
+    fun findAllByPage(
+        limit: Int,
+        offset: Int
+    ): Flux<UserPermissionEntity>
+
     @Query("""
         SELECT * FROM user_permissions 
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
-           AND id > :lastId
         ORDER BY created_time DESC
         LIMIT :limit
+        OFFSET :offset
     """)
     fun searchByKeywordWithCursor(
         keyword: String,
-        lastId: Long,
-        limit: Int
+        limit: Int,
+        offset: Int,
     ): Flux<UserPermissionEntity>
 
     @Query("""

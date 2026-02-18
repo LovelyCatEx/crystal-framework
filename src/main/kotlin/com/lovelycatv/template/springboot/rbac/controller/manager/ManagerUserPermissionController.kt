@@ -7,6 +7,7 @@ import com.lovelycatv.template.springboot.rbac.controller.manager.dto.ManagerUpd
 import com.lovelycatv.template.springboot.rbac.entity.UserPermissionEntity
 import com.lovelycatv.template.springboot.rbac.service.UserPermissionManagerService
 import com.lovelycatv.template.springboot.rbac.service.UserPermissionService
+import com.lovelycatv.template.springboot.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.template.springboot.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
@@ -23,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("/manager/permission")
+@RequestMapping("$REQUEST_MAPPING_PREFIX/manager/permission")
 class ManagerUserPermissionController(
     private val userPermissionManagerService: UserPermissionManagerService
 ) {
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_PERMISSION_CREATE}')")
-    @PostMapping("/create")
+    @PostMapping("/create", version = "1")
     suspend fun createPermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
@@ -40,7 +41,7 @@ class ManagerUserPermissionController(
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_PERMISSION_READ}')")
-    @GetMapping("/query")
+    @GetMapping("/query", version = "1")
     suspend fun readPermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
@@ -50,7 +51,7 @@ class ManagerUserPermissionController(
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_PERMISSION_UPDATE}')")
-    @PostMapping("/update")
+    @PostMapping("/update", version = "1")
     suspend fun updatePermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
@@ -62,7 +63,7 @@ class ManagerUserPermissionController(
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_PERMISSION_DELETE}')")
-    @PostMapping("/delete")
+    @PostMapping("/delete", version = "1")
     suspend fun deletePermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute

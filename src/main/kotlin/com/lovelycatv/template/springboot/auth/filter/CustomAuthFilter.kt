@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
@@ -54,12 +55,14 @@ class CustomAuthFilter(
             ?.toLong()
             ?: throw BusinessException("userId is missing")
 
-        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(
+        val token = UsernamePasswordAuthenticationToken(
             claims.subject,
             null,
             getUserAuthorities.invoke(userId)
         )
 
-        return chain.filter(exchange)
+        return chain.filter(exchange).contextWrite {
+            ReactiveSecurityContextHolder.withAuthentication(token)
+        }
     }
 }

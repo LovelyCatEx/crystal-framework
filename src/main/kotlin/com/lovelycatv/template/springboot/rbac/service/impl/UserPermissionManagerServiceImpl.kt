@@ -9,11 +9,9 @@ import com.lovelycatv.template.springboot.shared.controller.dto.BaseManagerReadD
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.request.PaginatedResponseData
 import com.lovelycatv.template.springboot.shared.utils.SnowIdGenerator
-import com.lovelycatv.template.springboot.shared.utils.toEmptyPaginatedResponseData
-import com.lovelycatv.template.springboot.shared.utils.toPageable
+import com.lovelycatv.template.springboot.shared.utils.awaitListWithTimeout
 import com.lovelycatv.template.springboot.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,21 +34,34 @@ class UserPermissionManagerServiceImpl(
                 records = if (e != null) listOf(e) else emptyList()
             )
         } else {
+            val limit = baseManagerReadDTO.pageSize
+            val offset = (baseManagerReadDTO.page - 1) * baseManagerReadDTO.pageSize
+
             if (baseManagerReadDTO.searchKeyword != null) {
-                this.getRepository().searchByKeywordWithCursor(
-                    baseManagerReadDTO.searchKeyword!!,
-                    0,
-                    baseManagerReadDTO.pageSize
+                val keyword = baseManagerReadDTO.searchKeyword!!
+
+                val total = this.getRepository().countByKeyword(keyword).awaitFirstOrNull() ?: 0
+                val records = this.getRepository().searchByKeywordWithCursor(
+                    keyword,
+                    limit,
+                    offset
+                ).awaitListWithTimeout()
+
+                baseManagerReadDTO.toPaginatedResponseData(
+                    total = total,
+                    records = records
                 )
             } else {
-                this.getRepository().searchByKeywordWithCursor(
-                    baseManagerReadDTO.searchKeyword!!,
-                    0,
-                    baseManagerReadDTO.pageSize
+                val total = this.getRepository().count().awaitFirstOrNull() ?: 0
+                val records = this.getRepository()
+                    .findAllByPage(limit, offset)
+                    .awaitListWithTimeout()
+
+                baseManagerReadDTO.toPaginatedResponseData(
+                    total = total,
+                    records = records
                 )
             }
-
-            baseManagerReadDTO.toEmptyPaginatedResponseData()
         }
     }
 

@@ -13,6 +13,7 @@ import com.lovelycatv.template.springboot.shared.request.PaginatedResponseData
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import kotlin.math.ceil
 
 class SpringDataExtensions private constructor()
 
@@ -30,13 +31,16 @@ fun <T: Any, R> Page<T>.toPaginatedResponseData(recordTransform: (T) -> R): Pagi
     )
 }
 
-fun <T> PageQuery.toEmptyPaginatedResponseData(): PaginatedResponseData<T> {
+fun <T> PageQuery.toPaginatedResponseData(
+    total: Long = 0,
+    records: List<T> = emptyList()
+): PaginatedResponseData<T> {
     return PaginatedResponseData(
         page = this.page,
         pageSize = this.pageSize,
-        total = 0,
-        totalPages = 0,
-        records = emptyList()
+        total = total,
+        totalPages = ceil(total.toDouble() / this.pageSize).toInt(),
+        records = records
     )
 }
 

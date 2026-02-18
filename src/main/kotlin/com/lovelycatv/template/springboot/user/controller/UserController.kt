@@ -1,6 +1,7 @@
 package com.lovelycatv.template.springboot.user.controller
 
 import com.lovelycatv.template.springboot.shared.annotations.Unauthorized
+import com.lovelycatv.template.springboot.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("/api/{version}/user")
+@RequestMapping("$REQUEST_MAPPING_PREFIX/user")
 class UserController(
     private val userService: UserService
 ) {
