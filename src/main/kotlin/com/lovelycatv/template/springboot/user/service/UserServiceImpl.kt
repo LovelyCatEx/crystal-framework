@@ -2,6 +2,7 @@ package com.lovelycatv.template.springboot.user.service
 
 import com.lovelycatv.template.springboot.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.template.springboot.rbac.service.UserRoleRelationService
+import com.lovelycatv.template.springboot.rbac.types.PermissionType
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.service.mail.MailService
 import com.lovelycatv.template.springboot.shared.service.redis.RedisService
@@ -15,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -47,7 +49,9 @@ class UserServiceImpl(
                 it.apply {
                     setInternalRawAuthorities(
                         runBlocking(Dispatchers.IO) {
-                            getUserRbacAccessInfo(it.id).permissions.map { it.name }
+                            userRoleRelationService
+                                .getUserRoles(it.id)
+                                .map { it.name }
                         }
                     )
                 }

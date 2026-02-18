@@ -2,6 +2,7 @@ package com.lovelycatv.template.springboot.user.service.result
 
 import com.lovelycatv.template.springboot.rbac.entity.UserPermissionEntity
 import com.lovelycatv.template.springboot.rbac.entity.UserRoleEntity
+import com.lovelycatv.template.springboot.rbac.types.PermissionType
 
 data class UserRbacQueryResult(
     val userId: Long,
@@ -12,10 +13,26 @@ data class UserRbacQueryResult(
         .distinctBy { it.id }
         .toSet()
 
-    val permissions: Set<UserPermissionEntity> = rolesWithPermissions
+    val rawPermissions: Set<UserPermissionEntity> = this.rolesWithPermissions
         .flatMap { it.permissions }
         .distinctBy { it.id }
         .toSet()
+
+    val actions: Set<UserPermissionEntity> = this.rawPermissions
+        .filter { it.getRealPermissionType() == PermissionType.ACTION }
+        .distinctBy { it.id }
+        .toSet()
+
+    val paths: Set<UserPermissionEntity> = this.rawPermissions
+        .mapNotNull {
+            if (it.getRealPermissionType() == PermissionType.MENU && it.path != null) {
+                it
+            } else {
+                null
+            }
+        }
+        .toSet()
+
 
     data class UserRoleWithPermissions(
         val role: UserRoleEntity,

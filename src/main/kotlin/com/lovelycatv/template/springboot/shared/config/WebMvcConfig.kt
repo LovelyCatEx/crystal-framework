@@ -2,6 +2,7 @@ package com.lovelycatv.template.springboot.shared.config
 
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
 import com.lovelycatv.template.springboot.shared.utils.JwtUtil
+import com.lovelycatv.template.springboot.user.service.UserService
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.MethodParameter
 import org.springframework.web.reactive.BindingContext
@@ -16,7 +17,9 @@ import reactor.kotlin.core.publisher.toMono
 
 @Configuration
 @EnableWebFlux
-class WebMvcConfig : WebFluxConfigurer {
+class WebMvcConfig(
+    private val userService: UserService
+) : WebFluxConfigurer {
     override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
         configurer.setDefaultVersion("1")
         configurer.usePathSegment(1)
@@ -41,7 +44,7 @@ class WebMvcConfig : WebFluxConfigurer {
 
                 val claims = try {
                     JwtUtil.parseToken("SpringBootTemplate", token)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 } ?: return Mono.empty()
 

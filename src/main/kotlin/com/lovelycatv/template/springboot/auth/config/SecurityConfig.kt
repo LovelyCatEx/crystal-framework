@@ -1,9 +1,13 @@
 package com.lovelycatv.template.springboot.auth.config
 
+import com.lovelycatv.template.springboot.auth.filter.CustomAuthFilter
 import com.lovelycatv.template.springboot.auth.filter.CustomLoginFilter
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.utils.toJSONString
+import com.lovelycatv.template.springboot.user.service.UserService
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -11,6 +15,7 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.reactive.config.EnableWebFlux
 import reactor.core.publisher.Mono
@@ -21,7 +26,8 @@ import reactor.kotlin.core.publisher.toMono
 @EnableWebFluxSecurity
 class SecurityConfig(
     private val unauthorizedPathScanner: UnauthorizedPathScanner,
-    private val reactiveAuthenticationManager: ReactiveAuthenticationManager
+    private val reactiveAuthenticationManager: ReactiveAuthenticationManager,
+    private val userService: UserService,
 ) {
     private val logger = logger()
 
@@ -71,12 +77,12 @@ class SecurityConfig(
         // no csrf
         http.csrf { it.disable() }
 
+        // Unauthorized endpoints
+        val unauthorizedEndpoints = unauthorizedPathScanner
+            .getUnauthorizedEndpointsSimple()
+
         // custom authentications
         http.authorizeExchange { authorizeExchangeSpec ->
-            // Unauthorized endpoints
-            val unauthorizedEndpoints = unauthorizedPathScanner
-                .getUnauthorizedEndpointsSimple()
-
             if (unauthorizedEndpoints.isNotEmpty()) {
                 logger.info("================================================================")
                 unauthorizedEndpoints.forEach {
@@ -97,6 +103,21 @@ class SecurityConfig(
             CustomLoginFilter("/api/v1/user/login", reactiveAuthenticationManager),
             SecurityWebFiltersOrder.AUTHENTICATION
         )
+
+        // custom auth filter
+        http.addFilterAfter(
+            CustomAuthFilter(
+                unauthorizedEndpoints = unauthorizedEndpoints.map {
+                    it.replace("{version}", "v1")
+                }
+            ) {
+                runBlocking(Dispatchers.IO) {
+                    userService.getUserRbacAccessInfo(it).actions.map { GrantedAuthority { it.name } }
+                }
+            },
+            SecurityWebFiltersOrder.AUTHENTICATION
+        )
+
 
         return http.build()
     }
