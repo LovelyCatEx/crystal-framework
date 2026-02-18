@@ -65,7 +65,7 @@ class SystemSettingsServiceImpl(
         val existing = this.getSettings(key)
 
         if (existing != null) {
-            // update
+            // internalUpdate
             this.getRepository().save(
                 existing.apply {
                     this.configValue = value

@@ -42,9 +42,10 @@ class GlobalErrorWebExceptionHandler(
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(ApiResponse.badRequest(
                             error.localizedMessage ?: error.message ?: "",
-                            HttpStatus.BAD_REQUEST.value()
+                            null
                         ))
                 }
+
                 else -> {
                     logger.error("An unexpected error occurred", error)
 

@@ -5,6 +5,6 @@ import com.lovelycatv.template.springboot.rbac.entity.UserRolePermissionRelation
 import com.lovelycatv.template.springboot.rbac.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.template.springboot.shared.service.BaseService
 
-interface UserRolePermissionRelationService : BaseService<UserRolePermissionRelationRepository, UserRolePermissionRelationEntity, Long> {
+interface UserRolePermissionRelationService : BaseService<UserRolePermissionRelationRepository, UserRolePermissionRelationEntity> {
     suspend fun getRolePermissions(roleId: Long): List<UserPermissionEntity>
 }

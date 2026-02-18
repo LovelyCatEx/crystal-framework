@@ -30,6 +30,16 @@ fun <T: Any, R> Page<T>.toPaginatedResponseData(recordTransform: (T) -> R): Pagi
     )
 }
 
+fun <T> PageQuery.toEmptyPaginatedResponseData(): PaginatedResponseData<T> {
+    return PaginatedResponseData(
+        page = this.page,
+        pageSize = this.pageSize,
+        total = 0,
+        totalPages = 0,
+        records = emptyList()
+    )
+}
+
 fun PageQuery.toPageable(sortDirection: Sort.Direction? = null, vararg sortColumns: String): PageRequest {
     return if (sortDirection == null || sortColumns.isEmpty()) {
         PageRequest

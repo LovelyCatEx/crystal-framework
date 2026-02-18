@@ -1,19 +1,26 @@
 package com.lovelycatv.template.springboot.shared.service
 
+import com.lovelycatv.template.springboot.shared.entity.BaseEntity
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.r2dbc.repository.R2dbcRepository
 
-interface BaseService<REPOSITORY: ReactiveCrudRepository<ENTITY, ID>, ENTITY: Any, ID: Any> {
+interface BaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEntity> {
     fun getRepository(): REPOSITORY
 
-    suspend fun getByIdOrThrow(
-        id: ID,
-        t: Throwable = BusinessException("Resource $id not found")
-    ): ENTITY {
+    suspend fun getByIdOrNull(
+        id: Long
+    ): ENTITY? {
         return this.getRepository()
             .findById(id)
             .awaitFirstOrNull()
-            ?: throw t
+    }
+
+    suspend fun getByIdOrThrow(
+        id: Long,
+        t: Throwable = BusinessException("Resource $id not found")
+    ): ENTITY {
+        return this.getByIdOrNull(id) ?: throw t
     }
 }

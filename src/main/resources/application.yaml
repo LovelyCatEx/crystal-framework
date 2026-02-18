@@ -20,5 +20,5 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
-    org.springframework.r2dbc: DEBUG
-    io.r2dbc.postgresql: DEBUG
+#    org.springframework.r2dbc: DEBUG
+#    io.r2dbc.postgresql: DEBUG

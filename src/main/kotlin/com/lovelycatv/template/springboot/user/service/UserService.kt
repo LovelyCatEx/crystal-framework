@@ -7,7 +7,7 @@ import com.lovelycatv.template.springboot.user.repository.UserRepository
 import com.lovelycatv.template.springboot.user.service.result.UserRbacQueryResult
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 
-interface UserService : BaseService<UserRepository, UserEntity, Long>, ReactiveUserDetailsService {
+interface UserService : BaseService<UserRepository, UserEntity>, ReactiveUserDetailsService {
     suspend fun register(
         username: String,
         password: String,

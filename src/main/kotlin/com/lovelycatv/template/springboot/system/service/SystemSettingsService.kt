@@ -5,7 +5,7 @@ import com.lovelycatv.template.springboot.system.entity.SystemSettingsEntity
 import com.lovelycatv.template.springboot.system.repository.SystemSettingsRepository
 import com.lovelycatv.template.springboot.system.types.SystemSettings
 
-interface SystemSettingsService : BaseService<SystemSettingsRepository, SystemSettingsEntity, Long> {
+interface SystemSettingsService : BaseService<SystemSettingsRepository, SystemSettingsEntity> {
     fun refreshSystemSettings()
 
     suspend fun getSystemSettings(): SystemSettings
