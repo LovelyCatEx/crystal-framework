@@ -17,99 +17,89 @@ class DelegatedR2dbcConnection(private val delegate: Connection) : Connection by
     private val logger = logger()
 
     override fun createStatement(p0: String): Statement {
-        val sql = if (p0.startsWith("SELECT")) {
-            addSoftDeleteConditionWithParser(p0)
-        } else if (p0.startsWith("UPDATE")) {
-            modifyUpdateSql(p0)
-        } else if (p0.startsWith("DELETE")) {
-            convertDeleteToSoftDelete(p0)
-        } else {
-            p0
+        val statement = try {
+            CCJSqlParserUtil.parse(p0)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Error while parsing SQL from $p0", e)
         }
 
-        logger.info("Modified SQL:")
-        logger.info("        from: $p0")
-        logger.info("          to: $sql")
+        var modified = true
+        val sql = when (statement) {
+            is PlainSelect -> {
+                addSoftDeleteConditionWithParser(statement)
+            }
+
+            is Update -> {
+                modifyUpdateSql(statement)
+            }
+
+            is Delete -> {
+                convertDeleteToSoftDelete(statement)
+            }
+
+            else -> {
+                modified = false
+                p0
+            }
+        }
+
+        if (modified) {
+            logger.info("Modified SQL:")
+            logger.info("        from: $p0")
+            logger.info("          to: $sql")
+        } else {
+            logger.warn("Unsupported statement type: ${statement.javaClass.name}")
+        }
 
         return delegate.createStatement(sql)
     }
 
-    fun addSoftDeleteConditionWithParser(sql: String): String {
-        return try {
-            val statement = CCJSqlParserUtil.parse(sql)
+    fun addSoftDeleteConditionWithParser(statement: PlainSelect): String {
+        val deletedTimeColumn = Column("deleted_time")
+        val isNullExpr = IsNullExpression(deletedTimeColumn)
 
-            if (statement is PlainSelect) {
-                val deletedTimeColumn = Column("deleted_time")
-                val isNullExpr = IsNullExpression(deletedTimeColumn)
-
-                when (val where = statement.where) {
-                    null -> {
-                        statement.where = isNullExpr
-                    }
-                    else -> {
-                        statement.where = AndExpression(
-                            ParenthesedExpressionList(where),
-                            isNullExpr
-                        )
-                    }
-                }
-
-                statement.toString()
-            } else {
-                sql
+        when (val where = statement.where) {
+            null -> {
+                statement.where = isNullExpr
             }
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Error while parsing SQL from $sql", e)
+            else -> {
+                statement.where = AndExpression(
+                    ParenthesedExpressionList(where),
+                    isNullExpr
+                )
+            }
         }
+
+        return statement.toString()
     }
 
-    fun modifyUpdateSql(sql: String): String {
-        return try {
-            val statement = CCJSqlParserUtil.parse(sql)
+    fun modifyUpdateSql(statement: Update): String {
+        val now = System.currentTimeMillis()
 
-            if (statement is Update) {
-                val now = System.currentTimeMillis()
+        statement.addUpdateSet(Column("modified_time"), LongValue(now))
 
-                statement.addUpdateSet(Column("modified_time"), LongValue(now))
-
-                statement.toString()
-            } else {
-                sql
-            }
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Error while parsing SQL from $sql", e)
-        }
+        return statement.toString()
     }
 
-    fun convertDeleteToSoftDelete(sql: String): String {
-        return try {
-            val statement = CCJSqlParserUtil.parse(sql)
+    fun convertDeleteToSoftDelete(statement: Delete): String {
+        val now = System.currentTimeMillis()
 
-            if (statement is Delete) {
-                val now = System.currentTimeMillis()
+        val update = Update()
 
-                val update = Update()
+        update.table = statement.table
 
-                update.table = statement.table
+        update.where = statement.where
 
-                update.where = statement.where
+        update.addUpdateSet(
+            Column("modified_time"),
+            LongValue(now)
+        )
 
-                update.addUpdateSet(
-                    Column("modified_time"),
-                    LongValue(now)
-                )
+        update.addUpdateSet(
+            Column("deleted_time"),
+            LongValue(now)
+        )
 
-                update.addUpdateSet(
-                    Column("deleted_time"),
-                    LongValue(now)
-                )
-
-                update.toString()
-            } else {
-                sql
-            }
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Error while parsing SQL from $sql", e)
-        }
+        return update.toString()
     }
 }
