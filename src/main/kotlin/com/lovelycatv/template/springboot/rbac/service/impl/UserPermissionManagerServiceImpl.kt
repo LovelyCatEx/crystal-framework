@@ -30,7 +30,7 @@ class UserPermissionManagerServiceImpl(
                 page = baseManagerReadDTO.page,
                 pageSize = baseManagerReadDTO.pageSize,
                 total = if (e != null) 1 else 0,
-                totalPages = 1,
+                totalPages = if (e != null) 1 else 0,
                 records = if (e != null) listOf(e) else emptyList()
             )
         } else {
@@ -41,7 +41,7 @@ class UserPermissionManagerServiceImpl(
                 val keyword = baseManagerReadDTO.searchKeyword!!
 
                 val total = this.getRepository().countByKeyword(keyword).awaitFirstOrNull() ?: 0
-                val records = this.getRepository().searchByKeywordWithCursor(
+                val records = this.getRepository().searchByKeyword(
                     keyword,
                     limit,
                     offset
