@@ -1,4 +1,4 @@
-package com.lovelycatv.template.springboot.user.controller.vo
+package com.lovelycatv.template.springboot.user.controller.dto
 
 import jakarta.validation.constraints.Email
 

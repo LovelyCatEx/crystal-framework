@@ -12,6 +12,10 @@ export class BaseManagerController<
         private readonly baseUrl: string
     ) {}
 
+    list() {
+        return doGet<ENTITY[]>(`/api${this.baseUrl}/list`);
+    }
+
     create(dto: C) {
         return doPost<unknown>(`/api${this.baseUrl}/create`, dto);
     }

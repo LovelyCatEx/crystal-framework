@@ -1,9 +1,8 @@
 package com.lovelycatv.template.springboot.user.service.impl
 
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerDeleteUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerReadUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerUpdateUserDTO
+import com.lovelycatv.template.springboot.shared.utils.SnowIdGenerator
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerCreateUserDTO
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerUpdateUserDTO
 import com.lovelycatv.template.springboot.user.entity.UserEntity
 import com.lovelycatv.template.springboot.user.repository.UserRepository
 import com.lovelycatv.template.springboot.user.service.UserManagerService
@@ -14,7 +13,8 @@ import org.springframework.stereotype.Service
 @Service
 class UserManagerServiceImpl(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val snowIdGenerator: SnowIdGenerator
 ) : UserManagerService {
     override fun getRepository(): UserRepository {
         return userRepository
@@ -22,6 +22,7 @@ class UserManagerServiceImpl(
 
     override suspend fun create(dto: ManagerCreateUserDTO): UserEntity {
         val entity = UserEntity(
+            id = snowIdGenerator.nextId(),
             username = dto.username,
             password = passwordEncoder.encode(dto.password)!!,
             email = dto.email,

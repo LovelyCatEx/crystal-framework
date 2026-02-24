@@ -1,14 +1,15 @@
-package com.lovelycatv.template.springboot.user.controller.manager
+package com.lovelycatv.template.springboot.user.controller.manager.user
 
 import com.lovelycatv.template.springboot.rbac.constants.SystemPermission
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerDeleteUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerReadUserDTO
-import com.lovelycatv.template.springboot.user.controller.manager.dto.ManagerUpdateUserDTO
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerCreateUserDTO
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerDeleteUserDTO
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerReadUserDTO
+import com.lovelycatv.template.springboot.user.controller.manager.user.dto.ManagerUpdateUserDTO
 import com.lovelycatv.template.springboot.user.service.UserManagerService
 import com.lovelycatv.template.springboot.shared.constants.GlobalConstants
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
+import com.lovelycatv.template.springboot.shared.utils.awaitListWithTimeout
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,6 +24,14 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerUserController(
     private val userManagerService: UserManagerService
 ) {
+    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_READ}')")
+    @GetMapping("/list", version = "1")
+    suspend fun readAllPermissions(
+        userAuthentication: UserAuthentication
+    ): ApiResponse<*> {
+        return ApiResponse.success(userManagerService.getRepository().findAll().awaitListWithTimeout())
+    }
+
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_CREATE}')")
     @PostMapping("/create", version = "1")
     suspend fun createUser(

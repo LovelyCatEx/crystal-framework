@@ -9,6 +9,7 @@ import com.lovelycatv.template.springboot.rbac.service.UserRoleManagerService
 import com.lovelycatv.template.springboot.shared.constants.GlobalConstants
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
+import com.lovelycatv.template.springboot.shared.utils.awaitListWithTimeout
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,6 +24,14 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerUserRoleController(
     private val userRoleManagerService: UserRoleManagerService
 ) {
+    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_READ}')")
+    @GetMapping("/list", version = "1")
+    suspend fun readAllRoles(
+        userAuthentication: UserAuthentication
+    ): ApiResponse<*> {
+        return ApiResponse.success(userRoleManagerService.getRepository().findAll().awaitListWithTimeout())
+    }
+
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_CREATE}')")
     @PostMapping("/create", version = "1")
     suspend fun createRole(

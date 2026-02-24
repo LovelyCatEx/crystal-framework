@@ -7,4 +7,6 @@ import com.lovelycatv.template.springboot.shared.service.BaseService
 
 interface UserRolePermissionRelationService : BaseService<UserRolePermissionRelationRepository, UserRolePermissionRelationEntity> {
     suspend fun getRolePermissions(roleId: Long): List<UserPermissionEntity>
+
+    suspend fun setRolePermissions(roleId: Long, permissionIds: List<Long>)
 }

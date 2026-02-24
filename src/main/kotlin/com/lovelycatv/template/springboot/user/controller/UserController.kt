@@ -6,11 +6,10 @@ import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
 import com.lovelycatv.template.springboot.user.controller.dto.UserRegisterDTO
-import com.lovelycatv.template.springboot.user.controller.vo.RequestRegisterEmailCodeDTO
-import com.lovelycatv.template.springboot.user.controller.vo.RequestResetPasswordEmailCodeDTO
-import com.lovelycatv.template.springboot.user.controller.vo.ResetPasswordDTO
+import com.lovelycatv.template.springboot.user.controller.dto.RequestRegisterEmailCodeDTO
+import com.lovelycatv.template.springboot.user.controller.dto.RequestResetPasswordEmailCodeDTO
+import com.lovelycatv.template.springboot.user.controller.dto.ResetPasswordDTO
 import com.lovelycatv.template.springboot.user.service.UserService
-import jakarta.validation.constraints.Email
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute

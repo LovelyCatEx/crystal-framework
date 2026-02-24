@@ -1,8 +1,7 @@
-package com.lovelycatv.template.springboot.user.service
+package com.lovelycatv.template.springboot.user.service.impl
 
 import com.lovelycatv.template.springboot.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.template.springboot.rbac.service.UserRoleRelationService
-import com.lovelycatv.template.springboot.rbac.types.PermissionType
 import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.service.mail.MailService
 import com.lovelycatv.template.springboot.shared.service.redis.RedisService
@@ -11,12 +10,12 @@ import com.lovelycatv.template.springboot.system.types.RedisConstants
 import com.lovelycatv.template.springboot.user.controller.vo.UserProfileVO
 import com.lovelycatv.template.springboot.user.entity.UserEntity
 import com.lovelycatv.template.springboot.user.repository.UserRepository
+import com.lovelycatv.template.springboot.user.service.UserService
 import com.lovelycatv.template.springboot.user.service.result.UserRbacQueryResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service

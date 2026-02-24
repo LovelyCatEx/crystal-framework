@@ -25,9 +25,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
 
     const selectedKeys = useMemo(() => {
         const currentPath = location.pathname;
-        const matchedKey = availableMenus.find((item) =>
-            currentPath.startsWith(item.key as string)
-        );
+        const matchedKey = Array.from(availableMenus)
+            .sort((a, b) => b.key.toString().length - a.key.toString().length)
+            .find((item) => currentPath.startsWith(item.key as string));
 
         return matchedKey ? [matchedKey] : [{ key: '/', path: '/', icon: <></>, label: '' }];
     }, [availableMenus, location.pathname]);

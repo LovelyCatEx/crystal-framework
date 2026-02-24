@@ -1,4 +1,4 @@
-package com.lovelycatv.template.springboot.user.controller.manager.dto
+package com.lovelycatv.template.springboot.user.controller.manager.user.dto
 
 import com.lovelycatv.template.springboot.shared.controller.dto.BaseManagerDeleteDTO
 
