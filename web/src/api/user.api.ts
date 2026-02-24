@@ -1,6 +1,27 @@
-import type {UserProfileVO} from "../types/user.types.ts";
-import {type ApiResponse, doGet} from "./system-request.ts";
+import {BaseManagerController} from "./BaseManagerController.ts";
+import type {User, UserProfileVO} from "../types/user.types.ts";
+import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
+import {doGet} from "./system-request.ts";
 
-export function getUserProfile(userId?: number): Promise<ApiResponse<UserProfileVO>> {
-    return doGet<UserProfileVO>('/api/user/profile', {userId});
+export const UserManagerController = new BaseManagerController<
+    User,
+    ManagerCreateUserDTO,
+    BaseManagerReadDTO,
+    ManagerUpdateUserDTO
+>('/manager/user');
+
+export interface ManagerCreateUserDTO {
+    username: string;
+    password: string;
+    email: string;
+    nickname: string;
+}
+
+export interface ManagerUpdateUserDTO extends BaseManagerUpdateDTO {
+    email?: string | null;
+    nickname?: string | null;
+}
+
+export async function getUserProfile() {
+    return doGet<UserProfileVO>('/api/user/profile');
 }

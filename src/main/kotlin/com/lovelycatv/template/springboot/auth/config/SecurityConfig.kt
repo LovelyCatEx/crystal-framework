@@ -25,7 +25,7 @@ import reactor.kotlin.core.publisher.toMono
 @Configuration
 @EnableWebFlux
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+//@EnableReactiveMethodSecurity
 class SecurityConfig(
     private val unauthorizedPathScanner: UnauthorizedPathScanner,
     private val reactiveAuthenticationManager: ReactiveAuthenticationManager,
