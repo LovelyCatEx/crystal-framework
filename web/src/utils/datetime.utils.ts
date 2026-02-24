@@ -1,12 +1,12 @@
 export type DateTimeFormat = 'YYYY-MM-DD HH:mm:ss' | string;
 
 export function formatTimestamp(
-    timestamp: number,
+    timestamp: string | number,
     format: DateTimeFormat = 'YYYY-MM-DD HH:mm:ss'
 ): string {
     if (timestamp === undefined) return '';
 
-    const date = new Date(timestamp);
+    const date = new Date(Number.parseInt(timestamp.toString()));
 
     if (isNaN(date.getTime())) {
         console.error('Invalid timestamp:', timestamp);

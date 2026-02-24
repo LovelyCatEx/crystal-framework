@@ -1,4 +1,4 @@
-\.ant-layout-sider-children::-webkit-scrollbar {
+.ant-layout-sider-children::-webkit-scrollbar {
     display: none;
 }
 
@@ -55,4 +55,30 @@
 /* Mobile Menu Scrollbar */
 .mobile-menu-panel::-webkit-scrollbar {
     display: none;
+}
+
+/* Manager Page */
+.custom-table .ant-table-thead > tr > th {
+    background: #f8fafc;
+    border-bottom: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+.custom-table .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px 16px;
+}
+.custom-table .ant-table-tbody > tr:hover > td {
+    background: #fbfcfe !important;
+}
+.custom-modal .ant-modal-content {
+    border-radius: 1rem;
+    padding: 24px;
+}
+.ant-input-number-input-wrap input {
+    height: 38px !important;
+}
+.ant-table-cell-fix-left-last::after,
+.ant-table-cell-fix-right-first::after {
+    box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.05) !important;
 }

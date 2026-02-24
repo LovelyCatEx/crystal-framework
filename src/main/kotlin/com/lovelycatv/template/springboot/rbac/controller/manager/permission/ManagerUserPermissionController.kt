@@ -1,19 +1,14 @@
-package com.lovelycatv.template.springboot.rbac.controller.manager
+package com.lovelycatv.template.springboot.rbac.controller.manager.permission
 
 import com.lovelycatv.template.springboot.rbac.constants.SystemPermission
-import com.lovelycatv.template.springboot.rbac.controller.manager.dto.ManagerCreatePermissionDTO
-import com.lovelycatv.template.springboot.rbac.controller.manager.dto.ManagerDeletePermissionDTO
-import com.lovelycatv.template.springboot.rbac.controller.manager.dto.ManagerUpdatePermissionDTO
-import com.lovelycatv.template.springboot.rbac.entity.UserPermissionEntity
+import com.lovelycatv.template.springboot.rbac.controller.manager.permission.dto.ManagerCreatePermissionDTO
+import com.lovelycatv.template.springboot.rbac.controller.manager.permission.dto.ManagerDeletePermissionDTO
+import com.lovelycatv.template.springboot.rbac.controller.manager.permission.dto.ManagerReadPermissionDTO
+import com.lovelycatv.template.springboot.rbac.controller.manager.permission.dto.ManagerUpdatePermissionDTO
 import com.lovelycatv.template.springboot.rbac.service.UserPermissionManagerService
-import com.lovelycatv.template.springboot.rbac.service.UserPermissionService
-import com.lovelycatv.template.springboot.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
-import com.lovelycatv.template.springboot.shared.controller.dto.BaseManagerReadDTO
-import com.lovelycatv.template.springboot.shared.exception.BusinessException
+import com.lovelycatv.template.springboot.shared.constants.GlobalConstants
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.types.UserAuthentication
-import com.lovelycatv.template.springboot.shared.utils.SnowIdGenerator
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("$REQUEST_MAPPING_PREFIX/manager/permission")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/user-permission")
 class ManagerUserPermissionController(
     private val userPermissionManagerService: UserPermissionManagerService
 ) {
@@ -45,7 +40,7 @@ class ManagerUserPermissionController(
     suspend fun readPermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
-        dto: BaseManagerReadDTO
+        dto: ManagerReadPermissionDTO
     ): ApiResponse<*> {
         return ApiResponse.success(userPermissionManagerService.query(dto))
     }

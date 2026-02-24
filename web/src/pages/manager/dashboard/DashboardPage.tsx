@@ -1,9 +1,7 @@
-import {ManagerPageContainer} from "../../../components/ManagerPageContainer.tsx";
+import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 
 export function DashboardPage() {
     return (
-        <ManagerPageContainer title="仪表盘">
-            123
-        </ManagerPageContainer>
+        <ActionBarComponent title="仪表盘" />
     )
 }

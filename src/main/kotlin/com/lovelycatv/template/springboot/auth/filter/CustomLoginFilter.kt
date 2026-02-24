@@ -100,8 +100,4 @@ class CustomLoginFilter(
         @JsonProperty("expiresIn")
         var expiresIn: Long = 0
     }
-
-    companion object {
-        private val objectMapper = ObjectMapper()
-    }
 }

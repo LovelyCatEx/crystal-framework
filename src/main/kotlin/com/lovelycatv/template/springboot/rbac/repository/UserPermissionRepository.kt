@@ -38,4 +38,6 @@ interface UserPermissionRepository : BaseRepository<UserPermissionEntity> {
     override fun countByKeyword(
         keyword: String
     ): Mono<Long>
+
+    fun findByName(name: String): Mono<UserPermissionEntity>
 }

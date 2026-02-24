@@ -63,7 +63,7 @@ interface BaseRepository<ENTITY: BaseEntity> : R2dbcRepository<ENTITY, Long> {
         keyword: String,
         limit: Int,
         offset: Int
-    ): Flux<UserPermissionEntity>
+    ): Flux<ENTITY>
 
     @Query("""
         SELECT COUNT(*) FROM #{#tableName}

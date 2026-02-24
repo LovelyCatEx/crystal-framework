@@ -1,0 +1,27 @@
+export interface PageQuery {
+    page: number;
+    pageSize: number;
+}
+
+export interface PaginatedResponseData<T> {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    records: T[];
+}
+
+export interface BaseManagerReadDTO {
+    page: number;
+    pageSize: number;
+    id?: string;
+    searchKeyword?: string;
+}
+
+export interface BaseManagerDeleteDTO {
+    id: string;
+}
+
+export interface BaseManagerUpdateDTO {
+    id: string;
+}

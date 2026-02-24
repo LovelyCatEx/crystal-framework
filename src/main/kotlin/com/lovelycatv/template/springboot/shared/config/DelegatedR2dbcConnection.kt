@@ -76,7 +76,11 @@ class DelegatedR2dbcConnection(private val delegate: Connection) : Connection by
     fun modifyUpdateSql(statement: Update): String {
         val now = System.currentTimeMillis()
 
-        statement.addUpdateSet(Column("modified_time"), LongValue(now))
+        if (!statement.updateSets.any {
+            it.columns.any { it.columnName == "modified_time" || it.columnName == "\"modified_time\"" }
+        }) {
+            statement.addUpdateSet(Column("modified_time"), LongValue(now))
+        }
 
         return statement.toString()
     }

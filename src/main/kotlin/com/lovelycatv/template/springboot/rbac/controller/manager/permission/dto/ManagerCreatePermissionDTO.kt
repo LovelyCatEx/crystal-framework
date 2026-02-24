@@ -1,4 +1,4 @@
-package com.lovelycatv.template.springboot.rbac.controller.manager.dto
+package com.lovelycatv.template.springboot.rbac.controller.manager.permission.dto
 
 data class ManagerCreatePermissionDTO(
     val name: String,

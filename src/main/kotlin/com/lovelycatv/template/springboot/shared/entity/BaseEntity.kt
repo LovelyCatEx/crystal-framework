@@ -25,6 +25,7 @@ abstract class BaseEntity(
         this.isNew = true
     }
 
+    @JsonSerialize(using = ToStringSerializer::class)
     override fun getId(): Long {
         return this.id
     }

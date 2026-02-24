@@ -1,6 +1,6 @@
 import {Avatar, Button, Divider, Dropdown, Layout, Menu, Space} from "antd";
 import {LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined} from "@ant-design/icons";
-import {Route, Routes, useNavigate} from "react-router-dom";
+import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import {clearUserAuthentication} from "../../utils/token.utils.ts";
@@ -15,7 +15,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
-    // const location = useLocation();
+    const location = useLocation();
 
     const availableMenus = menus
 
@@ -30,7 +30,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
         );
 
         return matchedKey ? [matchedKey] : [{ key: '/', path: '/', icon: <></>, label: '' }];
-    }, [availableMenus]);
+    }, [availableMenus, location.pathname]);
 
     useEffect(() => {
         const matchedKey = selectedKeys.length > 0 ? selectedKeys[0] : null;

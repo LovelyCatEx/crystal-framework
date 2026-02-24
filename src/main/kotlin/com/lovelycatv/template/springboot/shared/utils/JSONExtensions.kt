@@ -8,8 +8,9 @@
 
 package com.lovelycatv.template.springboot.shared.utils
 
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+
 
 class JSONExtensions private constructor()
 
