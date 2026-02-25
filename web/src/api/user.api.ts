@@ -25,3 +25,7 @@ export interface ManagerUpdateUserDTO extends BaseManagerUpdateDTO {
 export async function getUserProfile() {
     return doGet<UserProfileVO>('/api/user/profile');
 }
+
+export async function getUserAccessibleMenus() {
+    return doGet<string[]>('/api/user/menus/list');
+}

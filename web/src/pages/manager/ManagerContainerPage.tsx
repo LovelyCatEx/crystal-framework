@@ -7,7 +7,7 @@ import {clearUserAuthentication} from "../../utils/token.utils.ts";
 import {useEffect, useMemo, useState} from "react";
 import {buildDocumentTitle, ProjectDisplayName} from "../../global/global-settings.ts";
 import {useLoggedUser} from "../../compositions/use-logged-user.ts";
-import {menuPathLogin, menuPathProfile, menus} from "../../router";
+import {computeAccessibleMenus, menuPathLogin, menuPathProfile} from "../../router";
 import './ManagerContainerPageStyles.css';
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
@@ -17,7 +17,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const availableMenus = menus
+    const availableMenus = useMemo(() => {
+        return computeAccessibleMenus(loggedUser.accessibleMenuPaths);
+    }, [loggedUser.accessibleMenuPaths]);
 
     const handleMenuClick = (e: unknown) => {
         navigate((e as { key: string }).key);

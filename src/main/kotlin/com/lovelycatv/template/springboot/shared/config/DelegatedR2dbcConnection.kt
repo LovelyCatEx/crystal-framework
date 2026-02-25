@@ -10,6 +10,7 @@ import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionLi
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.Column
 import net.sf.jsqlparser.statement.delete.Delete
+import net.sf.jsqlparser.statement.select.OrderByElement
 import net.sf.jsqlparser.statement.select.PlainSelect
 import net.sf.jsqlparser.statement.update.Update
 

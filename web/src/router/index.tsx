@@ -1,5 +1,3 @@
-import type {MenuItem} from "../types/menu.types.ts";
-import type {MenuItemType} from "antd/es/menu/interface";
 import {
     DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined
 } from '@ant-design/icons';
@@ -9,6 +7,8 @@ import {UserRoleManagerPage} from "../pages/manager/rbac/UserRoleManagerPage.tsx
 import {UserManagerPage} from "../pages/manager/rbac/UserManagerPage.tsx";
 import {RolePermissionManagerPage} from "../pages/manager/rbac/RolePermissionManagerPage.tsx";
 import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
+import type {MenuItemType} from "antd/es/menu/interface";
+import type {MenuItem} from "../types/menu.types.ts";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -16,7 +16,9 @@ export const menuPathLogin = "/auth/login"
 export const menuPathRegister = "/auth/register"
 export const menuPathResetPassword = "/auth/reset-password"
 
-export const publicMenus: (MenuItem & MenuItemType)[] = [
+export type RouteItem = MenuItem & MenuItemType;
+
+export const publicMenus: RouteItem[] = [
     {
         key: menuPathDashboard,
         path: menuPathDashboard,
@@ -26,7 +28,7 @@ export const publicMenus: (MenuItem & MenuItemType)[] = [
     }
 ]
 
-export const adminMenus: (MenuItem & MenuItemType)[] = [
+export const adminMenus: RouteItem[] = [
     {
         key: '/manager/users',
         path: '/manager/users',
@@ -64,4 +66,10 @@ export const adminMenus: (MenuItem & MenuItemType)[] = [
     }
 ]
 
-export const menus: (MenuItem & MenuItemType)[] = [...publicMenus, ...adminMenus]
+export function computeAccessibleMenus(accessiblePathList: string[]): RouteItem[] {
+    return [
+        ...publicMenus,
+        ...adminMenus
+            .filter((menu) => accessiblePathList.includes(menu.path))
+    ]
+}

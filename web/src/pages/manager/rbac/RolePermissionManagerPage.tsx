@@ -1,17 +1,19 @@
 import {Button, Card, message, Modal, Space, Table, Tag, Tooltip, Transfer} from "antd";
 import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
+import type {Key} from "react";
 import {useEffect, useState} from "react";
 import {UserRoleManagerController} from "../../../api/user-role.api.ts";
 import {getRolePermissions, setRolePermissions} from "../../../api/user-role-permission.api.ts";
 import {UserPermissionManagerController} from "../../../api/user-permission.api.ts";
-import type {UserPermission} from "../../../types/user-permission.types.ts";
+import {PermissionType, type UserPermission} from "../../../types/user-permission.types.ts";
 import type {UserRole} from "../../../types/user-role.types.ts";
-import type {Key} from "react";
 
 interface TransferItem {
     key: string;
     title: string;
     description: string;
+    type: PermissionType;
+    path?: string | null;
 }
 
 export function RolePermissionManagerPage() {
@@ -85,7 +87,9 @@ export function RolePermissionManagerPage() {
     const transferData: TransferItem[] = allPermissions.map(p => ({
         key: String(p.id),
         title: p.name,
-        description: p.description || ''
+        description: p.description || '',
+        type: PermissionType[p.type] as unknown as PermissionType,
+        path: p.path
     }));
 
     useEffect(() => {
@@ -161,7 +165,11 @@ export function RolePermissionManagerPage() {
                     titles={['可用权限', '已分配权限']}
                     targetKeys={selectedPermissionIds}
                     onChange={handleTransferChange}
-                    render={item => `${item.title} (${item.description})`}
+                    render={item => {
+                        return <Tooltip title={`${item.path ? item.path : item.description}`}>
+                            <span><Tag color="orange">{item.type}</Tag> {item.title}</span>
+                        </Tooltip>
+                    }}
                     listStyle={{
                         width: 300,
                         height: 400,

@@ -2,10 +2,10 @@ package com.lovelycatv.template.springboot.rbac.constants
 
 object SystemPermission {
     const val MENU_PERMISSION_MANAGER = "permission:/manager/user-permissions"
-    const val MENU_ROLE_MANAGER = "permission:/manager/user-roles"
-    const val MENU_USER_MANAGER = "permission:/manager/users"
-    const val MENU_ROLE_PERMISSION_MANAGER = "permission:/manager/role-permissions"
-    const val MENU_USER_ROLE_MANAGER = "permission:/manager/user-roles-relation"
+    const val MENU_ROLE_MANAGER = "role:/manager/user-roles"
+    const val MENU_USER_MANAGER = "user:/manager/users"
+    const val MENU_ROLE_PERMISSION_MANAGER = "role.permission:/manager/role-permissions"
+    const val MENU_USER_ROLE_MANAGER = "user.role:/manager/user-roles-relation"
 
     const val ACTION_PERMISSION_CREATE = "permission.create"
     const val ACTION_PERMISSION_READ = "permission.read"

@@ -46,7 +46,7 @@ interface BaseRepository<ENTITY: BaseEntity> : R2dbcRepository<ENTITY, Long> {
             ?: "UNKNOWN_ENTITY_TABLE_NAME"
     }
 
-    @Query("SELECT * FROM #{#tableName} LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM #{#tableName} ORDER BY created_time DESC LIMIT :limit OFFSET :offset")
     fun findAllByPage(
         @Param("limit") limit: Int,
         @Param("offset") offset: Int,
