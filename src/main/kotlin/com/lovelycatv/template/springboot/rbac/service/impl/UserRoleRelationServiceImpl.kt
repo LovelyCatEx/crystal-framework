@@ -23,14 +23,11 @@ class UserRoleRelationServiceImpl(
     }
 
     override suspend fun getUserRoles(userId: Long): List<UserRoleEntity> {
-        val relationIds = userRoleRelationRepository
-            .findByUserId(userId)
-            .awaitListWithTimeout()
-
-        return relationIds.map {
-            userRoleRepository.findById(it.roleId).awaitFirstOrNull()
-                ?: throw BusinessException("role with id $it not found")
-        }
+        return userRoleRepository.findAllById(
+            userRoleRelationRepository
+                .findByUserId(userId)
+                .map { it.roleId }
+        ).awaitListWithTimeout()
     }
 
     @Transactional

@@ -6,5 +6,6 @@ data class ManagerReadPermissionDTO(
     override val page: Int,
     override val pageSize: Int,
     override val id: Long?,
-    override val searchKeyword: String?
+    override val searchKeyword: String?,
+    val type: Int?
 ) : BaseManagerReadDTO(page, pageSize)

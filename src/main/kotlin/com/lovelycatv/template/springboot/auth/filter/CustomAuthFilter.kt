@@ -11,6 +11,8 @@ import com.lovelycatv.template.springboot.shared.exception.BusinessException
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.template.springboot.shared.utils.JwtUtil
 import com.lovelycatv.template.springboot.shared.utils.toJSONString
+import com.lovelycatv.vertex.log.logger
+import io.jsonwebtoken.ExpiredJwtException
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -30,6 +32,8 @@ class CustomAuthFilter(
     val unauthorizedEndpoints: List<String>,
     val getUserAuthorities: (userId: Long) -> List<GrantedAuthority>
 ) : WebFilter {
+    private val logger = logger()
+
     override fun filter(
         exchange: ServerWebExchange,
         chain: WebFilterChain
@@ -46,8 +50,13 @@ class CustomAuthFilter(
 
         val claims = try {
             JwtUtil.parseToken("SpringBootTemplate", authorization)
-        } catch (_: Exception) {
-            throw BusinessException("invalid token pattern")
+        } catch (e: Exception) {
+            if (e is ExpiredJwtException) {
+                throw BusinessException("token expired")
+            } else {
+                logger.error("unexpected token parse exception", e)
+                throw BusinessException("invalid token pattern")
+            }
         }
 
         val userId = claims["userId"]

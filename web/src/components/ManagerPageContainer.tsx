@@ -1,5 +1,8 @@
-import React, {type JSX, useCallback, useEffect, useState} from "react";
-import {Button, Card, Form, Input, message, Modal, Popconfirm, Space, Table} from "antd";
+import React, {
+    type ForwardedRef, forwardRef, type JSX, type ReactNode, useCallback, useEffect,
+    useImperativeHandle, useState
+} from "react";
+import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table} from "antd";
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from "@ant-design/icons";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import type {ManagerPageTableColumn} from "./types/manager-page-container.types.ts";
@@ -13,16 +16,37 @@ import type {
 import type {BaseEntity} from "../types/BaseEntity.ts";
 import {formatTimestamp} from "../utils/datetime.utils.ts";
 
-export function ManagerPageContainer<ENTITY extends BaseEntity>(props: ActionBarComponentProps & {
+export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps {
     entityName: string;
     children?: React.ReactNode | JSX.Element;
+    tableActions?: {
+        label: React.ReactNode | JSX.Element,
+        children: React.ReactNode | JSX.Element,
+        queryParamsProvider?: () => object
+    }[];
     columns: ManagerPageTableColumn<ENTITY, unknown>[];
     query: <T extends BaseManagerReadDTO>(props: T) => Promise<PaginatedResponseData<ENTITY>>;
     delete: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
     update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
     create: <T extends object>(props: T) => Promise<unknown>;
     editModalFormChildren?: React.ReactNode | JSX.Element;
-}) {
+}
+
+export interface ManagerPageContainerRef {
+    refreshData: () => void;
+}
+
+export type ManagerPageContainerReturnType =
+    <ENTITY extends BaseEntity>(
+        props: ManagerPageContainerProps<ENTITY> & React.RefAttributes<ManagerPageContainerRef>
+    ) => ReactNode;
+
+export const ManagerPageContainer = forwardRef(ManagerPageContainerInner) as ManagerPageContainerReturnType
+
+function ManagerPageContainerInner<ENTITY extends BaseEntity>(
+    props: ManagerPageContainerProps<ENTITY>,
+    ref: ForwardedRef<ManagerPageContainerRef>,
+) {
     // Table
     const [data, setData] = useState<ENTITY[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -46,7 +70,13 @@ export function ManagerPageContainer<ENTITY extends BaseEntity>(props: ActionBar
         props.query({
             page: currentPage,
             pageSize: currentPageSize,
-            searchKeyword: searchKeyword.length > 0 ? searchKeyword : undefined
+            searchKeyword: searchKeyword.length > 0 ? searchKeyword : undefined,
+            ...Object.assign(
+                {},
+                ...(props.tableActions
+                        ?.mapNotNull((action) => action.queryParamsProvider?.())
+                    ?? [])
+            )
         }).then((res) => {
             setTotal(res.total);
             setData(res.records);
@@ -131,7 +161,6 @@ export function ManagerPageContainer<ENTITY extends BaseEntity>(props: ActionBar
                 title: '操作',
                 dataIndex: "action",
                 key: 'action',
-                fixed: 'end',
                 width: 120,
                 render: (_: unknown, record: ENTITY) => (
                     <Space>
@@ -156,6 +185,12 @@ export function ManagerPageContainer<ENTITY extends BaseEntity>(props: ActionBar
         }
     });
 
+    useImperativeHandle(ref, () => {
+        return {
+            refreshData: refreshData
+        }
+    })
+
     return (
         <>
             <ActionBarComponent
@@ -177,22 +212,37 @@ export function ManagerPageContainer<ENTITY extends BaseEntity>(props: ActionBar
             />
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
-                <div className="mb-6 flex gap-4">
-                    <Input
-                        placeholder={`搜索${props.entityName}...`}
-                        prefix={<SearchOutlined className="text-gray-400" />}
-                        className="max-w-xs rounded-xl h-10"
-                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
-                        allowClear
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setSearchKeyword(value);
-                            if (value === '') {
-                                handleSearch('');
-                            }
-                        }}
-                    />
-                </div>
+                <Row gutter={[16, 16]} className="mb-6">
+                    <Col xs={24} sm={24} md={12} lg={8} xl={6}>
+                        <div className="flex flex-col space-y-2">
+                            <span>搜索</span>
+                            <Input
+                                placeholder={`搜索${props.entityName}...`}
+                                prefix={<SearchOutlined className="text-gray-400" />}
+                                className="w-full rounded-xl h-10"
+                                onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                                allowClear
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setSearchKeyword(value);
+                                    if (value === '') {
+                                        handleSearch('');
+                                    }
+                                }}
+                            />
+                        </div>
+                    </Col>
+
+                    {props.tableActions?.map((action, index) => (
+                        <Col xs={24} sm={12} md={8} lg={6} xl={4} key={index}>
+                            <div className="flex flex-col space-y-2">
+                                <span>{action.label}</span>
+                                {action.children}
+                            </div>
+                        </Col>
+                    ))}
+                </Row>
+
                 <Table
                     columns={tableColumns}
                     dataSource={data}

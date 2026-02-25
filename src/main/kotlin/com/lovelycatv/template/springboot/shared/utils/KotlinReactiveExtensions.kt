@@ -29,21 +29,7 @@ suspend fun <T: Any> Flux<T>.awaitListWithTimeout(
             disposable.dispose()
         }
     } catch (_: TimeoutException) {
+        println("awaitListWithTimeout() function timeout: $timeout ms")
         emptyList()
     }
 }
-
-suspend fun <T: Any> Flux<T>.collectListSafe(): List<T> = coroutineScope {
-    val results = mutableListOf<T>()
-    val done = CompletableDeferred<Unit>()
-
-    this@collectListSafe.subscribe(
-        { results.add(it) },             // onNext
-        { e -> done.completeExceptionally(e) },  // onError
-        { done.complete(Unit) }          // onComplete
-    )
-
-    done.await()  // 协程挂起，等待 Flux 完成，不阻塞线程
-    results
-}
-

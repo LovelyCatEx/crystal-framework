@@ -1,15 +1,25 @@
 import {Col, Form, Input, Row, Select, Space, Tag, Tooltip} from "antd";
-import {ManagerPageContainer} from "../../../components/ManagerPageContainer.tsx";
-import {type ManagerCreatePermissionDTO, UserPermissionManagerController} from "../../../api/user-permission.api.ts";
-import React, {type JSX} from "react";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {
+    type ManagerCreatePermissionDTO,
+    type ManagerReadPermissionDTO,
+    UserPermissionManagerController
+} from "../../../api/user-permission.api.ts";
+import React, {type JSX, useEffect, useRef, useState} from "react";
 import {PermissionType, type UserPermission} from "../../../types/user-permission.types.ts";
 import TextArea from "antd/es/input/TextArea";
 
 export function UserPermissionManagerPage() {
+    const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const [filterPermissionType, setFilterPermissionType] = useState<number>()
 
+    useEffect(() => {
+        pageRef?.current?.refreshData?.()
+    }, [filterPermissionType]);
 
     return (
         <ManagerPageContainer
+            ref={pageRef}
             entityName="用户权限"
             title="用户权限管理"
             subtitle="配置系统用户权限列表"
@@ -104,7 +114,7 @@ export function UserPermissionManagerPage() {
                     </Form.Item>
                 </>
             }
-            query={async (props) => {
+            query={async (props: ManagerReadPermissionDTO) => {
                 return (await UserPermissionManagerController.query(props)).data!
             }}
             delete={async (props) => {
@@ -116,6 +126,26 @@ export function UserPermissionManagerPage() {
             create={async (props) => {
                 return (await UserPermissionManagerController.create(props as ManagerCreatePermissionDTO)).data!
             }}
+            tableActions={[
+                {
+                    label: <span>类型</span>,
+                    children: <Select
+                        defaultValue="-1"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '-1', label: '全部' },
+                            { value: '0', label: 'ACTION' },
+                            { value: '1', label: 'MENU' },
+                        ]}
+                        onChange={(value) => setFilterPermissionType(Number.parseInt(value))}
+                    />,
+                    queryParamsProvider() {
+                        return {
+                            type: filterPermissionType === -1 ? undefined : filterPermissionType
+                        }
+                    }
+                }
+            ]}
         >
 
         </ManagerPageContainer>

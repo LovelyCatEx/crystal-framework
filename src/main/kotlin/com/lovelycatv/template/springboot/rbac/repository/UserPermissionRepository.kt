@@ -16,7 +16,8 @@ interface UserPermissionRepository : BaseRepository<UserPermissionEntity> {
         """
         SELECT * FROM user_permissions 
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-           OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+           OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(path) LIKE LOWER(CONCAT('%', :keyword, '%')))
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -33,10 +34,46 @@ interface UserPermissionRepository : BaseRepository<UserPermissionEntity> {
         SELECT COUNT(*) FROM user_permissions 
         WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(path) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """
     )
     override fun countByKeyword(
         keyword: String
+    ): Mono<Long>
+
+    @Query(
+        """
+        SELECT * FROM user_permissions 
+        WHERE (:#{#keyword == null} = true
+           OR (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+           OR LOWER(path) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        AND (:#{#type == null} = true OR type = :type)
+        ORDER BY created_time DESC
+        LIMIT :limit
+        OFFSET :offset
+    """
+    )
+    fun advanceSearch(
+        keyword: String?,
+        type: Int?,
+        limit: Int,
+        offset: Int
+    ): Flux<UserPermissionEntity>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM user_permissions 
+        WHERE (:#{#keyword == null} = true
+           OR (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+           OR LOWER(path) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        AND (:#{#type == null} = true OR type = :type)
+    """
+    )
+    fun countAdvanceSearch(
+        keyword: String?,
+        type: Int?,
     ): Mono<Long>
 
     fun findByName(name: String): Mono<UserPermissionEntity>

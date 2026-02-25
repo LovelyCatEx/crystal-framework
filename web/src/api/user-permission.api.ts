@@ -5,7 +5,7 @@ import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.
 export const UserPermissionManagerController = new BaseManagerController<
     UserPermission,
     ManagerCreatePermissionDTO,
-    BaseManagerReadDTO,
+    ManagerReadPermissionDTO,
     ManagerUpdatePermissionDTO
 >('/manager/user-permission');
 
@@ -21,4 +21,8 @@ export interface ManagerUpdatePermissionDTO extends BaseManagerUpdateDTO {
     description?: string | null;
     type?: number | null;
     path?: string | null;
+}
+
+export interface ManagerReadPermissionDTO extends BaseManagerReadDTO {
+    type?: number | null;
 }

@@ -19,7 +19,11 @@ interface BaseManagerService<
         UPDATE_DTO: BaseManagerUpdateDTO,
         DELETE_DTO: BaseManagerDeleteDTO
 > : BaseService<REPOSITORY, ENTITY> {
-    suspend fun query(dto: READ_DTO): PaginatedResponseData<ENTITY> {
+    suspend fun query(
+        dto: READ_DTO,
+        isAdvanceQuery: suspend (dto: READ_DTO) -> Boolean = { dto.searchKeyword != null },
+        doAdvanceQuery: suspend (dto: READ_DTO, limit: Int, offset: Int) -> PaginatedResponseData<ENTITY> = this::defaultAdvanceQuery
+    ): PaginatedResponseData<ENTITY> {
         return if (dto.id != null) {
             // Find by id
             val e = this.getByIdOrNull(dto.id!!)
@@ -34,21 +38,8 @@ interface BaseManagerService<
             val limit = dto.pageSize
             val offset = (dto.page - 1) * dto.pageSize
 
-            if (dto.searchKeyword != null) {
-                // Search by keywords
-                val keyword = dto.searchKeyword!!
-
-                val total = this.getRepository().countByKeyword(keyword).awaitFirstOrNull() ?: 0
-                val records = this.getRepository().searchByKeyword(
-                    keyword,
-                    limit,
-                    offset
-                ).awaitListWithTimeout()
-
-                dto.toPaginatedResponseData(
-                    total = total,
-                    records = records
-                )
+            if (isAdvanceQuery.invoke(dto)) {
+                doAdvanceQuery.invoke(dto, limit, offset)
             } else {
                 // Simple pagination
                 val total = this.getRepository().count().awaitFirstOrNull() ?: 0
@@ -62,6 +53,60 @@ interface BaseManagerService<
                 )
             }
         }
+    }
+
+    /**
+     * Fix: Caused by: java.lang.AssertionError: FUN LOCAL_FUNCTION_FOR_LAMBDA
+     *
+     *     name:<anonymous>
+     *
+     *     visibility:local
+     *
+     *     modality:FINAL <> (dto:READ_DTO of com.lovelycatv.template.springboot.shared.service.BaseManagerService, limit:kotlin.Int, offset:kotlin.Int)
+     *
+     *     returnType:com.lovelycatv.template.springboot.shared.request.PaginatedResponseData<ENTITY of com.lovelycatv.template.springboot.shared.service.BaseManagerService> [suspend]
+     *
+     *     in file BaseManagerService.kt has no continuation;
+     *
+     *     can't call FUN IR_EXTERNAL_DECLARATION_STUB
+     *
+     *     name:awaitFirstOrNull
+     *
+     *     visibility:public
+     *
+     *     modality:FINAL <T> (<this>:org.reactivestreams.Publisher<T of kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull>)
+     *
+     *     returnType:T of kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull? [suspend]
+     *
+     * @param dto
+     * @param limit
+     * @param offset
+     * @return
+     */
+    private suspend fun defaultAdvanceQuery(
+        dto: READ_DTO,
+        limit: Int,
+        offset: Int
+    ): PaginatedResponseData<ENTITY> {
+        val keyword = dto.searchKeyword ?: return PaginatedResponseData(
+            page = dto.page,
+            pageSize = dto.pageSize,
+            total = 0,
+            totalPages = 0,
+            records = emptyList()
+        )
+
+        val total = this.getRepository().countByKeyword(keyword).awaitFirstOrNull() ?: 0
+        val records = this.getRepository().searchByKeyword(
+            keyword,
+            limit,
+            offset
+        ).awaitListWithTimeout()
+
+        return dto.toPaginatedResponseData(
+            total = total,
+            records = records
+        )
     }
 
     suspend fun create(dto: CREATE_DTO): ENTITY
