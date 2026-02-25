@@ -44,7 +44,7 @@ export function RolePermissionManagerPage() {
         try {
             const res = await UserPermissionManagerController.list();
             setAllPermissions(res.data || []);
-        } catch {
+        } catch(err) {
             void message.error("无法获取权限列表");
         }
     };

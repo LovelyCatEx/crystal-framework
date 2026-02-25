@@ -67,9 +67,15 @@ export const adminMenus: RouteItem[] = [
 ]
 
 export function computeAccessibleMenus(accessiblePathList: string[]): RouteItem[] {
+    if (!accessiblePathList || accessiblePathList.length == 0) {
+        return [
+            ...publicMenus,
+        ];
+    }
+
     return [
         ...publicMenus,
         ...adminMenus
-            .filter((menu) => accessiblePathList.includes(menu.path))
-    ]
+            .filter((menu) => accessiblePathList.includes(menu.path)),
+    ];
 }
