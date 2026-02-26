@@ -1,7 +1,5 @@
 package com.lovelycatv.template.springboot.system.types
 
-import com.lovelycatv.template.springboot.system.types.SystemSettingsItemDeclaration
-
 object SystemSettingsConstants {
     object Bootstrap {
         val AUTO_CHECK_RBAC_TABLE_DATA = SystemSettingsItemDeclaration(

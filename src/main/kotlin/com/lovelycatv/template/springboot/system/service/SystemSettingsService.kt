@@ -26,8 +26,9 @@ interface SystemSettingsService : BaseService<SystemSettingsRepository, SystemSe
 
         return when (declaration.valueType) {
             SystemSettingsItemValueType.STRING -> settingsValue
-            SystemSettingsItemValueType.NUMBER -> settingsValue.toLong()
-            SystemSettingsItemValueType.BOOLEAN -> settingsValue.toBoolean()
+            SystemSettingsItemValueType.NUMBER -> settingsValue.toLongOrNull()
+            SystemSettingsItemValueType.DECIMAL -> settingsValue.toDoubleOrNull()
+            SystemSettingsItemValueType.BOOLEAN -> settingsValue.toBooleanStrictOrNull()
         } as? R?
     }
 
