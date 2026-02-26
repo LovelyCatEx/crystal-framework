@@ -23,27 +23,7 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
         logger.info("=".repeat(64))
         logger.info("Starting system settings table data checker...")
 
-        val declarations = mutableListOf<SystemSettingsItemDeclaration>()
-        var nested = SystemSettingsConstants::class.nestedClasses
-
-        while (nested.isNotEmpty()) {
-            nested.forEach {
-                val instance = it.objectInstance
-                it.memberProperties.forEach { prop ->
-                    val value = if (instance != null) {
-                        prop.call(instance)
-                    } else {
-                        prop.getter.call()
-                    }
-
-                    if (value is SystemSettingsItemDeclaration) {
-                        declarations.add(value)
-                    }
-                }
-            }
-
-            nested = nested.flatMap { it.nestedClasses }
-        }
+        val declarations = SystemSettingsConstants.getAllDeclarations()
 
         logger.info("${declarations.size} system settings declaration(s) detected.")
 

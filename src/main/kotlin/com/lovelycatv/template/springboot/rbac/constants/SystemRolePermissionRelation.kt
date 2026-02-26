@@ -11,6 +11,8 @@ object SystemRolePermissionRelation {
         SystemRole.ROLE_ADMIN to listOf(
             SystemPermission.MENU_USER_MANAGER,
             SystemPermission.ACTION_USER_READ,
+            SystemPermission.MENU_SYSTEM_SETTINGS,
+            SystemPermission.ACTION_SYSTEM_SETTINGS_READ
         ),
     )
 }

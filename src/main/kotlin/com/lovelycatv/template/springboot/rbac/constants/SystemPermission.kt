@@ -8,6 +8,7 @@ object SystemPermission {
     const val MENU_USER_MANAGER = "user:/manager/users"
     const val MENU_ROLE_PERMISSION_MANAGER = "role.permission:/manager/role-permissions"
     const val MENU_USER_ROLE_MANAGER = "user.role:/manager/user-roles-relation"
+    const val MENU_SYSTEM_SETTINGS = "settings:/manager/settings"
 
     const val ACTION_PERMISSION_CREATE = "permission.create"
     const val ACTION_PERMISSION_READ = "permission.read"
@@ -29,6 +30,9 @@ object SystemPermission {
 
     const val ACTION_USER_ROLE_READ = "user.role.read"
     const val ACTION_USER_ROLE_UPDATE = "user.role.update"
+
+    const val ACTION_SYSTEM_SETTINGS_READ = "settings.read"
+    const val ACTION_SYSTEM_SETTINGS_UPDATE = "settings.update"
 
     /**
      * resolve permission from string declaration

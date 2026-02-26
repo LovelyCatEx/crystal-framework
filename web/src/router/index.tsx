@@ -1,5 +1,5 @@
 import {
-    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined
+    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
@@ -9,6 +9,7 @@ import {RolePermissionManagerPage} from "../pages/manager/rbac/RolePermissionMan
 import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
 import type {MenuItemType} from "antd/es/menu/interface";
 import type {MenuItem} from "../types/menu.types.ts";
+import {SystemSettingsManagerPage} from "../pages/manager/settings/SystemSettingsManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -63,6 +64,13 @@ export const adminMenus: RouteItem[] = [
         icon: <UserSwitchOutlined />,
         label: "用户角色分配",
         page: <UserRoleRelationManagerPage />
+    },
+    {
+        key: '/manager/settings',
+        path: '/manager/settings',
+        icon: <SettingOutlined />,
+        label: "系统设置",
+        page: <SystemSettingsManagerPage />
     }
 ]
 
