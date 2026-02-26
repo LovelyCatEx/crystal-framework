@@ -1,8 +1,13 @@
 package com.lovelycatv.template.springboot.system.types
 
 data class SystemSettings(
+    val bootstrap: Bootstrap,
     val mail: Mail,
 ) {
+    data class Bootstrap(
+        val autoCheckRbacTableData: Boolean
+    )
+
     data class Mail(
         val smtp: SMTP,
     ) {

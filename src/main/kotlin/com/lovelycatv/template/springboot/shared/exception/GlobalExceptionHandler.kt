@@ -2,6 +2,7 @@ package com.lovelycatv.template.springboot.shared.exception
 
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.vertex.log.logger
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -24,6 +25,13 @@ class GlobalExceptionHandler {
         logger.info("An exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>("missing parameter ${e.name}")
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException::class)
+    fun handleAuthorizationDeniedException(e: AuthorizationDeniedException): ApiResponse<*> {
+        logger.info("An authorization denied exception occurred", e)
+
+        return ApiResponse.forbidden<Nothing>("you are not allowed to access this resource")
     }
 
     @ExceptionHandler(Exception::class)

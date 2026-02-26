@@ -83,7 +83,10 @@ class CustomLoginFilter(
             exchange.exchange.response.statusCode = HttpStatus.OK
             exchange.exchange.response.writeWith(
                 exchange.exchange.response.bufferFactory().wrap(
-                    ApiResponse.unauthorized<Nothing>(exception.localizedMessage).toJSONString().toByteArray()
+                    ApiResponse
+                        .unauthorized<Nothing>(exception.localizedMessage)
+                        .toJSONString()
+                        .toByteArray()
                 ).toMono()
             )
         }

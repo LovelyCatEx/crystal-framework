@@ -29,14 +29,17 @@ class SystemSettingsServiceImpl(
 
     override suspend fun getSystemSettings(): SystemSettings {
         return cachedSystemSettings ?: SystemSettings(
+            bootstrap = SystemSettings.Bootstrap(
+                autoCheckRbacTableData = getSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA)!!
+            ),
             mail = SystemSettings.Mail(
                 smtp = SystemSettings.Mail.SMTP(
-                    host = getSettings(SystemSettingsConstants.Mail.SMTP.HOST) { "127.0.0.1" } !!,
-                    port = getSettings(SystemSettingsConstants.Mail.SMTP.PORT) { "465" }!!.toInt(),
-                    username = getSettings(SystemSettingsConstants.Mail.SMTP.USERNAME) { "username" }!!,
-                    password = getSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD) { "password" }!!,
-                    ssl = getSettings(SystemSettingsConstants.Mail.SMTP.SSL) { "true" }!!.toBoolean(),
-                    fromEmail = getSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL) { "user@example.com" }!!,
+                    host = getSettings(SystemSettingsConstants.Mail.SMTP.HOST)!!,
+                    port = getSettings<Long>(SystemSettingsConstants.Mail.SMTP.PORT)!!.toInt(),
+                    username = getSettings(SystemSettingsConstants.Mail.SMTP.USERNAME)!!,
+                    password = getSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD)!!,
+                    ssl = getSettings(SystemSettingsConstants.Mail.SMTP.SSL)!!,
+                    fromEmail = getSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL)!!,
                 )
             )
         ).also {
