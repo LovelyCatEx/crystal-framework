@@ -1,5 +1,5 @@
 import {doGet, doPost} from "./system-request.ts";
-import type {GetSystemSettingsSchemaData} from "../types/system-settings.ts";
+import type {GetSystemSettingsSchemaData} from "../types/system-settings.types.ts";
 
 export function getSystemSettingsSchema() {
     return doGet<GetSystemSettingsSchemaData>('/api/manager/settings/schema')
