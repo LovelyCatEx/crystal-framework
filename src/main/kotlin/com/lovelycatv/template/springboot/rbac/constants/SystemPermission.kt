@@ -1,5 +1,7 @@
 package com.lovelycatv.template.springboot.rbac.constants
 
+import com.lovelycatv.template.springboot.rbac.types.PermissionType
+
 object SystemPermission {
     const val MENU_PERMISSION_MANAGER = "permission:/manager/user-permissions"
     const val MENU_ROLE_MANAGER = "role:/manager/user-roles"
@@ -27,4 +29,29 @@ object SystemPermission {
 
     const val ACTION_USER_ROLE_READ = "user.role.read"
     const val ACTION_USER_ROLE_UPDATE = "user.role.update"
+
+    /**
+     * resolve permission from string declaration
+     *
+     * @param str declaration, eg: "user:/manager/users"
+     * @return (name, description, path)
+     */
+    fun resolvePermissionDeclaration(str: String): Triple<String, String, String?> {
+        val type = if (str.contains(":")) {
+            PermissionType.MENU
+        } else {
+            PermissionType.ACTION
+        }
+
+        return when (type) {
+            PermissionType.ACTION -> {
+                Triple(str, str, null)
+            }
+
+            PermissionType.MENU -> {
+                val (readPermissionKey, path) = str.split(":")
+                Triple(readPermissionKey, readPermissionKey, path)
+            }
+        }
+    }
 }

@@ -35,4 +35,6 @@ interface UserRoleRepository : BaseRepository<UserRoleEntity> {
     override fun countByKeyword(
         keyword: String
     ): Mono<Long>
+
+    fun findByName(name: String): Mono<UserRoleEntity>
 }

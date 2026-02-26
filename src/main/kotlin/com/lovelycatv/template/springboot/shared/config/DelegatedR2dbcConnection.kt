@@ -45,11 +45,11 @@ class DelegatedR2dbcConnection(private val delegate: Connection) : Connection by
         }
 
         if (modified) {
-            logger.info("Modified SQL:")
-            logger.info("        from: $p0")
-            logger.info("          to: $sql")
+            logger.debug("Modified SQL:")
+            logger.debug("        from: $p0")
+            logger.debug("          to: $sql")
         } else {
-            logger.warn("Unsupported statement type: ${statement.javaClass.name}")
+            logger.debug("Unsupported statement type: ${statement.javaClass.name}, sql: $sql")
         }
 
         return delegate.createStatement(sql)
