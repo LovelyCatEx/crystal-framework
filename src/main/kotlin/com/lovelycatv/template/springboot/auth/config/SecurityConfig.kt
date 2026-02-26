@@ -3,10 +3,12 @@ package com.lovelycatv.template.springboot.auth.config
 import com.lovelycatv.template.springboot.auth.filter.CustomAuthFilter
 import com.lovelycatv.template.springboot.auth.filter.CustomLoginFilter
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
+import com.lovelycatv.template.springboot.shared.service.redis.RedisService
 import com.lovelycatv.template.springboot.shared.utils.toJSONString
 import com.lovelycatv.template.springboot.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,6 +23,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.reactive.config.EnableWebFlux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
 
 @Configuration
 @EnableWebFlux
@@ -34,7 +37,7 @@ class SecurityConfig(
     private val logger = logger()
 
     @Bean
-    fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    fun securityWebFilterChain(http: ServerHttpSecurity, redisService: RedisService): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
                 logger.warn("Authentication failure: ${exception.localizedMessage}", exception)
@@ -113,8 +116,30 @@ class SecurityConfig(
                     it.replace("{version}", "v1")
                 }
             ) {
+                val redisKey = "userAuthorities:$it"
                 runBlocking(Dispatchers.IO) {
-                    userService.getUserRbacAccessInfo(it).actions.map { GrantedAuthority { it.name } }
+                    val cache = redisService
+                        .get<String>(redisKey)
+                        .awaitFirstOrNull()
+                        ?.split(",")
+
+                    cache?.map { GrantedAuthority { it } }
+                        ?: userService
+                            .getUserRbacAccessInfo(it)
+                            .actions
+                            .also {
+                                redisService.set(
+                                    redisKey,
+                                    it.joinToString(
+                                        separator = ",",
+                                        prefix = "",
+                                        postfix = ""
+                                    ) { it.name },
+                                    Duration.ofDays(3)
+                                ).awaitFirstOrNull()
+                            }
+                            .map { GrantedAuthority { it.name } }
+
                 }
             },
             SecurityWebFiltersOrder.AUTHENTICATION
