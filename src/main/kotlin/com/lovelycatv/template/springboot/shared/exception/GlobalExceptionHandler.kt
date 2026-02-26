@@ -2,6 +2,8 @@ package com.lovelycatv.template.springboot.shared.exception
 
 import com.lovelycatv.template.springboot.shared.response.ApiResponse
 import com.lovelycatv.vertex.log.logger
+import org.springframework.boot.actuate.audit.AuditEvent
+import org.springframework.boot.actuate.audit.AuditEventRepository
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -10,7 +12,7 @@ import org.springframework.web.server.MissingRequestValueException
 
 @Component
 @RestControllerAdvice
-class GlobalExceptionHandler {
+class GlobalExceptionHandler(private val auditEventRepository: AuditEventRepository) {
     private val logger = logger()
 
     @ExceptionHandler(BusinessException::class)

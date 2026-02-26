@@ -19,3 +19,4 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.r2dbc: DEBUG
+    org.springframework.boot.actuate: DEBUG
