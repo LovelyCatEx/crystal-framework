@@ -7,12 +7,14 @@ import com.lovelycatv.template.springboot.rbac.controller.manager.role.dto.Manag
 import com.lovelycatv.template.springboot.rbac.entity.UserRoleEntity
 import com.lovelycatv.template.springboot.rbac.repository.UserRoleRepository
 import com.lovelycatv.template.springboot.rbac.service.UserRoleManagerService
+import com.lovelycatv.template.springboot.shared.utils.SnowIdGenerator
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
 @Service
 class UserRoleManagerServiceImpl(
-    private val userRoleRepository: UserRoleRepository
+    private val userRoleRepository: UserRoleRepository,
+    private val snowIdGenerator: SnowIdGenerator
 ) : UserRoleManagerService {
     override fun getRepository(): UserRoleRepository {
         return userRoleRepository
@@ -20,6 +22,7 @@ class UserRoleManagerServiceImpl(
 
     override suspend fun create(dto: ManagerCreateRoleDTO): UserRoleEntity {
         val entity = UserRoleEntity(
+            id = snowIdGenerator.nextId(),
             name = dto.name,
             description = dto.description
         ).apply { newEntity() }
