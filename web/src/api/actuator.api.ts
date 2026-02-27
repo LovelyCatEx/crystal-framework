@@ -10,9 +10,14 @@ export function getAvailableMetricsList() {
     );
 }
 
-export function getMetric(type: string) {
+export function getMetric(
+    type: string,
+    tags: { tagName: string, optionName: string }[] = []
+) {
     return get<ActuatorMetricResult>(
-        `/api/actuator/metrics/${type}`,
+        tags.length > 0
+            ? `/api/actuator/metrics/${type}?${tags.map((tag) => `tag=${tag.tagName}:${tag.optionName}`).join('&')}`
+            : `/api/actuator/metrics/${type}`,
         {},
         { 'Authorization': 'Bearer ' + getUserAuthentication()?.token }
     );
