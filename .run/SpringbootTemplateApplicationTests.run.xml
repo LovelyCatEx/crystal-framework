@@ -3,12 +3,12 @@
     <module name="springboot-template" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.lovelycatv.template.springboot.*" />
+        <option name="PATTERN" value="com.lovelycatv.crystalframework.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="PACKAGE_NAME" value="com.lovelycatv.template.springboot" />
-    <option name="MAIN_CLASS_NAME" value="com.lovelycatv.template.springboot.SpringbootTemplateApplicationTests" />
+    <option name="PACKAGE_NAME" value="com.lovelycatv.crystalframework" />
+    <option name="MAIN_CLASS_NAME" value="com.lovelycatv.crystalframework.SpringbootTemplateApplicationTests" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <envs>

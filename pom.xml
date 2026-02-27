@@ -8,23 +8,33 @@
         <version>4.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.lovelycatv.template</groupId>
-    <artifactId>springboot-template</artifactId>
+    <groupId>com.lovelycatv.crystalframework</groupId>
+    <artifactId>core</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-template</name>
-    <description>springboot-template</description>
+    <name>crystalframework-core</name>
+    <description>Crystal Framework</description>
     <url/>
     <licenses>
-        <license/>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>lovelycat</id>
+            <name>LovelyCat</name>
+            <email>mail@lovelycatv.com</email>
+            <organization>Atomic Matrix</organization>
+            <organizationUrl>https://lovelycatv.com</organizationUrl>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git://github.com/LovelyCatEx/crystal-framework.git</connection>
+        <developerConnection>scm:git:ssh://github.com/LovelyCatEx/crystal-framework.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/LovelyCatEx/crystal-framework</url>
     </scm>
     <properties>
         <java.version>17</java.version>
