@@ -19,7 +19,17 @@ interface UserService : BaseService<UserRepository, UserEntity>, ReactiveUserDet
 
     suspend fun resetPassword(email: String, emailCode: String, newPassword: String)
 
+    suspend fun requestResetPasswordEmailConfirmationCode(userId: Long) {
+        this.requestResetPasswordEmailConfirmationCode(
+            this.getByIdOrThrow(userId).email
+        )
+    }
+
     suspend fun requestResetPasswordEmailConfirmationCode(email: String)
+
+    suspend fun resetEmailAddress(userId: Long, emailCode: String, newEmail: String)
+
+    suspend fun requestResetEmailAddressEmailConfirmationCode(email: String)
 
     suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult
 

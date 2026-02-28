@@ -8,8 +8,10 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.user.controller.dto.UserRegisterDTO
 import com.lovelycatv.crystalframework.user.controller.dto.RequestRegisterEmailCodeDTO
 import com.lovelycatv.crystalframework.user.controller.dto.RequestResetPasswordEmailCodeDTO
+import com.lovelycatv.crystalframework.user.controller.dto.ResetEmailDTO
 import com.lovelycatv.crystalframework.user.controller.dto.ResetPasswordDTO
 import com.lovelycatv.crystalframework.user.service.UserService
+import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -28,6 +30,7 @@ class UserController(
     @PostMapping("/register", version = "1")
     suspend fun register(
         @ModelAttribute
+        @Valid
         dto: UserRegisterDTO
     ): ApiResponse<*> {
         userService.register(dto.username, dto.password, dto.email, dto.emailCode)
@@ -39,6 +42,7 @@ class UserController(
     @PostMapping("/requestRegisterEmailCode", version = "1")
     suspend fun requestRegisterEmailCode(
         @ModelAttribute
+        @Valid
         dto: RequestRegisterEmailCodeDTO
     ): ApiResponse<*> {
         userService.requestRegisterEmailConfirmationCode(dto.email)
@@ -50,6 +54,7 @@ class UserController(
     @PostMapping("/resetPassword")
     suspend fun resetPassword(
       @ModelAttribute
+      @Valid
       dto: ResetPasswordDTO
     ): ApiResponse<*> {
         userService.resetPassword(dto.email, dto.emailCode, dto.newPassword)
@@ -61,9 +66,31 @@ class UserController(
     @PostMapping("/requestPasswordResetEmailCode")
     suspend fun requestPasswordResetEmailCode(
         @ModelAttribute
+        @Valid
         dto: RequestResetPasswordEmailCodeDTO
     ): ApiResponse<*> {
         userService.requestResetPasswordEmailConfirmationCode(dto.email)
+
+        return ApiResponse.success(null)
+    }
+
+    @PostMapping("/resetEmail")
+    suspend fun resetEmail(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: ResetEmailDTO
+    ): ApiResponse<*> {
+        userService.resetEmailAddress(userAuthentication.userId, dto.emailCode, dto.newEmail)
+
+        return ApiResponse.success(null)
+    }
+
+    @PostMapping("/requestResetEmailAddressEmailCode")
+    suspend fun requestPasswordResetEmailCode(
+        userAuthentication: UserAuthentication
+    ): ApiResponse<*> {
+        userService.requestResetPasswordEmailConfirmationCode(userAuthentication.userId)
 
         return ApiResponse.success(null)
     }

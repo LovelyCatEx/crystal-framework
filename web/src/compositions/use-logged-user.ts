@@ -4,7 +4,7 @@ import {useSWRState} from "./swr.ts";
 import {message} from "antd";
 
 export const useLoggedUser = () => {
-    const [userProfile] = useSWRState<UserProfileVO>(
+    const [userProfile, , , refreshUserProfile] = useSWRState<UserProfileVO>(
         'getUserProfile',
         getUserProfile,
         () => void message.error("无法获取用户资料")
@@ -16,5 +16,5 @@ export const useLoggedUser = () => {
         () => void message.error("无法获取资源列表")
     );
 
-    return { userProfile, accessibleMenuPaths };
+    return { userProfile, accessibleMenuPaths, refreshUserProfile };
 }

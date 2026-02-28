@@ -4,7 +4,14 @@ import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 import {useLoggedUser} from "../../../compositions/use-logged-user.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import {useEffect, useState} from "react";
-import {requestPasswordResetEmailCode, resetPassword, type ResetPasswordDTO} from "../../../api/auth.api.ts";
+import {
+    requestPasswordResetEmailCode,
+    resetPassword,
+    requestResetEmailAddressEmailCode,
+    resetEmail,
+    type ResetPasswordDTO,
+    type ResetEmailDTO
+} from "../../../api/auth.api.ts";
 
 const { Password } = Input;
 
@@ -60,68 +67,141 @@ const BasicInfo = () => {
 
 const SecuritySettings = () => {
     const loggedUser = useLoggedUser();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [sendingCode, setSendingCode] = useState(false);
-    const [countdown, setCountdown] = useState(0);
-    const [form] = Form.useForm();
+
+    /**
+     * Reset Password Modal
+     */
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordSendingCode, setPasswordSendingCode] = useState(false);
+    const [passwordCountdown, setPasswordCountdown] = useState(0);
+    const [passwordForm] = Form.useForm();
 
     useEffect(() => {
-        if (countdown > 0) {
+        if (passwordCountdown > 0) {
             const timer = setTimeout(() => {
-                setCountdown(countdown - 1);
+                setPasswordCountdown(passwordCountdown - 1);
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [countdown]);
+    }, [passwordCountdown]);
 
-    const handleOpenModal = () => {
-        form.setFieldsValue({
+    const handleOpenPasswordModal = () => {
+        passwordForm.setFieldsValue({
             email: loggedUser.userProfile?.email,
         });
-        setIsModalOpen(true);
+        setIsPasswordModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        form.resetFields();
-        setCountdown(0);
+    const handleClosePasswordModal = () => {
+        setIsPasswordModalOpen(false);
+        passwordForm.resetFields();
+        setPasswordCountdown(0);
     };
 
-    const handleSendCode = async () => {
-        const email = form.getFieldValue('email');
+    const handleSendPasswordCode = async () => {
+        const email = passwordForm.getFieldValue('email');
         if (!email) {
             void message.warning('请先输入邮箱');
             return;
         }
 
-        setSendingCode(true);
+        setPasswordSendingCode(true);
         try {
             await requestPasswordResetEmailCode(email);
             void message.success('验证码发送成功，请注意查收');
-            setCountdown(60);
+            setPasswordCountdown(60);
         } catch (error) {
             // @ts-ignore
             void message.error(`验证码发送失败 ${error.message}`);
         } finally {
-            setSendingCode(false);
+            setPasswordSendingCode(false);
         }
     };
 
-    const handleSubmit = async (values: ResetPasswordDTO) => {
-        setLoading(true);
+    const handlePasswordSubmit = async (values: ResetPasswordDTO) => {
+        setPasswordLoading(true);
         try {
             await resetPassword(values);
             void message.success('密码修改成功！');
-            handleCloseModal();
+            handleClosePasswordModal();
         } catch (error) {
             // @ts-ignore
             void message.error(`密码修改失败 ${error.message}`);
         } finally {
-            setLoading(false);
+            setPasswordLoading(false);
         }
     };
 
+    /**
+     * Reset Email Modal
+     */
+    const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+    const [emailLoading, setEmailLoading] = useState(false);
+    const [emailSendingCode, setEmailSendingCode] = useState(false);
+    const [emailCountdown, setEmailCountdown] = useState(0);
+    const [emailForm] = Form.useForm();
+
+    useEffect(() => {
+        if (emailCountdown > 0) {
+            const timer = setTimeout(() => {
+                setEmailCountdown(emailCountdown - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [emailCountdown]);
+
+    const handleOpenEmailModal = () => {
+        emailForm.setFieldsValue({
+            currentEmail: loggedUser.userProfile?.email,
+        });
+        setIsEmailModalOpen(true);
+    };
+
+    const handleCloseEmailModal = () => {
+        setIsEmailModalOpen(false);
+        emailForm.resetFields();
+        setEmailCountdown(0);
+    };
+
+    const handleSendEmailCode = async () => {
+        const newEmail = emailForm.getFieldValue('newEmail');
+        if (!newEmail) {
+            void message.warning('请先输入新邮箱');
+            return;
+        }
+
+        setEmailSendingCode(true);
+        try {
+            await requestResetEmailAddressEmailCode();
+            void message.success('验证码发送成功，请注意查收');
+            setEmailCountdown(60);
+        } catch (error) {
+            // @ts-ignore
+            void message.error(`验证码发送失败 ${error.message}`);
+        } finally {
+            setEmailSendingCode(false);
+        }
+    };
+
+    const handleEmailSubmit = async (values: ResetEmailDTO) => {
+        setEmailLoading(true);
+        try {
+            await resetEmail(values);
+            void message.success('邮箱修改成功！');
+            handleCloseEmailModal();
+            await loggedUser.refreshUserProfile();
+        } catch (error) {
+            // @ts-ignore
+            void message.error(`邮箱修改失败 ${error.message}`);
+        } finally {
+            setEmailLoading(false);
+        }
+    };
+
+    /**
+     * Account Security Component
+     */
     const settings = [
         {
             title: '账户密码',
@@ -129,14 +209,15 @@ const SecuritySettings = () => {
             status: '安全性：高',
             action: '修改',
             icon: <LockOutlined className="text-blue-500" />,
-            onClick: handleOpenModal,
+            onClick: handleOpenPasswordModal,
         },
         {
             title: '电子邮箱',
             desc: loggedUser.userProfile?.email,
             status: '已启用',
             action: '修改',
-            icon: <MailOutlined className="text-amber-500" />
+            icon: <MailOutlined className="text-amber-500" />,
+            onClick: handleOpenEmailModal,
         },
     ];
 
@@ -163,15 +244,15 @@ const SecuritySettings = () => {
 
             <Modal
                 title="修改密码"
-                open={isModalOpen}
-                onCancel={handleCloseModal}
+                open={isPasswordModalOpen}
+                onCancel={handleClosePasswordModal}
                 footer={null}
                 mask={{closable: false}}
             >
                 <Form
-                    form={form}
+                    form={passwordForm}
                     layout="vertical"
-                    onFinish={handleSubmit}
+                    onFinish={handlePasswordSubmit}
                     autoComplete="off"
                     className="mt-4"
                 >
@@ -201,12 +282,12 @@ const SecuritySettings = () => {
                             <Col span={8}>
                                 <Button
                                     type="primary"
-                                    loading={sendingCode}
-                                    disabled={countdown > 0}
-                                    onClick={handleSendCode}
+                                    loading={passwordSendingCode}
+                                    disabled={passwordCountdown > 0}
+                                    onClick={handleSendPasswordCode}
                                     className="w-full"
                                 >
-                                    {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
+                                    {passwordCountdown > 0 ? `${passwordCountdown}s后重试` : '发送验证码'}
                                 </Button>
                             </Col>
                         </Row>
@@ -253,7 +334,83 @@ const SecuritySettings = () => {
                         <Button
                             type="primary"
                             htmlType="submit"
-                            loading={loading}
+                            loading={passwordLoading}
+                            className="w-full"
+                        >
+                            确认修改
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
+                title="修改邮箱"
+                open={isEmailModalOpen}
+                onCancel={handleCloseEmailModal}
+                footer={null}
+                mask={{closable: false}}
+            >
+                <Form
+                    form={emailForm}
+                    layout="vertical"
+                    onFinish={handleEmailSubmit}
+                    autoComplete="off"
+                    className="mt-4"
+                >
+                    <Form.Item
+                        label="当前邮箱"
+                        name="currentEmail"
+                    >
+                        <Input
+                            prefix={<MailOutlined className="text-gray-400 mr-2" />}
+                            placeholder="当前邮箱"
+                            disabled
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="新邮箱"
+                        name="newEmail"
+                        rules={[
+                            { required: true, message: '请输入新邮箱' },
+                            { type: 'email', message: '邮箱格式不正确' },
+                            { max: 256, message: '邮箱长度不能超过256个字符' }
+                        ]}
+                    >
+                        <Input
+                            prefix={<MailOutlined className="text-gray-400 mr-2" />}
+                            placeholder="新邮箱"
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="验证码"
+                        name="emailCode"
+                        rules={[{ required: true, message: '请输入验证码' }]}
+                    >
+                        <Row gutter={12}>
+                            <Col span={16}>
+                                <Input placeholder="验证码" />
+                            </Col>
+                            <Col span={8}>
+                                <Button
+                                    type="primary"
+                                    loading={emailSendingCode}
+                                    disabled={emailCountdown > 0}
+                                    onClick={handleSendEmailCode}
+                                    className="w-full"
+                                >
+                                    {emailCountdown > 0 ? `${emailCountdown}s后重试` : '发送验证码'}
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Form.Item>
+
+                    <Form.Item className="mb-0">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={emailLoading}
                             className="w-full"
                         >
                             确认修改

@@ -68,20 +68,10 @@ class UserServiceImpl(
             .findByUsernameOrEmail(username, email)
             .awaitSingleOrNull()
 
-        val emailCodeRedisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
-        val existingCode = redisService
-            .get<String>(emailCodeRedisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode == null) {
-            throw BusinessException("invalid email code")
-        }
-
-        val (_, correctCode) = existingCode.split(":")
-
-        if (emailConfirmationCode != correctCode) {
-            throw BusinessException("incorrect email code")
-        }
+        this.checkCachedEmailCode(
+            RedisConstants.getRequestRegisterEmailCodeKey(email),
+            emailConfirmationCode
+        )
 
         if (existingUser != null) {
             if (existingUser.username == username) {
@@ -106,42 +96,18 @@ class UserServiceImpl(
     }
 
     override suspend fun requestRegisterEmailConfirmationCode(email: String) {
-        val redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
-        val existingCode = redisService
-            .get<String>(redisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode != null) {
-            val codeCreatedTime = existingCode.split(":")[0].toLong()
-            if (System.currentTimeMillis() - codeCreatedTime <= 60 * 1000L) {
-                throw BusinessException("request register email frequently")
-            }
+        withSendEmailCode(
+            redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
+        ) { code ->
+            mailService.sendMail(email, "Register", code)
         }
-
-        val code = (100000..999999).random().toString()
-
-        redisService
-            .set(redisKey, "${System.currentTimeMillis()}:$code", Duration.ofMinutes(5))
-            .awaitFirstOrNull()
-
-        mailService.sendMail(email, "Register", code)
     }
 
     override suspend fun resetPassword(email: String, emailCode: String, newPassword: String) {
-        val emailCodeRedisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
-        val existingCode = redisService
-            .get<String>(emailCodeRedisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode == null) {
-            throw BusinessException("invalid email code")
-        }
-
-        val (_, correctCode) = existingCode.split(":")
-
-        if (emailCode != correctCode) {
-            throw BusinessException("incorrect email code")
-        }
+        this.checkCachedEmailCode(
+            RedisConstants.getRequestResetPasswordEmailCodeKey(email),
+            emailCode
+        )
 
         val existingUser = this
             .getRepository()
@@ -160,25 +126,33 @@ class UserServiceImpl(
     }
 
     override suspend fun requestResetPasswordEmailConfirmationCode(email: String) {
-        val redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
-        val existingCode = redisService
-            .get<String>(redisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode != null) {
-            val codeCreatedTime = existingCode.split(":")[0].toLong()
-            if (System.currentTimeMillis() - codeCreatedTime <= 60 * 1000L) {
-                throw BusinessException("request reset password email frequently")
-            }
+        withSendEmailCode(
+            redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
+        ) { code ->
+            mailService.sendMail(email, "Reset Email", code)
         }
+    }
 
-        val code = (100000..999999).random().toString()
+    override suspend fun resetEmailAddress(userId: Long, emailCode: String, newEmail: String) {
+        val user = this.getByIdOrThrow(userId)
 
-        redisService
-            .set(redisKey, "${System.currentTimeMillis()}:$code", Duration.ofMinutes(5))
+        this.checkCachedEmailCode(
+            RedisConstants.getRequestResetPasswordEmailCodeKey(user.email),
+            emailCode
+        )
+
+        this.getRepository()
+            .save(user.apply { email = newEmail })
             .awaitFirstOrNull()
+            ?: throw BusinessException("could not reset email address for ${user.id}")
+    }
 
-        mailService.sendMail(email, "Reset Password", code)
+    override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String) {
+        withSendEmailCode(
+            redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email)
+        ) { code ->
+            mailService.sendMail(email, "Reset Email", code)
+        }
     }
 
     override suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult {
@@ -204,5 +178,49 @@ class UserServiceImpl(
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,
         )
+    }
+
+    private suspend fun checkCachedEmailCode(
+        redisKey: String,
+        emailCode: String
+    ) {
+        val existingCode = redisService
+            .get<String>(redisKey)
+            .awaitFirstOrNull()
+
+        if (existingCode == null) {
+            throw BusinessException("invalid email code")
+        }
+
+        val (_, correctCode) = existingCode.split(":")
+
+        if (emailCode != correctCode) {
+            throw BusinessException("incorrect email code")
+        }
+    }
+
+    private suspend fun withSendEmailCode(
+        redisKey: String,
+        validMinutes: Long = 5,
+        action: suspend (code: String) -> Unit
+    ) {
+        val existingCode = redisService
+            .get<String>(redisKey)
+            .awaitFirstOrNull()
+
+        if (existingCode != null) {
+            val codeCreatedTime = existingCode.split(":")[0].toLong()
+            if (System.currentTimeMillis() - codeCreatedTime <= 60 * 1000L) {
+                throw BusinessException("request email code frequently")
+            }
+        }
+
+        val code = (100000..999999).random().toString()
+
+        redisService
+            .set(redisKey, "${System.currentTimeMillis()}:$code", Duration.ofMinutes(validMinutes))
+            .awaitFirstOrNull()
+
+        action.invoke(code)
     }
 }
