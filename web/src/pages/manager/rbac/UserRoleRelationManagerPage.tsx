@@ -23,14 +23,17 @@ export function UserRoleRelationManagerPage() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const fetchUsers = async () => {
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPageSize, setCurrentPageSize] = useState(20);
+    const [total, setTotal] = useState(0);
+
+    const fetchUsers = async (page = currentPage, pageSize = currentPageSize) => {
         setLoading(true);
         try {
-            const res = await UserManagerController.query({
-                page: 1,
-                pageSize: 1000
-            });
+            const res = await UserManagerController.query({ page, pageSize });
             setUsers(res.data?.records || []);
+            setTotal(res.data?.total || 0);
         } catch {
             void message.error("无法获取用户列表");
         } finally {
@@ -45,6 +48,12 @@ export function UserRoleRelationManagerPage() {
         } catch {
             void message.error("无法获取角色列表");
         }
+    };
+
+    const handlePageChange = (page: number, pageSize: number) => {
+        setCurrentPage(page);
+        setCurrentPageSize(pageSize);
+        void fetchUsers(page, pageSize);
     };
 
     const openAssignModal = async (user: User) => {
@@ -89,8 +98,9 @@ export function UserRoleRelationManagerPage() {
     }));
 
     useEffect(() => {
-        fetchUsers();
-        fetchAllRoles();
+        void fetchUsers(currentPage, currentPageSize);
+        void fetchAllRoles();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const columns = [
@@ -149,7 +159,16 @@ export function UserRoleRelationManagerPage() {
                     dataSource={users}
                     rowKey="id"
                     loading={loading}
-                    pagination={false}
+                    pagination={{
+                        showSizeChanger: true,
+                        defaultPageSize: 20,
+                        className: "pr-6",
+                        current: currentPage,
+                        total: total,
+                        pageSize: currentPageSize,
+                        pageSizeOptions: [5, 10, 15, 20],
+                        onChange: handlePageChange
+                    }}
                 />
             </Card>
 

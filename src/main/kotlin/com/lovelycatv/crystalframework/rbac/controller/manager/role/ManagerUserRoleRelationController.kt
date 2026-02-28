@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.rbac.service.impl.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,6 +36,7 @@ class ManagerUserRoleRelationController(
     suspend fun setUserRoles(
         userAuthentication: UserAuthentication,
         @RequestBody
+        @Valid
         dto: SetUserRolesDTO
     ): ApiResponse<*> {
         userRoleRelationService.setUserRoles(dto.userId, dto.roleIds)

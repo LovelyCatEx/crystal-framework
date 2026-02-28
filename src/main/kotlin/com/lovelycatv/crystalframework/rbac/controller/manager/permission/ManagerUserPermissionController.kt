@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,6 +38,7 @@ class ManagerUserPermissionController(
     suspend fun createPermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerCreatePermissionDTO
     ): ApiResponse<*> {
         userPermissionManagerService.create(dto)
@@ -49,6 +51,7 @@ class ManagerUserPermissionController(
     suspend fun readPermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerReadPermissionDTO
     ): ApiResponse<*> {
         return ApiResponse.success(userPermissionManagerService.query(dto))
@@ -59,6 +62,7 @@ class ManagerUserPermissionController(
     suspend fun updatePermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerUpdatePermissionDTO
     ): ApiResponse<*> {
         userPermissionManagerService.update(dto)
@@ -71,6 +75,7 @@ class ManagerUserPermissionController(
     suspend fun deletePermission(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerDeletePermissionDTO
     ): ApiResponse<*> {
         userPermissionManagerService.delete(dto.id)

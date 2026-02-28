@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -37,6 +38,7 @@ class ManagerUserRoleController(
     suspend fun createRole(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerCreateRoleDTO
     ): ApiResponse<*> {
         userRoleManagerService.create(dto)
@@ -48,6 +50,7 @@ class ManagerUserRoleController(
     suspend fun readRole(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerReadRoleDTO
     ): ApiResponse<*> {
         return ApiResponse.success(userRoleManagerService.query(dto))
@@ -58,6 +61,7 @@ class ManagerUserRoleController(
     suspend fun updateRole(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerUpdateRoleDTO
     ): ApiResponse<*> {
         userRoleManagerService.update(dto)
@@ -69,6 +73,7 @@ class ManagerUserRoleController(
     suspend fun deleteRole(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: ManagerDeleteRoleDTO
     ): ApiResponse<*> {
         userRoleManagerService.delete(dto.id)

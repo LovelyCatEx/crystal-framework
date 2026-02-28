@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.rbac.service.impl.UserRolePermissionRelat
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +28,7 @@ class ManagerUserRolePermissionController(
         userAuthentication: UserAuthentication,
         @RequestParam roleId: Long
     ): ApiResponse<*> {
-        return ApiResponse.Companion.success(userRolePermissionRelationService.getRolePermissions(roleId))
+        return ApiResponse.success(userRolePermissionRelationService.getRolePermissions(roleId))
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_PERMISSION_UPDATE}')")
@@ -35,9 +36,10 @@ class ManagerUserRolePermissionController(
     suspend fun setRolePermissions(
         userAuthentication: UserAuthentication,
         @RequestBody
+        @Valid
         dto: SetRolePermissionsDTO
     ): ApiResponse<*> {
         userRolePermissionRelationService.setRolePermissions(dto.roleId, dto.permissionIds)
-        return ApiResponse.Companion.success(null)
+        return ApiResponse.success(null)
     }
 }
