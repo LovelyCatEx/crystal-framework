@@ -10,6 +10,7 @@ package com.lovelycatv.crystalframework.auth.filter
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.rbac.types.PermissionType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -29,7 +30,8 @@ import reactor.kotlin.core.publisher.toMono
 
 class CustomLoginFilter(
     defaultFilterProcessesUrl: String,
-    authenticationManager: ReactiveAuthenticationManager
+    authenticationManager: ReactiveAuthenticationManager,
+    userAuthorizationService: UserAuthorizationService
 ) : AuthenticationWebFilter(authenticationManager) {
 
     init {
@@ -56,20 +58,7 @@ class CustomLoginFilter(
         }
 
         setAuthenticationSuccessHandler { exchange, authentication ->
-            val data = LoginSuccessResponseData().apply {
-                token = JwtUtil.buildJwtToken(
-                    signKey = "SpringBootTemplate",
-                    authorities = authentication.authorities,
-                    authentication = authentication,
-                    expiration = 7 * 24 * 3600 * 1000L
-                ) {
-                    val principal = authentication.principal as UserEntity
-
-                    this.claim("userId", principal.id.toString())
-                }
-
-                expiresIn = 7 * 24 * 3600 * 1000L
-            }
+            val data = userAuthorizationService.buildLoginSuccessResponse(authentication.principal as UserEntity)
 
             exchange.exchange.response.statusCode = HttpStatus.OK
             exchange.exchange.response.writeWith(
@@ -90,17 +79,5 @@ class CustomLoginFilter(
                 ).toMono()
             )
         }
-    }
-
-    @JsonAutoDetect(
-        fieldVisibility = JsonAutoDetect.Visibility.ANY,
-        getterVisibility = JsonAutoDetect.Visibility.NONE,
-        isGetterVisibility = JsonAutoDetect.Visibility.NONE
-    )
-    class LoginSuccessResponseData {
-        @JsonProperty("token")
-        var token: String? = null
-        @JsonProperty("expiresIn")
-        var expiresIn: Long = 0
     }
 }

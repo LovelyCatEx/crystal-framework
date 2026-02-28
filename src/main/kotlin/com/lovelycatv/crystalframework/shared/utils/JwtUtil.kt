@@ -18,8 +18,8 @@ import java.util.*
 object JwtUtil {
     fun buildJwtToken(
         signKey: String?,
-        authorities: Iterable<GrantedAuthority>,
-        authentication: Authentication,
+        subject: String,
+        authorities: Set<String>,
         expiration: Long,
         customClaims: (JwtBuilder.() -> Unit)? = null
     ): String? {
@@ -28,13 +28,14 @@ object JwtUtil {
             authorityStr.append(authority).append(",")
         }
 
-        val builder = Jwts.builder()
+        val builder = Jwts
+            .builder()
             .claim("authorities", authorityStr)
 
         customClaims?.invoke(builder)
 
         builder
-            .setSubject(authentication.name)
+            .setSubject(subject)
             .setExpiration(Date(System.currentTimeMillis() + expiration))
             .signWith(SignatureAlgorithm.HS512, signKey)
             .compact()

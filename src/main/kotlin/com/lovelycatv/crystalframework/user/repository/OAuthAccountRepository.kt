@@ -1,0 +1,40 @@
+package com.lovelycatv.crystalframework.user.repository
+
+import com.lovelycatv.crystalframework.shared.repository.BaseRepository
+import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
+import org.springframework.data.r2dbc.repository.Query
+import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+
+@Repository
+interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
+    @Query(
+        """
+        SELECT * FROM oauth_accounts 
+        WHERE (LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        ORDER BY created_time DESC
+        LIMIT :limit
+        OFFSET :offset
+    """
+    )
+    override fun searchByKeyword(
+        keyword: String,
+        limit: Int,
+        offset: Int
+    ): Flux<OAuthAccountEntity>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM oauth_accounts 
+        WHERE LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    """
+    )
+    override fun countByKeyword(
+        keyword: String
+    ): Mono<Long>
+
+    fun findByPlatformAndIdentifier(platform: Int, identifier: String): Mono<OAuthAccountEntity>
+}

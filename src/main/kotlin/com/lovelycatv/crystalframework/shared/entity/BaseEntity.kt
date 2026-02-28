@@ -10,7 +10,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer
 abstract class BaseEntity(
     @Id
     @get:JsonSerialize(using = ToStringSerializer::class)
-    private val id: Long = 0,
+    private var id: Long = 0,
     @Column(value = "created_time")
     open val createdTime: Long = System.currentTimeMillis(),
     @Column(value = "modified_time")
@@ -28,6 +28,10 @@ abstract class BaseEntity(
     @JsonSerialize(using = ToStringSerializer::class)
     override fun getId(): Long {
         return this.id
+    }
+
+    fun setId(id: Long) {
+        this.id = id
     }
 
     override fun isNew(): Boolean {

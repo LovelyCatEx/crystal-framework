@@ -53,7 +53,7 @@ class GlobalErrorWebExceptionHandler(
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(
                             ApiResponse.internalServerError<Nothing>(
-                            errorProperties["message"] as? String ?: "Unknown error"
+                            errorProperties["message"] as? String ?: "Unknown Error"
                         ))
                 }
             }
