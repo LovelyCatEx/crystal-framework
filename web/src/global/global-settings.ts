@@ -1,4 +1,4 @@
-export const ProjectDisplayName = "ManagerTemplate"
+export const ProjectDisplayName = "Crystal Framework"
 export const DocumentTitleDelimiter = " - "
 
 export function buildDocumentTitle(
