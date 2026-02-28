@@ -199,6 +199,7 @@ class UserServiceImpl(
         return UserProfileVO(
             id = user.id,
             nickname = user.nickname,
+            avatar = null,
             username = if (fullAccess) user.username else null,
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,

@@ -10,6 +10,7 @@ import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelatio
 import type {MenuItemType} from "antd/es/menu/interface";
 import type {MenuItem} from "../types/menu.types.ts";
 import {SystemSettingsManagerPage} from "../pages/manager/settings/SystemSettingsManagerPage.tsx";
+import {UserProfilePage} from "../pages/manager/profile/UserProfilePage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -26,6 +27,13 @@ export const publicMenus: RouteItem[] = [
         icon: <DashboardOutlined />,
         label: "仪表盘",
         page: <DashboardPage />
+    },
+    {
+        key: menuPathProfile,
+        path: menuPathProfile,
+        icon: <UserOutlined />,
+        label: "个人中心",
+        page: <UserProfilePage />
     }
 ]
 

@@ -18,7 +18,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const location = useLocation();
 
     const availableMenus = useMemo(() => {
-        return computeAccessibleMenus(loggedUser.accessibleMenuPaths);
+        return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? []);
     }, [loggedUser.accessibleMenuPaths]);
 
     const handleMenuClick = (e: unknown) => {
