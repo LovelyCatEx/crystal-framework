@@ -7,9 +7,14 @@ import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadRes
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
+import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
+import com.lovelycatv.crystalframework.shared.utils.getContentType
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import java.io.File
+import org.springframework.http.codec.multipart.FilePart
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 abstract class AbstractFileResourceService(
     private val storageProvider: StorageProviderEntity,
@@ -28,25 +33,58 @@ abstract class AbstractFileResourceService(
     suspend fun uploadFile(
         userId: Long,
         fileType: ResourceFileType,
-        file: File,
+        filePart: FilePart,
+        targetFileName: String,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {
-        val md5 = FileMD5Utils.calculateMD5(file)
+        val (inputStream, fileSize) = filePart.asInputStreamWithLength()
+
+        return this.uploadFile(
+            userId = userId,
+            fileType = fileType,
+            fileNameWithExtension = targetFileName,
+            fileLength = fileSize,
+            fileContentType = filePart.getContentType(),
+            inputStream = inputStream,
+            progressReporter = progressReporter
+        )
+    }
+
+    suspend fun uploadFile(
+        userId: Long,
+        fileType: ResourceFileType,
+        fileNameWithExtension: String,
+        fileLength: Long,
+        fileContentType: String,
+        inputStream: InputStream,
+        progressReporter: ((Int) -> Unit)? = null
+    ): FileUploadResult {
+        fileResourceService.assertFileContentType(
+            fileType,
+            fileContentType
+        )
+
+        val byteArray = inputStream.readBytes()
+
+        val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
+
+        val uploadStream = ByteArrayInputStream(byteArray)
 
         val existing = fileResourceService.getByMD5(md5)
         if (existing != null) {
-            logger.info("File ${file.name} already exists with md5 $md5, upload skipped")
+            logger.info("File $fileNameWithExtension already exists with md5 $md5, upload skipped, entity: ${existing.toJSONString()}")
 
             return FileUploadResult(
                 success = true,
                 providerType = getStorageProvider(),
                 fileType = fileType,
                 objectKey = existing.objectKey,
-                fileResourceEntity = existing
+                fileResourceEntity = existing,
+                exception = null,
             )
         }
 
-        val objectKey = this.buildObjectKey(fileType, file.name).run {
+        val objectKey = this.buildObjectKey(fileType, fileNameWithExtension).run {
             if (!this.startsWith("/")) {
                 "/$this"
             } else {
@@ -54,13 +92,21 @@ abstract class AbstractFileResourceService(
             }
         }
 
-        val (fileName, fileExtension) = file.name.run {
+        val (fileName, fileExtension) = fileNameWithExtension.run {
             this.split(".")
         }
 
-        val result = this.doUploadFile(fileType, file, objectKey, progressReporter)
+        val result = this.doUploadFile(
+            fileType,
+            fileLength,
+            fileContentType,
+            fileNameWithExtension,
+            uploadStream,
+            objectKey,
+            progressReporter
+        )
 
-        return if (result) {
+        return if (result == null) {
             val fileResourceEntity = fileResourceService.getRepository().save(
                 FileResourceEntity(
                     id = fileResourceService.generateNextSnowId(),
@@ -69,7 +115,7 @@ abstract class AbstractFileResourceService(
                     fileName = fileName,
                     fileExtension = fileExtension,
                     md5 = md5,
-                    fileSize = file.length(),
+                    fileSize = fileLength,
                     storageProviderId = storageProvider.id,
                     objectKey = objectKey
                 ) newEntity true
@@ -80,7 +126,8 @@ abstract class AbstractFileResourceService(
                 providerType = getStorageProvider(),
                 fileType = fileType,
                 objectKey = objectKey,
-                fileResourceEntity = fileResourceEntity
+                fileResourceEntity = fileResourceEntity,
+                exception = null,
             )
         } else {
             FileUploadResult(
@@ -88,17 +135,21 @@ abstract class AbstractFileResourceService(
                 providerType = getStorageProvider(),
                 fileType = fileType,
                 objectKey = objectKey,
-                fileResourceEntity = null
+                fileResourceEntity = null,
+                exception = result,
             )
         }
     }
 
-    abstract suspend fun doUploadFile(
+    protected abstract suspend fun doUploadFile(
         fileType: ResourceFileType,
-        file: File,
+        fileLength: Long,
+        fileContentType: String,
+        fileNameWithExtension: String,
+        inputStream: InputStream,
         objectKey: String,
         progressReporter: ((Int) -> Unit)? = null
-    ): Boolean
+    ): Exception?
 
     open fun destroy() {}
 }

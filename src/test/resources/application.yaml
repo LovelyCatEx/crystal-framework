@@ -16,7 +16,8 @@ spring:
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.r2dbc: DEBUG
-    org.springframework.boot.actuate: DEBUG
+    root: info
+    org.springframework.security: info
+    org.springframework.web: info
+    org.springframework.r2dbc: info
+    org.springframework.boot.actuate: info

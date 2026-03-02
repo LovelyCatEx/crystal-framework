@@ -9,5 +9,6 @@ data class FileUploadResult(
     val providerType: StorageProviderType,
     val fileType: ResourceFileType,
     val objectKey: String,
-    val fileResourceEntity: FileResourceEntity?
+    val fileResourceEntity: FileResourceEntity?,
+    val exception: Exception?,
 )

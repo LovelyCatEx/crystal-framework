@@ -86,8 +86,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     >
                         <Space className="cursor-pointer">
                             <Avatar
-                                style={{ backgroundColor: '#2563eb' }}
                                 icon={<UserOutlined />}
+                                src={loggedUser.userProfile?.avatar}
                             />
                             <span className="hidden sm:inline font-medium text-gray-700">
                                 {loggedUser?.userProfile?.nickname}

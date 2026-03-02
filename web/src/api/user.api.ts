@@ -1,7 +1,7 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
 import type {User, UserProfileVO} from "../types/user.types.ts";
 import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
-import {doGet} from "./system-request.ts";
+import {doGet, doPost} from "./system-request.ts";
 
 export const UserManagerController = new BaseManagerController<
     User,
@@ -28,4 +28,11 @@ export async function getUserProfile() {
 
 export async function getUserAccessibleMenus() {
     return doGet<string[]>('/api/user/menus/list');
+}
+
+export async function uploadUserAvatar(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return doPost('/api/user/uploadAvatar', {file: file}, {'Content-Type': 'multipart/form-data'});
 }

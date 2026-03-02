@@ -1,11 +1,12 @@
 package com.lovelycatv.crystalframework.shared.utils
 
 import java.io.File
+import java.io.InputStream
 import java.security.MessageDigest
 
 object FileMD5Utils {
-    fun calculateMD5(file: File): String {
-        return file.inputStream().use { inputStream ->
+    fun calculateMD5(inputStream: InputStream): String {
+        return inputStream.use { inputStream ->
             val md = MessageDigest.getInstance("MD5")
             val buffer = ByteArray(8192)
             var bytesRead: Int
@@ -15,6 +16,12 @@ object FileMD5Utils {
             }
 
             md.digest().joinToString("") { "%02x".format(it) }
+        }
+    }
+
+    fun calculateMD5(file: File): String {
+        return file.inputStream().use {
+            calculateMD5(it)
         }
     }
 }

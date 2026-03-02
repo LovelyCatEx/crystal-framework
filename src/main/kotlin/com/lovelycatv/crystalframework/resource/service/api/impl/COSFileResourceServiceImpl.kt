@@ -9,12 +9,14 @@ import com.lovelycatv.vertex.log.logger
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
+import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import com.qcloud.cos.transfer.TransferManagerConfiguration
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
+import java.io.InputStream
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
@@ -65,11 +67,22 @@ class COSFileResourceServiceImpl(
 
     override suspend fun doUploadFile(
         fileType: ResourceFileType,
-        file: File,
+        fileLength: Long,
+        fileContentType: String,
+        fileNameWithExtension: String,
+        inputStream: InputStream,
         objectKey: String,
         progressReporter: ((Int) -> Unit)?
-    ): Boolean {
-        val request = PutObjectRequest(bucketName, objectKey, file)
+    ): Exception? {
+        val request = PutObjectRequest(
+            bucketName,
+            objectKey,
+            inputStream,
+            ObjectMetadata().apply {
+                contentLength = fileLength
+                contentType = fileContentType
+            }
+        )
 
         return suspendCancellableCoroutine { continuation ->
             try {
@@ -84,10 +97,10 @@ class COSFileResourceServiceImpl(
 
                 upload.waitForCompletion()
 
-                continuation.resume(true)
+                continuation.resume(null)
             } catch (e: Exception) {
                 logger.error("An error occurred while uploading file to COS", e)
-                continuation.resume(false)
+                continuation.resume(e)
             }
         }
     }

@@ -2,26 +2,38 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.resource.service.FileResourceService
+import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
+import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.mail.MailService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.getContentType
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
+import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Duration
+import java.util.UUID
 
 @Service
 class UserServiceImpl(
@@ -31,8 +43,12 @@ class UserServiceImpl(
     private val userRoleRelationService: UserRoleRelationService,
     private val rolePermissionRelationService: UserRolePermissionRelationService,
     private val mailService: MailService,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    private val fileResourceService: FileResourceService,
+    private val fileResourceServiceManager: FileResourceServiceManager
 ) : UserService {
+    private val logger = logger()
+
     override fun getRepository(): UserRepository {
         return this.userRepository
     }
@@ -173,11 +189,37 @@ class UserServiceImpl(
         return UserProfileVO(
             id = user.id,
             nickname = user.nickname,
-            avatar = null,
+            avatar = fileResourceService.getFileDownloadUrl(user.avatar),
             username = if (fullAccess) user.username else null,
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,
         )
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun uploadAvatar(userId: Long, file: FilePart) {
+        val (_, extension) = file.filename().split(".")
+        val targetFileName = UUID.randomUUID().toString() + "." + extension
+
+        val service = fileResourceServiceManager
+            .getService(userId, ResourceFileType.USER_AVATAR, targetFileName)
+
+        val result = service.uploadFile(
+            userId,
+            ResourceFileType.USER_AVATAR,
+            file,
+            targetFileName
+        )
+
+        if (!result.success || result.fileResourceEntity == null) {
+            logger.error("could not upload avatar for user: $userId, fileResource: ${result.fileResourceEntity.toJSONString()}", result.exception)
+            throw BusinessException("could not upload avatar", result.exception)
+        }
+
+        this.getRepository()
+            .updateAvatar(userId, result.fileResourceEntity.id)
+            .awaitFirstOrNull()
+            ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity.id}")
     }
 
     private suspend fun checkCachedEmailCode(

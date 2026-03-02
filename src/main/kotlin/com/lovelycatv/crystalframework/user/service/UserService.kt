@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 
 interface UserService : BaseService<UserRepository, UserEntity>, ReactiveUserDetailsService {
@@ -34,4 +35,6 @@ interface UserService : BaseService<UserRepository, UserEntity>, ReactiveUserDet
     suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult
 
     suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
+
+    suspend fun uploadAvatar(userId: Long, file: FilePart)
 }

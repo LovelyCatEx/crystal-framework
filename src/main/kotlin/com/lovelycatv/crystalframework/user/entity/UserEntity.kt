@@ -20,6 +20,8 @@ class UserEntity(
     var email: String = "",
     @Column(value = "nickname")
     var nickname: String = "",
+    @Column("avatar")
+    var avatar: Long? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null

@@ -5,20 +5,14 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.user.controller.dto.UserRegisterDTO
-import com.lovelycatv.crystalframework.user.controller.dto.RequestRegisterEmailCodeDTO
-import com.lovelycatv.crystalframework.user.controller.dto.RequestResetPasswordEmailCodeDTO
-import com.lovelycatv.crystalframework.user.controller.dto.ResetEmailDTO
-import com.lovelycatv.crystalframework.user.controller.dto.ResetPasswordDTO
+import com.lovelycatv.crystalframework.user.controller.dto.*
 import com.lovelycatv.crystalframework.user.service.UserService
 import jakarta.validation.Valid
+import org.springframework.http.MediaType
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @Validated
 @RestController
@@ -114,5 +108,19 @@ class UserController(
                 fullAccess = targetUserId == userAuthentication?.userId
             )
         )
+    }
+
+    @PostMapping("/uploadAvatar")
+    suspend fun uploadAvatar(
+        userAuthentication: UserAuthentication,
+        @RequestPart("file")
+        file: FilePart
+    ): ApiResponse<*> {
+        userService.uploadAvatar(
+            userId = userAuthentication.userId,
+            file = file
+        )
+
+        return ApiResponse.success(null)
     }
 }

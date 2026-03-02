@@ -10,11 +10,13 @@ interface BaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEnt
     fun getRepository(): REPOSITORY
 
     suspend fun getByIdOrNull(
-        id: Long
+        id: Long?
     ): ENTITY? {
-        return this.getRepository()
-            .findById(id)
-            .awaitFirstOrNull()
+        return id?.let { id ->
+            this.getRepository()
+                .findById(id)
+                .awaitFirstOrNull()
+        }
     }
 
     suspend fun getByIdOrThrow(

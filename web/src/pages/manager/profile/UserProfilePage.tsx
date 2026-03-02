@@ -1,5 +1,12 @@
-import {Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Tabs} from "antd";
-import {CameraOutlined, ClockCircleOutlined, LockOutlined, MailOutlined} from "@ant-design/icons";
+import {Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Tabs, Upload, type UploadProps} from "antd";
+import {
+    CameraOutlined,
+    ClockCircleOutlined,
+    LoadingOutlined,
+    LockOutlined,
+    MailOutlined,
+    UserOutlined
+} from "@ant-design/icons";
 import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 import {useLoggedUser} from "../../../compositions/use-logged-user.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
@@ -12,6 +19,7 @@ import {
     type ResetPasswordDTO,
     type ResetEmailDTO
 } from "../../../api/auth.api.ts";
+import {uploadUserAvatar} from "../../../api/user.api.ts";
 
 const { Password } = Input;
 
@@ -425,6 +433,38 @@ const SecuritySettings = () => {
 function UserProfileCard() {
     const loggedUser = useLoggedUser();
 
+    const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+
+    const handleAvatarUpload = (file: File) => {
+        setIsAvatarUploading(true);
+
+        uploadUserAvatar(file)
+            .then(() => {
+                void message.success("头像上传成功");
+                void loggedUser.refreshUserProfile();
+            })
+            .catch(() => {
+                void message.error("头像上传失败")
+            })
+            .finally(() => {
+                setIsAvatarUploading(false);
+            })
+
+        return false;
+    };
+
+    const uploadAvatarProps: UploadProps = {
+        name: 'file',
+        showUploadList: false,
+        beforeUpload: handleAvatarUpload,
+        accept: 'image/jpeg,image/png,image/gif,image/webp',
+        customRequest: ({ onSuccess }) => {
+            setTimeout(() => {
+                onSuccess?.('ok');
+            }, 0);
+        },
+    };
+
     return (
         <Card className="rounded-3xl shadow-sm border-none overflow-hidden">
             <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
@@ -432,14 +472,19 @@ function UserProfileCard() {
                 <div className="flex justify-center -mt-12 mb-4 relative">
                     <Avatar
                         size={100}
-                        className="rounded-3xl border-4 border-white shadow-md"
+                        className="rounded-3xl border-4 border-white shadow-md bg-black/50"
+                        icon={<UserOutlined />}
                         src={loggedUser.userProfile?.avatar}
                     />
-                    <Button
-                        icon={<CameraOutlined />}
-                        className="absolute bottom-0 right-1/2 translate-x-12 rounded-full border-none shadow-lg bg-white text-slate-600 hover:text-blue-500"
-                        size="small"
-                    />
+                    <Upload {...uploadAvatarProps}>
+                        <Button
+                            icon={isAvatarUploading ? <LoadingOutlined /> : <CameraOutlined />}
+                            className="absolute bottom-0 right-1/2 translate-x-12 rounded-full border-none shadow-lg
+                                     bg-white text-slate-600 transition-all"
+                            size="small"
+                            loading={isAvatarUploading}
+                        />
+                    </Upload>
                 </div>
                 <div className="text-center mb-6">
                     <h2 className="text-xl font-bold text-slate-800">{loggedUser.userProfile?.nickname}</h2>

@@ -26,9 +26,25 @@ spring:
             client-id: ${OAUTH_GITHUB_CLIENT_ID}
             client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
             scope: read:user
+  http:
+    codecs:
+      max-in-memory-size: 10MB
+  webflux:
+    multipart:
+      max-in-memory-size: 10MB
+
+crystalframework:
+  resource:
+    avatar:
+      supported-content-types:
+        - image/png
+        - image/jpeg
+        - image/webp
+
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-#    org.springframework.r2dbc: DEBUG
-#    io.r2dbc.postgresql: DEBUG
+    root: info
+    org.springframework.security: info
+    org.springframework.web: info
+    org.springframework.r2dbc: info
+    org.springframework.boot.actuate: info

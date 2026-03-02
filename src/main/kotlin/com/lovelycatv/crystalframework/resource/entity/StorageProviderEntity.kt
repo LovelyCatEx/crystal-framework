@@ -23,7 +23,7 @@ class StorageProviderEntity(
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
-) : BaseEntity() {
+) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
     fun getRealStorageProviderType(): StorageProviderType {
         return StorageProviderType.getByTypeId(this.type)
             ?: throw BusinessException("storage provider type ${this.type} not found")
