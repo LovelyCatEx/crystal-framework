@@ -1,7 +1,7 @@
 import { Button, Select, Space, Tooltip } from "antd";
 import { JsonEditor } from "./JsonEditor.tsx";
 import { useState } from "react";
-import { FileImageOutlined, CloudOutlined } from "@ant-design/icons";
+import {FileImageOutlined, CloudOutlined, FolderOutlined} from "@ant-design/icons";
 
 interface StorageProviderConfigEditorProps {
     value?: string;
@@ -10,6 +10,14 @@ interface StorageProviderConfigEditorProps {
 }
 
 const templates = [
+    {
+        label: "本地文件系统",
+        key: "local_file_system",
+        icon: <FolderOutlined />,
+        config: {
+            basePath: "",
+        }
+    },
     {
         label: "腾讯云 COS",
         key: "tencent_cos",

@@ -37,6 +37,7 @@ export const STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS: EntityTableColumns<StorageP
         title: "描述",
         dataIndex: "description",
         key: "description",
+        width: 180,
         render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
             return <Space orientation='vertical' size={0}>
                 <CopyableToolTip title={row.description ?? '无描述'}>

@@ -1,7 +1,8 @@
 import type {ReactNode} from "react";
-import {MailOutlined, SettingOutlined} from "@ant-design/icons";
+import {InfoCircleOutlined, MailOutlined, SettingOutlined} from "@ant-design/icons";
 
 export const settingsKeyToTranslationMap = new Map<string, string>([
+    ['basic.baseUrl', 'API 基本地址'],
     ['bootstrap.autoCheckRbacTableData', '自动校验 RBAC 表数据'],
     ['mail.smtp.username', '用户名'],
     ['mail.smtp.password', '密码'],
@@ -12,6 +13,7 @@ export const settingsKeyToTranslationMap = new Map<string, string>([
 ])
 
 export const settingsGroupToTranslationMap = new Map<string, {label: string, icon?: ReactNode}>([
+    ['basic', { label: '基本设置', icon: <InfoCircleOutlined /> }],
     ['bootstrap', { label: '启动设置项', icon: <SettingOutlined /> }],
     ['mail.smtp', { label: 'SMTP 邮件服务', icon: <MailOutlined /> }]
 ])

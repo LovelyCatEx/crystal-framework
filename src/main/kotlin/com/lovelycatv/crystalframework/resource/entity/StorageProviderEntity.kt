@@ -31,6 +31,10 @@ class StorageProviderEntity(
             ?: throw BusinessException("storage provider type ${this.type} not found")
     }
 
+    inline fun <reified T> getPropertiesObject(): T {
+        return properties.parseObject()
+    }
+
     fun getPropertiesMap(): Map<String, String?> {
         return properties.parseObject()
     }

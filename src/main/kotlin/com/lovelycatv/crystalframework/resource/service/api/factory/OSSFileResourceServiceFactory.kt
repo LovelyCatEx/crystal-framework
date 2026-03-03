@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.impl.COSFileResourceServiceImpl
 import com.lovelycatv.crystalframework.resource.service.api.impl.OSSFileResourceServiceImpl
+import com.lovelycatv.crystalframework.resource.types.OSSFileResourceServiceProperties
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import org.springframework.stereotype.Component
 
@@ -17,16 +18,16 @@ class OSSFileResourceServiceFactory(
     }
 
     override fun build(storageProvider: StorageProviderEntity): OSSFileResourceServiceImpl {
-        val properties = storageProvider.getPropertiesMap()
+        val properties: OSSFileResourceServiceProperties = storageProvider.getPropertiesObject()
 
         return OSSFileResourceServiceImpl(
             storageProvider = storageProvider,
             fileResourceService = fileResourceService,
-            accessKeyId = properties["accessKeyId"] as String,
-            accessKeySecret = properties["accessKeySecret"] as String,
-            securityToken = properties["securityToken"] as String,
-            region = properties["region"] as String,
-            bucketName = properties["bucketName"] as String,
+            accessKeyId = properties.accessKeyId,
+            accessKeySecret = properties.accessKeySecret,
+            securityToken = properties.securityToken,
+            region = properties.region,
+            bucketName = properties.bucketName,
         )
     }
 }
