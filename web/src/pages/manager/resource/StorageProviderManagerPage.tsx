@@ -1,0 +1,164 @@
+import {Col, Form, Input, Row, Select, Space, Tag} from "antd";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {
+    type ManagerCreateStorageProviderDTO,
+    type ManagerReadStorageProviderDTO,
+    StorageProviderManagerController
+} from "../../../api/storage-provider.api.ts";
+import React, {type JSX, useEffect, useRef, useState} from "react";
+import {StorageProviderType, type StorageProvider} from "../../../types/storage-provider.types.ts";
+import TextArea from "antd/es/input/TextArea";
+import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
+
+export function StorageProviderManagerPage() {
+    const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const [filterType, setFilterType] = useState<number>()
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.()
+    }, [filterType]);
+
+    return (
+        <ManagerPageContainer
+            ref={pageRef}
+            entityName="存储提供商"
+            title="存储提供商管理"
+            subtitle="管理系统存储提供商配置"
+            columns={[
+                {
+                    title: "名称",
+                    dataIndex: "name",
+                    key: "name",
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <Space orientation='vertical' size={0}>
+                            <CopyableToolTip title={row.name}>
+                                <span className="text-xs font-mono font-bold">{row.name}</span>
+                            </CopyableToolTip>
+                            <CopyableToolTip title={row.id}>
+                                <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
+                            </CopyableToolTip>
+                        </Space>
+                    }
+                },
+                {
+                    title: "类型",
+                    dataIndex: "type",
+                    key: "type",
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <Space orientation='vertical' size={0}>
+                            <CopyableToolTip title={StorageProviderType[row.type]}>
+                                <Tag color="orange" className="text-xs font-mono">{StorageProviderType[row.type]}</Tag>
+                            </CopyableToolTip>
+                        </Space>
+                    }
+                },
+                {
+                    title: "描述",
+                    dataIndex: "description",
+                    key: "description",
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <Space orientation='vertical' size={0}>
+                            <CopyableToolTip title={row.description ?? '无描述'}>
+                                <span className="text-xs font-mono">{row.description ?? '-'}</span>
+                            </CopyableToolTip>
+                        </Space>
+                    }
+                },
+                {
+                    title: "基础URL",
+                    dataIndex: "baseUrl",
+                    key: "baseUrl",
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <Space orientation='vertical' size={0}>
+                            <CopyableToolTip title={row.baseUrl}>
+                                <span className="text-xs font-mono text-blue-600">{row.baseUrl}</span>
+                            </CopyableToolTip>
+                        </Space>
+                    }
+                },
+                {
+                    title: "配置",
+                    dataIndex: "properties",
+                    key: "properties",
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <CopyableToolTip title={row.properties}>
+                            <span className="text-xs font-mono text-gray-500">{row.properties.substring(0, 30)}...</span>
+                        </CopyableToolTip>
+                    }
+                }
+            ]}
+            editModalFormChildren={
+                <>
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item name="name" label="名称" rules={[{ required: true }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商名称" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="type" label="类型" rules={[{ required: true }]}>
+                                <Select
+                                    className="w-full rounded-lg h-10 flex items-center"
+                                    placeholder="选择存储类型"
+                                    options={[
+                                        {
+                                            label: 'ALIYUN_OSS',
+                                            value: 0,
+                                        },
+                                        {
+                                            label: 'TENCENT_COS',
+                                            value: 1,
+                                        }
+                                    ]}
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item name="description" label="描述">
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商描述" />
+                    </Form.Item>
+                    <Form.Item name="baseUrl" label="基础URL" rules={[{ required: true }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="访问基础URL" />
+                    </Form.Item>
+                    <Form.Item name="properties" label="配置属性(JSON)" rules={[{ required: true }]}>
+                        <TextArea rows={4} placeholder="输入JSON格式的配置属性..." className="rounded-lg font-mono text-xs" />
+                    </Form.Item>
+                </>
+            }
+            query={async (props: ManagerReadStorageProviderDTO) => {
+                return (await StorageProviderManagerController.query(props)).data!
+            }}
+            delete={async (props) => {
+                return (await StorageProviderManagerController.delete(props)).data!
+            }}
+            update={async (props) => {
+                return (await StorageProviderManagerController.update(props)).data!
+            }}
+            create={async (props) => {
+                return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
+            }}
+            tableActions={[
+                {
+                    label: <span>类型</span>,
+                    children: <Select
+                        defaultValue="-1"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '-1', label: '全部' },
+                            { value: '0', label: 'ALIYUN_OSS' },
+                            { value: '1', label: 'TENCENT_COS' },
+                        ]}
+                        onChange={(value) => setFilterType(Number.parseInt(value))}
+                    />,
+                    queryParamsProvider() {
+                        return {
+                            type: filterType === -1 ? undefined : filterType
+                        }
+                    }
+                }
+            ]}
+        >
+
+        </ManagerPageContainer>
+    )
+}

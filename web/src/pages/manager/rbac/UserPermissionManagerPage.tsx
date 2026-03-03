@@ -1,4 +1,4 @@
-import {Col, Form, Input, Row, Select, Space, Tag, Tooltip} from "antd";
+import {Col, Form, Input, Row, Select, Space, Tag} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
 import {
     type ManagerCreatePermissionDTO,
@@ -8,6 +8,7 @@ import {
 import React, {type JSX, useEffect, useRef, useState} from "react";
 import {PermissionType, type UserPermission} from "../../../types/user-permission.types.ts";
 import TextArea from "antd/es/input/TextArea";
+import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
 
 export function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -30,12 +31,12 @@ export function UserPermissionManagerPage() {
                     key: "id",
                     render: function (_: unknown, row: UserPermission): React.ReactNode | JSX.Element {
                         return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.name}>
+                            <CopyableToolTip title={row.name}>
                                 <span className="text-xs font-mono">{row.name}</span>
-                            </Tooltip>
-                            <Tooltip title={row.id}>
+                            </CopyableToolTip>
+                            <CopyableToolTip title={row.id}>
                                 <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                            </Tooltip>
+                            </CopyableToolTip>
                         </Space>
                     }
                 },
@@ -45,9 +46,9 @@ export function UserPermissionManagerPage() {
                     key: "type",
                     render: function (_: unknown, row: UserPermission): React.ReactNode | JSX.Element {
                         return <Space orientation='vertical' size={0}>
-                            <Tooltip title={PermissionType[row.type]}>
+                            <CopyableToolTip title={PermissionType[row.type]}>
                                 <Tag color="orange" className="text-xs font-mono">{PermissionType[row.type]}</Tag>
-                            </Tooltip>
+                            </CopyableToolTip>
                         </Space>
                     }
                 },
@@ -57,9 +58,9 @@ export function UserPermissionManagerPage() {
                     key: "description",
                     render: function (_: unknown, row: UserPermission): React.ReactNode | JSX.Element {
                         return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.name}>
+                            <CopyableToolTip title={row.description}>
                                 <span className="text-xs font-mono">{row.description}</span>
-                            </Tooltip>
+                            </CopyableToolTip>
                         </Space>
                     }
                 },
@@ -69,9 +70,9 @@ export function UserPermissionManagerPage() {
                     key: "path",
                     render: function (_: unknown, row: UserPermission): React.ReactNode | JSX.Element {
                         return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.path}>
+                            <CopyableToolTip title={row.path}>
                                 <span color="orange" className="text-xs font-mono">{row.path}</span>
-                            </Tooltip>
+                            </CopyableToolTip>
                         </Space>
                     }
                 }

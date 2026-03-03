@@ -29,11 +29,44 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
         """
         SELECT COUNT(*) FROM oauth_accounts 
         WHERE LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%')))
+           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """
     )
     override fun countByKeyword(
         keyword: String
+    ): Mono<Long>
+
+    @Query(
+        """
+        SELECT * FROM oauth_accounts 
+        WHERE (:#{#keyword == null} = true
+           OR (LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+        AND (:#{#platform == null} = true OR platform = :platform)
+        ORDER BY created_time DESC
+        LIMIT :limit
+        OFFSET :offset
+    """
+    )
+    fun advanceSearch(
+        keyword: String?,
+        platform: Int?,
+        limit: Int,
+        offset: Int
+    ): Flux<OAuthAccountEntity>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM oauth_accounts 
+        WHERE (:#{#keyword == null} = true
+           OR (LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+           OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))))
+        AND (:#{#platform == null} = true OR platform = :platform)
+    """
+    )
+    fun countAdvanceSearch(
+        keyword: String?,
+        platform: Int?,
     ): Mono<Long>
 
     fun findByPlatformAndIdentifier(platform: Int, identifier: String): Mono<OAuthAccountEntity>

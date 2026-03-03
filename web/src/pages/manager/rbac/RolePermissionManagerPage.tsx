@@ -1,4 +1,4 @@
-import {Button, Card, message, Modal, Space, Table, Tag, Tooltip, Transfer} from "antd";
+import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
@@ -7,6 +7,7 @@ import {getRolePermissions, setRolePermissions} from "../../../api/user-role-per
 import {UserPermissionManagerController} from "../../../api/user-permission.api.ts";
 import {PermissionType, type UserPermission} from "../../../types/user-permission.types.ts";
 import type {UserRole} from "../../../types/user-role.types.ts";
+import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
 
 interface TransferItem {
     key: string;
@@ -114,12 +115,12 @@ export function RolePermissionManagerPage() {
             key: "name",
             render: (_: unknown, row: UserRole) => (
                 <Space orientation='vertical' size={0}>
-                    <Tooltip title={row.name}>
+                    <CopyableToolTip title={row.name}>
                         <span className="text-xs font-mono">{row.name}</span>
-                    </Tooltip>
-                    <Tooltip title={row.id}>
+                    </CopyableToolTip>
+                    <CopyableToolTip title={row.id}>
                         <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                    </Tooltip>
+                    </CopyableToolTip>
                 </Space>
             )
         },
@@ -185,9 +186,9 @@ export function RolePermissionManagerPage() {
                     targetKeys={selectedPermissionIds}
                     onChange={handleTransferChange}
                     render={item => {
-                        return <Tooltip title={`${item.path ? item.path : item.description}`}>
+                        return <CopyableToolTip title={`${item.path ? item.path : item.description}`}>
                             <span><Tag color="orange">{item.type}</Tag> {item.title}</span>
-                        </Tooltip>
+                        </CopyableToolTip>
                     }}
                     listStyle={{
                         width: 300,

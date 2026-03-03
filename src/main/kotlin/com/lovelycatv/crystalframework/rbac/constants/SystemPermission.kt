@@ -9,6 +9,7 @@ object SystemPermission {
     const val MENU_ROLE_PERMISSION_MANAGER = "role.permission:/manager/role-permissions"
     const val MENU_USER_ROLE_MANAGER = "user.role:/manager/user-roles-relation"
     const val MENU_SYSTEM_SETTINGS = "settings:/manager/settings"
+    const val MENU_OAUTH_ACCOUNT_MANAGER = "oauth.account:/manager/oauth-accounts"
 
     const val ACTION_PERMISSION_CREATE = "permission.create"
     const val ACTION_PERMISSION_READ = "permission.read"
@@ -33,6 +34,25 @@ object SystemPermission {
 
     const val ACTION_SYSTEM_SETTINGS_READ = "settings.read"
     const val ACTION_SYSTEM_SETTINGS_UPDATE = "settings.update"
+
+    const val ACTION_OAUTH_ACCOUNT_CREATE = "oauth.account.create"
+    const val ACTION_OAUTH_ACCOUNT_READ = "oauth.account.read"
+    const val ACTION_OAUTH_ACCOUNT_UPDATE = "oauth.account.update"
+    const val ACTION_OAUTH_ACCOUNT_DELETE = "oauth.account.delete"
+
+    const val MENU_FILE_RESOURCE_MANAGER = "file.resource:/manager/file-resources"
+
+    const val ACTION_FILE_RESOURCE_CREATE = "file.resource.create"
+    const val ACTION_FILE_RESOURCE_READ = "file.resource.read"
+    const val ACTION_FILE_RESOURCE_UPDATE = "file.resource.update"
+    const val ACTION_FILE_RESOURCE_DELETE = "file.resource.delete"
+
+    const val MENU_STORAGE_PROVIDER_MANAGER = "storage.provider:/manager/storage-providers"
+
+    const val ACTION_STORAGE_PROVIDER_CREATE = "storage.provider.create"
+    const val ACTION_STORAGE_PROVIDER_READ = "storage.provider.read"
+    const val ACTION_STORAGE_PROVIDER_UPDATE = "storage.provider.update"
+    const val ACTION_STORAGE_PROVIDER_DELETE = "storage.provider.delete"
 
     /**
      * resolve permission from string declaration

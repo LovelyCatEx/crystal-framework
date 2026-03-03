@@ -1,16 +1,20 @@
 import {
-    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined
+    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined,
+    CloudOutlined, FileOutlined, DatabaseOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
 import {UserRoleManagerPage} from "../pages/manager/rbac/UserRoleManagerPage.tsx";
-import {UserManagerPage} from "../pages/manager/rbac/UserManagerPage.tsx";
+import {UserManagerPage} from "../pages/manager/user/UserManagerPage.tsx";
 import {RolePermissionManagerPage} from "../pages/manager/rbac/RolePermissionManagerPage.tsx";
 import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
 import type {MenuItemType} from "antd/es/menu/interface";
 import type {MenuItem} from "../types/menu.types.ts";
 import {SystemSettingsManagerPage} from "../pages/manager/settings/SystemSettingsManagerPage.tsx";
 import {UserProfilePage} from "../pages/manager/profile/UserProfilePage.tsx";
+import {OAuthAccountManagerPage} from "../pages/manager/user/OAuthAccountManagerPage.tsx";
+import {FileResourceManagerPage} from "../pages/manager/resource/FileResourceManagerPage.tsx";
+import {StorageProviderManagerPage} from "../pages/manager/resource/StorageProviderManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -72,6 +76,27 @@ export const adminMenus: RouteItem[] = [
         icon: <UserSwitchOutlined />,
         label: "用户角色分配",
         page: <UserRoleRelationManagerPage />
+    },
+    {
+        key: '/manager/oauth-accounts',
+        path: '/manager/oauth-accounts',
+        icon: <CloudOutlined />,
+        label: "OAuth账号管理",
+        page: <OAuthAccountManagerPage />
+    },
+    {
+        key: '/manager/file-resources',
+        path: '/manager/file-resources',
+        icon: <FileOutlined />,
+        label: "文件资源管理",
+        page: <FileResourceManagerPage />
+    },
+    {
+        key: '/manager/storage-providers',
+        path: '/manager/storage-providers',
+        icon: <DatabaseOutlined />,
+        label: "存储提供商管理",
+        page: <StorageProviderManagerPage />
     },
     {
         key: '/manager/settings',

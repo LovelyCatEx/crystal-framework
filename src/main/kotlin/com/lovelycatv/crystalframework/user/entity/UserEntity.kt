@@ -8,6 +8,8 @@ import org.springframework.data.relational.core.mapping.Table
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ser.std.ToStringSerializer
 
 @Table("users")
 class UserEntity(
@@ -21,6 +23,7 @@ class UserEntity(
     @Column(value = "nickname")
     var nickname: String = "",
     @Column("avatar")
+    @get:JsonSerialize(using = ToStringSerializer::class)
     var avatar: Long? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),

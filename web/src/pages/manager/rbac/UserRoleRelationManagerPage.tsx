@@ -1,4 +1,4 @@
-import {Button, Card, message, Modal, Space, Table, Tag, Tooltip, Transfer} from "antd";
+import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 import {useEffect, useState} from "react";
 import {UserManagerController} from "../../../api/user.api.ts";
@@ -7,6 +7,7 @@ import {UserRoleManagerController} from "../../../api/user-role.api.ts";
 import type {User} from "../../../types/user.types.ts";
 import type {UserRole} from "../../../types/user-role.types.ts";
 import type {Key} from "react";
+import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
 
 interface TransferItem {
     key: string;
@@ -110,12 +111,12 @@ export function UserRoleRelationManagerPage() {
             key: "nickname",
             render: (_: unknown, row: User) => (
                 <Space orientation='vertical' size={0}>
-                    <Tooltip title={row.nickname}>
+                    <CopyableToolTip title={row.nickname}>
                         <span className="text-xs font-mono">{row.nickname}</span>
-                    </Tooltip>
-                    <Tooltip title={row.id}>
+                    </CopyableToolTip>
+                    <CopyableToolTip title={row.id}>
                         <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                    </Tooltip>
+                    </CopyableToolTip>
                 </Space>
             )
         },

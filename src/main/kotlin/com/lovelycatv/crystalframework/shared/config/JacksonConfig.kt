@@ -31,30 +31,11 @@ class JacksonConfig {
 
     @Bean
     fun jacksonObjectMapper(): ObjectMapper {
-        val rawObjectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
         val objectMapper = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper()
 
         objectMapper.registerModule(com.fasterxml.jackson.databind.module.SimpleModule().apply {
             addSerializer(Long::class.java, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)
             addSerializer(Long::class.javaPrimitiveType, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)
-            addSerializer(BaseEntity::class.java, object : JsonSerializer<BaseEntity>() {
-                override fun serialize(
-                    value: BaseEntity,
-                    gen: JsonGenerator,
-                    serializers: SerializerProvider
-                ) {
-                    val map = rawObjectMapper
-                        .convertValue(value, object : TypeReference<Map<String, Any?>>() {})
-                        .toMutableMap()
-
-                    map["id"] = map["id"]?.toString()
-                    map["createdTime"] = map["createdTime"]?.toString()
-                    map["modifiedTime"] = map["modifiedTime"]?.toString()
-                    map["deletedTime"] = map["deletedTime"]?.toString()
-
-                    gen.writeObject(map)
-                }
-            })
         })
 
         return objectMapper

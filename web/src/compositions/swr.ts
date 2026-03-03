@@ -4,7 +4,7 @@ import {message} from "antd";
 import useSWR, {type KeyedMutator} from "swr";
 
 export function useSWRComposition<T>(
-    key: string,
+    key: string | undefined,
     func: () => Promise<T>,
     onError?: (error: Error) => void
 ) {
@@ -29,7 +29,7 @@ export function useSWRComposition<T>(
 }
 
 export function useSWRState<T>(
-    key: string,
+    key: string | undefined,
     func: () => Promise<ApiResponse<T>>,
     onError?: (error: Error) => void
 ): [T | null, React.Dispatch<React.SetStateAction<T | null>>, boolean, KeyedMutator<ApiResponse<T>>] {

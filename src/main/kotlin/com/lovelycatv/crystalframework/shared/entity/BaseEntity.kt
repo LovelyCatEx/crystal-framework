@@ -12,8 +12,10 @@ abstract class BaseEntity(
     @get:JsonSerialize(using = ToStringSerializer::class)
     private var id: Long = 0,
     @Column(value = "created_time")
+    @get:JsonSerialize(using = ToStringSerializer::class)
     open val createdTime: Long = System.currentTimeMillis(),
     @Column(value = "modified_time")
+    @get:JsonSerialize(using = ToStringSerializer::class)
     open var modifiedTime: Long = System.currentTimeMillis(),
     @Column(value = "deleted_time")
     open var deletedTime: Long? = null

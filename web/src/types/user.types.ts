@@ -12,4 +12,5 @@ export interface User extends BaseEntity {
     username: string;
     email: string;
     nickname: string;
+    avatar: string | null;
 }

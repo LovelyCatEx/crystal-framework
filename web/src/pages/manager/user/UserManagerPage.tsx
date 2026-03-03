@@ -1,8 +1,25 @@
-import {Col, Form, Input, Row, Space, Tag, Tooltip} from "antd";
+import {Avatar, Col, Form, Input, Row, Space, Tag} from "antd";
 import {ManagerPageContainer} from "../../../components/ManagerPageContainer.tsx";
 import {type ManagerCreateUserDTO, UserManagerController} from "../../../api/user.api.ts";
 import React, {type JSX} from "react";
 import {type User} from "../../../types/user.types.ts";
+import {UserOutlined} from "@ant-design/icons";
+import {useSWRState} from "../../../compositions/swr.ts";
+import {managerGetFileDownloadUrl} from "../../../api/file-resource.api.ts";
+import {emptyApiResponseAsync} from "../../../api/system-request.ts";
+import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
+
+function UserAvatar({ fileEntityId }: { fileEntityId?: string | null }) {
+    const [avatarUrl] = useSWRState<string | null>(
+        fileEntityId ? 'getFileDownloadUrl' : undefined,
+        () => fileEntityId ? managerGetFileDownloadUrl(fileEntityId) : emptyApiResponseAsync()
+    )
+
+    return <Avatar
+        className={avatarUrl ? "" : "bg-black/50"}
+        src={avatarUrl ?? <UserOutlined />}
+    />
+}
 
 export function UserManagerPage() {
 
@@ -18,25 +35,29 @@ export function UserManagerPage() {
                     dataIndex: "id",
                     key: "id",
                     render: function (_: unknown, row: User): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.nickname}>
-                                <span className="text-xs font-mono">{row.nickname}</span>
-                            </Tooltip>
-                            <Tooltip title={row.id}>
-                                <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                            </Tooltip>
+                        return <Space orientation='horizontal' size={8}>
+                            <UserAvatar fileEntityId={row.avatar} />
+
+                            <Space orientation='vertical' size={0}>
+                                <CopyableToolTip title={row.username}>
+                                    <span className="text-xs font-mono">@{row.username}</span>
+                                </CopyableToolTip>
+                                <CopyableToolTip title={row.id}>
+                                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
+                                </CopyableToolTip>
+                            </Space>
                         </Space>
                     }
                 },
                 {
-                    title: "用户名",
-                    dataIndex: "username",
-                    key: "username",
+                    title: "昵称",
+                    dataIndex: "nickname",
+                    key: "nickname",
                     render: function (_: unknown, row: User): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.username}>
-                                <span className="text-xs font-mono">{row.username}</span>
-                            </Tooltip>
+                        return <Space orientation='vertical' size={8}>
+                            <CopyableToolTip title={row.nickname}>
+                                <span className="text-xs font-mono">{row.nickname}</span>
+                            </CopyableToolTip>
                         </Space>
                     }
                 },
@@ -46,9 +67,9 @@ export function UserManagerPage() {
                     key: "email",
                     render: function (_: unknown, row: User): React.ReactNode | JSX.Element {
                         return <Space orientation='vertical' size={0}>
-                            <Tooltip title={row.email}>
+                            <CopyableToolTip title={row.email}>
                                 <span className="text-xs font-mono">{row.email}</span>
-                            </Tooltip>
+                            </CopyableToolTip>
                         </Space>
                     }
                 }

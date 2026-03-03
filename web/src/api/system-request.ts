@@ -21,6 +21,23 @@ export interface PaginatedResponseData<T> {
     records: T[]
 }
 
+export function emptyApiResponse<T>() {
+    return {
+        code: 200,
+        message: '',
+        data: null,
+    } as ApiResponse<T>;
+}
+
+
+export function emptyApiResponseAsync<T>() {
+    return Promise.resolve({
+        code: 200,
+        message: '',
+        data: null,
+    } as ApiResponse<T>);
+}
+
 function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         return response;
