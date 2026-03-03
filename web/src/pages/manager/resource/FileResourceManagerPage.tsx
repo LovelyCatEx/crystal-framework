@@ -109,8 +109,8 @@ export function FileResourceManagerPage() {
                                     placeholder="选择文件类型"
                                     options={[
                                         {
-                                            label: 'USER_AVATAR',
-                                            value: 0,
+                                            label: '用户头像',
+                                            value: ResourceFileType.USER_AVATAR,
                                         }
                                     ]}
                                 />
@@ -167,11 +167,15 @@ export function FileResourceManagerPage() {
                 {
                     label: <span>类型</span>,
                     children: <Select
+                        className="min-w-32"
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: '全部' },
-                            { value: '0', label: 'USER_AVATAR' },
+                            {
+                                label: '用户头像',
+                                value: ResourceFileType.USER_AVATAR,
+                            }
                         ]}
                         onChange={(value) => setFilterType(Number.parseInt(value))}
                     />,

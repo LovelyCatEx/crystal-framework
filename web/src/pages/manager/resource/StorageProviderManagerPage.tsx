@@ -102,12 +102,16 @@ export function StorageProviderManagerPage() {
                                     placeholder="选择存储类型"
                                     options={[
                                         {
-                                            label: 'ALIYUN_OSS',
-                                            value: 0,
+                                            label: '本地文件系统',
+                                            value: StorageProviderType.LOCAL_FILE_SYSTEM,
                                         },
                                         {
-                                            label: 'TENCENT_COS',
-                                            value: 1,
+                                            label: '阿里云 OSS',
+                                            value: StorageProviderType.ALIYUN_OSS,
+                                        },
+                                        {
+                                            label: '腾讯 OSS',
+                                            value: StorageProviderType.TENCENT_COS,
                                         }
                                     ]}
                                 />
@@ -145,8 +149,18 @@ export function StorageProviderManagerPage() {
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: '全部' },
-                            { value: '0', label: 'ALIYUN_OSS' },
-                            { value: '1', label: 'TENCENT_COS' },
+                            {
+                                label: '本地文件系统',
+                                value: StorageProviderType.LOCAL_FILE_SYSTEM,
+                            },
+                            {
+                                label: '阿里云 OSS',
+                                value: StorageProviderType.ALIYUN_OSS,
+                            },
+                            {
+                                label: '腾讯 OSS',
+                                value: StorageProviderType.TENCENT_COS,
+                            }
                         ]}
                         onChange={(value) => setFilterType(Number.parseInt(value))}
                     />,

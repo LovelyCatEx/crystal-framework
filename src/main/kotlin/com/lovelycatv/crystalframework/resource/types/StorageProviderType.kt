@@ -1,8 +1,9 @@
 package com.lovelycatv.crystalframework.resource.types
 
 enum class StorageProviderType(val typeId: Int) {
-    ALIYUN_OSS(0),
-    TENCENT_COS(1);
+    LOCAL_FILE_SYSTEM(0),
+    ALIYUN_OSS(1),
+    TENCENT_COS(2);
 
     companion object {
         fun getByTypeId(typeId: Int): StorageProviderType? {
