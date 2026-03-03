@@ -1,14 +1,14 @@
-import {Col, Form, Input, message, Row, Select, Space, Switch, Tag} from "antd";
+import {Col, Form, Input, message, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateStorageProviderDTO,
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
 } from "../../../api/storage-provider.api.ts";
-import React, {type JSX, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {StorageProviderType, type StorageProvider} from "../../../types/storage-provider.types.ts";
-import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
 import {StorageProviderConfigEditor} from "../../../components/StorageProviderConfigEditor.tsx";
+import {STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS} from "../../../components/columns/StorageProviderEntityColumns.tsx";
 
 export function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -30,84 +30,24 @@ export function StorageProviderManagerPage() {
             })
     }
 
+    const columnsWithActive = [...STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS];
+    columnsWithActive.push({
+        title: "启用状态",
+        dataIndex: "active",
+        key: "active",
+        width: 100,
+        render: function (_: unknown, row: StorageProvider): React.ReactNode {
+            return <Switch value={row.active} onChange={(active) => handleStorageProviderActiveChange(active, row)} />
+        }
+    });
+
     return (
         <ManagerPageContainer
             ref={pageRef}
             entityName="存储提供商"
             title="存储提供商管理"
             subtitle="管理系统存储提供商配置"
-            columns={[
-                {
-                    title: "名称",
-                    dataIndex: "name",
-                    key: "name",
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <CopyableToolTip title={row.name}>
-                                <span className="text-xs font-mono font-bold">{row.name}</span>
-                            </CopyableToolTip>
-                            <CopyableToolTip title={row.id}>
-                                <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                            </CopyableToolTip>
-                        </Space>
-                    }
-                },
-                {
-                    title: "类型",
-                    dataIndex: "type",
-                    key: "type",
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <CopyableToolTip title={StorageProviderType[row.type]}>
-                                <Tag color="orange" className="text-xs font-mono">{StorageProviderType[row.type]}</Tag>
-                            </CopyableToolTip>
-                        </Space>
-                    }
-                },
-                {
-                    title: "描述",
-                    dataIndex: "description",
-                    key: "description",
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <CopyableToolTip title={row.description ?? '无描述'}>
-                                <span className="text-xs font-mono">{row.description ?? '-'}</span>
-                            </CopyableToolTip>
-                        </Space>
-                    }
-                },
-                {
-                    title: "基础URL",
-                    dataIndex: "baseUrl",
-                    key: "baseUrl",
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <Space orientation='vertical' size={0}>
-                            <CopyableToolTip title={row.baseUrl}>
-                                <span className="text-xs font-mono text-blue-600">{row.baseUrl}</span>
-                            </CopyableToolTip>
-                        </Space>
-                    }
-                },
-                {
-                    title: "配置",
-                    dataIndex: "properties",
-                    key: "properties",
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <CopyableToolTip title={row.properties}>
-                            <span className="text-xs font-mono text-gray-500">{row.properties.substring(0, 32)}...</span>
-                        </CopyableToolTip>
-                    }
-                },
-                {
-                    title: "启用状态",
-                    dataIndex: "active",
-                    key: "active",
-                    width: 100,
-                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                        return <Switch value={row.active} onChange={(active) => handleStorageProviderActiveChange(active, row)} />
-                    }
-                }
-            ]}
+            columns={columnsWithActive}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
