@@ -26,7 +26,7 @@ class RandomStorageProviderRouter(
         this.refreshCacheLazy()
 
         return storageProviderRepository
-            .findAll()
+            .findAllByActive(true)
             .awaitListWithTimeout()
             .also { this.cache = it }
     }

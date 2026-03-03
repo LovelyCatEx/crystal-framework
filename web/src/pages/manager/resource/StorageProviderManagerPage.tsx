@@ -1,4 +1,4 @@
-import {Col, Form, Input, Row, Select, Space, Tag} from "antd";
+import {Col, Form, Input, message, Row, Select, Space, Switch, Tag} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateStorageProviderDTO,
@@ -17,6 +17,18 @@ export function StorageProviderManagerPage() {
     useEffect(() => {
         pageRef?.current?.refreshData?.()
     }, [filterType]);
+
+    const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {
+        StorageProviderManagerController
+            .update({ id: row.id, active: active })
+            .then(() => {
+                void message.success("状态更新成功");
+                pageRef.current?.refreshData();
+            })
+            .catch(() => {
+                void message.error("状态更新失败");
+            })
+    }
 
     return (
         <ManagerPageContainer
@@ -84,6 +96,15 @@ export function StorageProviderManagerPage() {
                         return <CopyableToolTip title={row.properties}>
                             <span className="text-xs font-mono text-gray-500">{row.properties.substring(0, 32)}...</span>
                         </CopyableToolTip>
+                    }
+                },
+                {
+                    title: "启用状态",
+                    dataIndex: "active",
+                    key: "active",
+                    width: 100,
+                    render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
+                        return <Switch value={row.active} onChange={(active) => handleStorageProviderActiveChange(active, row)} />
                     }
                 }
             ]}

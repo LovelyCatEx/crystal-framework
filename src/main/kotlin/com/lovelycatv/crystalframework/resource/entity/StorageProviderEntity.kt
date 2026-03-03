@@ -20,6 +20,8 @@ class StorageProviderEntity(
     var baseUrl: String = "",
     @Column(value = "properties")
     var properties: String = "",
+    @Column(value = "active")
+    var active: Boolean = true,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null

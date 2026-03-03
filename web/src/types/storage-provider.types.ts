@@ -12,4 +12,5 @@ export interface StorageProvider extends BaseEntity {
     type: number;
     baseUrl: string;
     properties: string;
+    active: boolean;
 }

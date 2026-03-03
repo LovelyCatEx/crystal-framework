@@ -74,9 +74,10 @@ export function FileResourceManagerPage() {
                     title: "MD5",
                     dataIndex: "md5",
                     key: "md5",
+                    width: 180,
                     render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
                         return <CopyableToolTip title={row.md5}>
-                            <span className="text-xs font-mono">{row.md5.substring(0, 16)}...</span>
+                            <span className="text-xs font-mono">{row.md5}</span>
                         </CopyableToolTip>
                     }
                 },

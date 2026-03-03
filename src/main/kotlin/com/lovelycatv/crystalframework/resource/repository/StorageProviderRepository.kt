@@ -41,4 +41,6 @@ interface StorageProviderRepository : BaseRepository<StorageProviderEntity> {
         keyword: String?,
         type: Int?,
     ): Mono<Long>
+
+    fun findAllByActive(active: Boolean): Flux<StorageProviderEntity>
 }

@@ -8,5 +8,6 @@ data class ManagerUpdateStorageProviderDTO(
     val description: String? = null,
     val type: Int? = null,
     val baseUrl: String? = null,
-    val properties: String? = null
+    val properties: String? = null,
+    val active: Boolean? = null,
 ) : BaseManagerUpdateDTO(id)

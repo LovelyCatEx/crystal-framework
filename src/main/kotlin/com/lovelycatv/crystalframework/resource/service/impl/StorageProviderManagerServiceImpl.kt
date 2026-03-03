@@ -52,6 +52,9 @@ class StorageProviderManagerServiceImpl(
             if (dto.properties != null) {
                 this.properties = dto.properties
             }
+            if (dto.active != null) {
+                this.active = dto.active
+            }
         }
     }
 }

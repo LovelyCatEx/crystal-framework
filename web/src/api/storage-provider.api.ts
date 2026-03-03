@@ -23,6 +23,7 @@ export interface ManagerUpdateStorageProviderDTO extends BaseManagerUpdateDTO {
     type?: number | null;
     baseUrl?: string | null;
     properties?: string | null;
+    active?: boolean | null;
 }
 
 export interface ManagerReadStorageProviderDTO extends BaseManagerReadDTO {
