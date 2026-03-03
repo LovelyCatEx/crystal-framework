@@ -5,11 +5,14 @@ import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import tools.jackson.databind.annotation.JsonSerialize
+import tools.jackson.databind.ser.std.ToStringSerializer
 
 @Table("file_resources")
 class FileResourceEntity(
     id: Long = 0,
     @Column(value = "user_id")
+    @get:JsonSerialize(using = ToStringSerializer::class)
     var userId: Long = 0,
     @Column(value = "type")
     var type: Int = ResourceFileType.USER_AVATAR.typeId,
@@ -20,6 +23,7 @@ class FileResourceEntity(
     @Column(value = "md5")
     var md5: String = "",
     @Column(value = "file_size")
+    @get:JsonSerialize(using = ToStringSerializer::class)
     var fileSize: Long = 0,
     @Column(value = "storage_provider_id")
     var storageProviderId: Long = 0,

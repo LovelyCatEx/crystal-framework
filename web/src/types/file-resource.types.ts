@@ -10,7 +10,7 @@ export interface FileResource extends BaseEntity {
     fileName: string;
     fileExtension: string;
     md5: string;
-    fileSize: number;
+    fileSize: string;
     storageProviderId: string;
     objectKey: string;
 }

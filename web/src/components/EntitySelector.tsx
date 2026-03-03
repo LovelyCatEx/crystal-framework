@@ -29,7 +29,7 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
         title = `选择${props.entityName}`,
         cancelText,
         okText,
-        width = 520,
+        width = 1000,
         onCancel,
         onOk
     } = props;
@@ -43,13 +43,12 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
         onChange?.(entities);
     }, [onChange]);
 
-    const handleOk = useCallback(() => {
+    const handleOk = () => {
         onOk?.(selectedEntities);
-    }, [onOk]);
-
-    const handleCancel = useCallback(() => {
+    }
+    const handleCancel = () => {
         onCancel?.();
-    }, [onCancel]);
+    }
 
     return (
         <Modal
@@ -67,7 +66,6 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
                 entityName={entityName}
                 columns={columns}
                 query={query}
-                tableRowActionsRender={() => <></>}
                 tableSelection={{
                     type,
                     onChange: handleSelectionChange

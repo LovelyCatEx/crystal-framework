@@ -37,9 +37,8 @@ class OAuthAccountManagerServiceImpl(
         original: OAuthAccountEntity
     ): OAuthAccountEntity {
         return original.apply {
-            if (dto.userId != null) {
-                this.userId = dto.userId
-            }
+            this.userId = dto.userId
+
             if (dto.platform != null) {
                 this.platform = dto.platform
             }

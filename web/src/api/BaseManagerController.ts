@@ -17,8 +17,10 @@ export class BaseManagerController<
         private readonly baseUrl: string
     ) {}
 
-    getById(id: string) {
-        return this.query({ page: 1, pageSize: 1, id: id } as R)
+    async getById(id: string) {
+        const result = await this.query({ page: 1, pageSize: 1, id: id } as R)
+        const records = (result.data?.records ?? [])
+        return records.length > 0 ? records[0] : null
     }
 
     list() {

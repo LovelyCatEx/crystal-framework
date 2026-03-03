@@ -1,24 +1,9 @@
 import React, {type JSX} from "react";
-import {Avatar, Space, Tag} from "antd";
-import {useSWRState} from "../../compositions/swr.ts";
-import {managerGetFileDownloadUrl} from "../../api/file-resource.api.ts";
-import {emptyApiResponseAsync} from "../../api/system-request.ts";
-import {UserOutlined} from "@ant-design/icons";
+import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {User} from "../../types/user.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-
-function UserAvatar({ fileEntityId }: { fileEntityId?: string | null }) {
-    const [avatarUrl] = useSWRState<string | null>(
-        fileEntityId ? 'getFileDownloadUrl' : undefined,
-        () => fileEntityId ? managerGetFileDownloadUrl(fileEntityId) : emptyApiResponseAsync()
-    )
-
-    return <Avatar
-        className={avatarUrl ? "" : "bg-black/50"}
-        src={avatarUrl ?? <UserOutlined />}
-    />
-}
+import {UserAvatar} from "../UserAvatar.tsx";
 
 export const USER_MANAGER_TABLE_COLUMNS: EntityTableColumns<User> = [
     {
