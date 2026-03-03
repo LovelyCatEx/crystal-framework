@@ -28,7 +28,8 @@ const templates = [
         config: {
             accessKeyId: "",
             accessKeySecret: "",
-            endpoint: "",
+            securityToken: "",
+            region: "",
             bucketName: ""
         }
     }

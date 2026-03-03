@@ -46,7 +46,11 @@
             <artifactId>cos_api</artifactId>
             <version>5.6.261</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-oss-v2</artifactId>
+            <version>0.3.1</version>
+        </dependency>
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>vertex-core</artifactId>

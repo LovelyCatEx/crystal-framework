@@ -27,7 +27,7 @@ abstract class AbstractFileResourceService(
     }
 
     open fun buildObjectKey(fileType: ResourceFileType, fileNameWithExtension: String): String {
-        return "/${fileType.name.lowercase()}/$fileNameWithExtension"
+        return "${fileType.name.lowercase()}/$fileNameWithExtension"
     }
 
     suspend fun uploadFile(
@@ -84,13 +84,7 @@ abstract class AbstractFileResourceService(
             )
         }
 
-        val objectKey = this.buildObjectKey(fileType, fileNameWithExtension).run {
-            if (!this.startsWith("/")) {
-                "/$this"
-            } else {
-                this
-            }
-        }
+        val objectKey = this.buildObjectKey(fileType, fileNameWithExtension)
 
         val (fileName, fileExtension) = fileNameWithExtension.run {
             this.split(".")

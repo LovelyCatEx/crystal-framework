@@ -45,7 +45,24 @@ class FileResourceServiceImpl(
     }
 
     override suspend fun getFileDownloadUrl(entity: FileResourceEntity): String {
-        return storageProviderService
-            .getByIdOrThrow(entity.storageProviderId).baseUrl + entity.objectKey
+        val baseUrl = storageProviderService
+            .getByIdOrThrow(entity.storageProviderId).baseUrl
+            .run {
+                if (this.endsWith("/")) {
+                    this
+                } else {
+                    "$this/"
+                }
+            }
+
+        val key = entity.objectKey.run {
+            if (this.startsWith("/")) {
+                this.replaceFirst("/", "")
+            } else {
+                this
+            }
+        }
+
+        return baseUrl + key
     }
 }
