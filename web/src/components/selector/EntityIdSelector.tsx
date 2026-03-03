@@ -8,6 +8,7 @@ import type {BaseManagerController} from "../../api/BaseManagerController.ts";
 interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
     value?: string | null;
     onChange?: (value: string | null) => void;
+    isRowDisabled?: (row: ENTITY) => boolean;
     entityName: string;
     columns: EntityTableColumns<ENTITY>;
     controller: BaseManagerController<ENTITY, object>,
@@ -19,6 +20,7 @@ interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
 export function EntityIdSelector<ENTITY extends BaseEntity>({
     value,
     onChange,
+    isRowDisabled,
     entityName,
     columns,
     controller,
@@ -108,6 +110,7 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
                 query={async (props) => (await controller.query(props)).data!}
                 onCancel={handleCancel}
                 onOk={handleOk}
+                isRowDisabled={isRowDisabled}
             />
         </>
     );

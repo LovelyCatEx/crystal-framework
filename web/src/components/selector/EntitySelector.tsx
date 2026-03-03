@@ -6,6 +6,7 @@ import type {BaseEntity} from "../../types/BaseEntity.ts";
 interface EntitySelectorModalProps<ENTITY extends BaseEntity> {
     type: NonNullable<EntityTableProps<ENTITY>['tableSelection']>['type'];
     onChange?: (selected: ENTITY[]) => void;
+    isRowDisabled?: (row: ENTITY) => boolean;
     entityName: EntityTableProps<ENTITY>['entityName'];
     columns: EntityTableProps<ENTITY>['columns'];
     query: EntityTableProps<ENTITY>['query'];
@@ -22,6 +23,7 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
     const {
         type,
         onChange,
+        isRowDisabled,
         entityName,
         columns,
         query,
@@ -68,7 +70,8 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
                 query={query}
                 tableSelection={{
                     type,
-                    onChange: handleSelectionChange
+                    onChange: handleSelectionChange,
+                    isDisabled: isRowDisabled
                 }}
             />
         </Modal>

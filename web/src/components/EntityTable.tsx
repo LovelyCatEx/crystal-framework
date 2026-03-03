@@ -35,7 +35,8 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     query: <T extends BaseManagerReadDTO>(props: T) => Promise<PaginatedResponseData<ENTITY>>;
     tableSelection?: {
         type: 'disabled' | RowSelectionType;
-        onChange?: (record: ENTITY[]) => void;
+        onChange?: (records: ENTITY[]) => void;
+        isDisabled?: (record: ENTITY) => boolean;
     }
 }
 
@@ -150,7 +151,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             props?.tableSelection?.onChange?.(selectedRows);
         },
         getCheckboxProps: (record: ENTITY) => ({
-            disabled: false,
+            disabled: props?.tableSelection?.isDisabled?.(record) ?? false,
             name: record.id,
         }),
     };

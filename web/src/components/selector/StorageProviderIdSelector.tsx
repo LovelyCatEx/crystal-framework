@@ -14,6 +14,7 @@ export function StorageProviderIdSelector({ value, onChange }: StorageProviderId
         <EntityIdSelector<StorageProvider>
             value={value}
             onChange={onChange}
+            isRowDisabled={(row) => !row.active}
             entityName="存储提供商"
             columns={STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS}
             controller={StorageProviderManagerController}
