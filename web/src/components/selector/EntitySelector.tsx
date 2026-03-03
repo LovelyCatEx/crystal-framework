@@ -1,7 +1,7 @@
 import {Modal} from "antd";
 import {useCallback, useRef, useState} from "react";
-import {EntityTable, type EntityTableProps, type EntityTableRef} from "./EntityTable.tsx";
-import type {BaseEntity} from "../types/BaseEntity.ts";
+import {EntityTable, type EntityTableProps, type EntityTableRef} from "../EntityTable.tsx";
+import type {BaseEntity} from "../../types/BaseEntity.ts";
 
 interface EntitySelectorModalProps<ENTITY extends BaseEntity> {
     type: NonNullable<EntityTableProps<ENTITY>['tableSelection']>['type'];

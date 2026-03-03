@@ -9,7 +9,7 @@ import React, {
     useImperativeHandle,
     useState
 } from "react";
-import {Card, Flex, Input, message, Space, Table, type TableProps} from "antd";
+import {Flex, Input, message, Space, Table, type TableProps} from "antd";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "../utils/datetime.utils.ts";
 import {SearchOutlined} from "@ant-design/icons";
@@ -157,67 +157,65 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     return (
         <>
-            <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
-                <Flex className="mb-6 flex-wrap gap-4">
-                    {props.tablePrefixActions?.map((action, index) => (
-                        <div key={index} className="flex flex-col space-y-2">
-                            <span>{action.label}</span>
-                            {action.children}
-                        </div>
-                    ))}
-
-                    <div className="flex flex-col space-y-2">
-                        <span>搜索</span>
-                        <Input
-                            placeholder={`搜索${props.entityName}...`}
-                            prefix={<SearchOutlined className="text-gray-400" />}
-                            className="w-full rounded-xl"
-                            onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
-                            allowClear
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setSearchKeyword(value);
-                                if (value === '') {
-                                    handleSearch('');
-                                }
-                            }}
-                        />
+            <Flex className="mb-6 flex-wrap gap-4">
+                {props.tablePrefixActions?.map((action, index) => (
+                    <div key={index} className="flex flex-col space-y-2">
+                        <span>{action.label}</span>
+                        {action.children}
                     </div>
+                ))}
 
-                    {props.tableActions?.map((action, index) => (
-                        <div key={index} className="flex flex-col space-y-2">
-                            <span>{action.label}</span>
-                            {action.children}
-                        </div>
-                    ))}
-                </Flex>
+                <div className="flex flex-col space-y-2">
+                    <span>搜索</span>
+                    <Input
+                        placeholder={`搜索${props.entityName}...`}
+                        prefix={<SearchOutlined className="text-gray-400" />}
+                        className="w-full rounded-xl"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setSearchKeyword(value);
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
+                    />
+                </div>
 
-                <Table<ENTITY>
-                    columns={tableColumns}
-                    dataSource={data}
-                    rowKey="id"
-                    scroll={{ x: 1000 }}
-                    className="custom-table"
-                    pagination={{
-                        showSizeChanger: true,
-                        defaultPageSize: 20,
-                        className: "pr-6",
-                        current: currentPage,
-                        total: total,
-                        pageSize: currentPageSize,
-                        pageSizeOptions: [5, 10, 15, 20],
-                        onChange: (page: number, pageSize: number) => {
-                            setCurrentPage(page);
-                            setCurrentPageSize(pageSize);
-                        }
-                    }}
-                    loading={refreshing}
-                    rowSelection={props.tableSelection && props.tableSelection.type !== 'disabled'
-                        ? { type: props.tableSelection.type, ...rowSelection }
-                        : undefined
+                {props.tableActions?.map((action, index) => (
+                    <div key={index} className="flex flex-col space-y-2">
+                        <span>{action.label}</span>
+                        {action.children}
+                    </div>
+                ))}
+            </Flex>
+
+            <Table<ENTITY>
+                columns={tableColumns}
+                dataSource={data}
+                rowKey="id"
+                scroll={{ x: 1200 }}
+                className="custom-table"
+                pagination={{
+                    showSizeChanger: true,
+                    defaultPageSize: 20,
+                    className: "pr-6",
+                    current: currentPage,
+                    total: total,
+                    pageSize: currentPageSize,
+                    pageSizeOptions: [5, 10, 15, 20],
+                    onChange: (page: number, pageSize: number) => {
+                        setCurrentPage(page);
+                        setCurrentPageSize(pageSize);
                     }
-                />
-            </Card>
+                }}
+                loading={refreshing}
+                rowSelection={props.tableSelection && props.tableSelection.type !== 'disabled'
+                    ? { type: props.tableSelection.type, ...rowSelection }
+                    : undefined
+                }
+            />
 
             {props.children}
         </>

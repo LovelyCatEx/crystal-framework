@@ -8,6 +8,7 @@ import {
 import {useEffect, useRef, useState} from "react";
 import {ResourceFileType} from "../../../types/file-resource.types.ts";
 import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "../../../components/columns/FileResourceEntityColumns.tsx";
+import {UserIdSelector, StorageProviderIdSelector} from "../../../components/selector";
 
 export function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -26,12 +27,14 @@ export function FileResourceManagerPage() {
             columns={FILE_RESOURCE_MANAGER_TABLE_COLUMNS}
             editModalFormChildren={
                 <>
-                    <Row gutter={24}>
-                        <Col span={8}>
-                            <Form.Item name="userId" label="用户ID" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="所属用户ID" />
+                <Row gutter={24}>
+                        <Col span={24}>
+                            <Form.Item name="userId" label="所属用户" rules={[{ required: true }]}>
+                                <UserIdSelector />
                             </Form.Item>
                         </Col>
+                    </Row>
+                    <Row gutter={24}>
                         <Col span={8}>
                             <Form.Item name="type" label="文件类型" rules={[{ required: true }]}>
                                 <Select
@@ -46,9 +49,11 @@ export function FileResourceManagerPage() {
                                 />
                             </Form.Item>
                         </Col>
-                        <Col span={8}>
-                            <Form.Item name="storageProviderId" label="存储提供商ID" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商ID" />
+                    </Row>
+                    <Row gutter={24}>
+                        <Col span={24}>
+                            <Form.Item name="storageProviderId" label="存储提供商" rules={[{ required: true }]}>
+                                <StorageProviderIdSelector />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -71,7 +76,7 @@ export function FileResourceManagerPage() {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="fileSize" label="文件大小" rules={[{ required: true }]}>
+                            <Form.Item name="fileSize" label="文件大小 (Bytes)" rules={[{ required: true }]}>
                                 <Input type="number" className="w-full rounded-lg h-10 flex items-center" placeholder="文件大小(字节)" />
                             </Form.Item>
                         </Col>

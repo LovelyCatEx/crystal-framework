@@ -7,7 +7,7 @@ import React, {
     useRef,
     useState
 } from "react";
-import {Button, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
+import {Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
 import {DeleteOutlined, EditOutlined, ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
@@ -148,51 +148,53 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 </>}
             />
 
-            <EntityTable
-                ref={entityTableRef}
-                entityName={props.entityName}
-                columns={props.columns}
-                query={props.query}
-                tablePrefixActions={isCustomTableSelector ? props.tablePrefixActions : [
-                    ...[{
-                        label: '批量操作',
-                        children: <div className="flex flex-row items-center gap-2">
-                            <Select
-                                className="min-w-32"
-                                style={{ width: 120 }}
-                                options={[
-                                    { value: '1', label: '全部删除' },
-                                ]}
-                                onChange={(value) => setBatchOperationType(Number.parseInt(value))}
-                                placeholder="批量操作"
-                            />
+            <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+                <EntityTable
+                    ref={entityTableRef}
+                    entityName={props.entityName}
+                    columns={props.columns}
+                    query={props.query}
+                    tablePrefixActions={isCustomTableSelector ? props.tablePrefixActions : [
+                        ...[{
+                            label: '批量操作',
+                            children: <div className="flex flex-row items-center gap-2">
+                                <Select
+                                    className="min-w-32"
+                                    style={{ width: 120 }}
+                                    options={[
+                                        { value: '1', label: '全部删除' },
+                                    ]}
+                                    onChange={(value) => setBatchOperationType(Number.parseInt(value))}
+                                    placeholder="批量操作"
+                                />
 
-                            <Button
-                                type="primary"
-                                onClick={handleOnBatchOperationClick}
-                            >
-                                执行
-                            </Button>
-                        </div>,
-                    }],
-                    ...(props.tablePrefixActions ?? []),
-                ]}
-                tableActions={props.tableActions}
-                tableRowActionsRender={(record) => (
-                    <Space>
-                        <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                        <Popconfirm title="确定要删除此模型？" onConfirm={() => deleteModel(record.id)} okText="确认" cancelText="取消">
-                            <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-                        </Popconfirm>
-                    </Space>
-                )}
-                tableSelection={isCustomTableSelector ? props.tableSelection : {
-                    type: 'checkbox',
-                    onChange: (entities) => {
-                        setSelectedEntities(entities);
-                    }
-                }}
-            />
+                                <Button
+                                    type="primary"
+                                    onClick={handleOnBatchOperationClick}
+                                >
+                                    执行
+                                </Button>
+                            </div>,
+                        }],
+                        ...(props.tablePrefixActions ?? []),
+                    ]}
+                    tableActions={props.tableActions}
+                    tableRowActionsRender={(record) => (
+                        <Space>
+                            <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
+                            <Popconfirm title="确定要删除此模型？" onConfirm={() => deleteModel(record.id)} okText="确认" cancelText="取消">
+                                <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+                            </Popconfirm>
+                        </Space>
+                    )}
+                    tableSelection={isCustomTableSelector ? props.tableSelection : {
+                        type: 'checkbox',
+                        onChange: (entities) => {
+                            setSelectedEntities(entities);
+                        }
+                    }}
+                />
+            </Card>
 
             <Modal
                 title={(editingItem ? "编辑" : "新建") + props.entityName}
