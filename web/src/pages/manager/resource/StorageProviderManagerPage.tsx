@@ -7,8 +7,8 @@ import {
 } from "../../../api/storage-provider.api.ts";
 import React, {type JSX, useEffect, useRef, useState} from "react";
 import {StorageProviderType, type StorageProvider} from "../../../types/storage-provider.types.ts";
-import TextArea from "antd/es/input/TextArea";
 import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
+import {StorageProviderConfigEditor} from "../../../components/StorageProviderConfigEditor.tsx";
 
 export function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -82,7 +82,7 @@ export function StorageProviderManagerPage() {
                     key: "properties",
                     render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
                         return <CopyableToolTip title={row.properties}>
-                            <span className="text-xs font-mono text-gray-500">{row.properties.substring(0, 30)}...</span>
+                            <span className="text-xs font-mono text-gray-500">{row.properties.substring(0, 32)}...</span>
                         </CopyableToolTip>
                     }
                 }
@@ -121,7 +121,7 @@ export function StorageProviderManagerPage() {
                         <Input className="w-full rounded-lg h-10 flex items-center" placeholder="访问基础URL" />
                     </Form.Item>
                     <Form.Item name="properties" label="配置属性(JSON)" rules={[{ required: true }]}>
-                        <TextArea rows={4} placeholder="输入JSON格式的配置属性..." className="rounded-lg font-mono text-xs" />
+                        <StorageProviderConfigEditor placeholder="输入JSON格式的配置属性..." />
                     </Form.Item>
                 </>
             }
