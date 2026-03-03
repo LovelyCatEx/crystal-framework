@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.auth.service.impl
 
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData
+import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -18,13 +19,14 @@ import reactor.kotlin.core.publisher.toMono
 class UserAuthorizationServiceImpl(
     private val userService: UserService,
     private val oAuthAccountService: OAuthAccountService,
+    private val jwtSignKeyStore: JWTSignKeyStore,
 ) : UserAuthorizationService {
     override fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
         return LoginSuccessResponseData().apply {
             val expiration = 7 * 24 * 3600 * 1000L
 
             token = JwtUtil.buildJwtToken(
-                signKey = "SpringBootTemplate",
+                signKey = jwtSignKeyStore.getSignKey(),
                 subject = userEntity.username,
                 authorities = userEntity.authorities.map { it.toString() }.toSet(),
                 expiration = expiration

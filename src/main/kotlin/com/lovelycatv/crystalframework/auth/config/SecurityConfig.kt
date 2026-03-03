@@ -4,6 +4,7 @@ import com.google.protobuf.Api
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
 import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
+import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
@@ -66,7 +67,7 @@ class SecurityConfig(
     fun securityWebFilterChain(http: ServerHttpSecurity, redisService: RedisService,
                                oAuth2AuthenticationTokenAccountConverterManager: OAuth2AuthenticationTokenAccountConverterManager,
                                oAuthAccountService: OAuthAccountService,
-                               userAuthorizationService: UserAuthorizationService
+                               userAuthorizationService: UserAuthorizationService, jwtSignKeyStore: JWTSignKeyStore
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -197,34 +198,38 @@ class SecurityConfig(
             CustomAuthFilter(
                 unauthorizedEndpoints = unauthorizedEndpoints.map {
                     it.replace("{version}", "v1")
-                }
-            ) {
-                val redisKey = "userAuthorities:$it"
-                runBlocking(Dispatchers.IO) {
-                    val cache = redisService
-                        .get<String>(redisKey)
-                        .awaitFirstOrNull()
-                        ?.split(",")
+                },
+                getUserAuthorities = {
+                    val redisKey = "userAuthorities:$it"
+                    runBlocking(Dispatchers.IO) {
+                        val cache = redisService
+                            .get<String>(redisKey)
+                            .awaitFirstOrNull()
+                            ?.split(",")
 
-                    cache?.map { GrantedAuthority { it } }
-                        ?: userService
-                            .getUserRbacAccessInfo(it)
-                            .actions
-                            .also {
-                                redisService.set(
-                                    redisKey,
-                                    it.joinToString(
-                                        separator = ",",
-                                        prefix = "",
-                                        postfix = ""
-                                    ) { it.name },
-                                    Duration.ofDays(3)
-                                ).awaitFirstOrNull()
-                            }
-                            .map { GrantedAuthority { it.name } }
+                        cache?.map { GrantedAuthority { it } }
+                            ?: userService
+                                .getUserRbacAccessInfo(it)
+                                .actions
+                                .also {
+                                    redisService.set(
+                                        redisKey,
+                                        it.joinToString(
+                                            separator = ",",
+                                            prefix = "",
+                                            postfix = ""
+                                        ) { it.name },
+                                        Duration.ofDays(3)
+                                    ).awaitFirstOrNull()
+                                }
+                                .map { GrantedAuthority { it.name } }
 
+                    }
+                },
+                getJWTSignKey = {
+                    jwtSignKeyStore.getSignKey()
                 }
-            },
+            ),
             SecurityWebFiltersOrder.AUTHENTICATION
         )
 

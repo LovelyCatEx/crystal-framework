@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config
 
+import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.service.UserService
@@ -23,7 +24,8 @@ import tools.jackson.databind.json.JsonMapper
 @EnableWebFlux
 class WebMvcConfig(
     private val userService: UserService,
-    private val jsonMapper: JsonMapper
+    private val jsonMapper: JsonMapper,
+    private val jwtSignKeyStore: JWTSignKeyStore
 ) : WebFluxConfigurer {
     override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
         configurer.setDefaultVersion("1")
@@ -59,7 +61,7 @@ class WebMvcConfig(
                     ?: return Mono.empty()
 
                 val claims = try {
-                    JwtUtil.parseToken("SpringBootTemplate", token)
+                    JwtUtil.parseToken(jwtSignKeyStore.getSignKey(), token)
                 } catch (_: Exception) {
                     null
                 } ?: return Mono.empty()

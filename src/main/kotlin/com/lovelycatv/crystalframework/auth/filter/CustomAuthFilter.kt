@@ -30,7 +30,8 @@ import kotlin.text.get
 
 class CustomAuthFilter(
     val unauthorizedEndpoints: List<String>,
-    val getUserAuthorities: (userId: Long) -> List<GrantedAuthority>
+    val getUserAuthorities: (userId: Long) -> List<GrantedAuthority>,
+    val getJWTSignKey: () -> String,
 ) : WebFilter {
     private val logger = logger()
 
@@ -49,7 +50,7 @@ class CustomAuthFilter(
             ?: throw BusinessException("Authorization header is missing")
 
         val claims = try {
-            JwtUtil.parseToken("SpringBootTemplate", authorization)
+            JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
         } catch (e: Exception) {
             if (e is ExpiredJwtException) {
                 throw BusinessException("token expired")
