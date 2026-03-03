@@ -4,13 +4,18 @@ import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.beans.factory.getBeansWithAnnotation
 import org.springframework.context.ApplicationContext
+import org.springframework.http.server.PathContainer
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.util.pattern.PathPattern
+import org.springframework.web.util.pattern.PathPatternParser
 
 @Component
 class UnauthorizedPathScanner(
     private val applicationContext: ApplicationContext
 ) {
+    private val pathPatternParser = PathPatternParser()
+
     fun getUnauthorizedEndpointsSimple(): List<String> {
         val endpoints = mutableListOf<String>()
         val controllerBeans = applicationContext.getBeansWithAnnotation<RestController>()
@@ -64,5 +69,27 @@ class UnauthorizedPathScanner(
         }
 
         return endpoints.distinct()
+    }
+
+    /**
+     * Parse endpoint patterns to PathPattern for efficient matching
+     */
+    fun getUnauthorizedPathPatterns(): List<PathPattern> {
+        return getUnauthorizedEndpointsSimple().map { endpoint ->
+            // Convert path variables to Spring's path pattern syntax
+            // e.g., /api/{version}/user -> /api/*/user for matching
+            val pattern = endpoint.replace(Regex("\\{[^}]+\\}"), "*")
+            pathPatternParser.parse(pattern)
+        }
+    }
+
+    /**
+     * Check if the given path matches any unauthorized endpoint pattern
+     */
+    fun matches(path: String): Boolean {
+        val pathContainer = PathContainer.parsePath(path)
+        return getUnauthorizedPathPatterns().any { pattern ->
+            pattern.matches(pathContainer)
+        }
     }
 }

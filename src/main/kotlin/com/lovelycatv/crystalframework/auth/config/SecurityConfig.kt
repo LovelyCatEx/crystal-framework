@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.util.UriComponentsBuilder
+import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
@@ -62,6 +63,7 @@ class SecurityConfig(
     private val reactiveClientRegistrationRepository: ReactiveClientRegistrationRepository,
 ) {
     private val logger = logger()
+    private val pathPatternParser = PathPatternParser()
 
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity, redisService: RedisService,
@@ -157,27 +159,27 @@ class SecurityConfig(
         // no csrf
         http.csrf { it.disable() }
 
-        // Unauthorized endpoints
-        val unauthorizedEndpoints = unauthorizedPathScanner
-            .getUnauthorizedEndpointsSimple() + oauth2ClientProperties.registration.keys.flatMap {
-                listOf(
-                    "/login/oauth2/code/${it}",
-                    "/login/oauth2/authorization/${it}"
-                )
-            } + listOf("/login")
+        // Build path patterns for matching
+        val unauthorizedPathPatterns = unauthorizedPathScanner.getUnauthorizedPathPatterns() +
+                oauth2ClientProperties.registration.keys.flatMap {
+                    listOf(
+                        pathPatternParser.parse("/login/oauth2/code/${it}"),
+                        pathPatternParser.parse("/login/oauth2/authorization/${it}")
+                    )
+                } + listOf(pathPatternParser.parse("/login"))
 
         // custom authentications
         http.authorizeExchange { authorizeExchangeSpec ->
-            if (unauthorizedEndpoints.isNotEmpty()) {
+            if (unauthorizedPathPatterns.isNotEmpty()) {
                 logger.info("================================================================")
-                unauthorizedEndpoints.forEach {
+                unauthorizedPathPatterns.map { it.patternString }.forEach {
                     logger.info("+ Unauthorized endpoint: $it")
                 }
                 logger.info("================================================================")
             }
 
             authorizeExchangeSpec
-                .pathMatchers(*(listOf("/login/oauth2/code/**") + unauthorizedEndpoints).toTypedArray())
+                .pathMatchers(*(listOf("/login/oauth2/code/**") + unauthorizedPathPatterns.map { it.patternString }).toTypedArray())
                 .permitAll()
                 .anyExchange()
                 .authenticated()
@@ -196,9 +198,7 @@ class SecurityConfig(
         // custom auth filter
         http.addFilterAfter(
             CustomAuthFilter(
-                unauthorizedEndpoints = unauthorizedEndpoints.map {
-                    it.replace("{version}", "v1")
-                },
+                unauthorizedPathPatterns = unauthorizedPathPatterns,
                 getUserAuthorities = {
                     val redisKey = "userAuthorities:$it"
                     runBlocking(Dispatchers.IO) {

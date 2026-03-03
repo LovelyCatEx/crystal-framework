@@ -29,6 +29,9 @@ class SystemSettingsServiceImpl(
 
     override suspend fun getSystemSettings(): SystemSettings {
         return cachedSystemSettings ?: SystemSettings(
+            basic = SystemSettings.Basic(
+                baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!
+            ),
             bootstrap = SystemSettings.Bootstrap(
                 autoCheckRbacTableData = getSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA)!!
             ),
@@ -48,6 +51,10 @@ class SystemSettingsServiceImpl(
     }
 
     override suspend fun updateSystemSettings(settings: SystemSettings) {
+        setSettings(SystemSettingsConstants.Basic.BASE_URL, settings.basic.baseUrl)
+
+        setSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA, settings.bootstrap.autoCheckRbacTableData.toString())
+
         setSettings(SystemSettingsConstants.Mail.SMTP.HOST, settings.mail.smtp.host)
         setSettings(SystemSettingsConstants.Mail.SMTP.PORT, settings.mail.smtp.port.toString())
         setSettings(SystemSettingsConstants.Mail.SMTP.USERNAME, settings.mail.smtp.username)

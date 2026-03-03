@@ -3,6 +3,14 @@ package com.lovelycatv.crystalframework.system.types
 import kotlin.reflect.full.memberProperties
 
 object SystemSettingsConstants {
+    object Basic {
+        val BASE_URL = SystemSettingsItemDeclaration(
+            "basic.baseUrl",
+            SystemSettingsItemValueType.STRING,
+            "http://localhost:8080/api/v1",
+        )
+    }
+
     object Bootstrap {
         val AUTO_CHECK_RBAC_TABLE_DATA = SystemSettingsItemDeclaration(
             "bootstrap.autoCheckRbacTableData",

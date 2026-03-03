@@ -15,6 +15,7 @@ import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import io.jsonwebtoken.ExpiredJwtException
 import org.springframework.http.HttpStatus
+import org.springframework.http.server.PathContainer
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -25,12 +26,13 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
+import org.springframework.web.util.pattern.PathPattern
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import kotlin.text.get
 
 class CustomAuthFilter(
-    val unauthorizedEndpoints: List<String>,
+    val unauthorizedPathPatterns: List<PathPattern>,
     val getUserAuthorities: (userId: Long) -> List<GrantedAuthority>,
     val getJWTSignKey: () -> String,
 ) : WebFilter {
@@ -40,7 +42,14 @@ class CustomAuthFilter(
         exchange: ServerWebExchange,
         chain: WebFilterChain
     ): Mono<Void> {
-        if (exchange.request.path.toString() in unauthorizedEndpoints) {
+        val requestPath = exchange.request.path.pathWithinApplication()
+
+        // Check if the path matches any unauthorized endpoint pattern
+        val isUnauthorized = unauthorizedPathPatterns.any { pattern ->
+            pattern.matches(requestPath)
+        }
+
+        if (isUnauthorized) {
             return chain.filter(exchange)
         }
 
