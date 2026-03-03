@@ -1,22 +1,35 @@
-import {Col, Form, Input, Row, Select} from "antd";
+import {Button, Col, Form, Input, message, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
 import {
+    FileResourceManagerController,
     type ManagerCreateFileResourceDTO,
-    type ManagerReadFileResourceDTO,
-    FileResourceManagerController
+    managerGetFileDownloadUrl,
+    type ManagerReadFileResourceDTO
 } from "../../../api/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {ResourceFileType} from "../../../types/file-resource.types.ts";
+import {type FileResource, ResourceFileType} from "../../../types/file-resource.types.ts";
 import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "../../../components/columns/FileResourceEntityColumns.tsx";
-import {UserIdSelector, StorageProviderIdSelector} from "../../../components/selector";
+import {StorageProviderIdSelector, UserIdSelector} from "../../../components/selector";
+import {DownloadOutlined} from "@ant-design/icons";
+import {downloadFile} from "../../../utils/file-download.ts";
 
 export function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.()
+        pageRef?.current?.refreshData?.();
     }, [filterType]);
+
+    const handleDownloadFileEntity = async (record: FileResource) => {
+        const url = (await managerGetFileDownloadUrl(record.id)).data;
+
+        if (url) {
+            downloadFile(url);
+        } else {
+            await message.error("无法获取文件下载链接");
+        }
+    };
 
     return (
         <ManagerPageContainer
@@ -121,6 +134,11 @@ export function FileResourceManagerPage() {
                     }
                 }
             ]}
+            tableRowActionsRender={(record) => (
+                <>
+                    <Button type="text" size="small" icon={<DownloadOutlined />} onClick={() => handleDownloadFileEntity(record)} />
+                </>
+            )}
         >
 
         </ManagerPageContainer>

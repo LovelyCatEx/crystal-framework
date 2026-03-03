@@ -1,5 +1,16 @@
 import {message} from "antd";
 
+export const downloadFile = (url: string, filename?: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || '';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 export const downloadJson = (data: any, filename?: string) => {
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);

@@ -181,6 +181,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     tableActions={props.tableActions}
                     tableRowActionsRender={(record) => (
                         <Space>
+                            {props.tableRowActionsRender?.(record)}
                             <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
                             <Popconfirm title="确定要删除此模型？" onConfirm={() => deleteModel(record.id)} okText="确认" cancelText="取消">
                                 <Button type="text" size="small" icon={<DeleteOutlined />} danger />
