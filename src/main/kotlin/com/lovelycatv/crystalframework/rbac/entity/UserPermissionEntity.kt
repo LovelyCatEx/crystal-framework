@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.rbac.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.rbac.types.PermissionType
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -25,6 +26,7 @@ class UserPermissionEntity(
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
 ) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
+    @JsonIgnore
     fun getRealPermissionType(): PermissionType {
         return PermissionType.getById(this.type)
              ?: throw BusinessException("invalid permission type id $type")

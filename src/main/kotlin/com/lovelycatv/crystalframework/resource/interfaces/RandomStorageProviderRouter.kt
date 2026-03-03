@@ -1,37 +1,38 @@
 package com.lovelycatv.crystalframework.resource.interfaces
 
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
-import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
+import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 
 class RandomStorageProviderRouter(
-    private val storageProviderRepository: StorageProviderRepository
+    private val storageProviderService: StorageProviderService
 ) : StorageProviderRouter {
-    private var cache: List<StorageProviderEntity>? = null
-
     override suspend fun get(
         userId: Long,
         fileType: ResourceFileType,
         fileName: String
     ): StorageProviderEntity {
-        val providers = cache ?: refreshCache()
+        val providers = storageProviderService.getListCache("active-storage-providers")
+            ?: refreshCache()
 
         return providers.randomOrNull()
             ?: throw BusinessException("no storage provider found in database")
     }
 
-    suspend fun refreshCache(): List<StorageProviderEntity?> {
-        this.refreshCacheLazy()
+    override fun invalidateCache() {
+        storageProviderService.removeListCache("active-storage-providers")
 
-        return storageProviderRepository
-            .findAllByActive(true)
-            .awaitListWithTimeout()
-            .also { this.cache = it }
     }
 
-    fun refreshCacheLazy() {
-        this.cache = null
+    suspend fun refreshCache(): List<StorageProviderEntity?> {
+        this.invalidateCache()
+
+        return storageProviderService
+            .getRepository()
+            .findAllByActive(true)
+            .awaitListWithTimeout()
+            .also { storageProviderService.updateListCache("active-storage-providers", it) }
     }
 }

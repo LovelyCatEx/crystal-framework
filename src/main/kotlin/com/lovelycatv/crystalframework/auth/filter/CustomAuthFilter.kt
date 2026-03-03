@@ -7,29 +7,18 @@
  */
 package com.lovelycatv.crystalframework.auth.filter
 
-import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
-import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
-import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import io.jsonwebtoken.ExpiredJwtException
-import org.springframework.http.HttpStatus
-import org.springframework.http.server.PathContainer
-import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.server.authentication.AuthenticationWebFilter
-import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import org.springframework.web.util.pattern.PathPattern
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
-import kotlin.text.get
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,

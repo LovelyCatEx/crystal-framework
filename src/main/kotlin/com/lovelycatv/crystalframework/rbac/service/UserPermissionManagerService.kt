@@ -1,19 +1,18 @@
 package com.lovelycatv.crystalframework.rbac.service
 
+import com.lovelycatv.crystalframework.cache.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerCreatePermissionDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerDeletePermissionDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerReadPermissionDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerUpdatePermissionDTO
 import com.lovelycatv.crystalframework.rbac.entity.UserPermissionEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserPermissionRepository
-import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.service.BaseManagerService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-interface UserPermissionManagerService : BaseManagerService<
+interface UserPermissionManagerService : CachedBaseManagerService<
         UserPermissionRepository,
         UserPermissionEntity,
         ManagerCreatePermissionDTO,

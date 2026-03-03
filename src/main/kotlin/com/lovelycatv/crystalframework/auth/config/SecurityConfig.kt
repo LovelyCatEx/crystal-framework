@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.auth.config
 
-import com.google.protobuf.Api
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
 import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
@@ -15,12 +14,10 @@ import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.relational.core.sql.Not
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -29,7 +26,6 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver
@@ -38,7 +34,6 @@ import org.springframework.security.oauth2.client.web.server.ServerOAuth2Authori
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.util.StringUtils
 import org.springframework.web.reactive.config.EnableWebFlux

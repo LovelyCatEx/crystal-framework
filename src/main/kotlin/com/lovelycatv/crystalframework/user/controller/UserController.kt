@@ -8,11 +8,9 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.user.controller.dto.*
 import com.lovelycatv.crystalframework.user.service.UserService
 import jakarta.validation.Valid
-import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 
 @Validated
 @RestController

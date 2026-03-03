@@ -3,16 +3,13 @@ package com.lovelycatv.crystalframework
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.crystalframework.system.types.SystemSettingsItemDeclaration
 import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 import com.lovelycatv.vertex.log.logger
-import jdk.internal.vm.vector.VectorSupport.test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import kotlin.reflect.full.memberProperties
 
 @Order(1)
 @Component

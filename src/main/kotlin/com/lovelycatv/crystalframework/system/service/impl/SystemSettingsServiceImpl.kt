@@ -1,20 +1,22 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
-import kotlin.toString
 
 @Service
 class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService
 ) : SystemSettingsService {
     private val logger = logger()
     private var cachedSystemSettings: SystemSettings? = null
@@ -22,6 +24,11 @@ class SystemSettingsServiceImpl(
     override fun getRepository(): SystemSettingsRepository {
         return this.systemSettingsRepository
     }
+
+    override val cacheStore: ExpiringKVStore<String, SystemSettingsEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<SystemSettingsEntity>>
+        get() = redisService.asKVStore()
 
     override fun refreshSystemSettings() {
         this.cachedSystemSettings = null

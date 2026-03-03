@@ -1,13 +1,13 @@
 package com.lovelycatv.crystalframework.system.service
 
-import com.lovelycatv.crystalframework.shared.service.BaseService
+import com.lovelycatv.crystalframework.cache.service.CachedBaseService
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.types.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsItemDeclaration
 import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 
-interface SystemSettingsService : BaseService<SystemSettingsRepository, SystemSettingsEntity> {
+interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, SystemSettingsEntity> {
     fun refreshSystemSettings()
 
     suspend fun getSystemSettings(): SystemSettings

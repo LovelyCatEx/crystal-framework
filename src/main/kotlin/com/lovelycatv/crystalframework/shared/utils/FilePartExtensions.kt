@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.shared.utils
 import org.springframework.http.codec.multipart.FilePart
 import java.io.InputStream
 import java.io.SequenceInputStream
-import java.util.Collections
+import java.util.*
 
 class FilePartExtensions private constructor()
 

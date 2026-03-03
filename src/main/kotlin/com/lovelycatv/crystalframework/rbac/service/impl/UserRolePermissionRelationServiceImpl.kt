@@ -6,8 +6,10 @@ import com.lovelycatv.crystalframework.rbac.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,11 +18,17 @@ import org.springframework.transaction.annotation.Transactional
 class UserRolePermissionRelationServiceImpl(
     private val userRolePermissionRelationRepository: UserRolePermissionRelationRepository,
     private val userPermissionRepository: UserPermissionRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService
 ) : UserRolePermissionRelationService {
     override fun getRepository(): UserRolePermissionRelationRepository {
         return userRolePermissionRelationRepository
     }
+
+    override val cacheStore: ExpiringKVStore<String, UserRolePermissionRelationEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<UserRolePermissionRelationEntity>>
+        get() = redisService.asKVStore()
 
     override suspend fun getRolePermissions(roleId: Long): List<UserPermissionEntity> {
         val relationIds = this.getRepository()

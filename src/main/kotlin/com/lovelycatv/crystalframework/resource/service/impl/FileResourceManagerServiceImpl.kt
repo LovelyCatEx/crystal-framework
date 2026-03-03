@@ -6,15 +6,22 @@ import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
 import com.lovelycatv.crystalframework.resource.service.FileResourceManagerService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
 @Service
 class FileResourceManagerServiceImpl(
     private val fileResourceRepository: FileResourceRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService
 ) : FileResourceManagerService {
+    override val cacheStore: ExpiringKVStore<String, FileResourceEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<FileResourceEntity>>
+        get() = redisService.asKVStore()
     override fun getRepository(): FileResourceRepository {
         return this.fileResourceRepository
     }

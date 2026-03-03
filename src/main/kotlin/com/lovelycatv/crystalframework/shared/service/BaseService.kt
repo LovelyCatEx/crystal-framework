@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.shared.service
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.data.domain.Page
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 
 interface BaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEntity> {

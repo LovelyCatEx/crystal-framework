@@ -1,9 +1,6 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
 import com.aliyun.sdk.service.oss2.OSSClient
-import com.aliyun.sdk.service.oss2.credentials.Credentials
-import com.aliyun.sdk.service.oss2.credentials.CredentialsProvider
-import com.aliyun.sdk.service.oss2.credentials.EnvironmentVariableCredentialsProvider
 import com.aliyun.sdk.service.oss2.credentials.StaticCredentialsProvider
 import com.aliyun.sdk.service.oss2.models.PutObjectRequest
 import com.aliyun.sdk.service.oss2.transport.BinaryData

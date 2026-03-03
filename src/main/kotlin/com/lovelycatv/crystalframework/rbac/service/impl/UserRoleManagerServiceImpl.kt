@@ -1,20 +1,21 @@
 package com.lovelycatv.crystalframework.rbac.service.impl
 
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerCreateRoleDTO
-import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerDeleteRoleDTO
-import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerReadRoleDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerUpdateRoleDTO
 import com.lovelycatv.crystalframework.rbac.entity.UserRoleEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
 @Service
 class UserRoleManagerServiceImpl(
     private val userRoleRepository: UserRoleRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService
 ) : UserRoleManagerService {
     override fun getRepository(): UserRoleRepository {
         return userRoleRepository
@@ -36,4 +37,9 @@ class UserRoleManagerServiceImpl(
             dto.description?.let { description = it }
         }
     }
+
+    override val cacheStore: ExpiringKVStore<String, UserRoleEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<UserRoleEntity>>
+        get() = redisService.asKVStore()
 }

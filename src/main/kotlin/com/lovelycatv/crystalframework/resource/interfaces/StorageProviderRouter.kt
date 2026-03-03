@@ -9,4 +9,6 @@ interface StorageProviderRouter {
         fileType: ResourceFileType,
         fileName: String,
     ): StorageProviderEntity
+
+    fun invalidateCache()
 }

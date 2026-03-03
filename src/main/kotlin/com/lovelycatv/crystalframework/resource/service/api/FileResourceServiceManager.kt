@@ -9,7 +9,6 @@ import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
 import org.springframework.core.OrderComparator
 import org.springframework.stereotype.Component
-import java.io.File
 
 @Component
 class FileResourceServiceManager(

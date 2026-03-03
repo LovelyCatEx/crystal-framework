@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.resource.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -33,6 +34,7 @@ class FileResourceEntity(
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
 ) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
+    @JsonIgnore
     fun getRealResourceFileType(): ResourceFileType {
         return ResourceFileType.getByTypeId(this.type)
             ?: throw BusinessException("resource file type ${this.type} not found")

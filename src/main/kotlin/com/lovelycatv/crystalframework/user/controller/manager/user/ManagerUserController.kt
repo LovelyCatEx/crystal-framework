@@ -1,22 +1,18 @@
 package com.lovelycatv.crystalframework.user.controller.manager.user
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerCreateUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerDeleteUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerReadUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerUpdateUserDTO
 import com.lovelycatv.crystalframework.user.service.UserManagerService
-import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Validated
 @RestController

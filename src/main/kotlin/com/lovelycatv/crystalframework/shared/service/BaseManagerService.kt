@@ -114,11 +114,13 @@ interface BaseManagerService<
     suspend fun update(dto: UPDATE_DTO): ENTITY? {
         val existing = this.getByIdOrNull(dto.id) ?: return null
 
-        return this.getRepository().save(
+        val result = this.getRepository().save(
             this.applyDTOToEntity(dto, existing).apply {
                 this.modifiedTime = System.currentTimeMillis()
             } newEntity false
         ).awaitFirstOrNull() ?: throw BusinessException("Could not update resource")
+
+        return result
     }
 
     suspend fun applyDTOToEntity(dto: UPDATE_DTO, original: ENTITY): ENTITY

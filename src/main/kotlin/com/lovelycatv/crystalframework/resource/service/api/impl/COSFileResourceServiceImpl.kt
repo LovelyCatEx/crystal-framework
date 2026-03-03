@@ -4,7 +4,6 @@ import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
-import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.vertex.log.logger
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
@@ -15,7 +14,6 @@ import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import com.qcloud.cos.transfer.TransferManagerConfiguration
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.File
 import java.io.InputStream
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume

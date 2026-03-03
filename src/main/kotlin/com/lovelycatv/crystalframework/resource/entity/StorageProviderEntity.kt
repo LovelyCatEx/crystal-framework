@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.resource.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -26,15 +27,18 @@ class StorageProviderEntity(
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
 ) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
+    @JsonIgnore
     fun getRealStorageProviderType(): StorageProviderType {
         return StorageProviderType.getByTypeId(this.type)
             ?: throw BusinessException("storage provider type ${this.type} not found")
     }
 
+    @JsonIgnore
     inline fun <reified T> getPropertiesObject(): T {
         return properties.parseObject()
     }
 
+    @JsonIgnore
     fun getPropertiesMap(): Map<String, String?> {
         return properties.parseObject()
     }

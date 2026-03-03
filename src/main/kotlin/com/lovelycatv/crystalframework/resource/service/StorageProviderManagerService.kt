@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.resource.service
 
+import com.lovelycatv.crystalframework.cache.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerCreateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerDeleteStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerReadStorageProviderDTO
@@ -7,12 +8,11 @@ import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.M
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.service.BaseManagerService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-interface StorageProviderManagerService : BaseManagerService<
+interface StorageProviderManagerService : CachedBaseManagerService<
         StorageProviderRepository,
         StorageProviderEntity,
         ManagerCreateStorageProviderDTO,

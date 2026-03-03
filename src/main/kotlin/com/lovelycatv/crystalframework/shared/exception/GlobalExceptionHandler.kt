@@ -2,7 +2,6 @@ package com.lovelycatv.crystalframework.shared.exception
 
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.vertex.log.logger
-import org.springframework.boot.actuate.audit.AuditEvent
 import org.springframework.boot.actuate.audit.AuditEventRepository
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component

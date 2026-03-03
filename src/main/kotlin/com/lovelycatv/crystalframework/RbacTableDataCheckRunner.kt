@@ -20,8 +20,6 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.reflect.full.memberProperties
 
 @Order(2)

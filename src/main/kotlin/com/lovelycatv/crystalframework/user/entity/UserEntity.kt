@@ -41,6 +41,7 @@ class UserEntity(
         this.internalAuthorities = authorities.toMutableList()
     }
 
+    @JsonIgnore
     override fun getAuthorities(): Collection<GrantedAuthority> {
         return this.internalAuthorities
     }
@@ -59,5 +60,25 @@ class UserEntity(
 
     override fun getUsername(): String {
         return this.username
+    }
+
+    @JsonIgnore
+    override fun isAccountNonExpired(): Boolean {
+        return super.isAccountNonExpired()
+    }
+
+    @JsonIgnore
+    override fun isAccountNonLocked(): Boolean {
+        return super.isAccountNonLocked()
+    }
+
+    @JsonIgnore
+    override fun isCredentialsNonExpired(): Boolean {
+        return super.isCredentialsNonExpired()
+    }
+
+    @JsonIgnore
+    override fun isEnabled(): Boolean {
+        return super.isEnabled()
     }
 }

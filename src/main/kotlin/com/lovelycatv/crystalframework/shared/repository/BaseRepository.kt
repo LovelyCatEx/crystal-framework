@@ -1,20 +1,14 @@
 package com.lovelycatv.crystalframework.shared.repository
 
-import com.lovelycatv.crystalframework.rbac.entity.UserPermissionEntity
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.query.Param
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.lang.reflect.ParameterizedType
-import java.util.Locale
 import java.util.Locale.getDefault
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmErasure
 
 interface BaseRepository<ENTITY: BaseEntity> : R2dbcRepository<ENTITY, Long> {

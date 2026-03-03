@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.user.repository
 
-import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
+import com.lovelycatv.crystalframework.user.entity.UserEntity
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.stereotype.Repository

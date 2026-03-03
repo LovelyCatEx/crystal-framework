@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.domain.Persistable
@@ -36,6 +37,7 @@ abstract class BaseEntity(
         this.id = id
     }
 
+    @JsonIgnore
     override fun isNew(): Boolean {
         return isNew
     }
@@ -52,6 +54,7 @@ abstract class BaseEntity(
         deletedTime = null
     }
 
+    @JsonIgnore
     fun isDeleted() = deletedTime != null
 
     @Suppress("UNCHECKED_CAST")
