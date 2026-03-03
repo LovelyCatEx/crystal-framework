@@ -76,7 +76,7 @@ class ManagerUserRoleController(
         @Valid
         dto: ManagerDeleteRoleDTO
     ): ApiResponse<*> {
-        userRoleManagerService.delete(dto.id)
+        userRoleManagerService.deleteByDTO(dto)
         return ApiResponse.success(null)
     }
 }

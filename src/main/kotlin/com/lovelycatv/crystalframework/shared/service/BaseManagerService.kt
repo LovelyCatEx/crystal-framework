@@ -123,6 +123,14 @@ interface BaseManagerService<
 
     suspend fun applyDTOToEntity(dto: UPDATE_DTO, original: ENTITY): ENTITY
 
+    suspend fun batchDelete(ids: List<Long>) {
+        try {
+            this.getRepository().deleteAllById(ids).awaitFirstOrNull()
+        } catch (_: Exception) {
+            throw BusinessException("Could not delete resources")
+        }
+    }
+
     suspend fun delete(id: Long) {
         try {
             this.getRepository().deleteById(id).awaitFirstOrNull()
@@ -132,6 +140,6 @@ interface BaseManagerService<
     }
 
     suspend fun deleteByDTO(dto: DELETE_DTO) {
-        this.delete(dto.id)
+        this.batchDelete(dto.ids)
     }
 }

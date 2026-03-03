@@ -78,7 +78,7 @@ class ManagerStorageProviderController(
         @Valid
         dto: ManagerDeleteStorageProviderDTO
     ): ApiResponse<*> {
-        storageProviderManagerService.delete(dto.id)
+        storageProviderManagerService.deleteByDTO(dto)
 
         return ApiResponse.success(null)
     }

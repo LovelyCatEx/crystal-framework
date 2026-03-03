@@ -12,6 +12,10 @@ export class BaseManagerController<
         private readonly baseUrl: string
     ) {}
 
+    getById(id: string) {
+        return this.query({ page: 1, pageSize: 1, id: id } as R)
+    }
+
     list() {
         return doGet<ENTITY[]>(`/api${this.baseUrl}/list`);
     }

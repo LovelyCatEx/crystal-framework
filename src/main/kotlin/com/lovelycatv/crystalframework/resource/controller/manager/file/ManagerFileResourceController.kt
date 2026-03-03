@@ -90,7 +90,7 @@ class ManagerFileResourceController(
         @Valid
         dto: ManagerDeleteFileResourceDTO
     ): ApiResponse<*> {
-        fileResourceManagerService.delete(dto.id)
+        fileResourceManagerService.deleteByDTO(dto)
 
         return ApiResponse.success(null)
     }

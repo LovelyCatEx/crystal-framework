@@ -78,7 +78,7 @@ class ManagerOAuthAccountController(
         @Valid
         dto: ManagerDeleteOAuthAccountDTO
     ): ApiResponse<*> {
-        oAuthAccountManagerService.delete(dto.id)
+        oAuthAccountManagerService.deleteByDTO(dto)
 
         return ApiResponse.success(null)
     }

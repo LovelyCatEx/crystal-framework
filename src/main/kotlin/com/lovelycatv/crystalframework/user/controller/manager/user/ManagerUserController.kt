@@ -71,7 +71,7 @@ class ManagerUserController(
         @ModelAttribute
         dto: ManagerDeleteUserDTO
     ): ApiResponse<*> {
-        userManagerService.delete(dto.id)
+        userManagerService.deleteByDTO(dto)
         return ApiResponse.success(null)
     }
 }

@@ -19,7 +19,7 @@ export interface BaseManagerReadDTO {
 }
 
 export interface BaseManagerDeleteDTO {
-    id: string;
+    ids: string[];
 }
 
 export interface BaseManagerUpdateDTO {

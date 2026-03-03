@@ -78,7 +78,7 @@ class ManagerUserPermissionController(
         @Valid
         dto: ManagerDeletePermissionDTO
     ): ApiResponse<*> {
-        userPermissionManagerService.delete(dto.id)
+        userPermissionManagerService.deleteByDTO(dto)
 
         return ApiResponse.success(null)
     }

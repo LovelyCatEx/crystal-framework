@@ -105,7 +105,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     };
 
     const deleteModel = (id: string) => {
-        props.delete({ id: id })
+        props.delete({ ids: [id] })
             .then(() => {
                 void message.success(`${props.entityName}已刪除`);
                 refreshData();
