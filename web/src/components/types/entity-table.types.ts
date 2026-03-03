@@ -1,7 +1,9 @@
 import React, {type JSX} from "react";
 import type {BaseEntity} from "../../types/BaseEntity.ts";
 
-export interface ManagerPageTableColumn<ENTITY extends BaseEntity, COLUMN_DATA_TYPE> {
+export type EntityTableColumns<ENTITY extends BaseEntity, COLUMN_DATA_TYPE = unknown> = EntityTableColumn<ENTITY, COLUMN_DATA_TYPE>[]
+
+export interface EntityTableColumn<ENTITY extends BaseEntity, COLUMN_DATA_TYPE> {
     title: string;
     dataIndex: string;
     key: string;

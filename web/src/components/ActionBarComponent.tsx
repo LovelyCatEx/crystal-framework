@@ -9,7 +9,7 @@ export interface ActionBarComponentProps {
 export function ActionBarComponent(props: ActionBarComponentProps) {
     return (
         <>
-            <div className="mb-8 flex justify-between items-end">
+            <div className="mb-8 flex justify-between items-end gap-4 flex-wrap">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">{props.title}</h1>
                     {props.subtitle && <p className="text-gray-500 mt-1">{props.subtitle}</p>}

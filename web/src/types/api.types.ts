@@ -11,9 +11,7 @@ export interface PaginatedResponseData<T> {
     records: T[];
 }
 
-export interface BaseManagerReadDTO {
-    page: number;
-    pageSize: number;
+export interface BaseManagerReadDTO extends PageQuery {
     id?: string;
     searchKeyword?: string;
 }

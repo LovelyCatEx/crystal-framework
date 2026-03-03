@@ -1,5 +1,10 @@
-import type {BaseManagerDeleteDTO, BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
-import {doGet, doPost, type PaginatedResponseData} from "./system-request.ts";
+import type {
+    BaseManagerDeleteDTO,
+    BaseManagerReadDTO,
+    BaseManagerUpdateDTO,
+    PaginatedResponseData
+} from "../types/api.types.ts";
+import {doGet, doPost} from "./system-request.ts";
 
 export class BaseManagerController<
     ENTITY,
