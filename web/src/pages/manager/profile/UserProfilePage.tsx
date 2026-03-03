@@ -19,7 +19,7 @@ import {
     type ResetPasswordDTO,
     type ResetEmailDTO
 } from "../../../api/auth.api.ts";
-import {uploadUserAvatar} from "../../../api/user.api.ts";
+import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "../../../api/user.api.ts";
 
 const { Password } = Input;
 
@@ -38,12 +38,28 @@ const BasicInfo = () => {
         }
     }, [loggedUser.userProfile]);
 
+    const [updatingUserProfile, setUpdatingUserProfile] = useState(false);
+    const handleSubmitUserProfile = (values: UpdateUserProfileDTO) => {
+        setUpdatingUserProfile(true);
+        updateUserProfile(values)
+            .then(() => {
+                void message.success("用户资料更新成功");
+                void loggedUser.refreshUserProfile();
+            })
+            .catch(() => {
+                void message.error("用户资料更新失败")
+            })
+            .finally(() => {
+                setUpdatingUserProfile(false);
+            })
+    }
+
     return (
         <div className="py-4">
             <Form
                 form={form}
                 layout="vertical"
-                onFinish={() => message.success('資訊更新成功')}
+                onFinish={handleSubmitUserProfile}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                     <Form.Item label="用户名" name="username" rules={[{ required: true }]}>
@@ -65,7 +81,13 @@ const BasicInfo = () => {
                     <Input className="rounded-xl py-2" disabled />
                 </Form.Item>
 
-                <Button type="primary" size="large" className="rounded-xl px-8 h-auto py-2">
+                <Button
+                    type="primary"
+                    size="large"
+                    className="rounded-xl px-8 h-auto py-2"
+                    loading={updatingUserProfile}
+                    onClick={() => { form.submit() }}
+                >
                     保存
                 </Button>
             </Form>

@@ -9,6 +9,7 @@
       <option name="environmentVariables" />
     </selectedOptions>
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.lovelycatv.crystalframework.SpringbootTemplateApplication" />
+    <option name="VM_PARAMETERS" value="-Xms256m -Xmx512m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

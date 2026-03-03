@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.types.RedisConstants
+import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
@@ -194,6 +195,21 @@ class UserServiceImpl(
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,
         )
+    }
+
+    override suspend fun updateUserProfile(
+        userId: Long,
+        dto: UpdateUserProfileDTO
+    ) {
+        val user = getByIdOrThrow(userId, BusinessException("User $userId not found"))
+
+        this.getRepository().save(
+            user.apply {
+                dto.nickname?.let {
+                    nickname = it
+                }
+            }
+        ).awaitFirstOrNull() ?: throw BusinessException("could not update user profile")
     }
 
     @Transactional(rollbackFor = [Exception::class])

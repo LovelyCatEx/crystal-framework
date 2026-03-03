@@ -110,6 +110,18 @@ class UserController(
         )
     }
 
+    @PostMapping("/profile")
+    suspend fun updateUserProfile(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: UpdateUserProfileDTO
+    ): ApiResponse<*> {
+        userService.updateUserProfile(userAuthentication.userId, dto)
+
+        return ApiResponse.success(null)
+    }
+
     @PostMapping("/uploadAvatar")
     suspend fun uploadAvatar(
         userAuthentication: UserAuthentication,

@@ -36,3 +36,11 @@ export async function uploadUserAvatar(file: File) {
 
     return doPost('/api/user/uploadAvatar', {file: file}, {'Content-Type': 'multipart/form-data'});
 }
+
+export async function updateUserProfile(dto: UpdateUserProfileDTO) {
+    return doPost('/api/user/profile', {...dto})
+}
+
+export interface UpdateUserProfileDTO {
+    nickname?: string | null;
+}

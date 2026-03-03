@@ -1,4 +1,4 @@
-name: springboot-template
+name: crystalframework
 services:
   postgres:
     image: postgres:15

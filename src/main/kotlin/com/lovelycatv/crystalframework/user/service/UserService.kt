@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.service
 
 import com.lovelycatv.crystalframework.shared.service.BaseService
+import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
@@ -35,6 +36,8 @@ interface UserService : BaseService<UserRepository, UserEntity>, ReactiveUserDet
     suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult
 
     suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
+
+    suspend fun updateUserProfile(userId: Long, dto: UpdateUserProfileDTO)
 
     suspend fun uploadAvatar(userId: Long, file: FilePart)
 }
