@@ -8,6 +8,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.bind.support.WebExchangeBindException
 import org.springframework.web.server.MissingRequestValueException
 
 @Component
@@ -35,6 +36,10 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
 
             is AuthorizationDeniedException -> {
                 this.handleAuthorizationDeniedException(e)
+            }
+
+            is WebExchangeBindException -> {
+                this.handleWebExchangeBindException(e)
             }
 
             else -> {
@@ -69,6 +74,17 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         logger.info("An exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>("missing parameter ${e.name}")
+    }
+
+    @ExceptionHandler(WebExchangeBindException::class)
+    fun handleWebExchangeBindException(e: WebExchangeBindException): ApiResponse<*> {
+        logger.info("An parameter validation exception occurred", e)
+
+        return ApiResponse.badRequest<Nothing>(
+            e.bindingResult.fieldErrors.joinToString(separator = ", ") {
+                it.defaultMessage ?: "value of field ${it.field} cannot be ${it.rejectedValue?.toString()}"
+            }
+        )
     }
 
     @ExceptionHandler(AuthorizationDeniedException::class)
