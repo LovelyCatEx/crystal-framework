@@ -8,6 +8,7 @@
 package com.lovelycatv.crystalframework.auth.filter
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
@@ -47,23 +48,23 @@ class CustomAuthFilter(
             ?.firstOrNull()
             ?.replace("Bearer ", "")
             ?.trim()
-            ?: throw BusinessException("Authorization header is missing")
+            ?: throw UnauthorizedException("Authorization header is missing")
 
         val claims = try {
             JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
         } catch (e: Exception) {
             if (e is ExpiredJwtException) {
-                throw BusinessException("token expired")
+                throw UnauthorizedException("token expired")
             } else {
                 logger.error("unexpected token parse exception", e)
-                throw BusinessException("invalid token pattern")
+                throw UnauthorizedException("invalid token pattern")
             }
         }
 
         val userId = claims["userId"]
             ?.toString()
             ?.toLong()
-            ?: throw BusinessException("userId is missing")
+            ?: throw UnauthorizedException("userId is missing")
 
         val token = UsernamePasswordAuthenticationToken(
             claims.subject,

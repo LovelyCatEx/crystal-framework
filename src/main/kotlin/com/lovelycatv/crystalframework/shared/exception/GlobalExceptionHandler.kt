@@ -15,6 +15,48 @@ import org.springframework.web.server.MissingRequestValueException
 class GlobalExceptionHandler(private val auditEventRepository: AuditEventRepository) {
     private val logger = logger()
 
+    fun handle(e: Exception): ApiResponse<*> {
+        return when (e) {
+            is ForbiddenException -> {
+                this.handleForbiddenException(e)
+            }
+
+            is UnauthorizedException -> {
+                this.handleUnauthorizedException(e)
+            }
+
+            is BusinessException -> {
+                this.handleBusinessException(e)
+            }
+
+            is MissingRequestValueException -> {
+                this.handleMissingRequestValueException(e)
+            }
+
+            is AuthorizationDeniedException -> {
+                this.handleAuthorizationDeniedException(e)
+            }
+
+            else -> {
+                this.handleException(e)
+            }
+        }
+    }
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun handleForbiddenException(e: ForbiddenException): ApiResponse<*> {
+        logger.info("An forbidden exception occurred", e)
+
+        return ApiResponse.forbidden<Nothing>(e.localizedMessage ?: e.message ?: "")
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(e: UnauthorizedException): ApiResponse<*> {
+        logger.info("An unauthorized exception occurred", e)
+
+        return ApiResponse.unauthorized<Nothing>(e.localizedMessage ?: e.message ?: "")
+    }
+
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(e: BusinessException): ApiResponse<*> {
         logger.info("An business exception occurred", e)

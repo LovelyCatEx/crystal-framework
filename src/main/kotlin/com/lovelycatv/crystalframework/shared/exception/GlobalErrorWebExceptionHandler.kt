@@ -23,7 +23,8 @@ import org.springframework.web.reactive.function.server.ServerResponse
 class GlobalErrorWebExceptionHandler(
     errorAttributes: ErrorAttributes,
     webProperties: WebProperties,
-    applicationContext: ApplicationContext
+    applicationContext: ApplicationContext,
+    private val globalExceptionHandler: GlobalExceptionHandler
 ) : AbstractErrorWebExceptionHandler(errorAttributes, webProperties.resources, applicationContext) {
     private val logger = logger()
 
@@ -37,13 +38,10 @@ class GlobalErrorWebExceptionHandler(
             val errorProperties = getErrorAttributes(request, ErrorAttributeOptions.defaults())
 
             when (error) {
-                is BusinessException -> {
-                    ServerResponse.status(HttpStatus.BAD_REQUEST)
+                is Exception -> {
+                    ServerResponse.status(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(ApiResponse.badRequest(
-                            error.localizedMessage ?: error.message ?: "",
-                            null
-                        ))
+                        .bodyValue(globalExceptionHandler.handle(error))
                 }
 
                 else -> {
