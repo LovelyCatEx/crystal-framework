@@ -10,15 +10,18 @@ import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.types.OAuthPlatform
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class OAuthAccountServiceImpl(
     private val oauthAccountRepository: OAuthAccountRepository,
     private val oAuth2AuthenticationTokenAccountConverterManager: OAuth2AuthenticationTokenAccountConverterManager,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : OAuthAccountService {
     override fun getRepository(): OAuthAccountRepository {
         return this.oauthAccountRepository
@@ -28,6 +31,7 @@ class OAuthAccountServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<OAuthAccountEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
 
     override suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity? {
         return this.getRepository()

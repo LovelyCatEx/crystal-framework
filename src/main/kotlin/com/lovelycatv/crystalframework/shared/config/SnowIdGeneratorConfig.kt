@@ -8,6 +8,7 @@
 package com.lovelycatv.crystalframework.shared.config
 
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
@@ -17,13 +18,14 @@ import org.springframework.context.annotation.ScopedProxyMode
 class SnowIdGeneratorConfig {
     @Bean
     @Scope(proxyMode = ScopedProxyMode.NO)
+    @ConditionalOnMissingBean(SnowIdGenerator::class)
     fun snowIdGenerator(): SnowIdGenerator {
         return SnowIdGenerator(
             0,
-            41,
-            5,
-            5,
-            12,
+            45,
+            0,
+            0,
+            18,
             0,
             0,
             0,

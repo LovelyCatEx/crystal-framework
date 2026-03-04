@@ -10,18 +10,23 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class StorageProviderManagerServiceImpl(
     private val storageProviderRepository: StorageProviderRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : StorageProviderManagerService {
     override val cacheStore: ExpiringKVStore<String, StorageProviderEntity>
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<StorageProviderEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<StorageProviderEntity> = StorageProviderEntity::class
+
     override fun getRepository(): StorageProviderRepository {
         return this.storageProviderRepository
     }

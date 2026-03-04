@@ -9,12 +9,16 @@ import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 class RandomStorageProviderRouter(
     private val storageProviderService: StorageProviderService
 ) : StorageProviderRouter {
+    companion object {
+        const val CACHE_KEY_IDENTIFIER = "active-storage-providers"
+    }
+
     override suspend fun get(
         userId: Long,
         fileType: ResourceFileType,
         fileName: String
     ): StorageProviderEntity {
-        val providers = storageProviderService.getListCache("active-storage-providers")
+        val providers = storageProviderService.getListCache(CACHE_KEY_IDENTIFIER)
             ?: refreshCache()
 
         return providers.randomOrNull()
@@ -22,17 +26,16 @@ class RandomStorageProviderRouter(
     }
 
     override fun invalidateCache() {
-        storageProviderService.removeListCache("active-storage-providers")
-
+        storageProviderService.removeListCache(CACHE_KEY_IDENTIFIER)
     }
 
-    suspend fun refreshCache(): List<StorageProviderEntity?> {
+    suspend fun refreshCache(): List<StorageProviderEntity> {
         this.invalidateCache()
 
         return storageProviderService
             .getRepository()
             .findAllByActive(true)
             .awaitListWithTimeout()
-            .also { storageProviderService.updateListCache("active-storage-providers", it) }
+            .also { storageProviderService.updateListCache(CACHE_KEY_IDENTIFIER, it) }
     }
 }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -32,6 +33,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Duration
 import java.util.*
+import kotlin.reflect.KClass
 
 @Service
 class UserServiceImpl(
@@ -43,7 +45,8 @@ class UserServiceImpl(
     private val mailService: MailService,
     private val redisService: RedisService,
     private val fileResourceService: FileResourceService,
-    private val fileResourceServiceManager: FileResourceServiceManager
+    private val fileResourceServiceManager: FileResourceServiceManager,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : UserService {
     private val logger = logger()
 
@@ -283,4 +286,5 @@ class UserServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<UserEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<UserEntity> = UserEntity::class
 }

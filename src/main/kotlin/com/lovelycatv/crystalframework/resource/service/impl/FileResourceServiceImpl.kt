@@ -12,7 +12,9 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class FileResourceServiceImpl(
@@ -21,7 +23,8 @@ class FileResourceServiceImpl(
     private val storageProviderService: StorageProviderService,
     private val resourceModuleConfiguration: ResourceModuleConfiguration,
     private val systemSettingsService: SystemSettingsService,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : FileResourceService {
     override fun getRepository(): FileResourceRepository {
         return this.fileResourceRepository
@@ -83,4 +86,5 @@ class FileResourceServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<FileResourceEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<FileResourceEntity> = FileResourceEntity::class
 }

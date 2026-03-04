@@ -10,15 +10,18 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.reflect.KClass
 
 @Service
 class UserRoleRelationServiceImpl(
     private val userRoleRelationRepository: UserRoleRelationRepository,
     private val userRoleRepository: UserRoleRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : UserRoleRelationService {
     override fun getRepository(): UserRoleRelationRepository {
         return userRoleRelationRepository
@@ -28,6 +31,7 @@ class UserRoleRelationServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<UserRoleRelationEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<UserRoleRelationEntity> = UserRoleRelationEntity::class
 
     override suspend fun getUserRoles(userId: Long): List<UserRoleEntity> {
         return userRoleRepository.findAllById(

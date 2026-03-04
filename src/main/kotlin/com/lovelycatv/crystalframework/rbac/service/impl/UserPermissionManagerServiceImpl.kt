@@ -10,13 +10,16 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class UserPermissionManagerServiceImpl(
     private val userPermissionRepository: UserPermissionRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : UserPermissionManagerService {
     override fun getRepository(): UserPermissionRepository {
         return this.userPermissionRepository
@@ -55,4 +58,5 @@ class UserPermissionManagerServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<UserPermissionEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<UserPermissionEntity> = UserPermissionEntity::class
 }

@@ -9,20 +9,25 @@ import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class UserManagerServiceImpl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : UserManagerService {
     override val cacheStore: ExpiringKVStore<String, UserEntity>
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<UserEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<UserEntity> = UserEntity::class
+
     override fun getRepository(): UserRepository {
         return userRepository
     }

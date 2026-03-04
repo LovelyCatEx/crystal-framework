@@ -10,13 +10,16 @@ import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : SystemSettingsService {
     private val logger = logger()
     private var cachedSystemSettings: SystemSettings? = null
@@ -29,6 +32,7 @@ class SystemSettingsServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<SystemSettingsEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<SystemSettingsEntity> = SystemSettingsEntity::class
 
     override fun refreshSystemSettings() {
         this.cachedSystemSettings = null

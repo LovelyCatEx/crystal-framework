@@ -1,6 +1,9 @@
 package com.lovelycatv.crystalframework.shared.service.redis
 
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.*
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -43,43 +46,45 @@ interface RedisService {
 
         return object : ExpiringKVStore<String, T> {
             override fun set(key: String, value: T, expiration: Long) {
-                CompletableFuture.runAsync({
+                runBlocking(Dispatchers.IO) {
                     opsForValue<T>()
                         .set(key, value, Duration.ofMillis(expiration))
-                        .block()
-                }, executor).join()
+                        .awaitFirstOrNull()
+                }
             }
 
             override fun set(key: String, value: T) {
-                CompletableFuture.runAsync({
+                runBlocking(Dispatchers.IO) {
                     opsForValue<T>()
                         .set(key, value)
-                        .block()
-                }, executor).join()
+                        .awaitFirstOrNull()
+                }
             }
 
             override fun containsKey(key: String): Boolean {
-                return CompletableFuture.supplyAsync({
-                    hasKey(key).block() == true
-                }, executor).join()
+                return runBlocking(Dispatchers.IO) {
+                    hasKey(key).awaitFirstOrNull() == true
+                }
             }
 
             override fun get(key: String): T? {
-                return CompletableFuture.supplyAsync({
+                return runBlocking(Dispatchers.IO) {
                     this@RedisService
                         .get<T>(key)
-                        .block()
-                }, executor).join()
+                        .awaitFirstOrNull()
+                }
             }
 
             override fun remove(key: String): T? {
-                return CompletableFuture.supplyAsync({
+                return runBlocking(Dispatchers.IO) {
                     val v = get(key)
+
                     if (v != null) {
-                        this@RedisService.removeKey(key).block()
+                        this@RedisService.removeKey(key).awaitFirstOrNull()
                     }
+
                     v
-                }, executor).join()
+                }
             }
 
             override val keys: Set<String>

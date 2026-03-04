@@ -9,13 +9,16 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
 
 @Service
 class UserRoleManagerServiceImpl(
     private val userRoleRepository: UserRoleRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
 ) : UserRoleManagerService {
     override fun getRepository(): UserRoleRepository {
         return userRoleRepository
@@ -42,4 +45,5 @@ class UserRoleManagerServiceImpl(
         get() = redisService.asKVStore()
     override val listCacheStore: ExpiringKVStore<String, List<UserRoleEntity>>
         get() = redisService.asKVStore()
+    override val entityClass: KClass<UserRoleEntity> = UserRoleEntity::class
 }
