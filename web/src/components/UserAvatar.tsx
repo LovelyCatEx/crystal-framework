@@ -6,7 +6,7 @@ import {useSWRState} from "../compositions/swr.ts";
 
 export function UserAvatar({ fileEntityId }: { fileEntityId?: string | null }) {
     const [avatarUrl] = useSWRState<string | null>(
-        fileEntityId ? 'getFileDownloadUrl' : undefined,
+        fileEntityId ? `getFileDownloadUrl/${fileEntityId}` : undefined,
         () => fileEntityId ? managerGetFileDownloadUrl(fileEntityId) : emptyApiResponseAsync()
     )
 
