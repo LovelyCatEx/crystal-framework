@@ -10,7 +10,6 @@ import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.service.BaseService
 import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
-import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import kotlin.reflect.KClass
@@ -157,5 +156,44 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
                     )
                 }
             }
+    }
+
+    suspend fun <R> withInvalidateEntityCacheContext(entityId: Long, action: suspend () -> R): R {
+        this.removeCache(entityId)
+
+        val result = action.invoke()
+
+        this.removeCache(entityId)
+
+        return result
+    }
+
+    suspend fun withUpdateEntityContext(entityId: Long, action: suspend () -> ENTITY?): ENTITY? {
+        val result = action.invoke()
+
+        // Update cache
+        if (result != null) {
+            this.updateCache(result)
+        }
+
+        return result
+    }
+
+    suspend fun <R> withDeleteEntityContext(entityId: Long, action: suspend () -> R): R {
+        return this.withInvalidateEntityCacheContext(entityId, action)
+    }
+
+    suspend fun <R> withBatchDeleteEntityContext(entityIds: List<Long>, action: suspend () -> R): R {
+        entityIds.forEach { entityId ->
+            this.removeCache(entityId)
+        }
+
+        val result = action.invoke()
+
+        entityIds.forEach { entityId ->
+            this.removeCache(entityId)
+        }
+
+        return result
     }
 }

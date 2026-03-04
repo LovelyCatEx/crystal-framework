@@ -9,4 +9,6 @@ interface UserRoleRelationService : CachedBaseService<UserRoleRelationRepository
     suspend fun getUserRoles(userId: Long): List<UserRoleEntity>
 
     suspend fun setUserRoles(userId: Long, roleIds: List<Long>)
+
+    suspend fun setUserRolesByNames(userId: Long, roleNames: List<String>)
 }

@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
+import com.lovelycatv.crystalframework.rbac.constants.SystemRole
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
@@ -74,6 +75,7 @@ class UserServiceImpl(
             }
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun register(
         username: String,
         password: String,
@@ -100,7 +102,7 @@ class UserServiceImpl(
             }
         }
 
-        this.getRepository().save(
+        val user = this.getRepository().save(
             UserEntity(
                 id = snowIdGenerator.nextId(),
                 username = username,
@@ -109,7 +111,10 @@ class UserServiceImpl(
                 email = email,
                 nickname = username
             ) newEntity true
-        ).awaitSingleOrNull()
+        ).awaitSingleOrNull() ?: throw BusinessException("User $username not registered")
+
+        // Add role relations
+        userRoleRelationService.setUserRolesByNames(user.id, listOf(SystemRole.ROLE_USER))
     }
 
     override suspend fun requestRegisterEmailConfirmationCode(email: String) {
@@ -203,13 +208,15 @@ class UserServiceImpl(
     ) {
         val user = getByIdOrThrow(userId, BusinessException("User $userId not found"))
 
-        this.getRepository().save(
-            user.apply {
-                dto.nickname?.let {
-                    nickname = it
+        withUpdateEntityContext(userId) {
+            this.getRepository().save(
+                user.apply {
+                    dto.nickname?.let {
+                        nickname = it
+                    }
                 }
-            }
-        ).awaitFirstOrNull() ?: throw BusinessException("could not update user profile")
+            ).awaitFirstOrNull() ?: throw BusinessException("could not update user profile")
+        }
     }
 
     @Transactional(rollbackFor = [Exception::class])
@@ -232,10 +239,12 @@ class UserServiceImpl(
             throw BusinessException("could not upload avatar", result.exception)
         }
 
-        this.getRepository()
-            .updateAvatar(userId, result.fileResourceEntity.id)
-            .awaitFirstOrNull()
-            ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity.id}")
+        withInvalidateEntityCacheContext(userId) {
+            this.getRepository()
+                .updateAvatar(userId, result.fileResourceEntity.id)
+                .awaitFirstOrNull()
+                ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity.id}")
+        }
     }
 
     private suspend fun checkCachedEmailCode(

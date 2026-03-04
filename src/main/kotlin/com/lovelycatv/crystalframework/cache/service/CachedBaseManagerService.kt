@@ -17,33 +17,20 @@ interface CachedBaseManagerService<
 > : BaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
     CachedBaseService<REPOSITORY, ENTITY> {
     override suspend fun update(dto: UPDATE_DTO): ENTITY? {
-        val result = super.update(dto)
-
-        // Update cache
-        if (result != null) {
-            this.updateCache(result)
+        return super.withUpdateEntityContext(dto.id) {
+            super.update(dto)
         }
-
-        return result
     }
 
     override suspend fun delete(id: Long) {
-        this.removeCache(id)
-
-        super.delete(id)
-
-        this.removeCache(id)
+        super.withDeleteEntityContext(id) {
+            super.delete(id)
+        }
     }
 
     override suspend fun batchDelete(ids: List<Long>) {
-        ids.forEach {
-            this.removeCache(it)
-        }
-
-        super.batchDelete(ids)
-
-        ids.forEach {
-            this.removeCache(it)
+        super.withBatchDeleteEntityContext(ids) {
+            super.batchDelete(ids)
         }
     }
 }

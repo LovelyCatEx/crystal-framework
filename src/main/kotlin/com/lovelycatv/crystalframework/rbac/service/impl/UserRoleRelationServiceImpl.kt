@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.rbac.entity.UserRoleRelationEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserRoleRelationRepository
 import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.rbac.service.UserRoleService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
@@ -22,6 +23,7 @@ class UserRoleRelationServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val userRoleService: UserRoleService,
 ) : UserRoleRelationService {
     override fun getRepository(): UserRoleRelationRepository {
         return userRoleRelationRepository
@@ -43,6 +45,33 @@ class UserRoleRelationServiceImpl(
 
     @Transactional
     override suspend fun setUserRoles(userId: Long, roleIds: List<Long>) {
+        // Delete existing relations
+        val existing = userRoleRelationRepository
+            .findByUserId(userId)
+            .awaitListWithTimeout()
+
+        existing.forEach {
+            userRoleRelationRepository.delete(it).awaitFirstOrNull()
+        }
+
+        // Create new relations
+        roleIds.forEach { roleId ->
+            val entity = UserRoleRelationEntity(
+                id = snowIdGenerator.nextId(),
+                userId = userId,
+                roleId = roleId
+            ).apply { newEntity() }
+            userRoleRelationRepository.save(entity).awaitFirstOrNull()
+        }
+    }
+
+    @Transactional
+    override suspend fun setUserRolesByNames(userId: Long, roleNames: List<String>) {
+        val roleIds = userRoleService
+            .getAllRoles()
+            .filter { it.name in roleNames }
+            .map { it.id }
+
         // Delete existing relations
         val existing = userRoleRelationRepository
             .findByUserId(userId)
