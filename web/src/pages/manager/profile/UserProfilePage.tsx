@@ -245,7 +245,7 @@ const SecuritySettings = () => {
         {
             title: '电子邮箱',
             desc: loggedUser.userProfile?.email,
-            status: '已启用',
+            status: loggedUser.userProfile?.email ? '已绑定' : '未绑定',
             action: '修改',
             icon: <MailOutlined className="text-amber-500" />,
             onClick: handleOpenEmailModal,
@@ -558,7 +558,7 @@ function UserProfileCard() {
                     <div className="space-y-4">
                         <div className="flex items-center text-slate-600 text-sm">
                             <MailOutlined className="mr-3 text-slate-300" />
-                            {loggedUser.userProfile?.email}
+                            {loggedUser.userProfile?.email ?? '未绑定'}
                         </div>
                         <div className="flex items-center text-slate-600 text-sm">
                             <ClockCircleOutlined className="mr-3 text-slate-300" />

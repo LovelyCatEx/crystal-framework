@@ -19,7 +19,7 @@ class UserEntity(
     @Column(value = "password")
     private var password: String = "",
     @Column(value = "email")
-    var email: String = "",
+    var email: String? = null,
     @Column(value = "nickname")
     var nickname: String = "",
     @Column("avatar")

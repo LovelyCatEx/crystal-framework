@@ -49,4 +49,5 @@ interface UserRepository : BaseRepository<UserEntity> {
     @Modifying
     @Query("UPDATE users SET avatar = :avatar WHERE id = :id")
     fun updateAvatar(id: Long, avatar: Long): Mono<Long>
+    fun findByUsername(username: String): Mono<UserEntity>
 }

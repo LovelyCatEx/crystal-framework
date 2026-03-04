@@ -10,4 +10,6 @@ interface OAuthAccountService : CachedBaseService<OAuthAccountRepository, OAuthA
     suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity?
 
     suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity
+
+    suspend fun bindUser(accountId: Long, userId: Long)
 }

@@ -60,6 +60,7 @@ class UserAuthorizationServiceImpl(
                         }
                     } else {
                         ApiResponse.success(mapOf(
+                            "oauthAccountId" to it.id.toString(),
                             "platform" to it.getRealPlatform().name,
                             "identifier" to it.identifier,
                             "nickname" to it.nickname,

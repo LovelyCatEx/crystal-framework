@@ -24,4 +24,17 @@ interface BaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEnt
     ): ENTITY {
         return this.getByIdOrNull(id) ?: throw t
     }
+
+    suspend fun withUpdateById(entityId: Long, action: suspend ENTITY.() -> Unit): ENTITY {
+        val entity = this.getByIdOrThrow(entityId)
+
+        action.invoke(entity)
+
+        val after = this.getRepository()
+            .save(entity)
+            .awaitFirstOrNull()
+            ?: throw BusinessException("Resource $entityId could not be save")
+
+        return after
+    }
 }

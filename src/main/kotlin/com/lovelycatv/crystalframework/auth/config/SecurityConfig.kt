@@ -61,10 +61,11 @@ class SecurityConfig(
     private val pathPatternParser = PathPatternParser()
 
     @Bean
-    fun securityWebFilterChain(http: ServerHttpSecurity, redisService: RedisService,
-                               oAuth2AuthenticationTokenAccountConverterManager: OAuth2AuthenticationTokenAccountConverterManager,
-                               oAuthAccountService: OAuthAccountService,
-                               userAuthorizationService: UserAuthorizationService, jwtSignKeyStore: JWTSignKeyStore
+    fun securityWebFilterChain(
+        http: ServerHttpSecurity,
+        redisService: RedisService,
+        userAuthorizationService: UserAuthorizationService,
+        jwtSignKeyStore: JWTSignKeyStore
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -73,12 +74,14 @@ class SecurityConfig(
                 exchange.response.statusCode = HttpStatus.OK
                 exchange.response.headers.set("Content-Type", "application/json")
                 exchange.response.writeWith(
-                    Mono.just(exchange.response.bufferFactory().wrap(
-                        ApiResponse
-                            .unauthorized<Nothing>("invalid token")
-                            .toJSONString()
-                            .toByteArray()
-                    ))
+                    Mono.just(
+                        exchange.response.bufferFactory().wrap(
+                            ApiResponse
+                                .unauthorized<Nothing>("invalid token")
+                                .toJSONString()
+                                .toByteArray()
+                        )
+                    )
                 )
             }
 
@@ -99,14 +102,6 @@ class SecurityConfig(
         }
 
         http.oauth2Login {
-            it.authorizationRequestResolver(
-                noStateServerOAuth2AuthorizationRequestResolver()
-            )
-
-            it.authorizationRequestRepository(
-                noStateAuthorizationRequestRepository()
-            )
-
             it.authenticationSuccessHandler { exchange, authentication ->
                 exchange.exchange.response.statusCode = HttpStatus.OK
                 exchange.exchange.response.headers.set("Content-Type", "application/json")
@@ -159,7 +154,7 @@ class SecurityConfig(
                 oauth2ClientProperties.registration.keys.flatMap {
                     listOf(
                         pathPatternParser.parse("/login/oauth2/code/${it}"),
-                        pathPatternParser.parse("/login/oauth2/authorization/${it}")
+                        pathPatternParser.parse("/oauth2/authorization/${it}")
                     )
                 } + listOf(pathPatternParser.parse("/login"))
 
@@ -231,113 +226,4 @@ class SecurityConfig(
 
         return http.build()
     }
-
-    @Bean
-    fun noStateServerOAuth2AuthorizationRequestResolver(): ServerOAuth2AuthorizationRequestResolver {
-        return object : DefaultServerOAuth2AuthorizationRequestResolver(reactiveClientRegistrationRepository) {
-            override fun resolve(exchange: ServerWebExchange): Mono<OAuth2AuthorizationRequest> {
-                return super.resolve(exchange)
-                    .map { request ->
-                        OAuth2AuthorizationRequest.Builder()
-                            .authorizationUri(request.authorizationUri)
-                            .clientId(request.clientId)
-                            .redirectUri(request.redirectUri)
-                            .scopes(request.scopes)
-                            .state("")
-                            .parameters({ params ->
-                                params.putAll(request.additionalParameters)
-                                // Remove state
-                                params.remove("state")
-                            })
-                            .build()
-                    }
-            }
-        }
-    }
-
-    @Bean
-    fun noStateAuthorizationRequestRepository(): ServerAuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-        return object : ServerAuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-            override fun loadAuthorizationRequest(exchange: ServerWebExchange): Mono<OAuth2AuthorizationRequest> {
-                return Mono.empty()
-            }
-
-            override fun saveAuthorizationRequest(
-                authorizationRequest: OAuth2AuthorizationRequest,
-                exchange: ServerWebExchange
-            ): Mono<Void> {
-                return Mono.empty()
-            }
-
-            override fun removeAuthorizationRequest(exchange: ServerWebExchange): Mono<OAuth2AuthorizationRequest> {
-                val client = reactiveClientRegistrationRepository.findByRegistrationId(
-                    extractRegistrationIdFromPath(
-                        exchange.request.path.value()
-                    )
-                )
-
-                return client
-                    .map { client ->
-                        val redirectUrl = expandRedirectUri(exchange.request, client)
-
-                        OAuth2AuthorizationRequest.Builder()
-                            .authorizationUri(client.providerDetails.authorizationUri)
-                            .clientId(client.clientId)
-                            .redirectUri(redirectUrl)
-                            .scopes(client.scopes)
-                            .attributes(mapOf(
-                                OAuth2ParameterNames.REGISTRATION_ID to client.registrationId
-                            ))
-                            .state("")
-                            .build()
-                    }
-                    .switchIfEmpty {
-                        Mono.error(BusinessException("OAuth2 client registration not found"))
-                    }
-            }
-        }
-    }
-
-    private fun extractRegistrationIdFromPath(path: String): String {
-        val pattern = "/login/oauth2/code/([^/]+)".toRegex()
-        return pattern.find(path)?.groupValues?.get(1)
-            ?: throw IllegalArgumentException("Could not extract registrationId from path: $path")
-    }
-
-    private fun expandRedirectUri(request: ServerHttpRequest, clientRegistration: ClientRegistration): String {
-        val uriVariables: MutableMap<String, String> = mutableMapOf()
-        uriVariables["registrationId"] = clientRegistration.registrationId
-
-        val uriComponents = UriComponentsBuilder.fromUri(request.uri)
-            .replacePath(request.path.contextPath().value())
-            .replaceQuery(null)
-            .fragment(null)
-            .build()
-
-        val scheme = uriComponents.scheme
-        uriVariables["baseScheme"] = scheme ?: ""
-        val host = uriComponents.host
-        uriVariables["baseHost"] = host ?: ""
-
-        // following logic is based on HierarchicalUriComponents#toUriString()
-        val port = uriComponents.port
-        uriVariables["basePort"] = if (port == -1) "" else ":$port"
-        var path = uriComponents.path
-        if (StringUtils.hasLength(path)) {
-            if (path!![0] != '/') {
-                path = "/$path"
-            }
-        }
-        uriVariables["basePath"] = path ?: ""
-        uriVariables["baseUrl"] = uriComponents.toUriString()
-        var action = ""
-        if (AuthorizationGrantType.AUTHORIZATION_CODE == clientRegistration.authorizationGrantType) {
-            action = "login"
-        }
-        uriVariables["action"] = action
-        return UriComponentsBuilder.fromUriString(clientRegistration.redirectUri)
-            .buildAndExpand(uriVariables)
-            .toUriString()
-    }
-
 }

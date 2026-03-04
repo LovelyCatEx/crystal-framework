@@ -3,20 +3,12 @@ import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {GithubOutlined} from '@ant-design/icons';
-import {getUserAuthentication} from '../../utils/token.utils.ts';
-import {useEffect} from "react";
 import {ProjectDisplayName} from "../../global/global-settings.ts";
-import {menuPathDashboard, menuPathLogin, menuPathRegister, menuPathResetPassword} from "../../router";
+import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "../../router";
+import {OAuth2CodePage} from "./OAuth2CodePage.tsx";
 
 export function AuthorizationPage({ parentPath }: { parentPath: string }) {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const auth = getUserAuthentication();
-    if (auth && !auth.expired) {
-      navigate(menuPathDashboard);
-    }
-  }, [navigate]);
 
   return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
@@ -49,6 +41,7 @@ export function AuthorizationPage({ parentPath }: { parentPath: string }) {
           <Route path={menuPathLogin.replace(parentPath, "")} element={<LoginPage />} />
           <Route path={menuPathRegister.replace(parentPath, "")} element={<RegisterPage />} />
           <Route path={menuPathResetPassword.replace(parentPath, "")} element={<ForgotPasswordPage />} />
+          <Route path={menuPathOAuthCode.replace(parentPath, "")} element={<OAuth2CodePage />} />
         </Routes>
       </div>
   );
@@ -65,9 +58,9 @@ export function AuthCardLayout({
   children: React.ReactNode;
   title: string;
   subtitle: string;
-  footerText: string;
-  footerLink: string;
-  footerAction: () => void;
+  footerText?: string;
+  footerLink?: string;
+  footerAction?: () => void;
 }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative overflow-hidden">
@@ -101,15 +94,17 @@ export function AuthCardLayout({
             </div>
           </div>*/}
 
-          <div className="mt-10 text-center">
-            <span className="text-gray-500 text-sm">{footerText}</span>
-            <span
-              onClick={footerAction}
-              className="ml-2 text-sm font-bold text-pink-400 hover:text-pink-400 transition-colors cursor-pointer"
-            >
+          {footerText && footerLink && (
+              <div className="mt-10 text-center">
+                <span className="text-gray-500 text-sm">{footerText}</span>
+                <span
+                    onClick={footerAction}
+                    className="ml-2 text-sm font-bold text-pink-400 hover:text-pink-400 transition-colors cursor-pointer"
+                >
               {footerLink}
             </span>
-          </div>
+              </div>
+          )}
         </div>
       </div>
 

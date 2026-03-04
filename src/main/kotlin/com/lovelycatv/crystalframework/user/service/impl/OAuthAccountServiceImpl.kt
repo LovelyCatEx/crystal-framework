@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.types.OAuthPlatform
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
@@ -23,6 +24,8 @@ class OAuthAccountServiceImpl(
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
 ) : OAuthAccountService {
+    private val logger = logger()
+
     override fun getRepository(): OAuthAccountRepository {
         return this.oauthAccountRepository
     }
@@ -44,14 +47,36 @@ class OAuthAccountServiceImpl(
 
         val existing = this.getAccountByPlatformAndIdentifier(template.getRealPlatform(), template.identifier)
 
-        return existing
-            ?: (this.getRepository()
+        return existing?.run {
+            withInvalidateEntityCacheContext(existing) {
+                this.nickname = template.nickname
+
+                this
+            }
+        } ?: (this.getRepository()
                 .save(
                     template.apply {
                         id = snowIdGenerator.nextId()
                     } newEntity true
                 )
                 .awaitFirstOrNull()
-                ?: throw BusinessException("could not save oauth2 account into database"))
+                ?: throw BusinessException("Could not save OAuth2 account into database"))
+    }
+
+    override suspend fun bindUser(accountId: Long, userId: Long) {
+        withUpdateEntityContext(accountId) {
+            val result = withUpdateById(accountId) {
+                if (this.userId != null) {
+                    throw BusinessException("This account is already linked to a user")
+                }
+
+                this.userId = userId
+            }
+
+            logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been bound to user $userId")
+
+            result
+        }
+
     }
 }

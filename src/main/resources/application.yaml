@@ -26,6 +26,7 @@ spring:
             client-id: ${OAUTH_GITHUB_CLIENT_ID}
             client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
             scope: read:user
+            redirect-uri: http://localhost:5173/auth/oauth2-code
   http:
     codecs:
       max-in-memory-size: 10MB

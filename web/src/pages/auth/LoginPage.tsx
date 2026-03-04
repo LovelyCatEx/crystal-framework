@@ -4,7 +4,7 @@ import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
 import {login} from "../../api/auth.api.ts";
-import {setUserAuthentication} from "../../utils/token.utils.ts";
+import {getUserAuthentication, setUserAuthentication} from "../../utils/token.utils.ts";
 import {getQueryString} from "../../utils/url.utils.ts";
 import {buildDocumentTitle} from "../../global/global-settings.ts";
 import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "../../router";
@@ -23,6 +23,13 @@ export function LoginPage() {
   useEffect(() => {
     document.title = buildDocumentTitle('登录')
   }, []);
+
+  useEffect(() => {
+    const auth = getUserAuthentication();
+    if (auth && !auth.expired) {
+      navigate(menuPathDashboard);
+    }
+  }, [navigate]);
 
   const onFinish = (values: LoginFormData) => {
     setLoading(true);
@@ -73,13 +80,13 @@ export function LoginPage() {
         <Form.Item
           name="username"
           rules={[
-            { required: true, message: '请输入邮箱' },
-            { type: 'email', message: '邮箱格式不正确' },
+            { required: true, message: '请输入用户名或邮箱' },
+            { pattern: /^[a-zA-Z0-9_@.-]+$/, message: '只能包含英文字母、数字、下划线和横线或邮箱地址' },
           ]}
         >
           <Input
             prefix={<MailOutlined className="text-gray-400 mr-2" />}
-            placeholder="电子邮箱"
+            placeholder="用户名或邮箱"
             className="rounded-xl"
           />
         </Form.Item>

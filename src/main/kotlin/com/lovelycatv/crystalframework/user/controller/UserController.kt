@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.controller
 
+import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -16,7 +17,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("$REQUEST_MAPPING_PREFIX/user")
 class UserController(
-    private val userService: UserService
+    private val userService: UserService,
+    private val userAuthorizationService: UserAuthorizationService
 ) {
     @Unauthorized
     @PostMapping("/register", version = "1")
@@ -82,7 +84,7 @@ class UserController(
     suspend fun requestPasswordResetEmailCode(
         userAuthentication: UserAuthentication
     ): ApiResponse<*> {
-        userService.requestResetPasswordEmailConfirmationCode(userAuthentication.userId)
+        userService.requestResetEmailAddressEmailConfirmationCode(userAuthentication.userId)
 
         return ApiResponse.success(null)
     }
@@ -132,5 +134,60 @@ class UserController(
         )
 
         return ApiResponse.success(null)
+    }
+
+    @Unauthorized
+    @PostMapping("/bindOAuthAccount")
+    suspend fun bindOAuthAccount(
+        userAuthentication: UserAuthentication?,
+        @ModelAttribute
+        dto: BindOAuthAccountDTO
+    ): ApiResponse<*> {
+        if (userAuthentication == null && dto.username == null && dto.password == null) {
+            throw BusinessException("authentication and params cannot both be null")
+        }
+
+        val targetUser = if (userAuthentication != null) {
+            if (dto.username == null || dto.password == null) {
+                userService.bindUserFromOAuthAccount(
+                    oauthAccountId = dto.oauthAccountId,
+                    userId = userAuthentication.userId
+                )
+            } else {
+                userService.bindUserFromOAuthAccount(
+                    oauthAccountId = dto.oauthAccountId,
+                    username = dto.username,
+                    password = dto.password,
+                )
+            }
+        } else {
+            userService.bindUserFromOAuthAccount(
+                oauthAccountId = dto.oauthAccountId,
+                username = dto.username ?: throw BusinessException("unknown username"),
+                password = dto.password ?: throw BusinessException("unknown password"),
+            )
+        }
+
+        return ApiResponse.success(
+            userAuthorizationService.buildLoginSuccessResponse(targetUser)
+        )
+    }
+
+    @Unauthorized
+    @PostMapping("/registerFromOAuthAccount")
+    suspend fun registerFromOAuthAccount(
+        @ModelAttribute
+        dto: RegisterFromOAuthAccountDTO
+    ): ApiResponse<*> {
+        val user = userService.registerFromOAuthAccount(
+            oauthAccountId = dto.oauthAccountId,
+            username = dto.username,
+            password = dto.password,
+            nickname = dto.nickname
+        )
+
+        return ApiResponse.success(
+            userAuthorizationService.buildLoginSuccessResponse(user)
+        )
     }
 }

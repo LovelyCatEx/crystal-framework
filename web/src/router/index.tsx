@@ -21,6 +21,7 @@ export const menuPathProfile = "/manager/profile"
 export const menuPathLogin = "/auth/login"
 export const menuPathRegister = "/auth/register"
 export const menuPathResetPassword = "/auth/reset-password"
+export const menuPathOAuthCode = "/auth/oauth2-code"
 
 export type RouteItem = MenuItem & MenuItemType;
 

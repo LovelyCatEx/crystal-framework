@@ -16,6 +16,7 @@ import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
+import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
@@ -34,6 +35,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Duration
 import java.util.*
+import kotlin.math.log
 import kotlin.reflect.KClass
 
 @Service
@@ -48,6 +50,7 @@ class UserServiceImpl(
     private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
     override val eventPublisher: ApplicationEventPublisher,
+    private val oAuthAccountService: OAuthAccountService,
 ) : UserService {
     private val logger = logger()
 
@@ -106,8 +109,7 @@ class UserServiceImpl(
             UserEntity(
                 id = snowIdGenerator.nextId(),
                 username = username,
-                password = passwordEncoder.encode(password)
-                    ?: throw BusinessException("Could not create user entity due to missing encoded password, encoding failed"),
+                password = encodePassword(password),
                 email = email,
                 nickname = username
             ) newEntity true
@@ -115,6 +117,8 @@ class UserServiceImpl(
 
         // Add role relations
         userRoleRelationService.setUserRolesByNames(user.id, listOf(SystemRole.ROLE_USER))
+
+        logger.info("User ${user.username} / ${user.email} registered successfully, details: ${user.toJSONString()}")
     }
 
     override suspend fun requestRegisterEmailConfirmationCode(email: String) {
@@ -125,6 +129,7 @@ class UserServiceImpl(
         }
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun resetPassword(email: String, emailCode: String, newPassword: String) {
         this.checkCachedEmailCode(
             RedisConstants.getRequestResetPasswordEmailCodeKey(email),
@@ -145,6 +150,8 @@ class UserServiceImpl(
                 password = passwordEncoder.encode(newPassword)!!
             }
         ).awaitFirstOrNull()
+
+        logger.info("Password of user ${existingUser.username} / ${existingUser.email} has been reset")
     }
 
     override suspend fun requestResetPasswordEmailConfirmationCode(email: String) {
@@ -155,11 +162,18 @@ class UserServiceImpl(
         }
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun resetEmailAddress(userId: Long, emailCode: String, newEmail: String) {
         val user = this.getByIdOrThrow(userId)
 
+        if (user.email == null) {
+            throw BusinessException("email does not exist")
+        }
+
+        val oldEmail = user.email
+
         this.checkCachedEmailCode(
-            RedisConstants.getRequestResetPasswordEmailCodeKey(user.email),
+            RedisConstants.getRequestResetEmailAddressEmailCodeKey(user.email!!),
             emailCode
         )
 
@@ -167,6 +181,8 @@ class UserServiceImpl(
             .save(user.apply { email = newEmail })
             .awaitFirstOrNull()
             ?: throw BusinessException("could not reset email address for ${user.id}")
+
+        logger.info("Email of user ${user.username} / ${user.email} has been reset from $oldEmail to $newEmail")
     }
 
     override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String) {
@@ -202,6 +218,7 @@ class UserServiceImpl(
         )
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun updateUserProfile(
         userId: Long,
         dto: UpdateUserProfileDTO
@@ -217,6 +234,8 @@ class UserServiceImpl(
                 }
             ).awaitFirstOrNull() ?: throw BusinessException("could not update user profile")
         }
+
+        logger.info("User ${user.username} / ${user.email} has been updated, details: ${dto.toJSONString()}")
     }
 
     @Transactional(rollbackFor = [Exception::class])
@@ -245,6 +264,73 @@ class UserServiceImpl(
                 .awaitFirstOrNull()
                 ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity.id}")
         }
+
+        logger.info("User $userId uploaded avatar, resource details: ${result.fileResourceEntity.toJSONString()}")
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun bindUserFromOAuthAccount(
+        oauthAccountId: Long,
+        username: String,
+        password: String
+    ): UserEntity {
+        val user = this.findByUsername(username).awaitFirstOrNull()
+            ?: throw BusinessException("user $username not found")
+
+        if (!passwordEncoder.matches(password, user.password)) {
+            throw BusinessException("incorrect password")
+        }
+
+        oAuthAccountService.bindUser(oauthAccountId, (user as UserEntity).id)
+
+        logger.info("User ${user.username} / ${user.email} bind a new OAuth account $oauthAccountId")
+
+        return user
+    }
+
+    override suspend fun bindUserFromOAuthAccount(oauthAccountId: Long, userId: Long): UserEntity {
+        oAuthAccountService.bindUser(oauthAccountId, userId)
+
+        return this.getByIdOrThrow(userId)
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun registerFromOAuthAccount(
+        oauthAccountId: Long,
+        username: String,
+        password: String,
+        nickname: String
+    ): UserEntity {
+        val existingUser = this
+            .getRepository()
+            .findByUsername(username)
+            .awaitSingleOrNull()
+
+        if (existingUser != null) {
+            if (existingUser.username == username) {
+                throw BusinessException("User $username already exists")
+            }
+        }
+
+        val user = this.getRepository().save(
+            UserEntity(
+                id = snowIdGenerator.nextId(),
+                username = username,
+                password = encodePassword(password),
+                email = null,
+                nickname = nickname
+            ) newEntity true
+        ).awaitSingleOrNull() ?: throw BusinessException("User $username not registered")
+
+        // Add role relations
+        userRoleRelationService.setUserRolesByNames(user.id, listOf(SystemRole.ROLE_USER))
+
+        // Bind OAuth Account
+        oAuthAccountService.bindUser(oauthAccountId, user.id)
+
+        logger.info("User $username registered from OAuth account $oauthAccountId successfully, details: ${user.toJSONString()}")
+
+        return user
     }
 
     private suspend fun checkCachedEmailCode(
@@ -289,6 +375,11 @@ class UserServiceImpl(
             .awaitFirstOrNull()
 
         action.invoke(code)
+    }
+
+    private fun encodePassword(rawPassword: String): String {
+        return passwordEncoder.encode(rawPassword)
+            ?: throw BusinessException("Could not create user entity due to missing encoded password, encoding failed")
     }
 
     override val cacheStore: ExpiringKVStore<String, UserEntity>
