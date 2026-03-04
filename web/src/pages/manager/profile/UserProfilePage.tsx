@@ -20,6 +20,7 @@ import {
     type ResetEmailDTO
 } from "../../../api/auth.api.ts";
 import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "../../../api/user.api.ts";
+import ImageCropper from "../../../components/ImageCropper.tsx";
 
 const { Password } = Input;
 
@@ -456,11 +457,45 @@ function UserProfileCard() {
     const loggedUser = useLoggedUser();
 
     const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+    const [cropperOpen, setCropperOpen] = useState(false);
+    const [cropperImageUrl, setCropperImageUrl] = useState('');
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [cropperKey, setCropperKey] = useState(0);
 
     const handleAvatarUpload = (file: File) => {
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            void message.error('请上传 JPG、PNG、GIF 或 WebP 格式的图片');
+            return false;
+        }
+
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            void message.error('图片大小不能超过 5MB');
+            return false;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setCropperImageUrl(e.target?.result as string);
+            setPendingFile(file);
+            setCropperKey(prev => prev + 1);
+            setCropperOpen(true);
+        };
+        reader.readAsDataURL(file);
+
+        return false;
+    };
+
+    const handleCropConfirm = (croppedBlob: Blob) => {
+        setCropperOpen(false);
         setIsAvatarUploading(true);
 
-        uploadUserAvatar(file)
+        const croppedFile = new File([croppedBlob], pendingFile?.name || 'avatar.png', {
+            type: 'image/png',
+        });
+
+        uploadUserAvatar(croppedFile)
             .then(() => {
                 void message.success("头像上传成功");
                 void loggedUser.refreshUserProfile();
@@ -470,16 +505,22 @@ function UserProfileCard() {
             })
             .finally(() => {
                 setIsAvatarUploading(false);
-            })
+                setPendingFile(null);
+                setCropperImageUrl('');
+            });
+    };
 
-        return false;
+    const handleCropCancel = () => {
+        setCropperOpen(false);
+        setPendingFile(null);
+        setCropperImageUrl('');
     };
 
     const uploadAvatarProps: UploadProps = {
         name: 'file',
         showUploadList: false,
         beforeUpload: handleAvatarUpload,
-        accept: 'image/jpeg,image/png,image/gif,image/webp',
+        accept: 'image/jpeg,image/png,image/webp',
         customRequest: ({ onSuccess }) => {
             setTimeout(() => {
                 onSuccess?.('ok');
@@ -488,56 +529,59 @@ function UserProfileCard() {
     };
 
     return (
-        <Card className="rounded-3xl shadow-sm border-none overflow-hidden">
-            <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
-            <div className="relative pt-0 px-6 pb-6">
-                <div className="flex justify-center -mt-12 mb-4 relative">
-                    <Avatar
-                        size={100}
-                        className="rounded-3xl border-4 border-white shadow-md bg-black/50"
-                        icon={<UserOutlined />}
-                        src={loggedUser.userProfile?.avatar}
-                    />
-                    <Upload {...uploadAvatarProps}>
-                        <Button
-                            icon={isAvatarUploading ? <LoadingOutlined /> : <CameraOutlined />}
-                            className="absolute bottom-0 right-1/2 translate-x-12 rounded-full border-none shadow-lg
-                                     bg-white text-slate-600 transition-all"
-                            size="small"
-                            loading={isAvatarUploading}
+        <>
+            <Card className="rounded-3xl shadow-sm border-none overflow-hidden">
+                <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
+                <div className="relative pt-0 px-6 pb-6">
+                    <div className="flex justify-center -mt-12 mb-4 relative">
+                        <Avatar
+                            size={100}
+                            className="rounded-3xl border-4 border-white shadow-md bg-black/50"
+                            icon={<UserOutlined />}
+                            src={loggedUser.userProfile?.avatar}
                         />
-                    </Upload>
-                </div>
-                <div className="text-center mb-6">
-                    <h2 className="text-xl font-bold text-slate-800">{loggedUser.userProfile?.nickname}</h2>
-                    <p className="text-slate-400 text-sm italic">@{loggedUser.userProfile?.username}</p>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex items-center text-slate-600 text-sm">
-                        <MailOutlined className="mr-3 text-slate-300" />
-                        {loggedUser.userProfile?.email}
+                        <Upload {...uploadAvatarProps}>
+                            <Button
+                                icon={isAvatarUploading ? <LoadingOutlined /> : <CameraOutlined />}
+                                className="absolute bottom-0 right-1/2 translate-x-12 rounded-full border-none shadow-lg
+                                         bg-white text-slate-600 transition-all"
+                                size="small"
+                                loading={isAvatarUploading}
+                            />
+                        </Upload>
                     </div>
-                    <div className="flex items-center text-slate-600 text-sm">
-                        <ClockCircleOutlined className="mr-3 text-slate-300" />
-                        {formatTimestamp(loggedUser.userProfile?.registeredTime ?? 0)}
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl font-bold text-slate-800">{loggedUser.userProfile?.nickname}</h2>
+                        <p className="text-slate-400 text-sm italic">@{loggedUser.userProfile?.username}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center text-slate-600 text-sm">
+                            <MailOutlined className="mr-3 text-slate-300" />
+                            {loggedUser.userProfile?.email}
+                        </div>
+                        <div className="flex items-center text-slate-600 text-sm">
+                            <ClockCircleOutlined className="mr-3 text-slate-300" />
+                            {formatTimestamp(loggedUser.userProfile?.registeredTime ?? 0)}
+                        </div>
                     </div>
                 </div>
+            </Card>
 
-                {/*<Divider className="my-6 border-slate-100" />
-
-                <div>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">技能表情</div>
-                    <div className="flex flex-wrap gap-2">
-                        {['React', 'Tailwind', 'AntDesign', 'TypeScript', 'Node.js'].map(tag => (
-                            <Tag key={tag} className="m-0 border-none bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-xs font-medium">
-                                {tag}
-                            </Tag>
-                        ))}
-                    </div>
-                </div>*/}
-            </div>
-        </Card>
+            <ImageCropper
+                key={cropperKey}
+                componentKey={cropperKey}
+                open={cropperOpen}
+                imageUrl={cropperImageUrl}
+                onCancel={handleCropCancel}
+                onConfirm={handleCropConfirm}
+                aspectRatio={1}
+                shape="rect"
+                title="裁剪头像"
+                confirmText="确认上传"
+                cancelText="取消"
+            />
+        </>
     )
 }
 
