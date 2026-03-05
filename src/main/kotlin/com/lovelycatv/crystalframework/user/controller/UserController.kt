@@ -82,9 +82,11 @@ class UserController(
 
     @PostMapping("/requestResetEmailAddressEmailCode")
     suspend fun requestPasswordResetEmailCode(
-        userAuthentication: UserAuthentication
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        dto: RequestResetEmailAddressEmailCodeDTO
     ): ApiResponse<*> {
-        userService.requestResetEmailAddressEmailConfirmationCode(userAuthentication.userId)
+        userService.requestResetEmailAddressEmailConfirmationCode(dto.newEmail)
 
         return ApiResponse.success(null)
     }

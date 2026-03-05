@@ -145,11 +145,13 @@ class UserServiceImpl(
             throw BusinessException("User $email not found")
         }
 
-        this.getRepository().save(
-            existingUser.apply {
-                password = passwordEncoder.encode(newPassword)!!
-            }
-        ).awaitFirstOrNull()
+        withUpdateEntityContext(existingUser) {
+            this.getRepository().save(
+                existingUser.apply {
+                    password = encodePassword(newPassword)
+                }
+            ).awaitFirstOrNull() ?: throw BusinessException("Could not reset password")
+        }
 
         logger.info("Password of user ${existingUser.username} / ${existingUser.email} has been reset")
     }
@@ -173,14 +175,16 @@ class UserServiceImpl(
         val oldEmail = user.email
 
         this.checkCachedEmailCode(
-            RedisConstants.getRequestResetEmailAddressEmailCodeKey(user.email!!),
+            RedisConstants.getRequestResetEmailAddressEmailCodeKey(newEmail),
             emailCode
         )
 
-        this.getRepository()
-            .save(user.apply { email = newEmail })
-            .awaitFirstOrNull()
-            ?: throw BusinessException("could not reset email address for ${user.id}")
+        withUpdateEntityContext(user) {
+            this.getRepository()
+                .save(user.apply { email = newEmail })
+                .awaitFirstOrNull()
+                ?: throw BusinessException("could not reset email address for ${user.id}")
+        }
 
         logger.info("Email of user ${user.username} / ${user.email} has been reset from $oldEmail to $newEmail")
     }

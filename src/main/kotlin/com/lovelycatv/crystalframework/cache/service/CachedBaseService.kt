@@ -159,13 +159,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
     }
 
     suspend fun <R> withInvalidateEntityCacheContext(entity: ENTITY, action: suspend () -> R): R {
-        this.removeCache(entity.id)
-
-        val result = action.invoke()
-
-        this.removeCache(entity.id)
-
-        return result
+        return this.withInvalidateEntityCacheContext(entity.id, action)
     }
 
     suspend fun <R> withInvalidateEntityCacheContext(entityId: Long, action: suspend () -> R): R {
@@ -176,6 +170,10 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         this.removeCache(entityId)
 
         return result
+    }
+
+    suspend fun withUpdateEntityContext(entity: ENTITY, action: suspend () -> ENTITY): ENTITY {
+        return this.withUpdateEntityContext(entity.id, action)!!
     }
 
     suspend fun withUpdateEntityContext(entityId: Long, action: suspend () -> ENTITY?): ENTITY? {

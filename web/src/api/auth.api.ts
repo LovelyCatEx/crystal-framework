@@ -32,8 +32,8 @@ export async function resetPassword(dto: ResetPasswordDTO) {
     );
 }
 
-export async function requestResetEmailAddressEmailCode() {
-    return doPost('/api/user/requestResetEmailAddressEmailCode', {});
+export async function requestResetEmailAddressEmailCode(newEmail: string) {
+    return doPost('/api/user/requestResetEmailAddressEmailCode', { newEmail: newEmail });
 }
 
 export async function resetEmail(dto: ResetEmailDTO) {

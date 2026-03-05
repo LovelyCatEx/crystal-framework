@@ -25,12 +25,6 @@ interface UserService : CachedBaseService<UserRepository, UserEntity>, ReactiveU
     @Transactional(rollbackFor = [Exception::class])
     suspend fun resetPassword(email: String, emailCode: String, newPassword: String)
 
-    suspend fun requestResetEmailAddressEmailConfirmationCode(userId: Long) {
-        this.requestResetEmailAddressEmailConfirmationCode(
-            this.getByIdOrThrow(userId).email ?: throw BusinessException("email does not exist")
-        )
-    }
-
     suspend fun requestResetPasswordEmailConfirmationCode(email: String)
 
     @Transactional(rollbackFor = [Exception::class])

@@ -204,7 +204,7 @@ const SecuritySettings = () => {
 
         setEmailSendingCode(true);
         try {
-            await requestResetEmailAddressEmailCode();
+            await requestResetEmailAddressEmailCode(newEmail);
             void message.success('验证码发送成功，请注意查收');
             setEmailCountdown(60);
         } catch (error) {
