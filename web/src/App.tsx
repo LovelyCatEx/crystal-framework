@@ -3,6 +3,7 @@ import {Route, Routes} from "react-router-dom";
 import {RequireAuthComponent} from "./components/RequireAuthComponent.tsx";
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
 import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
+import {HomePage} from "./pages/home/HomePage.tsx";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
           }}
       >
           <Routes>
-              <Route path="/" element={<div>Nothing Here</div>} />
+              <Route path="/" element={<HomePage />} />
               <Route
                   path="/manager/*"
                   element={

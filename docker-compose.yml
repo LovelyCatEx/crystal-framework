@@ -10,10 +10,10 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - template_postgres_data:/var/lib/postgresql/data
+      - crystalframework_postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-      - template_network
+      - crystalframework_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
@@ -31,13 +31,13 @@ services:
     ports:
       - "5050:80"
     volumes:
-      - template_pgadmin_data:/var/lib/pgadmin
+      - crystalframework_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - template_network
+      - crystalframework_network
 
   redis:
     image: redis:8.2
@@ -46,10 +46,10 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
-      - template_redis_data:/data
+      - crystalframework_redis_data:/data
     restart: unless-stopped
     networks:
-      - template_network
+      - crystalframework_network
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 3s
@@ -57,9 +57,9 @@ services:
       retries: 5
 
 volumes:
-  template_postgres_data:
-  template_pgadmin_data:
-  template_redis_data:
+  crystalframework_postgres_data:
+  crystalframework_pgadmin_data:
+  crystalframework_redis_data:
 
 networks:
   template_network:
