@@ -338,8 +338,8 @@ export function OAuth2CodePage() {
             ...(isLoggedIn && loggedUser.userProfile ? [{
                 key: 'current',
                 label: '绑定当前账号',
-                children: <BindCurrentUserTab 
-                    userInfo={userInfo} 
+                children: <BindCurrentUserTab
+                    userInfo={userInfo}
                     currentUser={{
                         nickname: loggedUser.userProfile!.nickname,
                         username: loggedUser.userProfile!.username!,
