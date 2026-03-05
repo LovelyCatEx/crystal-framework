@@ -2,12 +2,12 @@ import React, {type JSX} from "react";
 import {Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {OAuthAccount} from "../../types/oauth-account.types.ts";
-import {OAuthPlatform} from "../../types/oauth-account.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "../../compositions/swr.ts";
 import {UserManagerController} from "../../api/user.api.ts";
 import type {User} from "../../types/user.types.ts";
 import {UserAvatar} from "../UserAvatar.tsx";
+import PlatformIcon from "../PlatformIcon.tsx";
 
 function SystemUserCell({ userId }: { userId: string | null }) {
     const { data: user, isLoading } = useSWRComposition<User | null>(
@@ -69,9 +69,7 @@ export const OAUTH_ACCOUNT_MANAGER_TABLE_COLUMNS: EntityTableColumns<OAuthAccoun
         key: "platform",
         render: function (_: unknown, row: OAuthAccount): React.ReactNode | JSX.Element {
             return <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={OAuthPlatform[row.platform]}>
-                    <Tag color="orange" className="text-xs font-mono">{OAuthPlatform[row.platform]}</Tag>
-                </CopyableToolTip>
+                <PlatformIcon platform={row.platform} />
             </Space>
         }
     },

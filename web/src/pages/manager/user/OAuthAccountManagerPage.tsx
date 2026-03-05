@@ -41,8 +41,16 @@ export function OAuthAccountManagerPage() {
                                     placeholder="选择平台"
                                     options={[
                                         {
-                                            label: 'GITHUB',
+                                            label: 'Github',
                                             value: 0,
+                                        },
+                                        {
+                                            label: 'Google',
+                                            value: 1,
+                                        },
+                                        {
+                                            label: 'QQ',
+                                            value: 2,
                                         }
                                     ]}
                                 />
@@ -88,7 +96,9 @@ export function OAuthAccountManagerPage() {
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: '全部' },
-                            { value: '0', label: 'GITHUB' },
+                            { value: '0', label: 'Github' },
+                            { value: '1', label: 'Google' },
+                            { value: '2', label: 'QQ' },
                         ]}
                         onChange={(value) => setFilterPlatform(Number.parseInt(value))}
                     />,
