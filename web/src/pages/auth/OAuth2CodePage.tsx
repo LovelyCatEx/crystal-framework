@@ -2,14 +2,15 @@ import {AuthCardLayout} from "./AuthorizationPage.tsx";
 import {useNavigate} from "react-router-dom";
 import {getQueryString} from "../../utils/url.utils.ts";
 import {menuPathDashboard, menuPathLogin} from "../../router";
-import {Button, Card, Avatar, Tabs, Form, Input, message} from "antd";
-import {useState} from "react";
+import {Button, Card, Avatar, Tabs, Form, Input, message, Space} from "antd";
+import {useMemo, useState} from "react";
 import {loginByOAuth2Code, bindOAuthAccount, registerFromOAuthAccount} from "../../api/auth.api.ts";
-import {setUserAuthentication} from "../../utils/token.utils.ts";
+import {setUserAuthentication, getUserAuthentication} from "../../utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "../../types/auth.types.ts";
 import {GithubOutlined, UserOutlined, LockOutlined} from "@ant-design/icons";
 import PlatformIcon from "../../components/PlatformIcon.tsx";
 import {getOAuthPlatformByName} from "../../types/oauth-account.types.ts";
+import {useLoggedUser} from "../../compositions/use-logged-user.ts";
 
 function isLoginResponse(res: OAuth2LoginResponse): res is LoginResponse {
     return (res as LoginResponse).token !== undefined;
@@ -33,6 +34,11 @@ interface RegisterTabProps {
 
 interface BindTabProps {
     userInfo: OAuth2UserInfo;
+}
+
+interface BindCurrentUserTabProps {
+    userInfo: OAuth2UserInfo;
+    currentUser: { nickname: string; username: string; avatar?: string | null };
 }
 
 function RegisterTab({userInfo}: RegisterTabProps) {
@@ -218,8 +224,67 @@ function BindTab({userInfo}: BindTabProps) {
     );
 }
 
+function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
+    const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleBind = () => {
+        setIsSubmitting(true);
+        bindOAuthAccount({
+            oauthAccountId: userInfo.oauthAccountId
+        })
+            .then((res) => {
+                if (res.data) {
+                    void message.success('绑定成功');
+                    setUserAuthentication(res.data.token, res.data.expiresIn);
+                    navigate(menuPathDashboard);
+                } else {
+                    void message.error(res.message || '绑定失败');
+                }
+            })
+            .catch(() => {
+                void message.error('绑定失败，请重试');
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
+    };
+
+    return (
+        <div className="space-y-6">
+            <Card className="bg-blue-50 border-blue-200">
+                <Space direction="vertical" size="middle" className="w-full">
+                    <div className="text-sm text-gray-500">当前登录用户</div>
+                    <Space>
+                        <Avatar
+                            size={48}
+                            src={currentUser.avatar}
+                            icon={<UserOutlined />}
+                        />
+                        <div>
+                            <div className="font-medium">{currentUser.nickname}</div>
+                            <div className="text-sm text-gray-500">@{currentUser.username}</div>
+                        </div>
+                    </Space>
+                </Space>
+            </Card>
+
+            <Button
+                type="primary"
+                size="large"
+                loading={isSubmitting}
+                className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none"
+                onClick={handleBind}
+            >
+                绑定到当前账号
+            </Button>
+        </div>
+    );
+}
+
 export function OAuth2CodePage() {
     const navigate = useNavigate();
+    const loggedUser = useLoggedUser();
 
     const code = getQueryString('code');
     const state = getQueryString('state');
@@ -227,7 +292,11 @@ export function OAuth2CodePage() {
     const [isProcessing, setProcessing] = useState(false);
     const [isProcessed, setProcessed] = useState(false);
     const [userInfo, setUserInfo] = useState<OAuth2UserInfo | null>(null);
-    const [activeTab, setActiveTab] = useState<'register' | 'bind'>('register');
+    const [activeTab, setActiveTab] = useState<string>('current');
+    const isLoggedIn = useMemo(() => {
+        const auth = getUserAuthentication();
+        return !!auth && !auth.expired;
+    }, []);
 
     if (!code || !state) {
         void message.error("无效的登录信息");
@@ -265,6 +334,18 @@ export function OAuth2CodePage() {
 
     if (userInfo) {
         const tabItems = [
+            ...(isLoggedIn && loggedUser.userProfile ? [{
+                key: 'current',
+                label: '绑定当前账号',
+                children: <BindCurrentUserTab 
+                    userInfo={userInfo} 
+                    currentUser={{
+                        nickname: loggedUser.userProfile!.nickname,
+                        username: loggedUser.userProfile!.username!,
+                        avatar: loggedUser.userProfile!.avatar
+                    }}
+                />
+            }] : []),
             {
                 key: 'register',
                 label: '注册新账号',
@@ -300,7 +381,7 @@ export function OAuth2CodePage() {
                 </Card>
                 <Tabs
                     activeKey={activeTab}
-                    onChange={(key) => setActiveTab(key as 'register' | 'bind')}
+                    onChange={(key) => setActiveTab(key)}
                     items={tabItems}
                     centered
                     className="w-full"
