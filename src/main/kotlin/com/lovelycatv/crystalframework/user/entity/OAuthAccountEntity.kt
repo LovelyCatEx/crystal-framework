@@ -23,6 +23,8 @@ class OAuthAccountEntity(
     var nickname: String? = null,
     @Column(value = "avatar")
     var avatar: String? = null,
+    @Column(value = "email")
+    var email: String? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null

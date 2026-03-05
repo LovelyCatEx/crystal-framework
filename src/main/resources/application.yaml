@@ -21,12 +21,34 @@ spring:
         provider:
           github:
             user-name-attribute: login
+          google:
+            user-name-attribute: name
+          oicq:
+            authorization-uri: https://graph.qq.com/oauth2.0/authorize
+            token-uri: https://graph.qq.com/oauth2.0/token
+            user-info-uri: https://graph.qq.com/user/get_user_info
         registration:
           github:
+            provider: github
             client-id: ${OAUTH_GITHUB_CLIENT_ID}
             client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
             scope: read:user
             redirect-uri: http://localhost:5173/auth/oauth2-code
+            authorization-grant-type: authorization_code
+          oicq:
+            provider: oicq
+            client-id: ${OAUTH_OICQ_CLIENT_ID}
+            client-secret: ${OAUTH_OICQ_CLIENT_SECRET}
+            scope: get_user_info
+            redirect-uri: http://127.0.0.1:5173/auth/oauth2-code
+            authorization-grant-type: authorization_code
+          google:
+            provider: google
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+            redirect-uri: http://localhost:5173/auth/oauth2-code
+            authorization-grant-type: authorization_code
+
   http:
     codecs:
       max-in-memory-size: 10MB

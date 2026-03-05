@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import com.lovelycatv.crystalframework.user.converter.OAuth2AuthenticationTokenAccountConverterManager
+import com.lovelycatv.crystalframework.auth.converters.OAuth2AuthenticationTokenAccountConverterManager
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService

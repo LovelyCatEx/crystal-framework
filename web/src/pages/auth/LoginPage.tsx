@@ -1,4 +1,4 @@
-import {Button, Checkbox, Form, Input, message} from 'antd';
+import {Button, Checkbox, Divider, Form, Input, message} from 'antd';
 import {LockOutlined, MailOutlined} from '@ant-design/icons';
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -8,6 +8,8 @@ import {getUserAuthentication, setUserAuthentication} from "../../utils/token.ut
 import {getQueryString} from "../../utils/url.utils.ts";
 import {buildDocumentTitle} from "../../global/global-settings.ts";
 import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "../../router";
+import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
+import {OAuthPlatform} from "../../types/oauth-account.types.ts";
 
 interface LoginFormData {
   username: string,
@@ -18,6 +20,7 @@ interface LoginFormData {
 
 export function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -120,7 +123,10 @@ export function LoginPage() {
           rules={[{ required: true, message: '请阅读并同意服务条款和隐私政策' }]}
           className="mb-6"
         >
-          <Checkbox className="text-xs text-gray-500">
+          <Checkbox 
+            className="text-xs text-gray-500"
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+          >
             我已阅读并同意
             <a href="/privacy" className="text-pink-400 hover:underline mx-1" target="_blank">隐私政策</a>
             和
@@ -139,6 +145,32 @@ export function LoginPage() {
           </Button>
         </Form.Item>
       </Form>
+
+      {/* Third Party Login */}
+      <div className="mt-8">
+        <Divider
+            plain
+            className="text-gray-400 text-[10px] uppercase tracking-widest"
+        >
+          或者通过以下方式
+        </Divider>
+        <div className="flex gap-4 mt-6">
+          <OAuthLoginButton
+              platform={OAuthPlatform.GITHUB}
+              agreedToTerms={agreedToTerms}
+          />
+
+          <OAuthLoginButton
+              platform={OAuthPlatform.GOOGLE}
+              agreedToTerms={agreedToTerms}
+          />
+
+          <OAuthLoginButton
+              platform={OAuthPlatform.OICQ}
+              agreedToTerms={agreedToTerms}
+          />
+        </div>
+      </div>
     </AuthCardLayout>
   );
 }

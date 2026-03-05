@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.user.converter
+package com.lovelycatv.crystalframework.auth.converters.types
 
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.types.OAuthPlatform

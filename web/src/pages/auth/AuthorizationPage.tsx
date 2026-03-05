@@ -76,24 +76,6 @@ export function AuthCardLayout({
 
           {children}
 
-          {/* Third Party Login */}
-          {/*<div className="mt-8">
-            <Divider
-              plain
-              className="text-gray-400 text-[10px] uppercase tracking-widest"
-            >
-              或者通过以下方式
-            </Divider>
-            <div className="flex gap-4 mt-6">
-              <Button className="flex-1 h-12 rounded-xl flex items-center justify-center hover:bg-gray-50 border-gray-200">
-                <GoogleOutlined className="text-lg" />
-              </Button>
-              <Button className="flex-1 h-12 rounded-xl flex items-center justify-center hover:bg-gray-50 border-gray-200">
-                <GithubOutlined className="text-lg" />
-              </Button>
-            </div>
-          </div>*/}
-
           {footerText && footerLink && (
               <div className="mt-10 text-center">
                 <span className="text-gray-500 text-sm">{footerText}</span>

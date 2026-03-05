@@ -8,6 +8,8 @@ import {loginByOAuth2Code, bindOAuthAccount, registerFromOAuthAccount} from "../
 import {setUserAuthentication} from "../../utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "../../types/auth.types.ts";
 import {GithubOutlined, UserOutlined, LockOutlined} from "@ant-design/icons";
+import PlatformIcon from "../../components/PlatformIcon.tsx";
+import {getOAuthPlatformByName} from "../../types/oauth-account.types.ts";
 
 function isLoginResponse(res: OAuth2LoginResponse): res is LoginResponse {
     return (res as LoginResponse).token !== undefined;
@@ -291,8 +293,7 @@ export function OAuth2CodePage() {
                         <div>
                             <div className="text-lg font-semibold">{userInfo.nickname}</div>
                             <div className="text-gray-500 text-sm flex items-center gap-2">
-                                <GithubOutlined />
-                                {userInfo.platform}
+                                <PlatformIcon platform={getOAuthPlatformByName(userInfo.platform)!} />
                             </div>
                         </div>
                     </div>

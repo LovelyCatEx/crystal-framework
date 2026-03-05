@@ -1,5 +1,6 @@
-package com.lovelycatv.crystalframework.user.converter
+package com.lovelycatv.crystalframework.auth.converters
 
+import com.lovelycatv.crystalframework.auth.converters.types.OAuth2AuthenticationTokenAccountConverter
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.types.OAuthPlatform
@@ -25,7 +26,8 @@ class GithubOAuth2AuthenticationTokenAccountConverter : OAuth2AuthenticationToke
                 ?: throw BusinessException("could not find identifier from the token"),
             nickname = oauth2Authority.attributes["login"]?.toString()
                 ?: oauth2Authority.attributes["name"]?.toString(),
-            avatar = oauth2Authority.attributes["avatar_url"]?.toString()
+            avatar = oauth2Authority.attributes["avatar_url"]?.toString(),
+            email = oauth2Authority.attributes["email"]?.toString(),
         )
     }
 }
