@@ -7,7 +7,6 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.mail.MailService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
@@ -16,6 +15,7 @@ import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
+import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
@@ -33,9 +33,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
-import java.time.Duration
 import java.util.*
-import kotlin.math.log
 import kotlin.reflect.KClass
 
 @Service
@@ -45,12 +43,12 @@ class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val userRoleRelationService: UserRoleRelationService,
     private val rolePermissionRelationService: UserRolePermissionRelationService,
-    private val mailService: MailService,
     private val redisService: RedisService,
     private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
     override val eventPublisher: ApplicationEventPublisher,
     private val oAuthAccountService: OAuthAccountService,
+    private val emailCodeAuthService: EmailCodeAuthService,
 ) : UserService {
     private val logger = logger()
 
@@ -90,7 +88,7 @@ class UserServiceImpl(
             .findByUsernameOrEmail(username, email)
             .awaitSingleOrNull()
 
-        this.checkCachedEmailCode(
+        emailCodeAuthService.checkCachedEmailCode(
             RedisConstants.getRequestRegisterEmailCodeKey(email),
             emailConfirmationCode
         )
@@ -122,16 +120,16 @@ class UserServiceImpl(
     }
 
     override suspend fun requestRegisterEmailConfirmationCode(email: String) {
-        withSendEmailCode(
+        emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
-        ) { code ->
+        ) { code, mailService ->
             mailService.sendMail(email, "Register", code)
         }
     }
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun resetPassword(email: String, emailCode: String, newPassword: String) {
-        this.checkCachedEmailCode(
+        emailCodeAuthService.checkCachedEmailCode(
             RedisConstants.getRequestResetPasswordEmailCodeKey(email),
             emailCode
         )
@@ -157,9 +155,9 @@ class UserServiceImpl(
     }
 
     override suspend fun requestResetPasswordEmailConfirmationCode(email: String) {
-        withSendEmailCode(
+        emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
-        ) { code ->
+        ) { code, mailService ->
             mailService.sendMail(email, "Reset Email", code)
         }
     }
@@ -174,7 +172,7 @@ class UserServiceImpl(
 
         val oldEmail = user.email
 
-        this.checkCachedEmailCode(
+        emailCodeAuthService.checkCachedEmailCode(
             RedisConstants.getRequestResetEmailAddressEmailCodeKey(newEmail),
             emailCode
         )
@@ -190,9 +188,9 @@ class UserServiceImpl(
     }
 
     override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String) {
-        withSendEmailCode(
+        emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email)
-        ) { code ->
+        ) { code, mailService  ->
             mailService.sendMail(email, "Reset Email", code)
         }
     }
@@ -335,50 +333,6 @@ class UserServiceImpl(
         logger.info("User $username registered from OAuth account $oauthAccountId successfully, details: ${user.toJSONString()}")
 
         return user
-    }
-
-    private suspend fun checkCachedEmailCode(
-        redisKey: String,
-        emailCode: String
-    ) {
-        val existingCode = redisService
-            .get<String>(redisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode == null) {
-            throw BusinessException("invalid email code")
-        }
-
-        val (_, correctCode) = existingCode.split(":")
-
-        if (emailCode != correctCode) {
-            throw BusinessException("incorrect email code")
-        }
-    }
-
-    private suspend fun withSendEmailCode(
-        redisKey: String,
-        validMinutes: Long = 5,
-        action: suspend (code: String) -> Unit
-    ) {
-        val existingCode = redisService
-            .get<String>(redisKey)
-            .awaitFirstOrNull()
-
-        if (existingCode != null) {
-            val codeCreatedTime = existingCode.split(":")[0].toLong()
-            if (System.currentTimeMillis() - codeCreatedTime <= 60 * 1000L) {
-                throw BusinessException("request email code frequently")
-            }
-        }
-
-        val code = (100000..999999).random().toString()
-
-        redisService
-            .set(redisKey, "${System.currentTimeMillis()}:$code", Duration.ofMinutes(validMinutes))
-            .awaitFirstOrNull()
-
-        action.invoke(code)
     }
 
     private fun encodePassword(rawPassword: String): String {

@@ -12,4 +12,8 @@ interface OAuthAccountService : CachedBaseService<OAuthAccountRepository, OAuthA
     suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity
 
     suspend fun bindUser(accountId: Long, userId: Long)
+
+    suspend fun unbindUser(accountId: Long, userId: Long)
+
+    suspend fun getUserOAuthAccounts(userId: Long): List<OAuthAccountEntity>
 }

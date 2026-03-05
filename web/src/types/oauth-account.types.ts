@@ -3,7 +3,7 @@ import type {BaseEntity} from "./BaseEntity.ts";
 export enum OAuthPlatform {
     GITHUB = 0,
     GOOGLE = 1,
-    OICQ = 3
+    OICQ = 2
 }
 
 export function getOAuthPlatformByName(platformName: string) {

@@ -65,7 +65,15 @@ export interface BindOAuthAccountDTO {
 }
 
 export async function bindOAuthAccount(dto: BindOAuthAccountDTO) {
-    return doPost<LoginResponse>('/api/user/bindOAuthAccount', { ...dto });
+    return doPost<LoginResponse>('/api/user/oauth/bindOAuthAccount', { ...dto });
+}
+
+export interface UnbindOAuthAccountDTO {
+    oauthAccountId: string;
+}
+
+export async function unbindOAuthAccount(dto: UnbindOAuthAccountDTO) {
+    return doPost<unknown>('/api/user/oauth/unbind', { ...dto });
 }
 
 export interface RegisterFromOAuthAccountDTO {
@@ -76,5 +84,5 @@ export interface RegisterFromOAuthAccountDTO {
 }
 
 export async function registerFromOAuthAccount(dto: RegisterFromOAuthAccountDTO) {
-    return doPost<LoginResponse>('/api/user/registerFromOAuthAccount', { ...dto });
+    return doPost<LoginResponse>('/api/user/oauth/registerFromOAuthAccount', { ...dto });
 }

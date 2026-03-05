@@ -4,6 +4,8 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.auth.converters.OAuth2AuthenticationTokenAccountConverterManager
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
@@ -70,6 +72,15 @@ class OAuthAccountServiceImpl(
                     throw BusinessException("This account is already linked to a user")
                 }
 
+                // Check whether the user already has an account of this platform
+                val duplicatedPlatformAccount = this@OAuthAccountServiceImpl.getRepository()
+                    .findByPlatformAndUserId(this.platform, userId)
+                    .awaitFirstOrNull()
+
+                if (duplicatedPlatformAccount != null) {
+                    throw BusinessException("An another account in this platform is already linked to a user")
+                }
+
                 this.userId = userId
             }
 
@@ -77,6 +88,27 @@ class OAuthAccountServiceImpl(
 
             result
         }
+    }
 
+    override suspend fun unbindUser(accountId: Long, userId: Long) {
+        withUpdateEntityContext(accountId) {
+            val result = withUpdateById(accountId) {
+                if (this.userId != userId) {
+                    throw ForbiddenException("You are not allowed to unbind this account")
+                }
+
+                this.userId = null
+            }
+
+            logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been unbound by user $userId")
+
+            result
+        }
+    }
+
+    override suspend fun getUserOAuthAccounts(userId: Long): List<OAuthAccountEntity> {
+        return this.getRepository()
+            .findAllByUserId(userId)
+            .awaitListWithTimeout()
     }
 }

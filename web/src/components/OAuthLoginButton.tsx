@@ -3,6 +3,7 @@ import { Button, message } from "antd";
 import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
 import { getOAuth2LoginUrl } from "../utils/oauth2";
 import { OAuthPlatform } from "../types/oauth-account.types";
+import {PLATFORM_REGISTRATION_ID_MAP} from "../global/constants.ts";
 
 interface OAuthLoginButtonProps {
     platform: OAuthPlatform;
@@ -25,12 +26,6 @@ const PLATFORM_CONFIG: Record<OAuthPlatform, { icon: React.ReactNode; label: str
     }
 };
 
-const PLATFORM_URL_KEY: Record<OAuthPlatform, string> = {
-    [OAuthPlatform.GITHUB]: "github",
-    [OAuthPlatform.GOOGLE]: "google",
-    [OAuthPlatform.OICQ]: "oicq"
-};
-
 export const OAuthLoginButton: React.FC<OAuthLoginButtonProps> = ({
     platform,
     agreedToTerms,
@@ -43,7 +38,7 @@ export const OAuthLoginButton: React.FC<OAuthLoginButtonProps> = ({
             void message.warning("请先阅读并同意服务条款和隐私政策");
             return;
         }
-        window.location.href = getOAuth2LoginUrl(PLATFORM_URL_KEY[platform]);
+        window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);
     };
 
     return (

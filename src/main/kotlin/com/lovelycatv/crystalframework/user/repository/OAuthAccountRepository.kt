@@ -70,4 +70,8 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
     ): Mono<Long>
 
     fun findByPlatformAndIdentifier(platform: Int, identifier: String): Mono<OAuthAccountEntity>
+
+    fun findAllByUserId(userId: Long): Flux<OAuthAccountEntity>
+
+    fun findByPlatformAndUserId(platform: Int, userId: Long): Mono<OAuthAccountEntity>
 }

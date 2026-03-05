@@ -1,26 +1,37 @@
-import {Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Tabs, Upload, type UploadProps} from "antd";
+import {Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Space, Tabs, Upload, type UploadProps} from "antd";
 import {
     CameraOutlined,
     ClockCircleOutlined,
+    ExclamationCircleFilled,
     LoadingOutlined,
     LockOutlined,
     MailOutlined,
+    PlusOutlined,
     UserOutlined
 } from "@ant-design/icons";
 import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
 import {useLoggedUser} from "../../../compositions/use-logged-user.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
     requestPasswordResetEmailCode,
-    resetPassword,
     requestResetEmailAddressEmailCode,
     resetEmail,
+    type ResetEmailDTO,
+    resetPassword,
     type ResetPasswordDTO,
-    type ResetEmailDTO
+    unbindOAuthAccount
 } from "../../../api/auth.api.ts";
 import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "../../../api/user.api.ts";
-import ImageCropper from "../../../components/ImageCropper.tsx";
+import {ImageCropper} from "../../../components/ImageCropper.tsx";
+import {useSWRState} from "../../../compositions/swr.ts";
+import {getUserOAuthAccounts} from "../../../api/user-oauth.api.ts";
+import PlatformIcon from "../../../components/PlatformIcon.tsx";
+import type {UserOAuthAccountVO} from "../../../types/user-oauth.types.ts";
+import {OAuthPlatform} from "../../../types/oauth-account.types.ts";
+import {getOAuth2LoginUrl} from "../../../utils/oauth2.ts";
+import {PLATFORM_REGISTRATION_ID_MAP} from "../../../global/constants.ts";
 
 const { Password } = Input;
 
@@ -453,6 +464,102 @@ const SecuritySettings = () => {
     );
 };
 
+const OAuthAccountSettings = () => {
+    const [modal, contextHolder] = Modal.useModal();
+
+    const loggedUser = useLoggedUser();
+
+    const [accounts, , , updateAccounts] = useSWRState('/getUserOAuthAccounts', getUserOAuthAccounts)
+
+    const handleUnbind = (account: UserOAuthAccountVO) => {
+        modal.confirm({
+            title: '解绑第三方账号',
+            icon: <ExclamationCircleFilled />,
+            content: `是否要解绑第三方账号 ${account.nickname}`,
+            onOk() {
+                unbindOAuthAccount({ oauthAccountId: account.id })
+                    .then(() => {
+                        void message.success("账号解绑成功");
+                        void loggedUser.refreshUserProfile();
+                        void updateAccounts();
+                    })
+                    .catch(() => {
+                        void message.warning("账号解绑失败");
+                    })
+            },
+        });
+    }
+
+    const handleBind = (platform: OAuthPlatform) => {
+        window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);
+    }
+
+    const allPlatforms = useMemo(() =>
+        [OAuthPlatform.GITHUB, OAuthPlatform.GOOGLE, OAuthPlatform.OICQ]
+    , []);
+
+    const boundPlatformIds = useMemo(() => new Set(accounts?.map(a => a.platformId) ?? []), [accounts]);
+
+    const boundAccounts = useMemo(() => {
+        return accounts?.map(account => ({
+            ...account,
+            platform: account.platformId as OAuthPlatform
+        })) ?? [];
+    }, [accounts]);
+
+    const unboundPlatforms = useMemo(() => {
+        return allPlatforms.filter(platform => !boundPlatformIds.has(platform));
+    }, [allPlatforms, boundPlatformIds]);
+
+    return (
+        <>
+            <div className="space-y-4">
+                {boundAccounts.map((account) => (
+                    <div key={account.id} className="flex flex-row items-center space-x-2 justify-between py-3 border-b border-gray-100 last:border-b-0">
+                        <Space orientation="horizontal" size={12}>
+                            <Avatar
+                                size={40}
+                                icon={<UserOutlined />}
+                                src={account.avatar}
+                            />
+
+                            <Space orientation="vertical" size={0}>
+                                <span className="font-medium">{account.nickname}</span>
+                                <PlatformIcon platform={account.platform} />
+                            </Space>
+                        </Space>
+
+                        <Button type="link" className="font-medium text-red-500" onClick={() => { handleUnbind(account); }}>
+                            解绑
+                        </Button>
+                    </div>
+                ))}
+
+                {unboundPlatforms.length > 0 && (
+                    <div className="pt-4">
+                        <div className="text-sm text-gray-500 mb-3">可绑定的平台</div>
+                        <div className="flex flex-wrap gap-3">
+                            {unboundPlatforms.map((platform) => (
+                                <Button
+                                    key={platform}
+                                    type="dashed"
+                                    className="flex items-center gap-2 px-4 py-2 h-auto"
+                                    onClick={() => handleBind(platform)}
+                                >
+                                    <PlusOutlined />
+                                    <PlatformIcon platform={platform} />
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {contextHolder}
+        </>
+    );
+}
+
 function UserProfileCard() {
     const loggedUser = useLoggedUser();
 
@@ -586,6 +693,21 @@ function UserProfileCard() {
 }
 
 export function UserProfilePage() {
+    const TAB_KEYS = {
+        INFO: 'info',
+        SECURITY: 'security',
+        OAUTH: 'oauth'
+    } as const;
+
+    type TabKey = typeof TAB_KEYS[keyof typeof TAB_KEYS];
+
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const activeTab = (searchParams.get('tab') as TabKey) || TAB_KEYS.INFO;
+
+    const handleTabChange = (key: string) => {
+        setSearchParams({ tab: key });
+    };
 
     return (
         <>
@@ -602,20 +724,26 @@ export function UserProfilePage() {
                 <div className="lg:col-span-8">
                     <Card className="rounded-3xl shadow-sm border-none min-h-[500px]">
                         <Tabs
-                            defaultActiveKey="1"
+                            activeKey={activeTab}
                             className="modern-tabs"
                             items={[
                                 {
-                                    key: '1',
+                                    key: TAB_KEYS.INFO,
                                     label: <span className="px-2 font-medium">基本信息</span>,
                                     children: <BasicInfo />,
                                 },
                                 {
-                                    key: '2',
+                                    key: TAB_KEYS.SECURITY,
                                     label: <span className="px-2 font-medium">账号安全</span>,
                                     children: <SecuritySettings />,
                                 },
+                                {
+                                    key: TAB_KEYS.OAUTH,
+                                    label: <span className="px-2 font-medium">第三方账号</span>,
+                                    children: <OAuthAccountSettings />,
+                                },
                             ]}
+                            onChange={handleTabChange}
                         />
                     </Card>
                 </div>
