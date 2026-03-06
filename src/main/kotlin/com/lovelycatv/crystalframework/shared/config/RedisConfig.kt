@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
@@ -16,7 +18,6 @@ class RedisConfig {
     ): ReactiveRedisTemplate<String, Any> {
         val stringSerializer = RedisSerializer.string()
 
-        // 使用默认的 GenericJackson2JsonRedisSerializer，它会自动配置 @class 类型信息
         val jsonSerializer = GenericJackson2JsonRedisSerializer()
 
         val serializationContext = RedisSerializationContext

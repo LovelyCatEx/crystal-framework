@@ -54,6 +54,27 @@ object SystemPermission {
     const val ACTION_STORAGE_PROVIDER_UPDATE = "storage.provider.update"
     const val ACTION_STORAGE_PROVIDER_DELETE = "storage.provider.delete"
 
+    const val MENU_MAIL_TEMPLATE_CATEGORY_MANAGER = "mail.template.category:/manager/mail-template-categories"
+
+    const val ACTION_MAIL_TEMPLATE_CATEGORY_CREATE = "mail.template.category.create"
+    const val ACTION_MAIL_TEMPLATE_CATEGORY_READ = "mail.template.category.read"
+    const val ACTION_MAIL_TEMPLATE_CATEGORY_UPDATE = "mail.template.category.update"
+    const val ACTION_MAIL_TEMPLATE_CATEGORY_DELETE = "mail.template.category.delete"
+
+    const val MENU_MAIL_TEMPLATE_TYPE_MANAGER = "mail.template.type:/manager/mail-template-types"
+
+    const val ACTION_MAIL_TEMPLATE_TYPE_CREATE = "mail.template.type.create"
+    const val ACTION_MAIL_TEMPLATE_TYPE_READ = "mail.template.type.read"
+    const val ACTION_MAIL_TEMPLATE_TYPE_UPDATE = "mail.template.type.update"
+    const val ACTION_MAIL_TEMPLATE_TYPE_DELETE = "mail.template.type.delete"
+
+    const val MENU_MAIL_TEMPLATE_MANAGER = "mail.template:/manager/mail-templates"
+
+    const val ACTION_MAIL_TEMPLATE_CREATE = "mail.template.create"
+    const val ACTION_MAIL_TEMPLATE_READ = "mail.template.read"
+    const val ACTION_MAIL_TEMPLATE_UPDATE = "mail.template.update"
+    const val ACTION_MAIL_TEMPLATE_DELETE = "mail.template.delete"
+
     /**
      * resolve permission from string declaration
      *

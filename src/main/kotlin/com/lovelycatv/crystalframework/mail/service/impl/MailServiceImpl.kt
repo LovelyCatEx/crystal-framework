@@ -1,5 +1,6 @@
-package com.lovelycatv.crystalframework.shared.service.mail
+package com.lovelycatv.crystalframework.mail.service.impl
 
+import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettings

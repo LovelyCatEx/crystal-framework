@@ -1,0 +1,7 @@
+package com.lovelycatv.crystalframework.mail.service
+
+import com.lovelycatv.crystalframework.cache.service.CachedBaseService
+import com.lovelycatv.crystalframework.mail.entity.MailTemplateCategoryEntity
+import com.lovelycatv.crystalframework.mail.repository.MailTemplateCategoryRepository
+
+interface MailTemplateCategoryService : CachedBaseService<MailTemplateCategoryRepository, MailTemplateCategoryEntity>

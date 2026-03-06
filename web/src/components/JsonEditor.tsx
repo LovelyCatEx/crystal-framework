@@ -83,11 +83,9 @@ function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = fal
     const handleObjectChange = (oldKey: string, newKey: string | null, newValue: JsonValue) => {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
             if (newKey === null) {
-                // Value changed, key unchanged
                 const newObj = {...value, [oldKey]: newValue};
                 onChange(name, null, newObj);
             } else if (newKey !== oldKey) {
-                // Key renamed
                 const newObj: JsonObject = {};
                 for (const [k, v] of Object.entries(value)) {
                     if (k === oldKey) {
@@ -184,7 +182,48 @@ function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = fal
         <div style={{marginLeft: indent}} className="mb-2">
             <div className="flex items-center gap-2 flex-wrap">
                 {isArrayItem ? (
-                    <Tag className="font-mono text-xs">{name}</Tag>
+                    <div className="w-full">
+                        <div className="flex flex-row items-center space-x-2 mb-2">
+                            {isComplex && (
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    onClick={() => setIsExpanded(!isExpanded)}
+                                    className="px-1"
+                                >
+                                    {isExpanded ? '▼' : '▶'}
+                                </Button>
+                            )}
+                            <Select<ValueType>
+                                className="w-24 max-w-24"
+                                value={valueType}
+                                onChange={handleTypeChange}
+                                options={[
+                                    {label: 'string', value: 'string'},
+                                    {label: 'number', value: 'number'},
+                                    {label: 'boolean', value: 'boolean'},
+                                    {label: 'null', value: 'null'},
+                                    {label: 'object', value: 'object'},
+                                    {label: 'array', value: 'array'},
+                                ]}
+                            />
+                            <Tag className="font-mono text-xs">{name}</Tag>
+                            <Tooltip title="删除">
+                                <Button
+                                    type="text"
+                                    danger
+                                    size="small"
+                                    icon={<DeleteOutlined/>}
+                                    onClick={onDelete}
+                                />
+                            </Tooltip>
+                        </div>
+                        {!isComplex && (
+                            <div className="pl-8">
+                                {renderValueInput()}
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div className="w-full flex flex-row items-center space-x-2">
                         {isComplex && (
@@ -233,7 +272,7 @@ function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = fal
                     </div>
                 )}
 
-                {!isComplex && renderValueInput()}
+                {!isArrayItem && !isComplex && renderValueInput()}
 
                 {isComplex && isExpanded && (
                     <Button
@@ -282,7 +321,9 @@ function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = fal
 
 export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProps) {
     const [mode, setMode] = useState<'visual' | 'json'>('visual');
-    const [jsonData, setJsonData] = useState<JsonObject>({});
+    const [rootType, setRootType] = useState<'object' | 'array'>('object');
+    const [jsonObject, setJsonObject] = useState<JsonObject>({});
+    const [jsonArray, setJsonArray] = useState<JsonArray>([]);
     const [jsonText, setJsonText] = useState(value);
     const [error, setError] = useState<string | null>(null);
 
@@ -290,14 +331,22 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
         const parseJson = () => {
             try {
                 const parsed = JSON.parse(value || '{}');
-                if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-                    setJsonData(parsed);
-                    setJsonText(JSON.stringify(parsed, null, 2));
-                    setError(null);
+                if (Array.isArray(parsed)) {
+                    setRootType('array');
+                    setJsonArray(parsed);
+                    setJsonObject({});
+                } else if (typeof parsed === 'object' && parsed !== null) {
+                    setRootType('object');
+                    setJsonObject(parsed);
+                    setJsonArray([]);
                 } else {
-                    setJsonData({value: parsed});
-                    setJsonText(JSON.stringify({value: parsed}, null, 2));
+                    // 原始类型，包装成对象
+                    setRootType('object');
+                    setJsonObject({value: parsed});
+                    setJsonArray([]);
                 }
+                setJsonText(JSON.stringify(parsed, null, 2));
+                setError(null);
             } catch {
                 setError('无效的JSON格式');
                 setJsonText(value);
@@ -306,44 +355,87 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
         parseJson();
     }, [value]);
 
-    const handleVisualChange = (oldKey: string, newKey: string | null, newValue: JsonValue) => {
-        if (newKey === null) {
-            // Value changed, key unchanged
-            const newData = {...jsonData, [oldKey]: newValue};
-            setJsonData(newData);
+    const handleRootTypeChange = (newType: 'object' | 'array') => {
+        setRootType(newType);
+        if (newType === 'object') {
+            const newData: JsonObject = {};
+            setJsonObject(newData);
+            setJsonArray([]);
             const jsonString = JSON.stringify(newData);
             setJsonText(JSON.stringify(newData, null, 2));
             onChange?.(jsonString);
-        } else if (newKey !== oldKey) {
-            // Key renamed
-            const newData: JsonObject = {};
-            for (const [k, v] of Object.entries(jsonData)) {
-                if (k === oldKey) {
-                    newData[newKey] = newValue;
-                } else {
-                    newData[k] = v;
-                }
-            }
-            setJsonData(newData);
+        } else {
+            const newData: JsonArray = [];
+            setJsonArray(newData);
+            setJsonObject({});
             const jsonString = JSON.stringify(newData);
             setJsonText(JSON.stringify(newData, null, 2));
             onChange?.(jsonString);
         }
     };
 
+    const handleObjectChange = (oldKey: string, newKey: string | null, newValue: JsonValue) => {
+        if (newKey === null) {
+            const newData = {...jsonObject, [oldKey]: newValue};
+            setJsonObject(newData);
+            const jsonString = JSON.stringify(newData);
+            setJsonText(JSON.stringify(newData, null, 2));
+            onChange?.(jsonString);
+        } else if (newKey !== oldKey) {
+            const newData: JsonObject = {};
+            for (const [k, v] of Object.entries(jsonObject)) {
+                if (k === oldKey) {
+                    newData[newKey] = newValue;
+                } else {
+                    newData[k] = v;
+                }
+            }
+            setJsonObject(newData);
+            const jsonString = JSON.stringify(newData);
+            setJsonText(JSON.stringify(newData, null, 2));
+            onChange?.(jsonString);
+        }
+    };
+
+    const handleArrayChange = (index: number, newValue: JsonValue) => {
+        const newArr = [...jsonArray];
+        newArr[index] = newValue;
+        setJsonArray(newArr);
+        const jsonString = JSON.stringify(newArr);
+        setJsonText(JSON.stringify(newArr, null, 2));
+        onChange?.(jsonString);
+    };
+
     const handleAddRootField = () => {
-        const newKey = `field${Object.keys(jsonData).length + 1}`;
-        const newData = {...jsonData, [newKey]: ''};
-        setJsonData(newData);
+        const newKey = `field${Object.keys(jsonObject).length + 1}`;
+        const newData = {...jsonObject, [newKey]: ''};
+        setJsonObject(newData);
+        const jsonString = JSON.stringify(newData);
+        setJsonText(JSON.stringify(newData, null, 2));
+        onChange?.(jsonString);
+    };
+
+    const handleAddRootArrayItem = () => {
+        const newData = [...jsonArray, ''];
+        setJsonArray(newData);
         const jsonString = JSON.stringify(newData);
         setJsonText(JSON.stringify(newData, null, 2));
         onChange?.(jsonString);
     };
 
     const handleDeleteRootField = (key: string) => {
-        const newData = {...jsonData};
+        const newData = {...jsonObject};
         delete newData[key];
-        setJsonData(newData);
+        setJsonObject(newData);
+        const jsonString = JSON.stringify(newData);
+        setJsonText(JSON.stringify(newData, null, 2));
+        onChange?.(jsonString);
+    };
+
+    const handleDeleteRootArrayItem = (index: number) => {
+        const newData = [...jsonArray];
+        newData.splice(index, 1);
+        setJsonArray(newData);
         const jsonString = JSON.stringify(newData);
         setJsonText(JSON.stringify(newData, null, 2));
         onChange?.(jsonString);
@@ -353,17 +445,88 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
         setJsonText(text);
         try {
             const parsed = JSON.parse(text);
-            if (typeof parsed === 'object' && parsed !== null) {
-                setJsonData(parsed);
-                setError(null);
-                onChange?.(JSON.stringify(parsed));
-            } else {
-                setJsonData({value: parsed});
-                setError(null);
-                onChange?.(JSON.stringify({value: parsed}));
+            if (Array.isArray(parsed)) {
+                setRootType('array');
+                setJsonArray(parsed);
+                setJsonObject({});
+            } else if (typeof parsed === 'object' && parsed !== null) {
+                setRootType('object');
+                setJsonObject(parsed);
+                setJsonArray([]);
             }
+            setError(null);
+            onChange?.(JSON.stringify(parsed));
         } catch {
             setError('JSON格式错误');
+        }
+    };
+
+    const renderRootContent = () => {
+        if (rootType === 'object') {
+            return (
+                <>
+                    {Object.keys(jsonObject).length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                            <Text type="secondary">暂无数据</Text>
+                        </div>
+                    ) : (
+                        Object.entries(jsonObject).map(([key, val]) => (
+                            <div key={key}>
+                                <JsonNode
+                                    name={key}
+                                    value={val}
+                                    onChange={handleObjectChange}
+                                    onDelete={() => handleDeleteRootField(key)}
+                                    depth={0}
+                                />
+                                <Divider orientation="horizontal" />
+                            </div>
+                        ))
+                    )}
+                    <Button
+                        type="dashed"
+                        block
+                        icon={<PlusOutlined/>}
+                        onClick={handleAddRootField}
+                        className="mt-2"
+                    >
+                        添加字段
+                    </Button>
+                </>
+            );
+        } else {
+            return (
+                <>
+                    {jsonArray.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                            <Text type="secondary">暂无数据</Text>
+                        </div>
+                    ) : (
+                        jsonArray.map((val, index) => (
+                            <div key={index}>
+                                <JsonNode
+                                    name={`[${index}]`}
+                                    value={val}
+                                    onChange={(_, __, newVal) => handleArrayChange(index, newVal)}
+                                    onDelete={() => handleDeleteRootArrayItem(index)}
+                                    depth={0}
+                                    isArrayItem={true}
+                                />
+                                <Divider orientation="horizontal" />
+                            </div>
+                        ))
+                    )}
+                    <Button
+                        type="dashed"
+                        block
+                        icon={<PlusOutlined/>}
+                        onClick={handleAddRootArrayItem}
+                        className="mt-2"
+                    >
+                        添加项
+                    </Button>
+                </>
+            );
         }
     };
 
@@ -390,41 +553,26 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
                         >
                             JSON
                         </Button>
+                        {mode === 'visual' && (
+                            <Select
+                                size="small"
+                                value={rootType}
+                                onChange={handleRootTypeChange}
+                                options={[
+                                    {label: '对象 {}', value: 'object'},
+                                    {label: '数组 []', value: 'array'},
+                                ]}
+                                className="w-28"
+                            />
+                        )}
                     </Space>
                     {error && <Text type="danger" className="text-xs">{error}</Text>}
                 </div>
             }
         >
             {mode === 'visual' ? (
-                <div className="max-h-96 overflow-y-auto pr-4">
-                    {Object.keys(jsonData).length === 0 ? (
-                        <div className="text-center py-8 text-gray-400">
-                            <Text type="secondary">暂无数据</Text>
-                        </div>
-                    ) : (
-                        Object.entries(jsonData).map(([key, val]) => (
-                            <>
-                                <JsonNode
-                                    key={key}
-                                    name={key}
-                                    value={val}
-                                    onChange={handleVisualChange}
-                                    onDelete={() => handleDeleteRootField(key)}
-                                    depth={0}
-                                />
-                                <Divider orientation="horizontal" />
-                            </>
-                        ))
-                    )}
-                    <Button
-                        type="dashed"
-                        block
-                        icon={<PlusOutlined/>}
-                        onClick={handleAddRootField}
-                        className="mt-2"
-                    >
-                        添加字段
-                    </Button>
+                <div className="max-h-96 overflow-y-auto">
+                    {renderRootContent()}
                 </div>
             ) : (
                 <TextArea

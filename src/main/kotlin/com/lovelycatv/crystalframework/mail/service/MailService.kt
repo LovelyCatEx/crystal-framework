@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.shared.service.mail
+package com.lovelycatv.crystalframework.mail.service
 
 import org.springframework.mail.javamail.JavaMailSender
 

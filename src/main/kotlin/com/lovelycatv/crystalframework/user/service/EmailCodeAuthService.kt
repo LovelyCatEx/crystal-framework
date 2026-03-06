@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.user.service
 
-import com.lovelycatv.crystalframework.shared.service.mail.MailService
+import com.lovelycatv.crystalframework.mail.service.MailService
 
 interface EmailCodeAuthService {
     suspend fun checkCachedEmailCode(

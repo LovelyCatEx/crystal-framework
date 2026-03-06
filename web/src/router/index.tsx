@@ -1,6 +1,6 @@
 import {
     DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined,
-    CloudOutlined, FileOutlined, DatabaseOutlined
+    CloudOutlined, FileOutlined, DatabaseOutlined, MailOutlined, FolderOutlined, TagsOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
@@ -15,6 +15,9 @@ import {UserProfilePage} from "../pages/manager/profile/UserProfilePage.tsx";
 import {OAuthAccountManagerPage} from "../pages/manager/user/OAuthAccountManagerPage.tsx";
 import {FileResourceManagerPage} from "../pages/manager/resource/FileResourceManagerPage.tsx";
 import {StorageProviderManagerPage} from "../pages/manager/resource/StorageProviderManagerPage.tsx";
+import {MailTemplateCategoryManagerPage} from "../pages/manager/mail/MailTemplateCategoryManagerPage.tsx";
+import {MailTemplateTypeManagerPage} from "../pages/manager/mail/MailTemplateTypeManagerPage.tsx";
+import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -98,6 +101,27 @@ export const adminMenus: RouteItem[] = [
         icon: <DatabaseOutlined />,
         label: "存储提供商管理",
         page: <StorageProviderManagerPage />
+    },
+    {
+        key: '/manager/mail-template-categories',
+        path: '/manager/mail-template-categories',
+        icon: <FolderOutlined />,
+        label: "邮件模板分类",
+        page: <MailTemplateCategoryManagerPage />
+    },
+    {
+        key: '/manager/mail-template-types',
+        path: '/manager/mail-template-types',
+        icon: <TagsOutlined />,
+        label: "邮件模板类型",
+        page: <MailTemplateTypeManagerPage />
+    },
+    {
+        key: '/manager/mail-templates',
+        path: '/manager/mail-templates',
+        icon: <MailOutlined />,
+        label: "邮件模板管理",
+        page: <MailTemplateManagerPage />
     },
     {
         key: '/manager/settings',
