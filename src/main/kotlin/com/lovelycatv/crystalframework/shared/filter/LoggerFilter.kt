@@ -87,14 +87,7 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
         private val logger: Logger
     ) : ServerHttpResponseDecorator(response) {
         override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
-            // Request Info
-            val queryParamsStr = if (originalRequest.queryParams.isNotEmpty()) {
-                originalRequest.queryParams.map { "${it.key}=${it.value.joinToString(",")}" }.joinToString(separator = "&", prefix = "?", postfix = "")
-            } else {
-                ""
-            }
-
-            logger.info("[$id] ${originalRequest.method.name()} ${originalRequest.uri}${queryParamsStr}")
+            logger.info("[$id] ${originalRequest.method.name()} ${originalRequest.uri}")
             logger.info("[$id] RemoteIpAddress: ${originalRequest.remoteAddress?.toString() ?: "Unknown"}")
 
             // Request Headers

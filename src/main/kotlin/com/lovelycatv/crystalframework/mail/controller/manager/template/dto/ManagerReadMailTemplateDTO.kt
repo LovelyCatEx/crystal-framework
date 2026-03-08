@@ -6,5 +6,6 @@ data class ManagerReadMailTemplateDTO(
     override val page: Int,
     override val pageSize: Int,
     override val id: Long? = null,
-    override val searchKeyword: String? = null
+    override val searchKeyword: String? = null,
+    val typeId: Long? = null
 ) : BaseManagerReadDTO(page, pageSize)

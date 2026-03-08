@@ -80,12 +80,17 @@ function VariablesDisplay({ templateTypes }: { templateTypes: MailTemplateType[]
 export function MailTemplateManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
+    const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
 
     useEffect(() => {
         MailTemplateTypeManagerController.list().then((res) => {
             setTemplateTypes(res.data || []);
         });
     }, []);
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.();
+    }, [selectedTypeId]);
 
     const handleActiveChange = (active: boolean, row: MailTemplate) => {
         MailTemplateManagerController
@@ -121,6 +126,27 @@ export function MailTemplateManagerPage() {
             title="邮件模板管理"
             subtitle="管理邮件模板内容"
             columns={columnsWithActive}
+            tableActions={[
+                {
+                    label: '模板类型',
+                    children: (
+                        <Select
+                            className="w-64"
+                            placeholder="选择模板类型"
+                            allowClear
+                            value={selectedTypeId}
+                            onChange={(value) => setSelectedTypeId(value)}
+                            options={templateTypes.map((type) => ({
+                                label: type.name,
+                                value: type.id,
+                            }))}
+                        />
+                    ),
+                    queryParamsProvider: () => ({
+                        typeId: selectedTypeId ?? undefined,
+                    }),
+                },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
