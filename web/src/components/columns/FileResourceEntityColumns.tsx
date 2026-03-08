@@ -1,12 +1,16 @@
 import React, {type JSX} from "react";
-import {Space, Spin, Tag} from "antd";
+import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {FileResource} from "../../types/file-resource.types.ts";
 import {ResourceFileType} from "../../types/file-resource.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "../../compositions/swr.ts";
 import {StorageProviderManagerController} from "../../api/storage-provider.api.ts";
-import {type StorageProvider, StorageProviderType} from "../../types/storage-provider.types.ts";
+import {UserManagerController} from "../../api/user.api.ts";
+import {type StorageProvider} from "../../types/storage-provider.types.ts";
+import type {User} from "../../types/user.types.ts";
+import {StorageProviderCard, UserCard} from "../card/pop";
+import {UserAvatar} from "../UserAvatar.tsx";
 
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -29,23 +33,51 @@ function StorageProviderCell({ providerId }: { providerId: string }) {
     }
 
     if (provider) {
-        return <CopyableToolTip
-            title={
-                <Space orientation="vertical">
-                    <span>提供商ID: {providerId}</span>
-                    <span>提供商类型: {StorageProviderType[provider.type]}</span>
-                </Space>
-            }
-        >
-            <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
-                {provider.name}
-            </Tag>
-        </CopyableToolTip>;
+        return (
+            <Popover content={<StorageProviderCard providerId={providerId} />} placement="right" trigger="hover">
+                <Tag color="blue" className="m-0 leading-4 h-4 px-1 rounded cursor-pointer">
+                    {provider.name}
+                </Tag>
+            </Popover>
+        );
     }
 
     return <CopyableToolTip title={providerId}>
-        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
+        <Tag color="blue" className="m-0 leading-4 h-4 px-1 rounded">
             提供商ID: {providerId}
+        </Tag>
+    </CopyableToolTip>;
+}
+
+function UserCell({ userId }: { userId: string }) {
+    const { data: user, isLoading } = useSWRComposition<User | null>(
+        `file-resource-user-${userId}`,
+        async () => {
+            return await UserManagerController.getById(userId);
+        }
+    );
+
+    if (isLoading) {
+        return <Spin size="small" />;
+    }
+
+    if (user) {
+        return (
+            <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
+                <Space orientation="horizontal" size={8} className="cursor-pointer">
+                    <UserAvatar fileEntityId={user.avatar} />
+                    <Space orientation="vertical" size={0}>
+                        <span className="text-xs font-mono font-bold">{user.nickname}</span>
+                        <span className="text-xs text-gray-400">@{user.username}</span>
+                    </Space>
+                </Space>
+            </Popover>
+        );
+    }
+
+    return <CopyableToolTip title={userId}>
+        <Tag color="green" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
+            用户ID: {userId}
         </Tag>
     </CopyableToolTip>;
 }
@@ -58,12 +90,24 @@ export const FILE_RESOURCE_MANAGER_TABLE_COLUMNS: EntityTableColumns<FileResourc
         render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
             return <Space orientation='vertical' size={0}>
                 <CopyableToolTip title={row.fileName}>
-                    <span className="text-xs font-mono">{row.fileName}</span>
+                    <span className="text-xs font-mono">{row.fileName}.{row.fileExtension}</span>
+                </CopyableToolTip>
+                <span className="text-xs font-mono">大小: {formatFileSize(Number.parseInt(row.fileSize))}</span>
+                <CopyableToolTip title={row.md5}>
+                    <span className="text-xs font-mono">MD5: {row.md5}</span>
                 </CopyableToolTip>
                 <CopyableToolTip title={row.id}>
                     <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
                 </CopyableToolTip>
             </Space>
+        }
+    },
+    {
+        title: "上传者",
+        dataIndex: "userId",
+        key: "userId",
+        render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
+            return <UserCell userId={row.userId} />;
         }
     },
     {
@@ -76,29 +120,6 @@ export const FILE_RESOURCE_MANAGER_TABLE_COLUMNS: EntityTableColumns<FileResourc
                     <Tag color="orange" className="text-xs font-mono">{ResourceFileType[row.type]}</Tag>
                 </CopyableToolTip>
             </Space>
-        }
-    },
-    {
-        title: "文件属性",
-        dataIndex: "fileExtension",
-        key: "fileExtension",
-        width: 160,
-        render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
-            return <Space orientation='vertical' size={0}>
-                <span className="text-xs font-mono">扩展名: {row.fileExtension}</span>
-                <span className="text-xs font-mono">大小: {formatFileSize(Number.parseInt(row.fileSize))}</span>
-            </Space>
-        }
-    },
-    {
-        title: "MD5",
-        dataIndex: "md5",
-        key: "md5",
-        width: 200,
-        render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
-            return <CopyableToolTip title={row.md5}>
-                <span className="text-xs font-mono">{row.md5}</span>
-            </CopyableToolTip>
         }
     },
     {

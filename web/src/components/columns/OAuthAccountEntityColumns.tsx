@@ -1,5 +1,5 @@
 import React, {type JSX} from "react";
-import {Space, Spin, Tag} from "antd";
+import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {OAuthAccount} from "../../types/oauth-account.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
@@ -8,6 +8,7 @@ import {UserManagerController} from "../../api/user.api.ts";
 import type {User} from "../../types/user.types.ts";
 import {UserAvatar} from "../UserAvatar.tsx";
 import PlatformIcon from "../PlatformIcon.tsx";
+import {UserCard} from "../card/pop/UserCard.tsx";
 
 function SystemUserCell({ userId }: { userId: string | null }) {
     const { data: user, isLoading } = useSWRComposition<User | null>(
@@ -27,17 +28,17 @@ function SystemUserCell({ userId }: { userId: string | null }) {
     }
 
     if (user) {
-        return <Space orientation='horizontal' size={8}>
-            <UserAvatar fileEntityId={user.avatar} />
-            <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={user.nickname}>
-                    <span>{user.nickname}</span>
-                </CopyableToolTip>
-                <CopyableToolTip title={user.username}>
-                    <span className="text-gray-400">@{user.username}</span>
-                </CopyableToolTip>
-            </Space>
-        </Space>;
+        return (
+            <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
+                <Space orientation='horizontal' size={8} className="cursor-pointer">
+                    <UserAvatar fileEntityId={user.avatar} />
+                    <Space orientation='vertical' size={0}>
+                        <span>{user.nickname}</span>
+                        <span className="text-gray-400">@{user.username}</span>
+                    </Space>
+                </Space>
+            </Popover>
+        );
     }
 
     return <CopyableToolTip title={userId}>
