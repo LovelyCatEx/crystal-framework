@@ -1,10 +1,15 @@
 package com.lovelycatv.crystalframework.mail.config
 
+import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
+import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerCreateMailTemplateDTO
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateCategoryEntity
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateCategoryRepository
+import com.lovelycatv.crystalframework.mail.repository.MailTemplateRepository
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
+import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateManagerService
 import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
+import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
 import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -27,14 +32,52 @@ class MailModuleAutoConfigure(
     private val mailTemplateTypeRepository: MailTemplateTypeRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val objectMapper: ObjectMapper,
+    private val mailTemplateRepository: MailTemplateRepository,
+    private val mailTemplateManagerService: MailTemplateManagerService,
+    private val systemMailTemplateConfigure: SystemMailTemplateConfigure
 ) : InitializingBean {
     private val logger = logger()
 
     private val categories = mutableListOf<MailTemplateCategoryDeclaration>()
     private val templateTypes = mutableListOf<MailTemplateTypeDeclaration>()
-
+    private val templates = mutableListOf<MailTemplateDeclaration>()
 
     override fun afterPropertiesSet() {
+        val preProcessMailTemplateDeclaration = fun (
+            declaration: MailTemplateDeclaration,
+            name: String,
+            type: MailTemplateTypeDeclaration,
+        ): MailTemplateDeclaration {
+            return declaration.copy(
+                name = name,
+                type = type
+            )
+        }
+
+        this.templates.add(
+            preProcessMailTemplateDeclaration.invoke(
+                this.systemMailTemplateConfigure.configureUserRegistration(),
+                SystemMailDeclaration.defaultSystemUserRegisterTemplate.name,
+                SystemMailDeclaration.defaultSystemUserRegisterTemplate.type,
+            )
+        )
+
+        this.templates.add(
+            preProcessMailTemplateDeclaration.invoke(
+                this.systemMailTemplateConfigure.configureUserResetPassword(),
+                SystemMailDeclaration.defaultSystemResetPasswordTemplate.name,
+                SystemMailDeclaration.defaultSystemResetPasswordTemplate.type,
+            )
+        )
+
+        this.templates.add(
+            preProcessMailTemplateDeclaration.invoke(
+                this.systemMailTemplateConfigure.configureUserResetEmail(),
+                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.name,
+                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.type,
+            )
+        )
+
         val configures = applicationContext
             .getBeansOfType<MailModuleConfigure>()
             .values
@@ -115,6 +158,32 @@ class MailModuleAutoConfigure(
             } else {
                 logger.info("√ ${typeDeclaration.name} (variables: $variables, allowMultiple: ${typeDeclaration.allowMultiple})")
                 allTypesInDatabase[typeDeclaration.name]!!
+            }
+        }
+
+        val allTemplatesInDatabase = mailTemplateRepository
+            .findAll()
+            .awaitListWithTimeout()
+            .associateBy { it.name }
+
+        logger.info("Checking mail templates...")
+
+        this.templates.forEach { templateDeclaration ->
+            if (!allTemplatesInDatabase.containsKey(templateDeclaration.name)) {
+                mailTemplateManagerService.create(
+                    ManagerCreateMailTemplateDTO(
+                        typeId = typeWithEntityMap[templateDeclaration.type]!!.id,
+                        name = templateDeclaration.name,
+                        description = templateDeclaration.description,
+                        title = templateDeclaration.title,
+                        content = templateDeclaration.content,
+                        active = templateDeclaration.active,
+                    )
+                )
+
+                logger.info("* ${templateDeclaration.name} - ${templateDeclaration.description}")
+            } else {
+                logger.info("√ ${templateDeclaration.name} - ${templateDeclaration.description}")
             }
         }
 

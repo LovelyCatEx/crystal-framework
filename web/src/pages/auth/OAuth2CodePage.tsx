@@ -83,7 +83,10 @@ function RegisterTab({userInfo}: RegisterTabProps) {
         >
             <Form.Item
                 name="username"
-                rules={[{ required: true, message: '请输入用户名' }]}
+                rules={[
+                    {required: true, message: '请输入用户名'},
+                    {pattern: /^[a-zA-Z0-9_-]+$/, message: '只能包含英文字母、数字、下划线和横线'},
+                ]}
             >
                 <Input
                     prefix={<UserOutlined className="text-gray-400 mr-2" />}
@@ -189,7 +192,10 @@ function BindTab({userInfo}: BindTabProps) {
         >
             <Form.Item
                 name="username"
-                rules={[{ required: true, message: '请输入用户名' }]}
+                rules={[
+                    {required: true, message: '请输入用户名或邮箱'},
+                    {pattern: /^[a-zA-Z0-9_@.-]+$/, message: '只能包含英文字母、数字、下划线和横线或邮箱地址'},
+                ]}
             >
                 <Input
                     prefix={<UserOutlined className="text-gray-400 mr-2" />}

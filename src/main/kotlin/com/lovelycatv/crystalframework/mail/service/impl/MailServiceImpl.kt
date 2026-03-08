@@ -1,11 +1,14 @@
 package com.lovelycatv.crystalframework.mail.service.impl
 
+import com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity
 import com.lovelycatv.crystalframework.mail.service.MailService
+import com.lovelycatv.crystalframework.mail.service.MailTemplateService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettings
 import com.lovelycatv.vertex.log.logger
 import jakarta.mail.internet.MimeMessage
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -14,7 +17,8 @@ import java.util.*
 
 @Service
 class MailServiceImpl(
-    private val systemSettingsService: SystemSettingsService
+    private val systemSettingsService: SystemSettingsService,
+    private val mailTemplateService: MailTemplateService
 ) : MailService {
     private val logger = logger()
 
@@ -56,6 +60,59 @@ class MailServiceImpl(
             logger.error("Send email to $to failed, subject: $subject, content: $content", e)
             throw BusinessException("Send email to $to failed, message: ${e.message}")
         }
+    }
+
+    override suspend fun sendMailByType(
+        to: String,
+        templateTypeName: String,
+        placeholders: Map<String, String?>
+    ) {
+        this.sendMail(
+            to,
+            mailTemplateService.getAvailableTemplateByTypeName(templateTypeName),
+            placeholders
+        )
+    }
+
+    override suspend fun sendMail(
+        to: String,
+        templateName: String,
+        placeholders: Map<String, String?>
+    ) {
+        this.sendMail(
+            to,
+            mailTemplateService
+                .getRepository()
+                .findByName(templateName)
+                .awaitFirstOrNull()
+                ?: throw BusinessException("Mail template named $templateName not found"),
+            placeholders
+        )
+    }
+
+    override suspend fun sendMail(
+        to: String,
+        template: MailTemplateEntity,
+        placeholders: Map<String, String?>
+    ) {
+        if (!template.active) {
+            throw BusinessException("This mail template is inactive")
+        }
+
+        logger.info("Sending mail to $to by using template: ${template.name}")
+
+        val title = resolvePlaceholders(template.title, placeholders)
+        val content = resolvePlaceholders(template.content, placeholders)
+
+        this.sendMail(to, title, content)
+    }
+
+    private fun resolvePlaceholders(originalContent: String, placeholders: Map<String, String?>): String {
+        var r = originalContent
+        placeholders.forEach { (k, v) ->
+            r = r.replace("{{$k}}", v ?: "null")
+        }
+        return r
     }
 
     fun createMailSender(mailSettings: SystemSettings.Mail): JavaMailSender {

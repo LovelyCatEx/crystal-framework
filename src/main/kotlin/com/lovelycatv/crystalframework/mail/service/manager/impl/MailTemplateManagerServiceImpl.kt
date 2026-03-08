@@ -5,9 +5,11 @@ import com.lovelycatv.crystalframework.mail.repository.MailTemplateRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateManagerService
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerCreateMailTemplateDTO
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerUpdateMailTemplateDTO
+import com.lovelycatv.crystalframework.mail.service.MailTemplateTypeService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -20,6 +22,7 @@ class MailTemplateManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val mailTemplateTypeService: MailTemplateTypeService,
 ) : MailTemplateManagerService {
     override val cacheStore: ExpiringKVStore<String, MailTemplateEntity>
         get() = redisService.asKVStore()
@@ -40,7 +43,7 @@ class MailTemplateManagerServiceImpl(
                 description = dto.description,
                 title = dto.title,
                 content = dto.content,
-                active = dto.active
+                active = actualTemplateActive(dto.active, dto.typeId)
             ) newEntity true
         ).awaitFirstOrNull() ?: throw BusinessException("Could not create mail template")
     }
@@ -55,7 +58,25 @@ class MailTemplateManagerServiceImpl(
             dto.description?.let { description = it }
             dto.title?.let { title = it }
             dto.content?.let { content = it }
-            dto.active?.let { active = it }
+            dto.active?.let { active = actualTemplateActive(it, dto.typeId ?: this.typeId ) }
         }
+    }
+
+    private suspend fun actualTemplateActive(requiredActive: Boolean, templateTypeId: Long): Boolean {
+        // Check whether the template type allowing multiple templates
+        var actualActive = requiredActive
+
+        val templateType = mailTemplateTypeService.getByIdOrThrow(templateTypeId)
+        if (!templateType.allowMultiple) {
+            val templatesInSameType = mailTemplateRepository
+                .findAllByTypeIdAndActive(templateType.id, true)
+                .awaitListWithTimeout()
+
+            if (templatesInSameType.isNotEmpty()) {
+                actualActive = false
+            }
+        }
+
+        return actualActive
     }
 }

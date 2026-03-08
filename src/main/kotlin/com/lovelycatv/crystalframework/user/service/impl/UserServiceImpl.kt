@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
+import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.rbac.constants.SystemRole
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
@@ -123,7 +124,13 @@ class UserServiceImpl(
         emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
         ) { code, mailService ->
-            mailService.sendMail(email, "Register", code)
+            mailService.sendMailByType(
+                email,
+                SystemMailDeclaration.systemUserRegisterTemplateType.name,
+                mapOf(
+                    SystemMailDeclaration.VARIABLE_EMAIL_CODE to code
+                )
+            )
         }
     }
 
@@ -158,7 +165,13 @@ class UserServiceImpl(
         emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
         ) { code, mailService ->
-            mailService.sendMail(email, "Reset Email", code)
+            mailService.sendMail(
+                email,
+                SystemMailDeclaration.systemResetPasswordTemplateType.name,
+                mapOf(
+                    SystemMailDeclaration.VARIABLE_EMAIL_CODE to code
+                )
+            )
         }
     }
 
@@ -191,7 +204,13 @@ class UserServiceImpl(
         emailCodeAuthService.withSendEmailCode(
             redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email)
         ) { code, mailService  ->
-            mailService.sendMail(email, "Reset Email", code)
+            mailService.sendMail(
+                email,
+                SystemMailDeclaration.systemResetEmailAddressTemplateType.name,
+                mapOf(
+                    SystemMailDeclaration.VARIABLE_EMAIL_CODE to code
+                )
+            )
         }
     }
 
