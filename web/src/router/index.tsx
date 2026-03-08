@@ -9,7 +9,7 @@ import {UserManagerPage} from "../pages/manager/user/UserManagerPage.tsx";
 import {RolePermissionManagerPage} from "../pages/manager/rbac/RolePermissionManagerPage.tsx";
 import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
 import type {MenuItemType} from "antd/es/menu/interface";
-import type {MenuItem} from "../types/menu.types.ts";
+import type {MenuGroup, MenuItem} from "../types/menu.types.ts";
 import {SystemSettingsManagerPage} from "../pages/manager/settings/SystemSettingsManagerPage.tsx";
 import {UserProfilePage} from "../pages/manager/profile/UserProfilePage.tsx";
 import {OAuthAccountManagerPage} from "../pages/manager/user/OAuthAccountManagerPage.tsx";
@@ -27,6 +27,24 @@ export const menuPathResetPassword = "/auth/reset-password"
 export const menuPathOAuthCode = "/auth/oauth2-code"
 
 export type RouteItem = MenuItem & MenuItemType;
+
+export const menuGroups: MenuGroup[] = [
+    {
+        name: 'rbac',
+        icon: <KeyOutlined />,
+        label: '用户权限',
+    },
+    {
+        name: 'system_storage',
+        icon: <FileOutlined />,
+        label: '系统储存',
+    },
+    {
+        name: 'mail_template',
+        icon: <MailOutlined />,
+        label: '邮件模板',
+    }
+]
 
 export const publicMenus: RouteItem[] = [
     {
@@ -54,34 +72,6 @@ export const adminMenus: RouteItem[] = [
         page: <UserManagerPage />
     },
     {
-        key: '/manager/user-roles',
-        path: '/manager/user-roles',
-        icon: <TeamOutlined />,
-        label: "用户角色管理",
-        page: <UserRoleManagerPage />
-    },
-    {
-        key: '/manager/user-permissions',
-        path: '/manager/user-permissions',
-        icon: <SafetyOutlined />,
-        label: "用户权限管理",
-        page: <UserPermissionManagerPage />
-    },
-    {
-        key: '/manager/role-permissions',
-        path: '/manager/role-permissions',
-        icon: <KeyOutlined />,
-        label: "角色权限管理",
-        page: <RolePermissionManagerPage />
-    },
-    {
-        key: '/manager/user-roles-relation',
-        path: '/manager/user-roles-relation',
-        icon: <UserSwitchOutlined />,
-        label: "用户角色分配",
-        page: <UserRoleRelationManagerPage />
-    },
-    {
         key: '/manager/oauth-accounts',
         path: '/manager/oauth-accounts',
         icon: <CloudOutlined />,
@@ -89,39 +79,76 @@ export const adminMenus: RouteItem[] = [
         page: <OAuthAccountManagerPage />
     },
     {
+        key: '/manager/user-roles',
+        path: '/manager/user-roles',
+        icon: <TeamOutlined />,
+        label: "用户角色管理",
+        page: <UserRoleManagerPage />,
+        group: 'rbac'
+    },
+    {
+        key: '/manager/user-permissions',
+        path: '/manager/user-permissions',
+        icon: <SafetyOutlined />,
+        label: "用户权限管理",
+        page: <UserPermissionManagerPage />,
+        group: 'rbac'
+    },
+    {
+        key: '/manager/role-permissions',
+        path: '/manager/role-permissions',
+        icon: <KeyOutlined />,
+        label: "角色权限管理",
+        page: <RolePermissionManagerPage />,
+        group: 'rbac'
+    },
+    {
+        key: '/manager/user-roles-relation',
+        path: '/manager/user-roles-relation',
+        icon: <UserSwitchOutlined />,
+        label: "用户角色分配",
+        page: <UserRoleRelationManagerPage />,
+        group: 'rbac'
+    },
+    {
         key: '/manager/file-resources',
         path: '/manager/file-resources',
         icon: <FileOutlined />,
         label: "文件资源管理",
-        page: <FileResourceManagerPage />
+        page: <FileResourceManagerPage />,
+        group: 'system_storage'
     },
     {
         key: '/manager/storage-providers',
         path: '/manager/storage-providers',
         icon: <DatabaseOutlined />,
         label: "存储提供商管理",
-        page: <StorageProviderManagerPage />
-    },
-    {
-        key: '/manager/mail-template-categories',
-        path: '/manager/mail-template-categories',
-        icon: <FolderOutlined />,
-        label: "邮件模板分类",
-        page: <MailTemplateCategoryManagerPage />
-    },
-    {
-        key: '/manager/mail-template-types',
-        path: '/manager/mail-template-types',
-        icon: <TagsOutlined />,
-        label: "邮件模板类型",
-        page: <MailTemplateTypeManagerPage />
+        page: <StorageProviderManagerPage />,
+        group: 'system_storage'
     },
     {
         key: '/manager/mail-templates',
         path: '/manager/mail-templates',
         icon: <MailOutlined />,
         label: "邮件模板管理",
-        page: <MailTemplateManagerPage />
+        page: <MailTemplateManagerPage />,
+        group: 'mail_template'
+    },
+    {
+        key: '/manager/mail-template-types',
+        path: '/manager/mail-template-types',
+        icon: <TagsOutlined />,
+        label: "邮件模板类型",
+        page: <MailTemplateTypeManagerPage />,
+        group: 'mail_template'
+    },
+    {
+        key: '/manager/mail-template-categories',
+        path: '/manager/mail-template-categories',
+        icon: <FolderOutlined />,
+        label: "邮件模板分类",
+        page: <MailTemplateCategoryManagerPage />,
+        group: 'mail_template'
     },
     {
         key: '/manager/settings',

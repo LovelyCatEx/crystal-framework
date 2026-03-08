@@ -7,8 +7,9 @@ import {clearUserAuthentication} from "../../utils/token.utils.ts";
 import {useEffect, useMemo, useState} from "react";
 import {buildDocumentTitle, ProjectDisplayName} from "../../global/global-settings.ts";
 import {useLoggedUser} from "../../compositions/use-logged-user.ts";
-import {computeAccessibleMenus, menuPathLogin, menuPathProfile} from "../../router";
+import {computeAccessibleMenus, menuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "../../router";
 import './ManagerContainerPageStyles.css';
+import type {ItemType} from "antd/es/menu/interface";
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const loggedUser = useLoggedUser();
@@ -20,6 +21,54 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const availableMenus = useMemo(() => {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? []);
     }, [loggedUser.accessibleMenuPaths]);
+
+    const { menuItems, groupKeys } = useMemo(() => {
+        const groupMap = new Map<string, RouteItem[]>();
+        const processedGroups = new Set<string>();
+        const groupKeyList: string[] = [];
+
+        availableMenus.forEach(menu => {
+            if (menu.group) {
+                const groupName = menu.group;
+                if (!groupMap.has(groupName)) {
+                    groupMap.set(groupName, []);
+                }
+                groupMap.get(groupName)!.push(menu);
+            }
+        });
+
+        const result: ItemType[] = [];
+
+        availableMenus.forEach(menu => {
+            if (menu.group) {
+                const groupName = menu.group;
+                if (processedGroups.has(groupName)) {
+                    return;
+                }
+                processedGroups.add(groupName);
+                groupKeyList.push(groupName);
+
+                const group = menuGroups.find(g => g.name === groupName);
+                const items = groupMap.get(groupName) || [];
+                if (group && items.length > 0) {
+                    result.push({
+                        key: groupName,
+                        label: group.label,
+                        icon: group.icon,
+                        children: items.map(item => ({
+                            key: item.key,
+                            label: item.label,
+                            icon: item.icon,
+                        })),
+                    });
+                }
+            } else {
+                result.push(menu);
+            }
+        });
+
+        return { menuItems: result, groupKeys: groupKeyList };
+    }, [availableMenus]);
 
     const handleMenuClick = (e: unknown) => {
         navigate((e as { key: string }).key);
@@ -125,7 +174,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     <Menu
                         mode="inline"
                         selectedKeys={selectedKeys.map((e) => e.key.toString())}
-                        items={availableMenus}
+                        defaultOpenKeys={groupKeys}
+                        items={menuItems}
                         onClick={handleMenuClick}
                         className="py-4 px-2 border-none"
                     />
@@ -169,8 +219,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
 
                             <Menu
                                 mode="inline"
-                                items={availableMenus}
+                                items={menuItems}
                                 selectedKeys={selectedKeys.map((e) => e.key.toString())}
+                                defaultOpenKeys={groupKeys}
                                 onClick={(e) => {
                                     handleMenuClick(e);
                                     setMobileMenuOpen(false);
