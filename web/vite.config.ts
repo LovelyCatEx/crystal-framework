@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const apiDomain = env.VITE_API_DOMAIN || 'http://localhost:8080'
+  const apiDomain = env.VITE_API_BASE_URL || 'http://localhost:8080'
 
   console.log("================================================================")
   console.log("Mode", mode)

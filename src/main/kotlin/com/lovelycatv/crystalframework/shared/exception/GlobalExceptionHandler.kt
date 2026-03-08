@@ -49,35 +49,35 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
 
     @ExceptionHandler(ForbiddenException::class)
     fun handleForbiddenException(e: ForbiddenException): ApiResponse<*> {
-        logger.info("An forbidden exception occurred", e)
+        logger.debug("An forbidden exception occurred", e)
 
         return ApiResponse.forbidden<Nothing>(e.localizedMessage ?: e.message ?: "")
     }
 
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedException(e: UnauthorizedException): ApiResponse<*> {
-        logger.info("An unauthorized exception occurred", e)
+        logger.debug("An unauthorized exception occurred", e)
 
         return ApiResponse.unauthorized<Nothing>(e.localizedMessage ?: e.message ?: "")
     }
 
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(e: BusinessException): ApiResponse<*> {
-        logger.info("An business exception occurred", e)
+        logger.debug("An business exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message ?: "")
     }
 
     @ExceptionHandler(MissingRequestValueException::class)
     fun handleMissingRequestValueException(e: MissingRequestValueException): ApiResponse<*> {
-        logger.info("An exception occurred", e)
+        logger.debug("An exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>("missing parameter ${e.name}")
     }
 
     @ExceptionHandler(WebExchangeBindException::class)
     fun handleWebExchangeBindException(e: WebExchangeBindException): ApiResponse<*> {
-        logger.info("An parameter validation exception occurred", e)
+        logger.debug("An parameter validation exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>(
             e.bindingResult.fieldErrors.joinToString(separator = ", ") {
@@ -88,7 +88,7 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
 
     @ExceptionHandler(AuthorizationDeniedException::class)
     fun handleAuthorizationDeniedException(e: AuthorizationDeniedException): ApiResponse<*> {
-        logger.info("An authorization denied exception occurred", e)
+        logger.debug("An authorization denied exception occurred", e)
 
         return ApiResponse.forbidden<Nothing>("you are not allowed to access this resource")
     }

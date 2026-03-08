@@ -33,20 +33,20 @@ spring:
             client-id: ${OAUTH_GITHUB_CLIENT_ID}
             client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
             scope: read:user
-            redirect-uri: http://localhost:5173/auth/oauth2-code
+            redirect-uri: ${OAUTH_GITHUB_REDIRECT_URL}
             authorization-grant-type: authorization_code
           oicq:
             provider: oicq
             client-id: ${OAUTH_OICQ_CLIENT_ID}
             client-secret: ${OAUTH_OICQ_CLIENT_SECRET}
             scope: get_user_info
-            redirect-uri: http://127.0.0.1:5173/auth/oauth2-code
+            redirect-uri: ${OAUTH_OICQ_REDIRECT_URL}
             authorization-grant-type: authorization_code
           google:
             provider: google
             client-id: ${OAUTH_GOOGLE_CLIENT_ID}
             client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
-            redirect-uri: http://localhost:5173/auth/oauth2-code
+            redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URL}
             authorization-grant-type: authorization_code
 
   http:
@@ -71,3 +71,15 @@ logging:
     org.springframework.web: info
     org.springframework.r2dbc: info
     org.springframework.boot.actuate: info
+    com.lovelycatv.crystalframework.shared.exception: debug
+server:
+  reactive:
+    session:
+      cookie:
+        secure: true
+        path: /
+        http-only: true
+        same-site: none
+        domain: ${COOKIE_DOMAIN}
+  forward-headers-strategy: framework
+  port: ${BACKEND_PORT}

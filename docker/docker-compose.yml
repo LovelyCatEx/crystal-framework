@@ -1,0 +1,111 @@
+name: crystalframework
+services:
+  postgres:
+    container_name: crystalframework-postgres
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - crystalframework_postgres_data:/var/lib/postgresql/data
+    networks:
+      - crystalframework_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: crystalframework-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=master@lovelycatv.com
+      - PGADMIN_DEFAULT_PASSWORD=master@lovelycatv.com
+      - PGADMIN_CONFIG_SERVER_MODE=True
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=True
+    ports:
+      - "5050:80"
+    volumes:
+      - crystalframework_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - crystalframework_network
+
+  redis:
+    image: redis:8.2
+    container_name: crystalframework-redis
+    command: redis-server --requirepass $REDIS_PASSWORD
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - crystalframework_redis_data:/data
+    networks:
+      - crystalframework_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: crystalframework-backend
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - OAUTH_GITHUB_CLIENT_ID=${OAUTH_GITHUB_CLIENT_ID}
+      - OAUTH_GITHUB_CLIENT_SECRET=${OAUTH_GITHUB_CLIENT_SECRET}
+      - OAUTH_GITHUB_REDIRECT_URL=${OAUTH_GITHUB_REDIRECT_URL}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
+      - OAUTH_GOOGLE_REDIRECT_URL=${OAUTH_GOOGLE_REDIRECT_URL}
+      - OAUTH_OICQ_CLIENT_ID=${OAUTH_OICQ_CLIENT_ID}
+      - OAUTH_OICQ_CLIENT_SECRET=${OAUTH_OICQ_CLIENT_SECRET}
+      - OAUTH_OICQ_REDIRECT_URL=${OAUTH_OICQ_REDIRECT_URL}
+      - BACKEND_PORT=${BACKEND_PORT}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+    ports:
+      - "${BACKEND_PORT}:8080"
+    volumes:
+      - crystalframework_backend_data:/app/data
+    networks:
+      - crystalframework_network
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    container_name: crystalframework-frontend
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:80"
+    networks:
+      - crystalframework_network
+
+volumes:
+  crystalframework_postgres_data:
+  crystalframework_pgadmin_data:
+  crystalframework_redis_data:
+  crystalframework_backend_data:
+
+networks:
+  crystalframework_network:
+    driver: bridge
