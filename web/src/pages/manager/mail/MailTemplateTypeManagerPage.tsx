@@ -32,8 +32,8 @@ export function MailTemplateTypeManagerPage() {
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="类型名称" />
+                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 128, message: '名称长度不能超过128个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="类型名称" maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -49,11 +49,13 @@ export function MailTemplateTypeManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述">
+                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
                         <Input.TextArea 
                             className="w-full rounded-lg" 
                             placeholder="类型描述" 
                             rows={3}
+                            maxLength={512}
+                            showCount
                         />
                     </Form.Item>
                     <Form.Item name="variables" label="变量(JSON格式)" rules={[{ required: true }]}>

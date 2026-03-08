@@ -72,20 +72,20 @@ export function FileResourceManagerPage() {
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="fileName" label="文件名" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件名" />
+                            <Form.Item name="fileName" label="文件名" rules={[{ required: true }, { max: 256, message: '文件名长度不能超过256个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件名" maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="fileExtension" label="扩展名" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件扩展名" />
+                            <Form.Item name="fileExtension" label="扩展名" rules={[{ required: true }, { max: 64, message: '扩展名长度不能超过64个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件扩展名" maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="md5" label="MD5" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件MD5值" />
+                            <Form.Item name="md5" label="MD5" rules={[{ required: true }, { max: 32, message: 'MD5长度不能超过32个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件MD5值" maxLength={32} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -94,8 +94,8 @@ export function FileResourceManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="objectKey" label="对象键" rules={[{ required: true }]}>
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储对象键" />
+                    <Form.Item name="objectKey" label="对象键" rules={[{ required: true }, { max: 256, message: '对象键长度不能超过256个字符' }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储对象键" maxLength={256} showCount />
                     </Form.Item>
                 </>
             }

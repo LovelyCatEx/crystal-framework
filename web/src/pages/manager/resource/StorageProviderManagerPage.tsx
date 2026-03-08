@@ -52,8 +52,8 @@ export function StorageProviderManagerPage() {
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商名称" />
+                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 64, message: '名称长度不能超过64个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商名称" maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -79,11 +79,11 @@ export function StorageProviderManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述">
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商描述" />
+                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商描述" maxLength={512} showCount />
                     </Form.Item>
-                    <Form.Item name="baseUrl" label="基础URL" rules={[{ required: true }]}>
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="访问基础URL" />
+                    <Form.Item name="baseUrl" label="基础URL" rules={[{ required: true }, { max: 256, message: '基础URL长度不能超过256个字符' }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="访问基础URL" maxLength={256} showCount />
                     </Form.Item>
                     <Form.Item name="properties" label="配置属性(JSON)" rules={[{ required: true }]}>
                         <StorageProviderConfigEditor placeholder="输入JSON格式的配置属性..." />

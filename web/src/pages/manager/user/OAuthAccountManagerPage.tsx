@@ -57,20 +57,20 @@ export function OAuthAccountManagerPage() {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="identifier" label="平台标识" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="平台唯一标识" />
+                            <Form.Item name="identifier" label="平台标识" rules={[{ required: true }, { max: 256, message: '平台标识长度不能超过256个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="平台唯一标识" maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="nickname" label="昵称">
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="用户昵称" />
+                            <Form.Item name="nickname" label="昵称" rules={[{ max: 128, message: '昵称长度不能超过128个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="用户昵称" maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="avatar" label="头像URL">
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="头像链接" />
+                            <Form.Item name="avatar" label="头像URL" rules={[{ max: 256, message: '头像URL长度不能超过256个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="头像链接" maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>

@@ -15,14 +15,14 @@ export function UserRoleManagerPage() {
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="角色名称" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" />
+                            <Form.Item name="name" label="角色名称" rules={[{ required: true }, { max: 128, message: '角色名称长度不能超过128个字符' }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
 
-                    <Form.Item name="description" label="角色描述">
-                        <TextArea rows={2} placeholder="输入角色描述..." className="rounded-lg" />
+                    <Form.Item name="description" label="角色描述" rules={[{ max: 512, message: '角色描述长度不能超过512个字符' }]}>
+                        <TextArea rows={2} placeholder="输入角色描述..." className="rounded-lg" maxLength={512} showCount />
                     </Form.Item>
                 </>
             }
