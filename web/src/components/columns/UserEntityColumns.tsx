@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {User} from "../../types/user.types.ts";
+import type {User} from "@/types/user.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {UserAvatar} from "../UserAvatar.tsx";
 

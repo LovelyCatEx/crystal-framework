@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {MailTemplateCategory} from "../../types/mail.types.ts";
+import type {MailTemplateCategory} from "@/types/mail.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 
 export const MAIL_TEMPLATE_CATEGORY_MANAGER_TABLE_COLUMNS: EntityTableColumns<MailTemplateCategory> = [

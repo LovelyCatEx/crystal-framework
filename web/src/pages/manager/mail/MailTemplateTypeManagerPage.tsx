@@ -1,15 +1,15 @@
 import {Col, Form, Input, Row, Select, Switch} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     MailTemplateTypeManagerController,
     type ManagerCreateMailTemplateTypeDTO,
     type ManagerReadMailTemplateTypeDTO
-} from "../../../api/mail-template-type.api.ts";
+} from "@/api/mail-template-type.api.ts";
 import {useEffect, useRef, useState} from "react";
-import type {MailTemplateCategory} from "../../../types/mail.types.ts";
-import {MAIL_TEMPLATE_TYPE_MANAGER_TABLE_COLUMNS} from "../../../components/columns/MailTemplateTypeEntityColumns.tsx";
-import {MailTemplateCategoryManagerController} from "../../../api/mail-template-category.api.ts";
-import {JsonEditor} from "../../../components/JsonEditor.tsx";
+import type {MailTemplateCategory} from "@/types/mail.types.ts";
+import {MAIL_TEMPLATE_TYPE_MANAGER_TABLE_COLUMNS} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
+import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
+import {JsonEditor} from "@/components/JsonEditor.tsx";
 
 export function MailTemplateTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

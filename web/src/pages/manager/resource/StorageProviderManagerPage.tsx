@@ -1,14 +1,14 @@
 import {Col, Form, Input, message, Row, Select, Switch} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateStorageProviderDTO,
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
-} from "../../../api/storage-provider.api.ts";
+} from "@/api/storage-provider.api.ts";
 import React, {useEffect, useRef, useState} from "react";
-import {StorageProviderType, type StorageProvider} from "../../../types/storage-provider.types.ts";
-import {StorageProviderConfigEditor} from "../../../components/StorageProviderConfigEditor.tsx";
-import {STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS} from "../../../components/columns/StorageProviderEntityColumns.tsx";
+import {StorageProviderType, type StorageProvider} from "@/types/storage-provider.types.ts";
+import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEditor.tsx";
+import {STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS} from "@/components/columns/StorageProviderEntityColumns.tsx";
 
 export function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

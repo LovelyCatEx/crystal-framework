@@ -3,11 +3,11 @@ import {LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined} from
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
-import {clearUserAuthentication} from "../../utils/token.utils.ts";
+import {clearUserAuthentication} from "@/utils/token.utils.ts";
 import {useEffect, useMemo, useState} from "react";
-import {buildDocumentTitle, ProjectDisplayName} from "../../global/global-settings.ts";
-import {useLoggedUser} from "../../compositions/use-logged-user.ts";
-import {computeAccessibleMenus, menuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "../../router";
+import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {computeAccessibleMenus, menuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "@/router";
 import './ManagerContainerPageStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
 

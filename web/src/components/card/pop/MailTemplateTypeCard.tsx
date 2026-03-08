@@ -1,7 +1,7 @@
 import {Card, Descriptions, Spin, Tag} from "antd";
-import type {MailTemplateType} from "../../../types/mail.types.ts";
-import {useSWRComposition} from "../../../compositions/swr.ts";
-import {MailTemplateTypeManagerController} from "../../../api/mail-template-type.api.ts";
+import type {MailTemplateType} from "@/types/mail.types.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 
 interface MailTemplateTypeCardProps {

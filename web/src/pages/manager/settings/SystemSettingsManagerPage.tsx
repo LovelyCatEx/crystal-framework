@@ -1,12 +1,12 @@
-import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
-import {useSWRComposition} from "../../../compositions/swr.ts";
-import {getSystemSettingsSchema, updateSystemSettings} from "../../../api/system-settings.api.ts";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {getSystemSettingsSchema, updateSystemSettings} from "@/api/system-settings.api.ts";
 import {Button, Card, Col, Form, Input, InputNumber, message, Row, Switch} from "antd";
-import {SystemSettingsItemValueType, type SystemSettingsSchema} from "../../../types/system-settings.types.ts";
+import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
-import {settingsGroupToTranslationMap, settingsKeyToTranslationMap} from "../../../i18n/system-settings.tsx";
+import {settingsGroupToTranslationMap, settingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
 import {ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
-import {downloadJson, importJsonFromFile} from "../../../utils/file-download.ts";
+import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 
 export function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);

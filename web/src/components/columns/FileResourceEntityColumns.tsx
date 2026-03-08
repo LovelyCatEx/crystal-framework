@@ -1,14 +1,14 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {FileResource} from "../../types/file-resource.types.ts";
-import {ResourceFileType} from "../../types/file-resource.types.ts";
+import type {FileResource} from "@/types/file-resource.types.ts";
+import {ResourceFileType} from "@/types/file-resource.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "../../compositions/swr.ts";
-import {StorageProviderManagerController} from "../../api/storage-provider.api.ts";
-import {UserManagerController} from "../../api/user.api.ts";
-import {type StorageProvider} from "../../types/storage-provider.types.ts";
-import type {User} from "../../types/user.types.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
+import {UserManagerController} from "@/api/user.api.ts";
+import {type StorageProvider} from "@/types/storage-provider.types.ts";
+import type {User} from "@/types/user.types.ts";
 import {StorageProviderCard, UserCard} from "../card/pop";
 import {UserAvatar} from "../UserAvatar.tsx";
 

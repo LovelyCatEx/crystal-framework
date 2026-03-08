@@ -1,11 +1,11 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {OAuthAccount} from "../../types/oauth-account.types.ts";
+import type {OAuthAccount} from "@/types/oauth-account.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "../../compositions/swr.ts";
-import {UserManagerController} from "../../api/user.api.ts";
-import type {User} from "../../types/user.types.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {UserManagerController} from "@/api/user.api.ts";
+import type {User} from "@/types/user.types.ts";
 import {UserAvatar} from "../UserAvatar.tsx";
 import PlatformIcon from "../PlatformIcon.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";

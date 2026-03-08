@@ -9,9 +9,9 @@ import {
     PlusOutlined,
     UserOutlined
 } from "@ant-design/icons";
-import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
-import {useLoggedUser} from "../../../compositions/use-logged-user.ts";
-import {formatTimestamp} from "../../../utils/datetime.utils.ts";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useMemo, useState} from "react";
 import {useSearchParams} from "react-router-dom";
 import {
@@ -22,16 +22,16 @@ import {
     resetPassword,
     type ResetPasswordDTO,
     unbindOAuthAccount
-} from "../../../api/auth.api.ts";
-import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "../../../api/user.api.ts";
-import {ImageCropper} from "../../../components/ImageCropper.tsx";
-import {useSWRState} from "../../../compositions/swr.ts";
-import {getUserOAuthAccounts} from "../../../api/user-oauth.api.ts";
+} from "@/api/auth.api.ts";
+import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "@/api/user.api.ts";
+import {ImageCropper} from "@/components/ImageCropper.tsx";
+import {useSWRState} from "@/compositions/swr.ts";
+import {getUserOAuthAccounts} from "@/api/user-oauth.api.ts";
 import PlatformIcon from "../../../components/PlatformIcon.tsx";
-import type {UserOAuthAccountVO} from "../../../types/user-oauth.types.ts";
-import {OAuthPlatform} from "../../../types/oauth-account.types.ts";
-import {getOAuth2LoginUrl} from "../../../utils/oauth2.ts";
-import {PLATFORM_REGISTRATION_ID_MAP} from "../../../global/constants.ts";
+import type {UserOAuthAccountVO} from "@/types/user-oauth.types.ts";
+import {OAuthPlatform} from "@/types/oauth-account.types.ts";
+import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
+import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
 
 const { Password } = Input;
 

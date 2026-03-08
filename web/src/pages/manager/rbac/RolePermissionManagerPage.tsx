@@ -1,13 +1,13 @@
 import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
-import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {UserRoleManagerController} from "../../../api/user-role.api.ts";
-import {getRolePermissions, setRolePermissions} from "../../../api/user-role-permission.api.ts";
-import {UserPermissionManagerController} from "../../../api/user-permission.api.ts";
-import {PermissionType, type UserPermission} from "../../../types/user-permission.types.ts";
-import type {UserRole} from "../../../types/user-role.types.ts";
-import {CopyableToolTip} from "../../../components/CopyableToolTip.tsx";
+import {UserRoleManagerController} from "@/api/user-role.api.ts";
+import {getRolePermissions, setRolePermissions} from "@/api/user-role-permission.api.ts";
+import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
+import {PermissionType, type UserPermission} from "@/types/user-permission.types.ts";
+import type {UserRole} from "@/types/user-role.types.ts";
+import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 
 interface TransferItem {
     key: string;

@@ -1,11 +1,11 @@
-import {ActionBarComponent} from "../../../components/ActionBarComponent.tsx";
-import {getAvailableMetricsList} from "../../../api/actuator.api.ts";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {getAvailableMetricsList} from "@/api/actuator.api.ts";
 import useSWR from "swr";
-import {ActuatorMetricRenderComponent} from "../../../components/ActuatorMetricRenderComponent.tsx";
-import {sortByMapOrder} from "../../../utils/map.ts";
-import {actuatorMetricsToTranslationMap} from "../../../i18n/actuator-metrics.ts";
+import {ActuatorMetricRenderComponent} from "@/components/ActuatorMetricRenderComponent.tsx";
+import {sortByMapOrder} from "@/utils/map.ts";
+import {actuatorMetricsToTranslationMap} from "@/i18n/actuator-metrics.ts";
 import {Statistic} from "antd";
-import {formatTimestamp} from "../../../utils/datetime.utils.ts";
+import {formatTimestamp} from "@/utils/datetime.utils.ts";
 
 export function DashboardPage() {
     const { data: metrics } = useSWR(

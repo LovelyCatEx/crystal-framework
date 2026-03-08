@@ -1,8 +1,8 @@
 import {Col, Form, Input, Row} from "antd";
-import {ManagerPageContainer} from "../../../components/ManagerPageContainer.tsx";
-import {type ManagerCreateRoleDTO, UserRoleManagerController} from "../../../api/user-role.api.ts";
+import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
+import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user-role.api.ts";
 import TextArea from "antd/es/input/TextArea";
-import {USER_ROLE_MANAGER_TABLE_COLUMNS} from "../../../components/columns/UserRoleEntityColumns.tsx";
+import {USER_ROLE_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserRoleEntityColumns.tsx";
 
 export function UserRoleManagerPage() {
     return (

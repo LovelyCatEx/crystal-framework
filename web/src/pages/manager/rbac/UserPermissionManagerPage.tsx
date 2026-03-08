@@ -1,13 +1,13 @@
 import {Col, Form, Input, Row, Select} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreatePermissionDTO,
     type ManagerReadPermissionDTO,
     UserPermissionManagerController
-} from "../../../api/user-permission.api.ts";
+} from "@/api/user-permission.api.ts";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
-import {USER_PERMISSION_MANAGER_TABLE_COLUMNS} from "../../../components/columns/UserPermissionEntityColumns.tsx";
+import {USER_PERMISSION_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserPermissionEntityColumns.tsx";
 
 export function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

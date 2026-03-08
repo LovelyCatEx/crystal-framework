@@ -1,7 +1,7 @@
 import {Card, Descriptions, Spin, Tag} from "antd";
-import type {StorageProvider} from "../../../types/storage-provider.types.ts";
-import {useSWRComposition} from "../../../compositions/swr.ts";
-import {StorageProviderManagerController} from "../../../api/storage-provider.api.ts";
+import type {StorageProvider} from "@/types/storage-provider.types.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 
 interface StorageProviderCardProps {

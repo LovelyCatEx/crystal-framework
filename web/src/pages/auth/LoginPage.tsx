@@ -3,13 +3,13 @@ import {LockOutlined, MailOutlined} from '@ant-design/icons';
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
-import {login} from "../../api/auth.api.ts";
-import {getUserAuthentication, setUserAuthentication} from "../../utils/token.utils.ts";
-import {getQueryString} from "../../utils/url.utils.ts";
-import {buildDocumentTitle} from "../../global/global-settings.ts";
-import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "../../router";
+import {login} from "@/api/auth.api.ts";
+import {getUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
+import {getQueryString} from "@/utils/url.utils.ts";
+import {buildDocumentTitle} from "@/global/global-settings.ts";
+import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "@/router";
 import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
-import {OAuthPlatform} from "../../types/oauth-account.types.ts";
+import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 
 interface LoginFormData {
   username: string,

@@ -1,10 +1,10 @@
 import React, {type JSX} from "react";
 import {Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {MailTemplateCategory, MailTemplateType} from "../../types/mail.types.ts";
+import type {MailTemplateCategory, MailTemplateType} from "@/types/mail.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "../../compositions/swr.ts";
-import {MailTemplateCategoryManagerController} from "../../api/mail-template-category.api.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
 
 function CategoryCell({ categoryId }: { categoryId: string }) {
     const { data: category, isLoading } = useSWRComposition<MailTemplateCategory | null>(

@@ -1,11 +1,11 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {MailTemplate, MailTemplateType} from "../../types/mail.types.ts";
+import type {MailTemplate, MailTemplateType} from "@/types/mail.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {MailTemplateTypeCard} from "../card/pop/MailTemplateTypeCard.tsx";
-import {useSWRComposition} from "../../compositions/swr.ts";
-import {MailTemplateTypeManagerController} from "../../api/mail-template-type.api.ts";
+import {MailTemplateTypeCard} from "@/components/card/pop";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
 
 function TypeCell({ typeId }: { typeId: string }) {
     const { data: templateType, isLoading } = useSWRComposition<MailTemplateType | null>(

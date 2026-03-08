@@ -3,8 +3,8 @@ import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {GithubOutlined} from '@ant-design/icons';
-import {ProjectDisplayName} from "../../global/global-settings.ts";
-import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "../../router";
+import {ProjectDisplayName} from "@/global/global-settings.ts";
+import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router";
 import {OAuth2CodePage} from "./OAuth2CodePage.tsx";
 
 export function AuthorizationPage({ parentPath }: { parentPath: string }) {

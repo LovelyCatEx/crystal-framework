@@ -1,7 +1,7 @@
 import {Card, Descriptions, Spin, Tag} from "antd";
-import type {User} from "../../../types/user.types.ts";
-import {useSWRComposition} from "../../../compositions/swr.ts";
-import {UserManagerController} from "../../../api/user.api.ts";
+import type {User} from "@/types/user.types.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
+import {UserManagerController} from "@/api/user.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {UserAvatar} from "../../UserAvatar.tsx";
 

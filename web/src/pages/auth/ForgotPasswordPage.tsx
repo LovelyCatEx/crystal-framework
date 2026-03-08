@@ -3,8 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import {Button, Col, Form, Input, message, Row} from 'antd';
 import {LockOutlined, MailOutlined} from '@ant-design/icons';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
-import {requestPasswordResetEmailCode, resetPassword, type ResetPasswordDTO} from "../../api/auth.api.ts";
-import {buildDocumentTitle} from "../../global/global-settings.ts";
+import {requestPasswordResetEmailCode, resetPassword, type ResetPasswordDTO} from "@/api/auth.api.ts";
+import {buildDocumentTitle} from "@/global/global-settings.ts";
 
 const { Password } = Input;
 

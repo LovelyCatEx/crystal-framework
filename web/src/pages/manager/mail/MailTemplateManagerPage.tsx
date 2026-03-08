@@ -1,17 +1,17 @@
 import { Col, Form, Input, Row, Select, Switch, Tag, message } from "antd";
-import { ManagerPageContainer, type ManagerPageContainerRef } from "../../../components/ManagerPageContainer.tsx";
+import { ManagerPageContainer, type ManagerPageContainerRef } from "@/components/ManagerPageContainer.tsx";
 import {
     MailTemplateManagerController,
     type ManagerCreateMailTemplateDTO,
     type ManagerReadMailTemplateDTO
-} from "../../../api/mail-template.api.ts";
+} from "@/api/mail-template.api.ts";
 import { useEffect, useRef, useState } from "react";
-import type { MailTemplateType, MailTemplate } from "../../../types/mail.types.ts";
-import { MAIL_TEMPLATE_MANAGER_TABLE_COLUMNS } from "../../../components/columns/MailTemplateEntityColumns.tsx";
-import { MailTemplateTypeManagerController } from "../../../api/mail-template-type.api.ts";
-import { HtmlEditor } from "../../../components/HtmlEditor.tsx";
+import type { MailTemplateType, MailTemplate } from "@/types/mail.types.ts";
+import { MAIL_TEMPLATE_MANAGER_TABLE_COLUMNS } from "@/components/columns/MailTemplateEntityColumns.tsx";
+import { MailTemplateTypeManagerController } from "@/api/mail-template-type.api.ts";
+import { HtmlEditor } from "@/components/HtmlEditor.tsx";
 import { CopyOutlined } from "@ant-design/icons";
-import type { EntityTableColumns } from "../../../components/types/entity-table.types.ts";
+import type { EntityTableColumns } from "@/components/types/entity-table.types.ts";
 
 interface TemplateVariablesProps {
     templateType: MailTemplateType | null;

@@ -1,7 +1,7 @@
 import {Col, Form, Input, Row} from "antd";
-import {ManagerPageContainer} from "../../../components/ManagerPageContainer.tsx";
-import {type ManagerCreateUserDTO, UserManagerController} from "../../../api/user.api.ts";
-import {USER_MANAGER_TABLE_COLUMNS} from "../../../components/columns/UserEntityColumns.tsx";
+import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
+import {type ManagerCreateUserDTO, UserManagerController} from "@/api/user.api.ts";
+import {USER_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserEntityColumns.tsx";
 
 export function UserManagerPage() {
     return (

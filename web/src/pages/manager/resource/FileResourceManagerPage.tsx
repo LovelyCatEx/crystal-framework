@@ -1,17 +1,17 @@
 import {Button, Col, Form, Input, message, Row, Select} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     FileResourceManagerController,
     type ManagerCreateFileResourceDTO,
     managerGetFileDownloadUrl,
     type ManagerReadFileResourceDTO
-} from "../../../api/file-resource.api.ts";
+} from "@/api/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {type FileResource, ResourceFileType} from "../../../types/file-resource.types.ts";
-import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "../../../components/columns/FileResourceEntityColumns.tsx";
-import {StorageProviderIdSelector, UserIdSelector} from "../../../components/selector";
+import {type FileResource, ResourceFileType} from "@/types/file-resource.types.ts";
+import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "@/components/columns/FileResourceEntityColumns.tsx";
+import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
 import {DownloadOutlined} from "@ant-design/icons";
-import {downloadFile} from "../../../utils/file-download.ts";
+import {downloadFile} from "@/utils/file-download.ts";
 
 export function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

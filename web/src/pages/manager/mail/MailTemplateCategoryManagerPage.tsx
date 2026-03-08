@@ -1,14 +1,14 @@
 import {Col, Form, Input, Row} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     MailTemplateCategoryManagerController,
     type ManagerCreateMailTemplateCategoryDTO,
     type ManagerReadMailTemplateCategoryDTO
-} from "../../../api/mail-template-category.api.ts";
+} from "@/api/mail-template-category.api.ts";
 import {useRef} from "react";
 import {
     MAIL_TEMPLATE_CATEGORY_MANAGER_TABLE_COLUMNS
-} from "../../../components/columns/MailTemplateCategoryEntityColumns.tsx";
+} from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
 
 export function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

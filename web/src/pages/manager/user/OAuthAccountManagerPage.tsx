@@ -1,13 +1,13 @@
 import {Col, Form, Input, Row, Select} from "antd";
-import {ManagerPageContainer, type ManagerPageContainerRef} from "../../../components/ManagerPageContainer.tsx";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateOAuthAccountDTO,
     type ManagerReadOAuthAccountDTO,
     OAuthAccountManagerController
-} from "../../../api/oauth-account.api.ts";
+} from "@/api/oauth-account.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {OAUTH_ACCOUNT_MANAGER_TABLE_COLUMNS} from "../../../components/columns/OAuthAccountEntityColumns.tsx";
-import {UserIdSelector} from "../../../components/selector/UserIdSelector.tsx";
+import {OAUTH_ACCOUNT_MANAGER_TABLE_COLUMNS} from "@/components/columns/OAuthAccountEntityColumns.tsx";
+import {UserIdSelector} from "@/components/selector";
 
 export function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

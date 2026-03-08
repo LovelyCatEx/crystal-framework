@@ -1,5 +1,5 @@
 import React, {type JSX} from "react";
-import type {BaseEntity} from "../../types/BaseEntity.ts";
+import type {BaseEntity} from "@/types/BaseEntity.ts";
 
 export type EntityTableColumns<ENTITY extends BaseEntity, COLUMN_DATA_TYPE = unknown> = EntityTableColumn<ENTITY, COLUMN_DATA_TYPE>[]
 

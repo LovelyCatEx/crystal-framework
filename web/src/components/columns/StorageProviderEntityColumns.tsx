@@ -1,8 +1,8 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {StorageProvider} from "../../types/storage-provider.types.ts";
-import {StorageProviderType} from "../../types/storage-provider.types.ts";
+import type {StorageProvider} from "@/types/storage-provider.types.ts";
+import {StorageProviderType} from "@/types/storage-provider.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 
 export const STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS: EntityTableColumns<StorageProvider> = [

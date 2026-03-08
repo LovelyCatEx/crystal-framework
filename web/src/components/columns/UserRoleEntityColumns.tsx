@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {UserRole} from "../../types/user-role.types.ts";
+import type {UserRole} from "@/types/user-role.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 
 export const USER_ROLE_MANAGER_TABLE_COLUMNS: EntityTableColumns<UserRole> = [

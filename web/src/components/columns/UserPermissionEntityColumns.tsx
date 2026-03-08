@@ -1,8 +1,8 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {UserPermission} from "../../types/user-permission.types.ts";
-import {PermissionType} from "../../types/user-permission.types.ts";
+import type {UserPermission} from "@/types/user-permission.types.ts";
+import {PermissionType} from "@/types/user-permission.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 
 export const USER_PERMISSION_MANAGER_TABLE_COLUMNS: EntityTableColumns<UserPermission> = [
