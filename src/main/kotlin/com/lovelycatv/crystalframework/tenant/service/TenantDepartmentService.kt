@@ -1,0 +1,7 @@
+package com.lovelycatv.crystalframework.tenant.service
+
+import com.lovelycatv.crystalframework.cache.service.CachedBaseService
+import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentEntity
+import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentRepository
+
+interface TenantDepartmentService : CachedBaseService<TenantDepartmentRepository, TenantDepartmentEntity>
