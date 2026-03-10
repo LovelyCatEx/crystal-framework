@@ -66,4 +66,16 @@ class UserRolePermissionRelationServiceImpl(
             userRolePermissionRelationRepository.save(entity).awaitFirstOrNull()
         }
     }
+
+    override suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByPermissionIdIn(permissionIds)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByRoleIdIn(roleIds)
+            .awaitFirstOrNull()
+    }
 }

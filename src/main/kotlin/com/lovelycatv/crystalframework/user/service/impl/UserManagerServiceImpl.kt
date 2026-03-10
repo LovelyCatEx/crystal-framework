@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
+import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerCreateUserDTO
@@ -12,6 +13,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
 
 @Service
@@ -21,6 +23,7 @@ class UserManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val userRoleRelationService: UserRoleRelationService,
 ) : UserManagerService {
     override val cacheStore: ExpiringKVStore<String, UserEntity>
         get() = redisService.asKVStore()
@@ -49,5 +52,12 @@ class UserManagerServiceImpl(
             dto.email?.let { email = it }
             dto.nickname?.let { nickname = it }
         }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun batchDelete(ids: List<Long>) {
+        super.batchDelete(ids)
+
+        userRoleRelationService.deleteByUserIdIn(ids)
     }
 }

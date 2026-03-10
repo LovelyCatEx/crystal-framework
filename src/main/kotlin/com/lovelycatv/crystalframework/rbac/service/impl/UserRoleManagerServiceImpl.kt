@@ -5,12 +5,15 @@ import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerU
 import com.lovelycatv.crystalframework.rbac.entity.UserRoleEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
+import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
+import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
 
 @Service
@@ -19,6 +22,8 @@ class UserRoleManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val userRoleRelationService: UserRoleRelationService,
+    private val userRolePermissionRelationService: UserRolePermissionRelationService,
 ) : UserRoleManagerService {
     override fun getRepository(): UserRoleRepository {
         return userRoleRepository
@@ -39,6 +44,15 @@ class UserRoleManagerServiceImpl(
             dto.name?.let { name = it }
             dto.description?.let { description = it }
         }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun batchDelete(ids: List<Long>) {
+        super.batchDelete(ids)
+
+        userRoleRelationService.deleteByRoleIdIn(ids)
+
+        userRolePermissionRelationService.deleteByRoleIdIn(ids)
     }
 
     override val cacheStore: ExpiringKVStore<String, UserRoleEntity>

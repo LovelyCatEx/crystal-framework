@@ -22,12 +22,6 @@ interface CachedBaseManagerService<
         }
     }
 
-    override suspend fun delete(id: Long) {
-        super.withDeleteEntityContext(id) {
-            super.delete(id)
-        }
-    }
-
     override suspend fun batchDelete(ids: List<Long>) {
         super.withBatchDeleteEntityContext(ids) {
             super.batchDelete(ids)

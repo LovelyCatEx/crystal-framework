@@ -4,9 +4,14 @@ import com.lovelycatv.crystalframework.cache.service.CachedBaseService
 import com.lovelycatv.crystalframework.rbac.entity.UserPermissionEntity
 import com.lovelycatv.crystalframework.rbac.entity.UserRolePermissionRelationEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserRolePermissionRelationRepository
+import reactor.core.publisher.Mono
 
 interface UserRolePermissionRelationService : CachedBaseService<UserRolePermissionRelationRepository, UserRolePermissionRelationEntity> {
     suspend fun getRolePermissions(roleId: Long): List<UserPermissionEntity>
 
     suspend fun setRolePermissions(roleId: Long, permissionIds: List<Long>)
+
+    suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>)
+
+    suspend fun deleteByRoleIdIn(roleIds: Collection<Long>)
 }

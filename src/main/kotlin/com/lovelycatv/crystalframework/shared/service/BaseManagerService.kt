@@ -135,7 +135,7 @@ interface BaseManagerService<
 
     suspend fun delete(id: Long) {
         try {
-            this.getRepository().deleteById(id).awaitFirstOrNull()
+            this.batchDelete(listOf(id))
         } catch (_: Exception) {
             throw BusinessException("Could not delete resource")
         }

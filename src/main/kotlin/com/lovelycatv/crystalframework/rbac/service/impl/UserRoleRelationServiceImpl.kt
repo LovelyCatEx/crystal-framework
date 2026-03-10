@@ -14,6 +14,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Mono
 import kotlin.reflect.KClass
 
 @Service
@@ -90,5 +91,13 @@ class UserRoleRelationServiceImpl(
             ).apply { newEntity() }
             userRoleRelationRepository.save(entity).awaitFirstOrNull()
         }
+    }
+
+    override suspend fun deleteByUserIdIn(userIds: Collection<Long>) {
+        this.getRepository().deleteByUserIdIn(userIds).awaitFirstOrNull()
+    }
+
+    override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        this.getRepository().deleteByRoleIdIn(roleIds).awaitFirstOrNull()
     }
 }
