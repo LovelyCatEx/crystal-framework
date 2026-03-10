@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.scheduling.annotation.EnableAsync
+import reactor.core.publisher.Hooks
 
 @EnableConfigurationProperties
 @SpringBootApplication
@@ -13,5 +14,6 @@ import org.springframework.scheduling.annotation.EnableAsync
 class SpringbootTemplateApplication
 
 fun main(args: Array<String>) {
+    Hooks.onOperatorDebug()
     runApplication<SpringbootTemplateApplication>(*args)
 }

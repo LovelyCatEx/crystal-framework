@@ -10,6 +10,7 @@ spring:
 #      validation-query: SELECT 1
     properties:
       preferQueryMode: simple
+      autocommit: false
   data:
     redis:
       host: ${REDIS_HOST}
@@ -55,7 +56,9 @@ spring:
   webflux:
     multipart:
       max-in-memory-size: 10MB
-
+  reactor:
+    debug-agent:
+      enabled: true
 crystalframework:
   resource:
     avatar:
@@ -69,7 +72,9 @@ logging:
     root: info
     org.springframework.security: info
     org.springframework.web: info
-    org.springframework.r2dbc: info
+    org.springframework.transaction: trace
+    org.springframework.r2dbc: trace
+    io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: debug
 server:
