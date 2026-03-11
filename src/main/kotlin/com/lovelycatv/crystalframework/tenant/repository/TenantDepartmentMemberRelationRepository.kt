@@ -18,7 +18,7 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
 
     @Query(
         """
-        SELECT * FROM tenantdepartment_member_relations 
+        SELECT * FROM tenant_department_member_relations 
         WHERE (:#{#departmentId == null} = true OR department_id = :departmentId)
         AND (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleType == null} = true OR role_type = :roleType)
@@ -37,7 +37,7 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantdepartment_member_relations 
+        SELECT COUNT(*) FROM tenant_department_member_relations 
         WHERE (:#{#departmentId == null} = true OR department_id = :departmentId)
         AND (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleType == null} = true OR role_type = :roleType)

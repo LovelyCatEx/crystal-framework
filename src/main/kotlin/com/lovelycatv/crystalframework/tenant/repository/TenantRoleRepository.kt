@@ -18,7 +18,7 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
 
     @Query(
         """
-        SELECT * FROM tenantroles 
+        SELECT * FROM tenant_roles 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
@@ -37,7 +37,7 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantroles 
+        SELECT COUNT(*) FROM tenant_roles 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#parentId == null} = true OR parent_id = :parentId)

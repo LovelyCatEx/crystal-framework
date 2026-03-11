@@ -14,7 +14,7 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
 
     @Query(
         """
-        SELECT * FROM tenantpermissions 
+        SELECT * FROM tenant_permissions 
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#type == null} = true OR type = :type)
@@ -32,7 +32,7 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantpermissions 
+        SELECT COUNT(*) FROM tenant_permissions 
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#type == null} = true OR type = :type)

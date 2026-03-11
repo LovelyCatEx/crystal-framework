@@ -16,7 +16,7 @@ interface TenantDepartmentRepository : BaseRepository<TenantDepartmentEntity> {
 
     @Query(
         """
-        SELECT * FROM tenantdepartments 
+        SELECT * FROM tenant_departments 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
@@ -35,7 +35,7 @@ interface TenantDepartmentRepository : BaseRepository<TenantDepartmentEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantdepartments 
+        SELECT COUNT(*) FROM tenant_departments 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#parentId == null} = true OR parent_id = :parentId)

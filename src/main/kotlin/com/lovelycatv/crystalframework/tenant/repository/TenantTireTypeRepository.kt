@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 interface TenantTireTypeRepository : BaseRepository<TenantTireTypeEntity> {
     @Query(
         """
-        SELECT * FROM tenanttiretypes 
+        SELECT * FROM tenant_tire_types 
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         ORDER BY created_time DESC
@@ -27,7 +27,7 @@ interface TenantTireTypeRepository : BaseRepository<TenantTireTypeEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenanttiretypes 
+        SELECT COUNT(*) FROM tenant_tire_types 
         WHERE LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """

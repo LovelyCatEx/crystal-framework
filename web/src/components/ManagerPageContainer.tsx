@@ -20,7 +20,7 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     delete: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
     update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
     create: <T extends object>(props: T) => Promise<unknown>;
-    editModalFormChildren?: React.ReactNode | JSX.Element;
+    editModalFormChildren?: React.ReactNode | JSX.Element | ((editingItem: ENTITY | null) => React.ReactNode | JSX.Element);
     editModalInitialValues?: object;
     showActionBar?: boolean;
 }
@@ -231,7 +231,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         <Input />
                     </Form.Item>
 
-                    {restProps.editModalFormChildren}
+                    {typeof restProps.editModalFormChildren === 'function'
+                        ? restProps.editModalFormChildren(editingItem)
+                        : restProps.editModalFormChildren}
                 </Form>
             </Modal>
 

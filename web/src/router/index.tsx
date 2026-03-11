@@ -21,6 +21,8 @@ import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManager
 import {TenantManagerPage} from "../pages/manager/tenant/TenantManagerPage.tsx";
 import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeManagerPage.tsx";
 import {TenantMemberManagerPage} from "../pages/manager/tenant/TenantMemberManagerPage.tsx";
+import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermissionManagerPage.tsx";
+import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -180,6 +182,22 @@ export const adminMenus: RouteItem[] = [
         icon: <TeamOutlined />,
         label: "租户成员管理",
         page: <TenantMemberManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-permissions',
+        path: '/manager/tenant-permissions',
+        icon: <SafetyOutlined />,
+        label: "租户权限管理",
+        page: <TenantPermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-roles',
+        path: '/manager/tenant-roles',
+        icon: <KeyOutlined />,
+        label: "租户角色管理",
+        page: <TenantRoleManagerPage />,
         group: 'tenant'
     },
     {

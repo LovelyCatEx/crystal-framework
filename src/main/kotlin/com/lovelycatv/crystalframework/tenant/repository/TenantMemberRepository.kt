@@ -18,7 +18,7 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
 
     @Query(
         """
-        SELECT * FROM tenantmembers 
+        SELECT * FROM tenant_members 
         WHERE (:#{#keyword == null} = true OR CAST(tenant_id AS TEXT) LIKE CONCAT('%', :keyword, '%'))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#status == null} = true OR status = :status)
@@ -37,7 +37,7 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantmembers 
+        SELECT COUNT(*) FROM tenant_members 
         WHERE (:#{#keyword == null} = true OR CAST(tenant_id AS TEXT) LIKE CONCAT('%', :keyword, '%'))
         AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
         AND (:#{#status == null} = true OR status = :status)

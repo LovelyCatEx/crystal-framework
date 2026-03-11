@@ -18,7 +18,7 @@ interface TenantMemberRoleRelationRepository : BaseRepository<TenantMemberRoleRe
 
     @Query(
         """
-        SELECT * FROM tenantmember_role_relations 
+        SELECT * FROM tenant_member_role_relations 
         WHERE (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleId == null} = true OR role_id = :roleId)
         ORDER BY created_time DESC
@@ -35,7 +35,7 @@ interface TenantMemberRoleRelationRepository : BaseRepository<TenantMemberRoleRe
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantmember_role_relations 
+        SELECT COUNT(*) FROM tenant_member_role_relations 
         WHERE (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleId == null} = true OR role_id = :roleId)
     """

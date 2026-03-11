@@ -18,7 +18,7 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
 
     @Query(
         """
-        SELECT * FROM tenantrole_permission_relations 
+        SELECT * FROM tenant_role_permission_relations 
         WHERE (:#{#roleId == null} = true OR role_id = :roleId)
         AND (:#{#permissionId == null} = true OR permission_id = :permissionId)
         ORDER BY created_time DESC
@@ -35,7 +35,7 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenantrole_permission_relations 
+        SELECT COUNT(*) FROM tenant_role_permission_relations 
         WHERE (:#{#roleId == null} = true OR role_id = :roleId)
         AND (:#{#permissionId == null} = true OR permission_id = :permissionId)
     """
