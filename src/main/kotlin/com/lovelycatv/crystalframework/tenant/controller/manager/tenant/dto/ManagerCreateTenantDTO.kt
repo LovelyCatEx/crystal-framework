@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
 
  data class ManagerCreateTenantDTO(
@@ -16,6 +17,14 @@ import jakarta.validation.constraints.Size
 
     @field:NotNull(message = "Tire type ID is required")
     val tireTypeId: Long,
+
+    @field:NotNull(message = "Subscribed time is required")
+    @field:Positive(message = "Subscribed time must be a positive timestamp")
+    val subscribedTime: Long,
+
+    @field:NotNull(message = "Expires time is required")
+    @field:Positive(message = "Expires time must be a positive timestamp")
+    val expiresTime: Long,
 
     @field:NotBlank(message = "Contact name is required")
     @field:Size(max = 64, message = "Contact name length cannot exceed 64 characters")

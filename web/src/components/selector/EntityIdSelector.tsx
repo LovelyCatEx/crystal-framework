@@ -47,7 +47,7 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
         } else {
             setSelectedEntity(null);
         }
-    }, []);
+    }, [value, controller]);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);

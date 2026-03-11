@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
 
  data class ManagerUpdateTenantDTO(
@@ -14,6 +15,12 @@ import jakarta.validation.constraints.Size
     val status: Int? = null,
 
     val tireTypeId: Long? = null,
+
+    @field:Positive(message = "Subscribed time must be a positive timestamp")
+    val subscribedTime: Long? = null,
+
+    @field:Positive(message = "Expires time must be a positive timestamp")
+    val expiresTime: Long? = null,
 
     @field:Size(max = 64, message = "Contact name length cannot exceed 64 characters")
     val contactName: String? = null,

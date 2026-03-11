@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ser.std.ToStringSerializer
 
-@Table("tenantmembers")
+@Table("tenant_members")
 class TenantMemberEntity(
     id: Long = 0,
     @Column(value = "tenant_id")

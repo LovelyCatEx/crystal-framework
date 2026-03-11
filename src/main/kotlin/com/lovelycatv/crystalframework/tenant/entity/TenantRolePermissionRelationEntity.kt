@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ser.std.ToStringSerializer
 
-@Table("tenantrole_permission_relations")
+@Table("tenant_role_permission_relations")
 class TenantRolePermissionRelationEntity(
     id: Long = 0,
     @Column(value = "role_id")

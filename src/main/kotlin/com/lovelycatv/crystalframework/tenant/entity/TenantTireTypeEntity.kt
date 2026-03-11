@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("tenanttiretypes")
+@Table("tenant_tire_types")
 class TenantTireTypeEntity(
     id: Long = 0,
     @Column(value = "name")

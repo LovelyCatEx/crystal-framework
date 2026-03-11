@@ -19,6 +19,7 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
     create: <T extends object>(props: T) => Promise<unknown>;
     editModalFormChildren?: React.ReactNode | JSX.Element;
+    editModalInitialValues?: object;
 }
 
 export interface ManagerPageContainerRef extends EntityTableRef {}
@@ -82,6 +83,10 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             form.setFieldsValue(item);
         } else {
             form.resetFields();
+            // 设置添加时的默认值
+            if (props.editModalInitialValues) {
+                form.setFieldsValue(props.editModalInitialValues);
+            }
         }
 
         setIsModalVisible(true);

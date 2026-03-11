@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.tenant.types.TenantPermissionType
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("tenantpermissions")
+@Table("tenant_permissions")
 class TenantPermissionEntity(
     id: Long = 0,
     @Column(value = "name")

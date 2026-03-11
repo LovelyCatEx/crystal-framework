@@ -31,15 +31,14 @@ class TenantManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateTenantDTO): TenantEntity {
-        val currentTime = System.currentTimeMillis()
         val entity = TenantEntity(
             id = snowIdGenerator.nextId(),
             ownerUserId = dto.ownerUserId,
             name = dto.name,
             description = dto.description,
             tireTypeId = dto.tireTypeId,
-            subscribedTime = currentTime,
-            expiresTime = currentTime + 365 * 24 * 60 * 60 * 1000L, // Default 1 year
+            subscribedTime = dto.subscribedTime,
+            expiresTime = dto.expiresTime,
             contactName = dto.contactName,
             contactEmail = dto.contactEmail,
             contactPhone = dto.contactPhone,
@@ -56,6 +55,8 @@ class TenantManagerServiceImpl(
             dto.description?.let { description = it }
             dto.status?.let { status = it }
             dto.tireTypeId?.let { tireTypeId = it }
+            dto.subscribedTime?.let { subscribedTime = it }
+            dto.expiresTime?.let { expiresTime = it }
             dto.contactName?.let { contactName = it }
             dto.contactEmail?.let { contactEmail = it }
             dto.contactPhone?.let { contactPhone = it }

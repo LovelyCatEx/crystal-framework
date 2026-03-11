@@ -1,6 +1,6 @@
 import {
     DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined,
-    CloudOutlined, FileOutlined, DatabaseOutlined, MailOutlined, FolderOutlined, TagsOutlined
+    CloudOutlined, FileOutlined, DatabaseOutlined, MailOutlined, FolderOutlined, TagsOutlined, ShopOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
@@ -18,6 +18,8 @@ import {StorageProviderManagerPage} from "../pages/manager/resource/StorageProvi
 import {MailTemplateCategoryManagerPage} from "../pages/manager/mail/MailTemplateCategoryManagerPage.tsx";
 import {MailTemplateTypeManagerPage} from "../pages/manager/mail/MailTemplateTypeManagerPage.tsx";
 import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManagerPage.tsx";
+import {TenantManagerPage} from "../pages/manager/tenant/TenantManagerPage.tsx";
+import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -43,6 +45,11 @@ export const menuGroups: MenuGroup[] = [
         name: 'mail_template',
         icon: <MailOutlined />,
         label: '邮件模板',
+    },
+    {
+        name: 'tenant',
+        icon: <ShopOutlined />,
+        label: '租户管理',
     }
 ]
 
@@ -149,6 +156,22 @@ export const adminMenus: RouteItem[] = [
         label: "邮件模板分类",
         page: <MailTemplateCategoryManagerPage />,
         group: 'mail_template'
+    },
+    {
+        key: '/manager/tenants',
+        path: '/manager/tenants',
+        icon: <ShopOutlined />,
+        label: "租户管理",
+        page: <TenantManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-tire-types',
+        path: '/manager/tenant-tire-types',
+        icon: <ShopOutlined />,
+        label: "套餐类型管理",
+        page: <TenantTireTypeManagerPage />,
+        group: 'tenant'
     },
     {
         key: '/manager/settings',
