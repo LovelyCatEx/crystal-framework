@@ -23,6 +23,8 @@ import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeM
 import {TenantMemberManagerPage} from "../pages/manager/tenant/TenantMemberManagerPage.tsx";
 import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermissionManagerPage.tsx";
 import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
+import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
+import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -198,6 +200,22 @@ export const adminMenus: RouteItem[] = [
         icon: <SafetyOutlined />,
         label: "租户权限管理",
         page: <TenantPermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-role-permissions',
+        path: '/manager/tenant-role-permissions',
+        icon: <KeyOutlined />,
+        label: "租户角色权限管理",
+        page: <TenantRolePermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-member-roles',
+        path: '/manager/tenant-member-roles',
+        icon: <UserSwitchOutlined />,
+        label: "租户成员角色管理",
+        page: <TenantMemberRoleManagerPage />,
         group: 'tenant'
     },
     {

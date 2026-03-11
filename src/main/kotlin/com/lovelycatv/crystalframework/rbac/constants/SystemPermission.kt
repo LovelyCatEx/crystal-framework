@@ -117,19 +117,18 @@ object SystemPermission {
     const val ACTION_TENANT_MEMBER_UPDATE = "tenant.member.update"
     const val ACTION_TENANT_MEMBER_DELETE = "tenant.member.delete"
 
-    const val MENU_TENANT_MEMBER_RELATION_MANAGER = "tenant.member.relation:/manager/tenant-member-relations"
 
-    const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member.relation:/manager/tenant-department-member-relations"
+    const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member.relation:/manager/tenant-department-members"
 
     const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ = "tenant.department.member.relation.read"
     const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE = "tenant.department.member.relation.update"
 
-    const val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = "tenant.member.role.relation:/manager/tenant-member-role-relations"
+    const val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = "tenant.member.role.relation:/manager/tenant-member-roles"
 
     const val ACTION_TENANT_MEMBER_ROLE_RELATION_READ = "tenant.member.role.relation.read"
     const val ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE = "tenant.member.role.relation.update"
 
-    const val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = "tenant.role.permission.relation:/manager/tenant-role-permission-relations"
+    const val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = "tenant.role.permission.relation:/manager/tenant-role-permissions"
 
     const val ACTION_TENANT_ROLE_PERMISSION_RELATION_READ = "tenant.role.permission.relation.read"
     const val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = "tenant.role.permission.relation.update"
