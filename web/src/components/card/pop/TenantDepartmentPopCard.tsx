@@ -17,7 +17,7 @@ export function TenantDepartmentPopCard({ departmentId }: TenantDepartmentPopCar
     );
 
     const { data: parentDepartment } = useSWRComposition<TenantDepartment | null>(
-        department?.parentId ? `tenant-department-card-${department.parentId}` : null,
+        department?.parentId ? `tenant-department-card-${department.parentId}` : undefined,
         async () => {
             if (!department?.parentId) return null;
             return await TenantDepartmentManagerController.getById(department.parentId);

@@ -3,7 +3,6 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     type ManagerCreateTenantRoleDTO,
     type ManagerUpdateTenantRoleDTO,
-    type TenantRole,
     TenantRoleManagerController
 } from "@/api/tenant-role.api.ts";
 import {useRef, useState} from "react";
@@ -12,6 +11,7 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.tsx";
 import {PlusOutlined} from "@ant-design/icons";
+import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 export function TenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);

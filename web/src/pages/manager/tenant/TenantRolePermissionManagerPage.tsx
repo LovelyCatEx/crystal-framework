@@ -2,11 +2,13 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantRoleManagerController, type TenantRole} from "@/api/tenant-role.api.ts";
+import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
 import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
-import {TenantPermissionManagerController, type TenantPermission} from "@/api/tenant-permission.api.ts";
+import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import type {TenantRole} from "@/types/tenat-role.types.ts";
+import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 interface TransferItem {
     key: string;

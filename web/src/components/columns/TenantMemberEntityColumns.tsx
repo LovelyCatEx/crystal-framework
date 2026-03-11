@@ -2,6 +2,7 @@ import React, {type JSX} from "react";
 import {Popover, Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {UserAvatar} from "../UserAvatar.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";
@@ -67,8 +68,9 @@ export const TENANT_MEMBER_TABLE_COLUMNS: EntityTableColumns<TenantMemberVO> = [
         key: "status",
         render: function (_: unknown, row: TenantMemberVO): React.ReactNode | JSX.Element {
             const statusInfo = TenantMemberStatusMap[row.status] || { label: '未知', color: 'default' };
+            const translatedLabel = tenantMemberStatusToTranslationMap.get(row.status) || statusInfo.label;
             return <Tag color={statusInfo.color} className="text-xs font-mono">
-                {statusInfo.label}
+                {translatedLabel}
             </Tag>
         }
     }

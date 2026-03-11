@@ -2,8 +2,9 @@ import {SafetyCertificateOutlined} from "@ant-design/icons";
 import {forwardRef} from "react";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {TENANT_ROLE_TABLE_COLUMNS} from "../columns/TenantRoleEntityColumns.tsx";
-import {TenantRoleManagerController, type TenantRole} from "@/api/tenant-role.api.ts";
+import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
 import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
+import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 interface TenantRoleIdSelectorProps {
     value?: string | null;

@@ -4,9 +4,9 @@ import {
     type ManagerCreateTenantMemberDTO,
     type ManagerUpdateTenantMemberDTO,
     TenantMemberManagerController,
-    TenantMemberStatus,
-    TenantMemberStatusMap
+    TenantMemberStatus
 } from "@/api/tenant-member.api.ts";
+import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {useRef, useState} from "react";
 import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
@@ -19,8 +19,11 @@ export function TenantMemberManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
 
     const statusOptions = [
-        { label: TenantMemberStatusMap[TenantMemberStatus.ACTIVE].label, value: TenantMemberStatus.ACTIVE },
-        { label: TenantMemberStatusMap[TenantMemberStatus.INACTIVE].label, value: TenantMemberStatus.INACTIVE }
+        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
+        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.DEPARTED), value: TenantMemberStatus.DEPARTED },
+        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.RESIGNED), value: TenantMemberStatus.RESIGNED },
+        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.REVIEWING), value: TenantMemberStatus.REVIEWING },
+        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.ACTIVE), value: TenantMemberStatus.ACTIVE }
     ];
 
     const handleTenantChange = (tenantId: string | null) => {
