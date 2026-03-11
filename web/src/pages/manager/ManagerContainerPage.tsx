@@ -23,10 +23,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? []);
     }, [loggedUser.accessibleMenuPaths]);
 
-    const { menuItems, groupKeys } = useMemo(() => {
+    const { menuItems } = useMemo(() => {
         const groupMap = new Map<string, RouteItem[]>();
         const processedGroups = new Set<string>();
-        const groupKeyList: string[] = [];
 
         availableMenus.forEach(menu => {
             if (menu.group) {
@@ -47,7 +46,6 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     return;
                 }
                 processedGroups.add(groupName);
-                groupKeyList.push(groupName);
 
                 const group = menuGroups.find(g => g.name === groupName);
                 const items = groupMap.get(groupName) || [];
@@ -68,14 +66,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             }
         });
 
-        return { menuItems: result, groupKeys: groupKeyList };
+        return { menuItems: result };
     }, [availableMenus]);
-
-    useEffect(() => {
-        if (groupKeys.length > 0 && openKeys.length === 0) {
-            setOpenKeys(groupKeys);
-        }
-    }, [groupKeys, openKeys.length]);
 
     const handleMenuClick = (e: unknown) => {
         navigate((e as { key: string }).key);
@@ -98,6 +90,14 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             document.title = ProjectDisplayName
         }
     }, [selectedKeys]);
+
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const matchedMenu = availableMenus.find((item) => currentPath.startsWith(item.key as string));
+        if (matchedMenu?.group) {
+            setOpenKeys([matchedMenu.group]);
+        }
+    }, [availableMenus, location.pathname]);
 
     return (
         <Layout className="min-h-screen bg-[#f8fafc]">
@@ -181,7 +181,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     <Menu
                         mode="inline"
                         selectedKeys={selectedKeys.map((e) => e.key.toString())}
-                        openKeys={openKeys}
+                        openKeys={collapsed ? [] : openKeys}
                         onOpenChange={setOpenKeys}
                         items={menuItems}
                         onClick={handleMenuClick}

@@ -137,6 +137,70 @@ export const adminMenus: RouteItem[] = [
         group: 'rbac'
     },
     {
+        key: '/manager/tenants',
+        path: '/manager/tenants',
+        icon: <ShopOutlined />,
+        label: "租户管理",
+        page: <TenantManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-members',
+        path: '/manager/tenant-members',
+        icon: <TeamOutlined />,
+        label: "成员管理",
+        page: <TenantMemberManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-roles',
+        path: '/manager/tenant-roles',
+        icon: <KeyOutlined />,
+        label: "角色管理",
+        page: <TenantRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-permissions',
+        path: '/manager/tenant-permissions',
+        icon: <SafetyOutlined />,
+        label: "权限管理",
+        page: <TenantPermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-role-permissions',
+        path: '/manager/tenant-role-permissions',
+        icon: <KeyOutlined />,
+        label: "角色权限管理",
+        page: <TenantRolePermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-member-roles',
+        path: '/manager/tenant-member-roles',
+        icon: <UserSwitchOutlined />,
+        label: "成员角色管理",
+        page: <TenantMemberRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-departments',
+        path: '/manager/tenant-departments',
+        icon: <ApartmentOutlined />,
+        label: "部门管理",
+        page: <TenantDepartmentManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-tire-types',
+        path: '/manager/tenant-tire-types',
+        icon: <ShopOutlined />,
+        label: "套餐类型管理",
+        page: <TenantTireTypeManagerPage />,
+        group: 'tenant'
+    },
+    {
         key: '/manager/file-resources',
         path: '/manager/file-resources',
         icon: <FileOutlined />,
@@ -175,70 +239,6 @@ export const adminMenus: RouteItem[] = [
         label: "邮件模板分类",
         page: <MailTemplateCategoryManagerPage />,
         group: 'mail_template'
-    },
-    {
-        key: '/manager/tenants',
-        path: '/manager/tenants',
-        icon: <ShopOutlined />,
-        label: "租户管理",
-        page: <TenantManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-tire-types',
-        path: '/manager/tenant-tire-types',
-        icon: <ShopOutlined />,
-        label: "套餐类型管理",
-        page: <TenantTireTypeManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-members',
-        path: '/manager/tenant-members',
-        icon: <TeamOutlined />,
-        label: "租户成员管理",
-        page: <TenantMemberManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-roles',
-        path: '/manager/tenant-roles',
-        icon: <KeyOutlined />,
-        label: "租户角色管理",
-        page: <TenantRoleManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-permissions',
-        path: '/manager/tenant-permissions',
-        icon: <SafetyOutlined />,
-        label: "租户权限管理",
-        page: <TenantPermissionManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-role-permissions',
-        path: '/manager/tenant-role-permissions',
-        icon: <KeyOutlined />,
-        label: "租户角色权限管理",
-        page: <TenantRolePermissionManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-member-roles',
-        path: '/manager/tenant-member-roles',
-        icon: <UserSwitchOutlined />,
-        label: "租户成员角色管理",
-        page: <TenantMemberRoleManagerPage />,
-        group: 'tenant'
-    },
-    {
-        key: '/manager/tenant-departments',
-        path: '/manager/tenant-departments',
-        icon: <ApartmentOutlined />,
-        label: "租户部门管理",
-        page: <TenantDepartmentManagerPage />,
-        group: 'tenant'
     },
     {
         key: '/manager/settings',
