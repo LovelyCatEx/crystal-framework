@@ -185,19 +185,19 @@ export const adminMenus: RouteItem[] = [
         group: 'tenant'
     },
     {
-        key: '/manager/tenant-permissions',
-        path: '/manager/tenant-permissions',
-        icon: <SafetyOutlined />,
-        label: "租户权限管理",
-        page: <TenantPermissionManagerPage />,
-        group: 'tenant'
-    },
-    {
         key: '/manager/tenant-roles',
         path: '/manager/tenant-roles',
         icon: <KeyOutlined />,
         label: "租户角色管理",
         page: <TenantRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-permissions',
+        path: '/manager/tenant-permissions',
+        icon: <SafetyOutlined />,
+        label: "租户权限管理",
+        page: <TenantPermissionManagerPage />,
         group: 'tenant'
     },
     {

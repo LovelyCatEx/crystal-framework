@@ -15,6 +15,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const loggedUser = useLoggedUser();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [openKeys, setOpenKeys] = useState<string[]>([]);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -69,6 +70,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
 
         return { menuItems: result, groupKeys: groupKeyList };
     }, [availableMenus]);
+
+    useEffect(() => {
+        if (groupKeys.length > 0 && openKeys.length === 0) {
+            setOpenKeys(groupKeys);
+        }
+    }, [groupKeys, openKeys.length]);
 
     const handleMenuClick = (e: unknown) => {
         navigate((e as { key: string }).key);
@@ -174,7 +181,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     <Menu
                         mode="inline"
                         selectedKeys={selectedKeys.map((e) => e.key.toString())}
-                        defaultOpenKeys={groupKeys}
+                        openKeys={openKeys}
+                        onOpenChange={setOpenKeys}
                         items={menuItems}
                         onClick={handleMenuClick}
                         className="py-4 px-2 border-none"
@@ -221,7 +229,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 mode="inline"
                                 items={menuItems}
                                 selectedKeys={selectedKeys.map((e) => e.key.toString())}
-                                defaultOpenKeys={groupKeys}
+                                openKeys={openKeys}
+                                onOpenChange={setOpenKeys}
                                 onClick={(e) => {
                                     handleMenuClick(e);
                                     setMobileMenuOpen(false);
