@@ -88,4 +88,10 @@ class TenantMemberRelationServiceImpl(
             }
         }
     }
+
+    override suspend fun getUserTenantMembers(userId: Long): List<TenantMemberEntity> {
+        return this.getRepository()
+            .findAllByMemberUserId(userId)
+            .awaitListWithTimeout()
+    }
 }

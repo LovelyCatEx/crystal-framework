@@ -8,5 +8,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelatio
 interface TenantMemberRoleRelationService : CachedBaseService<TenantMemberRoleRelationRepository, TenantMemberRoleRelationEntity> {
     suspend fun getMemberRoles(memberId: Long): List<TenantRoleEntity>
 
+    suspend fun getMemberRolesRecursive(memberId: Long): Set<TenantRoleEntity>
+
     suspend fun setMemberRoles(memberId: Long, roleIds: List<Long>)
 }

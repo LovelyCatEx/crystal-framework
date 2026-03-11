@@ -18,6 +18,7 @@ import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
+import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
@@ -50,6 +51,7 @@ class UserServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val oAuthAccountService: OAuthAccountService,
     private val emailCodeAuthService: EmailCodeAuthService,
+    private val userRbacQueryService: UserRbacQueryService,
 ) : UserService {
     private val logger = logger()
 
@@ -215,15 +217,7 @@ class UserServiceImpl(
     }
 
     override suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult {
-        return UserRbacQueryResult(
-            userId = userId,
-            rolesWithPermissions = userRoleRelationService.getUserRoles(userId).map {
-                UserRbacQueryResult.UserRoleWithPermissions(
-                    role = it,
-                    permissions = rolePermissionRelationService.getRolePermissions(it.id)
-                )
-            }
-        )
+        return userRbacQueryService.getUserRbacAccessInfo(userId)
     }
 
     override suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO {

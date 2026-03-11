@@ -13,4 +13,6 @@ interface TenantMemberRelationService : CachedBaseService<TenantMemberRepository
     suspend fun deleteByTenantIdIn(tenantIds: Collection<Long>)
 
     suspend fun deleteByUserIdIn(userIds: Collection<Long>)
+
+    suspend fun getUserTenantMembers(userId: Long): List<TenantMemberEntity>
 }

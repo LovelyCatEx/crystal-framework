@@ -7,10 +7,9 @@ import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
-import com.lovelycatv.crystalframework.user.service.UserService
+import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
@@ -21,14 +20,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 
 @Configuration
@@ -38,9 +34,7 @@ import java.time.Duration
 class SecurityConfig(
     private val unauthorizedPathScanner: UnauthorizedPathScanner,
     private val reactiveAuthenticationManager: ReactiveAuthenticationManager,
-    private val userService: UserService,
     private val oauth2ClientProperties: OAuth2ClientProperties,
-    private val reactiveClientRegistrationRepository: ReactiveClientRegistrationRepository,
 ) {
     private val logger = logger()
     private val pathPatternParser = PathPatternParser()
@@ -50,7 +44,7 @@ class SecurityConfig(
         http: ServerHttpSecurity,
         redisService: RedisService,
         userAuthorizationService: UserAuthorizationService,
-        jwtSignKeyStore: JWTSignKeyStore
+        jwtSignKeyStore: JWTSignKeyStore, userRbacQueryService: UserRbacQueryService
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -174,31 +168,9 @@ class SecurityConfig(
         http.addFilterAfter(
             CustomAuthFilter(
                 unauthorizedPathPatterns = unauthorizedPathPatterns,
-                getUserAuthorities = {
-                    val redisKey = "userAuthorities:$it"
+                getUserAuthorities = { userId ->
                     runBlocking(Dispatchers.IO) {
-                        val cache = redisService
-                            .get<String>(redisKey)
-                            .awaitFirstOrNull()
-                            ?.split(",")
-
-                        cache?.map { GrantedAuthority { it } }
-                            ?: userService
-                                .getUserRbacAccessInfo(it)
-                                .actions
-                                .also {
-                                    redisService.set(
-                                        redisKey,
-                                        it.joinToString(
-                                            separator = ",",
-                                            prefix = "",
-                                            postfix = ""
-                                        ) { it.name },
-                                        Duration.ofDays(3)
-                                    ).awaitFirstOrNull()
-                                }
-                                .map { GrantedAuthority { it.name } }
-
+                        userRbacQueryService.getUserAuthorities(userId)
                     }
                 },
                 getJWTSignKey = {

@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantRoleRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantRoleService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -19,7 +20,7 @@ import kotlin.reflect.KClass
 @Service
 class TenantMemberRoleRelationServiceImpl(
     private val tenantMemberRoleRelationRepository: TenantMemberRoleRelationRepository,
-    private val tenantRoleRepository: TenantRoleRepository,
+    private val tenantRoleService: TenantRoleService,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
@@ -39,10 +40,28 @@ class TenantMemberRoleRelationServiceImpl(
             .findAllByMemberId(memberId)
             .awaitListWithTimeout()
 
-        return relationIds.map {
-            tenantRoleRepository.findById(it.roleId).awaitFirstOrNull()
-                ?: throw BusinessException("role with id ${it.roleId} not found")
+        return relationIds.mapNotNull {
+            tenantRoleService.getByIdOrNull(it.roleId)
         }
+    }
+
+    override suspend fun getMemberRolesRecursive(memberId: Long): Set<TenantRoleEntity> {
+        val roles = this.getMemberRoles(memberId)
+        val results = mutableListOf<TenantRoleEntity>()
+        results.addAll(roles)
+
+        for (role in roles) {
+            var parentId = role.parentId
+            while (parentId != null) {
+                val parentRole = tenantRoleService.getByIdOrNull(parentId)
+                if (parentRole != null) {
+                    results.add(parentRole)
+                    parentId = parentRole.parentId
+                }
+            }
+        }
+
+        return results.distinctBy { it.id }.toSet()
     }
 
     @Transactional

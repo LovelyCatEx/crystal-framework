@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
-    val getUserAuthorities: (userId: Long) -> List<GrantedAuthority>,
+    val getUserAuthorities: (userId: Long) -> Collection<GrantedAuthority>,
     val getJWTSignKey: () -> String,
 ) : WebFilter {
     private val logger = logger()
