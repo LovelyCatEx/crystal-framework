@@ -4,8 +4,11 @@ import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.SetDepartmentMembersDTO
-import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
+import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerDeleteTenantDepartmentMemberDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerReadTenantDepartmentMemberDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerUpdateTenantDepartmentMemberDTO
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -15,26 +18,52 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/department/member")
 class ManagerTenantDepartmentMemberRelationController(
-    private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService
+    private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ}')")
-    @GetMapping("/get", version = "1")
-    suspend fun getDepartmentMembers(
+    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE}')")
+    @PostMapping("/create", version = "1")
+    suspend fun create(
         userAuthentication: UserAuthentication,
-        @RequestParam departmentId: Long
+        @ModelAttribute
+        @Valid
+        dto: ManagerCreateTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        return ApiResponse.success(tenantDepartmentMemberRelationService.getDepartmentMembers(departmentId))
+        tenantDepartmentMemberManagerService.create(dto)
+        return ApiResponse.success(null)
+    }
+
+    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ}')")
+    @GetMapping("/query", version = "1")
+    suspend fun query(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: ManagerReadTenantDepartmentMemberDTO
+    ): ApiResponse<*> {
+        return ApiResponse.success(tenantDepartmentMemberManagerService.queryVO(dto))
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE}')")
-    @PostMapping("/set", version = "1")
-    suspend fun setDepartmentMembers(
+    @PostMapping("/update", version = "1")
+    suspend fun update(
         userAuthentication: UserAuthentication,
-        @RequestBody
+        @ModelAttribute
         @Valid
-        dto: SetDepartmentMembersDTO
+        dto: ManagerUpdateTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        tenantDepartmentMemberRelationService.setDepartmentMembers(dto.departmentId, dto.memberIds)
+        tenantDepartmentMemberManagerService.update(dto)
+        return ApiResponse.success(null)
+    }
+
+    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE}')")
+    @PostMapping("/delete", version = "1")
+    suspend fun delete(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: ManagerDeleteTenantDepartmentMemberDTO
+    ): ApiResponse<*> {
+        tenantDepartmentMemberManagerService.deleteByDTO(dto)
         return ApiResponse.success(null)
     }
 }

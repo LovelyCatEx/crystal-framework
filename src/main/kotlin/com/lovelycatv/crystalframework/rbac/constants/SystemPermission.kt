@@ -120,8 +120,10 @@ object SystemPermission {
 
     const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member.relation:/manager/tenant-department-members"
 
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE = "tenant.department.member.relation.create"
     const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ = "tenant.department.member.relation.read"
     const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE = "tenant.department.member.relation.update"
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE = "tenant.department.member.relation.delete"
 
     const val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = "tenant.member.role.relation:/manager/tenant-member-roles"
 

@@ -1,21 +1,37 @@
-import {Button, Card, Col, Form, Input, message, Modal, Row, Space, Table, Tag, Tree} from "antd";
+import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, Tree} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantDepartmentIdSelector} from "@/components/selector/TenantDepartmentIdSelector.tsx";
 import {EntitySelectorModal} from "@/components/selector/EntitySelector.tsx";
+import {TenantDepartmentPopCard} from "@/components/card/pop/TenantDepartmentPopCard.tsx";
 import {
     type ManagerCreateTenantDepartmentDTO,
     type ManagerUpdateTenantDepartmentDTO,
     TenantDepartmentManagerController
 } from "@/api/tenant-department.api.ts";
-import {getDepartmentMembers, setDepartmentMembers as apiSetDepartmentMembers} from "@/api/tenant-department-member.api.ts";
+import {
+    DepartmentMemberRoleType,
+    DepartmentMemberRoleTypeMap,
+    type ManagerReadTenantDepartmentMemberDTO,
+    TenantDepartmentMemberManagerController
+} from "@/api/tenant-department-member.api.ts";
+import {departmentMemberRoleTypeToTranslationMap} from "@/i18n/department-member.ts";
 import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
 import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
-import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-import {PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleFilled, TeamOutlined, UserAddOutlined} from "@ant-design/icons";
+import {TENANT_DEPARTMENT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantDepartmentMemberEntityColumns.tsx";
+
+import {
+    DeleteOutlined,
+    EditOutlined,
+    ExclamationCircleFilled,
+    PlusOutlined,
+    SettingOutlined,
+    TeamOutlined,
+    UserAddOutlined
+} from "@ant-design/icons";
+import type {Key} from "react";
 import {useEffect, useState} from "react";
 import type {DataNode} from "antd/es/tree";
-import type {Key} from "react";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import type {TenantDepartment} from "@/types/tenant-department.types.ts";
 import type {TenantDepartmentMemberVO} from "@/types/tenant-department-member.types.ts";
@@ -42,8 +58,12 @@ export function TenantDepartmentManagerPage() {
     // Modal states
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isMemberSelectorVisible, setIsMemberSelectorVisible] = useState(false);
+    const [isRoleEditModalVisible, setIsRoleEditModalVisible] = useState(false);
     const [editingItem, setEditingItem] = useState<TenantDepartment | null>(null);
+    const [editingMember, setEditingMember] = useState<TenantDepartmentMemberVO | null>(null);
+    const [editingRoleType, setEditingRoleType] = useState<number>(DepartmentMemberRoleType.MEMBER);
     const [saving, setSaving] = useState(false);
+    const [updatingRole, setUpdatingRole] = useState(false);
     const [form] = Form.useForm();
 
     // Current department member IDs (for disabling already added members)
@@ -97,6 +117,17 @@ export function TenantDepartmentManagerPage() {
             const depts = res.data || [];
             setDepartments(depts);
             setTreeData(buildTreeData(depts));
+
+            // Check URL query parameter for departmentId
+            const urlParams = new URLSearchParams(window.location.search);
+            const deptIdFromUrl = urlParams.get('departmentId');
+            if (deptIdFromUrl) {
+                const dept = depts.find(d => d.id === deptIdFromUrl);
+                if (dept) {
+                    setSelectedDepartment(dept);
+                    void fetchDepartmentMembers(dept.id);
+                }
+            }
         } catch {
             void message.error("无法获取部门列表");
         } finally {
@@ -104,20 +135,37 @@ export function TenantDepartmentManagerPage() {
         }
     };
 
-    const fetchDepartmentMembers = async (departmentId: string) => {
+    const fetchDepartmentMembers = async (departmentId: string, page = currentPage, pageSize = currentPageSize) => {
         setMemberLoading(true);
         try {
-            const res = await getDepartmentMembers(departmentId);
-            const members = res.data || [];
-            setDepartmentMembers(members);
-            setTotal(members.length);
-            // Store existing member IDs for disabling in selector
-            setExistingMemberIds(new Set(members.map(m => String(m.id))));
+            const queryDTO: ManagerReadTenantDepartmentMemberDTO = {
+                departmentId,
+                page,
+                pageSize
+            };
+            const res = await TenantDepartmentMemberManagerController.query(queryDTO);
+            const data = res.data;
+            if (data) {
+                setDepartmentMembers(data.records);
+                setTotal(data.total);
+                // Store existing member IDs for disabling in selector
+                setExistingMemberIds(new Set(data.records.map((m: TenantDepartmentMemberVO) => String(m.member.id))));
+            }
         } catch {
             void message.error("无法获取部门成员");
         } finally {
             setMemberLoading(false);
         }
+    };
+
+    const updateDepartmentIdInUrl = (departmentId: string | null) => {
+        const url = new URL(window.location.href);
+        if (departmentId) {
+            url.searchParams.set('departmentId', departmentId);
+        } else {
+            url.searchParams.delete('departmentId');
+        }
+        window.history.replaceState({}, '', url.toString());
     };
 
     const handleTreeSelect = (selectedKeys: Key[]) => {
@@ -126,6 +174,11 @@ export function TenantDepartmentManagerPage() {
         setSelectedDepartment(dept);
         if (dept) {
             void fetchDepartmentMembers(dept.id);
+            // Update URL query parameter
+            updateDepartmentIdInUrl(dept.id);
+        } else {
+            // Remove departmentId from URL if no department selected
+            updateDepartmentIdInUrl(null);
         }
     };
 
@@ -208,14 +261,14 @@ export function TenantDepartmentManagerPage() {
         }
 
         try {
-            // Get current member IDs
-            const currentIds = departmentMembers.map(m => String(m.id));
-            // Add new selected member IDs
-            const newIds = selectedMembers.map(m => String(m.id));
-            // Merge and remove duplicates
-            const allIds = [...new Set([...currentIds, ...newIds])];
-
-            await apiSetDepartmentMembers(selectedDepartment.id, allIds);
+            // Create new member relations
+            for (const member of selectedMembers) {
+                await TenantDepartmentMemberManagerController.create({
+                    departmentId: selectedDepartment.id,
+                    memberId: member.id,
+                    roleType: DepartmentMemberRoleType.MEMBER
+                });
+            }
             void message.success(`成功添加 ${selectedMembers.length} 名成员`);
             setIsMemberSelectorVisible(false);
             void fetchDepartmentMembers(selectedDepartment.id);
@@ -241,60 +294,79 @@ export function TenantDepartmentManagerPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedTenantId]);
 
+    const handleRemoveMember = (row: TenantDepartmentMemberVO) => {
+        if (!selectedDepartment) return;
+        modal.confirm({
+            title: '移除成员',
+            icon: <ExclamationCircleFilled />,
+            content: `确定要将成员 "${row.member.user?.nickname || row.member.user?.username || row.id}" 从部门中移除吗？`,
+            onOk() {
+                return TenantDepartmentMemberManagerController.delete({ ids: [row.id] })
+                    .then(() => {
+                        void message.success("移除成员成功");
+                        void fetchDepartmentMembers(selectedDepartment.id);
+                    })
+                    .catch(() => {
+                        void message.error("移除成员失败");
+                    });
+            },
+        });
+    };
+
+    const openRoleEditModal = (row: TenantDepartmentMemberVO) => {
+        setEditingMember(row);
+        setEditingRoleType(row.roleType);
+        setIsRoleEditModalVisible(true);
+    };
+
+    const handleRoleEditCancel = () => {
+        setIsRoleEditModalVisible(false);
+        setEditingMember(null);
+    };
+
+    const handleRoleEditSave = async () => {
+        if (!selectedDepartment || !editingMember) return;
+        setUpdatingRole(true);
+        try {
+            await TenantDepartmentMemberManagerController.update({
+                id: editingMember.id,
+                departmentId: selectedDepartment.id,
+                memberId: editingMember.member.id,
+                roleType: editingRoleType
+            });
+            void message.success("更新角色成功");
+            setIsRoleEditModalVisible(false);
+            void fetchDepartmentMembers(selectedDepartment.id);
+        } catch {
+            void message.error("更新角色失败");
+        } finally {
+            setUpdatingRole(false);
+        }
+    };
+
     const memberColumns = [
-        {
-            title: "成员ID",
-            dataIndex: "id",
-            key: "id",
-            width: 100,
-            render: (_: unknown, row: TenantDepartmentMemberVO) => (
-                <CopyableToolTip title={row.member.id}>
-                    <Tag color="blue" className="text-xs">{row.member.id}</Tag>
-                </CopyableToolTip>
-            )
-        },
-        {
-            title: "昵称",
-            dataIndex: ["user", "nickname"],
-            key: "nickname",
-            render: (_: unknown, row: TenantDepartmentMemberVO) => row.member.user?.nickname || '-'
-        },
-        {
-            title: "用户名",
-            dataIndex: ["user", "username"],
-            key: "username",
-            render: (_: unknown, row: TenantDepartmentMemberVO) => row.member.user?.username || '-'
-        },
-        {
-            title: "邮箱",
-            dataIndex: ["user", "email"],
-            key: "email",
-            render: (_: unknown, row: TenantDepartmentMemberVO) => row.member.user?.email || '-'
-        },
+        ...TENANT_DEPARTMENT_MEMBER_TABLE_COLUMNS,
         {
             title: "操作",
             key: "action",
-            width: 100,
+            width: 150,
             render: (_: unknown, row: TenantDepartmentMemberVO) => (
-                <Button
-                    danger
-                    size="small"
-                    onClick={async () => {
-                        if (!selectedDepartment) return;
-                        try {
-                            const currentIds = departmentMembers
-                                .filter(m => m.id !== row.id)
-                                .map(m => String(m.id));
-                            await apiSetDepartmentMembers(selectedDepartment.id, currentIds);
-                            void message.success("移除成员成功");
-                            void fetchDepartmentMembers(selectedDepartment.id);
-                        } catch {
-                            void message.error("移除成员失败");
-                        }
-                    }}
-                >
-                    移除
-                </Button>
+                <Space size="small">
+                    <Button
+                        size="small"
+                        icon={<SettingOutlined />}
+                        onClick={() => openRoleEditModal(row)}
+                    >
+                        编辑角色
+                    </Button>
+                    <Button
+                        danger
+                        size="small"
+                        onClick={() => handleRemoveMember(row)}
+                    >
+                        移除
+                    </Button>
+                </Space>
             )
         }
     ];
@@ -336,6 +408,7 @@ export function TenantDepartmentManagerPage() {
                                 treeData={treeData}
                                 onSelect={handleTreeSelect}
                                 selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
+                                defaultExpandAll
                                 blockNode
                                 showLine
                             />
@@ -374,7 +447,22 @@ export function TenantDepartmentManagerPage() {
                                     }
                                 >
                                     <p><strong>描述：</strong>{selectedDepartment.description || '-'}</p>
-                                    <p><strong>父部门ID：</strong>{selectedDepartment.parentId || '-'}</p>
+                                    <p>
+                                        <strong>父部门：</strong>
+                                        {selectedDepartment.parentId ? (
+                                            <Popover
+                                                content={<TenantDepartmentPopCard departmentId={selectedDepartment.parentId} />}
+                                                placement="right"
+                                                trigger="hover"
+                                            >
+                                                <Tag color="orange" className="cursor-pointer">
+                                                    {departments.find(d => d.id === selectedDepartment.parentId)?.name || selectedDepartment.parentId}
+                                                </Tag>
+                                            </Popover>
+                                        ) : (
+                                            '-'
+                                        )}
+                                    </p>
                                     <p><strong>创建时间：</strong>{formatTimestamp(selectedDepartment.createdTime)}</p>
                                 </Card>
 
@@ -397,6 +485,7 @@ export function TenantDepartmentManagerPage() {
                                         dataSource={departmentMembers}
                                         rowKey="id"
                                         loading={memberLoading}
+                                        scroll={{ x: 1200 }}
                                         pagination={{
                                             current: currentPage,
                                             pageSize: currentPageSize,
@@ -407,6 +496,9 @@ export function TenantDepartmentManagerPage() {
                                             onChange: (page, pageSize) => {
                                                 setCurrentPage(page);
                                                 setCurrentPageSize(pageSize);
+                                                if (selectedDepartment) {
+                                                    void fetchDepartmentMembers(selectedDepartment.id, page, pageSize);
+                                                }
                                             }
                                         }}
                                     />
@@ -484,6 +576,50 @@ export function TenantDepartmentManagerPage() {
                 onCancel={handleMemberSelectorCancel}
                 onOk={handleMemberSelectorOk}
             />
+
+            {/* Role Edit Modal */}
+            <Modal
+                title={`编辑成员角色 - ${editingMember?.member.user?.nickname || editingMember?.member.user?.username || ''}`}
+                open={isRoleEditModalVisible}
+                onOk={handleRoleEditSave}
+                onCancel={handleRoleEditCancel}
+                confirmLoading={updatingRole}
+                width={400}
+            >
+                <div className="py-4">
+                    <p className="mb-4">请选择成员在部门中的角色：</p>
+                    <div className="space-y-2">
+                        {Object.entries(DepartmentMemberRoleType).map(([key, value]) => (
+                            <div
+                                key={key}
+                                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                    editingRoleType === value
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                                onClick={() => setEditingRoleType(value)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="radio"
+                                        checked={editingRoleType === value}
+                                        onChange={() => setEditingRoleType(value)}
+                                        className="cursor-pointer"
+                                    />
+                                    <Tag color={DepartmentMemberRoleTypeMap[value]?.color || 'default'}>
+                                        {departmentMemberRoleTypeToTranslationMap.get(value) || key}
+                                    </Tag>
+                                    <span className="text-xs text-gray-500">
+                                        {value === DepartmentMemberRoleType.MEMBER && ''}
+                                        {value === DepartmentMemberRoleType.ADMIN && ''}
+                                        {value === DepartmentMemberRoleType.SUPER_ADMIN && ''}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }

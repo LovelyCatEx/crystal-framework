@@ -2,9 +2,12 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.department.mem
 
 import jakarta.validation.constraints.NotNull
 
-data class SetDepartmentMembersDTO(
+data class ManagerCreateTenantDepartmentMemberDTO(
     @field:NotNull(message = "Department ID is required")
     val departmentId: Long,
 
-    val memberIds: List<Long>
+    @field:NotNull(message = "Member ID is required")
+    val memberId: Long,
+
+    val roleType: Int? = null
 )
