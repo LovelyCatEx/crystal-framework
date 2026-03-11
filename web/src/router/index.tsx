@@ -20,6 +20,7 @@ import {MailTemplateTypeManagerPage} from "../pages/manager/mail/MailTemplateTyp
 import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManagerPage.tsx";
 import {TenantManagerPage} from "../pages/manager/tenant/TenantManagerPage.tsx";
 import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeManagerPage.tsx";
+import {TenantMemberManagerPage} from "../pages/manager/tenant/TenantMemberManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -171,6 +172,14 @@ export const adminMenus: RouteItem[] = [
         icon: <ShopOutlined />,
         label: "套餐类型管理",
         page: <TenantTireTypeManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-members',
+        path: '/manager/tenant-members',
+        icon: <TeamOutlined />,
+        label: "租户成员管理",
+        page: <TenantMemberManagerPage />,
         group: 'tenant'
     },
     {

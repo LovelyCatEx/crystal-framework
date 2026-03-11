@@ -8,6 +8,7 @@ import type {BaseManagerController} from "@/api/BaseManagerController.ts";
 interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
     value?: string | null;
     onChange?: (value: string | null) => void;
+    onEntityChange?: (entity: ENTITY | null) => void;
     isRowDisabled?: (row: ENTITY) => boolean;
     entityName: string;
     columns: EntityTableColumns<ENTITY>;
@@ -20,6 +21,7 @@ interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
 export function EntityIdSelector<ENTITY extends BaseEntity>({
     value,
     onChange,
+    onEntityChange,
     isRowDisabled,
     entityName,
     columns,
@@ -62,9 +64,11 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
             const entity = selected[0];
             setSelectedEntity(entity);
             onChange?.(entity.id);
+            onEntityChange?.(entity);
         } else {
             setSelectedEntity(null);
             onChange?.(null);
+            onEntityChange?.(null);
         }
         setIsModalOpen(false);
     };
@@ -72,6 +76,7 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
     const handleClear = () => {
         setSelectedEntity(null);
         onChange?.(null);
+        onEntityChange?.(null);
     };
 
     return (

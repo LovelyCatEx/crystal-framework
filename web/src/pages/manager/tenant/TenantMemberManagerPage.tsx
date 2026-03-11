@@ -1,0 +1,121 @@
+import {Button, Col, Form, Row, Select} from "antd";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
+import {
+    type ManagerCreateTenantMemberDTO,
+    type ManagerUpdateTenantMemberDTO,
+    TenantMemberManagerController,
+    TenantMemberStatus,
+    TenantMemberStatusMap
+} from "@/api/tenant-member.api.ts";
+import {useRef, useState} from "react";
+import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
+import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
+import {PlusOutlined} from "@ant-design/icons";
+
+export function TenantMemberManagerPage() {
+    const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+
+    const statusOptions = [
+        { label: TenantMemberStatusMap[TenantMemberStatus.ACTIVE].label, value: TenantMemberStatus.ACTIVE },
+        { label: TenantMemberStatusMap[TenantMemberStatus.INACTIVE].label, value: TenantMemberStatus.INACTIVE }
+    ];
+
+    const handleTenantChange = (tenantId: string | null) => {
+        setSelectedTenantId(tenantId);
+    };
+
+    const handleOpenAddModal = () => {
+        pageRef.current?.openModal();
+    };
+
+    return (
+        <>
+            <ActionBarComponent
+                title="租户成员管理"
+                subtitle="管理租户成员信息"
+                titleActions={
+                    selectedTenantId ? (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            size="large"
+                            className="rounded-xl h-12 shadow-lg"
+                            onClick={handleOpenAddModal}
+                        >
+                            新增租户成员
+                        </Button>
+                    ) : null
+                }
+            />
+            <TenantSelectorWithDetail
+                value={selectedTenantId}
+                onChange={handleTenantChange}
+            />
+            {selectedTenantId && (
+                <ManagerPageContainer
+                    ref={pageRef}
+                    className="mt-4"
+                    entityName="租户成员"
+                    title=""
+                    subtitle=""
+                    showActionBar={false}
+                    columns={TENANT_MEMBER_TABLE_COLUMNS}
+                    editModalFormChildren={
+                        <>
+                            <Row gutter={24}>
+                                <Col span={12}>
+                                    <Form.Item name="tenantId" hidden>
+                                        <input type="hidden" value={selectedTenantId || ''} />
+                                    </Form.Item>
+                                    <Form.Item
+                                        name="memberUserId"
+                                        label="成员用户"
+                                        rules={[{ required: true, message: '请选择成员用户' }]}
+                                    >
+                                        <UserIdSelector />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="status"
+                                        label="状态"
+                                        rules={[{ required: true, message: '请选择状态' }]}
+                                        initialValue={TenantMemberStatus.ACTIVE}
+                                    >
+                                        <Select
+                                            className="w-full rounded-lg h-10 flex items-center"
+                                            placeholder="选择状态"
+                                            options={statusOptions}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </>
+                    }
+                    query={async (props) => {
+                        return (await TenantMemberManagerController.query({
+                            ...props,
+                            tenantId: selectedTenantId
+                        })).data!
+                    }}
+                    delete={async (props) => {
+                        return (await TenantMemberManagerController.delete(props)).data!
+                    }}
+                    update={async (props: ManagerUpdateTenantMemberDTO) => {
+                        return (await TenantMemberManagerController.update(props)).data!
+                    }}
+                    create={async (props) => {
+                        const createProps: ManagerCreateTenantMemberDTO = {
+                            ...(props as ManagerCreateTenantMemberDTO),
+                            tenantId: selectedTenantId
+                        };
+                        return (await TenantMemberManagerController.create(createProps)).data!
+                    }}
+                />
+            )}
+        </>
+    )
+}

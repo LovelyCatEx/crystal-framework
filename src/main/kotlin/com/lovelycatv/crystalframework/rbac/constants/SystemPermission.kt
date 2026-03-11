@@ -110,10 +110,14 @@ object SystemPermission {
     const val ACTION_TENANT_PERMISSION_UPDATE = "tenant.permission.update"
     const val ACTION_TENANT_PERMISSION_DELETE = "tenant.permission.delete"
 
-    const val MENU_TENANT_MEMBER_RELATION_MANAGER = "tenant.member.relation:/manager/tenant-member-relations"
+    const val MENU_TENANT_MEMBER_MANAGER = "tenant.member:/manager/tenant-members"
 
+    const val ACTION_TENANT_MEMBER_CREATE = "tenant.member.create"
     const val ACTION_TENANT_MEMBER_READ = "tenant.member.read"
     const val ACTION_TENANT_MEMBER_UPDATE = "tenant.member.update"
+    const val ACTION_TENANT_MEMBER_DELETE = "tenant.member.delete"
+
+    const val MENU_TENANT_MEMBER_RELATION_MANAGER = "tenant.member.relation:/manager/tenant-member-relations"
 
     const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member.relation:/manager/tenant-department-member-relations"
 
