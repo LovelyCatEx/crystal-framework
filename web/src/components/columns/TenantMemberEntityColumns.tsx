@@ -1,12 +1,12 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {TenantMemberVO} from "@/api/tenant-member.api.ts";
 import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {UserAvatar} from "../UserAvatar.tsx";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {UserCard} from "../card/pop/UserCard.tsx";
+import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 
 export const TENANT_MEMBER_TABLE_COLUMNS: EntityTableColumns<TenantMemberVO> = [
     {

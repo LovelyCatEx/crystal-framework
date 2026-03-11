@@ -1,16 +1,6 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
-import type {User} from "@/types/user.types.ts";
-
-export interface TenantMemberVO {
-    id: string;
-    tenantId: string;
-    memberUserId: string;
-    status: number;
-    createdTime: string;
-    modifiedTime: string;
-    user: User;
-}
+import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 
 export interface ManagerCreateTenantMemberDTO {
     tenantId: string;

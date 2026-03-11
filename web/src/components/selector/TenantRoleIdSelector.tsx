@@ -2,7 +2,7 @@ import {SafetyCertificateOutlined} from "@ant-design/icons";
 import {forwardRef} from "react";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {TENANT_ROLE_TABLE_COLUMNS} from "../columns/TenantRoleEntityColumns.tsx";
-import {TenantRoleManagerController, type TenantRoleVO} from "@/api/tenant-role.api.ts";
+import {TenantRoleManagerController, type TenantRole} from "@/api/tenant-role.api.ts";
 import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 
 interface TenantRoleIdSelectorProps {
@@ -14,7 +14,7 @@ interface TenantRoleIdSelectorProps {
 export const TenantRoleIdSelector = forwardRef<EntityIdSelectorRef, TenantRoleIdSelectorProps>(
     ({ value, onChange, disabledRoleId }, ref) => {
         return (
-            <EntityIdSelector<TenantRoleVO>
+            <EntityIdSelector<TenantRole>
                 ref={ref}
                 value={value}
                 onChange={onChange}

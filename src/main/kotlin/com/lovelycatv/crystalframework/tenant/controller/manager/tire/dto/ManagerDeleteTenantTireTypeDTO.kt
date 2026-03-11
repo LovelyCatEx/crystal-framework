@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto
+package com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 

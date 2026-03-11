@@ -1,8 +1,8 @@
 import {doGet, doPost} from "./system-request.ts";
-import type {TenantPermissionVO} from "./tenant-permission.api.ts";
+import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 export async function getTenantRolePermissions(roleId: string) {
-    return doGet<TenantPermissionVO[]>('/api/manager/tenant/role/permission/get', { roleId });
+    return doGet<TenantPermission[]>('/api/manager/tenant/role/permission/get', { roleId });
 }
 
 export async function setTenantRolePermissions(roleId: string, permissionIds: string[]) {

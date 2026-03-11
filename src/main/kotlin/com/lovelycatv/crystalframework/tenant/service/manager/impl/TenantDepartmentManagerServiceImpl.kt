@@ -45,8 +45,8 @@ class TenantDepartmentManagerServiceImpl(
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantDepartmentDTO, original: TenantDepartmentEntity): TenantDepartmentEntity {
         return original.apply {
             dto.name?.let { name = it }
-            dto.description?.let { description = it }
-            dto.parentId?.let { parentId = it }
+            description = dto.description
+            parentId = dto.parentId
         }
     }
 }

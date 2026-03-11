@@ -4,11 +4,13 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.vo.TenantDepartmentMemberVO
+import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.TenantMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelationEntity
-import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
+import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -20,6 +22,7 @@ import kotlin.reflect.KClass
 class TenantDepartmentMemberRelationServiceImpl(
     private val tenantDepartmentMemberRelationRepository: TenantDepartmentMemberRelationRepository,
     private val tenantMemberRepository: TenantMemberRepository,
+    private val userManagerService: UserManagerService,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
@@ -34,14 +37,20 @@ class TenantDepartmentMemberRelationServiceImpl(
         get() = redisService.asKVStore()
     override val entityClass: KClass<TenantDepartmentMemberRelationEntity> = TenantDepartmentMemberRelationEntity::class
 
-    override suspend fun getDepartmentMembers(departmentId: Long): List<TenantMemberEntity> {
+    override suspend fun getDepartmentMembers(departmentId: Long): List<TenantDepartmentMemberVO> {
         val relationIds = this.getRepository()
             .findAllByDepartmentId(departmentId)
             .awaitListWithTimeout()
 
         return relationIds.map {
-            tenantMemberRepository.findById(it.memberId).awaitFirstOrNull()
+            val member = tenantMemberRepository.findById(it.memberId).awaitFirstOrNull()
                 ?: throw BusinessException("member with id ${it.memberId} not found")
+            val user = userManagerService.getByIdOrNull(member.memberUserId)
+
+            TenantDepartmentMemberVO(
+                member = TenantMemberVO.fromEntity(member, user),
+                roleType = it.roleType
+            )
         }
     }
 

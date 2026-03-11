@@ -1,17 +1,6 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
-
-export interface TenantPermissionVO {
-    id: string;
-    name: string;
-    description: string | null;
-    type: number;
-    path: string | null;
-    preserved1: number | null;
-    preserved2: number | null;
-    createdTime: string;
-    modifiedTime: string;
-}
+import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 export interface ManagerCreateTenantPermissionDTO {
     name: string;
@@ -53,7 +42,7 @@ export const TenantPermissionTypeMap: Record<number, { label: string; color: str
 };
 
 class TenantPermissionManagerControllerClass extends BaseManagerController<
-    TenantPermissionVO,
+    TenantPermission,
     ManagerCreateTenantPermissionDTO,
     ManagerReadTenantPermissionDTO,
     ManagerUpdateTenantPermissionDTO,

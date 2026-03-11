@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto
+package com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size

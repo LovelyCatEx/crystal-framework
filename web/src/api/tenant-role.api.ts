@@ -1,15 +1,6 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
-
-export interface TenantRoleVO {
-    id: string;
-    tenantId: string;
-    name: string;
-    description: string | null;
-    parentId: string | null;
-    createdTime: string;
-    modifiedTime: string;
-}
+import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 export interface ManagerCreateTenantRoleDTO {
     tenantId: string;
@@ -37,7 +28,7 @@ export interface ManagerDeleteTenantRoleDTO extends BaseManagerDeleteDTO {
 }
 
 class TenantRoleManagerControllerClass extends BaseManagerController<
-    TenantRoleVO,
+    TenantRole,
     ManagerCreateTenantRoleDTO,
     ManagerReadTenantRoleDTO,
     ManagerUpdateTenantRoleDTO,

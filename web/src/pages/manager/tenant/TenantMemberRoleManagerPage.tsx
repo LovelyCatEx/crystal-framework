@@ -2,9 +2,9 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantMemberManagerController, type TenantMemberVO} from "@/api/tenant-member.api.ts";
+import {TenantMemberManagerController, type TenantMember} from "@/api/tenant-member.api.ts";
 import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
-import {TenantRoleManagerController, type TenantRoleVO} from "@/api/tenant-role.api.ts";
+import {TenantRoleManagerController, type TenantRole} from "@/api/tenant-role.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 
@@ -16,9 +16,9 @@ interface TransferItem {
 
 export function TenantMemberRoleManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-    const [members, setMembers] = useState<TenantMemberVO[]>([]);
-    const [allRoles, setAllRoles] = useState<TenantRoleVO[]>([]);
-    const [selectedMember, setSelectedMember] = useState<TenantMemberVO | null>(null);
+    const [members, setMembers] = useState<TenantMember[]>([]);
+    const [allRoles, setAllRoles] = useState<TenantRole[]>([]);
+    const [selectedMember, setSelectedMember] = useState<TenantMember | null>(null);
     const [selectedRoleIds, setSelectedRoleIds] = useState<Key[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export function TenantMemberRoleManagerPage() {
         void fetchMembers(page, pageSize);
     };
 
-    const openAssignModal = async (member: TenantMemberVO) => {
+    const openAssignModal = async (member: TenantMember) => {
         setSelectedMember(member);
         setIsModalVisible(true);
         try {
@@ -122,7 +122,7 @@ export function TenantMemberRoleManagerPage() {
             title: "成员",
             dataIndex: "user",
             key: "user",
-            render: (_: unknown, row: TenantMemberVO) => (
+            render: (_: unknown, row: TenantMember) => (
                 <Space orientation='vertical' size={0}>
                     <CopyableToolTip title={row.user?.nickname || '未知用户'}>
                         <span className="text-xs font-mono">{row.user?.nickname || '未知用户'}</span>
@@ -136,14 +136,14 @@ export function TenantMemberRoleManagerPage() {
         {
             title: "用户名",
             key: "username",
-            render: (_: unknown, row: TenantMemberVO) => (
+            render: (_: unknown, row: TenantMember) => (
                 <span className="text-xs font-mono">{row.user?.username || '-'}</span>
             )
         },
         {
             title: "邮箱",
             key: "email",
-            render: (_: unknown, row: TenantMemberVO) => (
+            render: (_: unknown, row: TenantMember) => (
                 <span className="text-xs font-mono">{row.user?.email || '-'}</span>
             )
         },
@@ -160,7 +160,7 @@ export function TenantMemberRoleManagerPage() {
         {
             title: "操作",
             key: "action",
-            render: (_: unknown, row: TenantMemberVO) => (
+            render: (_: unknown, row: TenantMember) => (
                 <Button type="primary" size="small" onClick={() => openAssignModal(row)}>
                     分配角色
                 </Button>

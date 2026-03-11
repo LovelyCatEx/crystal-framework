@@ -6,10 +6,10 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantTireTypeEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireTypeRepository
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerCreateTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerDeleteTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerReadTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerUpdateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerCreateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerDeleteTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerReadTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerUpdateTenantTireTypeDTO
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface TenantTireTypeManagerService : CachedBaseManagerService<

@@ -1,14 +1,14 @@
-package com.lovelycatv.crystalframework.tenant.controller.manager.tiretype
+package com.lovelycatv.crystalframework.tenant.controller.manager.tire
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerCreateTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerDeleteTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerReadTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerUpdateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerCreateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerDeleteTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerReadTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerUpdateTenantTireTypeDTO
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireTypeManagerService
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize

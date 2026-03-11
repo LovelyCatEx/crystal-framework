@@ -2,9 +2,9 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantRoleManagerController, type TenantRoleVO} from "@/api/tenant-role.api.ts";
+import {TenantRoleManagerController, type TenantRole} from "@/api/tenant-role.api.ts";
 import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
-import {TenantPermissionManagerController, type TenantPermissionVO} from "@/api/tenant-permission.api.ts";
+import {TenantPermissionManagerController, type TenantPermission} from "@/api/tenant-permission.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 
@@ -16,9 +16,9 @@ interface TransferItem {
 
 export function TenantRolePermissionManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-    const [roles, setRoles] = useState<TenantRoleVO[]>([]);
-    const [allPermissions, setAllPermissions] = useState<TenantPermissionVO[]>([]);
-    const [selectedRole, setSelectedRole] = useState<TenantRoleVO | null>(null);
+    const [roles, setRoles] = useState<TenantRole[]>([]);
+    const [allPermissions, setAllPermissions] = useState<TenantPermission[]>([]);
+    const [selectedRole, setSelectedRole] = useState<TenantRole | null>(null);
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export function TenantRolePermissionManagerPage() {
         void fetchRoles(page, pageSize);
     };
 
-    const openAssignModal = async (role: TenantRoleVO) => {
+    const openAssignModal = async (role: TenantRole) => {
         setSelectedRole(role);
         setIsModalVisible(true);
         try {
@@ -122,7 +122,7 @@ export function TenantRolePermissionManagerPage() {
             title: "角色",
             dataIndex: "name",
             key: "name",
-            render: (_: unknown, row: TenantRoleVO) => (
+            render: (_: unknown, row: TenantRole) => (
                 <Space orientation='vertical' size={0}>
                     <CopyableToolTip title={row.name}>
                         <span className="text-xs font-mono">{row.name}</span>
@@ -137,14 +137,14 @@ export function TenantRolePermissionManagerPage() {
             title: "描述",
             dataIndex: "description",
             key: "description",
-            render: (_: unknown, row: TenantRoleVO) => (
+            render: (_: unknown, row: TenantRole) => (
                 <span className="text-xs font-mono">{row.description || '-'}</span>
             )
         },
         {
             title: "操作",
             key: "action",
-            render: (_: unknown, row: TenantRoleVO) => (
+            render: (_: unknown, row: TenantRole) => (
                 <Button type="primary" size="small" onClick={() => openAssignModal(row)}>
                     分配权限
                 </Button>

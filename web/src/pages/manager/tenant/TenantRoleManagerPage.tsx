@@ -3,7 +3,7 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     type ManagerCreateTenantRoleDTO,
     type ManagerUpdateTenantRoleDTO,
-    type TenantRoleVO,
+    type TenantRole,
     TenantRoleManagerController
 } from "@/api/tenant-role.api.ts";
 import {useRef, useState} from "react";
@@ -57,7 +57,7 @@ export function TenantRoleManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={TENANT_ROLE_TABLE_COLUMNS}
-                    editModalFormChildren={(editingItem: TenantRoleVO | null) => (
+                    editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>
                                 <Col span={12}>

@@ -8,6 +8,8 @@ import {RedoOutlined} from "@ant-design/icons";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
 
+const TENANT_ID_STORAGE_KEY = 'selected_tenant_id';
+
 interface TenantSelectorWithDetailProps {
     value?: string | null;
     onChange?: (tenantId: string | null) => void;
@@ -23,21 +25,43 @@ export function TenantSelectorWithDetail({
     const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [initialChecked, setInitialChecked] = useState(false);
 
+    const getTenantIdFromStorage = (): string | null => {
+        return sessionStorage.getItem(TENANT_ID_STORAGE_KEY);
+    };
+
+    const saveTenantId = (tenantId: string | null) => {
+        if (tenantId) {
+            sessionStorage.setItem(TENANT_ID_STORAGE_KEY, tenantId);
+            const url = new URL(window.location.href);
+            url.searchParams.set('tenantId', tenantId);
+            window.history.replaceState({}, '', url.toString());
+        } else {
+            sessionStorage.removeItem(TENANT_ID_STORAGE_KEY);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('tenantId');
+            window.history.replaceState({}, '', url.toString());
+        }
+    };
+
     useEffect(() => {
         if (initialChecked) return;
         
         const urlParams = new URLSearchParams(window.location.search);
         const tenantIdFromUrl = urlParams.get('tenantId');
+        const tenantIdFromStorage = getTenantIdFromStorage();
+        const tenantIdToUse = tenantIdFromUrl || tenantIdFromStorage;
         
-        if (tenantIdFromUrl) {
-            TenantManagerController.getById(tenantIdFromUrl).then((tenant) => {
+        if (tenantIdToUse) {
+            TenantManagerController.getById(tenantIdToUse).then((tenant) => {
                 if (tenant) {
                     setSelectedTenant(tenant);
                     onTenantChange?.(tenant);
-                    onChange?.(tenantIdFromUrl);
+                    onChange?.(tenantIdToUse);
+                    saveTenantId(tenantIdToUse);
                 }
                 setInitialChecked(true);
             }).catch(() => {
+                saveTenantId(null);
                 setInitialChecked(true);
             });
         } else {
@@ -56,23 +80,13 @@ export function TenantSelectorWithDetail({
         onTenantChange?.(tenant);
         onChange?.(tenant?.id || null);
         
-        if (tenant?.id) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('tenantId', tenant.id);
-            window.history.replaceState({}, '', url.toString());
-        } else {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('tenantId');
-            window.history.replaceState({}, '', url.toString());
-        }
+        saveTenantId(tenant?.id || null);
     };
 
     const handleReselect = () => {
-        // 直接打开弹窗，不重置状态
         selectorRef.current?.openModal();
     };
 
-    // 如果没有选择租户，显示选择器
     if (!selectedTenant) {
         return (
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
@@ -91,7 +105,6 @@ export function TenantSelectorWithDetail({
 
     const statusInfo = TenantStatusMap[selectedTenant.status] || { label: '未知', color: 'default' };
 
-    // 选择了租户后，显示详情卡片，但保留隐藏的 TenantIdSelector 用于弹窗
     return (
         <Card
             className="border-none shadow-sm rounded-2xl overflow-hidden"
@@ -109,7 +122,6 @@ export function TenantSelectorWithDetail({
                 </div>
             }
         >
-            {/* 隐藏的 TenantIdSelector，用于重新选择时打开弹窗 */}
             <div style={{ display: 'none' }}>
                 <TenantIdSelector
                     ref={selectorRef}

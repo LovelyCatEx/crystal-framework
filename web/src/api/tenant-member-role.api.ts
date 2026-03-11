@@ -1,8 +1,8 @@
 import {doGet, doPost} from "./system-request.ts";
-import type {TenantRoleVO} from "./tenant-role.api.ts";
+import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 export async function getTenantMemberRoles(memberId: string) {
-    return doGet<TenantRoleVO[]>('/api/manager/tenant/member/role/get', { memberId });
+    return doGet<TenantRole[]>('/api/manager/tenant/member/role/get', { memberId });
 }
 
 export async function setTenantMemberRoles(memberId: string, roleIds: string[]) {

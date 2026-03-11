@@ -2,8 +2,8 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerCreateTenantTireTypeDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.tiretype.dto.ManagerUpdateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerCreateTenantTireTypeDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerUpdateTenantTireTypeDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantTireTypeEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireTypeRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireTypeManagerService

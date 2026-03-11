@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.service.impl
+package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData

@@ -52,7 +52,7 @@ class TenantManagerServiceImpl(
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantDTO, original: TenantEntity): TenantEntity {
         return original.apply {
             dto.name?.let { name = it }
-            dto.description?.let { description = it }
+            description = dto.description
             dto.status?.let { status = it }
             dto.tireTypeId?.let { tireTypeId = it }
             dto.subscribedTime?.let { subscribedTime = it }
@@ -61,7 +61,7 @@ class TenantManagerServiceImpl(
             dto.contactEmail?.let { contactEmail = it }
             dto.contactPhone?.let { contactPhone = it }
             dto.address?.let { address = it }
-            dto.settings?.let { settings = it }
+            settings = dto.settings
         }
     }
 }

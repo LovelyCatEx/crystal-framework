@@ -1,6 +1,19 @@
 import {
-    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined,
-    CloudOutlined, FileOutlined, DatabaseOutlined, MailOutlined, FolderOutlined, TagsOutlined, ShopOutlined
+    ApartmentOutlined,
+    CloudOutlined,
+    DashboardOutlined,
+    DatabaseOutlined,
+    FileOutlined,
+    FolderOutlined,
+    KeyOutlined,
+    MailOutlined,
+    SafetyOutlined,
+    SettingOutlined,
+    ShopOutlined,
+    TagsOutlined,
+    TeamOutlined,
+    UserOutlined,
+    UserSwitchOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
@@ -25,6 +38,7 @@ import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermiss
 import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
 import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
+import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -216,6 +230,14 @@ export const adminMenus: RouteItem[] = [
         icon: <UserSwitchOutlined />,
         label: "租户成员角色管理",
         page: <TenantMemberRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-departments',
+        path: '/manager/tenant-departments',
+        icon: <ApartmentOutlined />,
+        label: "租户部门管理",
+        page: <TenantDepartmentManagerPage />,
         group: 'tenant'
     },
     {
