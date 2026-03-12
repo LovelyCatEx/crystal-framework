@@ -32,3 +32,9 @@ export const TenantStatusMap: Record<number, { label: string; color: string }> =
     [TenantStatus.ACTIVE]: { label: '活跃', color: 'green' },
     [TenantStatus.CLOSED]: { label: '已关闭', color: 'red' }
 };
+
+export interface UserTenantVO {
+    tenantId: string;
+    tenantName: string;
+    tenantAvatar: string | null;
+}

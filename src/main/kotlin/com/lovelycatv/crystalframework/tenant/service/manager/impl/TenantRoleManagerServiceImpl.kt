@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerUpdateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
@@ -48,5 +49,26 @@ class TenantRoleManagerServiceImpl(
             dto.description?.let { description = it }
             dto.parentId?.let { parentId = it }
         }
+    }
+
+    override suspend fun createFromDeclaration(
+        tenantId: Long,
+        declaration: TenantRoleDeclaration
+    ): TenantRoleEntity {
+        return this.create(
+            ManagerCreateTenantRoleDTO(
+                tenantId = tenantId,
+                name = declaration.name,
+                description = declaration.description,
+                parentId = declaration.parentRole?.let {
+                    val parentRoleEntity = getRepository()
+                        .findByName(it.name)
+                        .awaitFirstOrNull()
+                        ?: createFromDeclaration(tenantId, it)
+
+                    parentRoleEntity.id
+                }
+            )
+        )
     }
 }

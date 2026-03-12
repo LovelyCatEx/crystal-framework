@@ -3,6 +3,8 @@ package com.lovelycatv.crystalframework.tenant.entity
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.utils.parseObject
+import com.lovelycatv.crystalframework.tenant.types.TenantSettings
 import com.lovelycatv.crystalframework.tenant.types.TenantStatus
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -51,5 +53,10 @@ class TenantEntity(
     fun getRealStatus(): TenantStatus {
         return TenantStatus.entries.getOrNull(this.status)
             ?: throw BusinessException("invalid tenant status id $status")
+    }
+
+    @JsonIgnore
+    fun getSettingsObject(): TenantSettings? {
+        return this.settings?.parseObject()
     }
 }

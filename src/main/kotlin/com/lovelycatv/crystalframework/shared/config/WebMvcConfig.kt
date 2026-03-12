@@ -66,10 +66,27 @@ class WebMvcConfig(
                     null
                 } ?: return Mono.empty()
 
-                return UserAuthentication(
-                    userId = claims.get("userId", String::class.java).toLong(),
-                    username = claims.subject
-                ).toMono()
+                val userId = try {
+                    claims.get("userId", String::class.java).toLong()
+                } catch (_: Exception) {
+                    null
+                }
+
+                val tenantId = try {
+                    claims.get("tenantId", String::class.java).toLong()
+                } catch (_: Exception) {
+                    null
+                }
+
+                return if (userId != null) {
+                    UserAuthentication(
+                        userId = userId,
+                        username = claims.subject,
+                        tenantId = tenantId
+                    ).toMono()
+                } else {
+                    Mono.empty()
+                }
             }
 
         })

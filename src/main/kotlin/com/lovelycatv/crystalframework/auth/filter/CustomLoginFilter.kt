@@ -16,8 +16,10 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 class CustomLoginFilter(
@@ -32,20 +34,20 @@ class CustomLoginFilter(
         )
 
         setServerAuthenticationConverter { exchange ->
-           exchange.formData
-                .handle { params, sink ->
+            exchange.formData
+                .flatMap { params ->
                     val username = params["username"]?.firstOrNull()
                     val password = params["password"]?.firstOrNull()
+                    val tenantId = params["tenantId"]?.firstOrNull() ?: 0
 
                     if (username == null || password == null) {
-                        sink.error(BusinessException("username or password is missing"))
-                        return@handle
+                        return@flatMap Mono.error(BusinessException("username or password is missing"))
                     }
 
-                    sink.next(UsernamePasswordAuthenticationToken(
-                        username,
+                    UsernamePasswordAuthenticationToken(
+                        "${username}:${tenantId}",
                         password,
-                    ))
+                    ).toMono()
                 }
         }
 

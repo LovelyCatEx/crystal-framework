@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
 
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.Size
     val name: String? = null,
 
     val description: String? = null,
+
+    val ownerUserId: Long? = null,
 
     val status: Int? = null,
 

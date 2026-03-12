@@ -168,9 +168,9 @@ class SecurityConfig(
         http.addFilterAfter(
             CustomAuthFilter(
                 unauthorizedPathPatterns = unauthorizedPathPatterns,
-                getUserAuthorities = { userId ->
+                getUserAuthorities = { userId, tenantId ->
                     runBlocking(Dispatchers.IO) {
-                        userRbacQueryService.getUserAuthorities(userId)
+                        userRbacQueryService.getUserAuthorities(userId, tenantId)
                     }
                 },
                 getJWTSignKey = {

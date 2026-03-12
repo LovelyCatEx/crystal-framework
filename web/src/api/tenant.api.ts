@@ -1,6 +1,7 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
-import type {Tenant} from "../types/tenant.types.ts";
+import type {Tenant, UserTenantVO} from "../types/tenant.types.ts";
 import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
+import {doGet} from "@/api/system-request.ts";
 
 export const TenantManagerController = new BaseManagerController<
     Tenant,
@@ -39,4 +40,8 @@ export interface ManagerUpdateTenantDTO extends BaseManagerUpdateDTO {
 
 export interface ManagerReadTenantDTO extends BaseManagerReadDTO {
     status?: number | null;
+}
+
+export function getJoinedTenants() {
+    return doGet<UserTenantVO[]>("/api/tenant/joined");
 }

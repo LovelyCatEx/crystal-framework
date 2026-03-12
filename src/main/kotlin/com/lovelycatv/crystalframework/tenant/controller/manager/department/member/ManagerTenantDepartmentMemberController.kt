@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/department/member")
-class ManagerTenantDepartmentMemberRelationController(
+class ManagerTenantDepartmentMemberController(
     private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService
 ) {
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE}')")

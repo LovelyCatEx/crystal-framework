@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
-    val getUserAuthorities: (userId: Long) -> Collection<GrantedAuthority>,
+    val getUserAuthorities: (userId: Long, tenantId: Long?) -> Collection<GrantedAuthority>,
     val getJWTSignKey: () -> String,
 ) : WebFilter {
     private val logger = logger()
@@ -64,10 +64,14 @@ class CustomAuthFilter(
             ?.toLong()
             ?: throw UnauthorizedException("userId is missing")
 
+        val tenantId = claims["tenantId"]
+            ?.toString()
+            ?.toLong()
+
         val token = UsernamePasswordAuthenticationToken(
             claims.subject,
             null,
-            getUserAuthorities.invoke(userId)
+            getUserAuthorities.invoke(userId, tenantId)
         )
 
         return chain.filter(exchange).contextWrite {

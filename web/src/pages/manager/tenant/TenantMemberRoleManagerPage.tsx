@@ -2,7 +2,8 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
+import {TenantMemberManagerController, TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
@@ -153,11 +154,15 @@ export function TenantMemberRoleManagerPage() {
             title: "状态",
             dataIndex: "status",
             key: "status",
-            render: (status: number) => (
-                <Tag color={status === 1 ? 'green' : 'red'} className="text-xs">
-                    {status === 1 ? 'ACTIVE' : 'INACTIVE'}
-                </Tag>
-            )
+            render: (status: number) => {
+                const statusInfo = TenantMemberStatusMap[status] || { label: '未知', color: 'default' };
+                const translatedLabel = tenantMemberStatusToTranslationMap.get(status) || statusInfo.label;
+                return (
+                    <Tag color={statusInfo.color} className="text-xs">
+                        {translatedLabel}
+                    </Tag>
+                );
+            }
         },
         {
             title: "操作",

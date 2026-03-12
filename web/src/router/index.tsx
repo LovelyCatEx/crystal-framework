@@ -39,6 +39,7 @@ import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPa
 import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
 import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
+import {TenantProfilePage} from "@/pages/manager/tenant/TenantProfilePage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -86,6 +87,17 @@ export const publicMenus: RouteItem[] = [
         icon: <UserOutlined />,
         label: "个人中心",
         page: <UserProfilePage />
+    }
+]
+
+export const tenantMenus: RouteItem[] = [
+    {
+        key: '/manager/tenant/profile',
+        path: '/manager/tenant/profile',
+        icon: <ShopOutlined />,
+        label: "组织信息",
+        page: <TenantProfilePage />,
+        group: 'tenant'
     }
 ]
 
@@ -258,6 +270,8 @@ export function computeAccessibleMenus(accessiblePathList: string[]): RouteItem[
 
     return [
         ...publicMenus,
+        ...tenantMenus
+            .filter((menu) => accessiblePathList.includes(menu.path)),
         ...adminMenus
             .filter((menu) => accessiblePathList.includes(menu.path)),
     ];

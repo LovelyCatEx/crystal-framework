@@ -48,4 +48,6 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
         @Param("tenantId") tenantId: Long?,
         @Param("parentId") parentId: Long?
     ): Mono<Long>
+
+    fun findByName(name: String): Mono<TenantRoleEntity>
 }

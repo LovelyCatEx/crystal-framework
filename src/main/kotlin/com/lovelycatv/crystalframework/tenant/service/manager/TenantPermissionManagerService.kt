@@ -10,7 +10,9 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantPermissionEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantPermissionRepository
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
+import com.lovelycatv.crystalframework.tenant.constants.TenantPermissionDeclaration
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.data.annotation.Id
 
 interface TenantPermissionManagerService : CachedBaseManagerService<
         TenantPermissionRepository,

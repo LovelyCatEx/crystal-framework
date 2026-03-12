@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantRoleRepository
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
+import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface TenantRoleManagerService : CachedBaseManagerService<
@@ -20,6 +21,8 @@ interface TenantRoleManagerService : CachedBaseManagerService<
         ManagerUpdateTenantRoleDTO,
         ManagerDeleteTenantRoleDTO
 > {
+    suspend fun createFromDeclaration(tenantId: Long, declaration: TenantRoleDeclaration): TenantRoleEntity
+
     override suspend fun query(
         dto: ManagerReadTenantRoleDTO,
         isAdvanceQuery: suspend (dto: ManagerReadTenantRoleDTO) -> Boolean,
@@ -27,7 +30,7 @@ interface TenantRoleManagerService : CachedBaseManagerService<
     ): PaginatedResponseData<TenantRoleEntity> {
         return super.query(
             dto = dto,
-            isAdvanceQuery = { dto.searchKeyword != null || dto.tenantId != null || dto.parentId != null },
+            isAdvanceQuery = { true },
             doAdvanceQuery = { readDto, limit, offset ->
                 val total = getRepository().countAdvanceSearch(readDto.searchKeyword, readDto.tenantId, readDto.parentId).awaitFirstOrNull() ?: 0
                 val records = getRepository().advanceSearch(

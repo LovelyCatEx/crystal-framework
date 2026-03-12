@@ -9,5 +9,5 @@ interface UserRbacQueryService {
 
     suspend fun getUserTenantRbacAccessInfo(userId: Long): UserTenantRbacQueryResult
 
-    suspend fun getUserAuthorities(userId: Long): Set<GrantedAuthority>
+    suspend fun getUserAuthorities(userId: Long, tenantId: Long?): Set<GrantedAuthority>
 }

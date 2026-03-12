@@ -12,6 +12,9 @@ import jakarta.validation.constraints.Size
 
     val description: String? = null,
 
+    @field:NotNull(message = "status is required")
+    val status: Int,
+
     @field:NotNull(message = "Owner user ID is required")
     val ownerUserId: Long,
 

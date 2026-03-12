@@ -31,21 +31,21 @@ export function TenantManagerPage() {
         { label: TenantStatusMap[TenantStatus.CLOSED].label, value: TenantStatus.CLOSED }
     ];
 
-    // 将 dayjs 对象转换为时间戳字符串
     const convertDateToTimestamp = (date: unknown): string => {
         if (date) {
-            // 检查是否是 dayjs 对象
-            if (typeof date === 'object' && date !== null && 'isValid' in date && typeof (date as any).isValid === 'function') {
+            if (typeof date === 'object' && 'isValid' in date && typeof (date as any).isValid === 'function') {
                 const dayjsDate = date as any;
                 if (dayjsDate.isValid()) {
                     return dayjsDate.valueOf().toString();
                 }
             }
+            if (typeof date === 'string') {
+                return date;
+            }
         }
         return '';
     };
 
-    // 添加时的默认值：订阅时间为现在，过期时间为一年后
     const initialValues = {
         subscribedTime: dayjs().valueOf().toString(),
         expiresTime: dayjs().add(1, 'year').valueOf().toString()
@@ -69,7 +69,7 @@ export function TenantManagerPage() {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="ownerUserId" label="所有者用户" rules={[{ required: true }]}>
-                                <UserIdSelector />
+                                <UserIdSelector isRowDisabled={(row, value) => row.id === value} />
                             </Form.Item>
                         </Col>
                     </Row>

@@ -2,7 +2,6 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.rbac.constants.SystemRole
-import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
@@ -12,6 +11,10 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.types.RedisConstants
+import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
+import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.types.TenantStatus
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -26,8 +29,11 @@ import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.flux
+import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -35,6 +41,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -44,7 +51,6 @@ class UserServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val passwordEncoder: PasswordEncoder,
     private val userRoleRelationService: UserRoleRelationService,
-    private val rolePermissionRelationService: UserRolePermissionRelationService,
     private val redisService: RedisService,
     private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
@@ -52,6 +58,9 @@ class UserServiceImpl(
     private val oAuthAccountService: OAuthAccountService,
     private val emailCodeAuthService: EmailCodeAuthService,
     private val userRbacQueryService: UserRbacQueryService,
+    @Lazy
+    private val tenantService: TenantService,
+    private val tenantMemberRelationService: TenantMemberRelationService
 ) : UserService {
     private val logger = logger()
 
@@ -60,22 +69,64 @@ class UserServiceImpl(
     }
 
     override fun findByUsername(username: String): Mono<UserDetails> {
-        return this
-            .getRepository()
-            .findByUsernameOrEmail(username, username)
-            .switchIfEmpty {
-                Mono.error(BusinessException("User $username not found"))
+        val (realUsername, tenantIdStr) = username.split(":")
+
+        val tenantMono: Mono<TenantEntity> = with(tenantIdStr.toLong()) {
+            mono {
+                if (this@with > 0) {
+                    val tenant = tenantService.getByIdOrThrow(
+                        this@with,
+                        BusinessException("tenant $tenantIdStr is not found")
+                    )
+
+                    if (tenant.getRealStatus() == TenantStatus.ACTIVE) {
+                        tenant
+                    } else {
+                        throw BusinessException("tenant is inactive or closed")
+                    }
+                } else {
+                    null
+                }
             }
-            .map {
-                it.apply {
+        }
+
+        return this@UserServiceImpl
+            .getRepository()
+            .findByUsernameOrEmail(realUsername, realUsername)
+            .switchIfEmpty {
+                Mono.error(BusinessException("User $realUsername not found"))
+            }
+            .map { userEntity ->
+                userEntity.apply {
                     setInternalRawAuthorities(
                         runBlocking(Dispatchers.IO) {
                             userRoleRelationService
-                                .getUserRoles(it.id)
+                                .getUserRoles(userEntity.id)
                                 .map { it.name }
                         }
                     )
                 }
+            }
+            .flatMap { userEntity ->
+                tenantMono
+                    .flatMap<UserDetails> {
+                        userEntity.setAuthenticatedTenant(it)
+                        flux {
+                            tenantMemberRelationService
+                                .getUserTenantMembers(userEntity.id)
+                                .forEach { this.send(it) }
+                        }.collectList()
+                            .flatMap {
+                                if (!it.any { it.tenantId == tenantIdStr.toLong() && it.memberUserId == userEntity.id }) {
+                                    Mono.error(BusinessException("User $realUsername not found in target tenant"))
+                                } else {
+                                    Mono.empty()
+                                }
+                            }
+                    }
+                    .switchIfEmpty {
+                        userEntity.toMono()
+                    }
             }
     }
 

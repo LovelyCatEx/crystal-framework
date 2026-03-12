@@ -72,8 +72,8 @@ logging:
     root: info
     org.springframework.security: info
     org.springframework.web: info
-    org.springframework.transaction: trace
-    org.springframework.r2dbc: trace
+    org.springframework.transaction: info
+    org.springframework.r2dbc: info
     io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: debug
