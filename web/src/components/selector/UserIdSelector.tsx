@@ -7,9 +7,10 @@ import type {User} from "@/types/user.types.ts";
 interface UserIdSelectorProps {
     value?: string | null;
     onChange?: (value: string | null) => void;
+    isRowDisabled?: (row: User, value?: string | null) => boolean;
 }
 
-export function UserIdSelector({ value, onChange }: UserIdSelectorProps) {
+export function UserIdSelector({ value, onChange, isRowDisabled }: UserIdSelectorProps) {
     return (
         <EntityIdSelector<User>
             value={value}
@@ -19,6 +20,13 @@ export function UserIdSelector({ value, onChange }: UserIdSelectorProps) {
             controller={UserManagerController}
             displayRender={(user) => `${user.username} (${user.email})`}
             placeholder="选择用户"
+            isRowDisabled={(row) => {
+                if (isRowDisabled) {
+                    return isRowDisabled(row, value);
+                } else {
+                    return false;
+                }
+            }}
             icon={<UserOutlined />}
         />
     );

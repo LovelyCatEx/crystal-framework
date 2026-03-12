@@ -1,5 +1,12 @@
 import {Button, Space, Spin} from "antd";
-import {type ReactNode, useEffect, useState} from "react";
+import {
+    type ForwardedRef,
+    forwardRef,
+    type ReactNode,
+    useEffect,
+    useImperativeHandle,
+    useState
+} from "react";
 import {EntitySelectorModal} from "./EntitySelector.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
@@ -8,6 +15,7 @@ import type {BaseManagerController} from "@/api/BaseManagerController.ts";
 interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
     value?: string | null;
     onChange?: (value: string | null) => void;
+    onEntityChange?: (entity: ENTITY | null) => void;
     isRowDisabled?: (row: ENTITY) => boolean;
     entityName: string;
     columns: EntityTableColumns<ENTITY>;
@@ -17,17 +25,32 @@ interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
     icon?: ReactNode;
 }
 
-export function EntityIdSelector<ENTITY extends BaseEntity>({
-    value,
-    onChange,
-    isRowDisabled,
-    entityName,
-    columns,
-    controller,
-    displayRender,
-    placeholder = "选择",
-    icon
-}: EntityIdSelectorProps<ENTITY>) {
+export interface EntityIdSelectorRef {
+    openModal: () => void;
+}
+
+export type EntityIdSelectorReturnType =
+    <ENTITY extends BaseEntity>(
+        props: EntityIdSelectorProps<ENTITY> & React.RefAttributes<EntityIdSelectorRef>
+    ) => ReactNode;
+
+export const EntityIdSelector = forwardRef(EntityIdSelectorInner) as EntityIdSelectorReturnType;
+
+function EntityIdSelectorInner<ENTITY extends BaseEntity>(
+    {
+        value,
+        onChange,
+        onEntityChange,
+        isRowDisabled,
+        entityName,
+        columns,
+        controller,
+        displayRender,
+        placeholder = "选择",
+        icon
+    }: EntityIdSelectorProps<ENTITY>,
+    ref: ForwardedRef<EntityIdSelectorRef>
+) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState<ENTITY | null>(null);
     const [loading, setLoading] = useState(false);
@@ -47,7 +70,7 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
         } else {
             setSelectedEntity(null);
         }
-    }, []);
+    }, [value, controller]);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -62,9 +85,11 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
             const entity = selected[0];
             setSelectedEntity(entity);
             onChange?.(entity.id);
+            onEntityChange?.(entity);
         } else {
             setSelectedEntity(null);
             onChange?.(null);
+            onEntityChange?.(null);
         }
         setIsModalOpen(false);
     };
@@ -72,7 +97,16 @@ export function EntityIdSelector<ENTITY extends BaseEntity>({
     const handleClear = () => {
         setSelectedEntity(null);
         onChange?.(null);
+        onEntityChange?.(null);
     };
+
+    useImperativeHandle(ref, () => {
+        return {
+            openModal: () => {
+                handleOpenModal();
+            }
+        };
+    });
 
     return (
         <>

@@ -75,6 +75,66 @@ object SystemPermission {
     const val ACTION_MAIL_TEMPLATE_UPDATE = "mail.template.update"
     const val ACTION_MAIL_TEMPLATE_DELETE = "mail.template.delete"
 
+    const val MENU_TENANT_MANAGER = "tenant:/manager/tenants"
+
+    const val ACTION_TENANT_CREATE = "tenant.create"
+    const val ACTION_TENANT_READ = "tenant.read"
+    const val ACTION_TENANT_UPDATE = "tenant.update"
+    const val ACTION_TENANT_DELETE = "tenant.delete"
+
+    const val MENU_TENANT_TIRE_TYPE_MANAGER = "tenant.tire.type:/manager/tenant-tire-types"
+
+    const val ACTION_TENANT_TIRE_TYPE_CREATE = "tenant.tire.type.create"
+    const val ACTION_TENANT_TIRE_TYPE_READ = "tenant.tire.type.read"
+    const val ACTION_TENANT_TIRE_TYPE_UPDATE = "tenant.tire.type.update"
+    const val ACTION_TENANT_TIRE_TYPE_DELETE = "tenant.tire.type.delete"
+
+    const val MENU_TENANT_DEPARTMENT_MANAGER = "tenant.department:/manager/tenant-departments"
+
+    const val ACTION_TENANT_DEPARTMENT_CREATE = "tenant.department.create"
+    const val ACTION_TENANT_DEPARTMENT_READ = "tenant.department.read"
+    const val ACTION_TENANT_DEPARTMENT_UPDATE = "tenant.department.update"
+    const val ACTION_TENANT_DEPARTMENT_DELETE = "tenant.department.delete"
+
+    const val MENU_TENANT_ROLE_MANAGER = "tenant.role:/manager/tenant-roles"
+
+    const val ACTION_TENANT_ROLE_CREATE = "tenant.role.create"
+    const val ACTION_TENANT_ROLE_READ = "tenant.role.read"
+    const val ACTION_TENANT_ROLE_UPDATE = "tenant.role.update"
+    const val ACTION_TENANT_ROLE_DELETE = "tenant.role.delete"
+
+    const val MENU_TENANT_PERMISSION_MANAGER = "tenant.permission:/manager/tenant-permissions"
+
+    const val ACTION_TENANT_PERMISSION_CREATE = "tenant.permission.create"
+    const val ACTION_TENANT_PERMISSION_READ = "tenant.permission.read"
+    const val ACTION_TENANT_PERMISSION_UPDATE = "tenant.permission.update"
+    const val ACTION_TENANT_PERMISSION_DELETE = "tenant.permission.delete"
+
+    const val MENU_TENANT_MEMBER_MANAGER = "tenant.member:/manager/tenant-members"
+
+    const val ACTION_TENANT_MEMBER_CREATE = "tenant.member.create"
+    const val ACTION_TENANT_MEMBER_READ = "tenant.member.read"
+    const val ACTION_TENANT_MEMBER_UPDATE = "tenant.member.update"
+    const val ACTION_TENANT_MEMBER_DELETE = "tenant.member.delete"
+
+
+    const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member:/manager/tenant-department-members"
+
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE = "tenant.department.member.create"
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ = "tenant.department.member.read"
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE = "tenant.department.member.update"
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE = "tenant.department.member.delete"
+
+    const val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = "tenant.member.role:/manager/tenant-member-roles"
+
+    const val ACTION_TENANT_MEMBER_ROLE_RELATION_READ = "tenant.member.role.read"
+    const val ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE = "tenant.member.role.update"
+
+    const val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = "tenant.role.permission:/manager/tenant-role-permissions"
+
+    const val ACTION_TENANT_ROLE_PERMISSION_RELATION_READ = "tenant.role.permission.read"
+    const val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = "tenant.role.permission.update"
+
     /**
      * resolve permission from string declaration
      *

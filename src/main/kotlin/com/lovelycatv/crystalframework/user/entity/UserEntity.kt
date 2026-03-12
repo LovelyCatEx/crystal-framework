@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.user.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import org.springframework.data.annotation.Transient
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -32,6 +33,18 @@ class UserEntity(
     @Transient
     @JsonIgnore
     private var internalAuthorities: MutableCollection<out GrantedAuthority> = mutableSetOf()
+
+    @Transient
+    @JsonIgnore
+    private var authenticatedTenant: TenantEntity? = null
+
+    fun getAuthenticatedTenant(): TenantEntity? {
+        return this.authenticatedTenant
+    }
+
+    fun setAuthenticatedTenant(authenticatedTenant: TenantEntity) {
+        this.authenticatedTenant = authenticatedTenant
+    }
 
     fun setInternalRawAuthorities(authorities: Iterable<String>) {
         setInternalAuthorities(authorities.map { SimpleGrantedAuthority(it) })

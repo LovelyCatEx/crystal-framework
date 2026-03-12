@@ -1,6 +1,19 @@
 import {
-    DashboardOutlined, UserOutlined, TeamOutlined, SafetyOutlined, KeyOutlined, UserSwitchOutlined, SettingOutlined,
-    CloudOutlined, FileOutlined, DatabaseOutlined, MailOutlined, FolderOutlined, TagsOutlined
+    ApartmentOutlined,
+    CloudOutlined,
+    DashboardOutlined,
+    DatabaseOutlined,
+    FileOutlined,
+    FolderOutlined,
+    KeyOutlined,
+    MailOutlined,
+    SafetyOutlined,
+    SettingOutlined,
+    ShopOutlined,
+    TagsOutlined,
+    TeamOutlined,
+    UserOutlined,
+    UserSwitchOutlined
 } from '@ant-design/icons';
 import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
@@ -18,6 +31,15 @@ import {StorageProviderManagerPage} from "../pages/manager/resource/StorageProvi
 import {MailTemplateCategoryManagerPage} from "../pages/manager/mail/MailTemplateCategoryManagerPage.tsx";
 import {MailTemplateTypeManagerPage} from "../pages/manager/mail/MailTemplateTypeManagerPage.tsx";
 import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManagerPage.tsx";
+import {TenantManagerPage} from "../pages/manager/tenant/TenantManagerPage.tsx";
+import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeManagerPage.tsx";
+import {TenantMemberManagerPage} from "../pages/manager/tenant/TenantMemberManagerPage.tsx";
+import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermissionManagerPage.tsx";
+import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
+import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
+import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
+import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
+import {TenantProfilePage} from "@/pages/manager/tenant/TenantProfilePage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -43,6 +65,11 @@ export const menuGroups: MenuGroup[] = [
         name: 'mail_template',
         icon: <MailOutlined />,
         label: '邮件模板',
+    },
+    {
+        name: 'tenant',
+        icon: <ShopOutlined />,
+        label: '租户管理',
     }
 ]
 
@@ -60,6 +87,17 @@ export const publicMenus: RouteItem[] = [
         icon: <UserOutlined />,
         label: "个人中心",
         page: <UserProfilePage />
+    }
+]
+
+export const tenantMenus: RouteItem[] = [
+    {
+        key: '/manager/tenant/profile',
+        path: '/manager/tenant/profile',
+        icon: <ShopOutlined />,
+        label: "组织信息",
+        page: <TenantProfilePage />,
+        group: 'tenant'
     }
 ]
 
@@ -109,6 +147,70 @@ export const adminMenus: RouteItem[] = [
         label: "用户角色分配",
         page: <UserRoleRelationManagerPage />,
         group: 'rbac'
+    },
+    {
+        key: '/manager/tenants',
+        path: '/manager/tenants',
+        icon: <ShopOutlined />,
+        label: "租户管理",
+        page: <TenantManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-members',
+        path: '/manager/tenant-members',
+        icon: <TeamOutlined />,
+        label: "成员管理",
+        page: <TenantMemberManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-roles',
+        path: '/manager/tenant-roles',
+        icon: <KeyOutlined />,
+        label: "角色管理",
+        page: <TenantRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-permissions',
+        path: '/manager/tenant-permissions',
+        icon: <SafetyOutlined />,
+        label: "权限管理",
+        page: <TenantPermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-role-permissions',
+        path: '/manager/tenant-role-permissions',
+        icon: <KeyOutlined />,
+        label: "角色权限管理",
+        page: <TenantRolePermissionManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-member-roles',
+        path: '/manager/tenant-member-roles',
+        icon: <UserSwitchOutlined />,
+        label: "成员角色管理",
+        page: <TenantMemberRoleManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-departments',
+        path: '/manager/tenant-departments',
+        icon: <ApartmentOutlined />,
+        label: "部门管理",
+        page: <TenantDepartmentManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-tire-types',
+        path: '/manager/tenant-tire-types',
+        icon: <ShopOutlined />,
+        label: "套餐类型管理",
+        page: <TenantTireTypeManagerPage />,
+        group: 'tenant'
     },
     {
         key: '/manager/file-resources',
@@ -168,6 +270,8 @@ export function computeAccessibleMenus(accessiblePathList: string[]): RouteItem[
 
     return [
         ...publicMenus,
+        ...tenantMenus
+            .filter((menu) => accessiblePathList.includes(menu.path)),
         ...adminMenus
             .filter((menu) => accessiblePathList.includes(menu.path)),
     ];

@@ -14,14 +14,20 @@ import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.type
 import type {BaseEntity} from "../types/BaseEntity.ts";
 import {EntityTable, type EntityTableProps, type EntityTableRef} from "./EntityTable.tsx";
 
-export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps, EntityTableProps<ENTITY> {
+type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
+
+export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps, EntityTableProps<ENTITY>, DivHTMLAttributes {
     delete: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
     update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
     create: <T extends object>(props: T) => Promise<unknown>;
-    editModalFormChildren?: React.ReactNode | JSX.Element;
+    editModalFormChildren?: React.ReactNode | JSX.Element | ((editingItem: ENTITY | null) => React.ReactNode | JSX.Element);
+    editModalInitialValues?: object;
+    showActionBar?: boolean;
 }
 
-export interface ManagerPageContainerRef extends EntityTableRef {}
+export interface ManagerPageContainerRef extends EntityTableRef {
+    openModal: () => void;
+}
 
 export type ManagerPageContainerReturnType =
     <ENTITY extends BaseEntity>(
@@ -82,6 +88,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             form.setFieldsValue(item);
         } else {
             form.resetFields();
+            if (props.editModalInitialValues) {
+                form.setFieldsValue(props.editModalInitialValues);
+            }
         }
 
         setIsModalVisible(true);
@@ -124,37 +133,46 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
         return {
             refreshData: () => {
                 entityTableRef?.current?.refreshData();
+            },
+            openModal: () => {
+                openModal();
             }
         }
     });
 
-    return (
-        <>
-            <ActionBarComponent
-                title={props.title}
-                subtitle={props.subtitle}
-                titleActions={<>
-                    {props.titleActions}
+    const showActionBar = props.showActionBar !== false;
 
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined/>}
-                        size="large"
-                        className="rounded-xl h-12 shadow-lg"
-                        onClick={() => openModal()}
-                    >
-                        新增{props.entityName}
-                    </Button>
-                </>}
-            />
+    const { className, style, ...restProps } = props;
+
+    return (
+        <div className={className} style={style}>
+            {showActionBar && (
+                <ActionBarComponent
+                    title={restProps.title}
+                    subtitle={restProps.subtitle}
+                    titleActions={<>
+                        {restProps.titleActions}
+
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            size="large"
+                            className="rounded-xl h-12 shadow-lg"
+                            onClick={() => openModal()}
+                        >
+                            新增{restProps.entityName}
+                        </Button>
+                    </>}
+                />
+            )}
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <EntityTable
                     ref={entityTableRef}
-                    entityName={props.entityName}
-                    columns={props.columns}
-                    query={props.query}
-                    tablePrefixActions={isCustomTableSelector ? props.tablePrefixActions : [
+                    entityName={restProps.entityName}
+                    columns={restProps.columns}
+                    query={restProps.query}
+                    tablePrefixActions={isCustomTableSelector ? restProps.tablePrefixActions : [
                         ...[{
                             label: '批量操作',
                             children: <div className="flex flex-row items-center gap-2">
@@ -176,19 +194,19 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                                 </Button>
                             </div>,
                         }],
-                        ...(props.tablePrefixActions ?? []),
+                        ...(restProps.tablePrefixActions ?? []),
                     ]}
-                    tableActions={props.tableActions}
+                    tableActions={restProps.tableActions}
                     tableRowActionsRender={(record) => (
                         <Space>
-                            {props.tableRowActionsRender?.(record)}
+                            {restProps.tableRowActionsRender?.(record)}
                             <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
                             <Popconfirm title="确定要删除此模型？" onConfirm={() => deleteModel(record.id)} okText="确认" cancelText="取消">
                                 <Button type="text" size="small" icon={<DeleteOutlined />} danger />
                             </Popconfirm>
                         </Space>
                     )}
-                    tableSelection={isCustomTableSelector ? props.tableSelection : {
+                    tableSelection={isCustomTableSelector ? restProps.tableSelection : {
                         type: 'checkbox',
                         onChange: (entities) => {
                             setSelectedEntities(entities);
@@ -198,7 +216,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             </Card>
 
             <Modal
-                title={(editingItem ? "编辑" : "新建") + props.entityName}
+                title={(editingItem ? "编辑" : "新建") + restProps.entityName}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => form.submit()}
@@ -213,11 +231,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         <Input />
                     </Form.Item>
 
-                    {props.editModalFormChildren}
+                    {typeof restProps.editModalFormChildren === 'function'
+                        ? restProps.editModalFormChildren(editingItem)
+                        : restProps.editModalFormChildren}
                 </Form>
             </Modal>
 
             {contextHolder}
-        </>
+        </div>
     )
 }

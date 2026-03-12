@@ -1,8 +1,8 @@
 import type {LoginResponse, OAuth2LoginResponse} from "../types/auth.types.ts";
 import {doGet, doPost} from "./system-request.ts";
 
-export async function login(username: string, password: string) {
-    return doPost<LoginResponse>('/api/user/login', { username: username, password: password });
+export async function login(username: string, password: string, tenantId?: string) {
+    return doPost<LoginResponse>('/api/user/login', { username: username, password: password, tenantId: tenantId });
 }
 
 export async function register(

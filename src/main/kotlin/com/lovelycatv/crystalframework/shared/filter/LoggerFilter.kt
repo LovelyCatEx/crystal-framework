@@ -143,7 +143,11 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
 
         private fun printResponseBodyString(id: Long, bodyStr: String) {
             if (bodyStr.isNotEmpty()) {
-                logger.info("[$id]   $bodyStr")
+                if (bodyStr.startsWith("{")) {
+                    logger.info("[$id]   $bodyStr")
+                } else {
+                    logger.info("[$id]   (response body does not seem to be a json object) contentLength: ${bodyStr.length}")
+                }
             } else {
                 logger.info("[$id]   (empty)")
             }

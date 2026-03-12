@@ -32,6 +32,9 @@ class UserAuthorizationServiceImpl(
                 expiration = expiration
             ) {
                 this.claim("userId", userEntity.id.toString())
+                userEntity.getAuthenticatedTenant()?.id?.let {
+                    this.claim("tenantId", it.toString())
+                }
             }
 
             expiresIn = expiration
