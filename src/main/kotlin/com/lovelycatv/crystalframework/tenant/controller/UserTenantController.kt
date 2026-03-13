@@ -28,7 +28,8 @@ class UserTenantController(
                 UserTenantVO(
                     tenantId = it.id,
                     tenantName = it.name,
-                    tenantAvatar = fileResourceService.getFileDownloadUrl(it.icon)
+                    tenantAvatar = fileResourceService.getFileDownloadUrl(it.icon),
+                    authenticated = userAuthentication.tenantId == it.id
                 )
             }
 

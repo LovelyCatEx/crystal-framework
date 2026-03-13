@@ -1,15 +1,100 @@
-import {Avatar, Button, Divider, Dropdown, Layout, Menu, Space} from "antd";
-import {LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined} from "@ant-design/icons";
+import {Avatar, Button, Divider, Dropdown, Layout, Menu, message, Space, Spin} from "antd";
+import {
+    DownOutlined,
+    LoadingOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    ShopOutlined,
+    UserOutlined
+} from "@ant-design/icons";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
-import {clearUserAuthentication} from "@/utils/token.utils.ts";
+import {clearUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
 import {useEffect, useMemo, useState} from "react";
 import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {computeAccessibleMenus, menuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "@/router";
 import './ManagerContainerPageStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
+import type {UserTenantVO} from "@/types/tenant.types.ts";
+import {switchTenant} from "@/api/auth.api.ts";
+import {useUserTenants} from "@/compositions/use-tenant.ts";
+
+function TenantSwitcher() {
+    const loggedUser = useLoggedUser();
+    const userTenants = useUserTenants();
+    const [switchingTenantId, setSwitchingTenantId] = useState<string | null>(null);
+
+    const handleTenantSwitch = async (tenant: UserTenantVO) => {
+        setSwitchingTenantId(tenant.tenantId);
+        try {
+            const result = await switchTenant({ tenantId: tenant.tenantId });
+            if (result.data) {
+                setUserAuthentication(result.data.token, result.data.expiresIn);
+                void message.success(`已切换到 ${tenant.tenantName}`);
+                window.location.reload();
+            }
+        } catch (error) {
+            void message.error(`切换到 ${tenant.tenantName} 失败`);
+        } finally {
+            setSwitchingTenantId(null);
+        }
+    };
+
+    const tenants = userTenants.joinedTenants || [];
+    if (tenants.length === 0) {
+        return null;
+    }
+
+    const allOptions: UserTenantVO[] = [
+        {
+            tenantId: '0',
+            tenantName: loggedUser.userProfile?.nickname ?? '非组织身份',
+            tenantAvatar: loggedUser.userProfile?.avatar ?? null,
+            authenticated: tenants.all((it) => !it.authenticated)
+        },
+        ...tenants
+    ];
+
+    const dropdownItems = allOptions.map(tenant => ({
+        key: tenant.tenantId,
+        label: (
+            <div className={`flex items-center gap-2 py-1 px-2 rounded`}>
+                <Avatar
+                    size="small"
+                    icon={<ShopOutlined />}
+                    src={tenant.tenantAvatar}
+                />
+                <span className={tenant.authenticated ? 'font-medium text-blue-500' : ''}>{tenant.tenantName}</span>
+                {tenant.authenticated && <span className="text-xs text-blue-500 ml-auto">当前</span>}
+                {switchingTenantId === tenant.tenantId && <Spin size="small" />}
+            </div>
+        ),
+        onClick: () => handleTenantSwitch(tenant),
+        disabled: switchingTenantId !== null || tenant.authenticated,
+    }));
+
+    return !userTenants.isJoinedTenantsLoading ? (
+        <Dropdown
+            menu={{ items: dropdownItems }}
+            placement="bottomLeft"
+            arrow
+        >
+            <Space orientation="horizontal" size={6} className="cursor-pointer">
+                <ShopOutlined />
+                <span className="hidden sm:inline">{userTenants.currentTenant?.tenantName ?? `@${loggedUser.userProfile?.username}`}</span>
+                <DownOutlined className="text-xs" />
+            </Space>
+        </Dropdown>
+    ) : (
+        <Space orientation="horizontal" size={8}>
+            <LoadingOutlined />
+            <span className="hidden sm:inline">切换中...</span>
+        </Space>
+    );
+}
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const loggedUser = useLoggedUser();
@@ -102,11 +187,14 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     return (
         <Layout className="min-h-screen bg-[#f8fafc]">
             <Header className="fixed top-0 left-0 w-full h-16 px-6 flex items-center justify-between z-50 backdrop-blur-md border-b border-gray-100 shadow-sm">
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                    <img src="/logo.svg" alt="Logo" className="w-8 h-8"/>
-                    <span className="text-2xl font-bold tracking-tight text-gray-900">
-                        {ProjectDisplayName}
-                    </span>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <img src="/logo.svg" alt="Logo" className="w-8 h-8"/>
+                        <span className="text-2xl font-bold tracking-tight text-gray-900">
+                            {ProjectDisplayName}
+                        </span>
+                    </div>
+                    <TenantSwitcher />
                 </div>
 
                 <div className="flex flex-row items-center gap-4">

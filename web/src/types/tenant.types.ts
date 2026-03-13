@@ -37,6 +37,7 @@ export interface UserTenantVO {
     tenantId: string;
     tenantName: string;
     tenantAvatar: string | null;
+    authenticated: boolean;
 }
 
 export interface TenantProfileVO {

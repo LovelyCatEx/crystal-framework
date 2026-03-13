@@ -86,3 +86,11 @@ export interface RegisterFromOAuthAccountDTO {
 export async function registerFromOAuthAccount(dto: RegisterFromOAuthAccountDTO) {
     return doPost<LoginResponse>('/api/user/oauth/registerFromOAuthAccount', { ...dto });
 }
+
+export interface SwitchTenantDTO {
+    tenantId: string;
+}
+
+export async function switchTenant(dto: SwitchTenantDTO) {
+    return doPost<LoginResponse>('/api/user/auth/switchTenant', dto);
+}
