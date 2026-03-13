@@ -62,14 +62,14 @@ class UserRbacQueryServiceImpl(
         )
     }
 
-    override suspend fun getUserAuthorities(userId: Long, tenantId: Long?): Set<GrantedAuthority> {
+    override suspend fun getUserAuthorities(userId: Long, tenantId: Long?, refreshCache: Boolean): Set<GrantedAuthority> {
         val redisKey = "userAuthorities:$userId"
         val cache = redisService
             .get<String>(redisKey)
             .awaitFirstOrNull()
             ?.split(",")
 
-        return if (cache != null) {
+        return if (!refreshCache && cache != null) {
             cache.map { GrantedAuthority { it } }.toSet()
         } else {
             val rbacPermissions = this

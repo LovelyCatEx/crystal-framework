@@ -10,13 +10,15 @@ object TenantPermission {
         path = "/manager/tenant/profile"
     )
 
+    const val ACTION_TENANT_PROFILE_READ_PEM = "i.tenant.profile.read"
     val ACTION_TENANT_PROFILE_READ = TenantPermissionDeclaration(
-        name = "i.tenant.profile.read",
+        name = ACTION_TENANT_PROFILE_READ_PEM,
         type = TenantPermissionType.ACTION,
     )
 
+    const val ACTION_TENANT_PROFILE_UPDATE_PEM = "i.tenant.profile.update"
     val ACTION_TENANT_PROFILE_UPDATE = TenantPermissionDeclaration(
-        name = "i.tenant.profile.update",
+        name = ACTION_TENANT_PROFILE_UPDATE_PEM,
         type = TenantPermissionType.ACTION,
     )
 

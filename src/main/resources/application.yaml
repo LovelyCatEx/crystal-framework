@@ -66,6 +66,11 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+    tenant-icon:
+      supported-content-types:
+        - image/png
+        - image/jpeg
+        - image/webp
 
 logging:
   level:

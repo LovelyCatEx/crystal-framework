@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
+import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.UserService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.Authentication
@@ -20,7 +21,12 @@ class UserAuthorizationServiceImpl(
     private val userService: UserService,
     private val oAuthAccountService: OAuthAccountService,
     private val jwtSignKeyStore: JWTSignKeyStore,
+    private val userRbacQueryService: UserRbacQueryService,
 ) : UserAuthorizationService {
+    override suspend fun refreshUserAuthorityCache(userId: Long, tenantId: Long?) {
+        userRbacQueryService.getUserAuthorities(userId, tenantId, true)
+    }
+
     override fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
         return LoginSuccessResponseData().apply {
             val expiration = 7 * 24 * 3600 * 1000L

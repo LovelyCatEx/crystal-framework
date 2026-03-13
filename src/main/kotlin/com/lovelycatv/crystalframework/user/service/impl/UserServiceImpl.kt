@@ -267,10 +267,6 @@ class UserServiceImpl(
         }
     }
 
-    override suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult {
-        return userRbacQueryService.getUserRbacAccessInfo(userId)
-    }
-
     override suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO {
         val user = getByIdOrThrow(userId, BusinessException("User $userId not found"))
 

@@ -38,3 +38,21 @@ export interface UserTenantVO {
     tenantName: string;
     tenantAvatar: string | null;
 }
+
+export interface TenantProfileVO {
+    tenantId: string;
+    ownerUserId: string;
+    name: string;
+    description: string | null;
+    icon: string | null;
+    status: number;
+    tireTypeId: string;
+    subscribedTime: string;
+    expiresTime: string;
+    contactName: string;
+    contactEmail: string;
+    contactPhone: string;
+    address: string;
+    createdTime: string;
+    modifiedTime: string;
+}

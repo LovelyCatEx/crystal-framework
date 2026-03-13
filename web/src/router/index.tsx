@@ -97,7 +97,6 @@ export const tenantMenus: RouteItem[] = [
         icon: <ShopOutlined />,
         label: "组织信息",
         page: <TenantProfilePage />,
-        group: 'tenant'
     }
 ]
 

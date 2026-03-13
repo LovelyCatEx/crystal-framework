@@ -135,7 +135,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                     navigate(menuPathProfile);
                                 } else if (e.key === 'logout') {
                                     clearUserAuthentication();
-                                    navigate(menuPathLogin);
+                                    navigate(`${menuPathLogin}?redirectTo=${encodeURIComponent(location.pathname + location.search)}`);
                                 }
                             },
                         }}

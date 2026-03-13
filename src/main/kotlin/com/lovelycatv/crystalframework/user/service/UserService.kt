@@ -32,8 +32,6 @@ interface UserService : CachedBaseService<UserRepository, UserEntity>, ReactiveU
 
     suspend fun requestResetEmailAddressEmailConfirmationCode(email: String)
 
-    suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult
-
     suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
 
     @Transactional(rollbackFor = [Exception::class])
