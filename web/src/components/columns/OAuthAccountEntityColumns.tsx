@@ -6,7 +6,7 @@ import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {UserManagerController} from "@/api/user.api.ts";
 import type {User} from "@/types/user.types.ts";
-import {UserAvatar} from "../UserAvatar.tsx";
+import {AvatarResource} from "../AvatarResource.tsx";
 import PlatformIcon from "../PlatformIcon.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";
 
@@ -31,7 +31,7 @@ function SystemUserCell({ userId }: { userId: string | null }) {
         return (
             <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
                 <Space orientation='horizontal' size={8} className="cursor-pointer">
-                    <UserAvatar fileEntityId={user.avatar} />
+                    <AvatarResource fileEntityId={user.avatar} />
                     <Space orientation='vertical' size={0}>
                         <span>{user.nickname}</span>
                         <span className="text-gray-400">@{user.username}</span>

@@ -17,8 +17,8 @@ export class BaseManagerController<
         private readonly baseUrl: string
     ) {}
 
-    async getById(id: string) {
-        const result = await this.query({ page: 1, pageSize: 1, id: id } as R)
+    async getById(id: string, additional: Record<string, string> = {}) {
+        const result = await this.query({ page: 1, pageSize: 1, id: id, ...additional } as R)
         const records = (result.data?.records ?? [])
         return records.length > 0 ? records[0] : null
     }

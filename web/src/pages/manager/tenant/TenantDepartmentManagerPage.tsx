@@ -398,25 +398,39 @@ export function TenantDepartmentManagerPage() {
             {selectedTenantId && (
                 <Row gutter={24} className="mt-4">
                     {/* Left: Department Tree */}
-                    <Col span={5}>
+                    <Col xs={24} xl={5} className="mb-4 xl:mb-0">
                         <Card
                             title="部门列表"
                             className="border-none shadow-sm rounded-2xl overflow-hidden"
                             loading={loading}
                         >
-                            <Tree
-                                treeData={treeData}
-                                onSelect={handleTreeSelect}
-                                selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
-                                defaultExpandAll
-                                blockNode
-                                showLine
-                            />
+                            {treeData.length > 0 ? (
+                                <Tree
+                                    treeData={treeData}
+                                    onSelect={handleTreeSelect}
+                                    selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
+                                    defaultExpandAll
+                                    blockNode
+                                    showLine
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                    <TeamOutlined className="text-4xl mb-4" />
+                                    <p className="text-sm mb-4">暂无部门</p>
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={openAddModal}
+                                    >
+                                        添加部门
+                                    </Button>
+                                </div>
+                            )}
                         </Card>
                     </Col>
 
                     {/* Right: Department Details & Members */}
-                    <Col span={19}>
+                    <Col xs={24} xl={19}>
                         {selectedDepartment ? (
                             <>
                                 {/* Department Info Card */}

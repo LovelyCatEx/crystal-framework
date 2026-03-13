@@ -3,7 +3,7 @@ import type {User} from "@/types/user.types.ts";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {UserManagerController} from "@/api/user.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
-import {UserAvatar} from "../../UserAvatar.tsx";
+import {AvatarResource} from "../../AvatarResource.tsx";
 
 interface UserCardProps {
     userId: string;
@@ -43,7 +43,7 @@ export function UserCard({ userId }: UserCardProps) {
             className="w-72"
             title={
                 <div className="flex items-center gap-3 pt-2 pb-2">
-                    <UserAvatar fileEntityId={user.avatar} />
+                    <AvatarResource fileEntityId={user.avatar} />
                     <div className="flex flex-col">
                         <CopyableToolTip title={user.nickname}>
                             <span className="font-bold">{user.nickname}</span>

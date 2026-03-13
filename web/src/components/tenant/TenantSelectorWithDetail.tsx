@@ -1,12 +1,13 @@
-import {Button, Card, Descriptions, Tag} from "antd";
+import {Button, Card, Descriptions, Space, Tag} from "antd";
 import {TenantIdSelector} from "@/components/selector/TenantIdSelector.tsx";
 import type {Tenant} from "@/types/tenant.types.ts";
 import {TenantStatusMap} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useRef, useState} from "react";
-import {RedoOutlined} from "@ant-design/icons";
+import {RedoOutlined, ShopOutlined} from "@ant-design/icons";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
+import {AvatarResource} from "@/components/AvatarResource.tsx";
 
 const TENANT_ID_STORAGE_KEY = 'selected_tenant_id';
 
@@ -110,7 +111,13 @@ export function TenantSelectorWithDetail({
             className="border-none shadow-sm rounded-2xl overflow-hidden"
             title={
                 <div className="flex items-center justify-between">
-                    <span className="font-bold">{selectedTenant.name}</span>
+                    <Space orientation="horizontal" size={12}>
+                        <AvatarResource
+                            fileEntityId={selectedTenant?.icon}
+                            defaultIcon={<ShopOutlined />}
+                        />
+                        <span className="font-bold">{selectedTenant.name}</span>
+                    </Space>
                     <Button
                         type="link"
                         size="small"

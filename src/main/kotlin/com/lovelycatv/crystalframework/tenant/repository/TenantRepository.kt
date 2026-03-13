@@ -17,7 +17,14 @@ interface TenantRepository : BaseRepository<TenantEntity> {
     @Query(
         """
         SELECT * FROM tenants 
-        WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        WHERE (:#{#keyword == null} = true 
+            OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_phone) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(address) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
         AND (:#{#status == null} = true OR status = :status)
         ORDER BY created_time DESC
         LIMIT :limit
@@ -34,7 +41,14 @@ interface TenantRepository : BaseRepository<TenantEntity> {
     @Query(
         """
         SELECT COUNT(*) FROM tenants 
-        WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        WHERE (:#{#keyword == null} = true 
+            OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(contact_phone) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(address) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        )
         AND (:#{#status == null} = true OR status = :status)
     """
     )

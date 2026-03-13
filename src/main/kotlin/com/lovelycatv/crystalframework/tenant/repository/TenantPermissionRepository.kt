@@ -24,7 +24,7 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
     """
     )
     fun advanceSearch(
-        @Param("keyword") keyword: String,
+        @Param("keyword") keyword: String?,
         @Param("type") type: Int?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
@@ -39,7 +39,7 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
     """
     )
     fun countAdvanceSearch(
-        @Param("keyword") keyword: String,
+        @Param("keyword") keyword: String?,
         @Param("type") type: Int?
     ): Mono<Long>
 }

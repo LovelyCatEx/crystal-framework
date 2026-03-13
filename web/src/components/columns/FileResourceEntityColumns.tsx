@@ -10,7 +10,7 @@ import {UserManagerController} from "@/api/user.api.ts";
 import {type StorageProvider} from "@/types/storage-provider.types.ts";
 import type {User} from "@/types/user.types.ts";
 import {StorageProviderCard, UserCard} from "../card/pop";
-import {UserAvatar} from "../UserAvatar.tsx";
+import {AvatarResource} from "../AvatarResource.tsx";
 
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -65,7 +65,7 @@ function UserCell({ userId }: { userId: string }) {
         return (
             <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
                 <Space orientation="horizontal" size={8} className="cursor-pointer">
-                    <UserAvatar fileEntityId={user.avatar} />
+                    <AvatarResource fileEntityId={user.avatar} />
                     <Space orientation="vertical" size={0}>
                         <span className="text-xs font-mono font-bold">{user.nickname}</span>
                         <span className="text-xs text-gray-400">@{user.username}</span>

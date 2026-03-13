@@ -31,9 +31,9 @@ interface TenantPermissionManagerService : CachedBaseManagerService<
             dto = dto,
             isAdvanceQuery = { dto.searchKeyword != null || dto.type != null },
             doAdvanceQuery = { readDto, limit, offset ->
-                val total = getRepository().countAdvanceSearch(readDto.searchKeyword!!, readDto.type).awaitFirstOrNull() ?: 0
+                val total = getRepository().countAdvanceSearch(readDto.searchKeyword, readDto.type).awaitFirstOrNull() ?: 0
                 val records = getRepository().advanceSearch(
-                    readDto.searchKeyword!!,
+                    readDto.searchKeyword,
                     readDto.type,
                     limit,
                     offset
