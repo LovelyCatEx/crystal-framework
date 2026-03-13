@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
@@ -31,7 +32,19 @@ class TenantRoleManagerServiceImpl(
         return tenantRoleRepository
     }
 
+    suspend fun getOrCreate(dto: ManagerCreateTenantRoleDTO): TenantRoleEntity {
+        val result = this.getRepository()
+            .findByTenantIdAndName(dto.tenantId, dto.name)
+            .awaitFirstOrNull()
+
+        return result ?: create(dto)
+    }
+
     override suspend fun create(dto: ManagerCreateTenantRoleDTO): TenantRoleEntity {
+        if (this.getRepository().findByTenantIdAndName(dto.tenantId, dto.name).awaitFirstOrNull() != null) {
+            throw BusinessException("Tenant role already exists")
+        }
+
         val entity = TenantRoleEntity(
             id = snowIdGenerator.nextId(),
             tenantId = dto.tenantId,
@@ -55,7 +68,7 @@ class TenantRoleManagerServiceImpl(
         tenantId: Long,
         declaration: TenantRoleDeclaration
     ): TenantRoleEntity {
-        return this.create(
+        return this.getOrCreate(
             ManagerCreateTenantRoleDTO(
                 tenantId = tenantId,
                 name = declaration.name,

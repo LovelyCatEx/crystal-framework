@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermissionDeclaration
@@ -32,6 +33,10 @@ class TenantPermissionManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateTenantPermissionDTO): TenantPermissionEntity {
+        if (this.getRepository().findByName(dto.name).awaitFirstOrNull() != null) {
+            throw BusinessException("permission ${dto.name} already exists")
+        }
+
         val entity = TenantPermissionEntity(
             id = snowIdGenerator.nextId(),
             name = dto.name,

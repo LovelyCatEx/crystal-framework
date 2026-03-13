@@ -22,8 +22,9 @@ export interface ManagerUpdateUserDTO extends BaseManagerUpdateDTO {
     nickname?: string | null;
 }
 
-export async function getUserProfile() {
-    return doGet<UserProfileVO>('/api/user/profile');
+export async function getUserProfile(id?: string) {
+    const params = id ? { id } : undefined;
+    return doGet<UserProfileVO>('/api/user/profile', params);
 }
 
 export async function getUserAccessibleMenus() {

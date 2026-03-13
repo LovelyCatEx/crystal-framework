@@ -21,18 +21,20 @@ class UserAuthorizationServiceImpl(
     private val userService: UserService,
     private val oAuthAccountService: OAuthAccountService,
     private val jwtSignKeyStore: JWTSignKeyStore,
-    private val userRbacQueryService: UserRbacQueryService,
+    private val userRbacQueryService: UserRbacQueryService
 ) : UserAuthorizationService {
-    override suspend fun refreshUserAuthorityCache(userId: Long, tenantId: Long?) {
-        userRbacQueryService.getUserAuthorities(userId, tenantId, true)
+    override suspend fun clearUserAuthorityCache(userId: Long) {
+        userRbacQueryService.clearUserAuthoritiesCache(userId)
     }
 
     override fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
         return LoginSuccessResponseData().apply {
             val expiration = 7 * 24 * 3600 * 1000L
 
+            val signKey = jwtSignKeyStore.getSignKey()
+
             token = JwtUtil.buildJwtToken(
-                signKey = jwtSignKeyStore.getSignKey(),
+                signKey = signKey,
                 subject = userEntity.username,
                 authorities = userEntity.authorities.map { it.toString() }.toSet(),
                 expiration = expiration

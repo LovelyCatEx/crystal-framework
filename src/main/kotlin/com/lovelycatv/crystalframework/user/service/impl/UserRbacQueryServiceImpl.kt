@@ -68,7 +68,6 @@ class UserRbacQueryServiceImpl(
             .get<String>(redisKey)
             .awaitFirstOrNull()
             ?.split(",")
-
         return if (!refreshCache && cache != null) {
             cache.map { GrantedAuthority { it } }.toSet()
         } else {
@@ -98,5 +97,10 @@ class UserRbacQueryServiceImpl(
 
             permissions.map { GrantedAuthority { it } }.toSet()
         }
+    }
+
+    override suspend fun clearUserAuthoritiesCache(userId: Long) {
+        val redisKey = "userAuthorities:$userId"
+        redisService.removeKey(redisKey).awaitFirstOrNull()
     }
 }

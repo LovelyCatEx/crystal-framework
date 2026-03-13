@@ -14,4 +14,6 @@ interface UserRbacQueryService {
         tenantId: Long?,
         refreshCache: Boolean = false
     ): Set<GrantedAuthority>
+
+    suspend fun clearUserAuthoritiesCache(userId: Long)
 }

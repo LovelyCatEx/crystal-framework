@@ -24,9 +24,11 @@ class ManagerTenantRoleController(
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_ROLE_READ}')")
     @GetMapping("/list", version = "1")
     suspend fun readAll(
-        userAuthentication: UserAuthentication
+        userAuthentication: UserAuthentication,
+        @RequestParam
+        tenantId: Long,
     ): ApiResponse<*> {
-        return ApiResponse.success(tenantRoleManagerService.getRepository().findAll().awaitListWithTimeout())
+        return ApiResponse.success(tenantRoleManagerService.getRepository().findAllByTenantId(tenantId).awaitListWithTimeout())
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_ROLE_CREATE}')")

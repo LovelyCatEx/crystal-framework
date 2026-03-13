@@ -91,15 +91,15 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
             logger.info("[$id] RemoteIpAddress: ${originalRequest.remoteAddress?.toString() ?: "Unknown"}")
 
             // Request Headers
-            logger.info("[$id] Request Headers:")
+            logger.debug("[$id] Request Headers:")
             originalRequest.headers.forEach { headerName, values ->
-                logger.info("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
             }
 
             // Response Headers
             logger.info("[$id] Response Headers:")
             delegate.headers.forEach { headerName, values ->
-                logger.info("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
             }
 
             val bufferProcessor = { buffer: DataBuffer ->

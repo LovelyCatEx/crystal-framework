@@ -42,17 +42,17 @@ export interface UserTenantVO {
 
 export interface TenantProfileVO {
     tenantId: string;
-    ownerUserId: string;
+    ownerUserId: string | null;
     name: string;
     description: string | null;
     icon: string | null;
     status: number;
-    tireTypeId: string;
-    subscribedTime: string;
-    expiresTime: string;
-    contactName: string;
-    contactEmail: string;
-    contactPhone: string;
+    tireTypeId: string | null;
+    subscribedTime: string | null;
+    expiresTime: string | null;
+    contactName: string | null;
+    contactEmail: string | null;
+    contactPhone: string | null;
     address: string;
     createdTime: string;
     modifiedTime: string;

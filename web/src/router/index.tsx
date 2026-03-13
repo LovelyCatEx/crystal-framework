@@ -40,6 +40,7 @@ import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRol
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
 import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
 import {TenantProfilePage} from "@/pages/manager/tenant/TenantProfilePage.tsx";
+import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -92,12 +93,19 @@ export const publicMenus: RouteItem[] = [
 
 export const tenantMenus: RouteItem[] = [
     {
+        key: '/manager/tenant/dashboard',
+        path: '/manager/tenant/dashboard',
+        icon: <ShopOutlined />,
+        label: "我的组织",
+        page: <MyTenantDashboard />,
+    },
+    {
         key: '/manager/tenant/profile',
         path: '/manager/tenant/profile',
-        icon: <ShopOutlined />,
-        label: "组织信息",
+        icon: <SettingOutlined />,
+        label: "组织设置",
         page: <TenantProfilePage />,
-    }
+    },
 ]
 
 export const adminMenus: RouteItem[] = [

@@ -5,10 +5,9 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
-import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
-import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import jakarta.validation.Valid
@@ -24,7 +23,6 @@ class TenantProfileController(
     private val tenantService: TenantService,
     private val fileResourceService: FileResourceService
 ) {
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_READ_PEM}')")
     @GetMapping
     suspend fun getTenantProfile(
         userAuthentication: UserAuthentication,
@@ -34,7 +32,22 @@ class TenantProfileController(
 
         val tenantProfileVO = tenant.toProfileVO(fileResourceService)
 
-        return ApiResponse.success(tenantProfileVO)
+        return ApiResponse.success(tenantProfileVO.apply {
+            if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_PROFILE_READ_PEM)) {
+                // Do nothing
+            } else {
+                this.ownerUserId = null
+                this.tireTypeId = null
+                this.subscribedTime = null
+                this.expiresTime = null
+
+                if (!RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_PROFILE_READ_BASIC_PEM)) {
+                    this.contactName = null
+                    this.contactEmail = null
+                    this.contactPhone = null
+                }
+            }
+        })
     }
 
     @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_UPDATE_PEM}')")

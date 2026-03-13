@@ -10,6 +10,13 @@ object TenantPermission {
         path = "/manager/tenant/profile"
     )
 
+    const val ACTION_TENANT_PROFILE_READ_BASIC_PEM = "i.tenant.profile.read.basic"
+    val ACTION_TENANT_PROFILE_READ_BASIC = TenantPermissionDeclaration(
+        name = ACTION_TENANT_PROFILE_READ_BASIC_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+
     const val ACTION_TENANT_PROFILE_READ_PEM = "i.tenant.profile.read"
     val ACTION_TENANT_PROFILE_READ = TenantPermissionDeclaration(
         name = ACTION_TENANT_PROFILE_READ_PEM,
@@ -20,6 +27,12 @@ object TenantPermission {
     val ACTION_TENANT_PROFILE_UPDATE = TenantPermissionDeclaration(
         name = ACTION_TENANT_PROFILE_UPDATE_PEM,
         type = TenantPermissionType.ACTION,
+    )
+
+    val MENU_MY_TENANT_DASHBOARD = TenantPermissionDeclaration(
+        name = "i.tenant.dashboard",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/dashboard"
     )
 
     fun allPermissions(): List<TenantPermissionDeclaration> {

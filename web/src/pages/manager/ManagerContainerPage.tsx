@@ -6,7 +6,7 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     ShopOutlined,
-    UserOutlined
+    UserOutlined, UserSwitchOutlined
 } from "@ant-design/icons";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
@@ -48,12 +48,14 @@ function TenantSwitcher() {
         return null;
     }
 
+    const isNonTenantAuthentication = tenants.all((it) => !it.authenticated)
+
     const allOptions: UserTenantVO[] = [
         {
             tenantId: '0',
             tenantName: loggedUser.userProfile?.nickname ?? '非组织身份',
             tenantAvatar: loggedUser.userProfile?.avatar ?? null,
-            authenticated: tenants.all((it) => !it.authenticated)
+            authenticated: isNonTenantAuthentication
         },
         ...tenants
     ];
@@ -83,8 +85,9 @@ function TenantSwitcher() {
             arrow
         >
             <Space orientation="horizontal" size={6} className="cursor-pointer">
-                <ShopOutlined />
-                <span className="hidden sm:inline">{userTenants.currentTenant?.tenantName ?? `@${loggedUser.userProfile?.username}`}</span>
+                {isNonTenantAuthentication ? <UserSwitchOutlined /> : <ShopOutlined />}
+
+                <span className="hidden sm:inline">{userTenants.currentTenant?.tenantName ?? loggedUser.userProfile?.username}</span>
                 <DownOutlined className="text-xs" />
             </Space>
         </Dropdown>

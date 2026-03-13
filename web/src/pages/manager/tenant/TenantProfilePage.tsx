@@ -61,7 +61,6 @@ export function TenantProfilePage() {
         }
     };
 
-    // 处理头像上传
     const handleIconUpload = (file: File) => {
         const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!validTypes.includes(file.type)) {
@@ -152,7 +151,7 @@ export function TenantProfilePage() {
     return (
         <>
             <ActionBarComponent
-                title="组织信息"
+                title="组织设置"
                 subtitle="查看和管理租户组织资料"
             />
 

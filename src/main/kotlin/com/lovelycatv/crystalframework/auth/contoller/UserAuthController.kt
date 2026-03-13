@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import jakarta.validation.Valid
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -39,6 +40,11 @@ class UserAuthController(
             .findByUsername("${user.username}:${dto.tenantId}")
             .awaitFirstOrNull()
             as? UserEntity?
+
+        userAuthorizationService.clearUserAuthorityCache(userAuthentication.userId)
+
+        // Prevents dead redis lock produces consistent blocking
+        delay(100)
 
         return ApiResponse.success(
             userWithTenant?.let {

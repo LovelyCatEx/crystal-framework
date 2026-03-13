@@ -28,7 +28,7 @@ class ManagerTenantMemberRoleRelationController(
         userAuthentication: UserAuthentication,
         @RequestParam memberId: Long
     ): ApiResponse<*> {
-        return ApiResponse.Companion.success(tenantMemberRoleRelationService.getMemberRoles(memberId))
+        return ApiResponse.success(tenantMemberRoleRelationService.getMemberRoles(memberId))
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE}')")
@@ -40,6 +40,6 @@ class ManagerTenantMemberRoleRelationController(
         dto: SetMemberRolesDTO
     ): ApiResponse<*> {
         tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
-        return ApiResponse.Companion.success(null)
+        return ApiResponse.success(null)
     }
 }

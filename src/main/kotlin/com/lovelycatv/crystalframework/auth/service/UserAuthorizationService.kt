@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication
 import reactor.core.publisher.Mono
 
 interface UserAuthorizationService {
-    suspend fun refreshUserAuthorityCache(userId: Long, tenantId: Long?)
+    suspend fun clearUserAuthorityCache(userId: Long)
 
     fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData
 

@@ -23,8 +23,10 @@ export class BaseManagerController<
         return records.length > 0 ? records[0] : null
     }
 
-    list() {
-        return doGet<ENTITY[]>(`/api${this.baseUrl}/list`);
+    list(queryParams: Record<string, string> = {}) {
+        const queryString = new URLSearchParams(queryParams).toString();
+        const url = queryString ? `/api${this.baseUrl}/list?${queryString}` : `/api${this.baseUrl}/list`;
+        return doGet<ENTITY[]>(url);
     }
 
     create(dto: C) {
