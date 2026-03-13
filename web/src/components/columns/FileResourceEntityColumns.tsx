@@ -3,6 +3,7 @@ import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {FileResource} from "@/types/file-resource.types.ts";
 import {ResourceFileType} from "@/types/file-resource.types.ts";
+import {resourceFileTypeToTranslationMap} from "@/i18n/file-resource.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
@@ -115,9 +116,10 @@ export const FILE_RESOURCE_MANAGER_TABLE_COLUMNS: EntityTableColumns<FileResourc
         dataIndex: "type",
         key: "type",
         render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
+            const translatedLabel = resourceFileTypeToTranslationMap.get(row.type) || ResourceFileType[row.type];
             return <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={ResourceFileType[row.type]}>
-                    <Tag color="orange" className="text-xs font-mono">{ResourceFileType[row.type]}</Tag>
+                <CopyableToolTip title={translatedLabel}>
+                    <Tag color="orange" className="text-xs font-mono">{translatedLabel}</Tag>
                 </CopyableToolTip>
             </Space>
         }

@@ -1,7 +1,8 @@
 import type {BaseEntity} from "./BaseEntity.ts";
 
 export enum ResourceFileType {
-    USER_AVATAR = 0
+    USER_AVATAR = 0,
+    TENANT_ICON = 1
 }
 
 export interface FileResource extends BaseEntity {
