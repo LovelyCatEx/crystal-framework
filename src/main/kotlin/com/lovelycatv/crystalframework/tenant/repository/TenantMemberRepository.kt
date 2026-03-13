@@ -18,9 +18,16 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
 
     @Query(
         """
-        SELECT * FROM tenant_members 
-        WHERE (:#{#keyword == null} = true OR CAST(tenant_id AS TEXT) LIKE CONCAT('%', :keyword, '%'))
-        AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
+        SELECT * FROM tenant_members
+        WHERE (:#{#keyword == null} = true 
+            OR CAST(id AS TEXT) = :keyword 
+            OR CAST(member_user_id AS TEXT) = :keyword
+            OR member_user_id IN (
+                SELECT id FROM users 
+                WHERE LOWER(username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            ))
+        AND tenant_id = :tenantId
         AND (:#{#status == null} = true OR status = :status)
         ORDER BY created_time DESC
         LIMIT :limit
@@ -29,7 +36,7 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
     )
     fun advanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("tenantId") tenantId: Long?,
+        @Param("tenantId") tenantId: Long,
         @Param("status") status: Int?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
@@ -37,15 +44,22 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
 
     @Query(
         """
-        SELECT COUNT(*) FROM tenant_members 
-        WHERE (:#{#keyword == null} = true OR CAST(tenant_id AS TEXT) LIKE CONCAT('%', :keyword, '%'))
-        AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
+        SELECT COUNT(*) FROM tenant_members
+        WHERE (:#{#keyword == null} = true 
+            OR CAST(id AS TEXT) = :keyword 
+            OR CAST(member_user_id AS TEXT) = :keyword
+            OR member_user_id IN (
+                SELECT id FROM users 
+                WHERE LOWER(username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            ))
+        AND tenant_id = :tenantId
         AND (:#{#status == null} = true OR status = :status)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("tenantId") tenantId: Long?,
+        @Param("tenantId") tenantId: Long,
         @Param("status") status: Int?
     ): Mono<Long>
 }

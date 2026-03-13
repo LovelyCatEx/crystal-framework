@@ -19,8 +19,11 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
     @Query(
         """
         SELECT * FROM tenant_roles 
-        WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
-        AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
+        WHERE (:#{#keyword == null} = true 
+            OR CAST(id AS TEXT) = :keyword 
+            OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        AND tenant_id = :tenantId
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
         ORDER BY created_time DESC
         LIMIT :limit
@@ -29,7 +32,7 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
     )
     fun advanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("tenantId") tenantId: Long?,
+        @Param("tenantId") tenantId: Long,
         @Param("parentId") parentId: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
@@ -38,14 +41,17 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
     @Query(
         """
         SELECT COUNT(*) FROM tenant_roles 
-        WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
-        AND (:#{#tenantId == null} = true OR tenant_id = :tenantId)
+        WHERE (:#{#keyword == null} = true 
+            OR CAST(id AS TEXT) = :keyword 
+            OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        AND tenant_id = :tenantId
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("tenantId") tenantId: Long?,
+        @Param("tenantId") tenantId: Long,
         @Param("parentId") parentId: Long?
     ): Mono<Long>
 
