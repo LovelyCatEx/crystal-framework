@@ -131,7 +131,7 @@ class TenantServiceImpl(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override suspend fun uploadTenantIcon(tenantId: Long, file: FilePart) {
+    override suspend fun uploadTenantIcon(userId: Long, tenantId: Long, file: FilePart) {
         val tenant = this.getByIdOrThrow(tenantId)
 
         val (_, extension) = file.filename().split(".")
@@ -141,7 +141,7 @@ class TenantServiceImpl(
             .getService(tenantId, ResourceFileType.TENANT_ICON, targetFileName)
 
         val result = service.uploadFile(
-            tenantId,
+            userId,
             ResourceFileType.TENANT_ICON,
             file,
             targetFileName

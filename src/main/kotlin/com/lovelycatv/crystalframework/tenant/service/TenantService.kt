@@ -34,10 +34,11 @@ interface TenantService : CachedBaseService<TenantRepository, TenantEntity> {
     /**
      * Upload tenant icon.
      *
+     * @param userId uploader userId
      * @param tenantId tenantId
      * @param file FilePart
      * @return Updated TenantProfileVO
      */
     @Transactional(rollbackFor = [Exception::class])
-    suspend fun uploadTenantIcon(tenantId: Long, file: FilePart)
+    suspend fun uploadTenantIcon(userId: Long, tenantId: Long, file: FilePart)
 }

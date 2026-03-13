@@ -70,7 +70,7 @@ class TenantProfileController(
         @RequestPart("file") file: FilePart
     ): ApiResponse<*> {
         userAuthentication.assertTenantIdNotNull()
-        tenantService.uploadTenantIcon(userAuthentication.tenantId!!, file)
+        tenantService.uploadTenantIcon(userAuthentication.userId, userAuthentication.tenantId!!, file)
         return ApiResponse.success(null)
     }
 }
