@@ -1,4 +1,4 @@
-import {Button, Col, DatePicker, Form, InputNumber, Row, Switch} from "antd";
+import {Button, Col, DatePicker, Form, InputNumber, message, Row, Switch, Tooltip} from "antd";
 import dayjs from "dayjs";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
@@ -10,7 +10,7 @@ import {useRef, useState} from "react";
 import {TENANT_INVITATION_TABLE_COLUMNS} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
-import {PlusOutlined, ApartmentOutlined, UserOutlined} from "@ant-design/icons";
+import {PlusOutlined, ApartmentOutlined, UserOutlined, LinkOutlined} from "@ant-design/icons";
 import {EntityIdSelector} from "@/components/selector";
 import {TENANT_DEPARTMENT_TABLE_COLUMNS} from "@/components/columns/TenantDepartmentEntityColumns.tsx";
 import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
@@ -78,6 +78,29 @@ export function TenantInvitationManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={TENANT_INVITATION_TABLE_COLUMNS}
+                    tableRowActionsRender={(row) => (
+                        <>
+                            <Tooltip title="复制邀请码链接">
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    icon={<LinkOutlined />}
+                                    onClick={async () => {
+                                        const host = window.location.origin
+                                        const url = `${host}/tenant/invitation?code=${row.invitationCode}`
+
+                                        try {
+                                            await navigator.clipboard.writeText(url)
+                                            message.success("已将邀请链接复制到剪切板")
+                                        } catch (err) {
+                                            message.error("复制失败，请手动复制")
+                                            console.error('复制失败:', err)
+                                        }
+                                    }}
+                                />
+                            </Tooltip>
+                        </>
+                    )}
                     editModalFormChildren={
                         <>
                             <Row gutter={24}>

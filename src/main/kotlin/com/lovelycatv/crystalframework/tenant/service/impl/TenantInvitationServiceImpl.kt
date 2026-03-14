@@ -52,10 +52,26 @@ class TenantInvitationServiceImpl(
             ?: throw BusinessException("invitation not found")
     }
 
+    override suspend fun isOverInvitationCount(invitation: TenantInvitationEntity): Boolean {
+        val count = tenantInvitationRecordService
+            .getRepository()
+            .countByInvitationId(invitation.id)
+            .awaitFirstOrNull()
+            ?: throw BusinessException("could not validate invitation")
+
+        return count >= invitation.invitationCount
+    }
+
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun acceptInvitation(userId: Long, invitationCode: String, realName: String, phoneNumber: String) {
-        val user = userService.getByIdOrThrow(userId)
         val invitation = this.getInvitationByCode(invitationCode)
+
+        // 0. Check the invitation code usages
+        if (this.isOverInvitationCount(invitation)) {
+            throw BusinessException("invitation has reached its usage limit")
+        }
+
+        val user = userService.getByIdOrThrow(userId)
         val tenant = tenantService.getByIdOrThrow(invitation.tenantId)
 
         // 1. Check whether the user is already in the target tenant

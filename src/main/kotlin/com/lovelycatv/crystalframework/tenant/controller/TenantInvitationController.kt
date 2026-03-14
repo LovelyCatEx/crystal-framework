@@ -34,6 +34,7 @@ class TenantInvitationController(
                 tenantId = invitation.tenantId,
                 expiresAt = invitation.expiresTime,
                 departmentName = department?.name,
+                reachedUsageLimit = tenantInvitationService.isOverInvitationCount(invitation)
             )
         )
     }

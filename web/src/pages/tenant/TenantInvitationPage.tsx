@@ -8,7 +8,8 @@ import {
     PhoneOutlined,
     SafetyCertificateOutlined,
     ShopOutlined,
-    TeamOutlined
+    TeamOutlined,
+    WarningOutlined
 } from '@ant-design/icons';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {getTenantProfile} from "@/api/tenant-profile.api.ts";
@@ -30,6 +31,7 @@ export function TenantInvitationPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [expiresAt, setExpiresAt] = useState<string | null>(null);
     const [departmentName, setDepartmentName] = useState<string | null>(null);
+    const [reachedUsageLimit, setReachedUsageLimit] = useState(false);
     const [step, setStep] = useState<'input' | 'info' | 'form'>('input');
 
     useEffect(() => {
@@ -69,6 +71,7 @@ export function TenantInvitationPage() {
             if (response.data) {
                 setExpiresAt(response.data.expiresAt || null);
                 setDepartmentName(response.data.departmentName || null);
+                setReachedUsageLimit(response.data.reachedUsageLimit);
 
                 const tenantResponse = await getTenantProfile(response.data.tenantId);
                 if (tenantResponse.data) {
@@ -91,7 +94,7 @@ export function TenantInvitationPage() {
     };
 
     const handleNextStep = () => {
-        if (tenantInfo && !isExpired) {
+        if (tenantInfo && !isExpired && !reachedUsageLimit) {
             setStep('form');
         }
     };
@@ -188,6 +191,11 @@ export function TenantInvitationPage() {
                                                         : tenantInfo.description)
                                                     : '暂无描述'}
                                             </p>
+                                            {reachedUsageLimit && (
+                                                <Tag color="warning" className="mt-2">
+                                                    <WarningOutlined /> 邀请码已达使用上限
+                                                </Tag>
+                                            )}
                                             {isExpired && (
                                                 <Tag color="error" className="mt-2">
                                                     <ClockCircleOutlined /> 邀请码已过期
@@ -214,11 +222,11 @@ export function TenantInvitationPage() {
                                             block
                                             size="large"
                                             onClick={handleNextStep}
-                                            disabled={isExpired}
+                                            disabled={isExpired || reachedUsageLimit}
                                             loading={loading}
                                             className="mb-4"
                                         >
-                                            {isExpired ? '邀请码已过期' : '下一步'}
+                                            {isExpired ? '邀请码已过期' : reachedUsageLimit ? '邀请码已达使用上限' : '下一步'}
                                         </Button>
                                         <Button
                                             block

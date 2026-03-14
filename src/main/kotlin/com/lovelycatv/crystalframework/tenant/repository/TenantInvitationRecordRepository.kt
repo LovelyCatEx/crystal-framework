@@ -50,4 +50,6 @@ interface TenantInvitationRecordRepository : BaseRepository<TenantInvitationReco
         @Param("keyword") keyword: String?,
         @Param("invitationId") invitationId: Long
     ): Mono<Long>
+
+    fun countByInvitationId(invitationId: Long): Mono<Long>
 }

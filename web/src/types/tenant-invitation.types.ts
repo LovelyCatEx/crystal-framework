@@ -17,4 +17,5 @@ export interface TenantInvitationVO {
     tenantId: string;
     expiresAt?: string;
     departmentName?: string;
+    reachedUsageLimit: boolean;
 }
