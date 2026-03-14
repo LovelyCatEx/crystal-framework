@@ -1,21 +1,14 @@
 import {Card, Descriptions, Spin, Tag} from "antd";
-import type {User} from "@/types/user.types.ts";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {UserManagerController} from "@/api/user.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {AvatarResource} from "../../AvatarResource.tsx";
+import {useUserProfile} from "@/compositions/use-user-profile.ts";
 
 interface UserCardProps {
     userId: string;
 }
 
 export function UserCard({ userId }: UserCardProps) {
-    const { data: user, isLoading } = useSWRComposition<User | null>(
-        `user-card-${userId}`,
-        async () => {
-            return await UserManagerController.getById(userId);
-        }
-    );
+    const { userProfile: user, isUserProfileLoading: isLoading } = useUserProfile(userId);
 
     if (isLoading) {
         return (

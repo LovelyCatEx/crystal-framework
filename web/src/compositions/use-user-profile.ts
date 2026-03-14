@@ -4,11 +4,11 @@ import {getUserProfile} from "@/api/user.api.ts";
 import {message} from "antd";
 
 export const useUserProfile = (userId?: string) => {
-    const [userProfile, , , refreshUserProfile] = useSWRState<UserProfileVO>(
+    const [userProfile, , isUserProfileLoading, refreshUserProfile] = useSWRState<UserProfileVO>(
         `getUserProfile?id=${userId}`,
         getUserProfile,
         () => void message.error("无法获取用户资料")
     );
 
-    return { userProfile, refreshUserProfile };
+    return { userProfile, isUserProfileLoading, refreshUserProfile };
 }

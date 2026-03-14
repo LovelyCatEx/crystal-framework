@@ -21,17 +21,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/file-resource")
 class ManagerFileResourceController(
     private val fileResourceManagerService: FileResourceManagerService,
-    private val fileResourceService: FileResourceService
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_FILE_RESOURCE_READ}')")
-    @GetMapping("/downloadUrl", version = "1")
-    suspend fun getFileDownloadUrl(
-        userAuthentication: UserAuthentication,
-        @RequestParam(value = "id") id: Long
-    ): ApiResponse<*> {
-        return ApiResponse.success(fileResourceService.getFileDownloadUrl(id))
-    }
-
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_FILE_RESOURCE_READ}')")
     @GetMapping("/list", version = "1")
     suspend fun readAllFileResources(

@@ -112,4 +112,14 @@ class TenantMemberManagerServiceImpl(
             records = vos
         )
     }
+
+    override suspend fun checkIsRelated(ids: Collection<Long>, tenantId: Long): Boolean {
+        for (id in ids) {
+            if (this.getByIdOrNull(id)?.tenantId != tenantId) {
+                return false
+            }
+        }
+
+        return true
+    }
 }

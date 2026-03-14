@@ -39,8 +39,9 @@ import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPa
 import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
 import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
-import {TenantProfilePage} from "@/pages/manager/tenant/TenantProfilePage.tsx";
+import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.tsx";
 import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
+import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -100,11 +101,18 @@ export const tenantMenus: RouteItem[] = [
         page: <MyTenantDashboard />,
     },
     {
+        key: '/manager/tenant/members',
+        path: '/manager/tenant/members',
+        icon: <TeamOutlined />,
+        label: "成员管理",
+        page: <MyTenantMemberManagerPage />,
+    },
+    {
         key: '/manager/tenant/profile',
         path: '/manager/tenant/profile',
         icon: <SettingOutlined />,
         label: "组织设置",
-        page: <TenantProfilePage />,
+        page: <MyTenantProfilePage />,
     },
 ]
 

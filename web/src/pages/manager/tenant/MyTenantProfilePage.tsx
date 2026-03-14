@@ -23,7 +23,7 @@ import {ImageCropper} from "@/components/ImageCropper.tsx";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-export function TenantProfilePage() {
+export function MyTenantProfilePage() {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);

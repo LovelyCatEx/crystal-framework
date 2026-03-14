@@ -1,4 +1,4 @@
-import {Button, Col, Form, Row, Select} from "antd";
+import {Col, Form, Row, Select, Spin} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantMemberDTO,
@@ -8,15 +8,16 @@ import {
 } from "@/api/tenant-member.api.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {useEffect, useRef, useState} from "react";
-import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
+import {MY_TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/MyTenantMemberEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
-import {PlusOutlined} from "@ant-design/icons";
+import {useUserTenants} from "@/compositions/use-tenant.ts";
 
-export function TenantMemberManagerPage() {
+export function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();
+    const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
+
+    const currentTenantId = currentTenant?.tenantId ?? null;
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();
@@ -30,52 +31,38 @@ export function TenantMemberManagerPage() {
         { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.ACTIVE), value: TenantMemberStatus.ACTIVE }
     ];
 
-    const handleTenantChange = (tenantId: string | null) => {
-        setSelectedTenantId(tenantId);
-    };
-
-    const handleOpenAddModal = () => {
-        pageRef.current?.openModal();
-    };
+    if (isJoinedTenantsLoading) {
+        return (
+            <>
+                <ActionBarComponent title="我的组织成员" subtitle="管理当前组织成员信息" />
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
+                    <Spin size="large" />
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
             <ActionBarComponent
-                title="租户成员管理"
-                subtitle="管理租户成员信息"
-                titleActions={
-                    selectedTenantId ? (
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined/>}
-                            size="large"
-                            className="rounded-xl h-12 shadow-lg"
-                            onClick={handleOpenAddModal}
-                        >
-                            新增租户成员
-                        </Button>
-                    ) : null
-                }
+                title="我的组织成员"
+                subtitle="管理当前组织成员信息"
             />
-            <TenantSelectorWithDetail
-                value={selectedTenantId}
-                onChange={handleTenantChange}
-            />
-            {selectedTenantId && (
+            {currentTenantId && (
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="租户成员"
+                    entityName="组织成员"
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_MEMBER_TABLE_COLUMNS}
+                    columns={MY_TENANT_MEMBER_TABLE_COLUMNS}
                     editModalFormChildren={
                         <>
                             <Row gutter={12}>
                                 <Col span={12}>
                                     <Form.Item name="tenantId" hidden>
-                                        <input type="hidden" value={selectedTenantId || ''} />
+                                        <input type="hidden" value={currentTenantId || ''} />
                                     </Form.Item>
                                     <Form.Item
                                         name="memberUserId"
@@ -102,7 +89,7 @@ export function TenantMemberManagerPage() {
                     query={async (props) => {
                         return (await TenantMemberManagerController.query({
                             ...props,
-                            tenantId: selectedTenantId
+                            tenantId: currentTenantId
                         })).data!
                     }}
                     tableActions={[
@@ -133,7 +120,7 @@ export function TenantMemberManagerPage() {
                     create={async (props) => {
                         const createProps: ManagerCreateTenantMemberDTO = {
                             ...(props as ManagerCreateTenantMemberDTO),
-                            tenantId: selectedTenantId
+                            tenantId: currentTenantId
                         };
                         return (await TenantMemberManagerController.create(createProps)).data!
                     }}
