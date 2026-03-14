@@ -12,6 +12,7 @@ import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEnti
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {PlusOutlined} from "@ant-design/icons";
+import {UserIdSelector} from "@/components/selector";
 
 export function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -72,17 +73,20 @@ export function TenantMemberManagerPage() {
                     columns={TENANT_MEMBER_TABLE_COLUMNS}
                     editModalFormChildren={
                         <>
-                            <Row gutter={12}>
+                            <Row gutter={24}>
                                 <Col span={12}>
                                     <Form.Item name="tenantId" hidden>
                                         <input type="hidden" value={selectedTenantId || ''} />
                                     </Form.Item>
                                     <Form.Item
                                         name="memberUserId"
-                                        hidden
+                                        label="成员用户（仅创建时有效）"
+                                        rules={[{ required: true, message: '请选择成员用户' }]}
                                     >
-                                        <input type="hidden" />
+                                        <UserIdSelector />
                                     </Form.Item>
+                                </Col>
+                                <Col span={12}>
                                     <Form.Item
                                         name="status"
                                         label="状态"

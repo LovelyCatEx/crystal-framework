@@ -29,11 +29,11 @@ interface TenantMemberManagerService : CachedBaseManagerService<
     ): PaginatedResponseData<TenantMemberEntity> {
         return super.query(
             dto = dto,
-            isAdvanceQuery = { true },
+            isAdvanceQuery = { it.tenantId != null },
             doAdvanceQuery = { readDto, limit, offset ->
                 val total = getRepository().countAdvanceSearch(
                     readDto.searchKeyword,
-                    readDto.tenantId,
+                    readDto.tenantId!!,
                     readDto.status
                 ).awaitFirstOrNull() ?: 0
 

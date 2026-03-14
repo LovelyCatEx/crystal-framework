@@ -22,7 +22,7 @@ export const TenantRoleIdSelector = forwardRef<EntityIdSelectorRef, TenantRoleId
                 entityName="租户角色"
                 columns={TENANT_ROLE_TABLE_COLUMNS}
                 controller={TenantRoleManagerController}
-                displayRender={(role) => `${role.name}${role.description ? ` (${role.description})` : ''}`}
+                displayRender={(role) => `${role.name}`}
                 isRowDisabled={(role) => role.id === disabledRoleId}
                 placeholder="选择父角色（可选）"
                 icon={<SafetyCertificateOutlined />}
