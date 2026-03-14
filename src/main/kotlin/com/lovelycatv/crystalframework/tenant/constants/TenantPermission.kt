@@ -62,6 +62,36 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // My Tenant Invitations
+    val MENU_TENANT_INVITATION_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.invitation",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/invitations"
+    )
+
+    const val ACTION_TENANT_INVITATION_CREATE_PEM = "i.tenant.invitation.create"
+    val ACTION_TENANT_INVITATION_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_INVITATION_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_INVITATION_READ_PEM = "i.tenant.invitation.read"
+    val ACTION_TENANT_INVITATION_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_INVITATION_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_INVITATION_UPDATE_PEM = "i.tenant.invitation.update"
+    val ACTION_TENANT_INVITATION_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_INVITATION_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_INVITATION_DELETE_PEM = "i.tenant.invitation.delete"
+    val ACTION_TENANT_INVITATION_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_INVITATION_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
 
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)

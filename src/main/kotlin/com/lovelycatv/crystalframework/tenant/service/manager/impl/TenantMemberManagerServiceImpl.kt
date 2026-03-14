@@ -66,7 +66,7 @@ class TenantMemberManagerServiceImpl(
             id = snowIdGenerator.nextId(),
             tenantId = dto.tenantId,
             memberUserId = dto.memberUserId,
-            status = dto.status ?: TenantMemberStatus.ACTIVE.ordinal
+            status = dto.status ?: TenantMemberStatus.ACTIVE.typeId
         ).apply { newEntity() }
 
         // Save member

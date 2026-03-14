@@ -4,6 +4,7 @@ import {RequireAuthComponent} from "./components/RequireAuthComponent.tsx";
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
 import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
 import {HomePage} from "./pages/home/HomePage.tsx";
+import {TenantInvitationPage} from "@/pages/tenant/TenantInvitationPage.tsx";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                   }
               />
               <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
+              <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
           </Routes>
       </ConfigProvider>
   )

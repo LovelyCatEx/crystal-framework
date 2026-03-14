@@ -113,7 +113,7 @@ export function TenantDepartmentManagerPage() {
         if (!tenantId) return;
         setLoading(true);
         try {
-            const res = await TenantDepartmentManagerController.list();
+            const res = await TenantDepartmentManagerController.list({ tenantId: tenantId });
             const depts = res.data || [];
             setDepartments(depts);
             setTreeData(buildTreeData(depts));
@@ -558,7 +558,7 @@ export function TenantDepartmentManagerPage() {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="parentId" label="父部门">
-                                <TenantDepartmentIdSelector disabledDepartmentId={editingItem?.id ?? null} />
+                                <TenantDepartmentIdSelector tenantId={selectedTenantId || ''} disabledDepartmentId={editingItem?.id ?? null} />
                             </Form.Item>
                         </Col>
                     </Row>

@@ -135,6 +135,13 @@ object SystemPermission {
     const val ACTION_TENANT_ROLE_PERMISSION_RELATION_READ = "tenant.role.permission.read"
     const val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = "tenant.role.permission.update"
 
+    const val MENU_TENANT_INVITATION_MANAGER = "tenant.invitation:/manager/tenant-invitations"
+
+    const val ACTION_TENANT_INVITATION_CREATE = "tenant.invitation.create"
+    const val ACTION_TENANT_INVITATION_READ = "tenant.invitation.read"
+    const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
+    const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
+
     /**
      * resolve permission from string declaration
      *

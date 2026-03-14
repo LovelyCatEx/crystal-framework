@@ -10,10 +10,11 @@ interface TenantDepartmentIdSelectorProps {
     value?: string | null;
     onChange?: (value: string | null) => void;
     disabledDepartmentId?: string | null;
+    tenantId: string;
 }
 
 export const TenantDepartmentIdSelector = forwardRef<EntityIdSelectorRef, TenantDepartmentIdSelectorProps>(
-    ({ value, onChange, disabledDepartmentId }, ref) => {
+    ({ value, onChange, disabledDepartmentId, tenantId }, ref) => {
         return (
             <EntityIdSelector<TenantDepartment>
                 ref={ref}
@@ -26,6 +27,9 @@ export const TenantDepartmentIdSelector = forwardRef<EntityIdSelectorRef, Tenant
                 isRowDisabled={(dept) => dept.id === disabledDepartmentId}
                 placeholder="选择父部门（可选）"
                 icon={<ApartmentOutlined />}
+                additionalQueryParams={() => {
+                    return { tenantId: tenantId };
+                }}
             />
         );
     }

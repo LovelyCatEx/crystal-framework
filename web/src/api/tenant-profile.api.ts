@@ -1,8 +1,9 @@
 import { doGet, doPost } from "./system-request.ts";
 import type { TenantProfileVO } from "../types/tenant.types.ts";
 
-export function getTenantProfile() {
-    return doGet<TenantProfileVO>("/api/tenant/profile");
+export function getTenantProfile(tenantId?: string) {
+    const params = tenantId ? { tenantId } : {};
+    return doGet<TenantProfileVO>("/api/tenant/profile", params);
 }
 
 export function updateTenantProfile(dto: UpdateTenantProfileDTO) {

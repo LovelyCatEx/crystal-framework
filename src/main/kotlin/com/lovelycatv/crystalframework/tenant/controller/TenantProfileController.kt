@@ -26,9 +26,15 @@ class TenantProfileController(
     @GetMapping
     suspend fun getTenantProfile(
         userAuthentication: UserAuthentication,
+        @RequestParam(required = false)
+        tenantId: Long?
     ): ApiResponse<*> {
-        val tenant = tenantService.getByIdOrNull(userAuthentication.tenantId)
-            ?: throw BusinessException("Tenant not found")
+        val tenant = tenantService.getByIdOrNull(
+            if (tenantId != null && tenantId > 0)
+                tenantId
+            else
+                userAuthentication.tenantId
+        ) ?: throw BusinessException("Tenant not found")
 
         val tenantProfileVO = tenant.toProfileVO(fileResourceService)
 
