@@ -15,6 +15,7 @@ import {getTenantProfile} from "@/api/tenant-profile.api.ts";
 import {acceptTenantInvitation, queryTenantInvitationByCode} from "@/api/invitation.api.ts";
 import type {TenantProfileVO} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
+import {buildDocumentTitle} from "@/global/global-settings.ts";
 
 const { Title, Text } = Typography;
 
@@ -39,6 +40,14 @@ export function TenantInvitationPage() {
             void fetchTenantInfo(code);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (tenantInfo) {
+            document.title = buildDocumentTitle(`邀请加入 ${tenantInfo.name}`)
+        } else {
+            document.title = buildDocumentTitle('组织邀请')
+        }
+    }, [tenantInfo]);
 
     const fetchTenantInfo = async (code: string) => {
         const trimmedCode = code.trim()

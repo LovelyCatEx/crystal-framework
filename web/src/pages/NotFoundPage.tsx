@@ -1,13 +1,19 @@
-import {Button, Typography, theme} from 'antd';
+import {Button, theme, Typography} from 'antd';
 import {useNavigate} from 'react-router-dom';
 import {HomeOutlined, QuestionCircleOutlined} from "@ant-design/icons";
+import {useEffect} from "react";
+import {buildDocumentTitle} from "@/global/global-settings.ts";
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 const { useToken } = theme;
 
 export function NotFoundPage() {
     const navigate = useNavigate();
     const { token } = useToken();
+
+    useEffect(() => {
+        document.title = buildDocumentTitle('404')
+    }, []);
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 font-sans antialiased overflow-hidden"
