@@ -39,9 +39,8 @@ class TenantRolePermissionRelationServiceImpl(
             .findAllByRoleId(roleId)
             .awaitListWithTimeout()
 
-        return relationIds.map {
+        return relationIds.mapNotNull {
             tenantPermissionRepository.findById(it.permissionId).awaitFirstOrNull()
-                ?: throw BusinessException("permission with id ${it.permissionId} not found")
         }
     }
 
