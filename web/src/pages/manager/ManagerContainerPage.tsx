@@ -21,6 +21,7 @@ import type {ItemType} from "antd/es/menu/interface";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
 import {switchTenant} from "@/api/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
+import {TenantMemberStatus} from "@/api/tenant-member.api.ts";
 
 function TenantSwitcher() {
     const loggedUser = useLoggedUser();
@@ -55,28 +56,31 @@ function TenantSwitcher() {
             tenantId: '0',
             tenantName: loggedUser.userProfile?.nickname ?? '非组织身份',
             tenantAvatar: loggedUser.userProfile?.avatar ?? null,
+            memberStatus: TenantMemberStatus.ACTIVE,
             authenticated: isNonTenantAuthentication
         },
         ...tenants
     ];
 
-    const dropdownItems = allOptions.map(tenant => ({
-        key: tenant.tenantId,
-        label: (
-            <div className={`flex items-center gap-2 py-1 px-2 rounded`}>
-                <Avatar
-                    size="small"
-                    icon={<ShopOutlined />}
-                    src={tenant.tenantAvatar}
-                />
-                <span className={tenant.authenticated ? 'font-medium text-blue-500' : ''}>{tenant.tenantName}</span>
-                {tenant.authenticated && <span className="text-xs text-blue-500 ml-auto">当前</span>}
-                {switchingTenantId === tenant.tenantId && <Spin size="small" />}
-            </div>
-        ),
-        onClick: () => handleTenantSwitch(tenant),
-        disabled: switchingTenantId !== null || tenant.authenticated,
-    }));
+    const dropdownItems = allOptions
+        .filter((it) => it.memberStatus === TenantMemberStatus.ACTIVE)
+        .map(tenant => ({
+            key: tenant.tenantId,
+            label: (
+                <div className={`flex items-center gap-2 py-1 px-2 rounded`}>
+                    <Avatar
+                        size="small"
+                        icon={<ShopOutlined />}
+                        src={tenant.tenantAvatar}
+                    />
+                    <span className={tenant.authenticated ? 'font-medium text-blue-500' : ''}>{tenant.tenantName}</span>
+                    {tenant.authenticated && <span className="text-xs text-blue-500 ml-auto">当前</span>}
+                    {switchingTenantId === tenant.tenantId && <Spin size="small" />}
+                </div>
+            ),
+            onClick: () => handleTenantSwitch(tenant),
+            disabled: switchingTenantId !== null || tenant.authenticated,
+        }));
 
     return !userTenants.isJoinedTenantsLoading ? (
         <Dropdown

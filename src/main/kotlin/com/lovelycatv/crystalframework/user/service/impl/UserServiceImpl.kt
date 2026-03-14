@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.crystalframework.tenant.types.TenantStatus
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
@@ -21,9 +22,7 @@ import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
-import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.UserService
-import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +56,6 @@ class UserServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val oAuthAccountService: OAuthAccountService,
     private val emailCodeAuthService: EmailCodeAuthService,
-    private val userRbacQueryService: UserRbacQueryService,
     @Lazy
     private val tenantService: TenantService,
     private val tenantMemberRelationService: TenantMemberRelationService
@@ -117,8 +115,11 @@ class UserServiceImpl(
                                 .forEach { this.send(it) }
                         }.collectList()
                             .flatMap {
-                                if (!it.any { it.tenantId == tenantIdStr.toLong() && it.memberUserId == userEntity.id }) {
-                                    Mono.error(BusinessException("User $realUsername not found in target tenant"))
+                                val memberRecord = it.find { it.tenantId == tenantIdStr.toLong() && it.memberUserId == userEntity.id }
+                                if (memberRecord == null) {
+                                    Mono.error(BusinessException("You are not the member of the target tenant"))
+                                } else if (memberRecord.getRealStatus() != TenantMemberStatus.ACTIVE) {
+                                    Mono.error(BusinessException("Your account is reviewing or closed by the target tenant"))
                                 } else {
                                     Mono.empty()
                                 }

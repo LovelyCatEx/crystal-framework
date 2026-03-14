@@ -11,6 +11,8 @@ import {
     UserOutlined
 } from "@ant-design/icons";
 import {TenantStatusMap} from "@/types/tenant.types.ts";
+import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useState} from "react";
 import {getUserProfile} from "@/api/user.api.ts";
@@ -329,6 +331,9 @@ export function MyTenantDashboard() {
                                                     {tenant.tenantName}
                                                 </Text>
                                                 {isCurrent && <Tag color="blue">当前</Tag>}
+                                                <Tag color={TenantMemberStatusMap[tenant.memberStatus]?.color || 'default'} className="text-sm px-2 py-0.5">
+                                                    {tenantMemberStatusToTranslationMap.get(tenant.memberStatus) || TenantMemberStatusMap[tenant.memberStatus]?.label || '未知'}
+                                                </Tag>
                                             </div>
                                             <div className="text-xs truncate">
                                                 <Text type="secondary" copyable className="!text-xs">

@@ -12,6 +12,7 @@ import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
 import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 import {getJoinedTenants} from "@/api/tenant.api.ts";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
+import {TenantMemberStatus} from "@/api/tenant-member.api.ts";
 
 interface LoginFormData {
     username: string,
@@ -76,10 +77,12 @@ function JoinedTenantAuth({ username, password, joinedTenants }: {
                     ...[{
                         tenantId: 0,
                         tenantAvatar: null,
-                        tenantName: '以非组织身份登录'
+                        tenantName: '以非组织身份登录',
+                        memberStatus: TenantMemberStatus.ACTIVE,
+                        authenticated: true
                     }] as unknown as UserTenantVO[],
                     ...joinedTenants
-                ].map((tenant) => (
+                ].filter((it) => it.memberStatus === TenantMemberStatus.ACTIVE).map((tenant) => (
                     <div
                         key={tenant.tenantId}
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${
