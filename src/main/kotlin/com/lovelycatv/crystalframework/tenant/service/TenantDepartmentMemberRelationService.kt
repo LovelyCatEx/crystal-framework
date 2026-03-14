@@ -6,4 +6,5 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelat
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
 
 interface TenantDepartmentMemberRelationService : CachedBaseService<TenantDepartmentMemberRelationRepository, TenantDepartmentMemberRelationEntity> {
+    suspend fun deleteByMemberIdIn(memberIds: Collection<Long>)
 }

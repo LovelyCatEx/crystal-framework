@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.Tenan
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
+import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
@@ -35,6 +36,7 @@ class TenantMemberManagerServiceImpl(
     private val tenantService: TenantService,
     @Lazy
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
+    private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService,
 ) : TenantMemberManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantMemberEntity>
         get() = redisService.asKVStore()
@@ -121,5 +123,13 @@ class TenantMemberManagerServiceImpl(
         }
 
         return true
+    }
+
+    override suspend fun batchDelete(ids: List<Long>) {
+        tenantMemberRoleRelationService.deleteByMemberIdIn(ids)
+
+        tenantDepartmentMemberRelationService.deleteByMemberIdIn(ids)
+
+        super.batchDelete(ids)
     }
 }

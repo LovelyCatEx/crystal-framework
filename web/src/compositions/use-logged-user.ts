@@ -3,7 +3,7 @@ import {useSWRState} from "./swr.ts";
 import {message} from "antd";
 import {useMemo} from "react";
 import {getUserAuthentication} from "../utils/token.utils.ts";
-import {useUserProfile} from "@/compositions/use-user-profile.ts";
+import {useCurrentUserProfile} from "@/compositions/use-user-profile.ts";
 
 export const useLoggedUser = () => {
     const hasAuthToken = useMemo(() => {
@@ -11,7 +11,7 @@ export const useLoggedUser = () => {
         return !!auth && !auth.expired;
     }, []);
 
-    const { userProfile, refreshUserProfile } = useUserProfile();
+    const { userProfile, refreshUserProfile } = useCurrentUserProfile();
 
     const [accessibleMenuPaths] = useSWRState<string[]>(
         hasAuthToken ? 'getUserAccessibleMenus' : undefined,

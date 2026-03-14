@@ -23,6 +23,7 @@ interface EntityIdSelectorProps<ENTITY extends BaseEntity> {
     displayRender: (entity: ENTITY) => string;
     placeholder?: string;
     icon?: ReactNode;
+    additionalQueryParams?: (props: Parameters<BaseManagerController<ENTITY, object>["query"]>[0]) => Record<string, string>
 }
 
 export interface EntityIdSelectorRef {
@@ -47,7 +48,8 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
         controller,
         displayRender,
         placeholder = "选择",
-        icon
+        icon,
+        additionalQueryParams
     }: EntityIdSelectorProps<ENTITY>,
     ref: ForwardedRef<EntityIdSelectorRef>
 ) {
@@ -141,7 +143,10 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
                 title={`选择${entityName}`}
                 entityName={entityName}
                 columns={columns}
-                query={async (props) => (await controller.query(props)).data!}
+                query={async (props) => (await controller.query({
+                    ...props,
+                    ...(additionalQueryParams ? additionalQueryParams(props) : {})
+                })).data!}
                 onCancel={handleCancel}
                 onOk={handleOk}
                 isRowDisabled={isRowDisabled}

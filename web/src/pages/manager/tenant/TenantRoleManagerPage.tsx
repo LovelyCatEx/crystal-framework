@@ -82,7 +82,7 @@ export function TenantRoleManagerPage() {
                                         name="parentId"
                                         label="父角色"
                                     >
-                                        <TenantRoleIdSelector disabledRoleId={editingItem?.id ?? null} />
+                                        <TenantRoleIdSelector tenantId={selectedTenantId || ''} disabledRoleId={editingItem?.id ?? null} />
                                     </Form.Item>
                                 </Col>
                             </Row>

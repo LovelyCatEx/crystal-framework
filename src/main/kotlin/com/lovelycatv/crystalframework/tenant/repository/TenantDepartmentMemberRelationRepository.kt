@@ -48,4 +48,6 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
         @Param("memberId") memberId: Long?,
         @Param("roleType") roleType: Int?
     ): Mono<Long>
+
+    fun deleteByMemberIdIn(memberIds: Collection<Long>): Mono<Void>
 }

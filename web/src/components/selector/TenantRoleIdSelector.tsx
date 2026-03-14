@@ -7,13 +7,14 @@ import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 interface TenantRoleIdSelectorProps {
+    tenantId: string;
     value?: string | null;
     onChange?: (value: string | null) => void;
     disabledRoleId?: string | null;
 }
 
 export const TenantRoleIdSelector = forwardRef<EntityIdSelectorRef, TenantRoleIdSelectorProps>(
-    ({ value, onChange, disabledRoleId }, ref) => {
+    ({ tenantId, value, onChange, disabledRoleId }, ref) => {
         return (
             <EntityIdSelector<TenantRole>
                 ref={ref}
@@ -26,6 +27,9 @@ export const TenantRoleIdSelector = forwardRef<EntityIdSelectorRef, TenantRoleId
                 isRowDisabled={(role) => role.id === disabledRoleId}
                 placeholder="选择父角色（可选）"
                 icon={<SafetyCertificateOutlined />}
+                additionalQueryParams={() => {
+                    return { tenantId: tenantId }
+                }}
             />
         );
     }

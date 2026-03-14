@@ -1,10 +1,10 @@
-import {Card, Descriptions, Spin, Tag} from "antd";
+import {Avatar, Card, Descriptions, Spin, Tag} from "antd";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
-import {AvatarResource} from "../../AvatarResource.tsx";
 import {useUserProfile} from "@/compositions/use-user-profile.ts";
+import {UserOutlined} from "@ant-design/icons";
 
 interface UserCardProps {
-    userId: string;
+    userId?: string;
 }
 
 export function UserCard({ userId }: UserCardProps) {
@@ -36,7 +36,10 @@ export function UserCard({ userId }: UserCardProps) {
             className="w-72"
             title={
                 <div className="flex items-center gap-3 pt-2 pb-2">
-                    <AvatarResource fileEntityId={user.avatar} />
+                    <Avatar
+                        src={user.avatar}
+                        icon={<UserOutlined />}
+                    />
                     <div className="flex flex-col">
                         <CopyableToolTip title={user.nickname}>
                             <span className="font-bold">{user.nickname}</span>
