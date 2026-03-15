@@ -6,8 +6,11 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     ShopOutlined,
-    UserOutlined, UserSwitchOutlined
+    UserOutlined, UserSwitchOutlined, BgColorsOutlined
 } from "@ant-design/icons";
+import {ThemeColorPickerModal} from "@/components/ThemeColorPickerModal.tsx";
+import {getStoredThemeKey, setStoredThemeKey, updateThemeCSSVariables} from "@/global/theme-config.ts";
+import type {ThemeColor} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
@@ -108,8 +111,20 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openKeys, setOpenKeys] = useState<string[]>([]);
+    const [themeModalOpen, setThemeModalOpen] = useState(false);
+    const [currentThemeKey, setCurrentThemeKey] = useState<string>(getStoredThemeKey);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const handleThemeChange = (theme: ThemeColor) => {
+        setCurrentThemeKey(theme.key);
+        setStoredThemeKey(theme.key);
+        updateThemeCSSVariables(theme);
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'app-theme-color-key',
+            newValue: theme.key,
+        }));
+    };
 
     const availableMenus = useMemo(() => {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? []);
@@ -218,6 +233,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                         menu={{
                             items: [
                                 { key: 'profile', label: '个人中心', icon: <UserOutlined /> },
+                                { key: 'theme', label: '自定义主题', icon: <BgColorsOutlined /> },
+                                { type: 'divider' },
                                 {
                                     key: 'logout',
                                     label: '退出登录',
@@ -228,9 +245,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                             onClick: (e) => {
                                 if (e.key === 'profile') {
                                     navigate(menuPathProfile);
+                                } else if (e.key === 'theme') {
+                                    setThemeModalOpen(true);
                                 } else if (e.key === 'logout') {
                                     clearUserAuthentication();
-                                    navigate(`${menuPathLogin}?redirectTo=${encodeURIComponent(location.pathname + location.search)}`);
+                                    navigate(`${menuPathLogin}?redirectTo=${window.location.pathname}`);
                                 }
                             },
                         }}
@@ -336,6 +355,13 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     </div>
                 )}
             </Layout>
+
+            <ThemeColorPickerModal
+                open={themeModalOpen}
+                currentThemeKey={currentThemeKey}
+                onClose={() => setThemeModalOpen(false)}
+                onThemeChange={handleThemeChange}
+            />
         </Layout>
     );
 }

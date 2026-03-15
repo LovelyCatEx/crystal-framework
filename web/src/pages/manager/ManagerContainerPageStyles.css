@@ -22,7 +22,7 @@
 }
 
 .ant-menu-item-selected::after {
-    border-right: 3px solid #FF8DA1 !important;
+    border-right: 3px solid var(--theme-color-primary, #FF8DA1) !important;
 }
 
 /* Mobile Menu Animations */

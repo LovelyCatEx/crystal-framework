@@ -1,6 +1,7 @@
 import {del, get, patch, post, put} from "./request.ts";
 import {getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
+import {menuPathLogin} from "@/router";
 
 export interface ApiResponse<T> {
     code: number;
@@ -31,7 +32,9 @@ function handleApiResponse<T>(response: ApiResponse<T>) {
     } else if (response.code === 401) {
         void message.warning('登录信息已过期');
         setTimeout(() => {
-            window.location.pathname = '/auth/login';
+            const url = new URL(window.location.origin + menuPathLogin);
+            url.searchParams.set('redirectTo', window.location.href);
+            window.location.href = url.toString();
         }, 500);
         throw response;
     } else if (response.code === 403) {

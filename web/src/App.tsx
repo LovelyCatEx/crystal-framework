@@ -6,29 +6,36 @@ import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
 import {HomePage} from "./pages/home/HomePage.tsx";
 import {TenantInvitationPage} from "@/pages/tenant/TenantInvitationPage.tsx";
 import {NotFoundPage} from "@/pages/NotFoundPage.tsx";
+import {useState, useEffect} from "react";
+import {getStoredThemeKey, getThemeByKey, buildThemeConfig, updateThemeCSSVariables} from "@/global/theme-config.ts";
+import type {ThemeColor} from "@/types/theme.types.ts";
 
 function App() {
+  const [currentTheme, setCurrentTheme] = useState<ThemeColor>(() => {
+    const storedKey = getStoredThemeKey();
+    return getThemeByKey(storedKey);
+  });
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'app-theme-color-key' && e.newValue) {
+        const theme = getThemeByKey(e.newValue);
+        setCurrentTheme(theme);
+        updateThemeCSSVariables(theme);
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    updateThemeCSSVariables(currentTheme);
+  }, [currentTheme]);
+
+  const themeConfig = buildThemeConfig(currentTheme);
+
   return (
-      <ConfigProvider
-          theme={{
-              token: {
-                  colorPrimary: '#FF8DA1',
-                  borderRadius: 12,
-                  fontFamily: 'Inter, system-ui, sans-serif',
-              },
-              components: {
-                  Layout: {
-                      headerBg: 'rgba(255, 255, 255, 0.7)',
-                      siderBg: '#ffffff',
-                  },
-                  Menu: {
-                      itemBorderRadius: 12,
-                      itemSelectedBg: 'rgba(255,240,243,0.8)',
-                      itemSelectedColor: '#FF8DA1',
-                  },
-              },
-          }}
-      >
+      <ConfigProvider theme={themeConfig}>
           <Routes>
               <Route path="/" element={<HomePage />} />
               <Route

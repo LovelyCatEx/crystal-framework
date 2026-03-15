@@ -1,4 +1,4 @@
-import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, Tree} from "antd";
+import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, theme, Tree} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantDepartmentIdSelector} from "@/components/selector/TenantDepartmentIdSelector.tsx";
@@ -42,6 +42,7 @@ interface TreeNodeData extends DataNode {
 }
 
 export function TenantDepartmentManagerPage() {
+    const { token } = theme.useToken();
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [departments, setDepartments] = useState<TenantDepartment[]>([]);
     const [selectedDepartment, setSelectedDepartment] = useState<TenantDepartment | null>(null);
@@ -608,9 +609,13 @@ export function TenantDepartmentManagerPage() {
                                 key={key}
                                 className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                                     editingRoleType === value
-                                        ? 'border-blue-500 bg-blue-50'
+                                        ? ''
                                         : 'border-gray-200 hover:border-gray-300'
                                 }`}
+                                style={editingRoleType === value ? {
+                                    borderColor: token.colorPrimary,
+                                    backgroundColor: token.colorPrimaryBg
+                                } : {}}
                                 onClick={() => setEditingRoleType(value)}
                             >
                                 <div className="flex items-center gap-3">
