@@ -1,9 +1,18 @@
-import {Button, Card, Divider, Input, Select, Space, Tag, Tooltip, Typography} from "antd";
-import {DeleteOutlined, PlusOutlined, EditOutlined, EyeOutlined} from "@ant-design/icons";
+import {Button, Card, Input, InputNumber, Select, Switch, Tag, Tabs, Tooltip, Typography} from "antd";
+import {
+    DeleteOutlined,
+    PlusOutlined,
+    EditOutlined,
+    DownOutlined,
+    RightOutlined,
+    CheckCircleOutlined,
+    ExclamationCircleOutlined
+} from "@ant-design/icons";
 import {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 
 const {Text} = Typography;
+const {Option} = Select;
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 type JsonObject = { [key: string]: JsonValue };
@@ -17,302 +26,264 @@ interface JsonEditorProps {
 
 type ValueType = 'string' | 'number' | 'boolean' | 'null' | 'object' | 'array';
 
-interface JsonNodeProps {
-    name: string;
-    value: JsonValue;
-    onChange: (oldName: string, newName: string | null, value: JsonValue) => void;
-    onDelete: () => void;
-    depth?: number;
-    isArrayItem?: boolean;
-}
+const TYPES = [
+    {label: '字符串', value: 'string'},
+    {label: '数字', value: 'number'},
+    {label: '布尔', value: 'boolean'},
+    {label: '对象', value: 'object'},
+    {label: '数组', value: 'array'},
+    {label: '空值', value: 'null'},
+];
 
-function getValueType(value: JsonValue): ValueType {
+const ROOT_TYPES = [
+    {label: '对象', value: 'object'},
+    {label: '数组', value: 'array'},
+];
+
+const getDefaultValue = (type: ValueType): JsonValue => {
+    switch (type) {
+        case 'string':
+            return '';
+        case 'number':
+            return 0;
+        case 'boolean':
+            return false;
+        case 'object':
+            return {};
+        case 'array':
+            return [];
+        case 'null':
+            return null;
+        default:
+            return '';
+    }
+};
+
+const getValueType = (value: JsonValue): ValueType => {
     if (value === null) return 'null';
     if (Array.isArray(value)) return 'array';
     if (typeof value === 'object') return 'object';
     if (typeof value === 'boolean') return 'boolean';
     if (typeof value === 'number') return 'number';
     return 'string';
+};
+
+interface JsonNodeProps {
+    name: string | number;
+    value: JsonValue;
+    onUpdate: (value: JsonValue) => void;
+    onDelete: () => void;
+    depth?: number;
+    isRoot?: boolean;
+    isArrayItem?: boolean;
 }
 
-function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = false}: JsonNodeProps) {
-    const [isExpanded, setIsExpanded] = useState(true);
-    const [editingName, setEditingName] = useState(name);
-    const valueType = getValueType(value);
-    const indent = depth * 16;
+function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false, isArrayItem = false}: JsonNodeProps) {
+    const [collapsed, setCollapsed] = useState(false);
+    const type = getValueType(value);
 
-    const handleTypeChange = (newType: ValueType) => {
-        let newValue: JsonValue;
-        switch (newType) {
-            case 'string':
-                newValue = '';
-                break;
-            case 'number':
-                newValue = 0;
-                break;
-            case 'boolean':
-                newValue = false;
-                break;
-            case 'null':
-                newValue = null;
-                break;
-            case 'object':
-                newValue = {};
-                break;
-            case 'array':
-                newValue = [];
-                break;
-            default:
-                newValue = '';
-        }
-        onChange(name, null, newValue);
+    const handleChangeType = (newType: ValueType) => {
+        onUpdate(getDefaultValue(newType));
     };
 
-    const handleValueChange = (newValue: string | number | boolean) => {
-        onChange(name, null, newValue);
+    const handleChangeValue = (newValue: string | number | boolean) => {
+        onUpdate(newValue);
     };
 
-    const handleNameChange = () => {
-        if (editingName !== name && editingName.trim() !== '') {
-            onChange(name, editingName.trim(), value);
-        } else {
-            setEditingName(name);
+    const handleChildUpdate = (key: string | number, newValue: JsonValue) => {
+        if (type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            onUpdate({...value, [key]: newValue});
+        } else if (type === 'array' && Array.isArray(value)) {
+            const newArray = [...value];
+            newArray[key as number] = newValue;
+            onUpdate(newArray);
         }
     };
 
-    const handleObjectChange = (oldKey: string, newKey: string | null, newValue: JsonValue) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-            if (newKey === null) {
-                const newObj = {...value, [oldKey]: newValue};
-                onChange(name, null, newObj);
-            } else if (newKey !== oldKey) {
-                const newObj: JsonObject = {};
-                for (const [k, v] of Object.entries(value)) {
-                    if (k === oldKey) {
-                        newObj[newKey] = newValue;
-                    } else {
-                        newObj[k] = v;
-                    }
-                }
-                onChange(name, null, newObj);
+    const handleChildDelete = (key: string | number) => {
+        if (type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            const {[key]: _, ...rest} = value;
+            onUpdate(rest);
+        } else if (type === 'array' && Array.isArray(value)) {
+            const newArray = [...value];
+            newArray.splice(key as number, 1);
+            onUpdate(newArray);
+        }
+    };
+
+    const handleAddChild = () => {
+        if (type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            let baseKey = "newKey";
+            let counter = 1;
+            let newKey = baseKey;
+            while (newKey in value) {
+                newKey = `${baseKey}_${counter++}`;
             }
+            onUpdate({...value, [newKey]: ""});
+        } else if (type === 'array' && Array.isArray(value)) {
+            onUpdate([...value, ""]);
         }
     };
 
-    const handleArrayChange = (index: number, newValue: JsonValue) => {
-        if (Array.isArray(value)) {
-            const newArr = [...value];
-            newArr[index] = newValue;
-            onChange(name, null, newArr);
-        }
+    const handleRenameKey = (oldKey: string | number, newKey: string) => {
+        if (oldKey === newKey || !newKey || typeof value !== 'object' || value === null || Array.isArray(value)) return;
+        const {[oldKey]: val, ...rest} = value as JsonObject;
+        onUpdate({...rest, [newKey]: val});
     };
 
-    const handleAddField = () => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-            const newKey = `field${Object.keys(value).length + 1}`;
-            onChange(name, null, {...value, [newKey]: ''});
-        }
+    const renderLabel = () => {
+        if (isRoot) return <Text strong className="text-blue-600">ROOT</Text>;
+
+        return (
+            <div className="flex items-center gap-2">
+                <Text type="secondary" className="font-mono text-xs">[{type}]</Text>
+                {typeof name === 'number' ? (
+                    <Tag className="font-mono text-xs m-0">Index {name}</Tag>
+                ) : (
+                    <Input
+                        size="small"
+                        className="w-32 font-medium"
+                        defaultValue={name}
+                        onBlur={(e) => handleRenameKey(name, e.target.value)}
+                    />
+                )}
+            </div>
+        );
     };
 
-    const handleAddArrayItem = () => {
-        if (Array.isArray(value)) {
-            onChange(name, null, [...value, '']);
-        }
-    };
-
-    const handleDeleteField = (key: string) => {
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-            const newObj = {...value};
-            delete newObj[key];
-            onChange(name, null, newObj);
-        }
-    };
-
-    const handleDeleteArrayItem = (index: number) => {
-        if (Array.isArray(value)) {
-            const newArr = [...value];
-            newArr.splice(index, 1);
-            onChange(name, null, newArr);
-        }
-    };
-
-    const renderValueInput = () => {
-        switch (valueType) {
+    const renderValueEditor = () => {
+        switch (type) {
             case 'string':
                 return (
                     <Input
-                        value={value as string}
-                        onChange={(e) => handleValueChange(e.target.value)}
-                        placeholder="字符串值"
+                        size="small"
                         className="flex-1"
+                        value={value as string}
+                        onChange={(e) => handleChangeValue(e.target.value)}
                     />
                 );
             case 'number':
                 return (
-                    <Input
-                        type="number"
+                    <InputNumber
+                        size="small"
+                        className="w-full"
                         value={value as number}
-                        onChange={(e) => handleValueChange(Number(e.target.value))}
-                        placeholder="数字值"
-                        className="flex-1"
+                        onChange={(v) => handleChangeValue(v ?? 0)}
                     />
                 );
             case 'boolean':
                 return (
-                    <Select
-                        value={value as boolean}
-                        onChange={(v) => handleValueChange(v)}
-                        options={[
-                            {label: 'true', value: true},
-                            {label: 'false', value: false},
-                        ]}
-                        className="w-28"
+                    <Switch
+                        size="small"
+                        checked={value as boolean}
+                        onChange={handleChangeValue}
                     />
                 );
             case 'null':
-                return <Tag color="default">null</Tag>;
+                return <Text disabled italic>null</Text>;
+            case 'object':
+            case 'array':
+                const count = type === 'object'
+                    ? (typeof value === 'object' && value !== null && !Array.isArray(value) ? Object.keys(value).length : 0)
+                    : (Array.isArray(value) ? value.length : 0);
+                return (
+                    <Text type="secondary" className="text-xs">
+                        {type === 'object' ? `{ ${count} items }` : `[ ${count} items ]`}
+                    </Text>
+                );
             default:
                 return null;
         }
     };
 
-    const isComplex = valueType === 'object' || valueType === 'array';
+    const isComplex = type === 'object' || type === 'array';
 
     return (
-        <div style={{marginLeft: indent}} className="mb-2">
-            <div className="flex items-center gap-2 flex-wrap">
-                {isArrayItem ? (
-                    <div className="w-full">
-                        <div className="flex flex-row items-center space-x-2 mb-2">
-                            {isComplex && (
-                                <Button
-                                    type="text"
-                                    size="small"
-                                    onClick={() => setIsExpanded(!isExpanded)}
-                                    className="px-1"
-                                >
-                                    {isExpanded ? '▼' : '▶'}
-                                </Button>
-                            )}
-                            <Select<ValueType>
-                                className="w-24 max-w-24"
-                                value={valueType}
-                                onChange={handleTypeChange}
-                                options={[
-                                    {label: 'string', value: 'string'},
-                                    {label: 'number', value: 'number'},
-                                    {label: 'boolean', value: 'boolean'},
-                                    {label: 'null', value: 'null'},
-                                    {label: 'object', value: 'object'},
-                                    {label: 'array', value: 'array'},
-                                ]}
-                            />
-                            <Tag className="font-mono text-xs">{name}</Tag>
-                            <Tooltip title="删除">
-                                <Button
-                                    type="text"
-                                    danger
-                                    size="small"
-                                    icon={<DeleteOutlined/>}
-                                    onClick={onDelete}
-                                />
-                            </Tooltip>
+        <div className={`flex flex-col mb-2 ${depth > 0 ? 'ml-6 border-l border-gray-100 pl-4' : ''}`}>
+            <div className="flex items-center justify-between group py-1 hover:bg-gray-50 rounded px-2 transition-all">
+                <div className="flex items-center gap-3 flex-1">
+                    {isComplex && (
+                        <div
+                            className="cursor-pointer hover:text-blue-500 transition-colors"
+                            onClick={() => setCollapsed(!collapsed)}
+                        >
+                            {collapsed ? <RightOutlined/> : <DownOutlined/>}
                         </div>
-                        {!isComplex && (
-                            <div className="pl-8">
-                                {renderValueInput()}
-                            </div>
-                        )}
+                    )}
+
+                    {renderLabel()}
+
+                    <div className="flex-1 max-w-md flex items-center gap-2">
+                        {!isComplex && renderValueEditor()}
                     </div>
-                ) : (
-                    <div className="w-full flex flex-row items-center space-x-2">
-                        {isComplex && (
-                            <Button
-                                type="text"
-                                size="small"
-                                onClick={() => setIsExpanded(!isExpanded)}
-                                className="px-1"
-                            >
-                                {isExpanded ? '▼' : '▶'}
-                            </Button>
-                        )}
+                </div>
 
-                        <Select<ValueType>
-                            className="w-24 max-w-24"
-                            value={valueType}
-                            onChange={handleTypeChange}
-                            options={[
-                                {label: 'string', value: 'string'},
-                                {label: 'number', value: 'number'},
-                                {label: 'boolean', value: 'boolean'},
-                                {label: 'null', value: 'null'},
-                                {label: 'object', value: 'object'},
-                                {label: 'array', value: 'array'},
-                            ]}
-                        />
-
-                        <Input
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            onBlur={handleNameChange}
-                            onPressEnter={handleNameChange}
-                            placeholder="字段名"
-                            className="w-full h-8 font-mono text-xs"
-                        />
-
-                        <Tooltip title="删除">
-                            <Button
-                                type="text"
-                                danger
-                                size="small"
-                                icon={<DeleteOutlined/>}
-                                onClick={onDelete}
-                            />
-                        </Tooltip>
-                    </div>
-                )}
-
-                {!isArrayItem && !isComplex && renderValueInput()}
-
-                {isComplex && isExpanded && (
-                    <Button
-                        type="dashed"
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Select
                         size="small"
-                        icon={<PlusOutlined/>}
-                        onClick={valueType === 'array' ? handleAddArrayItem : handleAddField}
+                        value={type}
+                        className="w-28"
+                        onChange={handleChangeType}
+                        bordered={false}
                     >
-                        添加{valueType === 'array' ? '项' : '字段'}
-                    </Button>
-                )}
+                        {(isRoot ? ROOT_TYPES : TYPES).map(t => <Option key={t.value} value={t.value}>{t.label}</Option>)}
+                    </Select>
+
+                    {isComplex && (
+                        <Button
+                            size="small"
+                            type="text"
+                            icon={<PlusOutlined className="text-green-500"/>}
+                            onClick={handleAddChild}
+                        />
+                    )}
+
+                    {!isRoot && (
+                        <Button
+                            size="small"
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined/>}
+                            onClick={onDelete}
+                        />
+                    )}
+                </div>
             </div>
 
-            {isComplex && isExpanded && (
-                <div className="mt-2 pl-4 border-l-2 border-gray-200">
-                    {valueType === 'object' && typeof value === 'object' && value !== null && (
-                        Object.entries(value).map(([key, val]) => (
-                            <JsonNode
-                                key={key}
-                                name={key}
-                                value={val}
-                                onChange={handleObjectChange}
-                                onDelete={() => handleDeleteField(key)}
-                                depth={depth + 1}
-                            />
-                        ))
-                    )}
-                    {valueType === 'array' && Array.isArray(value) && (
-                        value.map((val, index) => (
-                            <JsonNode
-                                key={index}
-                                name={`[${index}]`}
-                                value={val}
-                                onChange={(_, __, newVal) => handleArrayChange(index, newVal)}
-                                onDelete={() => handleDeleteArrayItem(index)}
-                                depth={depth + 1}
-                                isArrayItem={true}
-                            />
-                        ))
-                    )}
+            {!collapsed && isComplex && (
+                <div className="mt-1">
+                    {type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value) ? (
+                        Object.entries(value).length === 0 ? (
+                            <div className="ml-8 py-1 italic text-gray-400 text-xs">Empty Object</div>
+                        ) : (
+                            Object.entries(value).map(([k, v]) => (
+                                <JsonNode
+                                    key={k}
+                                    name={k}
+                                    value={v}
+                                    depth={depth + 1}
+                                    onUpdate={(val) => handleChildUpdate(k, val)}
+                                    onDelete={() => handleChildDelete(k)}
+                                />
+                            ))
+                        )
+                    ) : type === 'array' && Array.isArray(value) ? (
+                        value.length === 0 ? (
+                            <div className="ml-8 py-1 italic text-gray-400 text-xs">Empty Array</div>
+                        ) : (
+                            value.map((v, i) => (
+                                <JsonNode
+                                    key={i}
+                                    name={i}
+                                    value={v}
+                                    depth={depth + 1}
+                                    onUpdate={(val) => handleChildUpdate(i, val)}
+                                    onDelete={() => handleChildDelete(i)}
+                                    isArrayItem={true}
+                                />
+                            ))
+                        )
+                    ) : null}
                 </div>
             )}
         </div>
@@ -320,270 +291,165 @@ function JsonNode({name, value, onChange, onDelete, depth = 0, isArrayItem = fal
 }
 
 export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProps) {
-    const [mode, setMode] = useState<'visual' | 'json'>('visual');
-    const [rootType, setRootType] = useState<'object' | 'array'>('object');
-    const [jsonObject, setJsonObject] = useState<JsonObject>({});
-    const [jsonArray, setJsonArray] = useState<JsonArray>([]);
+    const [activeTab, setActiveTab] = useState('visual');
+    const [jsonData, setJsonData] = useState<JsonValue>({});
     const [jsonText, setJsonText] = useState(value);
-    const [error, setError] = useState<string | null>(null);
+    const [isValid, setIsValid] = useState(true);
 
     useEffect(() => {
-        const parseJson = () => {
-            try {
-                const parsed = JSON.parse(value || '{}');
-                if (Array.isArray(parsed)) {
-                    setRootType('array');
-                    setJsonArray(parsed);
-                    setJsonObject({});
-                } else if (typeof parsed === 'object' && parsed !== null) {
-                    setRootType('object');
-                    setJsonObject(parsed);
-                    setJsonArray([]);
-                } else {
-                    // 原始类型，包装成对象
-                    setRootType('object');
-                    setJsonObject({value: parsed});
-                    setJsonArray([]);
-                }
+        try {
+            const parsed = JSON.parse(value || '{}');
+
+            if (typeof parsed !== 'object' || parsed === null) {
+                const wrapped = {value: parsed};
+                setJsonData(wrapped);
+                setJsonText(JSON.stringify(wrapped, null, 2));
+                onChange?.(JSON.stringify(wrapped));
+            } else {
+                setJsonData(parsed);
                 setJsonText(JSON.stringify(parsed, null, 2));
-                setError(null);
-            } catch {
-                setError('无效的JSON格式');
-                setJsonText(value);
             }
-        };
-        parseJson();
+            setIsValid(true);
+        } catch {
+            setJsonText(value);
+            setIsValid(false);
+        }
     }, [value]);
 
-    const handleRootTypeChange = (newType: 'object' | 'array') => {
-        setRootType(newType);
-        if (newType === 'object') {
-            const newData: JsonObject = {};
-            setJsonObject(newData);
-            setJsonArray([]);
-            const jsonString = JSON.stringify(newData);
-            setJsonText(JSON.stringify(newData, null, 2));
-            onChange?.(jsonString);
-        } else {
-            const newData: JsonArray = [];
-            setJsonArray(newData);
-            setJsonObject({});
-            const jsonString = JSON.stringify(newData);
-            setJsonText(JSON.stringify(newData, null, 2));
-            onChange?.(jsonString);
-        }
-    };
-
-    const handleObjectChange = (oldKey: string, newKey: string | null, newValue: JsonValue) => {
-        if (newKey === null) {
-            const newData = {...jsonObject, [oldKey]: newValue};
-            setJsonObject(newData);
-            const jsonString = JSON.stringify(newData);
-            setJsonText(JSON.stringify(newData, null, 2));
-            onChange?.(jsonString);
-        } else if (newKey !== oldKey) {
-            const newData: JsonObject = {};
-            for (const [k, v] of Object.entries(jsonObject)) {
-                if (k === oldKey) {
-                    newData[newKey] = newValue;
-                } else {
-                    newData[k] = v;
-                }
-            }
-            setJsonObject(newData);
-            const jsonString = JSON.stringify(newData);
-            setJsonText(JSON.stringify(newData, null, 2));
-            onChange?.(jsonString);
-        }
-    };
-
-    const handleArrayChange = (index: number, newValue: JsonValue) => {
-        const newArr = [...jsonArray];
-        newArr[index] = newValue;
-        setJsonArray(newArr);
-        const jsonString = JSON.stringify(newArr);
-        setJsonText(JSON.stringify(newArr, null, 2));
-        onChange?.(jsonString);
-    };
-
-    const handleAddRootField = () => {
-        const newKey = `field${Object.keys(jsonObject).length + 1}`;
-        const newData = {...jsonObject, [newKey]: ''};
-        setJsonObject(newData);
-        const jsonString = JSON.stringify(newData);
+    const handleVisualChange = (newData: JsonValue) => {
+        setJsonData(newData);
         setJsonText(JSON.stringify(newData, null, 2));
-        onChange?.(jsonString);
+        onChange?.(JSON.stringify(newData));
+        setIsValid(true);
     };
 
-    const handleAddRootArrayItem = () => {
-        const newData = [...jsonArray, ''];
-        setJsonArray(newData);
-        const jsonString = JSON.stringify(newData);
-        setJsonText(JSON.stringify(newData, null, 2));
-        onChange?.(jsonString);
-    };
-
-    const handleDeleteRootField = (key: string) => {
-        const newData = {...jsonObject};
-        delete newData[key];
-        setJsonObject(newData);
-        const jsonString = JSON.stringify(newData);
-        setJsonText(JSON.stringify(newData, null, 2));
-        onChange?.(jsonString);
-    };
-
-    const handleDeleteRootArrayItem = (index: number) => {
-        const newData = [...jsonArray];
-        newData.splice(index, 1);
-        setJsonArray(newData);
-        const jsonString = JSON.stringify(newData);
-        setJsonText(JSON.stringify(newData, null, 2));
-        onChange?.(jsonString);
-    };
-
-    const handleJsonTextChange = (text: string) => {
+    const handleTextChange = (text: string) => {
         setJsonText(text);
         try {
             const parsed = JSON.parse(text);
-            if (Array.isArray(parsed)) {
-                setRootType('array');
-                setJsonArray(parsed);
-                setJsonObject({});
-            } else if (typeof parsed === 'object' && parsed !== null) {
-                setRootType('object');
-                setJsonObject(parsed);
-                setJsonArray([]);
-            }
-            setError(null);
+            setJsonData(parsed);
+            setIsValid(true);
             onChange?.(JSON.stringify(parsed));
         } catch {
-            setError('JSON格式错误');
+            setIsValid(false);
         }
     };
 
-    const renderRootContent = () => {
-        if (rootType === 'object') {
-            return (
-                <>
-                    {Object.keys(jsonObject).length === 0 ? (
-                        <div className="text-center py-8 text-gray-400">
-                            <Text type="secondary">暂无数据</Text>
+    const tabItems = [
+        {
+            key: 'visual',
+            label: (
+                <span className="flex items-center gap-1">
+                    <EditOutlined/> 可视化
+                </span>
+            ),
+            children: (
+                <div className="overflow-auto max-h-[500px] p-4">
+                    <JsonNode
+                        isRoot
+                        name="Root"
+                        value={jsonData}
+                        onUpdate={handleVisualChange}
+                        onDelete={() => {}}
+                    />
+                </div>
+            ),
+        },
+        {
+            key: 'json',
+            label: (
+                <span className="flex items-center gap-1">
+                    {'{ }'} 源码
+                </span>
+            ),
+            children: (
+                <div className="relative">
+                    <TextArea
+                        value={jsonText}
+                        onChange={(e) => handleTextChange(e.target.value)}
+                        className={`font-mono text-sm min-h-[300px] border-0 resize-none ${!isValid ? 'bg-red-50' : ''}`}
+                        spellCheck={false}
+                    />
+                    {!isValid && (
+                        <div
+                            className="absolute bottom-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs shadow-lg flex items-center gap-2">
+                            <ExclamationCircleOutlined/>
+                            无效的 JSON 格式
                         </div>
-                    ) : (
-                        Object.entries(jsonObject).map(([key, val]) => (
-                            <div key={key}>
-                                <JsonNode
-                                    name={key}
-                                    value={val}
-                                    onChange={handleObjectChange}
-                                    onDelete={() => handleDeleteRootField(key)}
-                                    depth={0}
-                                />
-                                <Divider orientation="horizontal" />
-                            </div>
-                        ))
                     )}
-                    <Button
-                        type="dashed"
-                        block
-                        icon={<PlusOutlined/>}
-                        onClick={handleAddRootField}
-                        className="mt-2"
-                    >
-                        添加字段
-                    </Button>
-                </>
-            );
-        } else {
-            return (
-                <>
-                    {jsonArray.length === 0 ? (
-                        <div className="text-center py-8 text-gray-400">
-                            <Text type="secondary">暂无数据</Text>
-                        </div>
-                    ) : (
-                        jsonArray.map((val, index) => (
-                            <div key={index}>
-                                <JsonNode
-                                    name={`[${index}]`}
-                                    value={val}
-                                    onChange={(_, __, newVal) => handleArrayChange(index, newVal)}
-                                    onDelete={() => handleDeleteRootArrayItem(index)}
-                                    depth={0}
-                                    isArrayItem={true}
-                                />
-                                <Divider orientation="horizontal" />
-                            </div>
-                        ))
-                    )}
-                    <Button
-                        type="dashed"
-                        block
-                        icon={<PlusOutlined/>}
-                        onClick={handleAddRootArrayItem}
-                        className="mt-2"
-                    >
-                        添加项
-                    </Button>
-                </>
-            );
-        }
-    };
+                </div>
+            ),
+        },
+    ];
 
     return (
         <Card
             size="small"
-            className="border rounded-lg"
-            title={
-                <div className="flex justify-between items-center">
-                    <Space>
-                        <Button
-                            type={mode === 'visual' ? 'primary' : 'default'}
-                            size="small"
-                            icon={<EyeOutlined/>}
-                            onClick={() => setMode('visual')}
-                        >
-                            可视化
-                        </Button>
-                        <Button
-                            type={mode === 'json' ? 'primary' : 'default'}
-                            size="small"
-                            icon={<EditOutlined/>}
-                            onClick={() => setMode('json')}
-                        >
-                            JSON
-                        </Button>
-                        {mode === 'visual' && (
-                            <Select
-                                size="small"
-                                value={rootType}
-                                onChange={handleRootTypeChange}
-                                options={[
-                                    {label: '对象 {}', value: 'object'},
-                                    {label: '数组 []', value: 'array'},
-                                ]}
-                                className="w-28"
-                            />
-                        )}
-                    </Space>
-                    {error && <Text type="danger" className="text-xs">{error}</Text>}
-                </div>
-            }
+            className="shadow-sm"
+            tabProps={{size: 'small'}}
+            tabList={[
+                {
+                    key: 'visual',
+                    tab: (
+                        <span className="flex items-center gap-1 px-2">
+                            <EditOutlined/> 可视化
+                        </span>
+                    ),
+                },
+                {
+                    key: 'json',
+                    tab: (
+                        <span className="flex items-center gap-1 px-2">
+                            {'{ }'} 源码
+                        </span>
+                    ),
+                },
+            ]}
+            activeTabKey={activeTab}
+            onTabChange={(key) => setActiveTab(key)}
         >
-            {mode === 'visual' ? (
-                <div className="max-h-96 overflow-y-auto">
-                    {renderRootContent()}
+            {activeTab === 'visual' ? (
+                <div className="overflow-auto max-h-[500px] p-2">
+                    <JsonNode
+                        isRoot
+                        name="Root"
+                        value={jsonData}
+                        onUpdate={handleVisualChange}
+                        onDelete={() => {}}
+                    />
                 </div>
             ) : (
-                <TextArea
-                    value={jsonText}
-                    onChange={(e) => handleJsonTextChange(e.target.value)}
-                    rows={8}
-                    placeholder={placeholder || "输入JSON格式数据..."}
-                    className="font-mono text-xs"
-                    status={error ? 'error' : undefined}
-                />
+                <div className="relative" style={{minHeight: 300}}>
+                    <TextArea
+                        value={jsonText}
+                        onChange={(e) => handleTextChange(e.target.value)}
+                        className={`font-mono text-sm border-0 resize-none ${!isValid ? 'bg-red-50' : ''}`}
+                        style={{minHeight: 300}}
+                        spellCheck={false}
+                    />
+                    {!isValid && (
+                        <div
+                            className="absolute bottom-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs shadow-lg flex items-center gap-2">
+                            <ExclamationCircleOutlined/>
+                            无效的 JSON 格式
+                        </div>
+                    )}
+                </div>
             )}
+
+            <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <Text type="secondary" className="text-xs">
+                    {isValid ? (
+                        <span className="flex items-center gap-1 text-green-600">
+                            <CheckCircleOutlined/> 格式有效
+                        </span>
+                    ) : (
+                        <span className="flex items-center gap-1 text-red-600">
+                            <ExclamationCircleOutlined/> 格式错误
+                        </span>
+                    )}
+                </Text>
+            </div>
         </Card>
     );
 }
