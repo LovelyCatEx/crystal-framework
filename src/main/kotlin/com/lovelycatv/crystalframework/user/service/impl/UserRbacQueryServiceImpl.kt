@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationServic
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantRolePermissionRelationService
 import com.lovelycatv.crystalframework.tenant.service.impl.TenantMemberRelationServiceImpl
+import com.lovelycatv.crystalframework.tenant.types.TenantPermissionType
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import com.lovelycatv.crystalframework.user.service.result.UserTenantRbacQueryResult
@@ -81,6 +82,7 @@ class UserRbacQueryServiceImpl(
                 .tenants
                 .filter { it.tenantId == tenantId }
                 .flatMap { it.permissions }
+                .filter { it.type == TenantPermissionType.ACTION.typeId }
                 .map { it.name }
 
             val permissions = rbacPermissions + tenantRbacPermissions

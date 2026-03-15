@@ -54,4 +54,7 @@ interface TenantInvitationRepository : BaseRepository<TenantInvitationEntity> {
     ): Mono<Long>
 
     fun getByInvitationCode(invitationCode: String): Mono<TenantInvitationEntity>
+
+    @Query("SELECT COUNT(*) FROM tenant_invitations WHERE created_time >= :startTime AND created_time < :endTime")
+    fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }

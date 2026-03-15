@@ -54,6 +54,10 @@ object CrystalFrameworkSQLModifier {
     }
 
     fun addSoftDeleteConditionWithParser(statement: PlainSelect): String {
+       if (statement.fromItem?.toString() == null) {
+           return statement.toString()
+       }
+
         val deletedTimeColumn = Column("deleted_time")
         val isNullExpr = IsNullExpression(deletedTimeColumn)
 

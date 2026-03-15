@@ -11,8 +11,8 @@ export function ActionBarComponent(props: ActionBarComponentProps) {
         <>
             <div className="mb-8 flex justify-between items-end gap-4 flex-wrap">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">{props.title}</h1>
-                    {props.subtitle && <p className="text-gray-500 mt-1">{props.subtitle}</p>}
+                    <h1 className="text-2xl font-bold text-gray-800">{props.title}</h1>
+                    {props.subtitle && <p className="text-gray-500 mt-2">{props.subtitle}</p>}
                 </div>
 
                 {props.titleActions}

@@ -50,4 +50,7 @@ interface UserRepository : BaseRepository<UserEntity> {
     @Query("UPDATE users SET avatar = :avatar WHERE id = :id")
     fun updateAvatar(id: Long, avatar: Long): Mono<Long>
     fun findByUsername(username: String): Mono<UserEntity>
+
+    @Query("SELECT COUNT(*) FROM users WHERE created_time >= :startTime AND created_time < :endTime")
+    fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }

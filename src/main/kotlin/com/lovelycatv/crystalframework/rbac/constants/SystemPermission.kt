@@ -142,6 +142,9 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
+    const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
+    const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
+
     /**
      * resolve permission from string declaration
      *
@@ -151,6 +154,8 @@ object SystemPermission {
     fun resolvePermissionDeclaration(str: String): Triple<String, String, String?> {
         val type = if (str.contains(":")) {
             PermissionType.MENU
+        } else if (str.contains("@")) {
+            PermissionType.COMPONENT
         } else {
             PermissionType.ACTION
         }
@@ -162,6 +167,11 @@ object SystemPermission {
 
             PermissionType.MENU -> {
                 val (readPermissionKey, path) = str.split(":")
+                Triple(readPermissionKey, readPermissionKey, path)
+            }
+
+            PermissionType.COMPONENT -> {
+                val (readPermissionKey, path) = str.split("@")
                 Triple(readPermissionKey, readPermissionKey, path)
             }
         }

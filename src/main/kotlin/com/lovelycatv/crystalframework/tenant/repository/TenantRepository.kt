@@ -56,4 +56,7 @@ interface TenantRepository : BaseRepository<TenantEntity> {
         @Param("keyword") keyword: String?,
         @Param("status") status: Int?
     ): Mono<Long>
+
+    @Query("SELECT COUNT(*) FROM tenants WHERE created_time >= :startTime AND created_time < :endTime")
+    fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }

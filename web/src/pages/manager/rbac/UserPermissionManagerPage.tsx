@@ -45,6 +45,10 @@ export function UserPermissionManagerPage() {
                                         {
                                             label: 'MENU',
                                             value: 1,
+                                        },
+                                        {
+                                            label: 'COMPONENT',
+                                            value: 2,
                                         }
                                     ]}
                                 />
@@ -84,6 +88,7 @@ export function UserPermissionManagerPage() {
                             { value: '-1', label: '全部' },
                             { value: '0', label: 'ACTION' },
                             { value: '1', label: 'MENU' },
+                            { value: '2', label: 'COMPONENT' },
                         ]}
                         onChange={(value) => setFilterPermissionType(Number.parseInt(value))}
                     />,

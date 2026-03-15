@@ -52,4 +52,7 @@ interface TenantInvitationRecordRepository : BaseRepository<TenantInvitationReco
     ): Mono<Long>
 
     fun countByInvitationId(invitationId: Long): Mono<Long>
+
+    @Query("SELECT COUNT(*) FROM tenant_invitation_records WHERE created_time >= :startTime AND created_time < :endTime")
+    fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }

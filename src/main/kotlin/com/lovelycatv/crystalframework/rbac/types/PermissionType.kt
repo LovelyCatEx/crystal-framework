@@ -2,7 +2,8 @@ package com.lovelycatv.crystalframework.rbac.types
 
 enum class PermissionType(val typeId: Int) {
     ACTION(0),
-    MENU(1);
+    MENU(1),
+    COMPONENT(2),;
 
     companion object {
         fun getById(id: Int): PermissionType? {
