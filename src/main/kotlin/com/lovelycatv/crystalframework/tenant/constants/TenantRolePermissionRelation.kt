@@ -37,8 +37,20 @@ object TenantRolePermissionRelation {
             // Roles
             TenantPermission.MENU_TENANT_ROLE_MANAGER,
             TenantPermission.ACTION_TENANT_ROLE_READ,
+            // Departments
+            TenantPermission.MENU_TENANT_DEPARTMENT_MANAGER,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_CREATE,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_READ,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_UPDATE,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_DELETE,
+            // Department Members
+            TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_CREATE,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE,
+            TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE,
         ),
         TenantRole.MEMBER to listOf(
+            // Dashboard
             TenantPermission.MENU_MY_TENANT_DASHBOARD,
             TenantPermission.ACTION_TENANT_PROFILE_READ_BASIC
         ),

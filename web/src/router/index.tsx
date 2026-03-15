@@ -44,9 +44,10 @@ import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.ts
 import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
 import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
 import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
-import {MyRoleManagerPage} from "@/pages/manager/tenant/MyRoleManagerPage.tsx";
-import {MyMemberRoleManagerPage} from "@/pages/manager/tenant/MyMemberRoleManagerPage.tsx";
-import {MyRolePermissionManagerPage} from "@/pages/manager/tenant/MyRolePermissionManagerPage.tsx";
+import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
+import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
+import {MyTenantRolePermissionManagerPage} from "@/pages/manager/tenant/MyTenantRolePermissionManagerPage.tsx";
+import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -132,7 +133,7 @@ export const tenantMenus: RouteItem[] = [
         path: '/manager/tenant/roles',
         icon: <KeyOutlined />,
         label: "角色管理",
-        page: <MyRoleManagerPage />,
+        page: <MyTenantRoleManagerPage />,
         group: 'i_tenant',
     },
     {
@@ -140,7 +141,7 @@ export const tenantMenus: RouteItem[] = [
         path: '/manager/tenant/member-roles',
         icon: <UserSwitchOutlined />,
         label: "成员角色管理",
-        page: <MyMemberRoleManagerPage />,
+        page: <MyTenantMemberRoleManagerPage />,
         group: 'i_tenant',
     },
     {
@@ -148,7 +149,15 @@ export const tenantMenus: RouteItem[] = [
         path: '/manager/tenant/role-permissions',
         icon: <SafetyOutlined />,
         label: "角色权限管理",
-        page: <MyRolePermissionManagerPage />,
+        page: <MyTenantRolePermissionManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/departments',
+        path: '/manager/tenant/departments',
+        icon: <ApartmentOutlined />,
+        label: "部门管理",
+        page: <MyTenantDepartmentManagerPage />,
         group: 'i_tenant',
     },
     {

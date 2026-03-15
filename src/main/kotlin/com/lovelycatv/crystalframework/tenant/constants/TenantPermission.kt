@@ -162,6 +162,62 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Department
+    val MENU_TENANT_DEPARTMENT_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.department",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/departments"
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_CREATE_PEM = "i.tenant.department.create"
+    val ACTION_TENANT_DEPARTMENT_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_READ_PEM = "i.tenant.department.read"
+    val ACTION_TENANT_DEPARTMENT_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_UPDATE_PEM = "i.tenant.department.update"
+    val ACTION_TENANT_DEPARTMENT_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_DELETE_PEM = "i.tenant.department.delete"
+    val ACTION_TENANT_DEPARTMENT_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    // Tenant Department Member
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM = "i.tenant.department.member.create"
+    val ACTION_TENANT_DEPARTMENT_MEMBER_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM = "i.tenant.department.member.read"
+    val ACTION_TENANT_DEPARTMENT_MEMBER_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM = "i.tenant.department.member.update"
+    val ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM = "i.tenant.department.member.delete"
+    val ACTION_TENANT_DEPARTMENT_MEMBER_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

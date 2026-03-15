@@ -8,8 +8,7 @@ data class ManagerCreateInvitationDTO(
     @field:NotNull(message = "Tenant ID is required")
     val tenantId: Long,
 
-    @field:NotNull(message = "Creator member ID is required")
-    var creatorMemberId: Long,
+    var creatorMemberId: Long? = null,
 
     val departmentId: Long? = null,
 

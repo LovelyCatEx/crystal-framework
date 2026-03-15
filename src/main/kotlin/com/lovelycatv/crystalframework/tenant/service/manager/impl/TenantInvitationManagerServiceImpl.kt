@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
@@ -36,7 +37,7 @@ class TenantInvitationManagerServiceImpl(
         val entity = TenantInvitationEntity(
             id = snowIdGenerator.nextId(),
             tenantId = dto.tenantId,
-            creatorMemberId = dto.creatorMemberId,
+            creatorMemberId = dto.creatorMemberId ?: throw BusinessException("invitation creator id must be specified"),
             departmentId = dto.departmentId,
             invitationCode = generateInvitationCode(dto.tenantId),
             invitationCount = dto.invitationCount,

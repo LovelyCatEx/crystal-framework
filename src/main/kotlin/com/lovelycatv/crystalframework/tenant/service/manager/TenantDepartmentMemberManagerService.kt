@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.department.memb
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.vo.TenantDepartmentMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
+import com.lovelycatv.crystalframework.tenant.service.TenantRelationshipCheckService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -20,7 +21,7 @@ interface TenantDepartmentMemberManagerService : CachedBaseManagerService<
         ManagerReadTenantDepartmentMemberDTO,
         ManagerUpdateTenantDepartmentMemberDTO,
         ManagerDeleteTenantDepartmentMemberDTO
-> {
+>, TenantRelationshipCheckService {
     override suspend fun query(
         dto: ManagerReadTenantDepartmentMemberDTO,
         isAdvanceQuery: suspend (dto: ManagerReadTenantDepartmentMemberDTO) -> Boolean,

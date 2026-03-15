@@ -2,13 +2,14 @@ import {Button, Card, message, Modal, Space, Spin, Table, Tag, Transfer} from "a
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
+import {TenantMemberManagerController, TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
+import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
-import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
-import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
-import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 interface TransferItem {
     key: string;
@@ -16,13 +17,13 @@ interface TransferItem {
     description: string;
 }
 
-export function MyRolePermissionManagerPage() {
+export function MyTenantMemberRoleManagerPage() {
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;
-    const [roles, setRoles] = useState<TenantRole[]>([]);
-    const [allPermissions, setAllPermissions] = useState<TenantPermission[]>([]);
-    const [selectedRole, setSelectedRole] = useState<TenantRole | null>(null);
-    const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);
+    const [members, setMembers] = useState<TenantMemberVO[]>([]);
+    const [allRoles, setAllRoles] = useState<TenantRole[]>([]);
+    const [selectedMember, setSelectedMember] = useState<TenantMemberVO | null>(null);
+    const [selectedRoleIds, setSelectedRoleIds] = useState<Key[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -32,97 +33,98 @@ export function MyRolePermissionManagerPage() {
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
 
-    const fetchRoles = async (page = currentPage, pageSize = currentPageSize, tenantId = currentTenantId) => {
+    const fetchMembers = async (page = currentPage, pageSize = currentPageSize, tenantId = currentTenantId) => {
         if (!tenantId) return;
         setLoading(true);
         try {
-            const res = await TenantRoleManagerController.query({
+            const res = await TenantMemberManagerController.query({
                 page,
                 pageSize,
                 tenantId
             });
-            setRoles(res.data?.records || []);
+            setMembers(res.data?.records || []);
             setTotal(res.data?.total || 0);
         } catch {
-            void message.error("无法获取角色列表");
+            void message.error("无法获取成员列表");
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchAllPermissions = async () => {
+    const fetchAllRoles = async () => {
         try {
-            const res = await TenantPermissionManagerController.list();
-            setAllPermissions(res.data || []);
+            if (!currentTenantId) return;
+            const res = await TenantRoleManagerController.list({ tenantId: currentTenantId });
+            setAllRoles(res.data || []);
         } catch {
-            void message.error("无法获取权限列表");
+            void message.error("无法获取角色列表");
         }
     };
 
     const handlePageChange = (page: number, pageSize: number) => {
         setCurrentPage(page);
         setCurrentPageSize(pageSize);
-        void fetchRoles(page, pageSize);
+        void fetchMembers(page, pageSize);
     };
 
-    const openAssignModal = async (role: TenantRole) => {
-        setSelectedRole(role);
+    const openAssignModal = async (member: TenantMemberVO) => {
+        setSelectedMember(member);
         setIsModalVisible(true);
         try {
-            const res = await getTenantRolePermissions(role.id);
-            const ids = res.data?.map(p => String(p.id)) || [];
-            setSelectedPermissionIds(ids);
+            const res = await getTenantMemberRoles(member.id);
+            const ids = res.data?.map(r => String(r.id)) || [];
+            setSelectedRoleIds(ids);
         } catch {
-            void message.error("无法获取角色权限");
-            setSelectedPermissionIds([]);
+            void message.error("无法获取成员角色");
+            setSelectedRoleIds([]);
         }
     };
 
     const handleSave = async () => {
-        if (!selectedRole) return;
-        const ids = selectedPermissionIds.map(String);
+        if (!selectedMember) return;
+        const ids = selectedRoleIds.map(String);
         setSaving(true);
         try {
-            await setTenantRolePermissions(selectedRole.id, ids);
-            void message.success("权限分配成功");
+            await setTenantMemberRoles(selectedMember.id, ids);
+            void message.success("角色分配成功");
             setIsModalVisible(false);
         } catch {
-            void message.error("权限分配失败");
+            void message.error("角色分配失败");
         } finally {
             setSaving(false);
         }
     };
 
     const handleTransferChange = (targetKeys: Key[]) => {
-        setSelectedPermissionIds(targetKeys);
+        setSelectedRoleIds(targetKeys);
     };
 
-    const transferData: TransferItem[] = allPermissions.map(p => ({
-        key: String(p.id),
-        title: p.name,
-        description: p.description || ''
+    const transferData: TransferItem[] = allRoles.map(r => ({
+        key: String(r.id),
+        title: r.name,
+        description: r.description || ''
     }));
 
     useEffect(() => {
         if (currentTenantId) {
-            void fetchRoles(1, currentPageSize, currentTenantId);
-            void fetchAllPermissions();
+            void fetchMembers(1, currentPageSize, currentTenantId);
+            void fetchAllRoles();
         } else {
-            setRoles([]);
-            setAllPermissions([]);
+            setMembers([]);
+            setAllRoles([]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTenantId]);
 
     const columns = [
         {
-            title: "角色",
-            dataIndex: "name",
-            key: "name",
-            render: (_: unknown, row: TenantRole) => (
+            title: "成员",
+            dataIndex: "user",
+            key: "user",
+            render: (_: unknown, row: TenantMemberVO) => (
                 <Space orientation='vertical' size={0}>
-                    <CopyableToolTip title={row.name}>
-                        <span className="text-xs font-mono">{row.name}</span>
+                    <CopyableToolTip title={row.user?.nickname || '未知用户'}>
+                        <span className="text-xs font-mono">{row.user?.nickname || '未知用户'}</span>
                     </CopyableToolTip>
                     <CopyableToolTip title={row.id}>
                         <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
@@ -131,19 +133,39 @@ export function MyRolePermissionManagerPage() {
             )
         },
         {
-            title: "描述",
-            dataIndex: "description",
-            key: "description",
-            render: (_: unknown, row: TenantRole) => (
-                <span className="text-xs font-mono">{row.description || '-'}</span>
+            title: "用户名",
+            key: "username",
+            render: (_: unknown, row: TenantMemberVO) => (
+                <span className="text-xs font-mono">{row.user?.username || '-'}</span>
             )
+        },
+        {
+            title: "邮箱",
+            key: "email",
+            render: (_: unknown, row: TenantMemberVO) => (
+                <span className="text-xs font-mono">{row.user?.email || '-'}</span>
+            )
+        },
+        {
+            title: "状态",
+            dataIndex: "status",
+            key: "status",
+            render: (status: number) => {
+                const statusInfo = TenantMemberStatusMap[status] || { label: '未知', color: 'default' };
+                const translatedLabel = tenantMemberStatusToTranslationMap.get(status) || statusInfo.label;
+                return (
+                    <Tag color={statusInfo.color} className="text-xs">
+                        {translatedLabel}
+                    </Tag>
+                );
+            }
         },
         {
             title: "操作",
             key: "action",
-            render: (_: unknown, row: TenantRole) => (
+            render: (_: unknown, row: TenantMemberVO) => (
                 <Button type="primary" size="small" onClick={() => openAssignModal(row)}>
-                    分配权限
+                    分配角色
                 </Button>
             )
         }
@@ -152,7 +174,7 @@ export function MyRolePermissionManagerPage() {
     if (isJoinedTenantsLoading) {
         return (
             <>
-                <ActionBarComponent title="我的角色权限管理" subtitle="为当前组织角色分配权限" />
+                <ActionBarComponent title="我的成员角色管理" subtitle="为当前组织成员分配角色" />
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
                     <Spin size="large" />
                 </div>
@@ -163,14 +185,14 @@ export function MyRolePermissionManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="我的角色权限管理"
-                subtitle="为当前组织角色分配权限"
+                title="我的成员角色管理"
+                subtitle="为当前组织成员分配角色"
             />
             {currentTenantId && (
                 <Card className="mt-4 border-none shadow-sm rounded-2xl overflow-hidden">
                     <Table
                         columns={columns}
-                        dataSource={roles}
+                        dataSource={members}
                         rowKey="id"
                         loading={loading}
                         pagination={{
@@ -187,7 +209,7 @@ export function MyRolePermissionManagerPage() {
             )}
 
             <Modal
-                title={`为角色 "${selectedRole?.name}" 分配权限`}
+                title={`为成员 "${selectedMember?.user?.nickname}" 分配角色`}
                 open={isModalVisible}
                 onOk={handleSave}
                 onCancel={() => setIsModalVisible(false)}
@@ -196,10 +218,10 @@ export function MyRolePermissionManagerPage() {
             >
                 <Transfer
                     dataSource={transferData}
-                    targetKeys={selectedPermissionIds}
+                    targetKeys={selectedRoleIds}
                     onChange={handleTransferChange}
                     render={item => item.title}
-                    titles={['未分配权限', '已分配权限']}
+                    titles={['未分配角色', '已分配角色']}
                     listStyle={{
                         width: 300,
                         height: 400

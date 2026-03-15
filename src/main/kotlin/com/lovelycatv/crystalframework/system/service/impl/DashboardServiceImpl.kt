@@ -151,11 +151,13 @@ class DashboardServiceImpl(
             -1
         }
 
+        val cpuLoad = osBean.cpuLoad
+
         return SystemMetricsVO(
             cpuUsage = MetricItem(
-                used = osBean.cpuLoad * 100.0,
+                used =  cpuLoad * 100.0,
                 total = osBean.availableProcessors,
-                usage = osBean.cpuLoad * 100.0,
+                usage = cpuLoad * 100.0,
             ),
             memoryUsage = MetricItem(
                 used = systemUsedMemory,

@@ -10,14 +10,8 @@ import {useRef, useState} from "react";
 import {TENANT_INVITATION_TABLE_COLUMNS} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
-import {PlusOutlined, ApartmentOutlined, UserOutlined, LinkOutlined} from "@ant-design/icons";
-import {EntityIdSelector} from "@/components/selector";
-import {TENANT_DEPARTMENT_TABLE_COLUMNS} from "@/components/columns/TenantDepartmentEntityColumns.tsx";
-import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
-import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
-import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
-import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
+import {PlusOutlined, LinkOutlined} from "@ant-design/icons";
+import {TenantDepartmentIdSelector, TenantMemberIdSelector} from "@/components/selector";
 
 export function TenantInvitationManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -113,14 +107,9 @@ export function TenantInvitationManagerPage() {
                                         label="创建者成员"
                                         rules={[{ required: true, message: '请选择创建者成员' }]}
                                     >
-                                        <EntityIdSelector<TenantMemberVO>
-                                            entityName="租户成员"
-                                            columns={TENANT_MEMBER_TABLE_COLUMNS}
-                                            controller={TenantMemberManagerController}
-                                            displayRender={(member) => `${member.user?.username || ''} (${member.user?.email || ''})`}
+                                        <TenantMemberIdSelector
+                                            tenantId={selectedTenantId!}
                                             placeholder="选择创建者成员"
-                                            icon={<UserOutlined />}
-                                            additionalQueryParams={() => ({ tenantId: selectedTenantId! })}
                                         />
                                     </Form.Item>
                                 </Col>
@@ -129,14 +118,9 @@ export function TenantInvitationManagerPage() {
                                         name="departmentId"
                                         label="部门（可选）"
                                     >
-                                        <EntityIdSelector<TenantDepartment>
-                                            entityName="租户部门"
-                                            columns={TENANT_DEPARTMENT_TABLE_COLUMNS}
-                                            controller={TenantDepartmentManagerController}
-                                            displayRender={(dept) => `${dept.name}${dept.description ? ` (${dept.description})` : ''}`}
+                                        <TenantDepartmentIdSelector
+                                            tenantId={selectedTenantId!}
                                             placeholder="选择部门（可选）"
-                                            icon={<ApartmentOutlined />}
-                                            additionalQueryParams={() => ({ tenantId: selectedTenantId! })}
                                         />
                                     </Form.Item>
                                 </Col>

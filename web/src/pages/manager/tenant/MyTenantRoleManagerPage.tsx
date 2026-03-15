@@ -13,7 +13,7 @@ import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.t
 import {PlusOutlined} from "@ant-design/icons";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
 
-export function MyRoleManagerPage() {
+export function MyTenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;

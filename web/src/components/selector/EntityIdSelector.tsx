@@ -60,7 +60,9 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
     useEffect(() => {
         if (value) {
             setLoading(true);
-            controller.getById(value)
+            // As the implementation of getById is using query() too
+            // So the additional parameters could be shared here
+            controller.getById(value, (additionalQueryParams ? additionalQueryParams({ page: 1, pageSize: 1, id: value }) : {}))
                 .then((entity) => {
                     if (entity) {
                         setSelectedEntity(entity);

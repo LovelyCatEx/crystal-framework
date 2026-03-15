@@ -1,5 +1,5 @@
 import {Badge, Card, Divider, message, Progress, Segmented} from "antd";
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     AppstoreOutlined,
     CloudOutlined,
@@ -7,8 +7,8 @@ import {
     DesktopOutlined,
     ThunderboltOutlined
 } from "@ant-design/icons";
-import { getSystemMetrics } from "@/api/dashboard.api.ts";
-import type { SystemMetricsVO } from "@/types/dashboard.types.ts";
+import {getSystemMetrics} from "@/api/dashboard.api.ts";
+import type {SystemMetricsVO} from "@/types/dashboard.types.ts";
 
 const autoRefreshOptions = [
     { label: "1s", value: 1000 },
@@ -135,7 +135,7 @@ export function SystemMetrics() {
                             <ThunderboltOutlined /> 系统资源监控
                         </span>
                         {lastUpdated && (
-                            <span className="text-xs text-gray-400">
+                            <span className={`text-xs flex items-center gap-1 transition-colors duration-300 ${loading ? 'text-blue-400' : 'text-gray-400'}`}>
                                 最后更新于 {lastUpdated.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                             </span>
                         )}

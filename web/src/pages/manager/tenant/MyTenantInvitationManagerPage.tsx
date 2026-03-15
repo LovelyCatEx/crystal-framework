@@ -9,11 +9,8 @@ import {
 import {useRef} from "react";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
-import {ApartmentOutlined, LinkOutlined, PlusOutlined} from "@ant-design/icons";
-import {EntityIdSelector} from "@/components/selector";
-import {TENANT_DEPARTMENT_TABLE_COLUMNS} from "@/components/columns/TenantDepartmentEntityColumns.tsx";
-import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
+import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
+import {TenantDepartmentIdSelector} from "@/components/selector";
 import {TENANT_INVITATION_TABLE_COLUMNS} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 
 export function MyTenantInvitationManagerPage() {
@@ -121,14 +118,9 @@ export function MyTenantInvitationManagerPage() {
                                         name="departmentId"
                                         label="部门（可选）"
                                     >
-                                        <EntityIdSelector<TenantDepartment>
-                                            entityName="租户部门"
-                                            columns={TENANT_DEPARTMENT_TABLE_COLUMNS}
-                                            controller={TenantDepartmentManagerController}
-                                            displayRender={(dept) => `${dept.name}${dept.description ? ` (${dept.description})` : ''}`}
+                                        <TenantDepartmentIdSelector
+                                            tenantId={currentTenantId}
                                             placeholder="选择部门（可选）"
-                                            icon={<ApartmentOutlined />}
-                                            additionalQueryParams={() => ({ tenantId: currentTenantId! })}
                                         />
                                     </Form.Item>
                                 </Col>
