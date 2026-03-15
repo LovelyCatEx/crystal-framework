@@ -44,6 +44,9 @@ import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.ts
 import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
 import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
 import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
+import {MyRoleManagerPage} from "@/pages/manager/tenant/MyRoleManagerPage.tsx";
+import {MyMemberRoleManagerPage} from "@/pages/manager/tenant/MyMemberRoleManagerPage.tsx";
+import {MyRolePermissionManagerPage} from "@/pages/manager/tenant/MyRolePermissionManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -122,6 +125,30 @@ export const tenantMenus: RouteItem[] = [
         icon: <TagsOutlined />,
         label: "邀请码管理",
         page: <MyTenantInvitationManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/roles',
+        path: '/manager/tenant/roles',
+        icon: <KeyOutlined />,
+        label: "角色管理",
+        page: <MyRoleManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/member-roles',
+        path: '/manager/tenant/member-roles',
+        icon: <UserSwitchOutlined />,
+        label: "成员角色管理",
+        page: <MyMemberRoleManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/role-permissions',
+        path: '/manager/tenant/role-permissions',
+        icon: <SafetyOutlined />,
+        label: "角色权限管理",
+        page: <MyRolePermissionManagerPage />,
         group: 'i_tenant',
     },
     {
@@ -238,19 +265,19 @@ export const adminMenus: RouteItem[] = [
         group: 'tenant'
     },
     {
-        key: '/manager/tenant-tire-types',
-        path: '/manager/tenant-tire-types',
-        icon: <ShopOutlined />,
-        label: "套餐类型管理",
-        page: <TenantTireTypeManagerPage />,
-        group: 'tenant'
-    },
-    {
         key: '/manager/tenant-invitations',
         path: '/manager/tenant-invitations',
         icon: <TagsOutlined />,
         label: "邀请码管理",
         page: <TenantInvitationManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-tire-types',
+        path: '/manager/tenant-tire-types',
+        icon: <ShopOutlined />,
+        label: "套餐类型管理",
+        page: <TenantTireTypeManagerPage />,
         group: 'tenant'
     },
     {

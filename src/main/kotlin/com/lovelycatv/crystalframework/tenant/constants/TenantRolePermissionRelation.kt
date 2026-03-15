@@ -7,6 +7,18 @@ object TenantRolePermissionRelation {
             // Profile
             TenantPermission.MENU_TENANT_PROFILE_MANAGER,
             TenantPermission.ACTION_TENANT_PROFILE_UPDATE,
+            // Roles
+            TenantPermission.ACTION_TENANT_ROLE_CREATE,
+            TenantPermission.ACTION_TENANT_ROLE_UPDATE,
+            TenantPermission.ACTION_TENANT_ROLE_DELETE,
+            // Role Permissions
+            TenantPermission.MENU_TENANT_ROLE_PERMISSION_MANAGER,
+            TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ,
+            TenantPermission.ACTION_TENANT_ROLE_PERMISSION_UPDATE,
+            // Member Roles
+            TenantPermission.MENU_TENANT_MEMBER_ROLE_MANAGER,
+            TenantPermission.ACTION_TENANT_MEMBER_ROLE_READ,
+            TenantPermission.ACTION_TENANT_MEMBER_ROLE_UPDATE,
         ),
         TenantRole.ADMIN to listOf(
             // Profile
@@ -22,6 +34,9 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_TENANT_INVITATION_READ,
             TenantPermission.ACTION_TENANT_INVITATION_UPDATE,
             TenantPermission.ACTION_TENANT_INVITATION_DELETE,
+            // Roles
+            TenantPermission.MENU_TENANT_ROLE_MANAGER,
+            TenantPermission.ACTION_TENANT_ROLE_READ,
         ),
         TenantRole.MEMBER to listOf(
             TenantPermission.MENU_MY_TENANT_DASHBOARD,

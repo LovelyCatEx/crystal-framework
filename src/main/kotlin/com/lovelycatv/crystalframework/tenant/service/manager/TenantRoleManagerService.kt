@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantRoleRepository
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
+import com.lovelycatv.crystalframework.tenant.service.TenantRelationshipCheckService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface TenantRoleManagerService : CachedBaseManagerService<
@@ -20,7 +21,7 @@ interface TenantRoleManagerService : CachedBaseManagerService<
         ManagerReadTenantRoleDTO,
         ManagerUpdateTenantRoleDTO,
         ManagerDeleteTenantRoleDTO
-> {
+>, TenantRelationshipCheckService {
     suspend fun createFromDeclaration(tenantId: Long, declaration: TenantRoleDeclaration): TenantRoleEntity
 
     override suspend fun query(

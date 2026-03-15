@@ -93,6 +93,75 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Roles
+    val MENU_TENANT_ROLE_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.role",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/roles"
+    )
+
+    const val ACTION_TENANT_ROLE_CREATE_PEM = "i.tenant.role.create"
+    val ACTION_TENANT_ROLE_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_ROLE_READ_PEM = "i.tenant.role.read"
+    val ACTION_TENANT_ROLE_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_ROLE_UPDATE_PEM = "i.tenant.role.update"
+    val ACTION_TENANT_ROLE_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_ROLE_DELETE_PEM = "i.tenant.role.delete"
+    val ACTION_TENANT_ROLE_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    // Tenant Member Roles
+    val MENU_TENANT_MEMBER_ROLE_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.member.role",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/member-roles"
+    )
+
+    const val ACTION_TENANT_MEMBER_ROLE_READ_PEM = "i.tenant.member.role.read"
+    val ACTION_TENANT_MEMBER_ROLE_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MEMBER_ROLE_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_MEMBER_ROLE_UPDATE_PEM = "i.tenant.member.role.update"
+    val ACTION_TENANT_MEMBER_ROLE_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MEMBER_ROLE_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    // Tenant Role Permissions
+    val MENU_TENANT_ROLE_PERMISSION_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.role.permission",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/role-permissions"
+    )
+
+    const val ACTION_TENANT_ROLE_PERMISSION_READ_PEM = "i.tenant.role.permission.read"
+    val ACTION_TENANT_ROLE_PERMISSION_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_PERMISSION_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_ROLE_PERMISSION_UPDATE_PEM = "i.tenant.role.permission.update"
+    val ACTION_TENANT_ROLE_PERMISSION_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_ROLE_PERMISSION_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }
