@@ -1,3 +1,5 @@
+export type ThemeMode = 'light' | 'dark';
+
 export interface ThemeColor {
     key: string;
     name: string;

@@ -407,7 +407,7 @@ export function MyTenantDepartmentManagerPage() {
                     {/* Left: Department Tree */}
                     <Col xs={24} xl={5} className="mb-4 xl:mb-0">
                         <Card
-                            title="部门列表"
+                            title={<span style={{ color: token.colorTextHeading }}>部门列表</span>}
                             className="border-none shadow-sm rounded-2xl overflow-hidden"
                             loading={loading}
                         >

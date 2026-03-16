@@ -1,4 +1,4 @@
-import {Badge, Card, Divider, message, Progress, Segmented} from "antd";
+import {Badge, Card, Divider, message, Progress, Segmented, theme} from "antd";
 import {useEffect, useRef, useState} from "react";
 import {
     AppstoreOutlined,
@@ -9,6 +9,8 @@ import {
 } from "@ant-design/icons";
 import {getSystemMetrics} from "@/api/dashboard.api.ts";
 import type {SystemMetricsVO} from "@/types/dashboard.types.ts";
+
+const { useToken } = theme;
 
 const autoRefreshOptions = [
     { label: "1s", value: 1000 },
@@ -87,6 +89,7 @@ function formatMetricTotal(total: number, unit: "bytes" | "percent" | "count" | 
 }
 
 export function SystemMetrics() {
+    const { token } = useToken();
     const [systemMetrics, setSystemMetrics] = useState<SystemMetricsVO | null>(null);
     const [loading, setLoading] = useState(false);
     const [refreshInterval, setRefreshInterval] = useState<number>(5000);
@@ -130,12 +133,17 @@ export function SystemMetrics() {
         <Card
             title={
                 <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <div className="flex items-center gap-3" style={{ color: token.colorTextHeading }}>
+                        <span
+                            className="text-sm font-bold flex items-center gap-2"
+                        >
                             <ThunderboltOutlined /> 系统资源监控
                         </span>
                         {lastUpdated && (
-                            <span className={`text-xs flex items-center gap-1 transition-colors duration-300 ${loading ? 'text-blue-400' : 'text-gray-400'}`}>
+                            <span
+                                className={`text-xs flex items-center gap-1 transition-colors duration-300 ${loading ? 'text-blue-400' : ''}`}
+                                style={{ color: loading ? token.colorPrimary : token.colorTextSecondary }}
+                            >
                                 最后更新于 {lastUpdated.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                             </span>
                         )}
@@ -144,7 +152,6 @@ export function SystemMetrics() {
                         options={autoRefreshOptions}
                         value={refreshInterval}
                         onChange={(value) => setRefreshInterval(value as number)}
-                        className="bg-slate-100"
                         size="small"
                     />
                 </div>
@@ -160,12 +167,21 @@ export function SystemMetrics() {
                     const totalDisplay = formatMetricTotal(metric.total, config.totalUnit);
 
                     return (
-                        <div key={config.key} className="p-5 bg-slate-50 rounded-2xl">
+                        <div
+                            key={config.key}
+                            className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-200/5"
+                        >
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-sm font-medium text-slate-500">
+                                <span
+                                    className="text-sm font-medium"
+                                    style={{ color: token.colorTextSecondary }}
+                                >
                                     {config.label}
                                 </span>
-                                <span className="text-base font-bold text-slate-700">
+                                <span
+                                    className="text-base font-bold"
+                                    style={{ color: token.colorText }}
+                                >
                                     {displayValue}
                                 </span>
                             </div>
@@ -176,7 +192,10 @@ export function SystemMetrics() {
                                 strokeWidth={8}
                                 className="rounded-full mb-3"
                             />
-                            <div className="flex justify-between text-xs text-slate-400">
+                            <div
+                                className="flex justify-between text-xs"
+                                style={{ color: token.colorTextTertiary }}
+                            >
                                 <span>使用率: {Math.round(metric.usage)}%</span>
                                 <span>{totalDisplay}</span>
                             </div>
@@ -184,12 +203,20 @@ export function SystemMetrics() {
                     );
                 })}
                 {systemMetrics?.gcMetrics && (
-                    <div className="p-5 bg-slate-50 rounded-2xl">
+                    <div
+                        className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-200/5"
+                    >
                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-sm font-medium text-slate-500">
+                            <span
+                                className="text-sm font-medium"
+                                style={{ color: token.colorTextSecondary }}
+                            >
                                 GC 暂停时间
                             </span>
-                            <span className="text-base font-bold text-slate-700">
+                            <span
+                                className="text-base font-bold"
+                                style={{ color: token.colorText }}
+                            >
                                 {systemMetrics.gcMetrics.avgTime} ms
                             </span>
                         </div>
@@ -207,7 +234,10 @@ export function SystemMetrics() {
                                 }}
                             />
                         </div>
-                        <div className="flex justify-between text-xs text-slate-400">
+                        <div
+                            className="flex justify-between text-xs"
+                            style={{ color: token.colorTextTertiary }}
+                        >
                             <span>累计: {systemMetrics.gcMetrics.totalTime / 1000} s</span>
                             <span>次数: {systemMetrics.gcMetrics.count}</span>
                         </div>
@@ -218,33 +248,33 @@ export function SystemMetrics() {
             <div className="flex items-center justify-between px-2 flex-wrap gap-4">
                 <div className="flex items-center space-x-6 flex-wrap gap-y-2">
                     <div className="flex items-center space-x-2">
-                        <DesktopOutlined className="text-slate-400" />
-                        <span className="text-xs text-slate-500">
+                        <DesktopOutlined style={{ color: token.colorTextTertiary }} />
+                        <span className="text-xs" style={{ color: token.colorTextSecondary }}>
                             服务器: {systemMetrics?.serverInfo?.serverName ?? "-"}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <DatabaseOutlined className="text-slate-400" />
-                        <span className="text-xs text-slate-500">
+                        <DatabaseOutlined style={{ color: token.colorTextTertiary }} />
+                        <span className="text-xs" style={{ color: token.colorTextSecondary }}>
                             数据库: {systemMetrics?.serverInfo?.databaseVersion ?? "-"}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <CloudOutlined className="text-slate-400" />
-                        <span className="text-xs text-slate-500">
+                        <CloudOutlined style={{ color: token.colorTextTertiary }} />
+                        <span className="text-xs" style={{ color: token.colorTextSecondary }}>
                             Redis: {systemMetrics?.serverInfo?.redisVersion ?? "-"}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <AppstoreOutlined className="text-slate-400" />
-                        <span className="text-xs text-slate-500">
+                        <AppstoreOutlined style={{ color: token.colorTextTertiary }} />
+                        <span className="text-xs" style={{ color: token.colorTextSecondary }}>
                             版本: {systemMetrics?.serverInfo?.projectVersion ?? "-"}
                         </span>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <Badge status="processing" color="blue" />
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs" style={{ color: token.colorTextSecondary }}>
                         系统运行时间: {systemMetrics?.serverInfo?.uptime ?? "-"}
                     </span>
                 </div>

@@ -8,6 +8,8 @@ import {RedoOutlined, ShopOutlined} from "@ant-design/icons";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
 import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {theme} from "antd";
+const { useToken } = theme;
 
 const TENANT_ID_STORAGE_KEY = 'selected_tenant_id';
 
@@ -22,6 +24,8 @@ export function TenantSelectorWithDetail({
     onChange,
     onTenantChange
 }: TenantSelectorWithDetailProps) {
+    const { token } = useToken();
+
     const selectorRef = useRef<EntityIdSelectorRef | null>(null);
     const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [initialChecked, setInitialChecked] = useState(false);
@@ -92,7 +96,7 @@ export function TenantSelectorWithDetail({
         return (
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <div className="p-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">选择租户</label>
+                    <label className="block text-sm font-medium mb-2" style={{ color: token.colorTextHeading }}>选择租户</label>
                     <TenantIdSelector
                         ref={selectorRef}
                         value={value}
@@ -116,7 +120,7 @@ export function TenantSelectorWithDetail({
                             fileEntityId={selectedTenant?.icon}
                             defaultIcon={<ShopOutlined />}
                         />
-                        <span className="font-bold">{selectedTenant.name}</span>
+                        <span className="font-bold" style={{ color: token.colorTextHeading }}>{selectedTenant.name}</span>
                     </Space>
                     <Button
                         type="link"

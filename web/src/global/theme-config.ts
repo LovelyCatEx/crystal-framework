@@ -1,6 +1,7 @@
-import type {ThemeColor, ThemeConfig} from "@/types/theme.types.ts";
+import type {ThemeColor, ThemeConfig, ThemeMode} from "@/types/theme.types.ts";
 
 export const THEME_STORAGE_KEY = 'app-theme-color-key';
+export const THEME_MODE_STORAGE_KEY = 'app-theme-mode-key';
 
 export const themeColors: ThemeColor[] = [
     {
@@ -75,7 +76,9 @@ export function getThemeByKey(key: string): ThemeColor {
     return themeColors.find(t => t.key === key) || defaultThemeColor;
 }
 
-export function buildThemeConfig(themeColor: ThemeColor): ThemeConfig {
+export function buildThemeConfig(themeColor: ThemeColor, themeMode: ThemeMode = 'light'): ThemeConfig {
+    const isDark = themeMode === 'dark';
+    
     return {
         token: {
             colorPrimary: themeColor.colorPrimary,
@@ -84,19 +87,35 @@ export function buildThemeConfig(themeColor: ThemeColor): ThemeConfig {
         },
         components: {
             Layout: {
-                headerBg: 'rgba(255, 255, 255, 0.7)',
-                siderBg: '#ffffff',
+                headerBg: isDark ? 'rgba(30, 30, 30, 0.8)' : 'rgba(255, 255, 255, 0.7)',
+                siderBg: isDark ? '#1f1f1f' : '#ffffff',
             },
             Menu: {
                 itemBorderRadius: 12,
-                itemSelectedBg: themeColor.itemSelectedBg,
+                itemSelectedBg: isDark 
+                    ? `${themeColor.colorPrimary}20`
+                    : themeColor.itemSelectedBg,
                 itemSelectedColor: themeColor.itemSelectedColor,
             },
         },
     };
 }
 
-export function updateThemeCSSVariables(themeColor: ThemeColor): void {
+export function getStoredThemeMode(): ThemeMode {
+    return (localStorage.getItem(THEME_MODE_STORAGE_KEY) as ThemeMode) || 'light';
+}
+
+export function setStoredThemeMode(mode: ThemeMode): void {
+    localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+}
+
+export function updateThemeCSSVariables(themeColor: ThemeColor, themeMode: ThemeMode = 'light'): void {
     const root = document.documentElement;
     root.style.setProperty('--theme-color-primary', themeColor.colorPrimary);
+    
+    if (themeMode === 'dark') {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
 }

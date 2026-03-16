@@ -63,7 +63,6 @@ export function DashboardPage() {
                             options={timeRangeOptions}
                             value={timeRange}
                             onChange={(value) => setTimeRange(value as string)}
-                            className="bg-slate-100"
                         />
                     </div>
                 )}

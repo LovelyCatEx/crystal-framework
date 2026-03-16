@@ -1,4 +1,19 @@
-import {Avatar, Button, Card, Col, Form, Input, message, Modal, Row, Space, Tabs, Upload, type UploadProps} from "antd";
+import {
+    Avatar,
+    Button,
+    Card,
+    Col,
+    Form,
+    Input,
+    message,
+    Modal,
+    Row,
+    Space,
+    Tabs,
+    theme,
+    Upload,
+    type UploadProps
+} from "antd";
 import {
     CameraOutlined,
     ClockCircleOutlined,
@@ -32,6 +47,7 @@ import type {UserOAuthAccountVO} from "@/types/user-oauth.types.ts";
 import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
 import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
+const { useToken } = theme;
 
 const { Password } = Input;
 
@@ -561,6 +577,8 @@ const OAuthAccountSettings = () => {
 }
 
 function UserProfileCard() {
+    const { token } = useToken();
+
     const loggedUser = useLoggedUser();
 
     const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -638,14 +656,15 @@ function UserProfileCard() {
     return (
         <>
             <Card className="rounded-2xl shadow-sm border-none overflow-hidden">
-                <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
+                <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0 dark:from-slate-800 dark:via-blue-900/40 dark:to-slate-800"></div>
                 <div className="relative pt-0 px-6 pb-6">
                     <div className="flex justify-center -mt-12 mb-4 relative">
                         <Avatar
                             size={100}
-                            className="rounded-3xl border-4 border-white shadow-md bg-black/50"
+                            className="rounded-3xl border-4 shadow-md bg-black/50"
                             icon={<UserOutlined />}
                             src={loggedUser.userProfile?.avatar}
+                            style={{ borderColor: token.colorBorderSecondary }}
                         />
                         <Upload {...uploadAvatarProps}>
                             <Button

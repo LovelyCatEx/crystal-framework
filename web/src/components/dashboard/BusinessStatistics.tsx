@@ -1,4 +1,4 @@
-import { Card } from "antd";
+import { Card, theme } from "antd";
 import { useEffect, useState } from "react";
 import {
     CloudOutlined,
@@ -12,6 +12,8 @@ import {
 } from "@ant-design/icons";
 import { getBusinessStats } from "@/api/dashboard.api.ts";
 import type { BusinessStatsVO } from "@/types/dashboard.types.ts";
+
+const { useToken } = theme;
 
 const statCardConfig = [
     { key: "totalUsers" as keyof BusinessStatsVO, title: "总用户数", icon: <UserOutlined />, color: "blue" },
@@ -38,6 +40,7 @@ export interface BusinessStatisticsProps {
 }
 
 export function BusinessStatistics({ timeRange }: BusinessStatisticsProps) {
+    const { token } = useToken();
     const [businessStats, setBusinessStats] = useState<BusinessStatsVO | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -66,42 +69,50 @@ export function BusinessStatistics({ timeRange }: BusinessStatisticsProps) {
 
                 return (
                     <Card
-                        key={config.key}
-                        className="rounded-3xl border-none shadow-sm hover:shadow-md transition-all"
-                        loading={loading}
-                    >
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">
-                                    {config.title}
-                                </p>
-                                <h2 className="text-3xl font-bold text-slate-800">
-                                    {formatNumber(value)}
-                                </h2>
-                                <span
-                                    className={`text-sm font-bold ${
-                                        change >= 0 ? "text-emerald-500" : "text-red-500"
-                                    }`}
-                                >
-                                    {formatChange(change)}
-                                </span>
-                            </div>
-                            <div
-                                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl
-                                ${config.color === "blue" ? "bg-blue-50 text-blue-600" : ""}
-                                ${config.color === "emerald" ? "bg-emerald-50 text-emerald-600" : ""}
-                                ${config.color === "violet" ? "bg-violet-50 text-violet-600" : ""}
-                                ${config.color === "orange" ? "bg-orange-50 text-orange-600" : ""}
-                                ${config.color === "cyan" ? "bg-cyan-50 text-cyan-600" : ""}
-                                ${config.color === "pink" ? "bg-pink-50 text-pink-600" : ""}
-                                ${config.color === "indigo" ? "bg-indigo-50 text-indigo-600" : ""}
-                                ${config.color === "amber" ? "bg-amber-50 text-amber-600" : ""}
-                            `}
+                    key={config.key}
+                    className="rounded-3xl border-none shadow-sm hover:shadow-md transition-all"
+                    loading={loading}
+                >
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-bold uppercase tracking-wider mb-2" style={{ color: token.colorTextSecondary }}>
+                                {config.title}
+                            </p>
+                            <h2 className="text-3xl font-bold" style={{ color: token.colorTextHeading }}>
+                                {formatNumber(value)}
+                            </h2>
+                            <span
+                                className="text-sm font-bold"
+                                style={{ color: change >= 0 ? token.colorSuccess : token.colorError }}
                             >
-                                {config.icon}
-                            </div>
+                                {formatChange(change)}
+                            </span>
                         </div>
-                    </Card>
+                        <div
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+                            style={{
+                                backgroundColor: config.color === "blue" ? token.colorPrimaryBg :
+                                    config.color === "emerald" ? token.colorSuccessBg :
+                                        config.color === "violet" ? token.colorInfoBg :
+                                            config.color === "orange" ? token.colorWarningBg :
+                                                config.color === "cyan" ? token.colorInfoBg :
+                                                    config.color === "pink" ? token.colorErrorBg :
+                                                        config.color === "indigo" ? token.colorPrimaryBg :
+                                                            config.color === "amber" ? token.colorWarningBg : token.colorFillTertiary,
+                                color: config.color === "blue" ? token.colorPrimary :
+                                    config.color === "emerald" ? token.colorSuccess :
+                                        config.color === "violet" ? token.colorInfo :
+                                            config.color === "orange" ? token.colorWarning :
+                                                config.color === "cyan" ? token.colorInfo :
+                                                    config.color === "pink" ? token.colorError :
+                                                        config.color === "indigo" ? token.colorPrimary :
+                                                            config.color === "amber" ? token.colorWarning : token.colorText
+                            }}
+                        >
+                            {config.icon}
+                        </div>
+                    </div>
+                </Card>
                 );
             })}
         </div>

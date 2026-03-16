@@ -9,8 +9,16 @@ import {
     UserOutlined, UserSwitchOutlined, BgColorsOutlined
 } from "@ant-design/icons";
 import {ThemeColorPickerModal} from "@/components/ThemeColorPickerModal.tsx";
-import {getStoredThemeKey, setStoredThemeKey, updateThemeCSSVariables} from "@/global/theme-config.ts";
-import type {ThemeColor} from "@/types/theme.types.ts";
+import {ThemeModeSelector} from "@/components/ThemeModeSelector.tsx";
+import {
+    getStoredThemeKey,
+    setStoredThemeKey,
+    updateThemeCSSVariables,
+    getStoredThemeMode,
+    setStoredThemeMode,
+    THEME_MODE_STORAGE_KEY
+} from "@/global/theme-config.ts";
+import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
@@ -25,6 +33,8 @@ import type {UserTenantVO} from "@/types/tenant.types.ts";
 import {switchTenant} from "@/api/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
+import {theme} from "antd";
+const { useToken } = theme;
 
 function TenantSwitcher() {
     const loggedUser = useLoggedUser();
@@ -107,22 +117,34 @@ function TenantSwitcher() {
 }
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
+    const { token } = useToken();
+
     const loggedUser = useLoggedUser();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openKeys, setOpenKeys] = useState<string[]>([]);
     const [themeModalOpen, setThemeModalOpen] = useState(false);
     const [currentThemeKey, setCurrentThemeKey] = useState<string>(getStoredThemeKey);
+    const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleThemeChange = (theme: ThemeColor) => {
         setCurrentThemeKey(theme.key);
         setStoredThemeKey(theme.key);
-        updateThemeCSSVariables(theme);
+        updateThemeCSSVariables(theme, themeMode);
         window.dispatchEvent(new StorageEvent('storage', {
             key: 'app-theme-color-key',
             newValue: theme.key,
+        }));
+    };
+
+    const handleThemeModeChange = (mode: ThemeMode) => {
+        setThemeMode(mode);
+        setStoredThemeMode(mode);
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: THEME_MODE_STORAGE_KEY,
+            newValue: mode,
         }));
     };
 
@@ -207,12 +229,15 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     }, [availableMenus, location.pathname]);
 
     return (
-        <Layout className="min-h-screen bg-[#f8fafc]">
-            <Header className="fixed top-0 left-0 w-full h-16 px-6 flex items-center justify-between z-50 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <Layout className="min-h-screen">
+            <Header
+                className="fixed top-0 left-0 w-full h-16 px-6 flex items-center justify-between z-50 backdrop-blur-md border-b shadow-sm"
+                style={{ borderColor: token.colorBorder }}
+            >
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                         <img src="/logo.svg" alt="Logo" className="w-8 h-8"/>
-                        <span className="text-2xl font-bold tracking-tight text-gray-900">
+                        <span className="text-2xl font-bold tracking-tight" style={{ color: token.colorTextHeading }}>
                             {ProjectDisplayName}
                         </span>
                     </div>
@@ -227,6 +252,13 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                         icon={mobileMenuOpen ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="md:hidden"
+                    />
+
+                    <ThemeModeSelector
+                        value={themeMode}
+                        onChange={handleThemeModeChange}
+                        size="middle"
+                        shape="round"
                     />
 
                     <Dropdown
@@ -259,7 +291,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 icon={<UserOutlined />}
                                 src={loggedUser.userProfile?.avatar}
                             />
-                            <span className="hidden sm:inline font-medium text-gray-700">
+                            <span className="hidden sm:inline font-medium" style={{ color: token.colorTextHeading }}>
                                 {loggedUser?.userProfile?.nickname}
                             </span>
                         </Space>
@@ -274,7 +306,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     trigger={null}
                     collapsible
                     collapsed={collapsed}
-                    className="hidden md:block overflow-auto h-[calc(100vh-64px)] fixed left-0 border-r border-gray-100"
+                    className="hidden md:block overflow-auto h-[calc(100vh-64px)] fixed left-0 border-r"
+                    style={{ borderColor: token.colorBorder }}
                 >
                     <div className="flex items-center justify-between px-4 py-2">
                         {!collapsed && <span className="text-sm text-gray-800"></span>}

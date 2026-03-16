@@ -1,4 +1,18 @@
-import {Avatar, Button, Card, Col, Form, Input, message, Row, Spin, Typography, Upload, type UploadProps} from "antd";
+import {
+    Avatar,
+    Button,
+    Card,
+    Col,
+    Form,
+    Input,
+    message,
+    Row,
+    Spin,
+    theme,
+    Typography,
+    Upload,
+    type UploadProps
+} from "antd";
 import {
     CameraOutlined,
     HomeOutlined,
@@ -19,11 +33,14 @@ import {
 import type {TenantProfileVO} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
+const { useToken } = theme;
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 export function MyTenantProfilePage() {
+    const { token } = useToken();
+
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -158,14 +175,15 @@ export function MyTenantProfilePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-4">
                     <Card className="rounded-2xl shadow-sm border-none overflow-hidden">
-                        <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
+                        <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0 dark:from-slate-800 dark:via-blue-900/40 dark:to-slate-800"></div>
                         <div className="relative pt-0 px-6 pb-6">
                             <div className="flex justify-center -mt-12 mb-4 relative">
                                 <Avatar
                                     size={100}
-                                    className="rounded-2xl border-4 border-white shadow-md bg-white"
+                                    className="rounded-2xl border-4 shadow-md bg-white"
                                     icon={<ShopOutlined className="text-4xl text-blue-500" />}
                                     src={tenant?.icon}
+                                    style={{ borderColor: token.colorBorderSecondary }}
                                 />
                                 <Upload {...uploadIconProps}>
                                     <Button

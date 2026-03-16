@@ -61,7 +61,7 @@ export function MyJoinedTenants() {
                 title={
                     <div className="flex items-center gap-2">
                         <TeamOutlined style={{ color: token.colorPrimary }} />
-                        <span className="text-sm font-bold text-slate-800">我加入的组织</span>
+                        <span className="text-sm font-bold" style={{ color: token.colorTextHeading }}>我加入的组织</span>
                     </div>
                 }
                 className="rounded-3xl border-none shadow-sm"
@@ -84,11 +84,11 @@ export function MyJoinedTenants() {
     return (
         <Card
                 title={
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center justify-between w-full" style={{ color: token.colorTextHeading }}>
                         <div className="flex items-center gap-2">
                             <TeamOutlined />
-                            <span className="text-sm font-bold text-slate-800">我加入的组织</span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-sm font-bold">我加入的组织</span>
+                            <span className="text-xs">
                                 ({joinedTenants?.length || 0})
                             </span>
                         </div>
