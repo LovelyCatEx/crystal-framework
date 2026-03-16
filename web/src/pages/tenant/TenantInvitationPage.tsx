@@ -16,7 +16,7 @@ import {getTenantProfile} from "@/api/tenant-profile.api.ts";
 import {acceptTenantInvitation, queryTenantInvitationByCode} from "@/api/invitation.api.ts";
 import type {TenantProfileVO} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import {buildDocumentTitle} from "@/global/global-settings.ts";
+import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
 
 const { Title, Text } = Typography;
 
@@ -59,8 +59,8 @@ export function TenantInvitationPage() {
             return;
         }
 
-        if (trimmedCode.length < 4) {
-            message.error('邀请码长度无效（至少需要 4 位）');
+        if (trimmedCode.length < 8) {
+            message.error('邀请码长度无效（至少需要 8 位）');
             return;
         }
 
@@ -124,7 +124,7 @@ export function TenantInvitationPage() {
                 {!isSubmitted ? (
                     <Card
                         className="border-none shadow-lg rounded-2xl overflow-hidden"
-                        bodyStyle={{ padding: '40px 32px' }}
+                        styles={{ body: { padding: '40px 32px' } }}
                     >
                         <div className="text-center mb-10">
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4 text-blue-600">
@@ -146,7 +146,7 @@ export function TenantInvitationPage() {
                                 <div className="flex gap-2">
                                     <Input
                                         size="large"
-                                        placeholder="例如：GLOW"
+                                        placeholder="例如：1brxVqQH2R6c568N"
                                         value={inviteCode}
                                         onChange={(e) => setInviteCode(e.target.value)}
                                         onPressEnter={() => fetchTenantInfo(inviteCode)}
@@ -318,7 +318,7 @@ export function TenantInvitationPage() {
                 )}
 
                 <div className="mt-8 text-center text-gray-400 text-sm">
-                    <span className="font-bold">Crystal Framework</span>
+                    <span className="font-bold">{ProjectDisplayName}</span>
                 </div>
             </div>
         </div>

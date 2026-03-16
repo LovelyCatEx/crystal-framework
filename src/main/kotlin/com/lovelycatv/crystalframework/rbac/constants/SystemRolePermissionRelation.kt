@@ -11,6 +11,8 @@ object SystemRolePermissionRelation {
         SystemRole.ROLE_ADMIN to listOf(
             // Dashboard
             SystemPermission.COMPONENT_DASHBOARD_BUSINESS_STATISTICS,
+            SystemPermission.COMPONENT_DASHBOARD_SYSTEM_METRICS,
+            SystemPermission.COMPONENT_DASHBOARD_MY_TENANTS,
             // User
             SystemPermission.MENU_USER_MANAGER,
             SystemPermission.ACTION_USER_READ,
@@ -19,6 +21,8 @@ object SystemRolePermissionRelation {
             // Storage
             SystemPermission.MENU_STORAGE_PROVIDER_MANAGER,
             SystemPermission.ACTION_STORAGE_PROVIDER_READ,
+            SystemPermission.MENU_FILE_RESOURCE_MANAGER,
+            SystemPermission.ACTION_FILE_RESOURCE_READ,
             // Mail template
             SystemPermission.MENU_MAIL_TEMPLATE_MANAGER,
             SystemPermission.ACTION_MAIL_TEMPLATE_READ,
@@ -31,5 +35,9 @@ object SystemRolePermissionRelation {
             SystemPermission.MENU_SYSTEM_SETTINGS,
             SystemPermission.ACTION_SYSTEM_SETTINGS_READ,
         ),
+        SystemRole.ROLE_USER to listOf(
+            // Dashboard
+            SystemPermission.COMPONENT_DASHBOARD_MY_TENANTS,
+        )
     )
 }

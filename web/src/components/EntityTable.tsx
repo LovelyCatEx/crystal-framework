@@ -197,7 +197,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 dataSource={data}
                 rowKey="id"
                 scroll={{ x: 1200 }}
-                className="custom-table"
                 pagination={{
                     showSizeChanger: true,
                     defaultPageSize: 20,

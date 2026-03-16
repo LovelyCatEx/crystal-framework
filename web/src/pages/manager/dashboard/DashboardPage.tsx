@@ -1,9 +1,10 @@
-import { ActionBarComponent } from "@/components/ActionBarComponent.tsx";
-import { Segmented } from "antd";
-import { useMemo, useState } from "react";
-import { useLoggedUser } from "@/compositions/use-logged-user.ts";
-import { BusinessStatistics } from "@/components/dashboard/BusinessStatistics.tsx";
-import { SystemMetrics } from "@/components/dashboard/SystemMetrics.tsx";
+import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {Segmented} from "antd";
+import {useMemo, useState} from "react";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {BusinessStatistics} from "@/components/dashboard/BusinessStatistics.tsx";
+import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
+import {MyJoinedTenants} from "@/components/dashboard/MyJoinedTenants.tsx";
 
 function getGreeting(): string {
     const hour = new Date().getHours();
@@ -16,6 +17,7 @@ function getGreeting(): string {
 
 const COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics";
 const COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics";
+const COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined";
 
 const timeRangeOptions = [
     { label: "1天", value: "1d" },
@@ -46,6 +48,10 @@ export function DashboardPage() {
         return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_SYSTEM_METRICS);
     }, [accessibleComponentPaths]);
 
+    const hasMyTeantsPermission = useMemo(() => {
+        return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_MY_TENANTS);
+    }, [accessibleComponentPaths]);
+
     return (
         <>
             <ActionBarComponent title={greetingTitle} />
@@ -65,6 +71,8 @@ export function DashboardPage() {
                 {hasBusinessStatsPermission && <BusinessStatistics timeRange={timeRange} />}
 
                 {hasSystemMetricsPermission && <SystemMetrics />}
+
+                {hasMyTeantsPermission && <MyJoinedTenants />}
             </div>
         </>
     );
