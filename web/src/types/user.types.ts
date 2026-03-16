@@ -14,3 +14,8 @@ export interface User extends BaseEntity {
     nickname: string;
     avatar: string | null;
 }
+
+export interface UserAccessibleResourceVO {
+    menus: string[];
+    components: string[];
+}

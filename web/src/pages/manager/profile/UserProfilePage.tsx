@@ -637,7 +637,7 @@ function UserProfileCard() {
 
     return (
         <>
-            <Card className="rounded-3xl shadow-sm border-none overflow-hidden">
+            <Card className="rounded-2xl shadow-sm border-none overflow-hidden">
                 <div className="h-24 bg-gradient-to-r from-blue-500 to-indigo-600 -m-6 mb-0"></div>
                 <div className="relative pt-0 px-6 pb-6">
                     <div className="flex justify-center -mt-12 mb-4 relative">
@@ -722,7 +722,7 @@ export function UserProfilePage() {
                 </div>
 
                 <div className="lg:col-span-8">
-                    <Card className="rounded-3xl shadow-sm border-none min-h-[500px]">
+                    <Card className="rounded-2xl shadow-sm border-none min-h-[500px]">
                         <Tabs
                             activeKey={activeTab}
                             className="modern-tabs"

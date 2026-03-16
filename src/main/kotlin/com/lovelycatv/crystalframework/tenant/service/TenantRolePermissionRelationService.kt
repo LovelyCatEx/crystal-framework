@@ -9,4 +9,8 @@ interface TenantRolePermissionRelationService : CachedBaseService<TenantRolePerm
     suspend fun getRolePermissions(roleId: Long): List<TenantPermissionEntity>
 
     suspend fun setRolePermissions(roleId: Long, permissionIds: List<Long>)
+
+    suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>)
+
+    suspend fun deleteByRoleIdIn(roleIds: Collection<Long>)
 }

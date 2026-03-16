@@ -2,15 +2,19 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.department.mem
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerDeleteTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerReadTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerUpdateTenantDepartmentMemberDTO
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import jakarta.validation.Valid
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -18,9 +22,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/department/member")
 class ManagerTenantDepartmentMemberController(
-    private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService
+    private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService,
+    private val tenantDepartmentManagerService: TenantDepartmentManagerService
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE}')")
     @PostMapping("/create", version = "1")
     suspend fun create(
         userAuthentication: UserAuthentication,
@@ -28,11 +32,21 @@ class ManagerTenantDepartmentMemberController(
         @Valid
         dto: ManagerCreateTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        tenantDepartmentMemberManagerService.create(dto)
+        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE)) {
+            tenantDepartmentMemberManagerService.create(dto)
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM)) {
+            userAuthentication.assertTenantIdNotNull()
+            if (tenantDepartmentManagerService.checkIsRelated(dto.departmentId, userAuthentication.tenantId!!)) {
+                tenantDepartmentMemberManagerService.create(dto)
+            } else {
+                throw UnauthorizedException()
+            }
+        } else {
+            throw ForbiddenException()
+        }
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ}')")
     @GetMapping("/query", version = "1")
     suspend fun query(
         userAuthentication: UserAuthentication,
@@ -40,10 +54,19 @@ class ManagerTenantDepartmentMemberController(
         @Valid
         dto: ManagerReadTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        return ApiResponse.success(tenantDepartmentMemberManagerService.queryVO(dto))
+        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ)) {
+            return ApiResponse.success(tenantDepartmentMemberManagerService.queryVO(dto))
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM)) {
+            if (tenantDepartmentManagerService.checkIsRelated(dto.departmentId, userAuthentication.tenantId!!)) {
+                return ApiResponse.success(tenantDepartmentMemberManagerService.queryVO(dto))
+            } else {
+                throw UnauthorizedException()
+            }
+        } else {
+            throw ForbiddenException()
+        }
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE}')")
     @PostMapping("/update", version = "1")
     suspend fun update(
         userAuthentication: UserAuthentication,
@@ -51,11 +74,21 @@ class ManagerTenantDepartmentMemberController(
         @Valid
         dto: ManagerUpdateTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        tenantDepartmentMemberManagerService.update(dto)
+        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE)) {
+            tenantDepartmentMemberManagerService.update(dto)
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM)) {
+            userAuthentication.assertTenantIdNotNull()
+            if (tenantDepartmentMemberManagerService.checkIsRelated(dto.id, userAuthentication.tenantId!!)) {
+                tenantDepartmentMemberManagerService.update(dto)
+            } else {
+                throw UnauthorizedException()
+            }
+        } else {
+            throw ForbiddenException()
+        }
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE}')")
     @PostMapping("/delete", version = "1")
     suspend fun delete(
         userAuthentication: UserAuthentication,
@@ -63,7 +96,18 @@ class ManagerTenantDepartmentMemberController(
         @Valid
         dto: ManagerDeleteTenantDepartmentMemberDTO
     ): ApiResponse<*> {
-        tenantDepartmentMemberManagerService.deleteByDTO(dto)
+        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE)) {
+            tenantDepartmentMemberManagerService.deleteByDTO(dto)
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM)) {
+            userAuthentication.assertTenantIdNotNull()
+            if (tenantDepartmentMemberManagerService.checkIsRelated(dto.ids, userAuthentication.tenantId!!)) {
+                tenantDepartmentMemberManagerService.deleteByDTO(dto)
+            } else {
+                throw UnauthorizedException()
+            }
+        } else {
+            throw ForbiddenException()
+        }
         return ApiResponse.success(null)
     }
 }

@@ -7,13 +7,18 @@ import {
     TenantPermissionType,
     TenantPermissionTypeMap
 } from "@/api/tenant-permission.api.ts";
-import {useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import {TENANT_PERMISSION_TABLE_COLUMNS} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 
 export function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const [filterType, setFilterType] = useState<number>();
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.();
+    }, [filterType]);
 
     const typeOptions = [
         { label: TenantPermissionTypeMap[TenantPermissionType.ACTION].label, value: TenantPermissionType.ACTION },
@@ -141,6 +146,25 @@ export function TenantPermissionManagerPage() {
                 query={async (props) => {
                     return (await TenantPermissionManagerController.query(props)).data!
                 }}
+                tableActions={[
+                    {
+                        label: <span>权限类型</span>,
+                        children: <Select
+                            defaultValue="-1"
+                            style={{ width: 120 }}
+                            options={[
+                                { value: '-1', label: '全部' },
+                                ...typeOptions
+                            ]}
+                            onChange={(value) => setFilterType(value === '-1' ? undefined : Number.parseInt(value))}
+                        />,
+                        queryParamsProvider() {
+                            return {
+                                type: filterType
+                            };
+                        }
+                    }
+                ]}
                 delete={async (props) => {
                     return (await TenantPermissionManagerController.delete(props)).data!
                 }}

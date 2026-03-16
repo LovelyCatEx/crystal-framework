@@ -1,4 +1,4 @@
-import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, Tree} from "antd";
+import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, theme, Tree} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantDepartmentIdSelector} from "@/components/selector/TenantDepartmentIdSelector.tsx";
@@ -42,6 +42,7 @@ interface TreeNodeData extends DataNode {
 }
 
 export function TenantDepartmentManagerPage() {
+    const { token } = theme.useToken();
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [departments, setDepartments] = useState<TenantDepartment[]>([]);
     const [selectedDepartment, setSelectedDepartment] = useState<TenantDepartment | null>(null);
@@ -113,7 +114,7 @@ export function TenantDepartmentManagerPage() {
         if (!tenantId) return;
         setLoading(true);
         try {
-            const res = await TenantDepartmentManagerController.list();
+            const res = await TenantDepartmentManagerController.list({ tenantId: tenantId });
             const depts = res.data || [];
             setDepartments(depts);
             setTreeData(buildTreeData(depts));
@@ -398,25 +399,39 @@ export function TenantDepartmentManagerPage() {
             {selectedTenantId && (
                 <Row gutter={24} className="mt-4">
                     {/* Left: Department Tree */}
-                    <Col span={5}>
+                    <Col xs={24} xl={5} className="mb-4 xl:mb-0">
                         <Card
                             title="部门列表"
                             className="border-none shadow-sm rounded-2xl overflow-hidden"
                             loading={loading}
                         >
-                            <Tree
-                                treeData={treeData}
-                                onSelect={handleTreeSelect}
-                                selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
-                                defaultExpandAll
-                                blockNode
-                                showLine
-                            />
+                            {treeData.length > 0 ? (
+                                <Tree
+                                    treeData={treeData}
+                                    onSelect={handleTreeSelect}
+                                    selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
+                                    defaultExpandAll
+                                    blockNode
+                                    showLine
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                    <TeamOutlined className="text-4xl mb-4" />
+                                    <p className="text-sm mb-4">暂无部门</p>
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={openAddModal}
+                                    >
+                                        添加部门
+                                    </Button>
+                                </div>
+                            )}
                         </Card>
                     </Col>
 
                     {/* Right: Department Details & Members */}
-                    <Col span={19}>
+                    <Col xs={24} xl={19}>
                         {selectedDepartment ? (
                             <>
                                 {/* Department Info Card */}
@@ -544,7 +559,7 @@ export function TenantDepartmentManagerPage() {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="parentId" label="父部门">
-                                <TenantDepartmentIdSelector disabledDepartmentId={editingItem?.id ?? null} />
+                                <TenantDepartmentIdSelector tenantId={selectedTenantId || ''} disabledDepartmentId={editingItem?.id ?? null} />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -594,9 +609,13 @@ export function TenantDepartmentManagerPage() {
                                 key={key}
                                 className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                                     editingRoleType === value
-                                        ? 'border-blue-500 bg-blue-50'
+                                        ? ''
                                         : 'border-gray-200 hover:border-gray-300'
                                 }`}
+                                style={editingRoleType === value ? {
+                                    borderColor: token.colorPrimary,
+                                    backgroundColor: token.colorPrimaryBg
+                                } : {}}
                                 onClick={() => setEditingRoleType(value)}
                             >
                                 <div className="flex items-center gap-3">

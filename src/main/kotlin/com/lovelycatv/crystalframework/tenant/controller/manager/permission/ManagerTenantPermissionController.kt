@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.permission.dto.ManagerCreateTenantPermissionDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.permission.dto.ManagerDeleteTenantPermissionDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.permission.dto.ManagerReadTenantPermissionDTO
@@ -21,7 +22,11 @@ import org.springframework.web.bind.annotation.*
 class ManagerTenantPermissionController(
     private val tenantPermissionManagerService: TenantPermissionManagerService
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_PERMISSION_READ}')")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'${SystemPermission.ACTION_TENANT_PERMISSION_READ}', " +
+            "'${TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM}'" +
+            ")"
+    )
     @GetMapping("/list", version = "1")
     suspend fun readAll(
         userAuthentication: UserAuthentication
@@ -41,7 +46,11 @@ class ManagerTenantPermissionController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_TENANT_PERMISSION_READ}')")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'${SystemPermission.ACTION_TENANT_PERMISSION_READ}', " +
+            "'${TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM}'" +
+            ")"
+    )
     @GetMapping("/query", version = "1")
     suspend fun query(
         userAuthentication: UserAuthentication,

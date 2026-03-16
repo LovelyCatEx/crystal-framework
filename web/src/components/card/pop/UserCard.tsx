@@ -1,21 +1,14 @@
-import {Card, Descriptions, Spin, Tag} from "antd";
-import type {User} from "@/types/user.types.ts";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {UserManagerController} from "@/api/user.api.ts";
+import {Avatar, Card, Descriptions, Spin, Tag} from "antd";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
-import {UserAvatar} from "../../UserAvatar.tsx";
+import {useUserProfile} from "@/compositions/use-user-profile.ts";
+import {UserOutlined} from "@ant-design/icons";
 
 interface UserCardProps {
-    userId: string;
+    userId?: string;
 }
 
 export function UserCard({ userId }: UserCardProps) {
-    const { data: user, isLoading } = useSWRComposition<User | null>(
-        `user-card-${userId}`,
-        async () => {
-            return await UserManagerController.getById(userId);
-        }
-    );
+    const { userProfile: user, isUserProfileLoading: isLoading } = useUserProfile(userId);
 
     if (isLoading) {
         return (
@@ -43,7 +36,10 @@ export function UserCard({ userId }: UserCardProps) {
             className="w-72"
             title={
                 <div className="flex items-center gap-3 pt-2 pb-2">
-                    <UserAvatar fileEntityId={user.avatar} />
+                    <Avatar
+                        src={user.avatar}
+                        icon={<UserOutlined />}
+                    />
                     <div className="flex flex-col">
                         <CopyableToolTip title={user.nickname}>
                             <span className="font-bold">{user.nickname}</span>

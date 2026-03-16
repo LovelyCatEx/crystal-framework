@@ -51,21 +51,25 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
     fun handleForbiddenException(e: ForbiddenException): ApiResponse<*> {
         logger.debug("An forbidden exception occurred", e)
 
-        return ApiResponse.forbidden<Nothing>(e.localizedMessage ?: e.message ?: "")
+        return ApiResponse.forbidden<Nothing>(
+            e.localizedMessage ?: e.message ?: "you cannot access this resource")
+
     }
 
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedException(e: UnauthorizedException): ApiResponse<*> {
         logger.debug("An unauthorized exception occurred", e)
 
-        return ApiResponse.unauthorized<Nothing>(e.localizedMessage ?: e.message ?: "")
+        return ApiResponse.unauthorized<Nothing>(
+            e.localizedMessage ?: e.message ?: "you are not authorized to perform this action"
+        )
     }
 
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(e: BusinessException): ApiResponse<*> {
         logger.debug("An business exception occurred", e)
 
-        return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message ?: "")
+        return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message ?: "bad request")
     }
 
     @ExceptionHandler(MissingRequestValueException::class)

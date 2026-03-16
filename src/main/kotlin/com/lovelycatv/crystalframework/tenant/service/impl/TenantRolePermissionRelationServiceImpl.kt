@@ -39,9 +39,8 @@ class TenantRolePermissionRelationServiceImpl(
             .findAllByRoleId(roleId)
             .awaitListWithTimeout()
 
-        return relationIds.map {
+        return relationIds.mapNotNull {
             tenantPermissionRepository.findById(it.permissionId).awaitFirstOrNull()
-                ?: throw BusinessException("permission with id ${it.permissionId} not found")
         }
     }
 
@@ -65,5 +64,17 @@ class TenantRolePermissionRelationServiceImpl(
             ).apply { newEntity() }
             tenantRolePermissionRelationRepository.save(entity).awaitFirstOrNull()
         }
+    }
+
+    override suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByPermissionIdIn(permissionIds)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByRoleIdIn(roleIds)
+            .awaitFirstOrNull()
     }
 }

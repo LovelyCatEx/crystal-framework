@@ -69,16 +69,7 @@ class RbacTableDataCheckRunner(
                 val permissionKey = permission.getter.call() as? String?
                     ?: throw IllegalStateException("$permissionPropertyName is not a valid permission declaration.")
 
-                val (name, description, path) = when (type) {
-                    PermissionType.ACTION -> {
-                        Triple(permissionKey, permissionKey, null)
-                    }
-
-                    PermissionType.MENU -> {
-                        val (readPermissionKey, path) = permissionKey.split(":")
-                        Triple(readPermissionKey, readPermissionKey, path)
-                    }
-                }
+                val (name, description, path) = SystemPermission.resolvePermissionDeclaration(permissionKey)
 
                 val existing = runBlocking(Dispatchers.IO) {
                     userPermissionManagerService

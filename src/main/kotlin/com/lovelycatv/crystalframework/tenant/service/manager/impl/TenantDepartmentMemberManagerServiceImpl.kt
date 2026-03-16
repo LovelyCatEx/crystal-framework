@@ -25,6 +25,7 @@ import kotlin.reflect.KClass
 class TenantDepartmentMemberManagerServiceImpl(
     private val tenantDepartmentMemberRelationRepository: TenantDepartmentMemberRelationRepository,
     private val tenantMemberRepository: TenantMemberRepository,
+    private val tenantDepartmentRepository: com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentRepository,
     private val userManagerService: UserManagerService,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
@@ -100,5 +101,16 @@ class TenantDepartmentMemberManagerServiceImpl(
             totalPages = entityResult.totalPages,
             records = vos
         )
+    }
+
+    override suspend fun checkIsRelated(ids: Collection<Long>, tenantId: Long): Boolean {
+        for (id in ids) {
+            val relation = this.getByIdOrNull(id) ?: return false
+            val department = tenantDepartmentRepository.findById(relation.departmentId).awaitFirstOrNull()
+            if (department?.tenantId != tenantId) {
+                return false
+            }
+        }
+        return true
     }
 }

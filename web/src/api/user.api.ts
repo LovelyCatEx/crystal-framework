@@ -1,5 +1,5 @@
 import {BaseManagerController} from "./BaseManagerController.ts";
-import type {User, UserProfileVO} from "../types/user.types.ts";
+import type {User, UserAccessibleResourceVO, UserProfileVO} from "../types/user.types.ts";
 import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
 import {doGet, doPost} from "./system-request.ts";
 
@@ -22,12 +22,13 @@ export interface ManagerUpdateUserDTO extends BaseManagerUpdateDTO {
     nickname?: string | null;
 }
 
-export async function getUserProfile() {
-    return doGet<UserProfileVO>('/api/user/profile');
+export async function getUserProfile(id?: string) {
+    const params = id ? { id } : undefined;
+    return doGet<UserProfileVO>('/api/user/profile', params);
 }
 
 export async function getUserAccessibleMenus() {
-    return doGet<string[]>('/api/user/menus/list');
+    return doGet<UserAccessibleResourceVO>('/api/user/menus/list');
 }
 
 export async function uploadUserAvatar(file: File) {

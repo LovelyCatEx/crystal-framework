@@ -38,8 +38,16 @@ import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermiss
 import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
 import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
-import {TenantDepartmentManagerPage} from "../pages/manager/tenant/TenantDepartmentManagerPage.tsx";
-import {TenantProfilePage} from "@/pages/manager/tenant/TenantProfilePage.tsx";
+import {TenantDepartmentManagerPage} from "@/pages/manager/tenant/TenantDepartmentManagerPage.tsx";
+import {TenantInvitationManagerPage} from "@/pages/manager/tenant/TenantInvitationManagerPage.tsx";
+import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.tsx";
+import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
+import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
+import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
+import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
+import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
+import {MyTenantRolePermissionManagerPage} from "@/pages/manager/tenant/MyTenantRolePermissionManagerPage.tsx";
+import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -70,6 +78,11 @@ export const menuGroups: MenuGroup[] = [
         name: 'tenant',
         icon: <ShopOutlined />,
         label: '租户管理',
+    },
+    {
+        name: 'i_tenant',
+        icon: <ShopOutlined />,
+        label: '组织管理',
     }
 ]
 
@@ -92,13 +105,69 @@ export const publicMenus: RouteItem[] = [
 
 export const tenantMenus: RouteItem[] = [
     {
+        key: '/manager/tenant/dashboard',
+        path: '/manager/tenant/dashboard',
+        icon: <ShopOutlined />,
+        label: "我的组织",
+        page: <MyTenantDashboard />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/members',
+        path: '/manager/tenant/members',
+        icon: <TeamOutlined />,
+        label: "成员管理",
+        page: <MyTenantMemberManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/invitations',
+        path: '/manager/tenant/invitations',
+        icon: <TagsOutlined />,
+        label: "邀请码管理",
+        page: <MyTenantInvitationManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/roles',
+        path: '/manager/tenant/roles',
+        icon: <KeyOutlined />,
+        label: "角色管理",
+        page: <MyTenantRoleManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/member-roles',
+        path: '/manager/tenant/member-roles',
+        icon: <UserSwitchOutlined />,
+        label: "成员角色管理",
+        page: <MyTenantMemberRoleManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/role-permissions',
+        path: '/manager/tenant/role-permissions',
+        icon: <SafetyOutlined />,
+        label: "角色权限管理",
+        page: <MyTenantRolePermissionManagerPage />,
+        group: 'i_tenant',
+    },
+    {
+        key: '/manager/tenant/departments',
+        path: '/manager/tenant/departments',
+        icon: <ApartmentOutlined />,
+        label: "部门管理",
+        page: <MyTenantDepartmentManagerPage />,
+        group: 'i_tenant',
+    },
+    {
         key: '/manager/tenant/profile',
         path: '/manager/tenant/profile',
-        icon: <ShopOutlined />,
-        label: "组织信息",
-        page: <TenantProfilePage />,
-        group: 'tenant'
-    }
+        icon: <SettingOutlined />,
+        label: "组织设置",
+        page: <MyTenantProfilePage />,
+        group: 'i_tenant',
+    },
 ]
 
 export const adminMenus: RouteItem[] = [
@@ -202,6 +271,14 @@ export const adminMenus: RouteItem[] = [
         icon: <ApartmentOutlined />,
         label: "部门管理",
         page: <TenantDepartmentManagerPage />,
+        group: 'tenant'
+    },
+    {
+        key: '/manager/tenant-invitations',
+        path: '/manager/tenant-invitations',
+        icon: <TagsOutlined />,
+        label: "邀请码管理",
+        page: <TenantInvitationManagerPage />,
         group: 'tenant'
     },
     {

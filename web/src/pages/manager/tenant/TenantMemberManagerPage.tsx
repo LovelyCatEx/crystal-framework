@@ -7,16 +7,21 @@ import {
     TenantMemberStatus
 } from "@/api/tenant-member.api.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
-import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {PlusOutlined} from "@ant-design/icons";
+import {UserIdSelector} from "@/components/selector";
 
 export function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+    const [filterStatus, setFilterStatus] = useState<number>();
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.();
+    }, [filterStatus]);
 
     const statusOptions = [
         { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
@@ -75,7 +80,7 @@ export function TenantMemberManagerPage() {
                                     </Form.Item>
                                     <Form.Item
                                         name="memberUserId"
-                                        label="成员用户"
+                                        label="成员用户（仅创建时有效）"
                                         rules={[{ required: true, message: '请选择成员用户' }]}
                                     >
                                         <UserIdSelector />
@@ -104,6 +109,25 @@ export function TenantMemberManagerPage() {
                             tenantId: selectedTenantId
                         })).data!
                     }}
+                    tableActions={[
+                        {
+                            label: <span>状态</span>,
+                            children: <Select
+                                defaultValue="-1"
+                                style={{ width: 120 }}
+                                options={[
+                                    { value: '-1', label: '全部' },
+                                    ...statusOptions
+                                ]}
+                                onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}
+                            />,
+                            queryParamsProvider() {
+                                return {
+                                    status: filterStatus
+                                };
+                            }
+                        }
+                    ]}
                     delete={async (props) => {
                         return (await TenantMemberManagerController.delete(props)).data!
                     }}

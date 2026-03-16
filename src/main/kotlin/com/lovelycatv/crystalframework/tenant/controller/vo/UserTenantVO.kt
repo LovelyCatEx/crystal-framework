@@ -4,4 +4,6 @@ data class UserTenantVO(
     val tenantId: Long,
     val tenantName: String,
     val tenantAvatar: String?,
+    val memberStatus: Int,
+    val authenticated: Boolean,
 )

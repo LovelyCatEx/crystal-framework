@@ -9,12 +9,20 @@ object KotlinObjectClassUtils {
     ): List<T> {
         val results = mutableListOf<T>()
 
-        instance::class.memberProperties.forEach { property ->
-            val value = property.getter.call(instance)
-            if (value is T) {
-                results.add(value)
+        instance::class.memberProperties
+            .forEach { property ->
+                if (property.isConst) {
+                    val value = property.getter.call()
+                    if (value is T) {
+                        results.add(value)
+                    }
+                } else {
+                    val value = property.getter.call(instance)
+                    if (value is T) {
+                        results.add(value)
+                    }
+                }
             }
-        }
 
         if (includingNestedObjectClass) {
             var nested = instance::class.nestedClasses
@@ -22,14 +30,21 @@ object KotlinObjectClassUtils {
                 nested.forEach {
                     val instance = it.objectInstance
                     it.memberProperties.forEach { prop ->
-                        val value = if (instance != null) {
-                            prop.call(instance)
+                        if (prop.isConst) {
+                            val value = prop.getter.call()
+                            if (value is T) {
+                                results.add(value)
+                            }
                         } else {
-                            prop.getter.call()
-                        }
+                            val value = if (instance != null) {
+                                prop.call(instance)
+                            } else {
+                                prop.getter.call()
+                            }
 
-                        if (value is T) {
-                            results.add(value)
+                            if (value is T) {
+                                results.add(value)
+                            }
                         }
                     }
                 }

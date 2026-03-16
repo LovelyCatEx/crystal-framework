@@ -2,22 +2,24 @@ import {Col, DatePicker, Form, Input, Row, Select} from "antd";
 import dayjs from "dayjs";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
-    TenantManagerController,
     type ManagerCreateTenantDTO,
     type ManagerReadTenantDTO,
-    type ManagerUpdateTenantDTO
+    type ManagerUpdateTenantDTO,
+    TenantManagerController
 } from "@/api/tenant.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {TENANT_MANAGER_TABLE_COLUMNS} from "@/components/columns/TenantEntityColumns.tsx";
 import {TenantTireTypeManagerController} from "@/api/tenant-tire-type.api.ts";
 import type {TenantTireType} from "@/types/tenant.types.ts";
-import {TenantStatus, TenantStatusMap} from "@/types/tenant.types.ts";
+import {TenantStatus} from "@/types/tenant.types.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
+import {tenantStatusToTranslationMap} from "@/i18n/tenant.ts";
 
 export function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
+    const [filterStatus, setFilterStatus] = useState<number>();
 
     useEffect(() => {
         TenantTireTypeManagerController.list().then((res) => {
@@ -25,10 +27,14 @@ export function TenantManagerPage() {
         });
     }, []);
 
+    useEffect(() => {
+        pageRef?.current?.refreshData?.();
+    }, [filterStatus]);
+
     const statusOptions = [
-        { label: TenantStatusMap[TenantStatus.REVIEWING].label, value: TenantStatus.REVIEWING },
-        { label: TenantStatusMap[TenantStatus.ACTIVE].label, value: TenantStatus.ACTIVE },
-        { label: TenantStatusMap[TenantStatus.CLOSED].label, value: TenantStatus.CLOSED }
+        { label: tenantStatusToTranslationMap.get(TenantStatus.REVIEWING), value: TenantStatus.REVIEWING },
+        { label: tenantStatusToTranslationMap.get(TenantStatus.ACTIVE), value: TenantStatus.ACTIVE },
+        { label: tenantStatusToTranslationMap.get(TenantStatus.CLOSED), value: TenantStatus.CLOSED }
     ];
 
     const convertDateToTimestamp = (date: unknown): string => {
@@ -206,6 +212,25 @@ export function TenantManagerPage() {
                 };
                 return (await TenantManagerController.create(createProps)).data!
             }}
+            tableActions={[
+                {
+                    label: <span>状态</span>,
+                    children: <Select
+                        defaultValue="-1"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '-1', label: '全部' },
+                            ...statusOptions
+                        ]}
+                        onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}
+                    />,
+                    queryParamsProvider() {
+                        return {
+                            status: filterStatus
+                        };
+                    }
+                }
+            ]}
         >
         </ManagerPageContainer>
     )

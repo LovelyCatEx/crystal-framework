@@ -58,7 +58,8 @@ export function TenantMemberRoleManagerPage() {
 
     const fetchAllRoles = async () => {
         try {
-            const res = await TenantRoleManagerController.list();
+            if (!selectedTenantId) return;
+            const res = await TenantRoleManagerController.list({ tenantId: selectedTenantId });
             setAllRoles(res.data || []);
         } catch {
             void message.error("无法获取角色列表");

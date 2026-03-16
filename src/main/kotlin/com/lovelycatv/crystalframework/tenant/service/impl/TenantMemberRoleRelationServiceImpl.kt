@@ -85,4 +85,16 @@ class TenantMemberRoleRelationServiceImpl(
             tenantMemberRoleRelationRepository.save(entity).awaitFirstOrNull()
         }
     }
+
+    override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByRoleIdIn(roleIds)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun deleteByMemberIdIn(memberIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByMemberIdIn(memberIds)
+            .awaitFirstOrNull()
+    }
 }

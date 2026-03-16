@@ -45,4 +45,7 @@ interface FileResourceRepository : BaseRepository<FileResourceEntity> {
         keyword: String?,
         type: Int?,
     ): Mono<Long>
+
+    @Query("SELECT COUNT(*) FROM file_resources WHERE created_time >= :startTime AND created_time < :endTime")
+    fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }

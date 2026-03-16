@@ -9,8 +9,7 @@ data class ManagerReadTenantMemberDTO(
     override val id: Long? = null,
     override val searchKeyword: String? = null,
 
-    @field:NotNull(message = "Tenant ID is required")
-    val tenantId: Long,
+    val tenantId: Long? = null,
 
     val status: Int? = null
 ) : BaseManagerReadDTO(page, pageSize)

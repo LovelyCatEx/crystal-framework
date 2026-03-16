@@ -60,15 +60,15 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
                     String(bytes, StandardCharsets.UTF_8)
                 }
 
-                logger.info("[$id] Request Body:")
+                logger.debug("[$id] Request Body:")
                 if (joined.isNotEmpty()) {
                     if (joined.length > 2000) {
-                        logger.info("[$id]   ${joined.substring(0, 2000)}... (truncated)")
+                        logger.debug("[$id]   ${joined.substring(0, 2000)}... (truncated)")
                     } else {
-                        logger.info("[$id]   $joined")
+                        logger.debug("[$id]   $joined")
                     }
                 } else {
-                    logger.info("[$id]   (empty)")
+                    logger.debug("[$id]   (empty)")
                 }
 
                 Flux.just(
@@ -87,19 +87,19 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
         private val logger: Logger
     ) : ServerHttpResponseDecorator(response) {
         override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
-            logger.info("[$id] ${originalRequest.method.name()} ${originalRequest.uri}")
-            logger.info("[$id] RemoteIpAddress: ${originalRequest.remoteAddress?.toString() ?: "Unknown"}")
+            logger.debug("[$id] ${originalRequest.method.name()} ${originalRequest.uri}")
+            logger.debug("[$id] RemoteIpAddress: ${originalRequest.remoteAddress?.toString() ?: "Unknown"}")
 
             // Request Headers
-            logger.info("[$id] Request Headers:")
+            logger.debug("[$id] Request Headers:")
             originalRequest.headers.forEach { headerName, values ->
-                logger.info("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
             }
 
             // Response Headers
-            logger.info("[$id] Response Headers:")
+            logger.debug("[$id] Response Headers:")
             delegate.headers.forEach { headerName, values ->
-                logger.info("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
             }
 
             val bufferProcessor = { buffer: DataBuffer ->
@@ -109,9 +109,9 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
 
                 val bodyStr = String(content, StandardCharsets.UTF_8)
 
-                logger.info("[$id] Response Body:")
+                logger.debug("[$id] Response Body:")
                 printResponseBodyString(id, bodyStr)
-                logger.info("=".repeat(96))
+                logger.debug("=".repeat(96))
 
                 content
             }
@@ -144,12 +144,12 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
         private fun printResponseBodyString(id: Long, bodyStr: String) {
             if (bodyStr.isNotEmpty()) {
                 if (bodyStr.startsWith("{")) {
-                    logger.info("[$id]   $bodyStr")
+                    logger.debug("[$id]   $bodyStr")
                 } else {
-                    logger.info("[$id]   (response body does not seem to be a json object) contentLength: ${bodyStr.length}")
+                    logger.debug("[$id]   (response body does not seem to be a json object) contentLength: ${bodyStr.length}")
                 }
             } else {
-                logger.info("[$id]   (empty)")
+                logger.debug("[$id]   (empty)")
             }
         }
     }

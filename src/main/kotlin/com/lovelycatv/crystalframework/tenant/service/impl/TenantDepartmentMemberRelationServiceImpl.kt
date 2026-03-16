@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelat
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
@@ -24,4 +25,10 @@ class TenantDepartmentMemberRelationServiceImpl(
     override val listCacheStore: ExpiringKVStore<String, List<TenantDepartmentMemberRelationEntity>>
         get() = redisService.asKVStore()
     override val entityClass: KClass<TenantDepartmentMemberRelationEntity> = TenantDepartmentMemberRelationEntity::class
+
+    override suspend fun deleteByMemberIdIn(memberIds: Collection<Long>) {
+        this.getRepository()
+            .deleteByMemberIdIn(memberIds)
+            .awaitFirstOrNull()
+    }
 }

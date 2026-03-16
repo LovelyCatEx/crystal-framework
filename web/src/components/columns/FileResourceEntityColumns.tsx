@@ -3,6 +3,7 @@ import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {FileResource} from "@/types/file-resource.types.ts";
 import {ResourceFileType} from "@/types/file-resource.types.ts";
+import {resourceFileTypeToTranslationMap} from "@/i18n/file-resource.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
@@ -10,7 +11,7 @@ import {UserManagerController} from "@/api/user.api.ts";
 import {type StorageProvider} from "@/types/storage-provider.types.ts";
 import type {User} from "@/types/user.types.ts";
 import {StorageProviderCard, UserCard} from "../card/pop";
-import {UserAvatar} from "../UserAvatar.tsx";
+import {AvatarResource} from "../AvatarResource.tsx";
 
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -65,7 +66,7 @@ function UserCell({ userId }: { userId: string }) {
         return (
             <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
                 <Space orientation="horizontal" size={8} className="cursor-pointer">
-                    <UserAvatar fileEntityId={user.avatar} />
+                    <AvatarResource fileEntityId={user.avatar} />
                     <Space orientation="vertical" size={0}>
                         <span className="text-xs font-mono font-bold">{user.nickname}</span>
                         <span className="text-xs text-gray-400">@{user.username}</span>
@@ -115,9 +116,10 @@ export const FILE_RESOURCE_MANAGER_TABLE_COLUMNS: EntityTableColumns<FileResourc
         dataIndex: "type",
         key: "type",
         render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
+            const translatedLabel = resourceFileTypeToTranslationMap.get(row.type) || ResourceFileType[row.type];
             return <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={ResourceFileType[row.type]}>
-                    <Tag color="orange" className="text-xs font-mono">{ResourceFileType[row.type]}</Tag>
+                <CopyableToolTip title={translatedLabel}>
+                    <Tag color="orange" className="text-xs font-mono">{translatedLabel}</Tag>
                 </CopyableToolTip>
             </Space>
         }

@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication
 import reactor.core.publisher.Mono
 
 interface UserAuthorizationService {
+    suspend fun clearUserAuthorityCache(userId: Long)
+
     fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData
 
     fun processOAuth2AuthenticationSuccess(authentication: Authentication): Mono<ApiResponse<*>>

@@ -10,13 +10,19 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.Mana
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.TenantMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
+import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
+import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
 
 @Service
@@ -26,6 +32,11 @@ class TenantMemberManagerServiceImpl(
     private val redisService: RedisService,
     private val snowIdGenerator: SnowIdGenerator,
     override val eventPublisher: ApplicationEventPublisher,
+    @Lazy
+    private val tenantService: TenantService,
+    @Lazy
+    private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
+    private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService,
 ) : TenantMemberManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantMemberEntity>
         get() = redisService.asKVStore()
@@ -37,6 +48,7 @@ class TenantMemberManagerServiceImpl(
         return this.tenantMemberRepository
     }
 
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateTenantMemberDTO): TenantMemberEntity {
         userManagerService.getByIdOrNull(dto.memberUserId)
             ?: throw BusinessException("User with ID ${dto.memberUserId} not found")
@@ -54,11 +66,27 @@ class TenantMemberManagerServiceImpl(
             id = snowIdGenerator.nextId(),
             tenantId = dto.tenantId,
             memberUserId = dto.memberUserId,
-            status = dto.status ?: TenantMemberStatus.ACTIVE.ordinal
+            status = dto.status ?: TenantMemberStatus.ACTIVE.typeId
         ).apply { newEntity() }
 
-        return tenantMemberRepository.save(entity).awaitFirstOrNull()
+        // Save member
+        val savedMember = tenantMemberRepository.save(entity).awaitFirstOrNull()
             ?: throw BusinessException("Could not create tenant member")
+
+        // Add default member role
+        val defaultMemberRoleId = tenantService
+            .getByIdOrThrow(dto.tenantId)
+            .getSettingsObject()
+            ?.defaultMemberRoleId
+
+        if (defaultMemberRoleId != null) {
+            tenantMemberRoleRelationService.setMemberRoles(
+                savedMember.id,
+                listOf(defaultMemberRoleId)
+            )
+        }
+
+        return savedMember
     }
 
     override suspend fun applyDTOToEntity(
@@ -85,5 +113,23 @@ class TenantMemberManagerServiceImpl(
             totalPages = entityResult.totalPages,
             records = vos
         )
+    }
+
+    override suspend fun checkIsRelated(ids: Collection<Long>, tenantId: Long): Boolean {
+        for (id in ids) {
+            if (this.getByIdOrNull(id)?.tenantId != tenantId) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    override suspend fun batchDelete(ids: List<Long>) {
+        tenantMemberRoleRelationService.deleteByMemberIdIn(ids)
+
+        tenantDepartmentMemberRelationService.deleteByMemberIdIn(ids)
+
+        super.batchDelete(ids)
     }
 }

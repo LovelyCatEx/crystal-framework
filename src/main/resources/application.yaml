@@ -16,6 +16,10 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
   security:
     oauth2:
       client:
@@ -62,6 +66,11 @@ spring:
 crystalframework:
   resource:
     avatar:
+      supported-content-types:
+        - image/png
+        - image/jpeg
+        - image/webp
+    tenant-icon:
       supported-content-types:
         - image/png
         - image/jpeg

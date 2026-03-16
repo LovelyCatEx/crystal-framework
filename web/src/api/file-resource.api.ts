@@ -36,6 +36,6 @@ export interface ManagerReadFileResourceDTO extends BaseManagerReadDTO {
     type?: number | null;
 }
 
-export function managerGetFileDownloadUrl(fileEntityId: string) {
-    return doGet<string | null>('/api/manager/file-resource/downloadUrl', { id: fileEntityId });
+export function getResourceFileDownloadUrlById(fileEntityId: string) {
+    return doGet<string | null>('/api/file-resource/downloadUrl', { id: fileEntityId });
 }

@@ -42,9 +42,13 @@ class FileResourceServiceImpl(
         fileType: ResourceFileType,
         contentType: String
     ): Boolean {
-        return contentType in this.getResourceModuleConfiguration()
+        val config = this.getResourceModuleConfiguration()
             .get(fileType)
-            .supportedContentTypes
+        return if (config != null) {
+            contentType in config.supportedContentTypes
+        } else {
+            false
+        }
     }
 
     override suspend fun getByMD5(md5: String): FileResourceEntity? {

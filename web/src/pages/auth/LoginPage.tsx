@@ -1,4 +1,4 @@
-import {Avatar, Button, Checkbox, Divider, Form, Input, message, Space} from 'antd';
+import {Avatar, Button, Checkbox, Divider, Form, Input, message, Space, theme} from 'antd';
 import {LockOutlined, MailOutlined, ShopOutlined} from '@ant-design/icons';
 import {useEffect, useState} from 'react';
 import {type NavigateFunction, useNavigate} from 'react-router-dom';
@@ -12,6 +12,7 @@ import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
 import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 import {getJoinedTenants} from "@/api/tenant.api.ts";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
+import {TenantMemberStatus} from "@/api/tenant-member.api.ts";
 
 interface LoginFormData {
     username: string,
@@ -22,7 +23,11 @@ interface LoginFormData {
 
 function turnToRedirectUrl(navigate: NavigateFunction) {
     const redirectTo = getQueryString('redirectTo') || menuPathDashboard;
-    navigate(redirectTo);
+    if (redirectTo.startsWith("/")) {
+        navigate(redirectTo);
+    } else {
+        window.location.href = redirectTo;
+    }
 }
 
 function JoinedTenantAuth({ username, password, joinedTenants }: {
@@ -30,6 +35,8 @@ function JoinedTenantAuth({ username, password, joinedTenants }: {
     password: string,
     joinedTenants: UserTenantVO[]
 }) {
+    const { token } = theme.useToken();
+
     if (!joinedTenants || joinedTenants.length == 0) {
         return (
             <span>你不属于任何组织</span>
@@ -76,17 +83,23 @@ function JoinedTenantAuth({ username, password, joinedTenants }: {
                     ...[{
                         tenantId: 0,
                         tenantAvatar: null,
-                        tenantName: '以非组织身份登录'
+                        tenantName: '以非组织身份登录',
+                        memberStatus: TenantMemberStatus.ACTIVE,
+                        authenticated: true
                     }] as unknown as UserTenantVO[],
                     ...joinedTenants
-                ].map((tenant) => (
+                ].filter((it) => it.memberStatus === TenantMemberStatus.ACTIVE).map((tenant) => (
                     <div
                         key={tenant.tenantId}
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                             selectedTenant?.tenantId === tenant.tenantId
-                                ? 'border-blue-500 bg-blue-50'
+                                ? ''
                                 : 'border-gray-200 hover:border-gray-300'
                         }`}
+                        style={selectedTenant?.tenantId === tenant.tenantId ? {
+                            borderColor: token.colorPrimary,
+                            backgroundColor: token.colorPrimaryBg
+                        } : {}}
                         onClick={() => setSelectedTenant(tenant)}
                     >
                         <div className="flex items-center gap-3">

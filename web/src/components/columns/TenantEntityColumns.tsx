@@ -7,6 +7,8 @@ import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {TenantTireTypeManagerController} from "@/api/tenant-tire-type.api.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
+import {ShopOutlined} from "@ant-design/icons";
+import {AvatarResource} from "@/components/AvatarResource.tsx";
 
 function TireTypeCell({ tireTypeId }: { tireTypeId: string }) {
     const { data: tireType, isLoading } = useSWRComposition<TenantTireType | null>(
@@ -21,18 +23,13 @@ function TireTypeCell({ tireTypeId }: { tireTypeId: string }) {
     }
 
     if (tireType) {
-        return <Space orientation='vertical' size={0}>
-            <CopyableToolTip title={tireType.name}>
-                <span className="text-xs font-mono font-bold">{tireType.name}</span>
-            </CopyableToolTip>
-            <CopyableToolTip title={tireType.id}>
-                <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {tireType.id}</Tag>
-            </CopyableToolTip>
-        </Space>;
+        return <CopyableToolTip title={tireType.name}>
+            <Tag className="font-mono font-bold" color="blue">{tireType.name}</Tag>
+        </CopyableToolTip>;
     }
 
     return <CopyableToolTip title={tireTypeId}>
-        <Tag color="purple" className="text-xs font-mono">{tireTypeId}</Tag>
+        <Tag color="purple" className="font-mono">{tireTypeId}</Tag>
     </CopyableToolTip>;
 }
 
@@ -42,13 +39,19 @@ export const TENANT_MANAGER_TABLE_COLUMNS: EntityTableColumns<Tenant> = [
         dataIndex: "name",
         key: "name",
         render: function (_: unknown, row: Tenant): React.ReactNode | JSX.Element {
-            return <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={row.name}>
-                    <span className="text-xs font-mono font-bold">{row.name}</span>
-                </CopyableToolTip>
-                <CopyableToolTip title={row.id}>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                </CopyableToolTip>
+            return <Space orientation="horizontal" size={8}>
+                <AvatarResource
+                    fileEntityId={row?.icon}
+                    defaultIcon={<ShopOutlined />}
+                />
+                <Space orientation='vertical' size={0}>
+                    <CopyableToolTip title={row.name}>
+                        <span className="text-xs font-mono font-bold">{row.name}</span>
+                    </CopyableToolTip>
+                    <CopyableToolTip title={row.id}>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
+                    </CopyableToolTip>
+                </Space>
             </Space>
         }
     },
@@ -60,7 +63,13 @@ export const TENANT_MANAGER_TABLE_COLUMNS: EntityTableColumns<Tenant> = [
         render: function (_: unknown, row: Tenant): React.ReactNode | JSX.Element {
             return <Space orientation='vertical' size={0}>
                 <CopyableToolTip title={row.description ?? '无描述'}>
-                    <span className="text-xs font-mono">{row.description ?? '-'}</span>
+                    <span className="text-xs font-mono">{
+                        ((row.description?.length || 0) > 64
+                            ? (row.description?.slice(0, 64) + '...')
+                            : row.description
+                        )
+                        ?? '-'
+                    }</span>
                 </CopyableToolTip>
             </Space>
         }

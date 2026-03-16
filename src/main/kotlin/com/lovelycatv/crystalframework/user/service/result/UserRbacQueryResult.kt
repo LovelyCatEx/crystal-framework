@@ -33,6 +33,11 @@ data class UserRbacQueryResult(
         }
         .toSet()
 
+    val components: Set<UserPermissionEntity> = this.rawPermissions
+        .filter { it.getRealPermissionType() == PermissionType.COMPONENT }
+        .distinctBy { it.id }
+        .toSet()
+
 
     data class UserRoleWithPermissions(
         val role: UserRoleEntity,

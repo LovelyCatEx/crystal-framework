@@ -5,7 +5,7 @@ import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
 import {departmentMemberRoleTypeToTranslationMap} from "@/i18n/department-member.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {UserAvatar} from "../UserAvatar.tsx";
+import {AvatarResource} from "../AvatarResource.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";
 import type {TenantDepartmentMemberVO} from "@/types/tenant-department-member.types.ts";
 import {DepartmentMemberRoleTypeMap} from "@/api/tenant-department-member.api.ts";
@@ -39,7 +39,7 @@ export const TENANT_DEPARTMENT_MEMBER_TABLE_COLUMNS: EntityTableColumns<TenantDe
             return (
                 <Popover content={<UserCard userId={user.id} />} placement="right" trigger="hover">
                     <Space orientation='horizontal' size={8} className="cursor-pointer">
-                        <UserAvatar fileEntityId={user.avatar} />
+                        <AvatarResource fileEntityId={user.avatar} />
                         <Space orientation='vertical' size={0}>
                             <CopyableToolTip title={user.username}>
                                 <span className="text-xs font-mono font-bold">@{user.username}</span>

@@ -3,7 +3,7 @@ import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {User} from "@/types/user.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {UserAvatar} from "../UserAvatar.tsx";
+import {AvatarResource} from "../AvatarResource.tsx";
 
 export const USER_MANAGER_TABLE_COLUMNS: EntityTableColumns<User> = [
     {
@@ -12,7 +12,7 @@ export const USER_MANAGER_TABLE_COLUMNS: EntityTableColumns<User> = [
         key: "id",
         render: function (_: unknown, row: User): React.ReactNode | JSX.Element {
             return <Space orientation='horizontal' size={8}>
-                <UserAvatar fileEntityId={row.avatar} />
+                <AvatarResource fileEntityId={row.avatar} />
 
                 <Space orientation='vertical' size={0}>
                     <CopyableToolTip title={row.username}>

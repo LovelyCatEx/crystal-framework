@@ -3,11 +3,12 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     FileResourceManagerController,
     type ManagerCreateFileResourceDTO,
-    managerGetFileDownloadUrl,
+    getResourceFileDownloadUrlById,
     type ManagerReadFileResourceDTO
 } from "@/api/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {type FileResource, ResourceFileType} from "@/types/file-resource.types.ts";
+import {resourceFileTypeToTranslationMap} from "@/i18n/file-resource.ts";
 import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
 import {DownloadOutlined} from "@ant-design/icons";
@@ -22,7 +23,7 @@ export function FileResourceManagerPage() {
     }, [filterType]);
 
     const handleDownloadFileEntity = async (record: FileResource) => {
-        const url = (await managerGetFileDownloadUrl(record.id)).data;
+        const url = (await getResourceFileDownloadUrlById(record.id)).data;
 
         if (url) {
             downloadFile(url);
@@ -55,8 +56,12 @@ export function FileResourceManagerPage() {
                                     placeholder="选择文件类型"
                                     options={[
                                         {
-                                            label: '用户头像',
+                                            label: resourceFileTypeToTranslationMap.get(ResourceFileType.USER_AVATAR),
                                             value: ResourceFileType.USER_AVATAR,
+                                        },
+                                        {
+                                            label: resourceFileTypeToTranslationMap.get(ResourceFileType.TENANT_ICON),
+                                            value: ResourceFileType.TENANT_ICON,
                                         }
                                     ]}
                                 />
@@ -121,8 +126,12 @@ export function FileResourceManagerPage() {
                         options={[
                             { value: '-1', label: '全部' },
                             {
-                                label: '用户头像',
+                                label: resourceFileTypeToTranslationMap.get(ResourceFileType.USER_AVATAR),
                                 value: ResourceFileType.USER_AVATAR,
+                            },
+                            {
+                                label: resourceFileTypeToTranslationMap.get(ResourceFileType.TENANT_ICON),
+                                value: ResourceFileType.TENANT_ICON,
                             }
                         ]}
                         onChange={(value) => setFilterType(Number.parseInt(value))}

@@ -11,4 +11,8 @@ interface TenantMemberRoleRelationService : CachedBaseService<TenantMemberRoleRe
     suspend fun getMemberRolesRecursive(memberId: Long): Set<TenantRoleEntity>
 
     suspend fun setMemberRoles(memberId: Long, roleIds: List<Long>)
+
+    suspend fun deleteByRoleIdIn(roleIds: Collection<Long>)
+
+    suspend fun deleteByMemberIdIn(memberIds: Collection<Long>)
 }
