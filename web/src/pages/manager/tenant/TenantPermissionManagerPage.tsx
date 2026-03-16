@@ -1,9 +1,9 @@
-import {Button, Col, Form, Input, InputNumber, Row, Select} from "antd";
+import {Button, Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantPermissionDTO,
     type ManagerUpdateTenantPermissionDTO,
-    TenantPermissionManagerController,
+    type ManagerReadTenantPermissionDTO,
     TenantPermissionType,
     TenantPermissionTypeMap
 } from "@/api/tenant-permission.api.ts";
@@ -11,10 +11,13 @@ import {useEffect, useRef, useState} from "react";
 import {TENANT_PERMISSION_TABLE_COLUMNS} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
+import {usePermissionController} from "@/components/PermissionWarningWrapper.tsx";
+import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 export function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>();
+    const { controller } = usePermissionController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();
@@ -118,7 +121,7 @@ export function TenantPermissionManagerPage() {
                     </>
                 }
                 query={async (props) => {
-                    return (await TenantPermissionManagerController.query(props)).data!
+                    return (await controller.query(props)).data!
                 }}
                 tableActions={[
                     {
@@ -140,13 +143,13 @@ export function TenantPermissionManagerPage() {
                     }
                 ]}
                 delete={async (props) => {
-                    return (await TenantPermissionManagerController.delete(props)).data!
+                    return (await controller.delete(props)).data!
                 }}
                 update={async (props: ManagerUpdateTenantPermissionDTO) => {
-                    return (await TenantPermissionManagerController.update(props)).data!
+                    return (await controller.update(props)).data!
                 }}
                 create={async (props) => {
-                    return (await TenantPermissionManagerController.create(props as ManagerCreateTenantPermissionDTO)).data!
+                    return (await controller.create(props as ManagerCreateTenantPermissionDTO)).data!
                 }}
             />
         </>

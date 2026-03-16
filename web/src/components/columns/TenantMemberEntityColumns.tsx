@@ -35,15 +35,9 @@ export const TENANT_MEMBER_TABLE_COLUMNS: EntityTableColumns<TenantMemberVO> = [
                     <Space orientation='horizontal' size={8} className="cursor-pointer">
                         <AvatarResource fileEntityId={user.avatar} />
                         <Space orientation='vertical' size={0}>
-                            <CopyableToolTip title={user.username}>
-                                <span className="text-xs font-mono font-bold">@{user.username}</span>
-                            </CopyableToolTip>
-                            <CopyableToolTip title={user.nickname}>
-                                <span className="text-xs font-mono">{user.nickname}</span>
-                            </CopyableToolTip>
-                            <CopyableToolTip title={user.id}>
-                                <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">用户ID: {user.id}</Tag>
-                            </CopyableToolTip>
+                            <span className="text-xs font-mono font-bold">{user.nickname}</span>
+                            <span className="text-xs font-mono text-gray-400">@{user.username}</span>
+                            <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">用户ID: {user.id}</Tag>
                         </Space>
                     </Space>
                 </Popover>

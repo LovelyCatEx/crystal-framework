@@ -2,16 +2,18 @@ import {Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreatePermissionDTO,
-    type ManagerReadPermissionDTO,
-    UserPermissionManagerController
+    type ManagerReadPermissionDTO
 } from "@/api/user-permission.api.ts";
+import type {UserPermission} from "@/types/user-permission.types.ts";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import {USER_PERMISSION_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserPermissionEntityColumns.tsx";
+import {usePermissionController} from "@/components/PermissionWarningWrapper.tsx";
 
 export function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPermissionType, setFilterPermissionType] = useState<number>()
+    const { controller } = usePermissionController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.()
@@ -67,16 +69,16 @@ export function UserPermissionManagerPage() {
                 </>
             }
             query={async (props: ManagerReadPermissionDTO) => {
-                return (await UserPermissionManagerController.query(props)).data!
+                return (await controller.query(props)).data!
             }}
             delete={async (props) => {
-                return (await UserPermissionManagerController.delete(props)).data!
+                return (await controller.delete(props)).data!
             }}
             update={async (props) => {
-                return (await UserPermissionManagerController.update(props)).data!
+                return (await controller.update(props)).data!
             }}
             create={async (props) => {
-                return (await UserPermissionManagerController.create(props as ManagerCreatePermissionDTO)).data!
+                return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
             tableActions={[
                 {

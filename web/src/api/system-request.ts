@@ -26,11 +26,11 @@ export function emptyApiResponseAsync<T>() {
     } as ApiResponse<T>);
 }
 
-function handleApiResponse<T>(response: ApiResponse<T>) {
+export function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         return response;
     } else if (response.code === 401) {
-        void message.warning('登录信息已过期');
+        void message.warning('验证信息已过期');
         setTimeout(() => {
             const url = new URL(window.location.origin + menuPathLogin);
             url.searchParams.set('redirectTo', window.location.href);
@@ -38,7 +38,7 @@ function handleApiResponse<T>(response: ApiResponse<T>) {
         }, 500);
         throw response;
     } else if (response.code === 403) {
-        void message.warning('你无权访问当前资源');
+        void message.warning(response.message || '你无权访问当前资源');
         throw response;
     } else {
         void message.error(response.message)

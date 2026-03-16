@@ -14,7 +14,7 @@ export class BaseManagerController<
     D extends BaseManagerDeleteDTO = BaseManagerDeleteDTO
 > {
     constructor(
-        private readonly baseUrl: string
+        protected readonly baseUrl: string
     ) {}
 
     async getById(id: string, additional: Record<string, string> = {}) {

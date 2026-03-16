@@ -48,6 +48,9 @@ import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManage
 import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
 import {MyTenantRolePermissionManagerPage} from "@/pages/manager/tenant/MyTenantRolePermissionManagerPage.tsx";
 import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
+import {PermissionWarningWrapper} from "@/components/PermissionWarningWrapper.tsx";
+import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
+import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -198,7 +201,11 @@ export const adminMenus: RouteItem[] = [
         path: '/manager/user-permissions',
         icon: <SafetyOutlined />,
         label: "用户权限管理",
-        page: <UserPermissionManagerPage />,
+        page: (
+            <PermissionWarningWrapper controller={UserPermissionManagerController}>
+                <UserPermissionManagerPage />
+            </PermissionWarningWrapper>
+        ),
         group: 'rbac'
     },
     {
@@ -246,7 +253,11 @@ export const adminMenus: RouteItem[] = [
         path: '/manager/tenant-permissions',
         icon: <SafetyOutlined />,
         label: "权限管理",
-        page: <TenantPermissionManagerPage />,
+        page: (
+            <PermissionWarningWrapper controller={TenantPermissionManagerController}>
+                <TenantPermissionManagerPage />
+            </PermissionWarningWrapper>
+        ),
         group: 'tenant'
     },
     {
