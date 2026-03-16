@@ -8,12 +8,12 @@ import type {UserPermission} from "@/types/user-permission.types.ts";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import {USER_PERMISSION_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserPermissionEntityColumns.tsx";
-import {usePermissionController} from "@/components/PermissionWarningWrapper.tsx";
+import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 
 export function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPermissionType, setFilterPermissionType] = useState<number>()
-    const { controller } = usePermissionController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
+    const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.()

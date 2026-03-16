@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {TenantMemberStatusMap} from "@/types/tenant-member.types.ts";
 import {departmentMemberRoleTypeToTranslationMap} from "@/i18n/department-member.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";

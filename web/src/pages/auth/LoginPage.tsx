@@ -12,7 +12,7 @@ import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
 import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 import {getJoinedTenants} from "@/api/tenant.api.ts";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
-import {TenantMemberStatus} from "@/api/tenant-member.api.ts";
+import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 
 interface LoginFormData {
     username: string,

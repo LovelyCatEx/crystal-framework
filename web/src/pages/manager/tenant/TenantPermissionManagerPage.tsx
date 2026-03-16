@@ -3,21 +3,20 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     type ManagerCreateTenantPermissionDTO,
     type ManagerUpdateTenantPermissionDTO,
-    type ManagerReadTenantPermissionDTO,
-    TenantPermissionType,
-    TenantPermissionTypeMap
+    type ManagerReadTenantPermissionDTO
 } from "@/api/tenant-permission.api.ts";
+import {TenantPermissionType, TenantPermissionTypeMap} from "@/types/tenant-permission.types.ts";
 import {useEffect, useRef, useState} from "react";
 import {TENANT_PERMISSION_TABLE_COLUMNS} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
-import {usePermissionController} from "@/components/PermissionWarningWrapper.tsx";
+import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 
 export function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>();
-    const { controller } = usePermissionController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
+    const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();

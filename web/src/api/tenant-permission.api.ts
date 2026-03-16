@@ -27,16 +27,6 @@ export interface ManagerDeleteTenantPermissionDTO extends BaseManagerDeleteDTO {
     ids: string[];
 }
 
-export const TenantPermissionType = {
-    ACTION: 0,
-    MENU: 1
-} as const;
-
-export const TenantPermissionTypeMap: Record<number, { label: string; color: string }> = {
-    [TenantPermissionType.ACTION]: { label: '操作权限', color: 'blue' },
-    [TenantPermissionType.MENU]: { label: '菜单权限', color: 'green' }
-};
-
 class TenantPermissionManagerControllerClass extends BaseManagerController<
     TenantPermission,
     ManagerCreateTenantPermissionDTO,

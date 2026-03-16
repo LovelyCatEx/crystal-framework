@@ -12,7 +12,6 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_TENANT_ROLE_UPDATE,
             TenantPermission.ACTION_TENANT_ROLE_DELETE,
             // Role Permissions
-            TenantPermission.MENU_TENANT_ROLE_PERMISSION_MANAGER,
             TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ,
             TenantPermission.ACTION_TENANT_ROLE_PERMISSION_UPDATE,
             // Member Roles

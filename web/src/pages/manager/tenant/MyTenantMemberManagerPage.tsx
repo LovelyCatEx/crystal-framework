@@ -4,8 +4,8 @@ import {
     type ManagerCreateTenantMemberDTO,
     type ManagerUpdateTenantMemberDTO,
     TenantMemberManagerController,
-    TenantMemberStatus
 } from "@/api/tenant-member.api.ts";
+import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {useEffect, useRef, useState} from "react";
 import {MY_TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/MyTenantMemberEntityColumns.tsx";

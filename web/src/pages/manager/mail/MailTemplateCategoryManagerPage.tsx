@@ -1,7 +1,6 @@
 import {Col, Form, Input, Row} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
-    MailTemplateCategoryManagerController,
     type ManagerCreateMailTemplateCategoryDTO,
     type ManagerReadMailTemplateCategoryDTO
 } from "@/api/mail-template-category.api.ts";
@@ -9,9 +8,12 @@ import {useRef} from "react";
 import {
     MAIL_TEMPLATE_CATEGORY_MANAGER_TABLE_COLUMNS
 } from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
+import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import type {MailTemplateCategory} from "@/types/mail.types.ts";
 
 export function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const { controller } = useProtectedController<MailTemplateCategory, ManagerCreateMailTemplateCategoryDTO, ManagerReadMailTemplateCategoryDTO>();
 
     return (
         <ManagerPageContainer
@@ -41,16 +43,16 @@ export function MailTemplateCategoryManagerPage() {
                 </>
             }
             query={async (props: ManagerReadMailTemplateCategoryDTO) => {
-                return (await MailTemplateCategoryManagerController.query(props)).data!
+                return (await controller.query(props)).data!
             }}
             delete={async (props) => {
-                return (await MailTemplateCategoryManagerController.delete(props)).data!
+                return (await controller.delete(props)).data!
             }}
             update={async (props) => {
-                return (await MailTemplateCategoryManagerController.update(props)).data!
+                return (await controller.update(props)).data!
             }}
             create={async (props) => {
-                return (await MailTemplateCategoryManagerController.create(props as ManagerCreateMailTemplateCategoryDTO)).data!
+                return (await controller.create(props as ManagerCreateMailTemplateCategoryDTO)).data!
             }}
         >
         </ManagerPageContainer>

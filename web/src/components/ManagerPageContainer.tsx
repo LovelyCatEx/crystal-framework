@@ -132,7 +132,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     useImperativeHandle(ref, () => {
         return {
             refreshData: () => {
-                entityTableRef?.current?.refreshData();
+                entityTableRef?.current?.refreshData?.();
             },
             openModal: () => {
                 openModal();

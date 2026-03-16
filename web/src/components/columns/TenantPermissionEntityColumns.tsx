@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import {TenantPermissionTypeMap} from "@/api/tenant-permission.api.ts";
+import {TenantPermissionTypeMap} from "@/types/tenant-permission.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import type {TenantPermission} from "@/types/tenant-permission.types.ts";

@@ -2,13 +2,13 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantMemberManagerController, TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
+import {TenantMemberStatusMap, type TenantMemberVO} from "@/types/tenant-member.types.ts";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 interface TransferItem {

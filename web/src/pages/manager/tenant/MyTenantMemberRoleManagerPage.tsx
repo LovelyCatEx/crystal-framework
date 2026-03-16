@@ -2,7 +2,8 @@ import {Button, Card, message, Modal, Space, Spin, Table, Tag, Transfer} from "a
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantMemberManagerController, TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
+import {TenantMemberStatusMap} from "@/types/tenant-member.types.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";

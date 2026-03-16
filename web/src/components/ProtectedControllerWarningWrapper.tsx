@@ -8,21 +8,21 @@ import {type ApiResponse, handleApiResponse} from "@/api/system-request.ts";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyController = BaseManagerController<any, any, any, any, any>;
 
-interface PermissionControllerContextValue {
+interface ProtectedControllerContextValue {
     controller: AnyController;
     isReadonly: boolean;
 }
 
-const PermissionControllerContext = createContext<PermissionControllerContextValue | null>(null);
+const ProtectedControllerContext = createContext<ProtectedControllerContextValue | null>(null);
 
-export function usePermissionController<
+export function useProtectedController<
     ENTITY = unknown,
     C extends object = object,
     R extends BaseManagerReadDTO = BaseManagerReadDTO,
     U extends BaseManagerUpdateDTO = BaseManagerUpdateDTO,
     D extends BaseManagerDeleteDTO = BaseManagerDeleteDTO
 >() {
-    const context = useContext(PermissionControllerContext);
+    const context = useContext(ProtectedControllerContext);
     if (!context) {
         throw new Error("usePermissionController must be used within PermissionWarningWrapper");
     }
@@ -32,7 +32,7 @@ export function usePermissionController<
     };
 }
 
-class ReadonlyControllerWrapper<
+class ProtectedControllerWrapper<
     ENTITY,
     C extends object,
     R extends BaseManagerReadDTO = BaseManagerReadDTO,
@@ -86,7 +86,7 @@ class ReadonlyControllerWrapper<
     }
 }
 
-interface PermissionWarningWrapperProps {
+interface ProtectedControllerWarningWrapperProps {
     children: ReactNode;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     controller: BaseManagerController<any, any, any, any, any>;
@@ -94,12 +94,12 @@ interface PermissionWarningWrapperProps {
     content?: string;
 }
 
-export function PermissionWarningWrapper({
+export function ProtectedControllerWarningWrapper({
     children,
     controller,
     title = "高危操作警告",
     content = "此页面推荐以只读模式进入，任何错误操作将会引发不可预料的后果，请选择操作模式："
-}: PermissionWarningWrapperProps) {
+}: ProtectedControllerWarningWrapperProps) {
     const [modal, contextHolder] = Modal.useModal();
     const [isReadonly, setIsReadonly] = useState<boolean>(true);
     const [hasConfirmed, setHasConfirmed] = useState(false);
@@ -112,7 +112,7 @@ export function PermissionWarningWrapper({
     const getIsReadonly = useCallback(() => isReadonlyRef.current, []);
 
     const wrappedController = useCallback(() => {
-        return new ReadonlyControllerWrapper(
+        return new ProtectedControllerWrapper(
             controller,
             getIsReadonly
         ) as unknown as AnyController;
@@ -139,7 +139,7 @@ export function PermissionWarningWrapper({
                             className="flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                         >
                             <EditOutlined />
-                            解除只读模式
+                            以编辑模式继续
                         </Button>
                         <Button
                             type="primary"
@@ -186,7 +186,7 @@ export function PermissionWarningWrapper({
 
 
     return (
-        <PermissionControllerContext.Provider value={{ controller: controllerInstance, isReadonly }}>
+        <ProtectedControllerContext.Provider value={{ controller: controllerInstance, isReadonly }}>
             {contextHolder}
             <div className="flex flex-col relative size-full" ref={overlayDivRef}>
                 {children}
@@ -212,6 +212,6 @@ export function PermissionWarningWrapper({
                     </div>
                 </div>
             </div>
-        </PermissionControllerContext.Provider>
+        </ProtectedControllerContext.Provider>
     );
 }

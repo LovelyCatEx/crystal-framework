@@ -1,19 +1,20 @@
 import {Col, Form, Input, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
-    MailTemplateTypeManagerController,
     type ManagerCreateMailTemplateTypeDTO,
     type ManagerReadMailTemplateTypeDTO
 } from "@/api/mail-template-type.api.ts";
 import {useEffect, useRef, useState} from "react";
-import type {MailTemplateCategory} from "@/types/mail.types.ts";
+import type {MailTemplateCategory, MailTemplateType} from "@/types/mail.types.ts";
 import {MAIL_TEMPLATE_TYPE_MANAGER_TABLE_COLUMNS} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
 import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
+import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 
 export function MailTemplateTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [categories, setCategories] = useState<MailTemplateCategory[]>([]);
+    const { controller } = useProtectedController<MailTemplateType, ManagerCreateMailTemplateTypeDTO, ManagerReadMailTemplateTypeDTO>();
 
     useEffect(() => {
         MailTemplateCategoryManagerController.list().then((res) => {
@@ -67,16 +68,16 @@ export function MailTemplateTypeManagerPage() {
                 </>
             }
             query={async (props: ManagerReadMailTemplateTypeDTO) => {
-                return (await MailTemplateTypeManagerController.query(props)).data!
+                return (await controller.query(props)).data!
             }}
             delete={async (props) => {
-                return (await MailTemplateTypeManagerController.delete(props)).data!
+                return (await controller.delete(props)).data!
             }}
             update={async (props) => {
-                return (await MailTemplateTypeManagerController.update(props)).data!
+                return (await controller.update(props)).data!
             }}
             create={async (props) => {
-                return (await MailTemplateTypeManagerController.create(props as ManagerCreateMailTemplateTypeDTO)).data!
+                return (await controller.create(props as ManagerCreateMailTemplateTypeDTO)).data!
             }}
         >
         </ManagerPageContainer>

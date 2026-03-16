@@ -6,7 +6,6 @@ object SystemPermission {
     const val MENU_PERMISSION_MANAGER = "permission:/manager/user-permissions"
     const val MENU_ROLE_MANAGER = "role:/manager/user-roles"
     const val MENU_USER_MANAGER = "user:/manager/users"
-    const val MENU_ROLE_PERMISSION_MANAGER = "role.permission:/manager/role-permissions"
     const val MENU_USER_ROLE_MANAGER = "user.role:/manager/user-roles-relation"
     const val MENU_SYSTEM_SETTINGS = "settings:/manager/settings"
     const val MENU_OAUTH_ACCOUNT_MANAGER = "oauth.account:/manager/oauth-accounts"

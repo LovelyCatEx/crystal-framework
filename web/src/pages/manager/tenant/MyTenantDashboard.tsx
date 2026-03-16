@@ -11,7 +11,7 @@ import {
     UserOutlined
 } from "@ant-design/icons";
 import {TenantStatusMap} from "@/types/tenant.types.ts";
-import {TenantMemberStatusMap} from "@/api/tenant-member.api.ts";
+import {TenantMemberStatusMap} from "@/types/tenant-member.types.ts";
 import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useState} from "react";

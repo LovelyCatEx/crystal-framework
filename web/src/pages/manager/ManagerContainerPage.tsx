@@ -24,7 +24,7 @@ import type {ItemType} from "antd/es/menu/interface";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
 import {switchTenant} from "@/api/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
-import {TenantMemberStatus} from "@/api/tenant-member.api.ts";
+import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 
 function TenantSwitcher() {
     const loggedUser = useLoggedUser();

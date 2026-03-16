@@ -144,12 +144,6 @@ object TenantPermission {
     )
 
     // Tenant Role Permissions
-    val MENU_TENANT_ROLE_PERMISSION_MANAGER = TenantPermissionDeclaration(
-        name = "i.tenant.role.permission",
-        type = TenantPermissionType.MENU,
-        path = "/manager/tenant/role-permissions"
-    )
-
     const val ACTION_TENANT_ROLE_PERMISSION_READ_PEM = "i.tenant.role.permission.read"
     val ACTION_TENANT_ROLE_PERMISSION_READ = TenantPermissionDeclaration(
         name = ACTION_TENANT_ROLE_PERMISSION_READ_PEM,

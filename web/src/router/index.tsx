@@ -19,7 +19,6 @@ import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
 import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
 import {UserRoleManagerPage} from "../pages/manager/rbac/UserRoleManagerPage.tsx";
 import {UserManagerPage} from "../pages/manager/user/UserManagerPage.tsx";
-import {RolePermissionManagerPage} from "../pages/manager/rbac/RolePermissionManagerPage.tsx";
 import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
 import type {MenuItemType} from "antd/es/menu/interface";
 import type {MenuGroup, MenuItem} from "../types/menu.types.ts";
@@ -46,11 +45,12 @@ import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberMa
 import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
 import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
 import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
-import {MyTenantRolePermissionManagerPage} from "@/pages/manager/tenant/MyTenantRolePermissionManagerPage.tsx";
 import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
-import {PermissionWarningWrapper} from "@/components/PermissionWarningWrapper.tsx";
+import {ProtectedControllerWarningWrapper} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
+import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -148,14 +148,6 @@ export const tenantMenus: RouteItem[] = [
         group: 'i_tenant',
     },
     {
-        key: '/manager/tenant/role-permissions',
-        path: '/manager/tenant/role-permissions',
-        icon: <SafetyOutlined />,
-        label: "角色权限管理",
-        page: <MyTenantRolePermissionManagerPage />,
-        group: 'i_tenant',
-    },
-    {
         key: '/manager/tenant/departments',
         path: '/manager/tenant/departments',
         icon: <ApartmentOutlined />,
@@ -202,18 +194,10 @@ export const adminMenus: RouteItem[] = [
         icon: <SafetyOutlined />,
         label: "用户权限管理",
         page: (
-            <PermissionWarningWrapper controller={UserPermissionManagerController}>
+            <ProtectedControllerWarningWrapper controller={UserPermissionManagerController}>
                 <UserPermissionManagerPage />
-            </PermissionWarningWrapper>
+            </ProtectedControllerWarningWrapper>
         ),
-        group: 'rbac'
-    },
-    {
-        key: '/manager/role-permissions',
-        path: '/manager/role-permissions',
-        icon: <KeyOutlined />,
-        label: "角色权限管理",
-        page: <RolePermissionManagerPage />,
         group: 'rbac'
     },
     {
@@ -254,9 +238,9 @@ export const adminMenus: RouteItem[] = [
         icon: <SafetyOutlined />,
         label: "权限管理",
         page: (
-            <PermissionWarningWrapper controller={TenantPermissionManagerController}>
+            <ProtectedControllerWarningWrapper controller={TenantPermissionManagerController}>
                 <TenantPermissionManagerPage />
-            </PermissionWarningWrapper>
+            </ProtectedControllerWarningWrapper>
         ),
         group: 'tenant'
     },
@@ -329,7 +313,11 @@ export const adminMenus: RouteItem[] = [
         path: '/manager/mail-template-types',
         icon: <TagsOutlined />,
         label: "邮件模板类型",
-        page: <MailTemplateTypeManagerPage />,
+        page: (
+            <ProtectedControllerWarningWrapper controller={MailTemplateTypeManagerController}>
+                <MailTemplateTypeManagerPage />
+            </ProtectedControllerWarningWrapper>
+        ),
         group: 'mail_template'
     },
     {
@@ -337,7 +325,11 @@ export const adminMenus: RouteItem[] = [
         path: '/manager/mail-template-categories',
         icon: <FolderOutlined />,
         label: "邮件模板分类",
-        page: <MailTemplateCategoryManagerPage />,
+        page: (
+            <ProtectedControllerWarningWrapper controller={MailTemplateCategoryManagerController}>
+                <MailTemplateCategoryManagerPage />
+            </ProtectedControllerWarningWrapper>
+        ),
         group: 'mail_template'
     },
     {
