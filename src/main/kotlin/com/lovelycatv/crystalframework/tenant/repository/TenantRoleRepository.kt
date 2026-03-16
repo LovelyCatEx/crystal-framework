@@ -58,4 +58,5 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
     fun findByName(name: String): Mono<TenantRoleEntity>
 
     fun findByParentId(parentId: Long): Flux<TenantRoleEntity>
+    fun findAllByParentId(parentId: Long): Flux<TenantRoleEntity>
 }

@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service
 import com.lovelycatv.crystalframework.cache.service.CachedBaseService
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
+import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.transaction.annotation.Transactional
@@ -41,4 +42,16 @@ interface TenantService : CachedBaseService<TenantRepository, TenantEntity> {
      */
     @Transactional(rollbackFor = [Exception::class])
     suspend fun uploadTenantIcon(userId: Long, tenantId: Long, file: FilePart)
+
+    suspend fun getMembersHasAllPermission(tenantId: Long, permissionName: String): List<TenantMemberEntity> {
+        return this.getMembersHasAllPermission(tenantId, listOf(permissionName))
+    }
+
+    suspend fun getMembersHasAllPermission(tenantId: Long, permissionNames: Collection<String>): List<TenantMemberEntity>
+
+    suspend fun getMembersHasAnyPermission(tenantId: Long, permissionName: String): List<TenantMemberEntity> {
+        return this.getMembersHasAnyPermission(tenantId, listOf(permissionName))
+    }
+
+    suspend fun getMembersHasAnyPermission(tenantId: Long, permissionNames: Collection<String>): List<TenantMemberEntity>
 }

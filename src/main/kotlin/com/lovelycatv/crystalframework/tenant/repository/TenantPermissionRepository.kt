@@ -42,4 +42,6 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
         @Param("keyword") keyword: String?,
         @Param("type") type: Int?
     ): Mono<Long>
+
+    fun findByNameIn(names: Collection<String>): Flux<TenantPermissionEntity>
 }

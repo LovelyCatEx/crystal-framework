@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.mail.config
 
-import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerCreateMailTemplateDTO
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateCategoryEntity
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
@@ -33,8 +32,7 @@ class MailModuleAutoConfigure(
     private val snowIdGenerator: SnowIdGenerator,
     private val objectMapper: ObjectMapper,
     private val mailTemplateRepository: MailTemplateRepository,
-    private val mailTemplateManagerService: MailTemplateManagerService,
-    private val systemMailTemplateConfigure: SystemMailTemplateConfigure
+    private val mailTemplateManagerService: MailTemplateManagerService
 ) : InitializingBean {
     private val logger = logger()
 
@@ -43,41 +41,6 @@ class MailModuleAutoConfigure(
     private val templates = mutableListOf<MailTemplateDeclaration>()
 
     override fun afterPropertiesSet() {
-        val preProcessMailTemplateDeclaration = fun (
-            declaration: MailTemplateDeclaration,
-            name: String,
-            type: MailTemplateTypeDeclaration,
-        ): MailTemplateDeclaration {
-            return declaration.copy(
-                name = name,
-                type = type
-            )
-        }
-
-        this.templates.add(
-            preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserRegistration(),
-                SystemMailDeclaration.defaultSystemUserRegisterTemplate.name,
-                SystemMailDeclaration.defaultSystemUserRegisterTemplate.type,
-            )
-        )
-
-        this.templates.add(
-            preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserResetPassword(),
-                SystemMailDeclaration.defaultSystemResetPasswordTemplate.name,
-                SystemMailDeclaration.defaultSystemResetPasswordTemplate.type,
-            )
-        )
-
-        this.templates.add(
-            preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserResetEmail(),
-                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.name,
-                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.type,
-            )
-        )
-
         val configures = applicationContext
             .getBeansOfType<MailModuleConfigure>()
             .values
@@ -93,6 +56,14 @@ class MailModuleAutoConfigure(
             it.configureTemplateType(
                 categoryMap,
                 templateTypes
+            )
+        }
+
+        configures.forEach {
+            it.configureTemplate(
+                categoryMap,
+                templateTypes,
+                templates
             )
         }
 

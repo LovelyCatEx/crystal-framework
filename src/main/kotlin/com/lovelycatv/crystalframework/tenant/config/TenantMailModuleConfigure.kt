@@ -1,24 +1,25 @@
-package com.lovelycatv.crystalframework.mail.config
+package com.lovelycatv.crystalframework.tenant.config
 
-import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
+import com.lovelycatv.crystalframework.mail.config.MailModuleConfigure
 import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
 import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
 import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
+import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class DefaultMailModuleConfigure(
-    private val systemMailTemplateConfigure: SystemMailTemplateConfigure
+class TenantMailModuleConfigure(
+    private val tenantMailTemplateConfigure: TenantMailTemplateConfigure
 ) : MailModuleConfigure {
     override fun configureTemplateCategory(categories: MutableList<MailTemplateCategoryDeclaration>) {
-        categories.addAll(SystemMailDeclaration.categories)
+        categories.add(TenantMailDeclaration.tenantCategory)
     }
 
     override fun configureTemplateType(
         categories: Map<String, MailTemplateCategoryDeclaration>,
         templateTypes: MutableList<MailTemplateTypeDeclaration>
     ) {
-        templateTypes.addAll(SystemMailDeclaration.types)
+        templateTypes.add(TenantMailDeclaration.tenantMemberJoinReviewTemplateType)
     }
 
     override fun configureTemplate(
@@ -39,27 +40,10 @@ class DefaultMailModuleConfigure(
 
         templates.add(
             preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserRegistration(),
-                SystemMailDeclaration.defaultSystemUserRegisterTemplate.name,
-                SystemMailDeclaration.defaultSystemUserRegisterTemplate.type,
+                TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate,
+                TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.name,
+                TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.type
             )
         )
-
-        templates.add(
-            preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserResetPassword(),
-                SystemMailDeclaration.defaultSystemResetPasswordTemplate.name,
-                SystemMailDeclaration.defaultSystemResetPasswordTemplate.type,
-            )
-        )
-
-        templates.add(
-            preProcessMailTemplateDeclaration.invoke(
-                this.systemMailTemplateConfigure.configureUserResetEmail(),
-                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.name,
-                SystemMailDeclaration.defaultSystemResetEmailAddressTemplate.type,
-            )
-        )
-
     }
 }

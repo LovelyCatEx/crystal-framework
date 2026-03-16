@@ -48,6 +48,8 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ,
             TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE,
             TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE,
+            // Mail
+            TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL
         ),
         TenantRole.MEMBER to listOf(
             // Dashboard

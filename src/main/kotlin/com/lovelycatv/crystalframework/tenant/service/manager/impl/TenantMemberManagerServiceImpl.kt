@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
@@ -37,6 +38,7 @@ class TenantMemberManagerServiceImpl(
     @Lazy
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService,
+    private val tenantMemberService: TenantMemberService,
 ) : TenantMemberManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantMemberEntity>
         get() = redisService.asKVStore()
@@ -102,8 +104,7 @@ class TenantMemberManagerServiceImpl(
         val entityResult = query(dto)
 
         val vos = entityResult.records.map { entity ->
-            val user = userManagerService.getByIdOrNull(entity.memberUserId)
-            TenantMemberVO.fromEntity(entity, user)
+            tenantMemberService.transformTenantMemberVO(entity)
         }
 
         return PaginatedResponseData(

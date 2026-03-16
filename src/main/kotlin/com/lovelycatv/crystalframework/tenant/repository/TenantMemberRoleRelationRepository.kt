@@ -14,6 +14,8 @@ interface TenantMemberRoleRelationRepository : BaseRepository<TenantMemberRoleRe
 
     fun findAllByRoleId(roleId: Long): Flux<TenantMemberRoleRelationEntity>
 
+    fun findAllByRoleIdIn(roleId: Collection<Long>): Flux<TenantMemberRoleRelationEntity>
+
     fun findByMemberIdAndRoleId(memberId: Long, roleId: Long): Mono<TenantMemberRoleRelationEntity>
 
     @Query(

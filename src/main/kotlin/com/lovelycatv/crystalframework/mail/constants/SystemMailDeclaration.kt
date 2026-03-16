@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
 object SystemMailDeclaration {
     const val VARIABLE_EMAIL_CODE = "code"
 
-    private val systemCategory = MailTemplateCategoryDeclaration(
+    val systemCategory = MailTemplateCategoryDeclaration(
         name = "system",
         description = "System mail templates",
     )

@@ -1,22 +1,26 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
-import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
-import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
+import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
+import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
+import com.lovelycatv.crystalframework.tenant.repository.TenantPermissionRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
+import com.lovelycatv.crystalframework.tenant.repository.TenantRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
+import com.lovelycatv.crystalframework.tenant.service.TenantRoleService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
-import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -36,8 +40,12 @@ class TenantServiceImpl(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantMemberService: TenantMemberService,
     private val tenantMemberManagerService: TenantMemberManagerService,
-    private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
+    private val tenantPermissionRepository: TenantPermissionRepository,
+    private val tenantRolePermissionRelationRepository: TenantRolePermissionRelationRepository,
+    private val tenantMemberRoleRelationRepository: TenantMemberRoleRelationRepository,
+    memberService: TenantMemberService,
+    private val tenantRoleService: TenantRoleService,
 ) : TenantService {
     private val logger = logger()
 
@@ -159,5 +167,73 @@ class TenantServiceImpl(
         }
 
         logger.info("Tenant $tenantId uploaded icon, resource details: ${result.fileResourceEntity.id}")
+    }
+
+    override suspend fun getMembersHasAllPermission(tenantId: Long, permissionNames: Collection<String>): List<TenantMemberEntity> {
+        val permissions = tenantPermissionRepository.findByNameIn(permissionNames)
+            .awaitListWithTimeout()
+
+        if (permissions.isEmpty()) {
+            return emptyList()
+        }
+
+        val roleIds = tenantRolePermissionRelationRepository
+            .findAllByPermissionIdIn(permissions.map { it.id }.distinct())
+            .awaitListWithTimeout()
+            .flatMap {
+                listOf(
+                    tenantRoleService.getByIdOrNull(it.roleId),
+                    *tenantRoleService.getChildren(it.roleId).toTypedArray()
+                )
+            }
+            .filterNotNull()
+            .filter { it.tenantId == tenantId }
+            .map { it.id }
+            .distinct()
+        val rawMemberRoleRelations = tenantMemberRoleRelationRepository
+            .findAllByRoleIdIn(roleIds)
+            .awaitListWithTimeout()
+
+        val memberIds = rawMemberRoleRelations
+            .groupBy { it.memberId }
+            .mapValues { it.value.map { it.roleId } }
+            .filter { it.value.containsAll(roleIds) }
+            .keys
+
+        return memberIds.mapNotNull {
+            tenantMemberService.getByIdOrNull(it)
+        }
+    }
+
+    override suspend fun getMembersHasAnyPermission(tenantId: Long, permissionNames: Collection<String>): List<TenantMemberEntity> {
+        val permissions = tenantPermissionRepository.findByNameIn(permissionNames)
+            .awaitListWithTimeout()
+
+        if (permissions.isEmpty()) {
+            return emptyList()
+        }
+
+        val roleIds = tenantRolePermissionRelationRepository
+            .findAllByPermissionIdIn(permissions.map { it.id }.distinct())
+            .awaitListWithTimeout()
+            .flatMap {
+                listOf(
+                    tenantRoleService.getByIdOrNull(it.roleId),
+                    *tenantRoleService.getChildren(it.roleId).toTypedArray()
+                )
+            }
+            .filterNotNull()
+            .filter { it.tenantId == tenantId }
+            .map { it.id }
+            .distinct()
+
+        val memberIds = tenantMemberRoleRelationRepository
+            .findAllByRoleIdIn(roleIds)
+            .awaitListWithTimeout()
+            .map { it.memberId }
+
+        return memberIds.mapNotNull {
+            tenantMemberService.getByIdOrNull(it)
+        }
     }
 }

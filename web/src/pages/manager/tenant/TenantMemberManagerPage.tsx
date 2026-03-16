@@ -20,8 +20,8 @@ export function TenantMemberManagerPage() {
     const [filterStatus, setFilterStatus] = useState<number>();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
-    }, [filterStatus]);
+        pageRef.current?.refreshData();
+    }, [filterStatus, selectedTenantId]);
 
     const statusOptions = [
         { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },

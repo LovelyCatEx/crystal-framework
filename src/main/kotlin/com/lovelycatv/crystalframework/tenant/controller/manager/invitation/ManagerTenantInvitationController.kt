@@ -33,15 +33,14 @@ class ManagerTenantInvitationController(
         @Valid
         dto: ManagerCreateInvitationDTO
     ): ApiResponse<*> {
-        val memberId = tenantMemberService
+        val userSelfMemberId = tenantMemberService
             .getByTenantIdAndUserId(dto.tenantId, userAuthentication.userId)
             ?.id
-            ?: throw BusinessException("member not found in tenant")
 
         if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_INVITATION_CREATE)) {
             tenantInvitationManagerService.create(dto.apply {
                 if (this.creatorMemberId == null) {
-                    this.creatorMemberId = memberId
+                    this.creatorMemberId = userSelfMemberId
                 }
             })
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_INVITATION_CREATE_PEM)) {
@@ -49,7 +48,7 @@ class ManagerTenantInvitationController(
             if (dto.tenantId == userAuthentication.tenantId) {
                 // Lock the creator to the user in authentication
                 tenantInvitationManagerService.create(dto.apply {
-                    this.creatorMemberId = memberId
+                    this.creatorMemberId = userSelfMemberId
                 })
             } else {
                 throw UnauthorizedException()

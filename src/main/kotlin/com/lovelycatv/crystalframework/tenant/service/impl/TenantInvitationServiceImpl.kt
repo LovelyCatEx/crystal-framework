@@ -1,7 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
+import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
+import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
+import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
@@ -32,6 +36,7 @@ class TenantInvitationServiceImpl(
     private val tenantDepartmentService: TenantDepartmentService,
     private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService,
     private val tenantInvitationRecordService: TenantInvitationRecordService,
+    private val mailService: MailService,
 ) : TenantInvitationService {
     private val logger = logger()
 
@@ -115,5 +120,39 @@ class TenantInvitationServiceImpl(
 
         // 3. Record invitation code usage
         tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
+
+        // 4. Send email to all members authorized to receive review notifications
+        if (invitation.requiresReviewing) {
+            val tenantMembersToReceiveEmail = tenantService
+                .getMembersHasAnyPermission(
+                    tenant.id,
+                    TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM
+                )
+                .mapNotNull {
+                    tenantMemberService.getByIdOrNull(it.id)?.let {
+                        tenantMemberService.transformTenantMemberVO(it)
+                    }
+                }
+                .filter { it.user != null }
+
+            if (tenantMembersToReceiveEmail.isEmpty()) {
+                throw BusinessException("your request is denied as there are no one could handle your request")
+            }
+
+            tenantMembersToReceiveEmail.forEach {
+                logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user!!.nickname}@${it.user.username}")
+                mailService.sendMailByType(
+                    to = it.user.email
+                        ?: throw BusinessException("request could not be processed as your email is absent"),
+                    templateTypeName = TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name,
+                    placeholders = mapOf(
+                        TenantMailDeclaration.VARIABLE_USERNAME to user.username,
+                        TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
+                        TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
+                        TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber
+                    )
+                )
+            }
+        }
     }
 }

@@ -196,7 +196,18 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         }],
                         ...(restProps.tablePrefixActions ?? []),
                     ]}
-                    tableActions={restProps.tableActions}
+                    tableActions={[
+                        ...(restProps.tableActions ?? []),
+                        ...[{
+                            label: '操作',
+                            children: <Button
+                                type="primary"
+                                onClick={() => entityTableRef.current?.refreshData()}
+                            >
+                                刷新
+                            </Button>
+                        }]
+                    ]}
                     tableRowActionsRender={(record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}

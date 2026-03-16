@@ -218,6 +218,13 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Mail
+    const val ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM = "i.tenant.mail.member.join"
+    val ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

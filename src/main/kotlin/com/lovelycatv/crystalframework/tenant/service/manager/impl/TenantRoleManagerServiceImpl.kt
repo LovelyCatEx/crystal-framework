@@ -81,7 +81,7 @@ class TenantRoleManagerServiceImpl(
                 description = declaration.description,
                 parentId = declaration.parentRole?.let {
                     val parentRoleEntity = getRepository()
-                        .findByName(it.name)
+                        .findByTenantIdAndName(tenantId, it.name)
                         .awaitFirstOrNull()
                         ?: createFromDeclaration(tenantId, it)
 

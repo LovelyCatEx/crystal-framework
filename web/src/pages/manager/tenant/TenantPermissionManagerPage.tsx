@@ -115,32 +115,6 @@ export function TenantPermissionManagerPage() {
                                 </Form.Item>
                             </Col>
                         </Row>
-                        <Row gutter={24}>
-                            <Col span={12}>
-                                <Form.Item
-                                    name="preserved1"
-                                    label="保留字段1"
-                                >
-                                    <InputNumber
-                                        className="w-full rounded-lg h-10"
-                                        placeholder="输入保留字段1（可选）"
-                                        style={{ width: '100%' }}
-                                    />
-                                </Form.Item>
-                            </Col>
-                            <Col span={12}>
-                                <Form.Item
-                                    name="preserved2"
-                                    label="保留字段2"
-                                >
-                                    <InputNumber
-                                        className="w-full rounded-lg h-10"
-                                        placeholder="输入保留字段2（可选）"
-                                        style={{ width: '100%' }}
-                                    />
-                                </Form.Item>
-                            </Col>
-                        </Row>
                     </>
                 }
                 query={async (props) => {

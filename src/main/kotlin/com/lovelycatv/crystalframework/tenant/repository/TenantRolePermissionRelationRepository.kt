@@ -14,6 +14,8 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
 
     fun findAllByPermissionId(permissionId: Long): Flux<TenantRolePermissionRelationEntity>
 
+    fun findAllByPermissionIdIn(permissionIds: Collection<Long>): Flux<TenantRolePermissionRelationEntity>
+
     fun findByRoleIdAndPermissionId(roleId: Long, permissionId: Long): Mono<TenantRolePermissionRelationEntity>
 
     @Query(

@@ -60,23 +60,5 @@ export const TENANT_PERMISSION_TABLE_COLUMNS: EntityTableColumns<TenantPermissio
                 <span className="text-xs font-mono text-gray-600">{row.path || '-'}</span>
             </CopyableToolTip>
         }
-    },
-    {
-        title: "保留字段",
-        dataIndex: "preserved",
-        key: "preserved",
-        render: function (_: unknown, row: TenantPermission): React.ReactNode | JSX.Element {
-            return <Space orientation='vertical' size={0}>
-                {row.preserved1 !== null && row.preserved1 !== undefined && (
-                    <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">P1: {row.preserved1}</Tag>
-                )}
-                {row.preserved2 !== null && row.preserved2 !== undefined && (
-                    <Tag color="cyan" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">P2: {row.preserved2}</Tag>
-                )}
-                {row.preserved1 === null && row.preserved2 === null && (
-                    <span className="text-xs font-mono text-gray-400">-</span>
-                )}
-            </Space>
-        }
     }
 ];

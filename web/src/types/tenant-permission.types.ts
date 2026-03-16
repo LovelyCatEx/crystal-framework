@@ -5,6 +5,4 @@ export interface TenantPermission extends BaseEntity{
     description: string | null;
     type: number;
     path: string | null;
-    preserved1: number | null;
-    preserved2: number | null;
 }

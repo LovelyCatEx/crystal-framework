@@ -7,8 +7,6 @@ export interface ManagerCreateTenantPermissionDTO {
     description?: string;
     type: number;
     path?: string;
-    preserved1?: number;
-    preserved2?: number;
 }
 
 export interface ManagerUpdateTenantPermissionDTO extends BaseManagerUpdateDTO {
@@ -16,8 +14,6 @@ export interface ManagerUpdateTenantPermissionDTO extends BaseManagerUpdateDTO {
     description?: string;
     type?: number;
     path?: string;
-    preserved1?: number;
-    preserved2?: number;
 }
 
 export interface ManagerReadTenantPermissionDTO {
