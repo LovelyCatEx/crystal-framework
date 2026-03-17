@@ -2,6 +2,7 @@ import { Button, Card, Space, Typography } from "antd";
 import { EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import TextArea from "antd/es/input/TextArea";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 
@@ -18,6 +19,7 @@ export function HtmlEditor({
     placeholder,
     height = 400
 }: HtmlEditorProps) {
+    const { t } = useTranslation();
     const [mode, setMode] = useState<"code" | "preview">("code");
     const [htmlText, setHtmlText] = useState(value);
     const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export function HtmlEditor({
                             icon={<EditOutlined />}
                             onClick={() => setMode("code")}
                         >
-                            代码
+                            {t('components.htmlEditor.code')}
                         </Button>
                         <Button
                             type={mode === "preview" ? "primary" : "default"}
@@ -65,7 +67,7 @@ export function HtmlEditor({
                             icon={<EyeOutlined />}
                             onClick={() => setMode("preview")}
                         >
-                            预览
+                            {t('components.htmlEditor.preview')}
                         </Button>
                     </Space>
                     {error && <Text type="danger" className="text-xs">{error}</Text>}
@@ -77,7 +79,7 @@ export function HtmlEditor({
                     value={htmlText}
                     onChange={(e) => handleHtmlTextChange(e.target.value)}
                     style={{ height: `${height}px` }}
-                    placeholder={placeholder || "输入 HTML 代码..."}
+                    placeholder={placeholder || t('components.htmlEditor.placeholder')}
                     className="font-mono text-xs"
                 />
             ) : (

@@ -2,12 +2,14 @@ import {Avatar, Card, Descriptions, Spin, Tag} from "antd";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {useUserProfile} from "@/compositions/use-user-profile.ts";
 import {UserOutlined} from "@ant-design/icons";
+import {useTranslation} from "react-i18next";
 
 interface UserCardProps {
     userId?: string;
 }
 
 export function UserCard({ userId }: UserCardProps) {
+    const { t } = useTranslation();
     const { userProfile: user, isUserProfileLoading: isLoading } = useUserProfile(userId);
 
     if (isLoading) {
@@ -24,7 +26,7 @@ export function UserCard({ userId }: UserCardProps) {
         return (
             <Card size="small" className="w-64">
                 <div className="text-center py-4 text-gray-400">
-                    未找到用户信息
+                    {t('components.popCard.user.notFound')}
                 </div>
             </Card>
         );
@@ -57,7 +59,7 @@ export function UserCard({ userId }: UserCardProps) {
                         <Tag color="blue" className="text-xs">{user.id}</Tag>
                     </CopyableToolTip>
                 </Descriptions.Item>
-                <Descriptions.Item label="邮箱">
+                <Descriptions.Item label={t('components.popCard.user.email')}>
                     <CopyableToolTip title={user.email}>
                         <span className="text-gray-600">{user.email}</span>
                     </CopyableToolTip>

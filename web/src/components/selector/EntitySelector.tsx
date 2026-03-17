@@ -1,5 +1,6 @@
 import {Modal} from "antd";
 import {useCallback, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
 import {EntityTable, type EntityTableProps, type EntityTableRef} from "../EntityTable.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 
@@ -20,6 +21,7 @@ interface EntitySelectorModalProps<ENTITY extends BaseEntity> {
 }
 
 export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySelectorModalProps<ENTITY>) {
+    const { t } = useTranslation();
     const {
         type,
         onChange,
@@ -28,9 +30,9 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
         columns,
         query,
         visible = true,
-        title = `选择${props.entityName}`,
-        cancelText,
-        okText,
+        title = t('components.selector.entitySelector.title', { entityName }),
+        cancelText = t('components.selector.entitySelector.cancelText'),
+        okText = t('components.selector.entitySelector.okText'),
         width = 1000,
         onCancel,
         onOk

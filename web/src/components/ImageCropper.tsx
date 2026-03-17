@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Modal, Slider, Button, Space } from 'antd';
 import { ZoomInOutlined, ZoomOutOutlined, RotateLeftOutlined, RotateRightOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 export type CropShape = 'rect' | 'circle';
 
@@ -51,6 +52,7 @@ const ImageCropperInner: React.FC<ImageCropperInnerProps> = ({
   maxZoom = 3,
   quality = 0.9,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -531,7 +533,7 @@ const ImageCropperInner: React.FC<ImageCropperInnerProps> = ({
           )}
 
           {!imageLoaded && (
-            <div className="text-gray-400">加载中...</div>
+            <div className="text-gray-400">{t('components.imageCropper.loading')}</div>
           )}
         </div>
 
@@ -566,14 +568,14 @@ const ImageCropperInner: React.FC<ImageCropperInnerProps> = ({
               size="small"
               onClick={handleRotateLeft}
             >
-              向左旋转
+              {t('components.imageCropper.rotateLeft')}
             </Button>
             <Button
               icon={<RotateRightOutlined />}
               size="small"
               onClick={handleRotateRight}
             >
-              向右旋转
+              {t('components.imageCropper.rotateRight')}
             </Button>
             <Button
               icon={<ReloadOutlined />}
@@ -581,7 +583,7 @@ const ImageCropperInner: React.FC<ImageCropperInnerProps> = ({
               onClick={handleReset}
               disabled={!imageLoaded}
             >
-              重置
+              {t('components.imageCropper.reset')}
             </Button>
           </Space>
         </div>

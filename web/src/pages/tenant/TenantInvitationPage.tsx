@@ -17,10 +17,12 @@ import {acceptTenantInvitation, queryTenantInvitationByCode} from "@/api/invitat
 import type {TenantProfileVO} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
+import {useTranslation} from "react-i18next";
 
 const { Title, Text } = Typography;
 
 export function TenantInvitationPage() {
+    const { t } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const [form] = Form.useForm();
@@ -45,22 +47,22 @@ export function TenantInvitationPage() {
 
     useEffect(() => {
         if (tenantInfo) {
-            document.title = buildDocumentTitle(`邀请加入 ${tenantInfo.name}`)
+            document.title = buildDocumentTitle(`${t('pages.tenantInvitation.title')} ${tenantInfo.name}`)
         } else {
-            document.title = buildDocumentTitle('组织邀请')
+            document.title = buildDocumentTitle(t('pages.tenantInvitation.title'))
         }
-    }, [tenantInfo]);
+    }, [tenantInfo, t]);
 
     const fetchTenantInfo = async (code: string) => {
         const trimmedCode = code.trim()
 
         if (!trimmedCode) {
-            message.warning('请输入邀请码');
+            message.warning(t('pages.tenantInvitation.enterInviteCode'));
             return;
         }
 
         if (trimmedCode.length < 8) {
-            message.error('邀请码长度无效（至少需要 8 位）');
+            message.error(t('pages.tenantInvitation.invalidInviteCodeLength'));
             return;
         }
 
@@ -79,15 +81,15 @@ export function TenantInvitationPage() {
                     setSearchParams({ code: trimmedCode });
                 } else {
                     setTenantInfo(null);
-                    message.error('获取组织信息失败');
+                    message.error(t('pages.tenantInvitation.fetchTenantFailed'));
                 }
             } else {
                 setTenantInfo(null);
-                message.error('邀请码无效');
+                message.error(t('pages.tenantInvitation.invalidInviteCode'));
             }
         } catch (error) {
             setTenantInfo(null);
-            message.error('邀请码无效或已过期');
+            message.error(t('pages.tenantInvitation.inviteCodeExpired'));
         } finally {
             setLoading(false);
         }
@@ -108,9 +110,9 @@ export function TenantInvitationPage() {
                 phoneNumber: values.phoneNumber,
             });
             setIsSubmitted(true);
-            message.success('申请已提交！请等待管理员审核。');
+            message.success(t('pages.tenantInvitation.submitSuccess'));
         } catch (error) {
-            message.error('提交失败，请重试');
+            message.error(t('pages.tenantInvitation.submitFailed'));
         } finally {
             setSubmitting(false);
         }
@@ -130,23 +132,23 @@ export function TenantInvitationPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl mb-4 text-blue-600">
                                 <SafetyCertificateOutlined style={{ fontSize: '32px' }} />
                             </div>
-                            <Title level={3} className="!mb-1 font-bold">{tenantInfo?.name ? `加入 ${tenantInfo.name}` : '加入组织'}</Title>
+                            <Title level={3} className="!mb-1 font-bold">{tenantInfo?.name ? `${t('pages.tenantInvitation.title')} ${tenantInfo.name}` : t('pages.tenantInvitation.title')}</Title>
                             <Text type="secondary" className="text-sm">
-                                {step === 'input' && '请输入管理员提供的邀请码以继续'}
-                                {step === 'info' && '请确认组织信息'}
-                                {step === 'form' && '请填写个人信息完成加入'}
+                                {step === 'input' && t('pages.tenantInvitation.inputStepHint')}
+                                {step === 'info' && t('pages.tenantInvitation.infoStepHint')}
+                                {step === 'form' && t('pages.tenantInvitation.formStepHint')}
                             </Text>
                         </div>
 
                         {step === 'input' && (
                             <div className="mb-8">
                                 <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ml-1">
-                                    组织邀请码
+                                    {t('pages.tenantInvitation.inviteCodeLabel')}
                                 </label>
                                 <div className="flex gap-2">
                                     <Input
                                         size="large"
-                                        placeholder="例如：1brxVqQH2R6c568N"
+                                        placeholder={t('pages.tenantInvitation.inviteCodePlaceholder')}
                                         value={inviteCode}
                                         onChange={(e) => setInviteCode(e.target.value)}
                                         onPressEnter={() => fetchTenantInfo(inviteCode)}
@@ -189,26 +191,26 @@ export function TenantInvitationPage() {
                                                     ? (tenantInfo.description.length > 32
                                                         ? tenantInfo.description.substring(0, 32) + '...'
                                                         : tenantInfo.description)
-                                                    : '暂无描述'}
+                                                    : t('pages.tenantInvitation.noDescription')}
                                             </p>
                                             {reachedUsageLimit && (
                                                 <Tag color="warning" className="mt-2">
-                                                    <WarningOutlined /> 邀请码已达使用上限
+                                                    <WarningOutlined /> {t('pages.tenantInvitation.reachedUsageLimit')}
                                                 </Tag>
                                             )}
                                             {isExpired && (
                                                 <Tag color="error" className="mt-2">
-                                                    <ClockCircleOutlined /> 邀请码已过期
+                                                    <ClockCircleOutlined /> {t('pages.tenantInvitation.expired')}
                                                 </Tag>
                                             )}
                                             {expiresAt && !isExpired && (
                                                 <div className="text-xs text-gray-400 mt-2">
-                                                    <ClockCircleOutlined /> 有效期至: {formatTimestamp(Number(expiresAt))}
+                                                    <ClockCircleOutlined /> {t('pages.tenantInvitation.validUntil')}: {formatTimestamp(Number(expiresAt))}
                                                 </div>
                                             )}
                                             {!expiresAt && (
                                                 <div className="text-xs text-gray-400 mt-2">
-                                                    <ClockCircleOutlined /> 永久有效
+                                                    <ClockCircleOutlined /> {t('pages.tenantInvitation.permanentValid')}
                                                 </div>
                                             )}
                                         </div>
@@ -226,7 +228,7 @@ export function TenantInvitationPage() {
                                             loading={loading}
                                             className="mb-4"
                                         >
-                                            {isExpired ? '邀请码已过期' : reachedUsageLimit ? '邀请码已达使用上限' : '下一步'}
+                                            {isExpired ? t('pages.tenantInvitation.expired') : reachedUsageLimit ? t('pages.tenantInvitation.reachedUsageLimit') : t('pages.tenantInvitation.nextStep')}
                                         </Button>
                                         <Button
                                             block
@@ -238,7 +240,7 @@ export function TenantInvitationPage() {
                                                 setSearchParams({});
                                             }}
                                         >
-                                            修改邀请码
+                                            {t('pages.tenantInvitation.modifyInviteCode')}
                                         </Button>
                                     </>
                                 )}
@@ -252,24 +254,24 @@ export function TenantInvitationPage() {
                                     >
                                         <Form.Item
                                             name="realName"
-                                            label="真实姓名"
-                                            rules={[{ required: true, message: '请输入您的姓名' }]}
+                                            label={t('pages.tenantInvitation.realName')}
+                                            rules={[{ required: true, message: t('pages.tenantInvitation.realNameRequired') }]}
                                         >
                                             <Input
                                                 prefix={<IdcardOutlined />}
-                                                placeholder="在此输入您的真实姓名"
+                                                placeholder={t('pages.tenantInvitation.realNamePlaceholder')}
                                                 size="large"
                                             />
                                         </Form.Item>
 
                                         <Form.Item
                                             name="phoneNumber"
-                                            label="手机号"
-                                            rules={[{ required: true, message: '请输入有效的手机号码' }]}
+                                            label={t('pages.tenantInvitation.phoneNumber')}
+                                            rules={[{ required: true, message: t('pages.tenantInvitation.phoneNumberRequired') }]}
                                         >
                                             <Input
                                                 prefix={<PhoneOutlined />}
-                                                placeholder="请输入手机号"
+                                                placeholder={t('pages.tenantInvitation.phoneNumberPlaceholder')}
                                                 size="large"
                                             />
                                         </Form.Item>
@@ -282,7 +284,7 @@ export function TenantInvitationPage() {
                                             loading={submitting}
                                             className="mt-2"
                                         >
-                                            接受邀请
+                                            {t('pages.tenantInvitation.acceptInvitation')}
                                         </Button>
                                         <Button
                                             block
@@ -290,7 +292,7 @@ export function TenantInvitationPage() {
                                             onClick={() => setStep('info')}
                                             className="mt-2"
                                         >
-                                            上一步
+                                            {t('pages.tenantInvitation.previousStep')}
                                         </Button>
                                     </Form>
                                 )}
@@ -302,17 +304,16 @@ export function TenantInvitationPage() {
                         <div className="w-24 h-24 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8">
                             <CheckCircleFilled style={{ fontSize: '48px' }} />
                         </div>
-                        <Title level={2} className="font-bold mb-2">申请已送出！</Title>
+                        <Title level={2} className="font-bold mb-2">{t('pages.tenantInvitation.submittedTitle')}</Title>
                         <p className="text-gray-500 mb-8 max-w-[280px] mx-auto">
-                            我们已通知 <b>{tenantInfo?.name}</b> 的管理员。<br />
-                            审核通过后您将收到电子邮件通知。
+                            {t('pages.tenantInvitation.submittedDescription', { tenantName: tenantInfo?.name })}<br />
                         </p>
                         <Button
                             size="large"
                             block
                             onClick={() => navigate('/')}
                         >
-                            返回首页
+                            {t('pages.tenantInvitation.backToHome')}
                         </Button>
                     </Card>
                 )}

@@ -2,12 +2,14 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {getAvailableMetricsList} from "@/api/actuator.api.ts";
 import useSWR from "swr";
 import {ActuatorMetricRenderComponent} from "@/components/ActuatorMetricRenderComponent.tsx";
-import {sortByMapOrder} from "@/utils/map.ts";
-import {actuatorMetricsToTranslationMap} from "@/i18n/actuator-metrics.ts";
+import {sortByArrayOrder} from "@/utils/map.ts";
+import {actuatorMetricsOrder} from "@/i18n/enum-orders.ts";
 import {Statistic} from "antd";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
+import {useTranslation} from "react-i18next";
 
 export function ActuatorDashboardPage() {
+    const { t } = useTranslation();
     const { data: metrics } = useSWR(
         'getAvailableMetricsList',
         () => getAvailableMetricsList().then((res) => res.data.names),
@@ -15,14 +17,14 @@ export function ActuatorDashboardPage() {
 
     return (
         <>
-            <ActionBarComponent title="仪表盘" subtitle="在此处查看系统基本信息" />
+            <ActionBarComponent title={t('pages.actuatorDashboard.title')} subtitle={t('pages.actuatorDashboard.subtitle')} />
 
             {/* Actuator Metrics */}
             <div className="flex flex-col space-y-2">
-                <p className="text-lg font-bold">Actuator 监控</p>
+                <p className="text-lg font-bold">Actuator {t('components.dashboard.systemMetrics.monitoring')}</p>
 
                 <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
-                    {sortByMapOrder((metrics ?? []), actuatorMetricsToTranslationMap).map((metricName) => (
+                    {sortByArrayOrder((metrics ?? []), actuatorMetricsOrder).map((metricName) => (
                         <div key={metricName} className="break-inside-avoid mb-4">
                             <ActuatorMetricRenderComponent
                                 metricName={metricName}
@@ -38,14 +40,14 @@ export function ActuatorDashboardPage() {
                                         suffix = 'MB'
                                         renderedValue = Math.round(Number.parseInt(value.toString()) / 1024 / 1024)
                                     } else if (lowerCaseBasicUnit === 'seconds') {
-                                        suffix = '秒'
+                                        suffix = t('components.dashboard.systemMetrics.units.seconds')
                                     } else if (lowerCaseBasicUnit === 'threads') {
-                                        suffix = '线程'
+                                        suffix = t('components.dashboard.systemMetrics.units.threads')
                                     } if (lowerCaseBasicUnit === 'connections') {
-                                        renderedName = '连接数'
+                                        renderedName = t('components.dashboard.systemMetrics.metrics.connections')
                                         suffix = ''
                                     } else if (lowerCaseBasicUnit === 'files') {
-                                        renderedName = '文件数'
+                                        renderedName = t('components.dashboard.systemMetrics.metrics.files')
                                         suffix = ''
                                     }
 
@@ -54,7 +56,7 @@ export function ActuatorDashboardPage() {
                                     }
 
                                     if (metricName === 'process.start.time') {
-                                        renderedName = '时间'
+                                        renderedName = t('components.dashboard.systemMetrics.metrics.time')
                                         renderedValue = formatTimestamp(Number.parseInt(value.toString()) * 1000)
                                         suffix = ''
                                     }

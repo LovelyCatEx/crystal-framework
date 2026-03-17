@@ -7,6 +7,7 @@ import {
     useImperativeHandle,
     useState
 } from "react";
+import {useTranslation} from "react-i18next";
 import {EntitySelectorModal} from "./EntitySelector.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
@@ -47,15 +48,18 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
         columns,
         controller,
         displayRender,
-        placeholder = "选择",
+        placeholder,
         icon,
         additionalQueryParams
     }: EntityIdSelectorProps<ENTITY>,
     ref: ForwardedRef<EntityIdSelectorRef>
 ) {
+    const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState<ENTITY | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const defaultPlaceholder = t('components.selector.entityIdSelector.placeholder');
 
     useEffect(() => {
         if (value) {
@@ -74,7 +78,7 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
         } else {
             setSelectedEntity(null);
         }
-    }, [value, controller]);
+    }, [value, controller, additionalQueryParams]);
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -129,12 +133,12 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
                             <span>{entityName}ID: {value}</span>
                         </Space>
                     ) : (
-                        placeholder
+                        placeholder || defaultPlaceholder
                     )}
                 </Button>
                 {(selectedEntity || value) && (
                     <Button type="link" danger onClick={handleClear}>
-                        清除
+                        {t('components.selector.entityIdSelector.clear')}
                     </Button>
                 )}
             </Space>
@@ -142,7 +146,7 @@ function EntityIdSelectorInner<ENTITY extends BaseEntity>(
             <EntitySelectorModal
                 type="radio"
                 visible={isModalOpen}
-                title={`选择${entityName}`}
+                title={t('components.selector.entitySelector.title', { entityName })}
                 entityName={entityName}
                 columns={columns}
                 query={async (props) => (await controller.query({

@@ -7,17 +7,19 @@ import {
 } from "@/api/mail-template.api.ts";
 import { useEffect, useRef, useState } from "react";
 import type { MailTemplateType, MailTemplate } from "@/types/mail.types.ts";
-import { MAIL_TEMPLATE_MANAGER_TABLE_COLUMNS } from "@/components/columns/MailTemplateEntityColumns.tsx";
+import { useMailTemplateTableColumns } from "@/components/columns/MailTemplateEntityColumns.tsx";
 import { MailTemplateTypeManagerController } from "@/api/mail-template-type.api.ts";
 import { HtmlEditor } from "@/components/HtmlEditor.tsx";
 import { CopyOutlined } from "@ant-design/icons";
 import type { EntityTableColumns } from "@/components/types/entity-table.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface TemplateVariablesProps {
     templateType: MailTemplateType | null;
+    t: (key: string, options?: Record<string, unknown>) => string;
 }
 
-function TemplateVariables({ templateType }: TemplateVariablesProps) {
+function TemplateVariables({ templateType, t }: TemplateVariablesProps) {
     if (!templateType) {
         return null;
     }
@@ -40,7 +42,7 @@ function TemplateVariables({ templateType }: TemplateVariablesProps) {
 
     const handleCopy = (variable: string) => {
         navigator.clipboard.writeText(`{{${variable}}}`).then(() => {
-            void message.success(`已复制 {{${variable}}} 到剪切板`);
+            void message.success(t('pages.mailTemplateManager.messages.copySuccess', { variable: `{{${variable}}}` }));
         });
     };
 
@@ -61,7 +63,12 @@ function TemplateVariables({ templateType }: TemplateVariablesProps) {
     );
 }
 
-function VariablesDisplay({ templateTypes }: { templateTypes: MailTemplateType[] }) {
+interface VariablesDisplayProps {
+    templateTypes: MailTemplateType[];
+    t: (key: string, options?: Record<string, unknown>) => string;
+}
+
+function VariablesDisplay({ templateTypes, t }: VariablesDisplayProps) {
     const form = Form.useFormInstance();
     const typeId = Form.useWatch('typeId', form);
     const selectedType = templateTypes.find((t) => t.id === typeId) || null;
@@ -71,13 +78,16 @@ function VariablesDisplay({ templateTypes }: { templateTypes: MailTemplateType[]
     }
 
     return (
-        <Form.Item label="可用变量" className="mb-2">
-            <TemplateVariables templateType={selectedType} />
+        <Form.Item label={t('pages.mailTemplateManager.modal.variables.label')} className="mb-2">
+            <TemplateVariables templateType={selectedType} t={t} />
         </Form.Item>
     );
 }
 
 export function MailTemplateManagerPage() {
+    const { t } = useTranslation();
+    const baseColumns = useMailTemplateTableColumns();
+
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
     const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
@@ -96,21 +106,21 @@ export function MailTemplateManagerPage() {
         MailTemplateManagerController
             .update({ id: row.id, active: active })
             .then(() => {
-                void message.success("状态更新成功");
+                void message.success(t('pages.mailTemplateManager.messages.statusUpdateSuccess'));
                 pageRef.current?.refreshData();
             })
             .catch(() => {
-                void message.error("状态更新失败");
+                void message.error(t('pages.mailTemplateManager.messages.statusUpdateFailed'));
             });
     };
 
-    const columnsWithActive: EntityTableColumns<MailTemplate> = [...MAIL_TEMPLATE_MANAGER_TABLE_COLUMNS];
+    const columnsWithActive: EntityTableColumns<MailTemplate> = [...baseColumns];
     const statusColumnIndex = columnsWithActive.findIndex(col => col.key === 'active');
     if (statusColumnIndex !== -1) {
         columnsWithActive.splice(statusColumnIndex, 1);
     }
     columnsWithActive.push({
-        title: "启用状态",
+        title: t('pages.mailTemplateManager.enabledStatus'),
         dataIndex: "active",
         key: "active",
         width: 100,
@@ -122,17 +132,17 @@ export function MailTemplateManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="邮件模板"
-            title="邮件模板管理"
-            subtitle="管理邮件模板内容"
+            entityName={t('entityNames.mailTemplate')}
+            title={t('pages.mailTemplateManager.title')}
+            subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
             tableActions={[
                 {
-                    label: '模板类型',
+                    label: t('pages.mailTemplateManager.filter.templateType'),
                     children: (
                         <Select
                             className="w-64"
-                            placeholder="选择模板类型"
+                            placeholder={t('pages.mailTemplateManager.filter.placeholder')}
                             allowClear
                             value={selectedTypeId}
                             onChange={(value) => setSelectedTypeId(value)}
@@ -151,15 +161,15 @@ export function MailTemplateManagerPage() {
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 128, message: '名称长度不能超过128个字符' }]}>
-                                <Input className="w-full rounded-lg h-10" placeholder="模板名称" maxLength={128} showCount />
+                            <Form.Item name="name" label={t('pages.mailTemplateManager.modal.name.label')} rules={[{ required: true, message: t('pages.mailTemplateManager.modal.name.required') }, { max: 128, message: t('pages.mailTemplateManager.modal.name.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10" placeholder={t('pages.mailTemplateManager.modal.name.placeholder')} maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="typeId" label="类型" rules={[{ required: true }]}>
+                            <Form.Item name="typeId" label={t('pages.mailTemplateManager.modal.typeId.label')} rules={[{ required: true, message: t('pages.mailTemplateManager.modal.typeId.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10"
-                                    placeholder="选择类型"
+                                    placeholder={t('pages.mailTemplateManager.modal.typeId.placeholder')}
                                     options={templateTypes.map((type) => ({
                                         label: type.name,
                                         value: type.id,
@@ -168,26 +178,26 @@ export function MailTemplateManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="title" label="标题" rules={[{ required: true }, { max: 512, message: '标题长度不能超过512个字符' }]}>
-                        <Input className="w-full rounded-lg h-10" placeholder="邮件标题" maxLength={512} showCount />
+                    <Form.Item name="title" label={t('pages.mailTemplateManager.modal.title.label')} rules={[{ required: true, message: t('pages.mailTemplateManager.modal.title.required') }, { max: 512, message: t('pages.mailTemplateManager.modal.title.maxLength') }]}>
+                        <Input className="w-full rounded-lg h-10" placeholder={t('pages.mailTemplateManager.modal.title.placeholder')} maxLength={512} showCount />
                     </Form.Item>
-                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
+                    <Form.Item name="description" label={t('pages.mailTemplateManager.modal.description.label')} rules={[{ max: 512, message: t('pages.mailTemplateManager.modal.description.maxLength') }]}>
                         <Input.TextArea
                             className="w-full rounded-lg"
-                            placeholder="模板描述"
+                            placeholder={t('pages.mailTemplateManager.modal.description.placeholder')}
                             rows={3}
                             maxLength={512}
                             showCount
                         />
                     </Form.Item>
-                    <VariablesDisplay templateTypes={templateTypes} />
-                    <Form.Item name="content" label="内容" rules={[{ required: true }]}>
+                    <VariablesDisplay templateTypes={templateTypes} t={t} />
+                    <Form.Item name="content" label={t('pages.mailTemplateManager.modal.content.label')} rules={[{ required: true, message: t('pages.mailTemplateManager.modal.content.required') }]}>
                         <HtmlEditor
-                            placeholder="邮件模板内容，支持变量替换"
+                            placeholder={t('pages.mailTemplateManager.modal.content.placeholder')}
                             height={400}
                         />
                     </Form.Item>
-                    <Form.Item name="active" label="启用状态" valuePropName="checked">
+                    <Form.Item name="active" label={t('pages.mailTemplateManager.modal.active.label')} valuePropName="checked">
                         <Switch />
                     </Form.Item>
                 </>

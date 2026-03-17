@@ -4,6 +4,7 @@ import {EditOutlined, ExclamationCircleFilled, LockOutlined, ReadOutlined, Unloc
 import {BaseManagerController} from "@/api/BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import {type ApiResponse, handleApiResponse} from "@/api/system-request.ts";
+import {useTranslation} from "react-i18next";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyController = BaseManagerController<any, any, any, any, any>;
@@ -41,7 +42,8 @@ class ProtectedControllerWrapper<
 > extends BaseManagerController<ENTITY, C, R, U, D> {
     constructor(
         private readonly parentController: BaseManagerController<ENTITY, C, R, U, D>,
-        private readonly isReadonly: () => boolean
+        private readonly isReadonly: () => boolean,
+        private readonly readonlyErrorMessage: string
     ) {
         super("");
     }
@@ -60,7 +62,7 @@ class ProtectedControllerWrapper<
 
     create(dto: C): Promise<ApiResponse<unknown>> {
         if (this.isReadonly()) {
-            const res = { code: 403, data: null, message: "只读模式，无法创建" };
+            const res = { code: 403, data: null, message: this.readonlyErrorMessage };
             handleApiResponse(res);
             return Promise.resolve(res);
         }
@@ -69,7 +71,7 @@ class ProtectedControllerWrapper<
 
     update(dto: U): Promise<ApiResponse<unknown>> {
         if (this.isReadonly()) {
-            const res = { code: 403, data: null, message: "只读模式，无法创建" };
+            const res = { code: 403, data: null, message: this.readonlyErrorMessage };
             handleApiResponse(res);
             return Promise.resolve(res);
         }
@@ -78,7 +80,7 @@ class ProtectedControllerWrapper<
 
     delete(dto: D): Promise<ApiResponse<unknown>> {
         if (this.isReadonly()) {
-            const res = { code: 403, data: null, message: "只读模式，无法创建" };
+            const res = { code: 403, data: null, message: this.readonlyErrorMessage };
             handleApiResponse(res);
             return Promise.resolve(res);
         }
@@ -97,9 +99,10 @@ interface ProtectedControllerWarningWrapperProps {
 export function ProtectedControllerWarningWrapper({
     children,
     controller,
-    title = "高危操作警告",
-    content = "此页面推荐以只读模式进入，任何错误操作将会引发不可预料的后果，请选择操作模式："
+    title,
+    content
 }: ProtectedControllerWarningWrapperProps) {
+    const {t} = useTranslation();
     const [modal, contextHolder] = Modal.useModal();
     const [isReadonly, setIsReadonly] = useState<boolean>(true);
     const [hasConfirmed, setHasConfirmed] = useState(false);
@@ -114,9 +117,10 @@ export function ProtectedControllerWarningWrapper({
     const wrappedController = useCallback(() => {
         return new ProtectedControllerWrapper(
             controller,
-            getIsReadonly
+            getIsReadonly,
+            t('components.protectedController.readonlyError')
         ) as unknown as AnyController;
-    }, [controller, getIsReadonly]);
+    }, [controller, getIsReadonly, t]);
 
     const [controllerInstance] = useState(() => wrappedController());
 
@@ -124,11 +128,11 @@ export function ProtectedControllerWarningWrapper({
         if (hasConfirmed) return;
 
         modal.warning({
-            title,
+            title: title ?? t('components.protectedController.warningTitle'),
             icon: <ExclamationCircleFilled />,
             content: (
                 <div className="py-2">
-                    <p className="text-gray-600 mb-4">{content}</p>
+                    <p className="mb-4">{content ?? t('components.protectedController.warningContent')}</p>
                     <div className="flex gap-3">
                         <Button
                             onClick={() => {
@@ -139,7 +143,7 @@ export function ProtectedControllerWarningWrapper({
                             className="flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                         >
                             <EditOutlined />
-                            以编辑模式继续
+                            {t('components.protectedController.editMode')}
                         </Button>
                         <Button
                             type="primary"
@@ -151,7 +155,7 @@ export function ProtectedControllerWarningWrapper({
                             className="flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                         >
                             <ReadOutlined />
-                            以只读模式继续
+                            {t('components.protectedController.readonlyMode')}
                         </Button>
                     </div>
                 </div>
@@ -162,7 +166,7 @@ export function ProtectedControllerWarningWrapper({
             closable: false,
             maskClosable: false,
         });
-    }, [hasConfirmed, title, content, modal]);
+    }, [hasConfirmed, title, content, modal, t]);
 
     const handleReopenModal = useCallback(() => {
         setHasConfirmed(false);
@@ -197,7 +201,7 @@ export function ProtectedControllerWarningWrapper({
                                 onClick={handleReopenModal}
                                 className="flex items-center gap-2 px-4 py-2 bg-green-100/80 hover:bg-green-200/80 backdrop-blur-sm text-green-800 rounded-full shadow-lg transition-colors cursor-pointer"
                             >
-                                <span className="text-sm font-medium">只读模式</span>
+                                <span className="text-sm font-medium">{t('components.protectedController.readonlyBadge')}</span>
                                 <LockOutlined />
                             </button>
                         ) : (
@@ -205,7 +209,7 @@ export function ProtectedControllerWarningWrapper({
                                 onClick={handleReopenModal}
                                 className="flex items-center gap-2 px-4 py-2 bg-red-100/80 hover:bg-red-200/80 backdrop-blur-sm text-red-800 rounded-full shadow-lg transition-colors cursor-pointer"
                             >
-                                <span className="text-sm font-medium">正在以编辑模式访问</span>
+                                <span className="text-sm font-medium">{t('components.protectedController.editModeBadge')}</span>
                                 <UnlockOutlined className="text-sm" />
                             </button>
                         )}

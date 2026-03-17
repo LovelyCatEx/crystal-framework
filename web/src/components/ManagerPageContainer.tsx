@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import {Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
 import {DeleteOutlined, EditOutlined, ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
+import {useTranslation} from "react-i18next";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
 import type {BaseEntity} from "../types/BaseEntity.ts";
@@ -40,6 +41,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     props: ManagerPageContainerProps<ENTITY>,
     ref: ForwardedRef<ManagerPageContainerRef>,
 ) {
+    const { t } = useTranslation();
     const [modal, contextHolder] = Modal.useModal();
 
     const isCustomTableSelector = props.tableSelection !== undefined && props.tableSelection !== null;
@@ -62,18 +64,18 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             }
 
             modal.confirm({
-                title: '删除所有选中的项目',
+                title: t('components.managerPageContainer.batchDeleteTitle'),
                 icon: <ExclamationCircleFilled />,
-                content: '此操作不可恢复，请确认是否要继续？',
+                content: t('components.managerPageContainer.batchDeleteConfirm'),
                 onOk() {
                     props
                         .delete({ ids: selectedEntities.map((entity) => entity.id) })
                         .then(() => {
-                            void message.success("批量删除成功");
+                            void message.success(t('components.managerPageContainer.batchDeleteSuccess'));
                             entityTableRef?.current?.refreshData();
                         })
                         .finally(() => {
-                            void message.error("批量删除失败");
+                            void message.error(t('components.managerPageContainer.batchDeleteFailed'));
                         })
                 },
             });
@@ -99,11 +101,11 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const deleteModel = (id: string) => {
         props.delete({ ids: [id] })
             .then(() => {
-                void message.success(`${props.entityName}已刪除`);
+                void message.success(t('components.managerPageContainer.deleteSuccess', { entityName: props.entityName }));
                 entityTableRef?.current?.refreshData();
             })
             .catch(() => {
-                void message.error(`${props.entityName}删除失败`);
+                void message.error(t('components.managerPageContainer.deleteFailed', { entityName: props.entityName }));
             })
     };
 
@@ -111,16 +113,16 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
         if (editingItem) {
             props.update(values).then(() => {
                 entityTableRef?.current?.refreshData();
-                void message.success(`${props.entityName}更新成功`);
+                void message.success(t('components.managerPageContainer.updateSuccess', { entityName: props.entityName }));
             }).catch(() => {
-                void message.error(`${props.entityName}更新失败`);
+                void message.error(t('components.managerPageContainer.updateFailed', { entityName: props.entityName }));
             })
         } else {
             props.create(values).then(() => {
                 entityTableRef?.current?.refreshData();
-                void message.success(`新增${props.entityName}成功`);
+                void message.success(t('components.managerPageContainer.createSuccess', { entityName: props.entityName }));
             }).catch(() => {
-                void message.error(`新增${props.entityName}失败`);
+                void message.error(t('components.managerPageContainer.createFailed', { entityName: props.entityName }));
             })
         }
 
@@ -160,7 +162,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                             className="rounded-xl h-12 shadow-lg"
                             onClick={() => openModal()}
                         >
-                            新增{restProps.entityName}
+                            {t('components.managerPageContainer.addNew', { entityName: restProps.entityName })}
                         </Button>
                     </>}
                 />
@@ -174,23 +176,23 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     query={restProps.query}
                     tablePrefixActions={isCustomTableSelector ? restProps.tablePrefixActions : [
                         ...[{
-                            label: '批量操作',
+                            label: t('components.managerPageContainer.batchOperation'),
                             children: <div className="flex flex-row items-center gap-2">
                                 <Select
                                     className="min-w-32"
                                     style={{ width: 120 }}
                                     options={[
-                                        { value: '1', label: '全部删除' },
+                                        { value: '1', label: t('components.managerPageContainer.batchDelete') },
                                     ]}
                                     onChange={(value) => setBatchOperationType(Number.parseInt(value))}
-                                    placeholder="批量操作"
+                                    placeholder={t('components.managerPageContainer.batchOperation')}
                                 />
 
                                 <Button
                                     type="primary"
                                     onClick={handleOnBatchOperationClick}
                                 >
-                                    执行
+                                    {t('components.managerPageContainer.execute')}
                                 </Button>
                             </div>,
                         }],
@@ -199,12 +201,12 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     tableActions={[
                         ...(restProps.tableActions ?? []),
                         ...[{
-                            label: '操作',
+                            label: t('components.managerPageContainer.action'),
                             children: <Button
                                 type="primary"
                                 onClick={() => entityTableRef.current?.refreshData()}
                             >
-                                刷新
+                                {t('components.managerPageContainer.refresh')}
                             </Button>
                         }]
                     ]}
@@ -212,7 +214,12 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}
                             <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                            <Popconfirm title={`确定要删除此${props.entityName}？`} onConfirm={() => deleteModel(record.id)} okText="确认" cancelText="取消">
+                            <Popconfirm 
+                                title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })} 
+                                onConfirm={() => deleteModel(record.id)} 
+                                okText={t('components.managerPageContainer.confirm')} 
+                                cancelText={t('components.managerPageContainer.cancel')}
+                            >
                                 <Button type="text" size="small" icon={<DeleteOutlined />} danger />
                             </Popconfirm>
                         </Space>
@@ -227,7 +234,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             </Card>
 
             <Modal
-                title={(editingItem ? "编辑" : "新建") + restProps.entityName}
+                title={(editingItem ? t('components.managerPageContainer.edit') : t('components.managerPageContainer.create')) + restProps.entityName}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => form.submit()}

@@ -2,13 +2,15 @@ import {Card, Flex, Statistic, Tag} from "antd";
 import {type ReactNode, useEffect, useMemo, useState} from "react";
 import useSWR from "swr";
 import {getMetric} from "../api/actuator.api.ts";
-import {actuatorMetricsToTranslationMap} from "../i18n/actuator-metrics.ts";
+import {getActuatorMetric} from "@/i18n/enum-helpers.ts";
+import {useTranslation} from "react-i18next";
 
 export function ActuatorMetricRenderComponent(props: {
     metricName: string,
     refreshInterval?: number,
     measuredValueRender?: (value: string | number, basicUnit: string | undefined, name: string) => ReactNode
 }) {
+    const { t } = useTranslation();
     const [refreshing, setRefreshing] = useState<boolean>(false);
 
     const { data: basicMetricResult } = useSWR(
@@ -65,7 +67,7 @@ export function ActuatorMetricRenderComponent(props: {
 
     const displayMetricName = useMemo(() => {
         return basicMetricResult?.name
-            ? actuatorMetricsToTranslationMap.get(basicMetricResult.name)
+            ? getActuatorMetric(basicMetricResult.name)
             ?? basicMetricResult?.name
             : 'unknown'
     }, [basicMetricResult])
@@ -76,13 +78,13 @@ export function ActuatorMetricRenderComponent(props: {
             <p className="text-gray-600">{basicMetricResult?.description}</p>
 
             {(basicMetricResult?.availableTags ?? []).length > 0 && (
-                <p className="mt-4 mb-2 text-lg">标签</p>
+                <p className="mt-4 mb-2 text-lg">{t('components.actuatorMetric.tags')}</p>
             )}
             {selectableTags.map((tag, index) => (
                 <div className="mb-4">
                     <p className="mb-2"><Tag color="blue">{tag.tag}</Tag></p>
                     <Flex gap="small" wrap align="center">
-                        可选值：{tag.options.map((tagName, optionIndex) => (
+                        {t('components.actuatorMetric.optionalValues')}：{tag.options.map((tagName, optionIndex) => (
                         <Tag.CheckableTag
                             checked={tag.selectedIndex == optionIndex}
                             onChange={(checked) => {
@@ -97,7 +99,7 @@ export function ActuatorMetricRenderComponent(props: {
             ))}
 
             {(metricResult?.measurements ?? []).length > 0 && (
-                <p className="mt-4 mb-2 text-lg">测量值</p>
+                <p className="mt-4 mb-2 text-lg">{t('components.actuatorMetric.measurements')}</p>
             )}
             {(metricResult?.measurements ?? [])
                 .map((measurement) =>

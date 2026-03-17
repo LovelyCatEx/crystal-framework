@@ -8,18 +8,21 @@ import {
     TenantManagerController
 } from "@/api/tenant.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {TENANT_MANAGER_TABLE_COLUMNS} from "@/components/columns/TenantEntityColumns.tsx";
+import {useTenantTableColumns} from "@/components/columns/TenantEntityColumns.tsx";
 import {TenantTireTypeManagerController} from "@/api/tenant-tire-type.api.ts";
 import type {TenantTireType} from "@/types/tenant.types.ts";
 import {TenantStatus} from "@/types/tenant.types.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
-import {tenantStatusToTranslationMap} from "@/i18n/tenant.ts";
+import {getTenantStatus} from "@/i18n/enum-helpers.ts";
+import {useTranslation} from "react-i18next";
 
 export function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
     const [filterStatus, setFilterStatus] = useState<number>();
+    const {t} = useTranslation();
+    const columns = useTenantTableColumns();
 
     useEffect(() => {
         TenantTireTypeManagerController.list().then((res) => {
@@ -32,9 +35,9 @@ export function TenantManagerPage() {
     }, [filterStatus]);
 
     const statusOptions = [
-        { label: tenantStatusToTranslationMap.get(TenantStatus.REVIEWING), value: TenantStatus.REVIEWING },
-        { label: tenantStatusToTranslationMap.get(TenantStatus.ACTIVE), value: TenantStatus.ACTIVE },
-        { label: tenantStatusToTranslationMap.get(TenantStatus.CLOSED), value: TenantStatus.CLOSED }
+        { label: getTenantStatus(TenantStatus.REVIEWING), value: TenantStatus.REVIEWING },
+        { label: getTenantStatus(TenantStatus.ACTIVE), value: TenantStatus.ACTIVE },
+        { label: getTenantStatus(TenantStatus.CLOSED), value: TenantStatus.CLOSED }
     ];
 
     const convertDateToTimestamp = (date: unknown): string => {
@@ -60,31 +63,31 @@ export function TenantManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="租户"
-            title="租户管理"
-            subtitle="管理系统租户信息"
-            columns={TENANT_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.tenant')}
+            title={t('pages.tenantManager.title')}
+            subtitle={t('pages.tenantManager.subtitle')}
+            columns={columns}
             editModalInitialValues={initialValues}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="租户名称" rules={[{ required: true }, { max: 64, message: '租户名称长度不能超过64个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="租户名称" maxLength={64} showCount />
+                            <Form.Item name="name" label={t('pages.tenantManager.modal.name.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.name.required') }, { max: 64, message: t('pages.tenantManager.modal.name.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.name.placeholder')} maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="ownerUserId" label="所有者用户" rules={[{ required: true }]}>
+                            <Form.Item name="ownerUserId" label={t('pages.tenantManager.modal.ownerUserId.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.ownerUserId.required') }]}>
                                 <UserIdSelector isRowDisabled={(row, value) => row.id === value} />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="tireTypeId" label="套餐类型" rules={[{ required: true }]}>
+                            <Form.Item name="tireTypeId" label={t('pages.tenantManager.modal.tireTypeId.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.tireTypeId.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择套餐类型"
+                                    placeholder={t('pages.tenantManager.modal.tireTypeId.placeholder')}
                                     options={tireTypes.map((type) => ({
                                         label: type.name,
                                         value: type.id,
@@ -93,10 +96,10 @@ export function TenantManagerPage() {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="status" label="状态">
+                            <Form.Item name="status" label={t('pages.tenantManager.modal.status.label')}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择状态"
+                                    placeholder={t('pages.tenantManager.modal.status.placeholder')}
                                     options={statusOptions}
                                     allowClear
                                 />
@@ -107,8 +110,8 @@ export function TenantManagerPage() {
                         <Col span={12}>
                             <Form.Item 
                                 name="subscribedTime" 
-                                label="订阅时间" 
-                                rules={[{ required: true }]}
+                                label={t('pages.tenantManager.modal.subscribedTime.label')} 
+                                rules={[{ required: true, message: t('pages.tenantManager.modal.subscribedTime.required') }]}
                                 getValueProps={(value) => {
                                     if (value && typeof value === 'string') {
                                         const timestamp = Number(value);
@@ -123,15 +126,15 @@ export function TenantManagerPage() {
                                     className="w-full rounded-lg h-10 flex items-center"
                                     showTime
                                     format="YYYY-MM-DD HH:mm:ss"
-                                    placeholder="选择订阅时间"
+                                    placeholder={t('pages.tenantManager.modal.subscribedTime.placeholder')}
                                 />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item 
                                 name="expiresTime" 
-                                label="过期时间" 
-                                rules={[{ required: true }]}
+                                label={t('pages.tenantManager.modal.expiresTime.label')} 
+                                rules={[{ required: true, message: t('pages.tenantManager.modal.expiresTime.required') }]}
                                 getValueProps={(value) => {
                                     if (value && typeof value === 'string') {
                                         const timestamp = Number(value);
@@ -146,46 +149,46 @@ export function TenantManagerPage() {
                                     className="w-full rounded-lg h-10 flex items-center"
                                     showTime
                                     format="YYYY-MM-DD HH:mm:ss"
-                                    placeholder="选择过期时间"
+                                    placeholder={t('pages.tenantManager.modal.expiresTime.placeholder')}
                                 />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="contactName" label="联系人姓名" rules={[{ required: true }, { max: 64, message: '联系人姓名长度不能超过64个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="联系人姓名" maxLength={64} showCount />
+                            <Form.Item name="contactName" label={t('pages.tenantManager.modal.contactName.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.contactName.required') }, { max: 64, message: t('pages.tenantManager.modal.contactName.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.contactName.placeholder')} maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="contactEmail" label="联系人邮箱" rules={[{ required: true }, { max: 256, message: '邮箱长度不能超过256个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="联系人邮箱" maxLength={256} showCount />
+                            <Form.Item name="contactEmail" label={t('pages.tenantManager.modal.contactEmail.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.contactEmail.required') }, { max: 256, message: t('pages.tenantManager.modal.contactEmail.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.contactEmail.placeholder')} maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="contactPhone" label="联系人电话" rules={[{ required: true }, { max: 32, message: '电话长度不能超过32个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="联系人电话" maxLength={32} showCount />
+                            <Form.Item name="contactPhone" label={t('pages.tenantManager.modal.contactPhone.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.contactPhone.required') }, { max: 32, message: t('pages.tenantManager.modal.contactPhone.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.contactPhone.placeholder')} maxLength={32} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="address" label="联系地址" rules={[{ required: true }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="联系地址" />
+                            <Form.Item name="address" label={t('pages.tenantManager.modal.address.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.address.required') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.address.placeholder')} />
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
+                    <Form.Item name="description" label={t('pages.tenantManager.modal.description.label')} rules={[{ max: 512, message: t('pages.tenantManager.modal.description.maxLength') }]}>
                         <Input.TextArea
                             className="w-full rounded-lg"
-                            placeholder="租户描述"
+                            placeholder={t('pages.tenantManager.modal.description.placeholder')}
                             rows={3}
                             maxLength={512}
                             showCount
                         />
                     </Form.Item>
-                    <Form.Item name="settings" label="设置(JSON格式)">
-                        <JsonEditor placeholder='{"key": "value"}' />
+                    <Form.Item name="settings" label={t('pages.tenantManager.modal.config.label')}>
+                        <JsonEditor placeholder={t('pages.tenantManager.modal.config.placeholder')} />
                     </Form.Item>
                 </>
             }
@@ -214,12 +217,12 @@ export function TenantManagerPage() {
             }}
             tableActions={[
                 {
-                    label: <span>状态</span>,
+                    label: <span>{t('pages.tenantManager.filter.status')}</span>,
                     children: <Select
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
-                            { value: '-1', label: '全部' },
+                            { value: '-1', label: t('pages.tenantManager.filter.all') },
                             ...statusOptions
                         ]}
                         onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}

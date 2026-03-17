@@ -3,12 +3,14 @@ import type {TenantDepartment} from "@/types/tenant-department.types.ts";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
+import {useTranslation} from "react-i18next";
 
 interface TenantDepartmentPopCardProps {
     departmentId: string;
 }
 
 export function TenantDepartmentPopCard({ departmentId }: TenantDepartmentPopCardProps) {
+    const { t } = useTranslation();
     const { data: department, isLoading } = useSWRComposition<TenantDepartment | null>(
         `tenant-department-card-${departmentId}`,
         async () => {
@@ -38,7 +40,7 @@ export function TenantDepartmentPopCard({ departmentId }: TenantDepartmentPopCar
         return (
             <Card size="small" className="w-64">
                 <div className="text-center py-4 text-gray-400">
-                    未找到部门信息
+                    {t('components.popCard.tenantDepartment.notFound')}
                 </div>
             </Card>
         );
@@ -62,10 +64,10 @@ export function TenantDepartmentPopCard({ departmentId }: TenantDepartmentPopCar
                         <Tag color="blue" className="text-xs">{department.id}</Tag>
                     </CopyableToolTip>
                 </Descriptions.Item>
-                <Descriptions.Item label="描述">
+                <Descriptions.Item label={t('components.popCard.tenantDepartment.description')}>
                     <span className="text-gray-600">{department.description || '-'}</span>
                 </Descriptions.Item>
-                <Descriptions.Item label="父部门">
+                <Descriptions.Item label={t('components.popCard.tenantDepartment.parentDepartment')}>
                     {department.parentId ? (
                         <Popover
                             content={<TenantDepartmentPopCard departmentId={department.parentId} />}
@@ -82,7 +84,7 @@ export function TenantDepartmentPopCard({ departmentId }: TenantDepartmentPopCar
                         '-'
                     )}
                 </Descriptions.Item>
-                <Descriptions.Item label="租户ID">
+                <Descriptions.Item label={t('components.popCard.tenantDepartment.tenantId')}>
                     <CopyableToolTip title={department.tenantId}>
                         <Tag color="purple" className="text-xs">{department.tenantId}</Tag>
                     </CopyableToolTip>

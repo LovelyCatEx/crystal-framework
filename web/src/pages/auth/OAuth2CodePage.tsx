@@ -4,6 +4,7 @@ import {getQueryString} from "@/utils/url.utils.ts";
 import {menuPathDashboard, menuPathLogin} from "@/router";
 import {Avatar, Button, Card, Form, Input, message, Space, Tabs} from "antd";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import {bindOAuthAccount, loginByOAuth2Code, registerFromOAuthAccount} from "@/api/auth.api.ts";
 import {setUserAuthentication} from "@/utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth.types.ts";
@@ -42,6 +43,7 @@ interface BindCurrentUserTabProps {
 }
 
 function RegisterTab({userInfo}: RegisterTabProps) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,15 +58,15 @@ function RegisterTab({userInfo}: RegisterTabProps) {
         })
             .then((res) => {
                 if (res.data) {
-                    void message.success('注册并绑定成功');
+                    void message.success(t('pages.auth.oauth2.bind.messages.registerBindSuccess'));
                     setUserAuthentication(res.data.token, res.data.expiresIn);
                     navigate(menuPathDashboard);
                 } else {
-                    void message.error(res.message || '注册失败');
+                    void message.error(res.message || t('pages.auth.oauth2.bind.messages.registerFailed'));
                 }
             })
             .catch(() => {
-                void message.error('注册失败，请重试');
+                void message.error(t('pages.auth.oauth2.bind.messages.registerFailed'));
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -84,24 +86,24 @@ function RegisterTab({userInfo}: RegisterTabProps) {
             <Form.Item
                 name="username"
                 rules={[
-                    {required: true, message: '请输入用户名'},
-                    {pattern: /^[a-zA-Z0-9_-]+$/, message: '只能包含英文字母、数字、下划线和横线'},
+                    {required: true, message: t('pages.auth.oauth2.bind.register.username.required')},
+                    {pattern: /^[a-zA-Z0-9_-]+$/, message: t('pages.auth.oauth2.bind.register.username.pattern')},
                 ]}
             >
                 <Input
                     prefix={<UserOutlined className="text-gray-400 mr-2" />}
-                    placeholder="用户名"
+                    placeholder={t('pages.auth.oauth2.bind.register.username.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
             </Form.Item>
             <Form.Item
                 name="password"
-                rules={[{ required: true, message: '请输入密码' }]}
+                rules={[{ required: true, message: t('pages.auth.oauth2.bind.register.password.required') }]}
             >
                 <Input.Password
                     prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                    placeholder="密码"
+                    placeholder={t('pages.auth.oauth2.bind.register.password.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
@@ -110,31 +112,31 @@ function RegisterTab({userInfo}: RegisterTabProps) {
                 name="confirmPassword"
                 dependencies={['password']}
                 rules={[
-                    { required: true, message: '请确认密码' },
+                    { required: true, message: t('pages.auth.oauth2.bind.register.confirmPassword.required') },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
                             if (!value || getFieldValue('password') === value) {
                                 return Promise.resolve();
                             }
-                            return Promise.reject(new Error('两次输入的密码不一致'));
+                            return Promise.reject(new Error(t('pages.auth.oauth2.bind.register.confirmPassword.mismatch')));
                         },
                     }),
                 ]}
             >
                 <Input.Password
                     prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                    placeholder="确认密码"
+                    placeholder={t('pages.auth.oauth2.bind.register.confirmPassword.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
             </Form.Item>
             <Form.Item
                 name="nickname"
-                rules={[{ required: true, message: '请输入昵称' }]}
+                rules={[{ required: true, message: t('pages.auth.oauth2.bind.register.nickname.required') }]}
             >
                 <Input
                     prefix={<UserOutlined className="text-gray-400 mr-2" />}
-                    placeholder="昵称"
+                    placeholder={t('pages.auth.oauth2.bind.register.nickname.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
@@ -147,7 +149,7 @@ function RegisterTab({userInfo}: RegisterTabProps) {
                     loading={isSubmitting}
                     className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none"
                 >
-                    注册并绑定
+                    {t('pages.auth.oauth2.bind.register.submit')}
                 </Button>
             </Form.Item>
         </Form>
@@ -155,6 +157,7 @@ function RegisterTab({userInfo}: RegisterTabProps) {
 }
 
 function BindTab({userInfo}: BindTabProps) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,15 +171,15 @@ function BindTab({userInfo}: BindTabProps) {
         })
             .then((res) => {
                 if (res.data) {
-                    void message.success('绑定成功');
+                    void message.success(t('pages.auth.oauth2.bind.messages.bindSuccess'));
                     setUserAuthentication(res.data.token, res.data.expiresIn);
                     navigate(menuPathDashboard);
                 } else {
-                    void message.error(res.message || '绑定失败');
+                    void message.error(res.message || t('pages.auth.oauth2.bind.messages.bindFailed'));
                 }
             })
             .catch(() => {
-                void message.error('绑定失败，请重试');
+                void message.error(t('pages.auth.oauth2.bind.messages.bindRetry'));
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -193,24 +196,24 @@ function BindTab({userInfo}: BindTabProps) {
             <Form.Item
                 name="username"
                 rules={[
-                    {required: true, message: '请输入用户名或邮箱'},
-                    {pattern: /^[a-zA-Z0-9_@.-]+$/, message: '只能包含英文字母、数字、下划线和横线或邮箱地址'},
+                    {required: true, message: t('pages.auth.oauth2.bind.bindExisting.username.required')},
+                    {pattern: /^[a-zA-Z0-9_@.-]+$/, message: t('pages.auth.oauth2.bind.bindExisting.username.pattern')},
                 ]}
             >
                 <Input
                     prefix={<UserOutlined className="text-gray-400 mr-2" />}
-                    placeholder="用户名"
+                    placeholder={t('pages.auth.oauth2.bind.bindExisting.username.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
             </Form.Item>
             <Form.Item
                 name="password"
-                rules={[{ required: true, message: '请输入密码' }]}
+                rules={[{ required: true, message: t('pages.auth.oauth2.bind.bindExisting.password.required') }]}
             >
                 <Input.Password
                     prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                    placeholder="密码"
+                    placeholder={t('pages.auth.oauth2.bind.bindExisting.password.placeholder')}
                     size="large"
                     className="rounded-xl"
                 />
@@ -223,7 +226,7 @@ function BindTab({userInfo}: BindTabProps) {
                     loading={isSubmitting}
                     className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none"
                 >
-                    绑定账号
+                    {t('pages.auth.oauth2.bind.bindExisting.submit')}
                 </Button>
             </Form.Item>
         </Form>
@@ -231,6 +234,7 @@ function BindTab({userInfo}: BindTabProps) {
 }
 
 function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -241,15 +245,15 @@ function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
         })
             .then((res) => {
                 if (res.data) {
-                    void message.success('绑定成功');
+                    void message.success(t('pages.auth.oauth2.bind.messages.bindSuccess'));
                     setUserAuthentication(res.data.token, res.data.expiresIn);
                     navigate(menuPathDashboard);
                 } else {
-                    void message.error(res.message || '绑定失败');
+                    void message.error(res.message || t('pages.auth.oauth2.bind.messages.bindFailed'));
                 }
             })
             .catch(() => {
-                void message.error('绑定失败，请重试');
+                void message.error(t('pages.auth.oauth2.bind.messages.bindRetry'));
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -260,7 +264,7 @@ function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
         <div className="space-y-6">
             <Card className="bg-blue-50 border-blue-200">
                 <Space direction="vertical" size="middle" className="w-full">
-                    <div className="text-sm text-gray-500">当前登录用户</div>
+                    <div className="text-sm text-gray-500">{t('pages.auth.oauth2.bind.currentUser.label')}</div>
                     <Space>
                         <Avatar
                             size={48}
@@ -282,13 +286,14 @@ function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
                 className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none"
                 onClick={handleBind}
             >
-                绑定到当前账号
+                {t('pages.auth.oauth2.bind.currentUser.button')}
             </Button>
         </div>
     );
 }
 
 export function OAuth2CodePage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const loggedUser = useLoggedUser();
 
@@ -302,7 +307,7 @@ export function OAuth2CodePage() {
     const isLoggedIn = loggedUser.hasAuthToken;
 
     if (!code || !state) {
-        void message.error("无效的登录信息");
+        void message.error(t('pages.auth.oauth2.messages.invalidLoginInfo'));
         navigate(menuPathLogin);
         return null;
     }
@@ -320,18 +325,18 @@ export function OAuth2CodePage() {
             .then((res) => {
                 if (res.data) {
                     if (isLoginResponse(res.data)) {
-                        void message.success('登录成功');
+                        void message.success(t('pages.auth.oauth2.messages.success'));
                         setUserAuthentication(res.data.token, res.data.expiresIn);
                         navigate(menuPathDashboard);
                     } else {
                         setUserInfo(res.data as OAuth2UserInfo);
                     }
                 } else {
-                    void message.error('登录失败，未知错误');
+                    void message.error(t('pages.auth.oauth2.messages.unknownError'));
                 }
             })
             .catch(() => {
-                void message.error('登录失败');
+                void message.error(t('pages.auth.oauth2.messages.failed'));
             })
             .finally(() => {
                 setProcessing(false);
@@ -343,7 +348,7 @@ export function OAuth2CodePage() {
         const tabItems = [
             ...(isLoggedIn && loggedUser.userProfile ? [{
                 key: 'current',
-                label: '绑定当前账号',
+                label: t('pages.auth.oauth2.bind.tabs.current'),
                 children: <BindCurrentUserTab
                     userInfo={userInfo}
                     currentUser={{
@@ -355,20 +360,20 @@ export function OAuth2CodePage() {
             }] : []),
             {
                 key: 'register',
-                label: '注册新账号',
+                label: t('pages.auth.oauth2.bind.tabs.register'),
                 children: <RegisterTab userInfo={userInfo} />
             },
             {
                 key: 'bind',
-                label: '绑定已有账号',
+                label: t('pages.auth.oauth2.bind.tabs.bind'),
                 children: <BindTab userInfo={userInfo} />
             }
         ];
 
         return (
             <AuthCardLayout
-                title="绑定账号"
-                subtitle="该第三方账号尚未绑定，请选择操作"
+                title={t('pages.auth.oauth2.bind.title')}
+                subtitle={t('pages.auth.oauth2.bind.subtitle')}
             >
                 <Card className="mb-6 bg-gray-50 border-gray-200">
                     <div className="flex items-center">
@@ -399,8 +404,8 @@ export function OAuth2CodePage() {
 
     return (
         <AuthCardLayout
-            title="第三方登录验证"
-            subtitle="请点击下方按钮完成登录验证"
+            title={t('pages.auth.oauth2.title')}
+            subtitle={t('pages.auth.oauth2.subtitle')}
         >
             <Button
                 type="primary"
@@ -410,7 +415,7 @@ export function OAuth2CodePage() {
                 className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none active:scale-[0.98] transition-all"
                 onClick={handleLogin}
             >
-                {isProcessing ? '验证中...' : '确认登录'}
+                {isProcessing ? t('pages.auth.oauth2.button.processing') : t('pages.auth.oauth2.button.confirm')}
             </Button>
         </AuthCardLayout>
     )

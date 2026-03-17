@@ -8,11 +8,14 @@ import {
 import React, {useEffect, useRef, useState} from "react";
 import {StorageProviderType, type StorageProvider} from "@/types/storage-provider.types.ts";
 import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEditor.tsx";
-import {STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS} from "@/components/columns/StorageProviderEntityColumns.tsx";
+import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
+import {useTranslation} from "react-i18next";
 
 export function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
+    const {t} = useTranslation();
+    const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.()
@@ -22,17 +25,17 @@ export function StorageProviderManagerPage() {
         StorageProviderManagerController
             .update({ id: row.id, active: active })
             .then(() => {
-                void message.success("状态更新成功");
+                void message.success(t('pages.storageProviderManager.messages.statusUpdateSuccess'));
                 pageRef.current?.refreshData();
             })
             .catch(() => {
-                void message.error("状态更新失败");
+                void message.error(t('pages.storageProviderManager.messages.statusUpdateFailed'));
             })
     }
 
-    const columnsWithActive = [...STORAGE_PROVIDER_MANAGER_TABLE_COLUMNS];
+    const columnsWithActive = [...baseColumns];
     columnsWithActive.push({
-        title: "启用状态",
+        title: t('pages.storageProviderManager.columns.active'),
         dataIndex: "active",
         key: "active",
         width: 100,
@@ -44,34 +47,34 @@ export function StorageProviderManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="存储提供商"
-            title="存储提供商管理"
-            subtitle="管理系统存储提供商配置"
+            entityName={t('entityNames.storageProvider')}
+            title={t('pages.storageProviderManager.title')}
+            subtitle={t('pages.storageProviderManager.subtitle')}
             columns={columnsWithActive}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 64, message: '名称长度不能超过64个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商名称" maxLength={64} showCount />
+                            <Form.Item name="name" label={t('pages.storageProviderManager.modal.name.label')} rules={[{ required: true, message: t('pages.storageProviderManager.modal.name.required') }, { max: 64, message: t('pages.storageProviderManager.modal.name.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.storageProviderManager.modal.name.placeholder')} maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="type" label="类型" rules={[{ required: true }]}>
+                            <Form.Item name="type" label={t('pages.storageProviderManager.modal.type.label')} rules={[{ required: true, message: t('pages.storageProviderManager.modal.type.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择存储类型"
+                                    placeholder={t('pages.storageProviderManager.modal.type.placeholder')}
                                     options={[
                                         {
-                                            label: '本地文件系统',
+                                            label: t('pages.storageProviderManager.modal.type.localFileSystem'),
                                             value: StorageProviderType.LOCAL_FILE_SYSTEM,
                                         },
                                         {
-                                            label: '阿里云 OSS',
+                                            label: t('pages.storageProviderManager.modal.type.aliyunOss'),
                                             value: StorageProviderType.ALIYUN_OSS,
                                         },
                                         {
-                                            label: '腾讯 OSS',
+                                            label: t('pages.storageProviderManager.modal.type.tencentCos'),
                                             value: StorageProviderType.TENCENT_COS,
                                         }
                                     ]}
@@ -79,14 +82,14 @@ export function StorageProviderManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储提供商描述" maxLength={512} showCount />
+                    <Form.Item name="description" label={t('pages.storageProviderManager.modal.description.label')} rules={[{ max: 512, message: t('pages.storageProviderManager.modal.description.maxLength') }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.storageProviderManager.modal.description.placeholder')} maxLength={512} showCount />
                     </Form.Item>
-                    <Form.Item name="baseUrl" label="基础URL" rules={[{ required: true }, { max: 256, message: '基础URL长度不能超过256个字符' }]}>
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="访问基础URL" maxLength={256} showCount />
+                    <Form.Item name="baseUrl" label={t('pages.storageProviderManager.modal.baseUrl.label')} rules={[{ required: true, message: t('pages.storageProviderManager.modal.baseUrl.required') }, { max: 256, message: t('pages.storageProviderManager.modal.baseUrl.maxLength') }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.storageProviderManager.modal.baseUrl.placeholder')} maxLength={256} showCount />
                     </Form.Item>
-                    <Form.Item name="properties" label="配置属性(JSON)" rules={[{ required: true }]}>
-                        <StorageProviderConfigEditor placeholder="输入JSON格式的配置属性..." />
+                    <Form.Item name="properties" label={t('pages.storageProviderManager.modal.properties.label')} rules={[{ required: true, message: t('pages.storageProviderManager.modal.properties.required') }]}>
+                        <StorageProviderConfigEditor placeholder={t('pages.storageProviderManager.modal.properties.placeholder')} />
                     </Form.Item>
                 </>
             }
@@ -104,22 +107,22 @@ export function StorageProviderManagerPage() {
             }}
             tableActions={[
                 {
-                    label: <span>类型</span>,
+                    label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
-                            { value: '-1', label: '全部' },
+                            { value: '-1', label: t('pages.storageProviderManager.filter.all') },
                             {
-                                label: '本地文件系统',
+                                label: t('pages.storageProviderManager.modal.type.localFileSystem'),
                                 value: StorageProviderType.LOCAL_FILE_SYSTEM,
                             },
                             {
-                                label: '阿里云 OSS',
+                                label: t('pages.storageProviderManager.modal.type.aliyunOss'),
                                 value: StorageProviderType.ALIYUN_OSS,
                             },
                             {
-                                label: '腾讯 OSS',
+                                label: t('pages.storageProviderManager.modal.type.tencentCos'),
                                 value: StorageProviderType.TENCENT_COS,
                             }
                         ]}

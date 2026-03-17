@@ -1,5 +1,6 @@
 import {Badge, Card, Divider, message, Progress, Segmented, theme} from "antd";
 import {useEffect, useRef, useState} from "react";
+import {useTranslation} from "react-i18next";
 import {
     AppstoreOutlined,
     CloudOutlined,
@@ -12,38 +13,16 @@ import type {SystemMetricsVO} from "@/types/dashboard.types.ts";
 
 const { useToken } = theme;
 
-const autoRefreshOptions = [
-    { label: "1s", value: 1000 },
-    { label: "3s", value: 3000 },
-    { label: "5s", value: 5000 },
-    { label: "1m", value: 60000 },
-    { label: "3m", value: 180000 },
-    { label: "5m", value: 300000 },
-    { label: "10m", value: 600000 },
-    { label: "15m", value: 900000 },
-    { label: "30m", value: 1800000 },
-];
-
 interface SystemMetricConfig {
     key: keyof Omit<SystemMetricsVO, "gcMetrics" | "serverInfo">;
-    label: string;
+    labelKey: string;
     unit: "bytes" | "percent" | "count" | "core" | "unit";
     totalUnit: "bytes" | "percent" | "count" | "core" | "unit";
     strokeColor: string;
 }
 
-const systemMetricConfig: SystemMetricConfig[] = [
-    { key: "cpuUsage", label: "CPU 使用率", unit: "percent", totalUnit: "core", strokeColor: "#3b82f6" },
-    { key: "memoryUsage", label: "内存占用", unit: "bytes", totalUnit: "bytes", strokeColor: "#10b981" },
-    { key: "jvmHeapMemory", label: "JVM 堆内存", unit: "bytes", totalUnit: "bytes", strokeColor: "#8b5cf6" },
-    { key: "jvmNonHeapMemory", label: "JVM 非堆内存", unit: "bytes", totalUnit: "bytes", strokeColor: "#f59e0b" },
-    { key: "systemLoad", label: "系统负载", unit: "unit", totalUnit: "core", strokeColor: "#f97316" },
-    { key: "diskUsage", label: "磁盘使用率", unit: "bytes", totalUnit: "bytes", strokeColor: "#6366f1" },
-    { key: "dbConnections", label: "数据库连接池", unit: "count", totalUnit: "count", strokeColor: "#ec4899" },
-];
-
 function formatNumber(num: number): string {
-    return num.toLocaleString("zh-CN");
+    return num.toLocaleString();
 }
 
 function formatBytes(bytes: number): string {
@@ -90,11 +69,34 @@ function formatMetricTotal(total: number, unit: "bytes" | "percent" | "count" | 
 
 export function SystemMetrics() {
     const { token } = useToken();
+    const { t } = useTranslation();
     const [systemMetrics, setSystemMetrics] = useState<SystemMetricsVO | null>(null);
     const [loading, setLoading] = useState(false);
     const [refreshInterval, setRefreshInterval] = useState<number>(5000);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const timerRef = useRef<number | null>(null);
+
+    const autoRefreshOptions = [
+        { label: t('components.dashboard.systemMetrics.refreshOptions.1s'), value: 1000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.3s'), value: 3000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.5s'), value: 5000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.1m'), value: 60000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.3m'), value: 180000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.5m'), value: 300000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.10m'), value: 600000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.15m'), value: 900000 },
+        { label: t('components.dashboard.systemMetrics.refreshOptions.30m'), value: 1800000 },
+    ];
+
+    const systemMetricConfig: SystemMetricConfig[] = [
+        { key: "cpuUsage", labelKey: "cpuUsage", unit: "percent", totalUnit: "core", strokeColor: "#3b82f6" },
+        { key: "memoryUsage", labelKey: "memoryUsage", unit: "bytes", totalUnit: "bytes", strokeColor: "#10b981" },
+        { key: "jvmHeapMemory", labelKey: "jvmHeapMemory", unit: "bytes", totalUnit: "bytes", strokeColor: "#8b5cf6" },
+        { key: "jvmNonHeapMemory", labelKey: "jvmNonHeapMemory", unit: "bytes", totalUnit: "bytes", strokeColor: "#f59e0b" },
+        { key: "systemLoad", labelKey: "systemLoad", unit: "unit", totalUnit: "core", strokeColor: "#f97316" },
+        { key: "diskUsage", labelKey: "diskUsage", unit: "bytes", totalUnit: "bytes", strokeColor: "#6366f1" },
+        { key: "dbConnections", labelKey: "dbConnections", unit: "count", totalUnit: "count", strokeColor: "#ec4899" },
+    ];
 
     const loadSystemMetrics = async () => {
         setLoading(true);
@@ -103,7 +105,7 @@ export function SystemMetrics() {
             setSystemMetrics(res.data);
             setLastUpdated(new Date());
         } catch (error) {
-            void message.warning("无法获取系统监控报告");
+            void message.warning(t('components.dashboard.systemMetrics.loadFailed'));
         } finally {
             setLoading(false);
         }
@@ -137,14 +139,14 @@ export function SystemMetrics() {
                         <span
                             className="text-sm font-bold flex items-center gap-2"
                         >
-                            <ThunderboltOutlined /> 系统资源监控
+                            <ThunderboltOutlined /> {t('components.dashboard.systemMetrics.title')}
                         </span>
                         {lastUpdated && (
                             <span
                                 className={`text-xs flex items-center gap-1 transition-colors duration-300 ${loading ? 'text-blue-400' : ''}`}
                                 style={{ color: loading ? token.colorPrimary : token.colorTextSecondary }}
                             >
-                                最后更新于 {lastUpdated.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                                {t('components.dashboard.systemMetrics.lastUpdated')} {lastUpdated.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                             </span>
                         )}
                     </div>
@@ -176,7 +178,7 @@ export function SystemMetrics() {
                                     className="text-sm font-medium"
                                     style={{ color: token.colorTextSecondary }}
                                 >
-                                    {config.label}
+                                    {t(`components.dashboard.systemMetrics.metrics.${config.labelKey}`)}
                                 </span>
                                 <span
                                     className="text-base font-bold"
@@ -196,7 +198,7 @@ export function SystemMetrics() {
                                 className="flex justify-between text-xs"
                                 style={{ color: token.colorTextTertiary }}
                             >
-                                <span>使用率: {Math.round(metric.usage)}%</span>
+                                <span>{t('components.dashboard.systemMetrics.units.usage')}: {Math.round(metric.usage)}%</span>
                                 <span>{totalDisplay}</span>
                             </div>
                         </div>
@@ -211,7 +213,7 @@ export function SystemMetrics() {
                                 className="text-sm font-medium"
                                 style={{ color: token.colorTextSecondary }}
                             >
-                                GC 暂停时间
+                                {t('components.dashboard.systemMetrics.metrics.gcPauseTime')}
                             </span>
                             <span
                                 className="text-base font-bold"
@@ -238,8 +240,8 @@ export function SystemMetrics() {
                             className="flex justify-between text-xs"
                             style={{ color: token.colorTextTertiary }}
                         >
-                            <span>累计: {systemMetrics.gcMetrics.totalTime / 1000} s</span>
-                            <span>次数: {systemMetrics.gcMetrics.count}</span>
+                            <span>Total: {systemMetrics.gcMetrics.totalTime / 1000} s</span>
+                            <span>Count: {systemMetrics.gcMetrics.count}</span>
                         </div>
                     </div>
                 )}
@@ -250,13 +252,13 @@ export function SystemMetrics() {
                     <div className="flex items-center space-x-2">
                         <DesktopOutlined style={{ color: token.colorTextTertiary }} />
                         <span className="text-xs" style={{ color: token.colorTextSecondary }}>
-                            服务器: {systemMetrics?.serverInfo?.serverName ?? "-"}
+                            Server: {systemMetrics?.serverInfo?.serverName ?? "-"}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <DatabaseOutlined style={{ color: token.colorTextTertiary }} />
                         <span className="text-xs" style={{ color: token.colorTextSecondary }}>
-                            数据库: {systemMetrics?.serverInfo?.databaseVersion ?? "-"}
+                            DB: {systemMetrics?.serverInfo?.databaseVersion ?? "-"}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -268,14 +270,14 @@ export function SystemMetrics() {
                     <div className="flex items-center space-x-2">
                         <AppstoreOutlined style={{ color: token.colorTextTertiary }} />
                         <span className="text-xs" style={{ color: token.colorTextSecondary }}>
-                            版本: {systemMetrics?.serverInfo?.projectVersion ?? "-"}
+                            Version: {systemMetrics?.serverInfo?.projectVersion ?? "-"}
                         </span>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <Badge status="processing" color="blue" />
                     <span className="text-xs" style={{ color: token.colorTextSecondary }}>
-                        系统运行时间: {systemMetrics?.serverInfo?.uptime ?? "-"}
+                        Uptime: {systemMetrics?.serverInfo?.uptime ?? "-"}
                     </span>
                 </div>
             </div>

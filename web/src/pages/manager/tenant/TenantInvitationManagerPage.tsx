@@ -7,15 +7,18 @@ import {
     InvitationManagerController
 } from "@/api/invitation.api.ts";
 import {useRef, useState} from "react";
-import {TENANT_INVITATION_TABLE_COLUMNS} from "@/components/columns/TenantInvitationEntityColumns.tsx";
+import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {PlusOutlined, LinkOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector, TenantMemberIdSelector} from "@/components/selector";
+import {useTranslation} from "react-i18next";
 
 export function TenantInvitationManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+    const {t} = useTranslation();
+    const columns = useTenantInvitationTableColumns();
 
     const handleTenantChange = (tenantId: string | null) => {
         setSelectedTenantId(tenantId);
@@ -43,8 +46,8 @@ export function TenantInvitationManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="邀请码管理"
-                subtitle="管理租户邀请码"
+                title={t('pages.tenantInvitationManager.title')}
+                subtitle={t('pages.tenantInvitationManager.subtitle')}
                 titleActions={
                     selectedTenantId ? (
                         <Button
@@ -54,7 +57,7 @@ export function TenantInvitationManagerPage() {
                             className="rounded-xl h-12 shadow-lg"
                             onClick={handleOpenAddModal}
                         >
-                            新增邀请码
+                            {t('pages.tenantInvitationManager.addInvitationCode')}
                         </Button>
                     ) : null
                 }
@@ -67,14 +70,14 @@ export function TenantInvitationManagerPage() {
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="邀请码"
+                    entityName={t('entityNames.tenantInvitation')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_INVITATION_TABLE_COLUMNS}
+                    columns={columns}
                     tableRowActionsRender={(row) => (
                         <>
-                            <Tooltip title="复制邀请码链接">
+                            <Tooltip title={t('pages.tenantInvitationManager.copyInvitationLink')}>
                                 <Button
                                     type="text"
                                     size="small"
@@ -85,10 +88,9 @@ export function TenantInvitationManagerPage() {
 
                                         try {
                                             await navigator.clipboard.writeText(url)
-                                            message.success("已将邀请链接复制到剪切板")
+                                            void message.success(t('pages.tenantInvitationManager.copySuccess'))
                                         } catch (err) {
-                                            message.error("复制失败，请手动复制")
-                                            console.error('复制失败:', err)
+                                            void message.error(t('pages.tenantInvitationManager.copyFailed'))
                                         }
                                     }}
                                 />
@@ -104,23 +106,23 @@ export function TenantInvitationManagerPage() {
                                     </Form.Item>
                                     <Form.Item
                                         name="creatorMemberId"
-                                        label="创建者成员"
-                                        rules={[{ required: true, message: '请选择创建者成员' }]}
+                                        label={t('pages.tenantInvitationManager.modal.creatorMemberId.label')}
+                                        rules={[{ required: true, message: t('pages.tenantInvitationManager.modal.creatorMemberId.required') }]}
                                     >
                                         <TenantMemberIdSelector
                                             tenantId={selectedTenantId!}
-                                            placeholder="选择创建者成员"
+                                            placeholder={t('pages.tenantInvitationManager.modal.creatorMemberId.placeholder')}
                                         />
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         name="departmentId"
-                                        label="部门（可选）"
+                                        label={t('pages.tenantInvitationManager.modal.departmentId.label')}
                                     >
                                         <TenantDepartmentIdSelector
                                             tenantId={selectedTenantId!}
-                                            placeholder="选择部门（可选）"
+                                            placeholder={t('pages.tenantInvitationManager.modal.departmentId.placeholder')}
                                         />
                                     </Form.Item>
                                 </Col>
@@ -129,13 +131,13 @@ export function TenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="invitationCount"
-                                        label="可邀请次数"
-                                        rules={[{ required: true, message: '请输入可邀请次数' }]}
+                                        label={t('pages.tenantInvitationManager.modal.invitationCount.label')}
+                                        rules={[{ required: true, message: t('pages.tenantInvitationManager.modal.invitationCount.required') }]}
                                         initialValue={10}
                                     >
                                         <InputNumber
                                             className="w-full rounded-lg h-10"
-                                            placeholder="输入可邀请次数"
+                                            placeholder={t('pages.tenantInvitationManager.modal.invitationCount.placeholder')}
                                             min={1}
                                             max={9999}
                                         />
@@ -144,7 +146,7 @@ export function TenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="expiresTime"
-                                        label="过期时间（可选）"
+                                        label={t('pages.tenantInvitationManager.modal.expiresTime.label')}
                                         getValueProps={(value) => {
                                             if (value && typeof value === 'string') {
                                                 const timestamp = Number(value);
@@ -159,7 +161,7 @@ export function TenantInvitationManagerPage() {
                                             className="w-full rounded-lg h-10 flex items-center"
                                             showTime
                                             format="YYYY-MM-DD HH:mm:ss"
-                                            placeholder="选择过期时间（可选）"
+                                            placeholder={t('pages.tenantInvitationManager.modal.expiresTime.placeholder')}
                                         />
                                     </Form.Item>
                                 </Col>
@@ -168,7 +170,7 @@ export function TenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="requiresReviewing"
-                                        label="需要审核"
+                                        label={t('pages.tenantInvitationManager.modal.requiresReviewing.label')}
                                         valuePropName="checked"
                                         initialValue={false}
                                     >

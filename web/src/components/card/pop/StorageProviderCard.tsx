@@ -3,16 +3,11 @@ import type {StorageProvider} from "@/types/storage-provider.types.ts";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
+import {useTranslation} from "react-i18next";
 
 interface StorageProviderCardProps {
     providerId: string;
 }
-
-const STORAGE_PROVIDER_TYPE_MAP: Record<number, string> = {
-    0: "本地文件系统",
-    1: "阿里云OSS",
-    2: "腾讯云COS"
-};
 
 const STORAGE_PROVIDER_TYPE_COLOR_MAP: Record<number, string> = {
     0: "default",
@@ -21,12 +16,19 @@ const STORAGE_PROVIDER_TYPE_COLOR_MAP: Record<number, string> = {
 };
 
 export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
+    const { t } = useTranslation();
     const { data: provider, isLoading } = useSWRComposition<StorageProvider | null>(
         `storage-provider-card-${providerId}`,
         async () => {
             return await StorageProviderManagerController.getById(providerId);
         }
     );
+
+    const getStorageProviderTypeMap = (): Record<number, string> => ({
+        0: t('components.popCard.storageProvider.localFileSystem'),
+        1: t('components.popCard.storageProvider.aliyunOSS'),
+        2: t('components.popCard.storageProvider.tencentCOS')
+    });
 
     if (isLoading) {
         return (
@@ -42,7 +44,7 @@ export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
         return (
             <Card size="small" className="w-64">
                 <div className="text-center py-4 text-gray-400">
-                    未找到存储提供商信息
+                    {t('components.popCard.storageProvider.notFound')}
                 </div>
             </Card>
         );
@@ -66,12 +68,12 @@ export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
                         <Tag color="blue" className="text-xs">{provider.id}</Tag>
                     </CopyableToolTip>
                 </Descriptions.Item>
-                <Descriptions.Item label="类型">
+                <Descriptions.Item label={t('components.popCard.storageProvider.type')}>
                     <Tag color={STORAGE_PROVIDER_TYPE_COLOR_MAP[provider.type] as string} className="text-xs">
-                        {STORAGE_PROVIDER_TYPE_MAP[provider.type] || "未知类型"}
+                        {getStorageProviderTypeMap()[provider.type] || t('components.popCard.storageProvider.unknownType')}
                     </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="描述">
+                <Descriptions.Item label={t('components.popCard.storageProvider.description')}>
                     <span className="text-gray-600">
                         {provider.description ?? "-"}
                     </span>
@@ -83,9 +85,9 @@ export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
                         </span>
                     </CopyableToolTip>
                 </Descriptions.Item>
-                <Descriptions.Item label="状态">
+                <Descriptions.Item label={t('components.popCard.storageProvider.status')}>
                     <Tag color={provider.active ? "green" : "red"} className="text-xs">
-                        {provider.active ? "启用" : "禁用"}
+                        {provider.active ? t('components.popCard.storageProvider.enabled') : t('components.popCard.storageProvider.disabled')}
                     </Tag>
                 </Descriptions.Item>
             </Descriptions>

@@ -6,29 +6,32 @@ import {
     TenantMemberManagerController,
 } from "@/api/tenant-member.api.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
-import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
+import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
-import {TENANT_MEMBER_TABLE_COLUMNS} from "@/components/columns/TenantMemberEntityColumns.tsx";
+import {useTenantMemberTableColumns} from "@/components/columns/TenantMemberEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {UserIdSelector} from "@/components/selector";
+import {useTranslation} from "react-i18next";
 
 export function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();
+    const {t} = useTranslation();
+    const columns = useTenantMemberTableColumns();
 
     useEffect(() => {
         pageRef.current?.refreshData();
     }, [filterStatus, selectedTenantId]);
 
     const statusOptions = [
-        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
-        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.DEPARTED), value: TenantMemberStatus.DEPARTED },
-        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.RESIGNED), value: TenantMemberStatus.RESIGNED },
-        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.REVIEWING), value: TenantMemberStatus.REVIEWING },
-        { label: tenantMemberStatusToTranslationMap.get(TenantMemberStatus.ACTIVE), value: TenantMemberStatus.ACTIVE }
+        { label: getTenantMemberStatus(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
+        { label: getTenantMemberStatus(TenantMemberStatus.DEPARTED), value: TenantMemberStatus.DEPARTED },
+        { label: getTenantMemberStatus(TenantMemberStatus.RESIGNED), value: TenantMemberStatus.RESIGNED },
+        { label: getTenantMemberStatus(TenantMemberStatus.REVIEWING), value: TenantMemberStatus.REVIEWING },
+        { label: getTenantMemberStatus(TenantMemberStatus.ACTIVE), value: TenantMemberStatus.ACTIVE }
     ];
 
     const handleTenantChange = (tenantId: string | null) => {
@@ -42,8 +45,8 @@ export function TenantMemberManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="租户成员管理"
-                subtitle="管理租户成员信息"
+                title={t('pages.tenantMemberManager.title')}
+                subtitle={t('pages.tenantMemberManager.subtitle')}
                 titleActions={
                     selectedTenantId ? (
                         <Button
@@ -53,7 +56,7 @@ export function TenantMemberManagerPage() {
                             className="rounded-xl h-12 shadow-lg"
                             onClick={handleOpenAddModal}
                         >
-                            新增租户成员
+                            {t('pages.tenantMemberManager.action.addNew')}
                         </Button>
                     ) : null
                 }
@@ -66,11 +69,11 @@ export function TenantMemberManagerPage() {
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="租户成员"
+                    entityName={t('entityNames.tenantMember')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_MEMBER_TABLE_COLUMNS}
+                    columns={columns}
                     editModalFormChildren={
                         <>
                             <Row gutter={24}>
@@ -80,8 +83,8 @@ export function TenantMemberManagerPage() {
                                     </Form.Item>
                                     <Form.Item
                                         name="memberUserId"
-                                        label="成员用户（仅创建时有效）"
-                                        rules={[{ required: true, message: '请选择成员用户' }]}
+                                        label={t('pages.tenantMemberManager.modal.memberUserId.label')}
+                                        rules={[{ required: true, message: t('pages.tenantMemberManager.modal.memberUserId.required') }]}
                                     >
                                         <UserIdSelector />
                                     </Form.Item>
@@ -89,13 +92,13 @@ export function TenantMemberManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="status"
-                                        label="状态"
-                                        rules={[{ required: true, message: '请选择状态' }]}
+                                        label={t('pages.tenantMemberManager.modal.status.label')}
+                                        rules={[{ required: true, message: t('pages.tenantMemberManager.modal.status.required') }]}
                                         initialValue={TenantMemberStatus.ACTIVE}
                                     >
                                         <Select
                                             className="w-full rounded-lg h-10 flex items-center"
-                                            placeholder="选择状态"
+                                            placeholder={t('pages.tenantMemberManager.modal.status.placeholder')}
                                             options={statusOptions}
                                         />
                                     </Form.Item>
@@ -111,12 +114,12 @@ export function TenantMemberManagerPage() {
                     }}
                     tableActions={[
                         {
-                            label: <span>状态</span>,
+                            label: <span>{t('pages.tenantMemberManager.filter.status')}</span>,
                             children: <Select
                                 defaultValue="-1"
                                 style={{ width: 120 }}
                                 options={[
-                                    { value: '-1', label: '全部' },
+                                    { value: '-1', label: t('pages.tenantMemberManager.filter.all') },
                                     ...statusOptions
                                 ]}
                                 onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}

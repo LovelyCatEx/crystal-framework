@@ -27,12 +27,6 @@ export enum TenantStatus {
     CLOSED = 2
 }
 
-export const TenantStatusMap: Record<number, { label: string; color: string }> = {
-    [TenantStatus.REVIEWING]: { label: '审核中', color: 'orange' },
-    [TenantStatus.ACTIVE]: { label: '活跃', color: 'green' },
-    [TenantStatus.CLOSED]: { label: '已关闭', color: 'red' }
-};
-
 export interface UserTenantVO {
     tenantId: string;
     tenantName: string;

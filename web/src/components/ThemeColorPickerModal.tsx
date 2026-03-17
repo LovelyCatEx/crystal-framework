@@ -2,6 +2,7 @@ import {Modal, Radio, Space, Tag} from "antd";
 import {CheckOutlined} from "@ant-design/icons";
 import {themeColors, getThemeByKey, setStoredThemeKey} from "@/global/theme-config.ts";
 import type {ThemeColor} from "@/types/theme.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface ThemeColorPickerModalProps {
     open: boolean;
@@ -16,6 +17,8 @@ export function ThemeColorPickerModal({
     onClose,
     onThemeChange,
 }: ThemeColorPickerModalProps) {
+    const {t} = useTranslation();
+
     const handleThemeSelect = (themeKey: string) => {
         const theme = getThemeByKey(themeKey);
         setStoredThemeKey(themeKey);
@@ -24,14 +27,14 @@ export function ThemeColorPickerModal({
 
     return (
         <Modal
-            title="自定义主题色"
+            title={t('components.themeColorPicker.title')}
             open={open}
             onCancel={onClose}
             footer={null}
             width={480}
         >
             <div className="py-4">
-                <p className="text-gray-500 mb-4 text-sm text-center">选择你喜欢的主题色，将会应用到整个系统界面</p>
+                <p className="text-gray-500 mb-4 text-sm text-center">{t('components.themeColorPicker.description')}</p>
                 <Radio.Group
                     value={currentThemeKey}
                     onChange={(e) => handleThemeSelect(e.target.value)}

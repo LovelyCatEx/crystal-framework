@@ -1,8 +1,8 @@
 import {Avatar, Button, Card, Col, Empty, Row, Spin, Tag, theme} from "antd";
+import {useTranslation} from "react-i18next";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {PlusOutlined, RightOutlined, ShopOutlined, TeamOutlined,} from "@ant-design/icons";
-import {TenantMemberStatusMap} from "@/types/tenant-member.types.ts";
-import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
+import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {getTenantProfile} from "@/api/tenant-profile.api.ts";
@@ -22,6 +22,7 @@ function formatDescription(description: string | null | undefined, maxLength: nu
 
 export function MyJoinedTenants() {
     const { token } = useToken();
+    const { t } = useTranslation();
     const { joinedTenants, isJoinedTenantsLoading, currentTenant } = useUserTenants();
     const navigate = useNavigate();
     const [tenantsWithProfile, setTenantsWithProfile] = useState<TenantWithProfile[]>([]);
@@ -61,7 +62,7 @@ export function MyJoinedTenants() {
                 title={
                     <div className="flex items-center gap-2">
                         <TeamOutlined style={{ color: token.colorPrimary }} />
-                        <span className="text-sm font-bold" style={{ color: token.colorTextHeading }}>我加入的组织</span>
+                        <span className="text-sm font-bold" style={{ color: token.colorTextHeading }}>{t('components.dashboard.myJoinedTenants.title')}</span>
                     </div>
                 }
                 className="rounded-3xl border-none shadow-sm"
@@ -87,7 +88,7 @@ export function MyJoinedTenants() {
                     <div className="flex items-center justify-between w-full" style={{ color: token.colorTextHeading }}>
                         <div className="flex items-center gap-2">
                             <TeamOutlined />
-                            <span className="text-sm font-bold">我加入的组织</span>
+                            <span className="text-sm font-bold">{t('components.dashboard.myJoinedTenants.title')}</span>
                             <span className="text-xs">
                                 ({joinedTenants?.length || 0})
                             </span>
@@ -98,17 +99,23 @@ export function MyJoinedTenants() {
             >
                 {sortedTenants.length === 0 ? (
                     <Empty
-                        description="暂无加入的组织"
+                        description={t('components.dashboard.myJoinedTenants.noTenants')}
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                         className="py-8"
                     >
-                        <Button onClick={handleJoinByCode}>通过邀请码加入</Button>
+                        <Button onClick={handleJoinByCode}>{t('components.dashboard.myJoinedTenants.joinByCode')}</Button>
                     </Empty>
                 ) : (
                     <Row gutter={[16, 16]}>
                         {sortedTenants.map((tenant) => {
                             const isCurrent = tenant.tenantId === currentTenant?.tenantId;
-                            const statusInfo = TenantMemberStatusMap[tenant.memberStatus];
+                            const statusColors: Record<number, string> = {
+                                0: 'default',
+                                1: 'red',
+                                2: 'orange',
+                                3: 'blue',
+                                4: 'green'
+                            };
                             const description = formatDescription(tenant.profile?.description);
 
                             return (
@@ -147,20 +154,18 @@ export function MyJoinedTenants() {
                                                     </span>
                                                     {isCurrent && (
                                                         <Tag color="blue" className="!text-xs !px-1 !py-0">
-                                                            当前
+                                                            {t('components.dashboard.myJoinedTenants.current')}
                                                         </Tag>
                                                     )}
                                                     <Tag
-                                                        color={statusInfo?.color || "default"}
+                                                        color={statusColors[tenant.memberStatus] || "default"}
                                                         className="!text-xs !px-1 !py-0"
                                                     >
-                                                        {tenantMemberStatusToTranslationMap.get(tenant.memberStatus) ||
-                                                            statusInfo?.label ||
-                                                            "未知"}
+                                                        {getTenantMemberStatus(tenant.memberStatus)}
                                                     </Tag>
                                                 </div>
                                                 <div className="mt-2">
-                                                    <span className="text-xs text-gray-400 line-clamp-2">{description || '暂无描述~'}</span>
+                                                    <span className="text-xs text-gray-400 line-clamp-2">{description || t('components.dashboard.myJoinedTenants.noDescription')}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -198,13 +203,13 @@ export function MyJoinedTenants() {
                                         className="text-sm font-medium transition-colors"
                                         style={{ color: token.colorTextSecondary }}
                                     >
-                                        通过邀请码加入
+                                        {t('components.dashboard.myJoinedTenants.joinByCode')}
                                     </span>
                                     <div
                                         className="text-xs mt-1"
                                         style={{ color: token.colorTextDisabled }}
                                     >
-                                        输入邀请码加入新组织
+                                        {t('components.dashboard.myJoinedTenants.joinByCodeDesc')}
                                     </div>
                                 </div>
                                 <RightOutlined

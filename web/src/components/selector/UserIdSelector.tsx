@@ -1,6 +1,7 @@
 import {UserOutlined} from "@ant-design/icons";
+import {useTranslation} from "react-i18next";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
-import {USER_MANAGER_TABLE_COLUMNS} from "../columns/UserEntityColumns.tsx";
+import {useUserTableColumns} from "../columns/UserEntityColumns.tsx";
 import {UserManagerController} from "@/api/user.api.ts";
 import type {User} from "@/types/user.types.ts";
 
@@ -11,15 +12,18 @@ interface UserIdSelectorProps {
 }
 
 export function UserIdSelector({ value, onChange, isRowDisabled }: UserIdSelectorProps) {
+    const { t } = useTranslation();
+    const columns = useUserTableColumns();
+    
     return (
         <EntityIdSelector<User>
             value={value}
             onChange={onChange}
-            entityName="用户"
-            columns={USER_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.user')}
+            columns={columns}
             controller={UserManagerController}
             displayRender={(user) => `${user.username} (${user.email})`}
-            placeholder="选择用户"
+            placeholder={t('components.selector.entityIdSelector.placeholder')}
             isRowDisabled={(row) => {
                 if (isRowDisabled) {
                     return isRowDisabled(row, value);

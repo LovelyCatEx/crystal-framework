@@ -8,15 +8,18 @@ import {
 } from "@/api/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {type FileResource, ResourceFileType} from "@/types/file-resource.types.ts";
-import {resourceFileTypeToTranslationMap} from "@/i18n/file-resource.ts";
-import {FILE_RESOURCE_MANAGER_TABLE_COLUMNS} from "@/components/columns/FileResourceEntityColumns.tsx";
+import {getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
 import {DownloadOutlined} from "@ant-design/icons";
 import {downloadFile} from "@/utils/file-download.ts";
+import {useTranslation} from "react-i18next";
 
 export function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
+    const {t} = useTranslation();
+    const columns = useFileResourceTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();
@@ -28,39 +31,39 @@ export function FileResourceManagerPage() {
         if (url) {
             downloadFile(url);
         } else {
-            await message.error("无法获取文件下载链接");
+            await message.error(t('pages.fileResourceManager.messages.downloadFailed'));
         }
     };
 
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="文件资源"
-            title="文件资源管理"
-            subtitle="管理系统文件资源列表"
-            columns={FILE_RESOURCE_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.fileResource')}
+            title={t('pages.fileResourceManager.title')}
+            subtitle={t('pages.fileResourceManager.subtitle')}
+            columns={columns}
             editModalFormChildren={
                 <>
                 <Row gutter={24}>
                         <Col span={24}>
-                            <Form.Item name="userId" label="所属用户" rules={[{ required: true }]}>
+                            <Form.Item name="userId" label={t('pages.fileResourceManager.modal.userId.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.userId.required') }]}>
                                 <UserIdSelector />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={8}>
-                            <Form.Item name="type" label="文件类型" rules={[{ required: true }]}>
+                            <Form.Item name="type" label={t('pages.fileResourceManager.modal.type.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.type.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择文件类型"
+                                    placeholder={t('pages.fileResourceManager.modal.type.placeholder')}
                                     options={[
                                         {
-                                            label: resourceFileTypeToTranslationMap.get(ResourceFileType.USER_AVATAR),
+                                            label: getResourceFileType(ResourceFileType.USER_AVATAR),
                                             value: ResourceFileType.USER_AVATAR,
                                         },
                                         {
-                                            label: resourceFileTypeToTranslationMap.get(ResourceFileType.TENANT_ICON),
+                                            label: getResourceFileType(ResourceFileType.TENANT_ICON),
                                             value: ResourceFileType.TENANT_ICON,
                                         }
                                     ]}
@@ -70,37 +73,37 @@ export function FileResourceManagerPage() {
                     </Row>
                     <Row gutter={24}>
                         <Col span={24}>
-                            <Form.Item name="storageProviderId" label="存储提供商" rules={[{ required: true }]}>
+                            <Form.Item name="storageProviderId" label={t('pages.fileResourceManager.modal.storageProviderId.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.storageProviderId.required') }]}>
                                 <StorageProviderIdSelector />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="fileName" label="文件名" rules={[{ required: true }, { max: 256, message: '文件名长度不能超过256个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件名" maxLength={256} showCount />
+                            <Form.Item name="fileName" label={t('pages.fileResourceManager.modal.fileName.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.fileName.required') }, { max: 256, message: t('pages.fileResourceManager.modal.fileName.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.fileResourceManager.modal.fileName.placeholder')} maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="fileExtension" label="扩展名" rules={[{ required: true }, { max: 64, message: '扩展名长度不能超过64个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件扩展名" maxLength={64} showCount />
+                            <Form.Item name="fileExtension" label={t('pages.fileResourceManager.modal.fileExtension.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.fileExtension.required') }, { max: 64, message: t('pages.fileResourceManager.modal.fileExtension.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.fileResourceManager.modal.fileExtension.placeholder')} maxLength={64} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="md5" label="MD5" rules={[{ required: true }, { max: 32, message: 'MD5长度不能超过32个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="文件MD5值" maxLength={32} showCount />
+                            <Form.Item name="md5" label={t('pages.fileResourceManager.modal.md5.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.md5.required') }, { max: 32, message: t('pages.fileResourceManager.modal.md5.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.fileResourceManager.modal.md5.placeholder')} maxLength={32} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="fileSize" label="文件大小 (Bytes)" rules={[{ required: true }]}>
-                                <Input type="number" className="w-full rounded-lg h-10 flex items-center" placeholder="文件大小(字节)" />
+                            <Form.Item name="fileSize" label={t('pages.fileResourceManager.modal.fileSize.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.fileSize.required') }]}>
+                                <Input type="number" className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.fileResourceManager.modal.fileSize.placeholder')} />
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="objectKey" label="对象键" rules={[{ required: true }, { max: 256, message: '对象键长度不能超过256个字符' }]}>
-                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder="存储对象键" maxLength={256} showCount />
+                    <Form.Item name="objectKey" label={t('pages.fileResourceManager.modal.objectKey.label')} rules={[{ required: true, message: t('pages.fileResourceManager.modal.objectKey.required') }, { max: 256, message: t('pages.fileResourceManager.modal.objectKey.maxLength') }]}>
+                        <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.fileResourceManager.modal.objectKey.placeholder')} maxLength={256} showCount />
                     </Form.Item>
                 </>
             }
@@ -118,19 +121,19 @@ export function FileResourceManagerPage() {
             }}
             tableActions={[
                 {
-                    label: <span>类型</span>,
+                    label: <span>{t('pages.fileResourceManager.filter.type')}</span>,
                     children: <Select
                         className="min-w-32"
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
-                            { value: '-1', label: '全部' },
+                            { value: '-1', label: t('pages.fileResourceManager.filter.all') },
                             {
-                                label: resourceFileTypeToTranslationMap.get(ResourceFileType.USER_AVATAR),
+                                label: getResourceFileType(ResourceFileType.USER_AVATAR),
                                 value: ResourceFileType.USER_AVATAR,
                             },
                             {
-                                label: resourceFileTypeToTranslationMap.get(ResourceFileType.TENANT_ICON),
+                                label: getResourceFileType(ResourceFileType.TENANT_ICON),
                                 value: ResourceFileType.TENANT_ICON,
                             }
                         ]}

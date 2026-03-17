@@ -3,12 +3,14 @@ import type {MailTemplateType} from "@/types/mail.types.ts";
 import {useSWRComposition} from "@/compositions/swr.ts";
 import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
+import {useTranslation} from "react-i18next";
 
 interface MailTemplateTypeCardProps {
     typeId: string;
 }
 
 export function MailTemplateTypeCard({ typeId }: MailTemplateTypeCardProps) {
+    const { t } = useTranslation();
     const { data: templateType, isLoading } = useSWRComposition<MailTemplateType | null>(
         `mail-template-type-${typeId}`,
         async () => {
@@ -30,7 +32,7 @@ export function MailTemplateTypeCard({ typeId }: MailTemplateTypeCardProps) {
         return (
             <Card size="small" className="w-64">
                 <div className="text-center py-4 text-gray-400">
-                    未找到类型信息
+                    {t('components.popCard.mailTemplateType.notFound')}
                 </div>
             </Card>
         );
@@ -54,17 +56,17 @@ export function MailTemplateTypeCard({ typeId }: MailTemplateTypeCardProps) {
                         <Tag color="blue" className="text-xs">{templateType.id}</Tag>
                     </CopyableToolTip>
                 </Descriptions.Item>
-                <Descriptions.Item label="描述">
+                <Descriptions.Item label={t('components.popCard.mailTemplateType.description')}>
                     <span className="text-gray-600">
                         {templateType.description ?? "-"}
                     </span>
                 </Descriptions.Item>
-                <Descriptions.Item label="允许多模板">
+                <Descriptions.Item label={t('components.popCard.mailTemplateType.allowMultiple')}>
                     <Tag color={templateType.allowMultiple ? "green" : "orange"} className="text-xs">
-                        {templateType.allowMultiple ? "是" : "否"}
+                        {templateType.allowMultiple ? t('common.yes') : t('common.no')}
                     </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="变量">
+                <Descriptions.Item label={t('components.popCard.mailTemplateType.variables')}>
                     <div className="text-xs font-mono text-gray-500 flex flex-row flex-wrap gap-2 items-start">
                         {(JSON.parse(templateType.variables) as string[]).map((variable) => (
                             <CopyableToolTip title={variable} key={variable}>

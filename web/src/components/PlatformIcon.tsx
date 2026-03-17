@@ -2,6 +2,7 @@ import React from "react";
 import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
 import { Space, Tag } from "antd";
 import { OAuthPlatform } from "../types/oauth-account.types";
+import { getOAuthPlatform } from "@/i18n/enum-helpers.ts";
 
 interface PlatformIconProps {
     platform: OAuthPlatform | string;
@@ -9,18 +10,15 @@ interface PlatformIconProps {
     className?: string;
 }
 
-const PLATFORM_CONFIG: Record<OAuthPlatform, { icon: React.ReactNode; label: string }> = {
+const PLATFORM_CONFIG: Record<OAuthPlatform, { icon: React.ReactNode }> = {
     [OAuthPlatform.GITHUB]: {
-        icon: <GithubOutlined />,
-        label: "GitHub"
+        icon: <GithubOutlined />
     },
     [OAuthPlatform.GOOGLE]: {
-        icon: <GoogleOutlined />,
-        label: "Google"
+        icon: <GoogleOutlined />
     },
     [OAuthPlatform.OICQ]: {
-        icon: <QqOutlined />,
-        label: "QQ"
+        icon: <QqOutlined />
     }
 };
 
@@ -30,8 +28,7 @@ export const PlatformIcon: React.FC<PlatformIconProps> = ({
     className = ""
 }) => {
     const config = PLATFORM_CONFIG[platform as OAuthPlatform] || {
-        icon: null,
-        label: platform
+        icon: null
     };
 
     return (
@@ -41,7 +38,7 @@ export const PlatformIcon: React.FC<PlatformIconProps> = ({
                     {config.icon}
                 </span>
             )}
-            {showText && <span>{config.label}</span>}
+            {showText && <span>{getOAuthPlatform(platform as OAuthPlatform)}</span>}
         </Space>
     );
 };
@@ -51,9 +48,7 @@ export const PlatformTag: React.FC<PlatformIconProps> = ({
     className = ""
 }) => {
     const config = PLATFORM_CONFIG[platform as OAuthPlatform] || {
-        icon: null,
-        color: "#999",
-        label: platform
+        icon: null
     };
 
     return (
@@ -61,7 +56,7 @@ export const PlatformTag: React.FC<PlatformIconProps> = ({
             className={`m-0 flex items-center gap-1 ${className}`}
         >
             {config.icon}
-            <span>{config.label}</span>
+            <span>{getOAuthPlatform(platform as OAuthPlatform)}</span>
         </Tag>
     );
 };

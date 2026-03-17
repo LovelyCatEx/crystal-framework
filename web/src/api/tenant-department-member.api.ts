@@ -33,12 +33,6 @@ export const DepartmentMemberRoleType = {
     SUPER_ADMIN: 2
 } as const;
 
-export const DepartmentMemberRoleTypeMap: Record<number, { label: string; color: string }> = {
-    [DepartmentMemberRoleType.MEMBER]: { label: 'MEMBER', color: 'default' },
-    [DepartmentMemberRoleType.ADMIN]: { label: 'ADMIN', color: 'blue' },
-    [DepartmentMemberRoleType.SUPER_ADMIN]: { label: 'SUPER_ADMIN', color: 'purple' }
-};
-
 class TenantDepartmentMemberManagerControllerClass extends BaseManagerController<
     TenantDepartmentMemberVO,
     ManagerCreateTenantDepartmentMemberDTO,

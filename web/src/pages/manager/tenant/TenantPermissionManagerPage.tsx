@@ -5,26 +5,30 @@ import {
     type ManagerUpdateTenantPermissionDTO,
     type ManagerReadTenantPermissionDTO
 } from "@/api/tenant-permission.api.ts";
-import {TenantPermissionType, TenantPermissionTypeMap} from "@/types/tenant-permission.types.ts";
+import {TenantPermissionType} from "@/types/tenant-permission.types.ts";
+import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
-import {TENANT_PERMISSION_TABLE_COLUMNS} from "@/components/columns/TenantPermissionEntityColumns.tsx";
+import {useTenantPermissionTableColumns} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import type {TenantPermission} from "@/types/tenant-permission.types.ts";
+import {useTranslation} from "react-i18next";
 
 export function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>();
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
+    const {t} = useTranslation();
+    const columns = useTenantPermissionTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();
     }, [filterType]);
 
     const typeOptions = [
-        { label: TenantPermissionTypeMap[TenantPermissionType.ACTION].label, value: TenantPermissionType.ACTION },
-        { label: TenantPermissionTypeMap[TenantPermissionType.MENU].label, value: TenantPermissionType.MENU }
+        { label: getTenantPermissionType(TenantPermissionType.ACTION), value: TenantPermissionType.ACTION },
+        { label: getTenantPermissionType(TenantPermissionType.MENU), value: TenantPermissionType.MENU }
     ];
 
     const handleOpenAddModal = () => {
@@ -34,8 +38,8 @@ export function TenantPermissionManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="租户权限管理"
-                subtitle="管理租户权限信息"
+                title={t('pages.tenantPermissionManager.title')}
+                subtitle={t('pages.tenantPermissionManager.subtitle')}
                 titleActions={
                     <Button
                         type="primary"
@@ -44,30 +48,30 @@ export function TenantPermissionManagerPage() {
                         className="rounded-xl h-12 shadow-lg"
                         onClick={handleOpenAddModal}
                     >
-                        新增权限
+                        {t('pages.tenantPermissionManager.action.addNew')}
                     </Button>
                 }
             />
             <ManagerPageContainer
                 ref={pageRef}
                 className="mt-4"
-                entityName="租户权限"
+                entityName={t('entityNames.tenantPermission')}
                 title=""
                 subtitle=""
                 showActionBar={false}
-                columns={TENANT_PERMISSION_TABLE_COLUMNS}
+                columns={columns}
                 editModalFormChildren={
                     <>
                         <Row gutter={24}>
                             <Col span={12}>
                                 <Form.Item
                                     name="name"
-                                    label="权限名称"
-                                    rules={[{ required: true, message: '请输入权限名称' }]}
+                                    label={t('pages.tenantPermissionManager.modal.name.label')}
+                                    rules={[{ required: true, message: t('pages.tenantPermissionManager.modal.name.required') }]}
                                 >
                                     <Input
                                         className="w-full rounded-lg h-10"
-                                        placeholder="输入权限名称"
+                                        placeholder={t('pages.tenantPermissionManager.modal.name.placeholder')}
                                         maxLength={256}
                                         showCount
                                     />
@@ -76,13 +80,13 @@ export function TenantPermissionManagerPage() {
                             <Col span={12}>
                                 <Form.Item
                                     name="type"
-                                    label="权限类型"
-                                    rules={[{ required: true, message: '请选择权限类型' }]}
+                                    label={t('pages.tenantPermissionManager.modal.type.label')}
+                                    rules={[{ required: true, message: t('pages.tenantPermissionManager.modal.type.required') }]}
                                     initialValue={TenantPermissionType.ACTION}
                                 >
                                     <Select
                                         className="w-full rounded-lg h-10 flex items-center"
-                                        placeholder="选择权限类型"
+                                        placeholder={t('pages.tenantPermissionManager.modal.type.placeholder')}
                                         options={typeOptions}
                                     />
                                 </Form.Item>
@@ -92,11 +96,11 @@ export function TenantPermissionManagerPage() {
                             <Col span={12}>
                                 <Form.Item
                                     name="path"
-                                    label="路径"
+                                    label={t('pages.tenantPermissionManager.modal.path.label')}
                                 >
                                     <Input
                                         className="w-full rounded-lg h-10"
-                                        placeholder="输入路径（可选）"
+                                        placeholder={t('pages.tenantPermissionManager.modal.path.placeholder')}
                                         maxLength={256}
                                         showCount
                                     />
@@ -105,11 +109,11 @@ export function TenantPermissionManagerPage() {
                             <Col span={12}>
                                 <Form.Item
                                     name="description"
-                                    label="描述"
+                                    label={t('pages.tenantPermissionManager.modal.description.label')}
                                 >
                                     <Input.TextArea
                                         className="w-full rounded-lg"
-                                        placeholder="输入描述（可选）"
+                                        placeholder={t('pages.tenantPermissionManager.modal.description.placeholder')}
                                         maxLength={512}
                                         showCount
                                         rows={1}
@@ -124,12 +128,12 @@ export function TenantPermissionManagerPage() {
                 }}
                 tableActions={[
                     {
-                        label: <span>权限类型</span>,
+                        label: <span>{t('pages.tenantPermissionManager.filter.type')}</span>,
                         children: <Select
                             defaultValue="-1"
                             style={{ width: 120 }}
                             options={[
-                                { value: '-1', label: '全部' },
+                                { value: '-1', label: t('pages.tenantPermissionManager.filter.all') },
                                 ...typeOptions
                             ]}
                             onChange={(value) => setFilterType(value === '-1' ? undefined : Number.parseInt(value))}

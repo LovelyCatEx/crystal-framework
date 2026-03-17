@@ -6,12 +6,15 @@ import {
     OAuthAccountManagerController
 } from "@/api/oauth-account.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {OAUTH_ACCOUNT_MANAGER_TABLE_COLUMNS} from "@/components/columns/OAuthAccountEntityColumns.tsx";
+import {useOAuthAccountTableColumns} from "@/components/columns/OAuthAccountEntityColumns.tsx";
 import {UserIdSelector} from "@/components/selector";
+import {useTranslation} from "react-i18next";
 
 export function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPlatform, setFilterPlatform] = useState<number>();
+    const {t} = useTranslation();
+    const columns = useOAuthAccountTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.();
@@ -20,25 +23,25 @@ export function OAuthAccountManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="OAuth账号"
-            title="OAuth账号管理"
-            subtitle="管理系统OAuth账号绑定列表"
-            columns={OAUTH_ACCOUNT_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.oauthAccount')}
+            title={t('pages.oauthAccountManager.title')}
+            subtitle={t('pages.oauthAccountManager.subtitle')}
+            columns={columns}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={24}>
-                            <Form.Item name="userId" label="系统用户">
+                            <Form.Item name="userId" label={t('pages.oauthAccountManager.modal.userId.label')}>
                                 <UserIdSelector />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="platform" label="平台" rules={[{ required: true }]}>
+                            <Form.Item name="platform" label={t('pages.oauthAccountManager.modal.platform.label')} rules={[{ required: true, message: t('pages.oauthAccountManager.modal.platform.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择平台"
+                                    placeholder={t('pages.oauthAccountManager.modal.platform.placeholder')}
                                     options={[
                                         {
                                             label: 'Github',
@@ -57,20 +60,20 @@ export function OAuthAccountManagerPage() {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="identifier" label="平台标识" rules={[{ required: true }, { max: 256, message: '平台标识长度不能超过256个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="平台唯一标识" maxLength={256} showCount />
+                            <Form.Item name="identifier" label={t('pages.oauthAccountManager.modal.identifier.label')} rules={[{ required: true, message: t('pages.oauthAccountManager.modal.identifier.required') }, { max: 256, message: t('pages.oauthAccountManager.modal.identifier.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.oauthAccountManager.modal.identifier.placeholder')} maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="nickname" label="昵称" rules={[{ max: 128, message: '昵称长度不能超过128个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="用户昵称" maxLength={128} showCount />
+                            <Form.Item name="nickname" label={t('pages.oauthAccountManager.modal.nickname.label')} rules={[{ max: 128, message: t('pages.oauthAccountManager.modal.nickname.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.oauthAccountManager.modal.nickname.placeholder')} maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="avatar" label="头像URL" rules={[{ max: 256, message: '头像URL长度不能超过256个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="头像链接" maxLength={256} showCount />
+                            <Form.Item name="avatar" label={t('pages.oauthAccountManager.modal.avatar.label')} rules={[{ max: 256, message: t('pages.oauthAccountManager.modal.avatar.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.oauthAccountManager.modal.avatar.placeholder')} maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -90,12 +93,12 @@ export function OAuthAccountManagerPage() {
             }}
             tableActions={[
                 {
-                    label: <span>平台</span>,
+                    label: <span>{t('pages.oauthAccountManager.filter.platform')}</span>,
                     children: <Select
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
-                            { value: '-1', label: '全部' },
+                            { value: '-1', label: t('pages.oauthAccountManager.filter.all') },
                             { value: '0', label: 'Github' },
                             { value: '1', label: 'Google' },
                             { value: '2', label: 'QQ' },

@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
 import {Button, Checkbox, Col, Form, Input, message, Row} from 'antd';
 import {LockOutlined, MailOutlined, UserOutlined} from '@ant-design/icons';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
@@ -17,6 +18,7 @@ interface RegisterFormData {
 }
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -24,8 +26,8 @@ export function RegisterPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = buildDocumentTitle('注册')
-  }, []);
+    document.title = buildDocumentTitle(t('pages.auth.register.title'))
+  }, [t]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -39,18 +41,17 @@ export function RegisterPage() {
   const handleSendCode = async () => {
     const email = form.getFieldValue('email');
     if (!email) {
-      void message.warning('请先输入邮箱');
+      void message.warning(t('pages.auth.register.messages.emailRequired'));
       return;
     }
 
     setSendingCode(true);
     try {
       await requestRegisterEmailCode(email);
-      void message.success('验证码发送成功，请注意查收');
+      void message.success(t('pages.auth.register.messages.codeSendSuccess'));
       setCountdown(60);
     } catch (error) {
-      void message.error('验证码发送失败，请稍后重试');
-      console.error('发送验证码失败:', error);
+      void message.error(t('pages.auth.register.messages.codeSendFailed'));
     } finally {
       setSendingCode(false);
     }
@@ -60,11 +61,10 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register(values.username, values.password, values.email, values.emailCode);
-      void message.success('注册成功！');
+      void message.success(t('pages.auth.register.messages.registerSuccess'));
       navigate(menuPathLogin);
     } catch (error) {
-      void message.error('注册失败，请稍后重试');
-      console.error('注册失败:', error);
+      void message.error(t('pages.auth.register.messages.registerFailed'));
     } finally {
       setLoading(false);
     }
@@ -72,10 +72,10 @@ export function RegisterPage() {
 
   return (
       <AuthCardLayout
-          title="创建账号"
-          subtitle="开启您的全新旅程"
-          footerText="已经有账号了?"
-          footerLink="返回登录"
+          title={t('pages.auth.register.title')}
+          subtitle={t('pages.auth.register.subtitle')}
+          footerText={t('pages.auth.register.footerText')}
+          footerLink={t('pages.auth.register.footerLink')}
           footerAction={() => navigate(menuPathLogin)}
       >
         <Form
@@ -90,14 +90,14 @@ export function RegisterPage() {
           <Form.Item
               name="username"
               rules={[
-                { required: true, message: '请输入用户名' },
-                { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含数字、字母和下划线' },
-                { max: 64, message: '用户名长度不能超过64个字符' }
+                { required: true, message: t('pages.auth.register.form.username.required') },
+                { pattern: /^[a-zA-Z0-9_]+$/, message: t('pages.auth.register.form.username.pattern') },
+                { max: 64, message: t('pages.auth.register.form.username.max') }
               ]}
           >
             <Input
                 prefix={<UserOutlined className="text-gray-400 mr-2" />}
-                placeholder="用户名"
+                placeholder={t('pages.auth.register.form.username.placeholder')}
                 className="rounded-xl"
             />
           </Form.Item>
@@ -105,26 +105,26 @@ export function RegisterPage() {
           <Form.Item
               name="email"
               rules={[
-                { required: true, message: '请输入邮箱' },
-                { type: 'email', message: '邮箱格式不正确' },
-                { max: 256, message: '邮箱长度不能超过256个字符' }
+                { required: true, message: t('pages.auth.register.form.email.required') },
+                { type: 'email', message: t('pages.auth.register.form.email.type') },
+                { max: 256, message: t('pages.auth.register.form.email.max') }
               ]}
           >
             <Input
                 prefix={<MailOutlined className="text-gray-400 mr-2" />}
-                placeholder="电子邮箱"
+                placeholder={t('pages.auth.register.form.email.placeholder')}
                 className="rounded-xl"
             />
           </Form.Item>
 
           <Form.Item
               name="emailCode"
-              rules={[{ required: true, message: '请输入验证码' }]}
+              rules={[{ required: true, message: t('pages.auth.register.form.emailCode.required') }]}
           >
             <Row gutter={12}>
               <Col span={16}>
                 <Input
-                    placeholder="验证码"
+                    placeholder={t('pages.auth.register.form.emailCode.placeholder')}
                     className="rounded-xl"
                 />
               </Col>
@@ -137,7 +137,7 @@ export function RegisterPage() {
                     onClick={handleSendCode}
                     className="w-full h-10 text-base font-semibold rounded-xl border-none active:scale-[0.98] transition-all"
                 >
-                  {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
+                  {countdown > 0 ? t('pages.auth.register.form.emailCode.retry', { count: countdown }) : t('pages.auth.register.form.emailCode.send')}
                 </Button>
               </Col>
             </Row>
@@ -146,14 +146,14 @@ export function RegisterPage() {
           <Form.Item
               name="password"
               rules={[
-                { required: true, message: '请输入密码' },
-                { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: '密码至少8位，且包含数字和字母' },
-                { max: 128, message: '密码长度不能超过128个字符' }
+                { required: true, message: t('pages.auth.register.form.password.required') },
+                { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: t('pages.auth.register.form.password.pattern') },
+                { max: 128, message: t('pages.auth.register.form.password.max') }
               ]}
           >
             <Password
                 prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                placeholder="密码"
+                placeholder={t('pages.auth.register.form.password.placeholder')}
                 className="rounded-xl"
             />
           </Form.Item>
@@ -162,20 +162,20 @@ export function RegisterPage() {
               name="confirmPassword"
               dependencies={['password']}
               rules={[
-                { required: true, message: '请确认密码' },
+                { required: true, message: t('pages.auth.register.form.confirmPassword.required') },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('password') === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('两次输入的密码不一致'));
+                    return Promise.reject(new Error(t('pages.auth.register.form.confirmPassword.mismatch')));
                   },
                 }),
               ]}
           >
             <Password
                 prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                placeholder="确认密码"
+                placeholder={t('pages.auth.register.form.confirmPassword.placeholder')}
                 className="rounded-xl"
             />
           </Form.Item>
@@ -183,14 +183,14 @@ export function RegisterPage() {
           <Form.Item
               name="agreement"
               valuePropName="checked"
-              rules={[{ required: true, message: '请阅读并同意服务条款和隐私政策' }]}
+              rules={[{ required: true, message: t('pages.auth.register.form.agreement.required') }]}
               className="mb-6"
           >
             <Checkbox className="text-xs text-gray-500">
-              我已阅读并同意
-              <a href="/privacy" className="text-pink-400 hover:underline mx-1" target="_blank">隐私政策</a>
-              和
-              <a href="/terms" className="text-pink-400 hover:underline mx-1" target="_blank">服务条款</a>
+              {t('pages.auth.register.form.agreement.text')}
+              <a href="/privacy" className="text-pink-400 hover:underline mx-1" target="_blank">{t('pages.auth.register.form.agreement.privacyPolicy')}</a>
+              {t('pages.auth.register.form.agreement.and')}
+              <a href="/terms" className="text-pink-400 hover:underline mx-1" target="_blank">{t('pages.auth.register.form.agreement.termsOfService')}</a>
             </Checkbox>
           </Form.Item>
 
@@ -201,7 +201,7 @@ export function RegisterPage() {
                 loading={loading}
                 className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none active:scale-[0.98] transition-all"
             >
-              注册账号
+              {t('pages.auth.register.form.submit')}
             </Button>
           </Form.Item>
         </Form>

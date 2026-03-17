@@ -20,13 +20,14 @@ import {
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import {clearUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
 import {useEffect, useMemo, useState} from "react";
 import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
-import {computeAccessibleMenus, menuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "@/router";
+import {computeAccessibleMenus, getMenuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "@/router";
 import './ManagerContainerPageStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
 import type {UserTenantVO} from "@/types/tenant.types.ts";
@@ -34,12 +35,14 @@ import {switchTenant} from "@/api/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {theme} from "antd";
+import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 const { useToken } = theme;
 
 function TenantSwitcher() {
     const loggedUser = useLoggedUser();
     const userTenants = useUserTenants();
     const [switchingTenantId, setSwitchingTenantId] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     const handleTenantSwitch = async (tenant: UserTenantVO) => {
         setSwitchingTenantId(tenant.tenantId);
@@ -47,11 +50,11 @@ function TenantSwitcher() {
             const result = await switchTenant({ tenantId: tenant.tenantId });
             if (result.data) {
                 setUserAuthentication(result.data.token, result.data.expiresIn);
-                void message.success(`已切换到 ${tenant.tenantName}`);
+                void message.success(t('pages.managerContainer.switchSuccess', { tenantName: tenant.tenantName }));
                 window.location.reload();
             }
         } catch (error) {
-            void message.error(`切换到 ${tenant.tenantName} 失败`);
+            void message.error(t('pages.managerContainer.switchFailed', { tenantName: tenant.tenantName }));
         } finally {
             setSwitchingTenantId(null);
         }
@@ -67,7 +70,7 @@ function TenantSwitcher() {
     const allOptions: UserTenantVO[] = [
         {
             tenantId: '0',
-            tenantName: loggedUser.userProfile?.nickname ?? '非组织身份',
+            tenantName: loggedUser.userProfile?.nickname ?? t('pages.managerContainer.notOrganizationIdentity'),
             tenantAvatar: loggedUser.userProfile?.avatar ?? null,
             memberStatus: TenantMemberStatus.ACTIVE,
             authenticated: isNonTenantAuthentication
@@ -87,7 +90,7 @@ function TenantSwitcher() {
                         src={tenant.tenantAvatar}
                     />
                     <span className={tenant.authenticated ? 'font-medium text-blue-500' : ''}>{tenant.tenantName}</span>
-                    {tenant.authenticated && <span className="text-xs text-blue-500 ml-auto">当前</span>}
+                    {tenant.authenticated && <span className="text-xs text-blue-500 ml-auto">{t('pages.managerContainer.current')}</span>}
                     {switchingTenantId === tenant.tenantId && <Spin size="small" />}
                 </div>
             ),
@@ -111,13 +114,14 @@ function TenantSwitcher() {
     ) : (
         <Space orientation="horizontal" size={8}>
             <LoadingOutlined />
-            <span className="hidden sm:inline">切换中...</span>
+            <span className="hidden sm:inline">{t('pages.managerContainer.switching')}</span>
         </Space>
     );
 }
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const { token } = useToken();
+    const { t } = useTranslation();
 
     const loggedUser = useLoggedUser();
     const [collapsed, setCollapsed] = useState(false);
@@ -149,8 +153,10 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     };
 
     const availableMenus = useMemo(() => {
-        return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? []);
-    }, [loggedUser.accessibleMenuPaths]);
+        return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t);
+    }, [loggedUser.accessibleMenuPaths, t]);
+
+    const menuGroups = useMemo(() => getMenuGroups(t), [t]);
 
     const { menuItems } = useMemo(() => {
         const groupMap = new Map<string, RouteItem[]>();
@@ -196,7 +202,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
         });
 
         return { menuItems: result };
-    }, [availableMenus]);
+    }, [availableMenus, menuGroups]);
 
     const handleMenuClick = (e: unknown) => {
         navigate((e as { key: string }).key);
@@ -261,15 +267,17 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                         shape="round"
                     />
 
+                    <LanguageSwitcher />
+
                     <Dropdown
                         menu={{
                             items: [
-                                { key: 'profile', label: '个人中心', icon: <UserOutlined /> },
-                                { key: 'theme', label: '自定义主题', icon: <BgColorsOutlined /> },
+                                { key: 'profile', label: t('pages.managerContainer.userProfile'), icon: <UserOutlined /> },
+                                { key: 'theme', label: t('pages.managerContainer.customTheme'), icon: <BgColorsOutlined /> },
                                 { type: 'divider' },
                                 {
                                     key: 'logout',
-                                    label: '退出登录',
+                                    label: t('pages.managerContainer.logout'),
                                     icon: <LogoutOutlined />,
                                     danger: true,
                                 },
@@ -302,7 +310,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             <Layout className="mt-16">
                 {/* Left-Side Menu */}
                 <Sider
-                    width={240}
+                    width={260}
                     trigger={null}
                     collapsible
                     collapsed={collapsed}
@@ -338,7 +346,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
 
                 {/* Main Router View */}
                 <Content
-                    className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'} relative z-10`}
+                    className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
                 >
                     <Routes>
                         {availableMenus.map((menu) => (
@@ -361,7 +369,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                         {/* Mobile Menu */}
                         <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-auto mobile-menu-panel z-70">
                             <div className="flex items-center justify-between px-4 py-4 border-b">
-                                <span className="text-lg font-semibold text-gray-900">菜单</span>
+                                <span className="text-lg font-semibold text-gray-900">{t('pages.managerContainer.menu')}</span>
                                 <Button
                                     type="text"
                                     size="small"

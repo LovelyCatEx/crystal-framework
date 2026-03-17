@@ -6,35 +6,38 @@ import {
 } from "@/api/mail-template-category.api.ts";
 import {useRef} from "react";
 import {
-    MAIL_TEMPLATE_CATEGORY_MANAGER_TABLE_COLUMNS
+    useMailTemplateCategoryTableColumns
 } from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import type {MailTemplateCategory} from "@/types/mail.types.ts";
+import {useTranslation} from "react-i18next";
 
 export function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { controller } = useProtectedController<MailTemplateCategory, ManagerCreateMailTemplateCategoryDTO, ManagerReadMailTemplateCategoryDTO>();
+    const {t} = useTranslation();
+    const columns = useMailTemplateCategoryTableColumns();
 
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="邮件模板分类"
-            title="邮件模板分类管理"
-            subtitle="管理邮件模板分类"
-            columns={MAIL_TEMPLATE_CATEGORY_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.mailTemplateCategory')}
+            title={t('pages.mailTemplateCategoryManager.title')}
+            subtitle={t('pages.mailTemplateCategoryManager.subtitle')}
+            columns={columns}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 128, message: '名称长度不能超过128个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="分类名称" maxLength={128} showCount />
+                            <Form.Item name="name" label={t('pages.mailTemplateCategoryManager.modal.name.label')} rules={[{ required: true, message: t('pages.mailTemplateCategoryManager.modal.name.required') }, { max: 128, message: t('pages.mailTemplateCategoryManager.modal.name.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.mailTemplateCategoryManager.modal.name.placeholder')} maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
-                        <Input.TextArea 
-                            className="w-full rounded-lg" 
-                            placeholder="分类描述" 
+                    <Form.Item name="description" label={t('pages.mailTemplateCategoryManager.modal.description.label')} rules={[{ max: 512, message: t('pages.mailTemplateCategoryManager.modal.description.maxLength') }]}>
+                        <Input.TextArea
+                            className="w-full rounded-lg"
+                            placeholder={t('pages.mailTemplateCategoryManager.modal.description.placeholder')}
                             rows={4}
                             maxLength={512}
                             showCount

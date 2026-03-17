@@ -10,9 +10,8 @@ import {
     ShopOutlined,
     UserOutlined
 } from "@ant-design/icons";
-import {TenantStatusMap} from "@/types/tenant.types.ts";
-import {TenantMemberStatusMap} from "@/types/tenant-member.types.ts";
-import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
+import {useTranslation} from "react-i18next";
+import {getTenantStatus, getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useState} from "react";
 import {getUserProfile} from "@/api/user.api.ts";
@@ -21,8 +20,8 @@ import type {UserProfileVO} from "@/types/user.types.ts";
 const { Title, Text } = Typography;
 const { useToken } = theme;
 
-function formatValue(value: string | null | undefined): string {
-    return value ?? '-';
+function formatValue(value: string | null | undefined, t: (key: string) => string): string {
+    return value ?? t('pages.myTenantDashboard.contact.notSet');
 }
 
 function getExpireStatus(expiresTime: string | null | undefined): { isExpired: boolean; isNearExpire: boolean; daysLeft: number } {
@@ -38,6 +37,7 @@ function getExpireStatus(expiresTime: string | null | undefined): { isExpired: b
 }
 
 export function MyTenantDashboard() {
+    const { t } = useTranslation();
     const { token } = useToken();
     const { joinedTenants, isJoinedTenantsLoading, currentTenant, currentTenantProfile } = useUserTenants();
     const [profile, , isProfileLoading] = currentTenantProfile;
@@ -59,7 +59,7 @@ export function MyTenantDashboard() {
     if (isJoinedTenantsLoading || isProfileLoading) {
         return (
             <>
-                <ActionBarComponent title="我的组织" subtitle="查看您当前的组织信息" />
+                <ActionBarComponent title={t('pages.myTenantDashboard.title')} subtitle={t('pages.myTenantDashboard.subtitle')} />
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
                     <Spin size="large" />
                 </div>
@@ -70,21 +70,26 @@ export function MyTenantDashboard() {
     if (!joinedTenants || joinedTenants.length === 0) {
         return (
             <>
-                <ActionBarComponent title="我的组织" subtitle="查看您当前的组织信息" />
+                <ActionBarComponent title={t('pages.myTenantDashboard.title')} subtitle={t('pages.myTenantDashboard.subtitle')} />
                 <Empty
-                    description="您还没有加入任何组织"
+                    description={t('pages.myTenantDashboard.noTenants')}
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
             </>
         );
     }
 
-    const statusInfo = profile ? TenantStatusMap[profile.status] : null;
+    const statusColors: Record<number, string> = {
+        0: 'orange',
+        1: 'green',
+        2: 'red'
+    };
+    const statusColor = profile ? statusColors[profile.status] : null;
     const expireStatus = profile ? getExpireStatus(profile.expiresTime) : null;
 
     return (
         <>
-            <ActionBarComponent title={currentTenant?.tenantName || '我的组织'} subtitle="查看您当前的组织信息" />
+            <ActionBarComponent title={currentTenant?.tenantName || t('pages.myTenantDashboard.title')} subtitle={t('pages.myTenantDashboard.subtitle')} />
 
             {profile && (
                 <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
@@ -99,9 +104,9 @@ export function MyTenantDashboard() {
                                     style={{ borderColor: token.colorBorderSecondary }}
                                 />
                                 <Title level={4} className="!mb-2">{profile.name}</Title>
-                                {statusInfo && (
-                                    <Tag color={statusInfo.color} className="text-sm px-3 py-1">
-                                        {statusInfo.label}
+                                {profile && (
+                                    <Tag color={statusColor || 'default'} className="text-sm px-3 py-1">
+                                        {getTenantStatus(profile.status)}
                                     </Tag>
                                 )}
                                 {profile.description && (
@@ -118,12 +123,12 @@ export function MyTenantDashboard() {
                             <div className="grid grid-cols-2 gap-4 text-center mb-4">
                                 <div className="bg-blue-50 rounded-xl p-4 dark:bg-blue-950/30">
                                     <CalendarOutlined className="text-blue-500 text-lg mb-2 dark:text-blue-300/70" />
-                                    <div className="text-xs text-slate-400 mb-1 dark:text-slate-500">订阅时间</div>
+                                    <div className="text-xs text-slate-400 mb-1 dark:text-slate-500">{t('pages.myTenantDashboard.subscription.subscribedTime')}</div>
                                     <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         {profile.subscribedTime ? formatTimestamp(Number(profile.subscribedTime), 'YYYY-MM-DD') : '-'}
                                     </div>
                                 </div>
-                                <Tooltip title={expireStatus && profile.expiresTime ? (expireStatus.isExpired ? '已过期' : `剩余 ${expireStatus.daysLeft} 天`) : ''}>
+                                <Tooltip title={expireStatus && profile.expiresTime ? (expireStatus.isExpired ? t('pages.myTenantDashboard.subscription.expired') : t('pages.myTenantDashboard.subscription.daysLeft', { days: expireStatus.daysLeft })) : ''}>
                                     <div className={`rounded-xl p-4 cursor-pointer ${
                                         expireStatus?.isExpired 
                                             ? 'bg-red-50 dark:bg-red-950/30' 
@@ -138,7 +143,7 @@ export function MyTenantDashboard() {
                                                     ? 'text-orange-500 dark:text-orange-300/70' 
                                                     : 'text-green-500 dark:text-green-300/70'
                                         }`} />
-                                        <div className="text-xs text-slate-400 mb-1 dark:text-slate-500">过期时间</div>
+                                        <div className="text-xs text-slate-400 mb-1 dark:text-slate-500">{t('pages.myTenantDashboard.subscription.expiresTime')}</div>
                                         <div className={`text-sm font-medium ${
                                             expireStatus?.isExpired 
                                                 ? 'text-red-600 dark:text-red-300/80' 
@@ -154,7 +159,7 @@ export function MyTenantDashboard() {
 
                             <div className="bg-gray-50 rounded-xl p-4 dark:bg-slate-800/40">
                                 <div className="flex items-center justify-center gap-2 mb-2">
-                                    <span className="text-xs text-slate-400 dark:text-slate-500">组织所有者</span>
+                                    <span className="text-xs text-slate-400 dark:text-slate-500">{t('pages.myTenantDashboard.owner.title')}</span>
                                 </div>
                                 <div className="flex items-center justify-center gap-3">
                                     {isOwnerLoading ? (
@@ -163,13 +168,13 @@ export function MyTenantDashboard() {
                                         <>
                                             <Avatar size={36} src={owner.avatar} icon={<UserOutlined />} />
                                             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                {formatValue(owner.nickname)}
+                                                {formatValue(owner.nickname, t)}
                                             </span>
                                         </>
                                     ) : (
                                         <>
                                             <Avatar size={36} icon={<UserOutlined />} />
-                                            <span className="text-sm text-slate-500 dark:text-slate-400">{formatValue(profile.ownerUserId)}</span>
+                                            <span className="text-sm text-slate-500 dark:text-slate-400">{formatValue(profile.ownerUserId, t)}</span>
                                         </>
                                     )}
                                 </div>
@@ -180,14 +185,14 @@ export function MyTenantDashboard() {
                     <Col xs={24} lg={16}>
                         <Card className="rounded-2xl shadow-sm border-none h-full">
                             <div className="mb-6">
-                                <Title level={5} className="!mb-1">详细信息</Title>
-                                <Text type="secondary">查看组织的详细资料信息</Text>
+                                <Title level={5} className="!mb-1">{t('pages.myTenantDashboard.basicInfo')}</Title>
+                                <Text type="secondary">{t('pages.myTenantDashboard.basicInfoDesc')}</Text>
                             </div>
 
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></div>
-                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">基本信息</span>
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('pages.myTenantDashboard.basicInfo')}</span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="group bg-slate-50 hover:bg-blue-50 rounded-xl p-4 transition-all duration-300 border border-slate-100 hover:border-blue-200 dark:bg-slate-800/40 dark:border-slate-700/50 dark:hover:border-blue-800/50">
@@ -195,10 +200,10 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <ShopOutlined className="text-blue-500 text-xs dark:text-blue-300/70" />
                                             </div>
-                                            组织ID
+                                            {t('pages.myTenantDashboard.tenantId')}
                                         </div>
                                         <Text copyable className="text-sm font-medium text-slate-700 font-mono dark:text-slate-300">
-                                            {formatValue(profile.tenantId)}
+                                            {formatValue(profile.tenantId, t)}
                                         </Text>
                                     </div>
 
@@ -207,12 +212,12 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <span className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-300/70"></span>
                                             </div>
-                                            状态
+                                            {t('pages.myTenantDashboard.member.status')}
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {statusInfo ? (
-                                                <Tag color={statusInfo.color} className="!text-sm !px-3 !py-0.5">
-                                                    {statusInfo.label}
+                                            {profile ? (
+                                                <Tag color={statusColor || 'default'} className="!text-sm !px-3 !py-0.5">
+                                                    {getTenantStatus(profile.status)}
                                                 </Tag>
                                             ) : '-'}
                                         </div>
@@ -225,7 +230,7 @@ export function MyTenantDashboard() {
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-gradient-to-b from-purple-400 to-purple-600 rounded-full"></div>
-                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">联系信息</span>
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('pages.myTenantDashboard.contact.title')}</span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="group bg-slate-50 hover:bg-purple-50 rounded-xl p-4 transition-all duration-300 border border-slate-100 hover:border-purple-200 dark:bg-slate-800/40 dark:border-slate-700/50 dark:hover:border-purple-600/50">
@@ -233,10 +238,10 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <UserOutlined className="text-purple-500 text-xs dark:text-purple-300/70" />
                                             </div>
-                                            联系人
+                                            {t('pages.myTenantDashboard.contact.name')}
                                         </div>
                                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {formatValue(profile.contactName)}
+                                            {formatValue(profile.contactName, t)}
                                         </div>
                                     </div>
 
@@ -245,10 +250,10 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <MailOutlined className="text-purple-500 text-xs dark:text-purple-300/70" />
                                             </div>
-                                            联系邮箱
+                                            {t('pages.myTenantDashboard.contact.email')}
                                         </div>
                                         <Text copyable className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {formatValue(profile.contactEmail)}
+                                            {formatValue(profile.contactEmail, t)}
                                         </Text>
                                     </div>
 
@@ -257,10 +262,10 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <PhoneOutlined className="text-purple-500 text-xs dark:text-purple-300/70" />
                                             </div>
-                                            联系电话
+                                            {t('pages.myTenantDashboard.contact.phone')}
                                         </div>
                                         <Text copyable className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {formatValue(profile.contactPhone)}
+                                            {formatValue(profile.contactPhone, t)}
                                         </Text>
                                     </div>
 
@@ -269,10 +274,10 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <HomeOutlined className="text-purple-500 text-xs dark:text-purple-300/70" />
                                             </div>
-                                            地址
+                                            {t('pages.myTenantDashboard.contact.address')}
                                         </div>
                                         <Text copyable className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {formatValue(profile.address)}
+                                            {formatValue(profile.address, t)}
                                         </Text>
                                     </div>
                                 </div>
@@ -283,7 +288,7 @@ export function MyTenantDashboard() {
                             <div>
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="w-1 h-5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full"></div>
-                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">时间信息</span>
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('pages.myTenantDashboard.timeInfo')}</span>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="group bg-slate-50 hover:bg-amber-50 rounded-xl p-4 transition-all duration-300 border border-slate-100 hover:border-amber-200 dark:bg-slate-800/40 dark:border-slate-700/50 dark:hover:border-amber-800/50">
@@ -291,7 +296,7 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <CalendarOutlined className="text-amber-500 text-xs dark:text-amber-300/70" />
                                             </div>
-                                            创建时间
+                                            {t('pages.myTenantDashboard.time.createdTime')}
                                         </div>
                                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                             {profile.createdTime ? formatTimestamp(profile.createdTime) : '-'}
@@ -303,7 +308,7 @@ export function MyTenantDashboard() {
                                             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center shadow-sm dark:bg-slate-700/50">
                                                 <ClockCircleOutlined className="text-amber-500 text-xs dark:text-amber-300/70" />
                                             </div>
-                                            修改时间
+                                            {t('pages.myTenantDashboard.time.updatedTime')}
                                         </div>
                                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                             {profile.modifiedTime ? formatTimestamp(profile.modifiedTime) : '-'}
@@ -316,7 +321,7 @@ export function MyTenantDashboard() {
                 </Row>
             )}
 
-            <ActionBarComponent title="已加入的组织" subtitle="查看您已加入的所有组织" />
+            <ActionBarComponent title={t('pages.myTenantDashboard.joinedTenants.title')} subtitle={t('pages.myTenantDashboard.joinedTenants.subtitle')} />
 
             <Row gutter={[16, 16]}>
                 {joinedTenants
@@ -350,9 +355,9 @@ export function MyTenantDashboard() {
                                                 <Text strong className="text-base truncate">
                                                     {tenant.tenantName}
                                                 </Text>
-                                                {isCurrent && <Tag color="blue">当前</Tag>}
-                                                <Tag color={TenantMemberStatusMap[tenant.memberStatus]?.color || 'default'} className="text-sm px-2 py-0.5">
-                                                    {tenantMemberStatusToTranslationMap.get(tenant.memberStatus) || TenantMemberStatusMap[tenant.memberStatus]?.label || '未知'}
+                                                {isCurrent && <Tag color="blue">{t('pages.myTenantDashboard.joinedTenants.current')}</Tag>}
+                                                <Tag color={statusColors[tenant.memberStatus] || 'default'} className="text-sm px-2 py-0.5">
+                                                    {getTenantMemberStatus(tenant.memberStatus)}
                                                 </Tag>
                                             </div>
                                             <div className="text-xs truncate">

@@ -11,8 +11,3 @@ export enum TenantPermissionType {
     ACTION = 0,
     MENU = 1
 }
-
-export const TenantPermissionTypeMap: Record<number, { label: string; color: string }> = {
-    [TenantPermissionType.ACTION]: { label: '操作权限', color: 'blue' },
-    [TenantPermissionType.MENU]: { label: '菜单权限', color: 'green' }
-};

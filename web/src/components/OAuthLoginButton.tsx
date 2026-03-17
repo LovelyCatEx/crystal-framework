@@ -4,6 +4,7 @@ import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
 import { getOAuth2LoginUrl } from "../utils/oauth2";
 import { OAuthPlatform } from "../types/oauth-account.types";
 import {PLATFORM_REGISTRATION_ID_MAP} from "../global/constants.ts";
+import { useTranslation } from "react-i18next";
 
 interface OAuthLoginButtonProps {
     platform: OAuthPlatform;
@@ -31,11 +32,12 @@ export const OAuthLoginButton: React.FC<OAuthLoginButtonProps> = ({
     agreedToTerms,
     className = "flex-1 h-12 rounded-xl flex items-center justify-center hover:bg-gray-50 border-gray-200"
 }) => {
+    const { t } = useTranslation();
     const config = PLATFORM_CONFIG[platform];
 
     const handleClick = () => {
         if (!agreedToTerms) {
-            void message.warning("请先阅读并同意服务条款和隐私政策");
+            void message.warning(t('pages.login.form.agreement.required'));
             return;
         }
         window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);

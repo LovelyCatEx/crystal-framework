@@ -24,6 +24,7 @@ import {
     PlusOutlined,
     UserOutlined
 } from "@ant-design/icons";
+import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
@@ -52,6 +53,7 @@ const { useToken } = theme;
 const { Password } = Input;
 
 const BasicInfo = () => {
+    const { t } = useTranslation();
     const loggedUser = useLoggedUser();
 
     const [form] = Form.useForm();
@@ -64,18 +66,18 @@ const BasicInfo = () => {
                 email: loggedUser.userProfile.email,
             })
         }
-    }, [loggedUser.userProfile]);
+    }, [loggedUser.userProfile, form]);
 
     const [updatingUserProfile, setUpdatingUserProfile] = useState(false);
     const handleSubmitUserProfile = (values: UpdateUserProfileDTO) => {
         setUpdatingUserProfile(true);
         updateUserProfile(values)
             .then(() => {
-                void message.success("用户资料更新成功");
+                void message.success(t('pages.userProfile.basicInfo.updateSuccess'));
                 void loggedUser.refreshUserProfile();
             })
             .catch(() => {
-                void message.error("用户资料更新失败")
+                void message.error(t('pages.userProfile.basicInfo.updateFailed'))
             })
             .finally(() => {
                 setUpdatingUserProfile(false);
@@ -90,20 +92,20 @@ const BasicInfo = () => {
                 onFinish={handleSubmitUserProfile}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                    <Form.Item label="用户名" name="username" rules={[{ required: true }]}>
+                    <Form.Item label={t('pages.userProfile.basicInfo.username')} name="username" rules={[{ required: true }]}>
                         <Input className="rounded-xl py-2" disabled />
                     </Form.Item>
-                    <Form.Item label="昵称" name="nickname" rules={[{ required: true }]}>
+                    <Form.Item label={t('pages.userProfile.basicInfo.nickname')} name="nickname" rules={[{ required: true }]}>
                         <Input className="rounded-xl py-2" />
                     </Form.Item>
                 </div>
 
                 <Form.Item
-                    label="电子邮箱"
+                    label={t('pages.userProfile.basicInfo.email')}
                     name="email"
                     rules={[{ required: true, type: 'email' }]}
                     extra={
-                        <p className="mt-2 text-gray-400">若要修改电子邮箱，请前往 <span className="font-bold">账号安全</span> 设置页</p>
+                        <p className="mt-2 text-gray-400">{t('pages.userProfile.basicInfo.emailHint')}</p>
                     }
                 >
                     <Input className="rounded-xl py-2" disabled />
@@ -116,7 +118,7 @@ const BasicInfo = () => {
                     loading={updatingUserProfile}
                     onClick={() => { form.submit() }}
                 >
-                    保存
+                    {t('pages.userProfile.basicInfo.save')}
                 </Button>
             </Form>
         </div>
@@ -124,11 +126,9 @@ const BasicInfo = () => {
 };
 
 const SecuritySettings = () => {
+    const { t } = useTranslation();
     const loggedUser = useLoggedUser();
 
-    /**
-     * Reset Password Modal
-     */
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordSendingCode, setPasswordSendingCode] = useState(false);
@@ -160,18 +160,17 @@ const SecuritySettings = () => {
     const handleSendPasswordCode = async () => {
         const email = passwordForm.getFieldValue('email');
         if (!email) {
-            void message.warning('请先输入邮箱');
+            void message.warning(t('pages.userProfile.security.passwordModal.emailRequired'));
             return;
         }
 
         setPasswordSendingCode(true);
         try {
             await requestPasswordResetEmailCode(email);
-            void message.success('验证码发送成功，请注意查收');
+            void message.success(t('pages.userProfile.security.passwordModal.codeSendSuccess'));
             setPasswordCountdown(60);
         } catch (error) {
-            // @ts-ignore
-            void message.error(`验证码发送失败 ${error.message}`);
+            void message.error(t('pages.userProfile.security.passwordModal.codeSendFailed'));
         } finally {
             setPasswordSendingCode(false);
         }
@@ -181,19 +180,15 @@ const SecuritySettings = () => {
         setPasswordLoading(true);
         try {
             await resetPassword(values);
-            void message.success('密码修改成功！');
+            void message.success(t('pages.userProfile.security.passwordModal.updateSuccess'));
             handleClosePasswordModal();
         } catch (error) {
-            // @ts-ignore
-            void message.error(`密码修改失败 ${error.message}`);
+            void message.error(t('pages.userProfile.security.passwordModal.codeSendFailed'));
         } finally {
             setPasswordLoading(false);
         }
     };
 
-    /**
-     * Reset Email Modal
-     */
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
     const [emailLoading, setEmailLoading] = useState(false);
     const [emailSendingCode, setEmailSendingCode] = useState(false);
@@ -225,18 +220,17 @@ const SecuritySettings = () => {
     const handleSendEmailCode = async () => {
         const newEmail = emailForm.getFieldValue('newEmail');
         if (!newEmail) {
-            void message.warning('请先输入新邮箱');
+            void message.warning(t('pages.userProfile.security.emailModal.newEmailRequired'));
             return;
         }
 
         setEmailSendingCode(true);
         try {
             await requestResetEmailAddressEmailCode(newEmail);
-            void message.success('验证码发送成功，请注意查收');
+            void message.success(t('pages.userProfile.security.emailModal.codeSendSuccess'));
             setEmailCountdown(60);
         } catch (error) {
-            // @ts-ignore
-            void message.error(`验证码发送失败 ${error.message}`);
+            void message.error(t('pages.userProfile.security.emailModal.codeSendFailed'));
         } finally {
             setEmailSendingCode(false);
         }
@@ -246,34 +240,30 @@ const SecuritySettings = () => {
         setEmailLoading(true);
         try {
             await resetEmail(values);
-            void message.success('邮箱修改成功！');
+            void message.success(t('pages.userProfile.security.emailModal.updateSuccess'));
             handleCloseEmailModal();
             await loggedUser.refreshUserProfile();
         } catch (error) {
-            // @ts-ignore
-            void message.error(`邮箱修改失败 ${error.message}`);
+            void message.error(t('pages.userProfile.security.emailModal.codeSendFailed'));
         } finally {
             setEmailLoading(false);
         }
     };
 
-    /**
-     * Account Security Component
-     */
     const settings = [
         {
-            title: '账户密码',
-            desc: '建议设置高强度复杂密码以保障账号安全',
-            status: '安全性：高',
-            action: '修改',
+            title: t('pages.userProfile.security.accountPassword.title'),
+            desc: t('pages.userProfile.security.accountPassword.desc'),
+            status: t('pages.userProfile.security.accountPassword.status'),
+            action: t('pages.userProfile.security.accountPassword.action'),
             icon: <LockOutlined className="text-blue-500" />,
             onClick: handleOpenPasswordModal,
         },
         {
-            title: '电子邮箱',
+            title: t('pages.userProfile.security.email.title'),
             desc: loggedUser.userProfile?.email,
-            status: loggedUser.userProfile?.email ? '已绑定' : '未绑定',
-            action: '修改',
+            status: loggedUser.userProfile?.email ? t('pages.userProfile.security.email.statusBound') : t('pages.userProfile.security.email.statusUnbound'),
+            action: t('pages.userProfile.security.email.action'),
             icon: <MailOutlined className="text-amber-500" />,
             onClick: handleOpenEmailModal,
         },
@@ -301,7 +291,7 @@ const SecuritySettings = () => {
             </div>
 
             <Modal
-                title="修改密码"
+                title={t('pages.userProfile.security.passwordModal.title')}
                 open={isPasswordModalOpen}
                 onCancel={handleClosePasswordModal}
                 footer={null}
@@ -315,27 +305,25 @@ const SecuritySettings = () => {
                     className="mt-4"
                 >
                     <Form.Item
-                        label="电子邮箱"
+                        label={t('pages.userProfile.security.passwordModal.email')}
                         name="email"
-                        rules={[
-                            { required: true, message: '请输入邮箱' },
-                        ]}
+                        rules={[{ required: true }]}
                     >
                         <Input
                             prefix={<MailOutlined className="text-gray-400 mr-2" />}
-                            placeholder="电子邮箱"
+                            placeholder={t('pages.userProfile.security.passwordModal.email')}
                             disabled
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="验证码"
+                        label={t('pages.userProfile.security.passwordModal.verificationCode')}
                         name="emailCode"
-                        rules={[{ required: true, message: '请输入验证码' }]}
+                        rules={[{ required: true, message: t('pages.userProfile.security.passwordModal.verificationCode') }]}
                     >
                         <Row gutter={12}>
                             <Col span={16}>
-                                <Input placeholder="验证码" />
+                                <Input placeholder={t('pages.userProfile.security.passwordModal.verificationCode')} />
                             </Col>
                             <Col span={8}>
                                 <Button
@@ -345,46 +333,46 @@ const SecuritySettings = () => {
                                     onClick={handleSendPasswordCode}
                                     className="w-full"
                                 >
-                                    {passwordCountdown > 0 ? `${passwordCountdown}s后重试` : '发送验证码'}
+                                    {passwordCountdown > 0 ? t('pages.userProfile.security.passwordModal.resendCode', { seconds: passwordCountdown }) : t('pages.userProfile.security.passwordModal.sendCode')}
                                 </Button>
                             </Col>
                         </Row>
                     </Form.Item>
 
                     <Form.Item
-                        label="新密码"
+                        label={t('pages.userProfile.security.passwordModal.newPassword')}
                         name="newPassword"
                         rules={[
-                            { required: true, message: '请输入新密码' },
-                            { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: '密码至少8位，且包含数字和字母' },
-                            { max: 128, message: '密码长度不能超过128个字符' }
+                            { required: true, message: t('pages.userProfile.security.passwordModal.newPassword') },
+                            { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: t('pages.userProfile.security.passwordModal.passwordHint') },
+                            { max: 128, message: 'Password max 128 chars' }
                         ]}
                     >
                         <Password
                             prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                            placeholder="新密码"
+                            placeholder={t('pages.userProfile.security.passwordModal.newPassword')}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="确认密码"
+                        label={t('pages.userProfile.security.passwordModal.confirmPassword')}
                         name="confirmPassword"
                         dependencies={['newPassword']}
                         rules={[
-                            { required: true, message: '请确认新密码' },
+                            { required: true, message: t('pages.userProfile.security.passwordModal.confirmPassword') },
                             ({ getFieldValue }) => ({
                                 validator(_, value) {
                                     if (!value || getFieldValue('newPassword') === value) {
                                         return Promise.resolve();
                                     }
-                                    return Promise.reject(new Error('两次输入的密码不一致'));
+                                    return Promise.reject(new Error('Password mismatch'));
                                 },
                             }),
                         ]}
                     >
                         <Password
                             prefix={<LockOutlined className="text-gray-400 mr-2" />}
-                            placeholder="确认新密码"
+                            placeholder={t('pages.userProfile.security.passwordModal.confirmPassword')}
                         />
                     </Form.Item>
 
@@ -395,14 +383,14 @@ const SecuritySettings = () => {
                             loading={passwordLoading}
                             className="w-full"
                         >
-                            确认修改
+                            {t('pages.userProfile.security.passwordModal.confirm')}
                         </Button>
                     </Form.Item>
                 </Form>
             </Modal>
 
             <Modal
-                title="修改邮箱"
+                title={t('pages.userProfile.security.emailModal.title')}
                 open={isEmailModalOpen}
                 onCancel={handleCloseEmailModal}
                 footer={null}
@@ -416,39 +404,39 @@ const SecuritySettings = () => {
                     className="mt-4"
                 >
                     <Form.Item
-                        label="当前邮箱"
+                        label={t('pages.userProfile.security.emailModal.currentEmail')}
                         name="currentEmail"
                     >
                         <Input
                             prefix={<MailOutlined className="text-gray-400 mr-2" />}
-                            placeholder="当前邮箱"
+                            placeholder={t('pages.userProfile.security.emailModal.currentEmail')}
                             disabled
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="新邮箱"
+                        label={t('pages.userProfile.security.emailModal.newEmail')}
                         name="newEmail"
                         rules={[
-                            { required: true, message: '请输入新邮箱' },
-                            { type: 'email', message: '邮箱格式不正确' },
-                            { max: 256, message: '邮箱长度不能超过256个字符' }
+                            { required: true, message: t('pages.userProfile.security.emailModal.newEmailRequired') },
+                            { type: 'email', message: 'Invalid email' },
+                            { max: 256, message: 'Email max 256 chars' }
                         ]}
                     >
                         <Input
                             prefix={<MailOutlined className="text-gray-400 mr-2" />}
-                            placeholder="新邮箱"
+                            placeholder={t('pages.userProfile.security.emailModal.newEmail')}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="验证码"
+                        label={t('pages.userProfile.security.emailModal.verificationCode')}
                         name="emailCode"
-                        rules={[{ required: true, message: '请输入验证码' }]}
+                        rules={[{ required: true, message: t('pages.userProfile.security.emailModal.verificationCode') }]}
                     >
                         <Row gutter={12}>
                             <Col span={16}>
-                                <Input placeholder="验证码" />
+                                <Input placeholder={t('pages.userProfile.security.emailModal.verificationCode')} />
                             </Col>
                             <Col span={8}>
                                 <Button
@@ -458,7 +446,7 @@ const SecuritySettings = () => {
                                     onClick={handleSendEmailCode}
                                     className="w-full"
                                 >
-                                    {emailCountdown > 0 ? `${emailCountdown}s后重试` : '发送验证码'}
+                                    {emailCountdown > 0 ? t('pages.userProfile.security.emailModal.resendCode', { seconds: emailCountdown }) : t('pages.userProfile.security.emailModal.sendCode')}
                                 </Button>
                             </Col>
                         </Row>
@@ -471,7 +459,7 @@ const SecuritySettings = () => {
                             loading={emailLoading}
                             className="w-full"
                         >
-                            确认修改
+                            {t('pages.userProfile.security.emailModal.confirm')}
                         </Button>
                     </Form.Item>
                 </Form>
@@ -481,6 +469,7 @@ const SecuritySettings = () => {
 };
 
 const OAuthAccountSettings = () => {
+    const { t } = useTranslation();
     const [modal, contextHolder] = Modal.useModal();
 
     const loggedUser = useLoggedUser();
@@ -489,18 +478,18 @@ const OAuthAccountSettings = () => {
 
     const handleUnbind = (account: UserOAuthAccountVO) => {
         modal.confirm({
-            title: '解绑第三方账号',
+            title: t('pages.userProfile.oauth.unbindTitle'),
             icon: <ExclamationCircleFilled />,
-            content: `是否要解绑第三方账号 ${account.nickname}`,
+            content: t('pages.userProfile.oauth.unbindConfirm', { nickname: account.nickname }),
             onOk() {
                 unbindOAuthAccount({ oauthAccountId: account.id })
                     .then(() => {
-                        void message.success("账号解绑成功");
+                        void message.success(t('pages.userProfile.oauth.unbindSuccess'));
                         void loggedUser.refreshUserProfile();
                         void updateAccounts();
                     })
                     .catch(() => {
-                        void message.warning("账号解绑失败");
+                        void message.warning(t('pages.userProfile.oauth.unbindFailed'));
                     })
             },
         });
@@ -546,14 +535,14 @@ const OAuthAccountSettings = () => {
                         </Space>
 
                         <Button type="link" className="font-medium text-red-500" onClick={() => { handleUnbind(account); }}>
-                            解绑
+                            {t('pages.userProfile.oauth.bind')}
                         </Button>
                     </div>
                 ))}
 
                 {unboundPlatforms.length > 0 && (
                     <div className="pt-4">
-                        <div className="text-sm text-gray-500 mb-3">可绑定的平台</div>
+                        <div className="text-sm text-gray-500 mb-3">{t('pages.userProfile.oauth.availablePlatforms')}</div>
                         <div className="flex flex-wrap gap-3">
                             {unboundPlatforms.map((platform) => (
                                 <Button
@@ -577,6 +566,7 @@ const OAuthAccountSettings = () => {
 }
 
 function UserProfileCard() {
+    const { t } = useTranslation();
     const { token } = useToken();
 
     const loggedUser = useLoggedUser();
@@ -590,13 +580,13 @@ function UserProfileCard() {
     const handleAvatarUpload = (file: File) => {
         const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!validTypes.includes(file.type)) {
-            void message.error('请上传 JPG、PNG、GIF 或 WebP 格式的图片');
+            void message.error(t('pages.userProfile.avatar.invalidType'));
             return false;
         }
 
         const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
-            void message.error('图片大小不能超过 5MB');
+            void message.error(t('pages.userProfile.avatar.maxSize'));
             return false;
         }
 
@@ -622,11 +612,11 @@ function UserProfileCard() {
 
         uploadUserAvatar(croppedFile)
             .then(() => {
-                void message.success("头像上传成功");
+                void message.success(t('pages.userProfile.avatar.uploadSuccess'));
                 void loggedUser.refreshUserProfile();
             })
             .catch(() => {
-                void message.error("头像上传失败")
+                void message.error(t('pages.userProfile.avatar.uploadFailed'))
             })
             .finally(() => {
                 setIsAvatarUploading(false);
@@ -684,7 +674,7 @@ function UserProfileCard() {
                     <div className="space-y-4">
                         <div className="flex items-center text-slate-600 text-sm">
                             <MailOutlined className="mr-3 text-slate-300" />
-                            {loggedUser.userProfile?.email ?? '未绑定'}
+                            {loggedUser.userProfile?.email ?? t('pages.userProfile.card.unbound')}
                         </div>
                         <div className="flex items-center text-slate-600 text-sm">
                             <ClockCircleOutlined className="mr-3 text-slate-300" />
@@ -703,15 +693,17 @@ function UserProfileCard() {
                 onConfirm={handleCropConfirm}
                 aspectRatio={1}
                 shape="rect"
-                title="裁剪头像"
-                confirmText="确认上传"
-                cancelText="取消"
+                title={t('pages.userProfile.avatar.cropTitle')}
+                confirmText={t('pages.userProfile.avatar.confirmUpload')}
+                cancelText={t('pages.userProfile.avatar.cancel')}
             />
         </>
     )
 }
 
 export function UserProfilePage() {
+    const { t } = useTranslation();
+    
     const TAB_KEYS = {
         INFO: 'info',
         SECURITY: 'security',
@@ -731,8 +723,8 @@ export function UserProfilePage() {
     return (
         <>
             <ActionBarComponent
-                title="个人中心"
-                subtitle="查看/编辑你的个人资料"
+                title={t('pages.userProfile.title')}
+                subtitle={t('pages.userProfile.subtitle')}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -748,17 +740,17 @@ export function UserProfilePage() {
                             items={[
                                 {
                                     key: TAB_KEYS.INFO,
-                                    label: <span className="px-2 font-medium">基本信息</span>,
+                                    label: <span className="px-2 font-medium">{t('pages.userProfile.tabs.basicInfo')}</span>,
                                     children: <BasicInfo />,
                                 },
                                 {
                                     key: TAB_KEYS.SECURITY,
-                                    label: <span className="px-2 font-medium">账号安全</span>,
+                                    label: <span className="px-2 font-medium">{t('pages.userProfile.tabs.security')}</span>,
                                     children: <SecuritySettings />,
                                 },
                                 {
                                     key: TAB_KEYS.OAUTH,
-                                    label: <span className="px-2 font-medium">第三方账号</span>,
+                                    label: <span className="px-2 font-medium">{t('pages.userProfile.tabs.oauth')}</span>,
                                     children: <OAuthAccountSettings />,
                                 },
                             ]}

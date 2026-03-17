@@ -8,6 +8,7 @@ import type {User} from "@/types/user.types.ts";
 import type {UserRole} from "@/types/user-role.types.ts";
 import type {Key} from "react";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import {useTranslation} from "react-i18next";
 
 interface TransferItem {
     key: string;
@@ -23,6 +24,7 @@ export function UserRoleRelationManagerPage() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const {t} = useTranslation();
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +38,7 @@ export function UserRoleRelationManagerPage() {
             setUsers(res.data?.records || []);
             setTotal(res.data?.total || 0);
         } catch {
-            void message.error("无法获取用户列表");
+            void message.error(t('pages.userRoleRelationManager.messages.fetchUsersFailed'));
         } finally {
             setLoading(false);
         }
@@ -47,7 +49,7 @@ export function UserRoleRelationManagerPage() {
             const res = await UserRoleManagerController.list();
             setAllRoles(res.data || []);
         } catch {
-            void message.error("无法获取角色列表");
+            void message.error(t('pages.userRoleRelationManager.messages.fetchRolesFailed'));
         }
     };
 
@@ -63,10 +65,9 @@ export function UserRoleRelationManagerPage() {
         try {
             const res = await getUserRoles(user.id);
             const ids = res.data?.map(r => String(r.id)) || [];
-            console.log("Loaded roles for user:", user.id, ids);
             setSelectedRoleIds(ids);
         } catch {
-            void message.error("无法获取用户角色");
+            void message.error(t('pages.userRoleRelationManager.messages.fetchUserRolesFailed'));
             setSelectedRoleIds([]);
         }
     };
@@ -74,21 +75,19 @@ export function UserRoleRelationManagerPage() {
     const handleSave = async () => {
         if (!selectedUser) return;
         const ids = selectedRoleIds.map(String);
-        console.log("Saving roles for user:", selectedUser.id, ids);
         setSaving(true);
         try {
             await setUserRoles(selectedUser.id, ids);
-            void message.success("角色分配成功");
+            void message.success(t('pages.userRoleRelationManager.messages.assignSuccess'));
             setIsModalVisible(false);
         } catch {
-            void message.error("角色分配失败");
+            void message.error(t('pages.userRoleRelationManager.messages.assignFailed'));
         } finally {
             setSaving(false);
         }
     };
 
     const handleTransferChange = (targetKeys: Key[]) => {
-        console.log("Transfer changed:", targetKeys);
         setSelectedRoleIds(targetKeys);
     };
 
@@ -106,7 +105,7 @@ export function UserRoleRelationManagerPage() {
 
     const columns = [
         {
-            title: "用户",
+            title: t('pages.userRoleRelationManager.columns.user'),
             dataIndex: "nickname",
             key: "nickname",
             render: (_: unknown, row: User) => (
@@ -121,7 +120,7 @@ export function UserRoleRelationManagerPage() {
             )
         },
         {
-            title: "用户名",
+            title: t('pages.userRoleRelationManager.columns.username'),
             dataIndex: "username",
             key: "username",
             render: (_: unknown, row: User) => (
@@ -129,7 +128,7 @@ export function UserRoleRelationManagerPage() {
             )
         },
         {
-            title: "邮箱",
+            title: t('pages.userRoleRelationManager.columns.email'),
             dataIndex: "email",
             key: "email",
             render: (_: unknown, row: User) => (
@@ -137,11 +136,11 @@ export function UserRoleRelationManagerPage() {
             )
         },
         {
-            title: "操作",
+            title: t('pages.userRoleRelationManager.columns.action'),
             key: "action",
             render: (_: unknown, row: User) => (
                 <Button type="primary" size="small" onClick={() => openAssignModal(row)}>
-                    分配角色
+                    {t('pages.userRoleRelationManager.action.assignRole')}
                 </Button>
             )
         }
@@ -150,8 +149,8 @@ export function UserRoleRelationManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="用户角色管理"
-                subtitle="为用户分配系统角色"
+                title={t('pages.userRoleRelationManager.title')}
+                subtitle={t('pages.userRoleRelationManager.subtitle')}
             />
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
@@ -174,7 +173,7 @@ export function UserRoleRelationManagerPage() {
             </Card>
 
             <Modal
-                title={`为用户 "${selectedUser?.nickname}" 分配角色`}
+                title={t('pages.userRoleRelationManager.modal.title', { name: selectedUser?.nickname || '' })}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={handleSave}
@@ -186,7 +185,7 @@ export function UserRoleRelationManagerPage() {
             >
                 <Transfer
                     dataSource={transferData}
-                    titles={['可用角色', '已分配角色']}
+                    titles={[t('pages.userRoleRelationManager.modal.titles.available'), t('pages.userRoleRelationManager.modal.titles.assigned')]}
                     targetKeys={selectedRoleIds}
                     onChange={handleTransferChange}
                     render={item => `${item.title} (${item.description})`}

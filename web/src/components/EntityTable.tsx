@@ -16,6 +16,7 @@ import {SearchOutlined} from "@ant-design/icons";
 import type {EntityTableColumn, EntityTableColumns} from "./types/entity-table.types.ts";
 import type {BaseManagerReadDTO, PaginatedResponseData} from "../types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
+import {useTranslation} from "react-i18next";
 
 export interface EntityTableProps<ENTITY extends BaseEntity> {
     entityName: string;
@@ -55,6 +56,8 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     props: EntityTableProps<ENTITY>,
     ref: ForwardedRef<EntityTableRef>,
 ) {
+    const { t } = useTranslation();
+
     // Table
     const [data, setData] = useState<ENTITY[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -86,11 +89,11 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             setTotal(res.total);
             setData(res.records);
         }).catch(() => {
-            void message.error(`无法获取${props.entityName}列表`)
+            void message.error(t('components.entityTable.fetchError', { entityName: props.entityName }))
         }).finally(() => {
             setRefreshing(false);
         })
-    }, [currentPage, currentPageSize, props, searchKeyword])
+    }, [currentPage, currentPageSize, props, searchKeyword, t])
 
     const handleSearch = (keyword: string) => {
         setSearchKeyword(keyword);
@@ -106,19 +109,19 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         ...props.columns,
         ...[
             ...[{
-                title: "记录时间",
+                title: t('components.entityTable.recordTime'),
                 dataIndex: "createdTime",
                 key: "createdTime",
                 width: 240,
                 render: (_: unknown, row: ENTITY) => {
                     return <Space orientation='vertical' size={0}>
-                        <span className="text-xs">创建时间 {formatTimestamp(row.createdTime)}</span>
-                        <span className="text-xs">修改时间 {formatTimestamp(row.modifiedTime)}</span>
+                        <span className="text-xs">{t('components.entityTable.createdTime')} {formatTimestamp(row.createdTime)}</span>
+                        <span className="text-xs">{t('components.entityTable.modifiedTime')} {formatTimestamp(row.modifiedTime)}</span>
                     </Space>
                 }
             }],
             ...(props.tableRowActionsRender !== undefined ? [{
-                title: '操作',
+                title: t('components.entityTable.action'),
                 dataIndex: "action",
                 key: 'action',
                 width: 120,
@@ -167,9 +170,9 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 ))}
 
                 <div className="flex flex-col space-y-2">
-                    <span>搜索</span>
+                    <span>{t('components.entityTable.search')}</span>
                     <Input
-                        placeholder={`搜索${props.entityName}...`}
+                        placeholder={t('components.entityTable.searchPlaceholder', { entityName: props.entityName })}
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="w-full rounded-xl"
                         onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
@@ -208,6 +211,9 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                     onChange: (page: number, pageSize: number) => {
                         setCurrentPage(page);
                         setCurrentPageSize(pageSize);
+                    },
+                    showTotal: (total: number) => {
+                        return <>{t('components.entityTable.pagination.total', { total })}</>
                     }
                 }}
                 loading={refreshing}

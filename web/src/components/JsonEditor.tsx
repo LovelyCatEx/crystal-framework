@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
+import {useTranslation} from "react-i18next";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -26,18 +27,18 @@ interface JsonEditorProps {
 
 type ValueType = 'string' | 'number' | 'boolean' | 'null' | 'object' | 'array';
 
-const TYPES = [
-    {label: '字符串', value: 'string'},
-    {label: '数字', value: 'number'},
-    {label: '布尔', value: 'boolean'},
-    {label: '对象', value: 'object'},
-    {label: '数组', value: 'array'},
-    {label: '空值', value: 'null'},
+const getTypes = (t: (key: string) => string) => [
+    {label: t('components.jsonEditor.type.string'), value: 'string'},
+    {label: t('components.jsonEditor.type.number'), value: 'number'},
+    {label: t('components.jsonEditor.type.boolean'), value: 'boolean'},
+    {label: t('components.jsonEditor.type.object'), value: 'object'},
+    {label: t('components.jsonEditor.type.array'), value: 'array'},
+    {label: t('components.jsonEditor.type.null'), value: 'null'},
 ];
 
-const ROOT_TYPES = [
-    {label: '对象', value: 'object'},
-    {label: '数组', value: 'array'},
+const getRootTypes = (t: (key: string) => string) => [
+    {label: t('components.jsonEditor.type.object'), value: 'object'},
+    {label: t('components.jsonEditor.type.array'), value: 'array'},
 ];
 
 const getDefaultValue = (type: ValueType): JsonValue => {
@@ -79,8 +80,11 @@ interface JsonNodeProps {
 }
 
 function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: JsonNodeProps) {
+    const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(false);
     const type = getValueType(value);
+    const TYPES = getTypes(t);
+    const ROOT_TYPES = getRootTypes(t);
 
     const handleChangeType = (newType: ValueType) => {
         onUpdate(getDefaultValue(newType));
@@ -132,13 +136,13 @@ function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: 
     };
 
     const renderLabel = () => {
-        if (isRoot) return <Text strong className="text-blue-600">ROOT</Text>;
+        if (isRoot) return <Text strong className="text-blue-600">{t('components.jsonEditor.root')}</Text>;
 
         return (
             <div className="flex items-center gap-2">
                 <Text type="secondary" className="font-mono text-xs">[{type}]</Text>
                 {typeof name === 'number' ? (
-                    <Tag className="font-mono text-xs m-0">Index {name}</Tag>
+                    <Tag className="font-mono text-xs m-0">{t('components.jsonEditor.index')} {name}</Tag>
                 ) : (
                     <Input
                         size="small"
@@ -254,7 +258,7 @@ function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: 
                 <div className="mt-1">
                     {type === 'object' && typeof value === 'object' && value !== null && !Array.isArray(value) ? (
                         Object.entries(value).length === 0 ? (
-                            <div className="ml-8 py-1 italic text-gray-400 text-xs">Empty Object</div>
+                            <div className="ml-8 py-1 italic text-gray-400 text-xs">{t('components.jsonEditor.emptyObject')}</div>
                         ) : (
                             Object.entries(value).map(([k, v]) => (
                                 <JsonNode
@@ -269,7 +273,7 @@ function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: 
                         )
                     ) : type === 'array' && Array.isArray(value) ? (
                         value.length === 0 ? (
-                            <div className="ml-8 py-1 italic text-gray-400 text-xs">Empty Array</div>
+                            <div className="ml-8 py-1 italic text-gray-400 text-xs">{t('components.jsonEditor.emptyArray')}</div>
                         ) : (
                             value.map((v, i) => (
                                 <JsonNode
@@ -291,6 +295,7 @@ function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: 
 }
 
 export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProps) {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('visual');
     const [jsonData, setJsonData] = useState<JsonValue>({});
     const [jsonText, setJsonText] = useState(value);
@@ -345,7 +350,7 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
                     key: 'visual',
                     tab: (
                         <span className="flex items-center gap-1 px-2">
-                            <EditOutlined/> 可视化
+                            <EditOutlined/> {t('components.jsonEditor.visual')}
                         </span>
                     ),
                 },
@@ -353,7 +358,7 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
                     key: 'json',
                     tab: (
                         <span className="flex items-center gap-1 px-2">
-                            {'{ }'} 源码
+                            {'{ }'} {t('components.jsonEditor.source')}
                         </span>
                     ),
                 },
@@ -385,7 +390,7 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
                         <div
                             className="absolute bottom-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs shadow-lg flex items-center gap-2">
                             <ExclamationCircleOutlined/>
-                            无效的 JSON 格式
+                            {t('components.jsonEditor.invalidJson')}
                         </div>
                     )}
                 </div>
@@ -395,11 +400,11 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
                 <Text type="secondary" className="text-xs">
                     {isValid ? (
                         <span className="flex items-center gap-1 text-green-600">
-                            <CheckCircleOutlined/> 格式有效
+                            <CheckCircleOutlined/> {t('components.jsonEditor.valid')}
                         </span>
                     ) : (
                         <span className="flex items-center gap-1 text-red-600">
-                            <ExclamationCircleOutlined/> 格式错误
+                            <ExclamationCircleOutlined/> {t('components.jsonEditor.invalid')}
                         </span>
                     )}
                 </Text>

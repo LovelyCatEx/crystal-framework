@@ -5,15 +5,20 @@ import {
     type ManagerReadPermissionDTO
 } from "@/api/user-permission.api.ts";
 import type {UserPermission} from "@/types/user-permission.types.ts";
+import {PermissionType} from "@/types/user-permission.types.ts";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
-import {USER_PERMISSION_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserPermissionEntityColumns.tsx";
+import {useUserPermissionTableColumns} from "@/components/columns/UserPermissionEntityColumns.tsx";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import {useTranslation} from "react-i18next";
+import {getPermissionType} from "@/i18n/enum-helpers.ts";
 
 export function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPermissionType, setFilterPermissionType] = useState<number>()
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
+    const {t} = useTranslation();
+    const columns = useUserPermissionTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.()
@@ -22,49 +27,49 @@ export function UserPermissionManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="用户权限"
-            title="用户权限管理"
-            subtitle="配置系统用户权限列表"
-            columns={USER_PERMISSION_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.userPermission')}
+            title={t('pages.userPermissionManager.title')}
+            subtitle={t('pages.userPermissionManager.subtitle')}
+            columns={columns}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={8}>
-                            <Form.Item name="name" label="权限名称" rules={[{ required: true }, { max: 256, message: '权限名称长度不能超过256个字符' }]}>
+                            <Form.Item name="name" label={t('pages.userPermissionManager.modal.name.label')} rules={[{ required: true, message: t('pages.userPermissionManager.modal.name.required') }, { max: 256, message: t('pages.userPermissionManager.modal.name.maxLength') }]}>
                                 <Input className="w-full rounded-lg h-10 flex items-center" maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="type" label="权限类型" rules={[{ required: true }]}>
+                            <Form.Item name="type" label={t('pages.userPermissionManager.modal.type.label')} rules={[{ required: true, message: t('pages.userPermissionManager.modal.type.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择权限类型"
+                                    placeholder={t('pages.userPermissionManager.modal.type.placeholder')}
                                     options={[
                                         {
-                                            label: 'ACTION',
-                                            value: 0,
+                                            label: getPermissionType(PermissionType.ACTION),
+                                            value: PermissionType.ACTION,
                                         },
                                         {
-                                            label: 'MENU',
-                                            value: 1,
+                                            label: getPermissionType(PermissionType.MENU),
+                                            value: PermissionType.MENU,
                                         },
                                         {
-                                            label: 'COMPONENT',
-                                            value: 2,
+                                            label: getPermissionType(PermissionType.COMPONENT),
+                                            value: PermissionType.COMPONENT,
                                         }
                                     ]}
                                 />
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                            <Form.Item name="path" label="资源路径" rules={[{ max: 256, message: '资源路径长度不能超过256个字符' }]}>
+                            <Form.Item name="path" label={t('pages.userPermissionManager.modal.path.label')} rules={[{ max: 256, message: t('pages.userPermissionManager.modal.path.maxLength') }]}>
                                 <Input className="w-full rounded-lg h-10 flex items-center" maxLength={256} showCount />
                             </Form.Item>
                         </Col>
                     </Row>
 
-                    <Form.Item name="description" label="权限描述" rules={[{ max: 512, message: '权限描述长度不能超过512个字符' }]}>
-                        <TextArea rows={2} placeholder="输入权限描述..." className="rounded-lg" maxLength={512} showCount />
+                    <Form.Item name="description" label={t('pages.userPermissionManager.modal.description.label')} rules={[{ max: 512, message: t('pages.userPermissionManager.modal.description.maxLength') }]}>
+                        <TextArea rows={2} placeholder={t('pages.userPermissionManager.modal.description.placeholder')} className="rounded-lg" maxLength={512} showCount />
                     </Form.Item>
                 </>
             }
@@ -82,15 +87,15 @@ export function UserPermissionManagerPage() {
             }}
             tableActions={[
                 {
-                    label: <span>类型</span>,
+                    label: <span>{t('pages.userPermissionManager.filter.type')}</span>,
                     children: <Select
                         defaultValue="-1"
                         style={{ width: 120 }}
                         options={[
-                            { value: '-1', label: '全部' },
-                            { value: '0', label: 'ACTION' },
-                            { value: '1', label: 'MENU' },
-                            { value: '2', label: 'COMPONENT' },
+                            { value: '-1', label: t('pages.userPermissionManager.filter.all') },
+                            { value: '0', label: getPermissionType(PermissionType.ACTION) },
+                            { value: '1', label: getPermissionType(PermissionType.MENU) },
+                            { value: '2', label: getPermissionType(PermissionType.COMPONENT) },
                         ]}
                         onChange={(value) => setFilterPermissionType(Number.parseInt(value))}
                     />,

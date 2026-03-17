@@ -7,7 +7,7 @@ import {
     type ManagerUpdateTenantRoleDTO,
     TenantRoleManagerController
 } from "@/api/tenant-role.api.ts";
-import {TENANT_ROLE_TABLE_COLUMNS} from "@/components/columns/TenantRoleEntityColumns.tsx";
+import {useTenantRoleTableColumns} from "@/components/columns/TenantRoleEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.tsx";
@@ -15,19 +15,23 @@ import {PlusOutlined} from "@ant-design/icons";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
 import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
-import {TenantPermissionType, type TenantPermission} from "@/types/tenant-permission.types.ts";
+import {type TenantPermission} from "@/types/tenant-permission.types.ts";
+import {useTranslation} from "react-i18next";
+import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 
 interface TransferItem {
     key: string;
     title: string;
     description: string;
-    type: TenantPermissionType;
+    type: number;
     path?: string | null;
 }
 
 export function TenantRoleManagerPage() {
+    const columns = useTenantRoleTableColumns();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+    const {t} = useTranslation();
 
     // Permission assignment modal states
     const [allPermissions, setAllPermissions] = useState<TenantPermission[]>([]);
@@ -50,7 +54,7 @@ export function TenantRoleManagerPage() {
             const res = await TenantPermissionManagerController.list();
             setAllPermissions(res.data || []);
         } catch {
-            void message.error("无法获取权限列表");
+            void message.error(t('pages.tenantRoleManager.messages.fetchPermissionsFailed'));
         }
     };
 
@@ -62,7 +66,7 @@ export function TenantRoleManagerPage() {
             const ids = res.data?.map(p => String(p.id)) || [];
             setSelectedPermissionIds(ids);
         } catch {
-            void message.error("无法获取角色权限");
+            void message.error(t('pages.tenantRoleManager.messages.fetchRolePermissionsFailed'));
             setSelectedPermissionIds([]);
         }
     };
@@ -73,10 +77,10 @@ export function TenantRoleManagerPage() {
         setSavingPermissions(true);
         try {
             await setTenantRolePermissions(selectedRole.id, ids);
-            void message.success("权限分配成功");
+            void message.success(t('pages.tenantRoleManager.messages.assignSuccess'));
             setIsPermissionModalVisible(false);
         } catch {
-            void message.error("权限分配失败");
+            void message.error(t('pages.tenantRoleManager.messages.assignFailed'));
         } finally {
             setSavingPermissions(false);
         }
@@ -90,7 +94,7 @@ export function TenantRoleManagerPage() {
         key: String(p.id),
         title: p.name,
         description: p.description || '',
-        type: TenantPermissionType[p.type] as unknown as TenantPermissionType,
+        type: p.type,
         path: p.path
     }));
 
@@ -101,8 +105,8 @@ export function TenantRoleManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="租户角色管理"
-                subtitle="管理租户角色信息"
+                title={t('pages.tenantRoleManager.title')}
+                subtitle={t('pages.tenantRoleManager.subtitle')}
                 titleActions={
                     selectedTenantId ? (
                         <Button
@@ -112,7 +116,7 @@ export function TenantRoleManagerPage() {
                             className="rounded-xl h-12 shadow-lg"
                             onClick={handleOpenAddModal}
                         >
-                            新增租户角色
+                            {t('pages.tenantRoleManager.action.addNew')}
                         </Button>
                     ) : null
                 }
@@ -125,11 +129,11 @@ export function TenantRoleManagerPage() {
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="租户角色"
+                    entityName={t('entityNames.tenantRole')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_ROLE_TABLE_COLUMNS}
+                    columns={columns}
                     editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>
@@ -139,12 +143,12 @@ export function TenantRoleManagerPage() {
                                     </Form.Item>
                                     <Form.Item
                                         name="name"
-                                        label="角色名称"
-                                        rules={[{ required: true, message: '请输入角色名称' }]}
+                                        label={t('pages.tenantRoleManager.modal.name.label')}
+                                        rules={[{ required: true, message: t('pages.tenantRoleManager.modal.name.required') }]}
                                     >
                                         <Input
                                             className="w-full rounded-lg h-10"
-                                            placeholder="输入角色名称"
+                                            placeholder={t('pages.tenantRoleManager.modal.name.placeholder')}
                                             maxLength={64}
                                             showCount
                                         />
@@ -153,7 +157,7 @@ export function TenantRoleManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="parentId"
-                                        label="父角色"
+                                        label={t('pages.tenantRoleManager.modal.parentId.label')}
                                     >
                                         <TenantRoleIdSelector tenantId={selectedTenantId || ''} disabledRoleId={editingItem?.id ?? null} />
                                     </Form.Item>
@@ -163,11 +167,11 @@ export function TenantRoleManagerPage() {
                                 <Col span={24}>
                                     <Form.Item
                                         name="description"
-                                        label="描述"
+                                        label={t('pages.tenantRoleManager.modal.description.label')}
                                     >
                                         <Input.TextArea
                                             className="w-full rounded-lg"
-                                            placeholder="输入描述（可选）"
+                                            placeholder={t('pages.tenantRoleManager.modal.description.placeholder')}
                                             maxLength={512}
                                             showCount
                                             rows={2}
@@ -201,14 +205,14 @@ export function TenantRoleManagerPage() {
                             size="small"
                             onClick={() => openAssignPermissionModal(record)}
                         >
-                            分配权限
+                            {t('pages.tenantRoleManager.action.assignPermission')}
                         </Button>
                     )}
                 />
             )}
 
             <Modal
-                title={`为角色 "${selectedRole?.name}" 分配权限`}
+                title={t('pages.tenantRoleManager.permissionModal.title', { name: selectedRole?.name || '' })}
                 open={isPermissionModalVisible}
                 onOk={handleSavePermissions}
                 onCancel={() => setIsPermissionModalVisible(false)}
@@ -220,12 +224,16 @@ export function TenantRoleManagerPage() {
             >
                 <Transfer
                     dataSource={transferData}
-                    titles={['可用权限', '已分配权限']}
+                    titles={[t('pages.tenantRoleManager.permissionModal.titles.available'), t('pages.tenantRoleManager.permissionModal.titles.assigned')]}
                     targetKeys={selectedPermissionIds}
                     onChange={handleTransferChange}
                     render={item => {
+                        const typeColors: Record<number, string> = {
+                            0: 'blue',
+                            1: 'green'
+                        };
                         return <span>
-                            <Tag color="orange">{item.type}</Tag>
+                            <Tag color={typeColors[item.type] || 'default'}>{getTenantPermissionType(item.type)}</Tag>
                             &nbsp;{item.title}
                             &nbsp;{item.path ? <Tag>{item.path}</Tag> : <span className="text-gray-500">({item.description})</span>}
                         </span>

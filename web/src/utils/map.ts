@@ -10,3 +10,16 @@ export function sortByMapOrder<T extends string>(arr: T[], map: Map<T, any>): T[
         return orderA - orderB;
     });
 }
+
+export function sortByArrayOrder<T extends string>(arr: T[], orderArray: readonly string[]): T[] {
+    const orderMap = new Map<string, number>();
+    orderArray.forEach((key, index) => {
+        orderMap.set(key, index);
+    });
+
+    return [...arr].sort((a, b) => {
+        const orderA = orderMap.get(a) ?? Number.MAX_SAFE_INTEGER;
+        const orderB = orderMap.get(b) ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+    });
+}

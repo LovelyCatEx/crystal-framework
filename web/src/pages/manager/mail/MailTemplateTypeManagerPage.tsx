@@ -6,15 +6,18 @@ import {
 } from "@/api/mail-template-type.api.ts";
 import {useEffect, useRef, useState} from "react";
 import type {MailTemplateCategory, MailTemplateType} from "@/types/mail.types.ts";
-import {MAIL_TEMPLATE_TYPE_MANAGER_TABLE_COLUMNS} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
+import {useMailTemplateTypeTableColumns} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
 import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import {useTranslation} from "react-i18next";
 
 export function MailTemplateTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [categories, setCategories] = useState<MailTemplateCategory[]>([]);
     const { controller } = useProtectedController<MailTemplateType, ManagerCreateMailTemplateTypeDTO, ManagerReadMailTemplateTypeDTO>();
+    const {t} = useTranslation();
+    const columns = useMailTemplateTypeTableColumns();
 
     useEffect(() => {
         MailTemplateCategoryManagerController.list().then((res) => {
@@ -25,23 +28,23 @@ export function MailTemplateTypeManagerPage() {
     return (
         <ManagerPageContainer
             ref={pageRef}
-            entityName="邮件模板类型"
-            title="邮件模板类型管理"
-            subtitle="管理邮件模板类型"
-            columns={MAIL_TEMPLATE_TYPE_MANAGER_TABLE_COLUMNS}
+            entityName={t('entityNames.mailTemplateType')}
+            title={t('pages.mailTemplateTypeManager.title')}
+            subtitle={t('pages.mailTemplateTypeManager.subtitle')}
+            columns={columns}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
                         <Col span={12}>
-                            <Form.Item name="name" label="名称" rules={[{ required: true }, { max: 128, message: '名称长度不能超过128个字符' }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder="类型名称" maxLength={128} showCount />
+                            <Form.Item name="name" label={t('pages.mailTemplateTypeManager.modal.name.label')} rules={[{ required: true, message: t('pages.mailTemplateTypeManager.modal.name.required') }, { max: 128, message: t('pages.mailTemplateTypeManager.modal.name.maxLength') }]}>
+                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.mailTemplateTypeManager.modal.name.placeholder')} maxLength={128} showCount />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="categoryId" label="分类" rules={[{ required: true }]}>
+                            <Form.Item name="categoryId" label={t('pages.mailTemplateTypeManager.modal.categoryId.label')} rules={[{ required: true, message: t('pages.mailTemplateTypeManager.modal.categoryId.required') }]}>
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
-                                    placeholder="选择分类"
+                                    placeholder={t('pages.mailTemplateTypeManager.modal.categoryId.placeholder')}
                                     options={categories.map((cat) => ({
                                         label: cat.name,
                                         value: cat.id,
@@ -50,19 +53,19 @@ export function MailTemplateTypeManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item name="description" label="描述" rules={[{ max: 512, message: '描述长度不能超过512个字符' }]}>
-                        <Input.TextArea 
-                            className="w-full rounded-lg" 
-                            placeholder="类型描述" 
+                    <Form.Item name="description" label={t('pages.mailTemplateTypeManager.modal.description.label')} rules={[{ max: 512, message: t('pages.mailTemplateTypeManager.modal.description.maxLength') }]}>
+                        <Input.TextArea
+                            className="w-full rounded-lg"
+                            placeholder={t('pages.mailTemplateTypeManager.modal.description.placeholder')}
                             rows={3}
                             maxLength={512}
                             showCount
                         />
                     </Form.Item>
-                    <Form.Item name="variables" label="变量(JSON格式)" rules={[{ required: true }]}>
-                        <JsonEditor placeholder='{"username": "用户名", "code": "验证码"}' />
+                    <Form.Item name="variables" label={t('pages.mailTemplateTypeManager.modal.variables.label')} rules={[{ required: true, message: t('pages.mailTemplateTypeManager.modal.variables.required') }]}>
+                        <JsonEditor placeholder={t('pages.mailTemplateTypeManager.modal.variables.placeholder')} />
                     </Form.Item>
-                    <Form.Item name="allowMultiple" label="允许多个" valuePropName="checked">
+                    <Form.Item name="allowMultiple" label={t('pages.mailTemplateTypeManager.modal.allowMultiple.label')} valuePropName="checked">
                         <Switch />
                     </Form.Item>
                 </>

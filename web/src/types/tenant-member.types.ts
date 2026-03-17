@@ -9,14 +9,6 @@ export enum TenantMemberStatus {
     ACTIVE = 4
 }
 
-export const TenantMemberStatusMap: Record<number, { label: string; color: string }> = {
-    [TenantMemberStatus.INACTIVE]: { label: 'INACTIVE', color: 'default' },
-    [TenantMemberStatus.DEPARTED]: { label: 'DEPARTED', color: 'red' },
-    [TenantMemberStatus.RESIGNED]: { label: 'RESIGNED', color: 'orange' },
-    [TenantMemberStatus.REVIEWING]: { label: 'REVIEWING', color: 'blue' },
-    [TenantMemberStatus.ACTIVE]: { label: 'ACTIVE', color: 'green' }
-};
-
 export interface TenantMember extends BaseEntity {
     id: string;
     tenantId: string;

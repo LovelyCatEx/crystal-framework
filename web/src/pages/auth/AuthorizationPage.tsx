@@ -1,4 +1,5 @@
 import {Route, Routes, useNavigate} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
 import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
@@ -6,6 +7,7 @@ import {GithubOutlined} from '@ant-design/icons';
 import {ProjectDisplayName} from "@/global/global-settings.ts";
 import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router";
 import {OAuth2CodePage} from "./OAuth2CodePage.tsx";
+import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 
 export function AuthorizationPage({ parentPath }: { parentPath: string }) {
   const navigate = useNavigate();
@@ -21,7 +23,8 @@ export function AuthorizationPage({ parentPath }: { parentPath: string }) {
             </span>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <a
                 href="https://github.com/LovelyCatEx"
                 target="_blank"
@@ -91,9 +94,16 @@ export function AuthCardLayout({
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-6 text-gray-400 text-xs z-0">
-        © 2026 {ProjectDisplayName}. All rights reserved.
-      </div>
+      <AuthFooter />
+    </div>
+  );
+}
+
+function AuthFooter() {
+  const { t } = useTranslation();
+  return (
+    <div className="fixed bottom-6 text-gray-400 text-xs z-0">
+      {t('pages.auth.authorization.allRightsReserved', { projectName: ProjectDisplayName })}
     </div>
   );
 }

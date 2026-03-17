@@ -11,12 +11,15 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector} from "@/components/selector";
-import {TENANT_INVITATION_TABLE_COLUMNS} from "@/components/columns/TenantInvitationEntityColumns.tsx";
+import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
+import {useTranslation} from "react-i18next";
 
 export function MyTenantInvitationManagerPage() {
+    const { t } = useTranslation();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;
+    const columns = useTenantInvitationTableColumns();
 
     const handleOpenAddModal = () => {
         pageRef.current?.openModal();
@@ -40,7 +43,7 @@ export function MyTenantInvitationManagerPage() {
     if (isJoinedTenantsLoading) {
         return (
             <>
-                <ActionBarComponent title="我的组织邀请码" subtitle="管理当前组织的邀请码" />
+                <ActionBarComponent title={t('pages.myTenantInvitationManager.title')} subtitle={t('pages.myTenantInvitationManager.subtitle')} />
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
                     <Spin size="large" />
                 </div>
@@ -51,8 +54,8 @@ export function MyTenantInvitationManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="我的组织邀请码"
-                subtitle="管理当前组织的邀请码"
+                title={t('pages.myTenantInvitationManager.title')}
+                subtitle={t('pages.myTenantInvitationManager.subtitle')}
                 titleActions={
                     currentTenantId ? (
                         <Button
@@ -62,7 +65,7 @@ export function MyTenantInvitationManagerPage() {
                             className="rounded-xl h-12 shadow-lg"
                             onClick={handleOpenAddModal}
                         >
-                            新增邀请码
+                            {t('pages.myTenantInvitationManager.action.addNew')}
                         </Button>
                     ) : null
                 }
@@ -71,14 +74,14 @@ export function MyTenantInvitationManagerPage() {
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="邀请码"
+                    entityName={t('entityNames.tenantInvitation')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_INVITATION_TABLE_COLUMNS}
+                    columns={columns}
                     tableRowActionsRender={(row) => (
                         <>
-                            <Tooltip title="复制邀请码链接">
+                            <Tooltip title={t('pages.myTenantInvitationManager.action.copyLinkTooltip')}>
                                 <Button
                                     type="text"
                                     size="small"
@@ -89,10 +92,9 @@ export function MyTenantInvitationManagerPage() {
 
                                         try {
                                             await navigator.clipboard.writeText(url)
-                                            message.success("已将邀请链接复制到剪切板")
+                                            message.success(t('pages.myTenantInvitationManager.messages.copySuccess'))
                                         } catch (err) {
-                                            message.error("复制失败，请手动复制")
-                                            console.error('复制失败:', err)
+                                            message.error(t('pages.myTenantInvitationManager.messages.copyFailed'))
                                         }
                                     }}
                                 />
@@ -116,18 +118,18 @@ export function MyTenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="departmentId"
-                                        label="部门（可选）"
+                                        label={t('pages.myTenantInvitationManager.modal.departmentId.label')}
                                     >
                                         <TenantDepartmentIdSelector
                                             tenantId={currentTenantId}
-                                            placeholder="选择部门（可选）"
+                                            placeholder={t('pages.myTenantInvitationManager.modal.departmentId.placeholder')}
                                         />
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item
                                         name="requiresReviewing"
-                                        label="需要审核"
+                                        label={t('pages.myTenantInvitationManager.modal.requiresReviewing.label')}
                                         valuePropName="checked"
                                         initialValue={false}
                                     >
@@ -139,13 +141,13 @@ export function MyTenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="invitationCount"
-                                        label="可邀请次数"
-                                        rules={[{ required: true, message: '请输入可邀请次数' }]}
+                                        label={t('pages.myTenantInvitationManager.modal.invitationCount.label')}
+                                        rules={[{ required: true, message: t('pages.myTenantInvitationManager.modal.invitationCount.required') }]}
                                         initialValue={10}
                                     >
                                         <InputNumber
                                             className="w-full rounded-lg h-10"
-                                            placeholder="输入可邀请次数"
+                                            placeholder={t('pages.myTenantInvitationManager.modal.invitationCount.placeholder')}
                                             min={1}
                                             max={1000}
                                         />
@@ -154,7 +156,7 @@ export function MyTenantInvitationManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="expiresTime"
-                                        label="过期时间（可选）"
+                                        label={t('pages.myTenantInvitationManager.modal.expiresTime.label')}
                                         getValueProps={(value) => {
                                             if (value && typeof value === 'string') {
                                                 const timestamp = Number(value);
@@ -169,7 +171,7 @@ export function MyTenantInvitationManagerPage() {
                                             className="w-full rounded-lg h-10 flex items-center"
                                             showTime
                                             format="YYYY-MM-DD HH:mm:ss"
-                                            placeholder="选择过期时间（可选）"
+                                            placeholder={t('pages.myTenantInvitationManager.modal.expiresTime.placeholder')}
                                         />
                                     </Form.Item>
                                 </Col>

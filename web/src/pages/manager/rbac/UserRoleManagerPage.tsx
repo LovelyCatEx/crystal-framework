@@ -4,17 +4,19 @@ import {useEffect, useState} from "react";
 import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
 import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user-role.api.ts";
 import TextArea from "antd/es/input/TextArea";
-import {USER_ROLE_MANAGER_TABLE_COLUMNS} from "@/components/columns/UserRoleEntityColumns.tsx";
+import {useUserRoleTableColumns} from "@/components/columns/UserRoleEntityColumns.tsx";
 import {getRolePermissions, setRolePermissions} from "@/api/user-role-permission.api.ts";
 import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
-import {PermissionType, type UserPermission} from "@/types/user-permission.types.ts";
+import {type UserPermission} from "@/types/user-permission.types.ts";
 import type {UserRole} from "@/types/user-role.types.ts";
+import {useTranslation} from "react-i18next";
+import {getPermissionType} from "@/i18n/enum-helpers.ts";
 
 interface TransferItem {
     key: string;
     title: string;
     description: string;
-    type: PermissionType;
+    type: number;
     path?: string | null;
 }
 
@@ -24,13 +26,15 @@ export function UserRoleManagerPage() {
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);
     const [isPermissionModalVisible, setIsPermissionModalVisible] = useState(false);
     const [savingPermissions, setSavingPermissions] = useState(false);
+    const {t} = useTranslation();
+    const columns = useUserRoleTableColumns();
 
     const fetchAllPermissions = async () => {
         try {
             const res = await UserPermissionManagerController.list();
             setAllPermissions(res.data || []);
         } catch {
-            void message.error("无法获取权限列表");
+            void message.error(t('pages.userRoleManager.messages.fetchPermissionsFailed'));
         }
     };
 
@@ -42,7 +46,7 @@ export function UserRoleManagerPage() {
             const ids = res.data?.map(p => String(p.id)) || [];
             setSelectedPermissionIds(ids);
         } catch {
-            void message.error("无法获取角色权限");
+            void message.error(t('pages.userRoleManager.messages.fetchRolePermissionsFailed'));
             setSelectedPermissionIds([]);
         }
     };
@@ -53,10 +57,10 @@ export function UserRoleManagerPage() {
         setSavingPermissions(true);
         try {
             await setRolePermissions(selectedRole.id, ids);
-            void message.success("权限分配成功");
+            void message.success(t('pages.userRoleManager.messages.assignSuccess'));
             setIsPermissionModalVisible(false);
         } catch {
-            void message.error("权限分配失败");
+            void message.error(t('pages.userRoleManager.messages.assignFailed'));
         } finally {
             setSavingPermissions(false);
         }
@@ -70,7 +74,7 @@ export function UserRoleManagerPage() {
         key: String(p.id),
         title: p.name,
         description: p.description || '',
-        type: PermissionType[p.type] as unknown as PermissionType,
+        type: p.type,
         path: p.path
     }));
 
@@ -81,22 +85,22 @@ export function UserRoleManagerPage() {
     return (
         <>
             <ManagerPageContainer
-                entityName="用户角色"
-                title="用户角色管理"
-                subtitle="配置系统用户角色列表"
-                columns={USER_ROLE_MANAGER_TABLE_COLUMNS}
+                entityName={t('entityNames.userRole')}
+                title={t('pages.userRoleManager.title')}
+                subtitle={t('pages.userRoleManager.subtitle')}
+                columns={columns}
                 editModalFormChildren={
                     <>
                         <Row gutter={24}>
                             <Col span={12}>
-                                <Form.Item name="name" label="角色名称" rules={[{ required: true }, { max: 128, message: '角色名称长度不能超过128个字符' }]}>
+                                <Form.Item name="name" label={t('pages.userRoleManager.modal.name.label')} rules={[{ required: true, message: t('pages.userRoleManager.modal.name.required') }, { max: 128, message: t('pages.userRoleManager.modal.name.maxLength') }]}>
                                     <Input className="w-full rounded-lg h-10 flex items-center" maxLength={128} showCount />
                                 </Form.Item>
                             </Col>
                         </Row>
 
-                        <Form.Item name="description" label="角色描述" rules={[{ max: 512, message: '角色描述长度不能超过512个字符' }]}>
-                            <TextArea rows={2} placeholder="输入角色描述..." className="rounded-lg" maxLength={512} showCount />
+                        <Form.Item name="description" label={t('pages.userRoleManager.modal.description.label')} rules={[{ max: 512, message: t('pages.userRoleManager.modal.description.maxLength') }]}>
+                            <TextArea rows={2} placeholder={t('pages.userRoleManager.modal.description.placeholder')} className="rounded-lg" maxLength={512} showCount />
                         </Form.Item>
                     </>
                 }
@@ -117,13 +121,13 @@ export function UserRoleManagerPage() {
                         size="small"
                         onClick={() => openAssignPermissionModal(record)}
                     >
-                        分配权限
+                        {t('pages.userRoleManager.action.assignPermission')}
                     </Button>
                 )}
             />
 
             <Modal
-                title={`为角色 "${selectedRole?.name}" 分配权限`}
+                title={t('pages.userRoleManager.permissionModal.title', { name: selectedRole?.name || '' })}
                 open={isPermissionModalVisible}
                 onCancel={() => setIsPermissionModalVisible(false)}
                 onOk={handleSavePermissions}
@@ -135,12 +139,17 @@ export function UserRoleManagerPage() {
             >
                 <Transfer
                     dataSource={transferData}
-                    titles={['可用权限', '已分配权限']}
+                    titles={[t('pages.userRoleManager.permissionModal.titles.available'), t('pages.userRoleManager.permissionModal.titles.assigned')]}
                     targetKeys={selectedPermissionIds}
                     onChange={handleTransferChange}
                     render={item => {
+                        const typeColors: Record<number, string> = {
+                            0: 'blue',
+                            1: 'green',
+                            2: 'purple'
+                        };
                         return <span>
-                            <Tag color="orange">{item.type}</Tag>
+                            <Tag color={typeColors[item.type] || 'default'}>{getPermissionType(item.type)}</Tag>
                             &nbsp;{item.title}
                             &nbsp;{item.path ? <Tag>{item.path}</Tag> : <span className="text-gray-500">({item.description})</span>}
                         </span>

@@ -4,8 +4,10 @@ import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {TenantDepartment} from "@/types/tenant-department.types.ts";
 import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
+import {useTranslation} from "react-i18next";
 
 const ParentDepartmentDisplay: React.FC<{ tenantId: string, parentId: string }> = ({ tenantId, parentId }) => {
+    const { t } = useTranslation();
     const [department, setDepartment] = useState<TenantDepartment | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ const ParentDepartmentDisplay: React.FC<{ tenantId: string, parentId: string }> 
         return (
             <CopyableToolTip title={parentId}>
                 <Tag color="red" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
-                    父部门ID: {parentId}
+                    {t('components.columns.tenantDepartment.parentDepartmentId')}: {parentId}
                 </Tag>
             </CopyableToolTip>
         );
@@ -53,28 +55,32 @@ const ParentDepartmentDisplay: React.FC<{ tenantId: string, parentId: string }> 
     );
 };
 
-export const TENANT_DEPARTMENT_TABLE_COLUMNS: EntityTableColumns<TenantDepartment> = [
-    {
-        title: "部门名称",
-        dataIndex: "name",
-        key: "name",
-        render: (value: unknown) => String(value),
-    },
-    {
-        title: "描述",
-        dataIndex: "description",
-        key: "description",
-        render: (value: unknown) => value ? String(value) : "-",
-    },
-    {
-        title: "父部门",
-        dataIndex: "parentId",
-        key: "parentId",
-        render: function (_: unknown, row: TenantDepartment): React.ReactNode | JSX.Element {
-            if (!row.parentId) {
-                return <Tag color="default" className="text-xs">-</Tag>;
+export function useTenantDepartmentTableColumns(): EntityTableColumns<TenantDepartment> {
+    const { t } = useTranslation();
+
+    return [
+        {
+            title: t('components.columns.tenantDepartment.departmentName'),
+            dataIndex: "name",
+            key: "name",
+            render: (value: unknown) => String(value),
+        },
+        {
+            title: t('components.columns.tenantDepartment.description'),
+            dataIndex: "description",
+            key: "description",
+            render: (value: unknown) => value ? String(value) : "-",
+        },
+        {
+            title: t('components.columns.tenantDepartment.parentDepartment'),
+            dataIndex: "parentId",
+            key: "parentId",
+            render: function (_: unknown, row: TenantDepartment): React.ReactNode | JSX.Element {
+                if (!row.parentId) {
+                    return <Tag color="default" className="text-xs">-</Tag>;
+                }
+                return <ParentDepartmentDisplay tenantId={row.tenantId} parentId={row.parentId} />;
             }
-            return <ParentDepartmentDisplay tenantId={row.tenantId} parentId={row.parentId} />;
-        }
-    },
-];
+        },
+    ];
+}

@@ -4,17 +4,20 @@ import {getSystemSettingsSchema, updateSystemSettings} from "@/api/system-settin
 import {Button, Card, Col, Form, Input, InputNumber, message, Row, Switch} from "antd";
 import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
-import {settingsGroupToTranslationMap, settingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
+import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
 import {ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
+import {useTranslation} from "react-i18next";
 
 export function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
+    const {t} = useTranslation();
+    const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
 
     const { data, isLoading, mutate } = useSWRComposition(
         'settings-schema',
         () => getSystemSettingsSchema().then((res) => res.data),
-        () => void message.error("无法获取系统设置")
+        () => void message.error(t('pages.systemSettingsManager.fetchFailed'))
     )
 
     const [form] = Form.useForm();
@@ -39,10 +42,10 @@ export function SystemSettingsManagerPage() {
     const updateSettings = (props: Record<string, string | null>) => {
         updateSystemSettings(props)
             .then(() => {
-                void message.success("系统设置已保存")
+                void message.success(t('pages.systemSettingsManager.saveSuccess'))
             })
             .catch(() => {
-                void message.error("系统设置保存失败")
+                void message.error(t('pages.systemSettingsManager.saveFailed'))
             })
             .finally(() => {
                 setRefreshing(true)
@@ -59,11 +62,11 @@ export function SystemSettingsManagerPage() {
                 if (res) {
                     form.setFieldsValue(res)
                 } else {
-                    void message.warning("导入的配置为空")
+                    void message.warning(t('pages.systemSettingsManager.importEmpty'))
                 }
             })
             .catch(() => {
-                void message.error("导入配置失败")
+                void message.error(t('pages.systemSettingsManager.importFailed'))
             })
     }
 
@@ -75,8 +78,8 @@ export function SystemSettingsManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="系统设置"
-                subtitle="编辑所有系统设置"
+                title={t('pages.systemSettingsManager.title')}
+                subtitle={t('pages.systemSettingsManager.subtitle')}
                 titleActions={
                     <Button
                         type="primary"
@@ -87,7 +90,7 @@ export function SystemSettingsManagerPage() {
                             form.submit();
                         }}
                     >
-                        保存设置
+                        {t('pages.systemSettingsManager.saveSettings')}
                     </Button>
                 }
             />
@@ -95,7 +98,7 @@ export function SystemSettingsManagerPage() {
             <Card className="mb-4">
                 <div className="text-lg font-bold mb-4 flex items-center space-x-2">
                     <ToolOutlined />
-                    <span>操作</span>
+                    <span>{t('pages.systemSettingsManager.operation')}</span>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -103,13 +106,13 @@ export function SystemSettingsManagerPage() {
                         icon={<ImportOutlined />}
                         onClick={importSettings}
                     >
-                        导入配置
+                        {t('pages.systemSettingsManager.importConfig')}
                     </Button>
                     <Button
                         icon={<ExportOutlined />}
                         onClick={exportSettings}
                     >
-                        导出配置
+                        {t('pages.systemSettingsManager.exportConfig')}
                     </Button>
                 </div>
             </Card>
@@ -141,8 +144,6 @@ export function SystemSettingsManagerPage() {
                                         chunks.push(items.slice(i, i + 3));
                                     }
 
-                                    console.log(chunks)
-
                                     return chunks.map((chunk, chunkIndex) => (
                                         <Row gutter={[16, 16]} key={chunkIndex}>
                                             {chunk.map(([key, value]) => (
@@ -171,6 +172,7 @@ export function SystemSettingsManagerPage() {
 
 function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema }) {
     const [formItemProps, setFormItemProps] = useState<Record<string, unknown>>();
+    const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
 
     return (
         <Form.Item

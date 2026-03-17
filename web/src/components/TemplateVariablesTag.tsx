@@ -1,12 +1,15 @@
 import { Tag, message } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import type { MailTemplateType } from "../types/mail.types.ts";
+import { useTranslation } from "react-i18next";
 
 interface TemplateVariablesTagProps {
     templateType: MailTemplateType | null;
 }
 
 export function TemplateVariablesTag({ templateType }: TemplateVariablesTagProps) {
+    const { t } = useTranslation();
+
     if (!templateType) {
         return null;
     }
@@ -29,7 +32,7 @@ export function TemplateVariablesTag({ templateType }: TemplateVariablesTagProps
 
     const handleCopy = (variable: string) => {
         navigator.clipboard.writeText(`{{${variable}}}`).then(() => {
-            void message.success(`已复制 {{${variable}}} 到剪切板`);
+            void message.success(t('components.templateVariablesTag.copySuccess', { variable: `{{${variable}}}` }));
         });
     };
 

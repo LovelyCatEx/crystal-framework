@@ -3,11 +3,13 @@ import {useNavigate} from 'react-router-dom';
 import {HomeOutlined, QuestionCircleOutlined} from "@ant-design/icons";
 import {useEffect} from "react";
 import {buildDocumentTitle} from "@/global/global-settings.ts";
+import {useTranslation} from "react-i18next";
 
 const { Title } = Typography;
 const { useToken } = theme;
 
 export function NotFoundPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { token } = useToken();
 
@@ -45,10 +47,10 @@ export function NotFoundPage() {
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
                     <Title level={2} className="!font-bold !mb-2" style={{ color: token.colorTextHeading }}>
-                        哎呀！路径丢失了
+                        {t('pages.notFound.title')}
                     </Title>
                     <p className="text-lg mb-10 max-w-[360px] mx-auto" style={{ color: token.colorTextSecondary }}>
-                        您访问的页面可能已被移动、删除或不存在。
+                        {t('pages.notFound.description')}
                     </p>
 
                     <Button
@@ -60,7 +62,7 @@ export function NotFoundPage() {
                         style={{ boxShadow: `0 10px 15px -3px ${token.colorPrimary}40` }}
                         onClick={() => navigate('/')}
                     >
-                        返回首页
+                        {t('pages.notFound.backToHome')}
                     </Button>
                 </div>
             </div>

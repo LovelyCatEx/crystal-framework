@@ -3,13 +3,14 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
 import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
-import {tenantMemberStatusToTranslationMap} from "@/i18n/tenant-member.ts";
+import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {getTenantMemberRoles, setTenantMemberRoles} from "@/api/tenant-member-role.api.ts";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-import {TenantMemberStatusMap, type TenantMemberVO} from "@/types/tenant-member.types.ts";
+import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface TransferItem {
     key: string;
@@ -19,6 +20,7 @@ interface TransferItem {
 
 export function TenantMemberRoleManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+    const {t} = useTranslation();
     const [members, setMembers] = useState<TenantMemberVO[]>([]);
     const [allRoles, setAllRoles] = useState<TenantRole[]>([]);
     const [selectedMember, setSelectedMember] = useState<TenantMemberVO | null>(null);
@@ -50,7 +52,7 @@ export function TenantMemberRoleManagerPage() {
             setMembers(res.data?.records || []);
             setTotal(res.data?.total || 0);
         } catch {
-            void message.error("无法获取成员列表");
+            void message.error(t('pages.tenantMemberRoleManager.messages.fetchMembersFailed'));
         } finally {
             setLoading(false);
         }
@@ -62,7 +64,7 @@ export function TenantMemberRoleManagerPage() {
             const res = await TenantRoleManagerController.list({ tenantId: selectedTenantId });
             setAllRoles(res.data || []);
         } catch {
-            void message.error("无法获取角色列表");
+            void message.error(t('pages.tenantMemberRoleManager.messages.fetchRolesFailed'));
         }
     };
 
@@ -80,7 +82,7 @@ export function TenantMemberRoleManagerPage() {
             const ids = res.data?.map(r => String(r.id)) || [];
             setSelectedRoleIds(ids);
         } catch {
-            void message.error("无法获取成员角色");
+            void message.error(t('pages.tenantMemberRoleManager.messages.fetchMemberRolesFailed'));
             setSelectedRoleIds([]);
         }
     };
@@ -91,10 +93,10 @@ export function TenantMemberRoleManagerPage() {
         setSaving(true);
         try {
             await setTenantMemberRoles(selectedMember.id, ids);
-            void message.success("角色分配成功");
+            void message.success(t('pages.tenantMemberRoleManager.messages.assignSuccess'));
             setIsModalVisible(false);
         } catch {
-            void message.error("角色分配失败");
+            void message.error(t('pages.tenantMemberRoleManager.messages.assignFailed'));
         } finally {
             setSaving(false);
         }
@@ -123,13 +125,13 @@ export function TenantMemberRoleManagerPage() {
 
     const columns = [
         {
-            title: "成员",
+            title: t('pages.tenantMemberRoleManager.columns.member'),
             dataIndex: "user",
             key: "user",
             render: (_: unknown, row: TenantMemberVO) => (
                 <Space orientation='vertical' size={0}>
-                    <CopyableToolTip title={row.user?.nickname || '未知用户'}>
-                        <span className="text-xs font-mono">{row.user?.nickname || '未知用户'}</span>
+                    <CopyableToolTip title={row.user?.nickname || t('common.unknownUser')}>
+                        <span className="text-xs font-mono">{row.user?.nickname || t('common.unknownUser')}</span>
                     </CopyableToolTip>
                     <CopyableToolTip title={row.id}>
                         <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
@@ -138,39 +140,44 @@ export function TenantMemberRoleManagerPage() {
             )
         },
         {
-            title: "用户名",
+            title: t('pages.tenantMemberRoleManager.columns.username'),
             key: "username",
             render: (_: unknown, row: TenantMemberVO) => (
                 <span className="text-xs font-mono">{row.user?.username || '-'}</span>
             )
         },
         {
-            title: "邮箱",
+            title: t('pages.tenantMemberRoleManager.columns.email'),
             key: "email",
             render: (_: unknown, row: TenantMemberVO) => (
                 <span className="text-xs font-mono">{row.user?.email || '-'}</span>
             )
         },
         {
-            title: "状态",
+            title: t('pages.tenantMemberRoleManager.columns.status'),
             dataIndex: "status",
             key: "status",
             render: (status: number) => {
-                const statusInfo = TenantMemberStatusMap[status] || { label: '未知', color: 'default' };
-                const translatedLabel = tenantMemberStatusToTranslationMap.get(status) || statusInfo.label;
+                const statusColors: Record<number, string> = {
+                    0: 'default',
+                    1: 'red',
+                    2: 'orange',
+                    3: 'blue',
+                    4: 'green'
+                };
                 return (
-                    <Tag color={statusInfo.color} className="text-xs">
-                        {translatedLabel}
+                    <Tag color={statusColors[status] || 'default'} className="text-xs">
+                        {getTenantMemberStatus(status)}
                     </Tag>
                 );
             }
         },
         {
-            title: "操作",
+            title: t('pages.tenantMemberRoleManager.columns.action'),
             key: "action",
             render: (_: unknown, row: TenantMemberVO) => (
                 <Button type="primary" size="small" onClick={() => openAssignModal(row)}>
-                    分配角色
+                    {t('pages.tenantMemberRoleManager.action.assignRole')}
                 </Button>
             )
         }
@@ -179,8 +186,8 @@ export function TenantMemberRoleManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="租户成员角色管理"
-                subtitle="为租户成员分配角色"
+                title={t('pages.tenantMemberRoleManager.title')}
+                subtitle={t('pages.tenantMemberRoleManager.subtitle')}
             />
             <TenantSelectorWithDetail
                 value={selectedTenantId}
@@ -199,7 +206,6 @@ export function TenantMemberRoleManagerPage() {
                             total: total,
                             showSizeChanger: true,
                             showQuickJumper: true,
-                            showTotal: (total) => `共 ${total} 条`,
                             onChange: handlePageChange
                         }}
                     />
@@ -207,7 +213,7 @@ export function TenantMemberRoleManagerPage() {
             )}
 
             <Modal
-                title={`为成员 "${selectedMember?.user?.nickname}" 分配角色`}
+                title={t('pages.tenantMemberRoleManager.modal.title', { nickname: selectedMember?.user?.nickname || '' })}
                 open={isModalVisible}
                 onOk={handleSave}
                 onCancel={() => setIsModalVisible(false)}
@@ -219,7 +225,7 @@ export function TenantMemberRoleManagerPage() {
                     targetKeys={selectedRoleIds}
                     onChange={handleTransferChange}
                     render={item => item.title}
-                    titles={['未分配角色', '已分配角色']}
+                    titles={[t('pages.tenantMemberRoleManager.modal.titles.unassigned'), t('pages.tenantMemberRoleManager.modal.titles.assigned')]}
                     listStyle={{
                         width: 300,
                         height: 400

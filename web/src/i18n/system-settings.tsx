@@ -1,19 +1,26 @@
 import type {ReactNode} from "react";
 import {InfoCircleOutlined, MailOutlined, SettingOutlined} from "@ant-design/icons";
+import {useTranslation} from "react-i18next";
 
-export const settingsKeyToTranslationMap = new Map<string, string>([
-    ['basic.baseUrl', 'API 基本地址'],
-    ['bootstrap.autoCheckRbacTableData', '自动校验 RBAC 表数据'],
-    ['mail.smtp.username', '用户名'],
-    ['mail.smtp.password', '密码'],
-    ['mail.smtp.host', '主机'],
-    ['mail.smtp.port', '端口'],
-    ['mail.smtp.ssl', '是否启用 SSL'],
-    ['mail.smtp.fromEmail', '发件地址'],
-])
+export function useSettingsKeyToTranslationMap(): Map<string, string> {
+    const { t } = useTranslation();
+    return new Map<string, string>([
+        ['basic.baseUrl', t('pages.systemSettingsManager.keys.basic.baseUrl')],
+        ['bootstrap.autoCheckRbacTableData', t('pages.systemSettingsManager.keys.bootstrap.autoCheckRbacTableData')],
+        ['mail.smtp.username', t('pages.systemSettingsManager.keys.mail.smtp.username')],
+        ['mail.smtp.password', t('pages.systemSettingsManager.keys.mail.smtp.password')],
+        ['mail.smtp.host', t('pages.systemSettingsManager.keys.mail.smtp.host')],
+        ['mail.smtp.port', t('pages.systemSettingsManager.keys.mail.smtp.port')],
+        ['mail.smtp.ssl', t('pages.systemSettingsManager.keys.mail.smtp.ssl')],
+        ['mail.smtp.fromEmail', t('pages.systemSettingsManager.keys.mail.smtp.fromEmail')],
+    ]);
+}
 
-export const settingsGroupToTranslationMap = new Map<string, {label: string, icon?: ReactNode}>([
-    ['basic', { label: '基本设置', icon: <InfoCircleOutlined /> }],
-    ['bootstrap', { label: '启动设置项', icon: <SettingOutlined /> }],
-    ['mail.smtp', { label: 'SMTP 邮件服务', icon: <MailOutlined /> }]
-])
+export function useSettingsGroupToTranslationMap(): Map<string, {label: string, icon?: ReactNode}> {
+    const { t } = useTranslation();
+    return new Map<string, {label: string, icon?: ReactNode}>([
+        ['basic', { label: t('pages.systemSettingsManager.groups.basic'), icon: <InfoCircleOutlined /> }],
+        ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
+        ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }]
+    ]);
+}

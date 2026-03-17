@@ -6,17 +6,20 @@ import {
     TenantRoleManagerController
 } from "@/api/tenant-role.api.ts";
 import {useRef} from "react";
-import {TENANT_ROLE_TABLE_COLUMNS} from "@/components/columns/TenantRoleEntityColumns.tsx";
+import {useTenantRoleTableColumns} from "@/components/columns/TenantRoleEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
+import {useTranslation} from "react-i18next";
 
 export function MyTenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;
+    const {t} = useTranslation();
+    const columns = useTenantRoleTableColumns();
 
     const handleOpenAddModal = () => {
         pageRef.current?.openModal();
@@ -25,7 +28,7 @@ export function MyTenantRoleManagerPage() {
     if (isJoinedTenantsLoading) {
         return (
             <>
-                <ActionBarComponent title="我的角色管理" subtitle="管理当前组织的角色" />
+                <ActionBarComponent title={t('pages.myTenantRoleManager.title')} subtitle={t('pages.myTenantRoleManager.subtitle')} />
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
                     <Spin size="large" />
                 </div>
@@ -36,8 +39,8 @@ export function MyTenantRoleManagerPage() {
     return (
         <>
             <ActionBarComponent
-                title="我的角色管理"
-                subtitle="管理当前组织的角色"
+                title={t('pages.myTenantRoleManager.title')}
+                subtitle={t('pages.myTenantRoleManager.subtitle')}
                 titleActions={
                     currentTenantId ? (
                         <Button
@@ -47,7 +50,7 @@ export function MyTenantRoleManagerPage() {
                             className="rounded-xl h-12 shadow-lg"
                             onClick={handleOpenAddModal}
                         >
-                            新增角色
+                            {t('pages.myTenantRoleManager.action.addNew')}
                         </Button>
                     ) : null
                 }
@@ -56,11 +59,11 @@ export function MyTenantRoleManagerPage() {
                 <ManagerPageContainer
                     ref={pageRef}
                     className="mt-4"
-                    entityName="角色"
+                    entityName={t('entityNames.tenantRole')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    columns={TENANT_ROLE_TABLE_COLUMNS}
+                    columns={columns}
                     editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>
@@ -70,12 +73,12 @@ export function MyTenantRoleManagerPage() {
                                     </Form.Item>
                                     <Form.Item
                                         name="name"
-                                        label="角色名称"
-                                        rules={[{ required: true, message: '请输入角色名称' }]}
+                                        label={t('pages.myTenantRoleManager.modal.name.label')}
+                                        rules={[{ required: true, message: t('pages.myTenantRoleManager.modal.name.required') }]}
                                     >
                                         <Input
                                             className="w-full rounded-lg h-10"
-                                            placeholder="输入角色名称"
+                                            placeholder={t('pages.myTenantRoleManager.modal.name.placeholder')}
                                             maxLength={64}
                                             showCount
                                         />
@@ -84,7 +87,7 @@ export function MyTenantRoleManagerPage() {
                                 <Col span={12}>
                                     <Form.Item
                                         name="parentId"
-                                        label="父角色"
+                                        label={t('pages.myTenantRoleManager.modal.parentId.label')}
                                     >
                                         <TenantRoleIdSelector tenantId={currentTenantId || ''} disabledRoleId={editingItem?.id ?? null} />
                                     </Form.Item>
@@ -94,11 +97,11 @@ export function MyTenantRoleManagerPage() {
                                 <Col span={24}>
                                     <Form.Item
                                         name="description"
-                                        label="描述"
+                                        label={t('pages.myTenantRoleManager.modal.description.label')}
                                     >
                                         <Input.TextArea
                                             className="w-full rounded-lg"
-                                            placeholder="输入描述（可选）"
+                                            placeholder={t('pages.myTenantRoleManager.modal.description.placeholder')}
                                             maxLength={512}
                                             showCount
                                             rows={2}

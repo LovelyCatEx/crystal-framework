@@ -10,9 +10,11 @@ import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 import type {TenantDepartment} from "@/types/tenant-department.types.ts";
 import {UserCard} from "@/components/card/pop";
 import {AvatarResource} from "@/components/AvatarResource.tsx";
+import { useTranslation } from "react-i18next";
 const { Text } = Typography;
 
 const MemberInfoDisplay: React.FC<{ tenantId: string, memberId: string }> = ({ tenantId, memberId }) => {
+    const { t } = useTranslation();
     const [member, setMember] = useState<TenantMemberVO | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -38,7 +40,7 @@ const MemberInfoDisplay: React.FC<{ tenantId: string, memberId: string }> = ({ t
         return (
             <CopyableToolTip title={memberId}>
                 <Tag color="red" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
-                    成员ID: {memberId}
+                    {t('components.columns.tenantInvitation.memberId')}: {memberId}
                 </Tag>
             </CopyableToolTip>
         );
@@ -57,7 +59,7 @@ const MemberInfoDisplay: React.FC<{ tenantId: string, memberId: string }> = ({ t
                         <span className="text-xs font-mono">{user.nickname}</span>
                     </CopyableToolTip>
                     <CopyableToolTip title={user.id}>
-                        <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">用户ID: {user.id}</Tag>
+                        <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{t('components.columns.tenantInvitation.userId')}: {user.id}</Tag>
                     </CopyableToolTip>
                 </Space>
             </Space>
@@ -66,6 +68,7 @@ const MemberInfoDisplay: React.FC<{ tenantId: string, memberId: string }> = ({ t
 };
 
 const DepartmentInfoDisplay: React.FC<{ tenantId: string, departmentId: string }> = ({ tenantId, departmentId }) => {
+    const { t } = useTranslation();
     const [department, setDepartment] = useState<TenantDepartment | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -91,7 +94,7 @@ const DepartmentInfoDisplay: React.FC<{ tenantId: string, departmentId: string }
         return (
             <CopyableToolTip title={departmentId}>
                 <Tag color="red" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
-                    部门ID: {departmentId}
+                    {t('components.columns.tenantInvitation.departmentId')}: {departmentId}
                 </Tag>
             </CopyableToolTip>
         );
@@ -113,102 +116,106 @@ const DepartmentInfoDisplay: React.FC<{ tenantId: string, departmentId: string }
     );
 };
 
-export const TENANT_INVITATION_TABLE_COLUMNS: EntityTableColumns<Invitation> = [
-    {
-        title: "记录信息",
-        dataIndex: "id",
-        key: "id",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            return <Space orientation='vertical' size={0}>
-                <CopyableToolTip title={row.id}>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
-                </CopyableToolTip>
-                <CopyableToolTip title={row.tenantId}>
-                    <Tag color="orange" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">租户 ID: {row.tenantId}</Tag>
-                </CopyableToolTip>
-            </Space>
-        }
-    },
-    {
-        title: "邀请码",
-        dataIndex: "invitationCode",
-        key: "invitationCode",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            return (
-                <Tag color="blue" className="px-3 py-1">
-                    <Text copyable className="text-xs font-mono font-bold ">{row.invitationCode}</Text>
-                </Tag>
-            );
-        }
-    },
-    {
-        title: "可邀请次数",
-        dataIndex: "invitationCount",
-        key: "invitationCount",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            return (
-                <Tag color={row.invitationCount > 0 ? "blue" : "red"} className="font-mono">
-                    {row.invitationCount} 次
-                </Tag>
-            );
-        }
-    },
-    {
-        title: "创建者",
-        dataIndex: "creatorMemberId",
-        key: "creatorMemberId",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            return <MemberInfoDisplay tenantId={row.tenantId} memberId={row.creatorMemberId} />;
-        }
-    },
-    {
-        title: "部门",
-        dataIndex: "departmentId",
-        key: "departmentId",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            if (!row.departmentId) {
-                return <Tag color="default" className="text-xs">未指定</Tag>;
+export function useTenantInvitationTableColumns(): EntityTableColumns<Invitation> {
+    const { t } = useTranslation();
+
+    return [
+        {
+            title: t('components.columns.tenantInvitation.recordInfo'),
+            dataIndex: "id",
+            key: "id",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                return <Space orientation='vertical' size={0}>
+                    <CopyableToolTip title={row.id}>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>
+                    </CopyableToolTip>
+                    <CopyableToolTip title={row.tenantId}>
+                        <Tag color="orange" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{t('components.columns.tenantInvitation.tenantId')}: {row.tenantId}</Tag>
+                    </CopyableToolTip>
+                </Space>
             }
-            return <DepartmentInfoDisplay tenantId={row.tenantId} departmentId={row.departmentId} />;
-        }
-    },
-    {
-        title: "需要审核",
-        dataIndex: "requiresReviewing",
-        key: "requiresReviewing",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            return row.requiresReviewing ? (
-                <Tooltip title="需要审核">
-                    <Tag color="orange" icon={<ClockCircleOutlined />}>
-                        是
+        },
+        {
+            title: t('components.columns.tenantInvitation.invitationCode'),
+            dataIndex: "invitationCode",
+            key: "invitationCode",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                return (
+                    <Tag color="blue" className="px-3 py-1">
+                        <Text copyable className="text-xs font-mono font-bold ">{row.invitationCode}</Text>
                     </Tag>
-                </Tooltip>
-            ) : (
-                <Tooltip title="无需审核">
-                    <Tag color="green" icon={<CheckCircleOutlined />}>
-                        否
-                    </Tag>
-                </Tooltip>
-            );
-        }
-    },
-    {
-        title: "过期时间",
-        dataIndex: "expiresTime",
-        key: "expiresTime",
-        render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
-            if (!row.expiresTime) {
-                return <Tag color="default" className="text-xs">永不过期</Tag>;
+                );
             }
-            const expiresDate = new Date(Number(row.expiresTime));
-            const isExpired = expiresDate.getTime() < Date.now();
-            return (
-                <Tooltip title={expiresDate.toLocaleString()}>
-                    <Tag color={isExpired ? "red" : "blue"} icon={isExpired ? <CloseCircleOutlined /> : <ClockCircleOutlined />} className="text-xs">
-                        {isExpired ? "已过期" : expiresDate.toLocaleDateString()}
+        },
+        {
+            title: t('components.columns.tenantInvitation.invitationCount'),
+            dataIndex: "invitationCount",
+            key: "invitationCount",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                return (
+                    <Tag color={row.invitationCount > 0 ? "blue" : "red"} className="font-mono">
+                        {row.invitationCount} {t('components.columns.tenantInvitation.times')}
                     </Tag>
-                </Tooltip>
-            );
+                );
+            }
+        },
+        {
+            title: t('components.columns.tenantInvitation.creator'),
+            dataIndex: "creatorMemberId",
+            key: "creatorMemberId",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                return <MemberInfoDisplay tenantId={row.tenantId} memberId={row.creatorMemberId} />;
+            }
+        },
+        {
+            title: t('components.columns.tenantInvitation.department'),
+            dataIndex: "departmentId",
+            key: "departmentId",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                if (!row.departmentId) {
+                    return <Tag color="default" className="text-xs">{t('components.columns.tenantInvitation.notSpecified')}</Tag>;
+                }
+                return <DepartmentInfoDisplay tenantId={row.tenantId} departmentId={row.departmentId} />;
+            }
+        },
+        {
+            title: t('components.columns.tenantInvitation.requiresReviewing'),
+            dataIndex: "requiresReviewing",
+            key: "requiresReviewing",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                return row.requiresReviewing ? (
+                    <Tooltip title={t('components.columns.tenantInvitation.requiresReviewingTooltip')}>
+                        <Tag color="orange" icon={<ClockCircleOutlined />}>
+                            {t('components.columns.tenantInvitation.yes')}
+                        </Tag>
+                    </Tooltip>
+                ) : (
+                    <Tooltip title={t('components.columns.tenantInvitation.noReviewingTooltip')}>
+                        <Tag color="green" icon={<CheckCircleOutlined />}>
+                            {t('components.columns.tenantInvitation.no')}
+                        </Tag>
+                    </Tooltip>
+                );
+            }
+        },
+        {
+            title: t('components.columns.tenantInvitation.expiresTime'),
+            dataIndex: "expiresTime",
+            key: "expiresTime",
+            render: function (_: unknown, row: Invitation): React.ReactNode | JSX.Element {
+                if (!row.expiresTime) {
+                    return <Tag color="default" className="text-xs">{t('components.columns.tenantInvitation.neverExpires')}</Tag>;
+                }
+                const expiresDate = new Date(Number(row.expiresTime));
+                const isExpired = expiresDate.getTime() < Date.now();
+                return (
+                    <Tooltip title={expiresDate.toLocaleString()}>
+                        <Tag color={isExpired ? "red" : "blue"} icon={isExpired ? <CloseCircleOutlined /> : <ClockCircleOutlined />} className="text-xs">
+                            {isExpired ? t('components.columns.tenantInvitation.expired') : expiresDate.toLocaleDateString()}
+                        </Tag>
+                    </Tooltip>
+                );
+            }
         }
-    }
-];
+    ];
+}

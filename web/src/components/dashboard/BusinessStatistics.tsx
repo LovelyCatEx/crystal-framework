@@ -1,5 +1,6 @@
 import { Card, theme } from "antd";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     CloudOutlined,
     FileOutlined,
@@ -15,34 +16,26 @@ import type { BusinessStatsVO } from "@/types/dashboard.types.ts";
 
 const { useToken } = theme;
 
-const statCardConfig = [
-    { key: "totalUsers" as keyof BusinessStatsVO, title: "总用户数", icon: <UserOutlined />, color: "blue" },
-    { key: "totalTenants" as keyof BusinessStatsVO, title: "总租户数", icon: <ShopOutlined />, color: "emerald" },
-    { key: "totalTenantMembers" as keyof BusinessStatsVO, title: "租户成员数", icon: <TeamOutlined />, color: "violet" },
-    { key: "totalFileResources" as keyof BusinessStatsVO, title: "文件资源数", icon: <FileOutlined />, color: "orange" },
-    { key: "totalMailSent" as keyof BusinessStatsVO, title: "邮件发送量", icon: <MailOutlined />, color: "cyan" },
-    { key: "totalInvitations" as keyof BusinessStatsVO, title: "邀请码数", icon: <TagsOutlined />, color: "pink" },
-    { key: "totalInvitationRecords" as keyof BusinessStatsVO, title: "邀请记录数", icon: <CloudOutlined />, color: "indigo" },
-    { key: "totalOAuthAccounts" as keyof BusinessStatsVO, title: "OAuth 绑定数", icon: <SafetyOutlined />, color: "amber" },
-];
-
-function formatNumber(num: number): string {
-    return num.toLocaleString("zh-CN");
-}
-
-function formatChange(change: number): string {
-    const sign = change >= 0 ? "+" : "";
-    return `${sign}${formatNumber(change)}`;
-}
-
 export interface BusinessStatisticsProps {
     timeRange: string;
 }
 
 export function BusinessStatistics({ timeRange }: BusinessStatisticsProps) {
     const { token } = useToken();
+    const { t } = useTranslation();
     const [businessStats, setBusinessStats] = useState<BusinessStatsVO | null>(null);
     const [loading, setLoading] = useState(false);
+
+    const statCardConfig = [
+        { key: "totalUsers" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalUsers'), icon: <UserOutlined />, color: "blue" },
+        { key: "totalTenants" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalTenants'), icon: <ShopOutlined />, color: "emerald" },
+        { key: "totalTenantMembers" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalTenantMembers'), icon: <TeamOutlined />, color: "violet" },
+        { key: "totalFileResources" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalFileResources'), icon: <FileOutlined />, color: "orange" },
+        { key: "totalMailSent" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalMailSent'), icon: <MailOutlined />, color: "cyan" },
+        { key: "totalInvitations" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalInvitations'), icon: <TagsOutlined />, color: "pink" },
+        { key: "totalInvitationRecords" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalInvitationRecords'), icon: <CloudOutlined />, color: "indigo" },
+        { key: "totalOAuthAccounts" as keyof BusinessStatsVO, title: t('components.dashboard.businessStats.totalOAuthAccounts'), icon: <SafetyOutlined />, color: "amber" },
+    ];
 
     useEffect(() => {
         loadBusinessStats();
@@ -59,6 +52,15 @@ export function BusinessStatistics({ timeRange }: BusinessStatisticsProps) {
             setLoading(false);
         }
     };
+
+    function formatNumber(num: number): string {
+        return num.toLocaleString();
+    }
+
+    function formatChange(change: number): string {
+        const sign = change >= 0 ? "+" : "";
+        return `${sign}${formatNumber(change)}`;
+    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
