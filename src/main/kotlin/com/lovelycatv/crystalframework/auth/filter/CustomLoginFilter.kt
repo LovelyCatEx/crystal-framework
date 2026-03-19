@@ -12,6 +12,11 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.entity.UserEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -27,6 +32,7 @@ class CustomLoginFilter(
     authenticationManager: ReactiveAuthenticationManager,
     userAuthorizationService: UserAuthorizationService
 ) : AuthenticationWebFilter(authenticationManager) {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
         setRequiresAuthenticationMatcher(
@@ -52,7 +58,14 @@ class CustomLoginFilter(
         }
 
         setAuthenticationSuccessHandler { exchange, authentication ->
-            val data = userAuthorizationService.buildLoginSuccessResponse(authentication.principal as UserEntity)
+            val loggedUser = authentication.principal as UserEntity
+
+            val data = userAuthorizationService.buildLoginSuccessResponse(loggedUser)
+
+            coroutineScope.launch(Dispatchers.IO) {
+                userAuthorizationService.clearUserAuthorityCache(loggedUser.id)
+                delay(100)
+            }
 
             exchange.exchange.response.statusCode = HttpStatus.OK
             exchange.exchange.response.writeWith(
