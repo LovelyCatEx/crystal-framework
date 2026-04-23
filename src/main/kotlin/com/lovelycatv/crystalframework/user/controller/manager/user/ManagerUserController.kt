@@ -1,73 +1,38 @@
 package com.lovelycatv.crystalframework.user.controller.manager.user
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerCreateUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerDeleteUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerReadUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerUpdateUserDTO
+import com.lovelycatv.crystalframework.user.entity.UserEntity
+import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.UserManagerService
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
+@ManagerPermissions(
+    read = SystemPermission.ACTION_USER_READ,
+    readAll = SystemPermission.ACTION_USER_READ,
+    create = SystemPermission.ACTION_USER_CREATE,
+    update = SystemPermission.ACTION_USER_UPDATE,
+    delete = SystemPermission.ACTION_USER_DELETE,
+)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/user")
 class ManagerUserController(
-    private val userManagerService: UserManagerService
-) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_READ}')")
-    @GetMapping("/list", version = "1")
-    suspend fun readAllPermissions(
-        userAuthentication: UserAuthentication
-    ): ApiResponse<*> {
-        return ApiResponse.success(userManagerService.getRepository().findAll().awaitListWithTimeout())
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_CREATE}')")
-    @PostMapping("/create", version = "1")
-    suspend fun createUser(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        dto: ManagerCreateUserDTO
-    ): ApiResponse<*> {
-        userManagerService.create(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_READ}')")
-    @GetMapping("/query", version = "1")
-    suspend fun readUser(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        dto: ManagerReadUserDTO
-    ): ApiResponse<*> {
-        return ApiResponse.success(userManagerService.query(dto))
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_UPDATE}')")
-    @PostMapping("/update", version = "1")
-    suspend fun updateUser(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        dto: ManagerUpdateUserDTO
-    ): ApiResponse<*> {
-        userManagerService.update(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_DELETE}')")
-    @PostMapping("/delete", version = "1")
-    suspend fun deleteUser(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        dto: ManagerDeleteUserDTO
-    ): ApiResponse<*> {
-        userManagerService.deleteByDTO(dto)
-        return ApiResponse.success(null)
-    }
-}
+    managerService: UserManagerService
+) : StandardManagerController<
+        UserManagerService,
+        UserRepository,
+        UserEntity,
+        ManagerCreateUserDTO,
+        ManagerReadUserDTO,
+        ManagerUpdateUserDTO,
+        ManagerDeleteUserDTO
+>(managerService)
