@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SpringbootTemplateApplicationTests" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
-    <module name="crystal-framework" />
+  <configuration default="false" name="CrystalFrameworkApplicationTests" type="JUnit" factoryName="JUnit">
+    <module name="core" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.lovelycatv.crystalframework.*" />
