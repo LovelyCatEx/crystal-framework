@@ -1,22 +1,16 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
+import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ser.std.ToStringSerializer
 
-@Table("tenant_departments")
-class TenantDepartmentEntity(
+abstract class BaseTenantEntity(
     id: Long = 0,
-    tenantId: Long = 0,
-    @Column(value = "name")
-    var name: String = "",
-    @Column(value = "description")
-    var description: String? = null,
-    @Column(value = "parent_id")
+    @Column(value = "tenant_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
-    var parentId: Long? = null,
+    var tenantId: Long = 0,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
-) : BaseTenantEntity(id, tenantId, createdTime, modifiedTime, deletedTime)
+) : BaseEntity(id, createdTime, modifiedTime, deletedTime)
