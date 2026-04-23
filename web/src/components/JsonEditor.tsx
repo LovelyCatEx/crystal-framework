@@ -1,12 +1,12 @@
-import {Button, Card, Input, InputNumber, Select, Switch, Tag, Tabs, Tooltip, Typography} from "antd";
+import {Button, Card, Input, InputNumber, Select, Switch, Tag, Typography} from "antd";
 import {
-    DeleteOutlined,
-    PlusOutlined,
-    EditOutlined,
-    DownOutlined,
-    RightOutlined,
     CheckCircleOutlined,
-    ExclamationCircleOutlined
+    DeleteOutlined,
+    DownOutlined,
+    EditOutlined,
+    ExclamationCircleOutlined,
+    PlusOutlined,
+    RightOutlined
 } from "@ant-design/icons";
 import {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
@@ -78,7 +78,7 @@ interface JsonNodeProps {
     isArrayItem?: boolean;
 }
 
-function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false, isArrayItem = false}: JsonNodeProps) {
+function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false}: JsonNodeProps) {
     const [collapsed, setCollapsed] = useState(false);
     const type = getValueType(value);
 
@@ -290,7 +290,7 @@ function JsonNode({name, value, onUpdate, onDelete, depth = 0, isRoot = false, i
     );
 }
 
-export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProps) {
+export function JsonEditor({value = '{}', onChange}: JsonEditorProps) {
     const [activeTab, setActiveTab] = useState('visual');
     const [jsonData, setJsonData] = useState<JsonValue>({});
     const [jsonText, setJsonText] = useState(value);
@@ -334,53 +334,6 @@ export function JsonEditor({value = '{}', onChange, placeholder}: JsonEditorProp
             setIsValid(false);
         }
     };
-
-    const tabItems = [
-        {
-            key: 'visual',
-            label: (
-                <span className="flex items-center gap-1">
-                    <EditOutlined/> 可视化
-                </span>
-            ),
-            children: (
-                <div className="overflow-auto max-h-[500px] p-4">
-                    <JsonNode
-                        isRoot
-                        name="Root"
-                        value={jsonData}
-                        onUpdate={handleVisualChange}
-                        onDelete={() => {}}
-                    />
-                </div>
-            ),
-        },
-        {
-            key: 'json',
-            label: (
-                <span className="flex items-center gap-1">
-                    {'{ }'} 源码
-                </span>
-            ),
-            children: (
-                <div className="relative">
-                    <TextArea
-                        value={jsonText}
-                        onChange={(e) => handleTextChange(e.target.value)}
-                        className={`font-mono text-sm min-h-[300px] border-0 resize-none ${!isValid ? 'bg-red-50' : ''}`}
-                        spellCheck={false}
-                    />
-                    {!isValid && (
-                        <div
-                            className="absolute bottom-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs shadow-lg flex items-center gap-2">
-                            <ExclamationCircleOutlined/>
-                            无效的 JSON 格式
-                        </div>
-                    )}
-                </div>
-            ),
-        },
-    ];
 
     return (
         <Card
