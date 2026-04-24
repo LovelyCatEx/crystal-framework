@@ -162,6 +162,210 @@ CREATE TABLE public.system_settings (
 ALTER TABLE public.system_settings OWNER TO postgres;
 
 --
+-- Name: tenant_department_member_relations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_department_member_relations (
+    id bigint NOT NULL,
+    department_id bigint NOT NULL,
+    member_id bigint NOT NULL,
+    role_type integer NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_department_member_relations OWNER TO postgres;
+
+--
+-- Name: tenant_departments; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_departments (
+    id bigint NOT NULL,
+    tenant_id bigint NOT NULL,
+    name character varying(64) NOT NULL,
+    description character varying(512),
+    parent_id bigint,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_departments OWNER TO postgres;
+
+--
+-- Name: tenant_invitation_records; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_invitation_records (
+    id bigint NOT NULL,
+    invitation_id bigint NOT NULL,
+    used_user_id bigint NOT NULL,
+    real_name character varying(64) NOT NULL,
+    phone_number character varying(32) NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_invitation_records OWNER TO postgres;
+
+--
+-- Name: tenant_invitations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_invitations (
+    id bigint NOT NULL,
+    tenant_id bigint NOT NULL,
+    creator_member_id bigint NOT NULL,
+    department_id bigint,
+    invitation_code character varying(16) NOT NULL,
+    invitation_count integer NOT NULL,
+    expires_time bigint,
+    requires_reviewing boolean NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_invitations OWNER TO postgres;
+
+--
+-- Name: tenant_member_role_relations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_member_role_relations (
+    id bigint NOT NULL,
+    member_id bigint NOT NULL,
+    role_id bigint NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_member_role_relations OWNER TO postgres;
+
+--
+-- Name: tenant_members; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_members (
+    id bigint NOT NULL,
+    tenant_id bigint NOT NULL,
+    member_user_id bigint NOT NULL,
+    status integer NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_members OWNER TO postgres;
+
+--
+-- Name: tenant_permissions; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_permissions (
+    id bigint NOT NULL,
+    name character varying(256) NOT NULL,
+    description character varying(512),
+    type integer NOT NULL,
+    path character varying(256),
+    preserved_1 integer,
+    preserved_2 integer,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_permissions OWNER TO postgres;
+
+--
+-- Name: tenant_role_permission_relations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_role_permission_relations (
+    id bigint NOT NULL,
+    role_id bigint NOT NULL,
+    permission_id bigint NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_role_permission_relations OWNER TO postgres;
+
+--
+-- Name: tenant_roles; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_roles (
+    id bigint NOT NULL,
+    tenant_id bigint NOT NULL,
+    name character varying(64) NOT NULL,
+    description character varying(512),
+    parent_id bigint,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_roles OWNER TO postgres;
+
+--
+-- Name: tenant_tire_types; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenant_tire_types (
+    id bigint NOT NULL,
+    name character varying(32) NOT NULL,
+    description character varying(512),
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenant_tire_types OWNER TO postgres;
+
+--
+-- Name: tenants; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tenants (
+    id bigint NOT NULL,
+    owner_user_id bigint NOT NULL,
+    name character varying(64) NOT NULL,
+    description text,
+    icon bigint,
+    status integer NOT NULL,
+    tire_type_id bigint NOT NULL,
+    subscribed_time bigint NOT NULL,
+    expires_time bigint NOT NULL,
+    contact_name character varying(64) NOT NULL,
+    settings text,
+    contact_email character varying(256) NOT NULL,
+    contact_phone character varying(32) NOT NULL,
+    address text NOT NULL,
+    created_time bigint NOT NULL,
+    modified_time bigint NOT NULL,
+    deleted_time bigint
+);
+
+
+ALTER TABLE public.tenants OWNER TO postgres;
+
+--
 -- Name: user_permissions; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -297,6 +501,78 @@ ALTER TABLE ONLY public.system_settings
 
 
 --
+-- Name: tenant_departments tenant_departments_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_departments
+    ADD CONSTRAINT tenant_departments_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_invitation_records tenant_invitation_records_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_invitation_records
+    ADD CONSTRAINT tenant_invitation_records_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_invitations tenant_invitations_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_invitations
+    ADD CONSTRAINT tenant_invitations_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_member_role_relations tenant_member_role_relations_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_member_role_relations
+    ADD CONSTRAINT tenant_member_role_relations_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_members tenant_members_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_members
+    ADD CONSTRAINT tenant_members_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_permissions tenant_permissions_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_permissions
+    ADD CONSTRAINT tenant_permissions_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_role_permission_relations tenant_role_permission_relations_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_role_permission_relations
+    ADD CONSTRAINT tenant_role_permission_relations_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenant_tire_types tenant_tire_types_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenant_tire_types
+    ADD CONSTRAINT tenant_tire_types_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tenants tenants_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tenants
+    ADD CONSTRAINT tenants_pk PRIMARY KEY (id);
+
+
+--
 -- Name: user_permissions user_permissions_pk_2; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -342,3 +618,29 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pk_2 PRIMARY KEY (id);
+
+
+--
+-- Name: tenants_name_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tenants_name_index ON public.tenants USING btree (name);
+
+
+--
+-- Name: tenants_status_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tenants_status_index ON public.tenants USING btree (status);
+
+
+--
+-- Name: tenants_tire_type_id_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX tenants_tire_type_id_index ON public.tenants USING btree (tire_type_id);
+
+
+--
+-- PostgreSQL database dump complete
+--
