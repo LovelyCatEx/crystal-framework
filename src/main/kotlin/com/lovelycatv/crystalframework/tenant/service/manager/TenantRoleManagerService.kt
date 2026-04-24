@@ -14,14 +14,14 @@ import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.tenant.service.TenantRelationshipCheckService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-interface TenantRoleManagerService : CachedBaseManagerService<
+interface TenantRoleManagerService : BaseTenantResourceManagerService<
         TenantRoleRepository,
         TenantRoleEntity,
         ManagerCreateTenantRoleDTO,
         ManagerReadTenantRoleDTO,
         ManagerUpdateTenantRoleDTO,
         ManagerDeleteTenantRoleDTO
->, TenantRelationshipCheckService {
+> {
     suspend fun createFromDeclaration(tenantId: Long, declaration: TenantRoleDeclaration): TenantRoleEntity
 
     override suspend fun query(

@@ -14,14 +14,14 @@ import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-interface TenantDepartmentMemberManagerService : CachedBaseManagerService<
+interface TenantDepartmentMemberManagerService : BaseTenantResourceManagerService<
         TenantDepartmentMemberRelationRepository,
         TenantDepartmentMemberRelationEntity,
         ManagerCreateTenantDepartmentMemberDTO,
         ManagerReadTenantDepartmentMemberDTO,
         ManagerUpdateTenantDepartmentMemberDTO,
         ManagerDeleteTenantDepartmentMemberDTO
->, TenantRelationshipCheckService {
+> {
     override suspend fun query(
         dto: ManagerReadTenantDepartmentMemberDTO,
         isAdvanceQuery: suspend (dto: ManagerReadTenantDepartmentMemberDTO) -> Boolean,
