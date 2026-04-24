@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerUpdateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
@@ -76,5 +77,9 @@ class TenantInvitationManagerServiceImpl(
         return (1..16)
             .map { chars.random() }
             .joinToString("")
+    }
+
+    override suspend fun findAllByTenantId(tenantId: Long): List<TenantInvitationEntity> {
+        return getRepository().findAllByTenantId(tenantId).awaitListWithTimeout()
     }
 }

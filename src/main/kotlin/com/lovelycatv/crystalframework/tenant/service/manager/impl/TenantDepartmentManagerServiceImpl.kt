@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerCreateTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerUpdateTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentEntity
@@ -57,5 +58,9 @@ class TenantDepartmentManagerServiceImpl(
             }
         }
         return true
+    }
+
+    override suspend fun findAllByTenantId(tenantId: Long): List<TenantDepartmentEntity> {
+        return this.getRepository().findAllByTenantId(tenantId).awaitListWithTimeout()
     }
 }

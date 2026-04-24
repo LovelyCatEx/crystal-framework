@@ -1,14 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.department.dto
 
-import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
-import jakarta.validation.constraints.NotNull
+import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerReadTenantResourceDTO
 
 data class ManagerReadTenantDepartmentDTO(
     override val page: Int,
     override val pageSize: Int,
+    override val tenantId: Long,
     override val id: Long? = null,
     override val searchKeyword: String? = null,
-
-    val tenantId: Long? = null,
-    val parentId: Long? = null
-) : BaseManagerReadDTO(page, pageSize)
+    val parentId: Long? = null,
+) : BaseManagerReadTenantResourceDTO(page, pageSize, tenantId)

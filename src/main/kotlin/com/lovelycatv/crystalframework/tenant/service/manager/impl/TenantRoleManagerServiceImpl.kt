@@ -132,4 +132,8 @@ class TenantRoleManagerServiceImpl(
         }
         return true
     }
+
+    override suspend fun findAllByTenantId(tenantId: Long): List<TenantRoleEntity> {
+        return this.getRepository().findAllByTenantId(tenantId).awaitListWithTimeout()
+    }
 }

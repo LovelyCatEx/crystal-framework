@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerUpdateTenantMemberDTO
@@ -131,5 +132,9 @@ class TenantMemberManagerServiceImpl(
         tenantDepartmentMemberRelationService.deleteByMemberIdIn(ids)
 
         super.batchDelete(ids)
+    }
+
+    override suspend fun findAllByTenantId(tenantId: Long): List<TenantMemberEntity> {
+        return this.getRepository().findAllByTenantId(tenantId).awaitListWithTimeout()
     }
 }
