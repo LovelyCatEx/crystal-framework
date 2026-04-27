@@ -147,6 +147,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             },
             openModal: () => {
                 openModal();
+            },
+            clearSelection: () => {
+                entityTableRef?.current?.clearSelection();
             }
         }
     });
