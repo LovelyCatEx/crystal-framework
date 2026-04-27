@@ -7,6 +7,8 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.MethodSignature
+import org.springframework.aop.support.AopUtils
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.annotation.Order
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
@@ -23,7 +25,10 @@ class ManagerControllerPermissionAspect {
     suspend fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
         val controller = joinPoint.target
 
-        val permissions = controller::class.java.getAnnotation(ManagerPermissions::class.java)
+        // AopUtils.getTargetClass + AnnotationUtils.findAnnotation walk through CGLIB
+        // proxies and the inheritance chain, which Class.getAnnotation cannot do.
+        val targetClass = AopUtils.getTargetClass(controller)
+        val permissions = AnnotationUtils.findAnnotation(targetClass, ManagerPermissions::class.java)
             ?: return joinPoint.proceed()
 
         val methodSignature = joinPoint.signature as MethodSignature
