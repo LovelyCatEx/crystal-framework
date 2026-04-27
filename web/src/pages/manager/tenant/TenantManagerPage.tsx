@@ -41,16 +41,12 @@ export function TenantManagerPage() {
     ];
 
     const convertDateToTimestamp = (date: unknown): string => {
-        if (date) {
-            if (typeof date === 'object' && 'isValid' in date && typeof (date as any).isValid === 'function') {
-                const dayjsDate = date as any;
-                if (dayjsDate.isValid()) {
-                    return dayjsDate.valueOf().toString();
-                }
-            }
-            if (typeof date === 'string') {
-                return date;
-            }
+        if (!date) return '';
+        if (dayjs.isDayjs(date)) {
+            return date.isValid() ? date.valueOf().toString() : '';
+        }
+        if (typeof date === 'string') {
+            return date;
         }
         return '';
     };
