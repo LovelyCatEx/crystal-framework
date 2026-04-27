@@ -32,6 +32,13 @@ class OAuthAccountManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateOAuthAccountDTO): OAuthAccountEntity {
+        oAuthAccountRepository.findByPlatformAndIdentifier(dto.platform, dto.identifier).awaitFirstOrNull()?.let {
+            throw BusinessException("OAuth account '${dto.identifier}' is already linked on platform ${dto.platform}")
+        }
+        oAuthAccountRepository.findByPlatformAndUserId(dto.platform, dto.userId).awaitFirstOrNull()?.let {
+            throw BusinessException("user ${dto.userId} already has an account on platform ${dto.platform}")
+        }
+
         return this.getRepository().save(
             OAuthAccountEntity(
                 id = snowIdGenerator.nextId(),

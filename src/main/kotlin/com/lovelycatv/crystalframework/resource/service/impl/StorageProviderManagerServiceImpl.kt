@@ -32,6 +32,10 @@ class StorageProviderManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateStorageProviderDTO): StorageProviderEntity {
+        storageProviderRepository.findByName(dto.name).awaitFirstOrNull()?.let {
+            throw BusinessException("storage provider name '${dto.name}' is already taken")
+        }
+
         return this.getRepository().save(
             StorageProviderEntity(
                 id = snowIdGenerator.nextId(),

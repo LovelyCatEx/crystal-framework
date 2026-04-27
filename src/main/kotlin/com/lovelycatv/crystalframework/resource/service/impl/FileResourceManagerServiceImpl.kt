@@ -32,6 +32,10 @@ class FileResourceManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateFileResourceDTO): FileResourceEntity {
+        fileResourceRepository.findByMd5(dto.md5).awaitFirstOrNull()?.let {
+            throw BusinessException("a file resource with md5 '${dto.md5}' already exists")
+        }
+
         return this.getRepository().save(
             FileResourceEntity(
                 id = snowIdGenerator.nextId(),

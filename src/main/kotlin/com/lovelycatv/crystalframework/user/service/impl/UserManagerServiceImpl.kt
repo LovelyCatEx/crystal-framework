@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerCreateUserDTO
@@ -36,6 +37,13 @@ class UserManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateUserDTO): UserEntity {
+        userRepository.findByUsername(dto.username).awaitFirstOrNull()?.let {
+            throw BusinessException("username '${dto.username}' is already taken")
+        }
+        userRepository.findByEmail(dto.email).awaitFirstOrNull()?.let {
+            throw BusinessException("email '${dto.email}' is already registered")
+        }
+
         val entity = UserEntity(
             id = snowIdGenerator.nextId(),
             username = dto.username,
