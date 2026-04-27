@@ -70,13 +70,15 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // Search
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    const refreshData = useCallback(()=> {
+    const refreshData = useCallback((overrideKeyword?: string) => {
         setRefreshing(true);
+
+        const effectiveKeyword = overrideKeyword !== undefined ? overrideKeyword : searchKeyword;
 
         props.query({
             page: currentPage,
             pageSize: currentPageSize,
-            searchKeyword: searchKeyword.length > 0 ? searchKeyword : undefined,
+            searchKeyword: effectiveKeyword.length > 0 ? effectiveKeyword : undefined,
             ...Object.assign(
                 {},
                 ...([
@@ -97,7 +99,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const handleSearch = (keyword: string) => {
         setSearchKeyword(keyword);
-        refreshData();
+        refreshData(keyword);
     }
 
     useEffect(() => {
