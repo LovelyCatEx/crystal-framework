@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.auth.service.impl
 
+import com.lovelycatv.crystalframework.auth.config.AuthConfiguration
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
@@ -21,7 +22,8 @@ class UserAuthorizationServiceImpl(
     private val userService: UserService,
     private val oAuthAccountService: OAuthAccountService,
     private val jwtSignKeyStore: JWTSignKeyStore,
-    private val userRbacQueryService: UserRbacQueryService
+    private val userRbacQueryService: UserRbacQueryService,
+    private val authConfiguration: AuthConfiguration,
 ) : UserAuthorizationService {
     override suspend fun clearUserAuthorityCache(userId: Long) {
         userRbacQueryService.clearUserAuthoritiesCache(userId)
@@ -29,7 +31,7 @@ class UserAuthorizationServiceImpl(
 
     override fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
         return LoginSuccessResponseData().apply {
-            val expiration = 7 * 24 * 3600 * 1000L
+            val expiration = authConfiguration.jwt.expiration.toMillis()
 
             val signKey = jwtSignKeyStore.getSignKey()
 

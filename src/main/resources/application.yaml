@@ -71,6 +71,9 @@ spring:
     redis:
       namespace: crystalframework:session
 crystalframework:
+  auth:
+    jwt:
+      expiration: 7d
   resource:
     avatar:
       supported-content-types:
