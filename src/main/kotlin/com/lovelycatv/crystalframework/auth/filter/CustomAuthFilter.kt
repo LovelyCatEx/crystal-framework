@@ -34,6 +34,7 @@ class CustomAuthFilter(
     ): Mono<Void> {
         val requestPath = exchange.request.path.pathWithinApplication()
 
+        // Check if the path matches any unauthorized endpoint pattern
         val isUnauthorized = unauthorizedPathPatterns.any { pattern ->
             pattern.matches(requestPath)
         }
@@ -44,38 +45,42 @@ class CustomAuthFilter(
 
         val authorization = exchange.request.headers["Authorization"]
             ?.firstOrNull()
-            ?.removePrefix("Bearer ")
+            ?.replace("Bearer ", "")
             ?.trim()
-            ?: return Mono.error(UnauthorizedException("Authorization header is missing"))
+            ?: throw UnauthorizedException("Authorization header is missing")
 
         val claims = try {
             JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
         } catch (e: Exception) {
-            return if (e is ExpiredJwtException) {
-                Mono.error(UnauthorizedException("token expired"))
+            if (e is ExpiredJwtException) {
+                throw UnauthorizedException("token expired")
             } else {
                 logger.error("unexpected token parse exception", e)
-                Mono.error(UnauthorizedException("invalid token pattern"))
+                throw UnauthorizedException("invalid token pattern")
             }
         }
 
         val userId = claims["userId"]
             ?.toString()
-            ?.toLongOrNull()
-            ?: return Mono.error(UnauthorizedException("userId is missing"))
+            ?.toLong()
+            ?: throw UnauthorizedException("userId is missing")
 
         val tenantId = claims["tenantId"]
             ?.toString()
-            ?.toLongOrNull()
+            ?.toLong()
 
-        val subject = claims.subject
+        return mono {
+            getUserAuthorities.invoke(userId, tenantId)
+        }.flatMap {
+            val token = UsernamePasswordAuthenticationToken(
+                claims.subject,
+                null,
+                it
+            )
 
-        return mono { getUserAuthorities(userId, tenantId) }
-            .flatMap { authorities ->
-                val token = UsernamePasswordAuthenticationToken(subject, null, authorities)
-                chain.filter(exchange).contextWrite {
-                    ReactiveSecurityContextHolder.withAuthentication(token)
-                }
+            chain.filter(exchange).contextWrite {
+                ReactiveSecurityContextHolder.withAuthentication(token)
             }
+        }
     }
 }

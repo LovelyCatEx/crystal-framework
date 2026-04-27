@@ -9,6 +9,8 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,12 +21,14 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 
 @Configuration
+@EnableWebFlux
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
