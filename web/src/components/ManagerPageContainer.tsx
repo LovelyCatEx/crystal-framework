@@ -3,7 +3,9 @@ import React, {
     forwardRef,
     type JSX,
     type ReactNode,
+    useCallback,
     useImperativeHandle,
+    useMemo,
     useRef,
     useState
 } from "react";
@@ -58,7 +60,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const [selectedEntities, setSelectedEntities] = useState<ENTITY[]>([]);
     const [batchOperationType, setBatchOperationType] = useState(0);
 
-    const handleOnBatchOperationClick = () => {
+    const handleOnBatchOperationClick = useCallback(() => {
         if (batchOperationType === 1) {
             if (selectedEntities.length <= 0) {
                 return;
@@ -83,7 +85,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 },
             });
         }
-    };
+    }, [batchOperationType, selectedEntities, modal, props, t]);
 
 
     const openModal = (item: ENTITY | null = null) => {
@@ -153,6 +155,59 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     const { className, style, ...restProps } = props;
 
+    const builtinTablePrefixActions = useMemo(() => {
+        if (isCustomTableSelector) return restProps.tablePrefixActions;
+        return [
+            {
+                label: t('components.managerPageContainer.batchOperation'),
+                children: <div className="flex flex-row items-center gap-2">
+                    <Select
+                        className="min-w-32"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '1', label: t('components.managerPageContainer.batchDelete') },
+                        ]}
+                        onChange={(value) => setBatchOperationType(Number.parseInt(value))}
+                        placeholder={t('components.managerPageContainer.batchOperation')}
+                    />
+
+                    <Button
+                        type="primary"
+                        onClick={handleOnBatchOperationClick}
+                    >
+                        {t('components.managerPageContainer.execute')}
+                    </Button>
+                </div>,
+            },
+            ...(restProps.tablePrefixActions ?? []),
+        ];
+    }, [isCustomTableSelector, restProps.tablePrefixActions, t, handleOnBatchOperationClick]);
+
+    const builtinTableActions = useMemo(() => {
+        return [
+            ...(restProps.tableActions ?? []),
+            {
+                label: t('components.managerPageContainer.action'),
+                children: <Button
+                    type="primary"
+                    onClick={() => entityTableRef.current?.refreshData()}
+                >
+                    {t('components.managerPageContainer.refresh')}
+                </Button>
+            },
+        ];
+    }, [restProps.tableActions, t]);
+
+    const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
+        if (isCustomTableSelector) return restProps.tableSelection;
+        return {
+            type: 'checkbox',
+            onChange: (entities) => {
+                setSelectedEntities(entities);
+            }
+        };
+    }, [isCustomTableSelector, restProps.tableSelection]);
+
     return (
         <div className={className} style={style}>
             {showActionBar && (
@@ -181,42 +236,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     entityName={restProps.entityName}
                     columns={restProps.columns}
                     query={restProps.query}
-                    tablePrefixActions={isCustomTableSelector ? restProps.tablePrefixActions : [
-                        ...[{
-                            label: t('components.managerPageContainer.batchOperation'),
-                            children: <div className="flex flex-row items-center gap-2">
-                                <Select
-                                    className="min-w-32"
-                                    style={{ width: 120 }}
-                                    options={[
-                                        { value: '1', label: t('components.managerPageContainer.batchDelete') },
-                                    ]}
-                                    onChange={(value) => setBatchOperationType(Number.parseInt(value))}
-                                    placeholder={t('components.managerPageContainer.batchOperation')}
-                                />
-
-                                <Button
-                                    type="primary"
-                                    onClick={handleOnBatchOperationClick}
-                                >
-                                    {t('components.managerPageContainer.execute')}
-                                </Button>
-                            </div>,
-                        }],
-                        ...(restProps.tablePrefixActions ?? []),
-                    ]}
-                    tableActions={[
-                        ...(restProps.tableActions ?? []),
-                        ...[{
-                            label: t('components.managerPageContainer.action'),
-                            children: <Button
-                                type="primary"
-                                onClick={() => entityTableRef.current?.refreshData()}
-                            >
-                                {t('components.managerPageContainer.refresh')}
-                            </Button>
-                        }]
-                    ]}
+                    tablePrefixActions={builtinTablePrefixActions}
+                    tableActions={builtinTableActions}
                     tableRowActionsRender={(record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}
@@ -231,12 +252,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                             </Popconfirm>
                         </Space>
                     )}
-                    tableSelection={isCustomTableSelector ? restProps.tableSelection : {
-                        type: 'checkbox',
-                        onChange: (entities) => {
-                            setSelectedEntities(entities);
-                        }
-                    }}
+                    tableSelection={builtinTableSelection}
                 />
             </Card>
 
