@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.user.event.TenantMemberAuthoritiesInvalidationEvent
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberRoleRelationEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
@@ -84,17 +85,32 @@ class TenantMemberRoleRelationServiceImpl(
             ).apply { newEntity() }
             tenantMemberRoleRelationRepository.save(entity).awaitFirstOrNull()
         }
+
+        eventPublisher.publishEvent(TenantMemberAuthoritiesInvalidationEvent(memberId))
     }
 
     override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        // Capture affected members up front; the relation rows are gone after the delete
+        // and the @Async listener has no way to recover the mapping.
+        val affectedMemberIds = roleIds.toSet().flatMap { roleId ->
+            this.getRepository()
+                .findAllByRoleId(roleId)
+                .awaitListWithTimeout()
+                .map { it.memberId }
+        }.toSet()
+
         this.getRepository()
             .deleteByRoleIdIn(roleIds)
             .awaitFirstOrNull()
+
+        affectedMemberIds.forEach { eventPublisher.publishEvent(TenantMemberAuthoritiesInvalidationEvent(it)) }
     }
 
     override suspend fun deleteByMemberIdIn(memberIds: Collection<Long>) {
         this.getRepository()
             .deleteByMemberIdIn(memberIds)
             .awaitFirstOrNull()
+
+        memberIds.toSet().forEach { eventPublisher.publishEvent(TenantMemberAuthoritiesInvalidationEvent(it)) }
     }
 }

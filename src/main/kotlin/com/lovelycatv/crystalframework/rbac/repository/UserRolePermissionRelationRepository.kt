@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono
 interface UserRolePermissionRelationRepository : BaseRepository<UserRolePermissionRelationEntity> {
     fun findByRoleId(roleId: Long): Flux<UserRolePermissionRelationEntity>
 
+    fun findByPermissionIdIn(permissionIds: Collection<Long>): Flux<UserRolePermissionRelationEntity>
+
     fun deleteByPermissionIdIn(permissionIds: Collection<Long>): Mono<Void>
 
     fun deleteByRoleIdIn(roleIds: Collection<Long>): Mono<Void>

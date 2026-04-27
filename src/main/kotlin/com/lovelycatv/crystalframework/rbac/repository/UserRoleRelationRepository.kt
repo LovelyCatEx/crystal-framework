@@ -12,6 +12,9 @@ interface UserRoleRelationRepository : BaseRepository<UserRoleRelationEntity> {
     @Query("SELECT * FROM user_role_relations WHERE user_id = :userId")
     fun findByUserId(userId: Long): Flux<UserRoleRelationEntity>
 
+    @Query("SELECT * FROM user_role_relations WHERE role_id = :roleId")
+    fun findByRoleId(roleId: Long): Flux<UserRoleRelationEntity>
+
     fun deleteByRoleIdIn(roleIds: Collection<Long>): Mono<Void>
 
     fun deleteByUserIdIn(userIds: Collection<Long>): Mono<Void>

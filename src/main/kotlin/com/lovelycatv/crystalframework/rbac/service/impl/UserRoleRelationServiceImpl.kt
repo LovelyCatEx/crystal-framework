@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.rbac.service.UserRoleService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.user.event.UserAuthoritiesInvalidationEvent
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -64,6 +65,8 @@ class UserRoleRelationServiceImpl(
             ).apply { newEntity() }
             userRoleRelationRepository.save(entity).awaitFirstOrNull()
         }
+
+        eventPublisher.publishEvent(UserAuthoritiesInvalidationEvent(userId))
     }
 
     @Transactional
@@ -91,13 +94,28 @@ class UserRoleRelationServiceImpl(
             ).apply { newEntity() }
             userRoleRelationRepository.save(entity).awaitFirstOrNull()
         }
+
+        eventPublisher.publishEvent(UserAuthoritiesInvalidationEvent(userId))
     }
 
     override suspend fun deleteByUserIdIn(userIds: Collection<Long>) {
         this.getRepository().deleteByUserIdIn(userIds).awaitFirstOrNull()
+
+        userIds.toSet().forEach { eventPublisher.publishEvent(UserAuthoritiesInvalidationEvent(it)) }
     }
 
     override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
+        val affectedUserIds = roleIds.toSet().flatMap { roleId ->
+            this.getRepository()
+                .findByRoleId(roleId)
+                .awaitListWithTimeout()
+                .map { it.userId }
+        }.toSet()
+
         this.getRepository().deleteByRoleIdIn(roleIds).awaitFirstOrNull()
+
+        // The relation rows are already gone, so a SystemRoleAuthoritiesInvalidationEvent
+        // would not match anything anymore. Fan out to the captured users directly.
+        affectedUserIds.forEach { eventPublisher.publishEvent(UserAuthoritiesInvalidationEvent(it)) }
     }
 }

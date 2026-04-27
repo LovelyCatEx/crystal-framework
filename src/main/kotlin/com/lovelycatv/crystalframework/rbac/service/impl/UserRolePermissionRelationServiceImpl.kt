@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.user.event.SystemRoleAuthoritiesInvalidationEvent
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -65,17 +66,29 @@ class UserRolePermissionRelationServiceImpl(
             ).apply { newEntity() }
             userRolePermissionRelationRepository.save(entity).awaitFirstOrNull()
         }
+
+        eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(roleId))
     }
 
     override suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>) {
+        val affectedRoleIds = this.getRepository()
+            .findByPermissionIdIn(permissionIds)
+            .awaitListWithTimeout()
+            .map { it.roleId }
+            .toSet()
+
         this.getRepository()
             .deleteByPermissionIdIn(permissionIds)
             .awaitFirstOrNull()
+
+        affectedRoleIds.forEach { eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(it)) }
     }
 
     override suspend fun deleteByRoleIdIn(roleIds: Collection<Long>) {
         this.getRepository()
             .deleteByRoleIdIn(roleIds)
             .awaitFirstOrNull()
+
+        roleIds.toSet().forEach { eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(it)) }
     }
 }
