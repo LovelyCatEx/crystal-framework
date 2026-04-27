@@ -350,9 +350,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 >
                     <Routes>
                         {availableMenus.map((menu) => (
-                            <Route path={menu.path.replace(parentPath, "")} element={
-                                menu.page ? menu.page : <>NO IMPLEMENTATIONS</>
-                            } />
+                            <Route
+                                key={menu.key.toString()}
+                                path={menu.path.replace(parentPath, "")}
+                                element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                            />
                         ))}
                     </Routes>
                 </Content>
