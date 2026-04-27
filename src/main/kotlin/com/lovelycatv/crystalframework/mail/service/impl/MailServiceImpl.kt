@@ -121,7 +121,7 @@ class MailServiceImpl(
             port = mailSettings.smtp.port
             username = mailSettings.smtp.username
             password = mailSettings.smtp.password
-            defaultEncoding = "UTF_8"
+            defaultEncoding = "UTF-8"
             javaMailProperties = Properties().apply {
                 val timeout = 5000
                 this["mail.transport.protocol"] = "smtp"
