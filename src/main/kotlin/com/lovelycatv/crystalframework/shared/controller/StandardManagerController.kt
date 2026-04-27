@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -40,6 +41,7 @@ abstract class StandardManagerController<
     suspend fun create(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: CREATE_DTO
     ): ApiResponse<*> {
         managerService.create(dto)
@@ -50,6 +52,7 @@ abstract class StandardManagerController<
     suspend fun read(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: READ_DTO
     ): ApiResponse<*> {
         return ApiResponse.success(managerService.query(dto))
@@ -59,6 +62,7 @@ abstract class StandardManagerController<
     suspend fun update(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: UPDATE_DTO
     ): ApiResponse<*> {
         managerService.update(dto)
@@ -69,6 +73,7 @@ abstract class StandardManagerController<
     suspend fun delete(
         userAuthentication: UserAuthentication,
         @ModelAttribute
+        @Valid
         dto: DELETE_DTO
     ): ApiResponse<*> {
         managerService.deleteByDTO(dto)
