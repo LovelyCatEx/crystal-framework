@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ManagerPermissions(
-    read = SystemPermission.ACTION_STORAGE_PROVIDER_READ,
-    readAll = SystemPermission.ACTION_STORAGE_PROVIDER_READ,
-    create = SystemPermission.ACTION_STORAGE_PROVIDER_CREATE,
-    update = SystemPermission.ACTION_STORAGE_PROVIDER_UPDATE,
-    delete = SystemPermission.ACTION_STORAGE_PROVIDER_DELETE,
+    read = [SystemPermission.ACTION_STORAGE_PROVIDER_READ],
+    readAll = [SystemPermission.ACTION_STORAGE_PROVIDER_READ],
+    create = [SystemPermission.ACTION_STORAGE_PROVIDER_CREATE],
+    update = [SystemPermission.ACTION_STORAGE_PROVIDER_UPDATE],
+    delete = [SystemPermission.ACTION_STORAGE_PROVIDER_DELETE],
 )
 @Validated
 @RestController

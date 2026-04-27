@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ManagerPermissions(
-    read = SystemPermission.ACTION_TENANT_TIRE_TYPE_READ,
-    readAll = SystemPermission.ACTION_TENANT_TIRE_TYPE_READ,
-    create = SystemPermission.ACTION_TENANT_TIRE_TYPE_CREATE,
-    update = SystemPermission.ACTION_TENANT_TIRE_TYPE_UPDATE,
-    delete = SystemPermission.ACTION_TENANT_TIRE_TYPE_DELETE,
+    read = [SystemPermission.ACTION_TENANT_TIRE_TYPE_READ],
+    readAll = [SystemPermission.ACTION_TENANT_TIRE_TYPE_READ],
+    create = [SystemPermission.ACTION_TENANT_TIRE_TYPE_CREATE],
+    update = [SystemPermission.ACTION_TENANT_TIRE_TYPE_UPDATE],
+    delete = [SystemPermission.ACTION_TENANT_TIRE_TYPE_DELETE],
 )
 @Validated
 @RestController

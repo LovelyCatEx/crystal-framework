@@ -30,7 +30,7 @@ class ManagerControllerPermissionAspect {
         val methodName = methodSignature.method.name
 
         val requiredPermissions = when (methodName) {
-            "readAll" -> permissions.readAll.ifEmpty { permissions.read }
+            "readAll" -> permissions.readAll
             "read" -> permissions.read
             "create" -> permissions.create
             "update" -> permissions.update

@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @ManagerPermissions(
-    read = SystemPermission.ACTION_PERMISSION_READ,
-    readAll = SystemPermission.ACTION_PERMISSION_READ,
-    create = SystemPermission.ACTION_PERMISSION_CREATE,
-    update = SystemPermission.ACTION_PERMISSION_UPDATE,
-    delete = SystemPermission.ACTION_PERMISSION_DELETE,
+    read = [SystemPermission.ACTION_PERMISSION_READ],
+    readAll = [SystemPermission.ACTION_PERMISSION_READ],
+    create = [SystemPermission.ACTION_PERMISSION_CREATE],
+    update = [SystemPermission.ACTION_PERMISSION_UPDATE],
+    delete = [SystemPermission.ACTION_PERMISSION_DELETE],
 )
 @Validated
 @RestController
