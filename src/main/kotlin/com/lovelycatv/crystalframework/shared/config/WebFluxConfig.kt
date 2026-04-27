@@ -11,7 +11,6 @@ import org.springframework.http.codec.json.JacksonJsonDecoder
 import org.springframework.http.codec.json.JacksonJsonEncoder
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.config.ApiVersionConfigurer
-import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
@@ -21,8 +20,7 @@ import reactor.kotlin.core.publisher.toMono
 import tools.jackson.databind.json.JsonMapper
 
 @Configuration
-@EnableWebFlux
-class WebMvcConfig(
+class WebFluxConfig(
     private val userService: UserService,
     private val jsonMapper: JsonMapper,
     private val jwtSignKeyStore: JWTSignKeyStore

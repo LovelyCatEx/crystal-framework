@@ -19,14 +19,12 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 
 @Configuration
-@EnableWebFlux
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
