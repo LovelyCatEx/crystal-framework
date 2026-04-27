@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.invitation
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -55,6 +56,15 @@ class ManagerTenantInvitationController(
             ?.id
 
         if (RbacUtils.hasAuthority(this.createPermission)) {
+            // System-level callers may attribute the invitation to any member, but that
+            // member must actually belong to the target tenant.
+            dto.creatorMemberId?.let { memberId ->
+                val member = tenantMemberService.getByIdOrNull(memberId)
+                    ?: throw BusinessException("creator member $memberId does not exist")
+                if (member.tenantId != dto.tenantId) {
+                    throw BusinessException("creator member $memberId does not belong to tenant ${dto.tenantId}")
+                }
+            }
             tenantInvitationManagerService.create(dto.apply {
                 if (this.creatorMemberId == null) {
                     this.creatorMemberId = userSelfMemberId
