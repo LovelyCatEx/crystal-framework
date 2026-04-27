@@ -2,13 +2,13 @@ package com.lovelycatv.crystalframework.tenant.controller.manager
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.crystalframework.tenant.entity.BaseTenantEntity
 import com.lovelycatv.crystalframework.tenant.service.manager.BaseTenantResourceManagerService
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam
 abstract class StandardTenantManagerController<
         SERVICE : BaseTenantResourceManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
         REPOSITORY : BaseRepository<ENTITY>,
-        ENTITY: BaseEntity,
+        ENTITY: BaseTenantEntity,
         CREATE_DTO: BaseManagerCreateTenantResourceDTO,
         READ_DTO: BaseManagerReadTenantResourceDTO,
         UPDATE_DTO: BaseManagerUpdateDTO,
@@ -43,6 +43,8 @@ abstract class StandardTenantManagerController<
         @RequestParam
         tenantId: Long,
     ): ApiResponse<*> {
+        customReadAll(userAuthentication, tenantId)?.let { return it }
+
         if (RbacUtils.hasAuthority(this.readPermission)) {
             return ApiResponse.success(managerService.findAllByTenantId(tenantId))
         } else if (RbacUtils.hasAuthority(this.scopedReadPermission)) {
@@ -56,6 +58,15 @@ abstract class StandardTenantManagerController<
         }
     }
 
+    /**
+     * Hook for [readAll]. Return non-null to short-circuit the standard logic with a custom response;
+     * return null (default) to fall through to the standard implementation.
+     */
+    protected open suspend fun customReadAll(
+        userAuthentication: UserAuthentication,
+        tenantId: Long,
+    ): ApiResponse<*>? = null
+
     @PostMapping("/create", version = "1")
     suspend fun create(
         userAuthentication: UserAuthentication,
@@ -63,6 +74,8 @@ abstract class StandardTenantManagerController<
         @Valid
         dto: CREATE_DTO
     ): ApiResponse<*> {
+        customCreate(userAuthentication, dto)?.let { return it }
+
         if (RbacUtils.hasAuthority(this.createPermission)) {
             managerService.create(dto)
         } else if (RbacUtils.hasAuthority(this.scopedCreatePermission)) {
@@ -78,6 +91,15 @@ abstract class StandardTenantManagerController<
         return ApiResponse.success(null)
     }
 
+    /**
+     * Hook for [create]. Return non-null to short-circuit the standard logic with a custom response;
+     * return null (default) to fall through to the standard implementation.
+     */
+    protected open suspend fun customCreate(
+        userAuthentication: UserAuthentication,
+        dto: CREATE_DTO
+    ): ApiResponse<*>? = null
+
     @GetMapping("/query", version = "1")
     suspend fun query(
         userAuthentication: UserAuthentication,
@@ -85,6 +107,8 @@ abstract class StandardTenantManagerController<
         @Valid
         dto: READ_DTO
     ): ApiResponse<*> {
+        customQuery(userAuthentication, dto)?.let { return it }
+
         if (RbacUtils.hasAuthority(this.readPermission)) {
             return ApiResponse.success(managerService.query(dto))
         } else if (RbacUtils.hasAuthority(this.scopedReadPermission)) {
@@ -98,6 +122,15 @@ abstract class StandardTenantManagerController<
         }
     }
 
+    /**
+     * Hook for [query]. Return non-null to short-circuit the standard logic with a custom response;
+     * return null (default) to fall through to the standard implementation.
+     */
+    protected open suspend fun customQuery(
+        userAuthentication: UserAuthentication,
+        dto: READ_DTO
+    ): ApiResponse<*>? = null
+
     @PostMapping("/update", version = "1")
     suspend fun update(
         userAuthentication: UserAuthentication,
@@ -105,6 +138,8 @@ abstract class StandardTenantManagerController<
         @Valid
         dto: UPDATE_DTO
     ): ApiResponse<*> {
+        customUpdate(userAuthentication, dto)?.let { return it }
+
         if (RbacUtils.hasAuthority(this.updatePermission)) {
             managerService.update(dto)
         } else if (RbacUtils.hasAuthority(this.scopedUpdatePermission)) {
@@ -120,6 +155,15 @@ abstract class StandardTenantManagerController<
         return ApiResponse.success(null)
     }
 
+    /**
+     * Hook for [update]. Return non-null to short-circuit the standard logic with a custom response;
+     * return null (default) to fall through to the standard implementation.
+     */
+    protected open suspend fun customUpdate(
+        userAuthentication: UserAuthentication,
+        dto: UPDATE_DTO
+    ): ApiResponse<*>? = null
+
     @PostMapping("/delete", version = "1")
     suspend fun delete(
         userAuthentication: UserAuthentication,
@@ -127,6 +171,8 @@ abstract class StandardTenantManagerController<
         @Valid
         dto: DELETE_DTO
     ): ApiResponse<*> {
+        customDelete(userAuthentication, dto)?.let { return it }
+
         if (RbacUtils.hasAuthority(this.deletePermission)) {
             managerService.deleteByDTO(dto)
         } else if (RbacUtils.hasAuthority(this.scopedDeletePermission)) {
@@ -141,4 +187,13 @@ abstract class StandardTenantManagerController<
         }
         return ApiResponse.success(null)
     }
+
+    /**
+     * Hook for [delete]. Return non-null to short-circuit the standard logic with a custom response;
+     * return null (default) to fall through to the standard implementation.
+     */
+    protected open suspend fun customDelete(
+        userAuthentication: UserAuthentication,
+        dto: DELETE_DTO
+    ): ApiResponse<*>? = null
 }

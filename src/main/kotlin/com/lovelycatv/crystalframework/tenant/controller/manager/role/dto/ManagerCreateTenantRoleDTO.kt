@@ -1,12 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.role.dto
 
+import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerCreateTenantResourceDTO
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
- data class ManagerCreateTenantRoleDTO(
-    @field:NotNull(message = "Tenant ID is required")
-    val tenantId: Long,
+data class ManagerCreateTenantRoleDTO(
+    override val tenantId: Long,
 
     @field:NotBlank(message = "Name is required")
     @field:Size(max = 64, message = "Name length cannot exceed 64 characters")
@@ -16,4 +15,4 @@ import jakarta.validation.constraints.Size
     val description: String? = null,
 
     val parentId: Long? = null
-)
+) : BaseManagerCreateTenantResourceDTO(tenantId)

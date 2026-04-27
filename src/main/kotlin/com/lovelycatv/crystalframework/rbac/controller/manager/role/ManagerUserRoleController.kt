@@ -5,74 +5,34 @@ import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerC
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerDeleteRoleDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerReadRoleDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerUpdateRoleDTO
+import com.lovelycatv.crystalframework.rbac.entity.UserRoleEntity
+import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
+import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import jakarta.validation.Valid
-import org.springframework.security.access.prepost.PreAuthorize
+import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
+@ManagerPermissions(
+    read = SystemPermission.ACTION_ROLE_READ,
+    readAll = SystemPermission.ACTION_ROLE_READ,
+    create = SystemPermission.ACTION_ROLE_CREATE,
+    update = SystemPermission.ACTION_ROLE_UPDATE,
+    delete = SystemPermission.ACTION_ROLE_DELETE,
+)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/user-role")
 class ManagerUserRoleController(
-    private val userRoleManagerService: UserRoleManagerService
-) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_READ}')")
-    @GetMapping("/list", version = "1")
-    suspend fun readAllRoles(
-        userAuthentication: UserAuthentication
-    ): ApiResponse<*> {
-        return ApiResponse.success(userRoleManagerService.getRepository().findAll().awaitListWithTimeout())
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_CREATE}')")
-    @PostMapping("/create", version = "1")
-    suspend fun createRole(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: ManagerCreateRoleDTO
-    ): ApiResponse<*> {
-        userRoleManagerService.create(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_READ}')")
-    @GetMapping("/query", version = "1")
-    suspend fun readRole(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: ManagerReadRoleDTO
-    ): ApiResponse<*> {
-        return ApiResponse.success(userRoleManagerService.query(dto))
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_UPDATE}')")
-    @PostMapping("/update", version = "1")
-    suspend fun updateRole(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: ManagerUpdateRoleDTO
-    ): ApiResponse<*> {
-        userRoleManagerService.update(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_ROLE_DELETE}')")
-    @PostMapping("/delete", version = "1")
-    suspend fun deleteRole(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: ManagerDeleteRoleDTO
-    ): ApiResponse<*> {
-        userRoleManagerService.deleteByDTO(dto)
-        return ApiResponse.success(null)
-    }
-}
+    managerService: UserRoleManagerService
+) : StandardManagerController<
+        UserRoleManagerService,
+        UserRoleRepository,
+        UserRoleEntity,
+        ManagerCreateRoleDTO,
+        ManagerReadRoleDTO,
+        ManagerUpdateRoleDTO,
+        ManagerDeleteRoleDTO
+>(managerService)

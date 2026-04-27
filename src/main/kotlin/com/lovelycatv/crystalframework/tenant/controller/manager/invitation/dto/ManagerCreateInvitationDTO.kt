@@ -1,12 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto
 
+import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerCreateTenantResourceDTO
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 
 data class ManagerCreateInvitationDTO(
-    @field:NotNull(message = "Tenant ID is required")
-    val tenantId: Long,
+    override val tenantId: Long,
 
     var creatorMemberId: Long? = null,
 
@@ -20,4 +20,4 @@ data class ManagerCreateInvitationDTO(
     val expiresTime: Long? = null,
 
     val requiresReviewing: Boolean = false
-)
+) : BaseManagerCreateTenantResourceDTO(tenantId)

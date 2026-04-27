@@ -29,7 +29,7 @@ class ManagerControllerPermissionAspect {
         val methodSignature = joinPoint.signature as MethodSignature
         val methodName = methodSignature.method.name
 
-        val requiredPermission = when (methodName) {
+        val requiredPermissions = when (methodName) {
             "readAll" -> permissions.readAll.ifEmpty { permissions.read }
             "read" -> permissions.read
             "create" -> permissions.create
@@ -37,8 +37,10 @@ class ManagerControllerPermissionAspect {
             "delete" -> permissions.delete
             else -> null
         }
+            ?.filter { it.isNotEmpty() }
+            ?.toList()
 
-        if (requiredPermission.isNullOrEmpty()) {
+        if (requiredPermissions.isNullOrEmpty()) {
             logger.warn("No valid permission required for $methodSignature, skipped.")
             return joinPoint.proceed()
         }
@@ -48,21 +50,20 @@ class ManagerControllerPermissionAspect {
             .mapNotNull { it.authentication }
             .awaitSingle()
 
-        if (!hasPermission(authentication, requiredPermission)) {
+        if (!hasAnyPermission(authentication, requiredPermissions)) {
             throw AccessDeniedException(
-                "Access denied: Required permission '$requiredPermission' for method '$methodName'"
+                "Access denied: Required any of permissions $requiredPermissions for method '$methodName'"
             )
         }
 
         return joinPoint.proceed()
     }
 
-    private fun hasPermission(
+    private fun hasAnyPermission(
         authentication: Authentication,
-        requiredPermission: String
+        requiredPermissions: List<String>
     ): Boolean {
-        return authentication.authorities.any {
-            it.authority == requiredPermission
-        }
+        val granted = authentication.authorities.mapNotNullTo(HashSet()) { it.authority }
+        return requiredPermissions.any { it in granted }
     }
 }

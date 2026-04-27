@@ -8,6 +8,5 @@ import jakarta.validation.constraints.Size
 open class BaseManagerReadTenantResourceDTO(
     override val page: Int,
     override val pageSize: Int,
-    @field:NotNull(message = "Tenant ID is required")
-    open val tenantId: Long,
+    open val tenantId: Long?,
 ) : BaseManagerReadDTO(page, pageSize)
