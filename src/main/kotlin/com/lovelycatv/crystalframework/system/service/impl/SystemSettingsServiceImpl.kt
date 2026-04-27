@@ -5,13 +5,19 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
+import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.crystalframework.system.types.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
+import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.stereotype.Service
+import java.util.UUID
 import kotlin.reflect.KClass
 
 @Service
@@ -19,10 +25,32 @@ class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
+    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
     override val eventPublisher: ApplicationEventPublisher,
 ) : SystemSettingsService {
     private val logger = logger()
+
+    @Volatile
     private var cachedSystemSettings: SystemSettings? = null
+
+    private val instanceId = UUID.randomUUID().toString()
+
+    private val refreshTopic = ChannelTopic(RedisConstants.SYSTEM_SETTINGS_REFRESH_TOPIC)
+
+    @PostConstruct
+    fun subscribeRefreshTopic() {
+        redisMessageListenerContainer
+            .receive(refreshTopic)
+            .subscribe { message ->
+                val sender = message.message
+                if (sender == instanceId) {
+                    return@subscribe
+                }
+                logger.info("Received system settings refresh signal from instance $sender")
+                cachedSystemSettings = null
+            }
+    }
 
     override fun getRepository(): SystemSettingsRepository {
         return this.systemSettingsRepository
@@ -36,6 +64,9 @@ class SystemSettingsServiceImpl(
 
     override fun refreshSystemSettings() {
         this.cachedSystemSettings = null
+        reactiveRedisTemplate
+            .convertAndSend(refreshTopic.topic, instanceId)
+            .subscribe()
     }
 
     override suspend fun getSystemSettings(): SystemSettings {

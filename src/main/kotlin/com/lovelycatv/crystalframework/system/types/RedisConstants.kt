@@ -7,6 +7,8 @@ object RedisConstants {
 
     const val ENTITY_CACHE_BY_LIST = "entity-cache:list:"
 
+    const val SYSTEM_SETTINGS_REFRESH_TOPIC = "crystalframework:system-settings:refresh"
+
     fun getRequestRegisterEmailCodeKey(email: String) = "register-email-code:$email"
 
     fun getRequestResetPasswordEmailCodeKey(email: String) = "reset-password-email-code:$email"
