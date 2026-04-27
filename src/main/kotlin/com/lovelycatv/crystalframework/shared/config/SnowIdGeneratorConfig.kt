@@ -19,17 +19,18 @@ class SnowIdGeneratorConfig {
     @Bean
     @Scope(proxyMode = ScopedProxyMode.NO)
     @ConditionalOnMissingBean(SnowIdGenerator::class)
-    fun snowIdGenerator(): SnowIdGenerator {
+    fun snowIdGenerator(shardingConfiguration: ShardingConfiguration): SnowIdGenerator {
+        val s = shardingConfiguration.snowflake
         return SnowIdGenerator(
-            0,
-            45,
-            0,
-            0,
-            18,
-            0,
-            0,
-            0,
-            0
+            s.startPoint,
+            s.timestampLength,
+            s.dataCenterIdLength,
+            s.workerIdLength,
+            s.sequenceIdLength,
+            s.geneIdLength,
+            s.dataCenterId,
+            s.workerId,
+            s.actualGeneLength,
         )
     }
 }

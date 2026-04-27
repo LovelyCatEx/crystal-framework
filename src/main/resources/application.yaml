@@ -75,6 +75,17 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+  sharding:
+    snowflake:
+      start-point: 0
+      timestamp-length: 41
+      data-center-id-length: 5
+      worker-id-length: 5
+      sequence-id-length: 12
+      gene-id-length: 0
+      data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
+      worker-id: ${SNOWFLAKE_WORKER_ID:0}
+      actual-gene-length: 0
 
 logging:
   level:

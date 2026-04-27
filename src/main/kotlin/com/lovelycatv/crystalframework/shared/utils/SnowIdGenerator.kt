@@ -36,9 +36,9 @@ class SnowIdGenerator(
             throw IllegalArgumentException("Id length must be 64 in total.")
         }
  
-        maxSequence = (1 shl sequenceIdLength).toLong()
-        maxDataCenters = (1 shl dataCenterIdLength).toLong()
-        maxWorkers = (1 shl workerIdLength).toLong()
+        maxSequence = 1L shl sequenceIdLength
+        maxDataCenters = 1L shl dataCenterIdLength
+        maxWorkers = 1L shl workerIdLength
  
         if (dataCenterId >= maxDataCenters) {
             throw IllegalArgumentException("Data center id out of range, max $maxDataCenters but current $dataCenterId")
@@ -113,6 +113,6 @@ class SnowIdGenerator(
      * @return
      */
     fun getGene(origin: Long, geneLength: Int = actualGeneLength): Long {
-        return origin and ((1 shl geneLength) - 1).toLong()
+        return origin and ((1L shl geneLength) - 1)
     }
 }
