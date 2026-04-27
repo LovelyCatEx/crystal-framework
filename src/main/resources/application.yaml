@@ -2,15 +2,13 @@ spring:
   application:
     name: springboot-template
   r2dbc:
-    url: r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    url: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
     pool:
       initial-size: 20
       max-size: 40
       max-idle-time: 30m
-#      validation-query: SELECT 1
-    properties:
-      preferQueryMode: simple
-      autocommit: false
   data:
     redis:
       host: ${REDIS_HOST}
