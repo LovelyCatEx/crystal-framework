@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 import io.micrometer.observation.KeyValuesConvention
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -54,12 +55,18 @@ class ManagerSystemSettingsController(
     suspend fun updateSystemSettings(
         @RequestBody dto: Map<String, String?>
     ): ApiResponse<*> {
-        val declarations = SystemSettingsConstants.getAllDeclarations().map { it.key }
+        val declarationsByKey = SystemSettingsConstants
+            .getAllDeclarations()
+            .associateBy { it.key }
 
-        // Check whether the dto is fit to system settings declarations
-        val test = dto.keys.all { it in declarations }
-        if (!test) {
-            throw BusinessException("Some keys in body is invalid")
+        dto.forEach { (key, value) ->
+            val declaration = declarationsByKey[key]
+                ?: throw BusinessException("setting key '$key' is not declared")
+            if (value != null && !declaration.valueType.matches(value)) {
+                throw BusinessException(
+                    "setting '$key' expects ${declaration.valueType.name.lowercase()} but got '$value'"
+                )
+            }
         }
 
         dto.forEach { (key, value) ->
@@ -67,5 +74,12 @@ class ManagerSystemSettingsController(
         }
 
         return ApiResponse.success(null)
+    }
+
+    private fun SystemSettingsItemValueType.matches(raw: String): Boolean = when (this) {
+        SystemSettingsItemValueType.STRING -> true
+        SystemSettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
+        SystemSettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
+        SystemSettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
     }
 }
