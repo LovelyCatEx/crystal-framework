@@ -1726,6 +1726,12 @@ export const zhCN = {
     }
   },
 
+  api: {
+    sessionExpired: '验证信息已过期',
+    forbidden: '你无权访问当前资源',
+    unknownError: '未知错误'
+  },
+
   enums: {
     tenantMemberStatus: {
       0: '未激活',

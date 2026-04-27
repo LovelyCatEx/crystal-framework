@@ -1729,6 +1729,12 @@ export const enUS = {
     }
   },
 
+  api: {
+    sessionExpired: 'Your session has expired',
+    forbidden: 'You do not have permission to access this resource',
+    unknownError: 'Unknown error'
+  },
+
   enums: {
     tenantMemberStatus: {
       0: 'Inactive',

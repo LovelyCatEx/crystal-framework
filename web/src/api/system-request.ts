@@ -2,6 +2,7 @@ import {del, get, patch, post, put} from "./request.ts";
 import {getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
 import {menuPathLogin} from "@/router";
+import i18n from "@/i18n";
 
 export interface ApiResponse<T> {
     code: number;
@@ -30,7 +31,7 @@ export function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         return response;
     } else if (response.code === 401) {
-        void message.warning('验证信息已过期');
+        void message.warning(i18n.t('api.sessionExpired'));
         setTimeout(() => {
             const url = new URL(window.location.origin + menuPathLogin);
             url.searchParams.set('redirectTo', window.location.href);
@@ -38,11 +39,10 @@ export function handleApiResponse<T>(response: ApiResponse<T>) {
         }, 500);
         throw response;
     } else if (response.code === 403) {
-        void message.warning(response.message || '你无权访问当前资源');
+        void message.warning(response.message || i18n.t('api.forbidden'));
         throw response;
     } else {
-        void message.error(response.message)
-        // console.error("未知错误", response)
+        void message.error(response.message || i18n.t('api.unknownError'))
         throw response;
     }
 }
