@@ -73,6 +73,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         .delete({ ids: selectedEntities.map((entity) => entity.id) })
                         .then(() => {
                             void message.success(t('components.managerPageContainer.batchDeleteSuccess'));
+                            setSelectedEntities([]);
+                            entityTableRef?.current?.clearSelection();
                             entityTableRef?.current?.refreshData();
                         })
                         .catch(() => {
@@ -103,6 +105,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
         props.delete({ ids: [id] })
             .then(() => {
                 void message.success(t('components.managerPageContainer.deleteSuccess', { entityName: props.entityName }));
+                setSelectedEntities((prev) => prev.filter((it) => it.id !== id));
+                entityTableRef?.current?.clearSelection();
                 entityTableRef?.current?.refreshData();
             })
             .catch(() => {

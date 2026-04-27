@@ -48,6 +48,7 @@ export interface EntityTableRefreshOptions {
 
 export interface EntityTableRef {
     refreshData: (options?: EntityTableRefreshOptions) => void;
+    clearSelection: () => void;
 }
 
 export type EntityTableReturnType =
@@ -74,6 +75,9 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     // Search
     const [searchKeyword, setSearchKeyword] = useState('');
+
+    // Selection (controlled, so parent can reset visually)
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     // When refreshData explicitly resets page, suppress the immediate effect re-fire that
     // would otherwise be triggered by the setCurrentPage(1) state change.
@@ -182,11 +186,17 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     useImperativeHandle(ref, () => {
         return {
             refreshData: refreshData,
+            clearSelection: () => {
+                setSelectedRowKeys([]);
+                props?.tableSelection?.onChange?.([]);
+            },
         }
     });
 
     const rowSelection: TableProps<ENTITY>['rowSelection'] = {
-        onChange: (_, selectedRows: ENTITY[]) => {
+        selectedRowKeys: selectedRowKeys,
+        onChange: (keys, selectedRows: ENTITY[]) => {
+            setSelectedRowKeys(keys);
             props?.tableSelection?.onChange?.(selectedRows);
         },
         getCheckboxProps: (record: ENTITY) => ({
