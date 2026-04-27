@@ -79,7 +79,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
     }
 
     fun buildListCacheKey(identifier: String): String {
-        return "${RedisConstants.ENTITY_CACHE_BY_ID}$identifier"
+        return "${RedisConstants.ENTITY_CACHE_BY_LIST}$identifier"
     }
 
     fun getListCache(identifier: String): List<ENTITY>? {
