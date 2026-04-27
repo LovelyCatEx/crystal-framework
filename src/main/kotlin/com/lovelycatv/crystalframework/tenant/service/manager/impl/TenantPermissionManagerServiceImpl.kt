@@ -35,13 +35,17 @@ class TenantPermissionManagerServiceImpl(
     }
 
     override suspend fun create(dto: ManagerCreateTenantPermissionDTO): TenantPermissionEntity {
-        if (this.getRepository().findByName(dto.name).awaitFirstOrNull() != null) {
-            throw BusinessException("permission ${dto.name} already exists")
+        val name = dto.name.trim()
+        if (name.isEmpty()) {
+            throw BusinessException("permission name must not be blank")
+        }
+        if (tenantPermissionRepository.findByName(name).awaitFirstOrNull() != null) {
+            throw BusinessException("permission $name already exists")
         }
 
         val entity = TenantPermissionEntity(
             id = snowIdGenerator.nextId(),
-            name = dto.name,
+            name = name,
             description = dto.description,
             type = dto.type,
             path = dto.path,
@@ -53,8 +57,21 @@ class TenantPermissionManagerServiceImpl(
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantPermissionDTO, original: TenantPermissionEntity): TenantPermissionEntity {
+        dto.name?.let { newName ->
+            val trimmed = newName.trim()
+            if (trimmed.isEmpty()) {
+                throw BusinessException("permission name must not be blank")
+            }
+            if (trimmed != original.name) {
+                tenantPermissionRepository.findByName(trimmed).awaitFirstOrNull()?.let { collision ->
+                    if (collision.id != original.id) {
+                        throw BusinessException("permission $trimmed already exists")
+                    }
+                }
+                original.name = trimmed
+            }
+        }
         return original.apply {
-            dto.name?.let { name = it }
             dto.description?.let { description = it }
             dto.type?.let { type = it }
             dto.path?.let { path = it }
