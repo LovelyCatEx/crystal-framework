@@ -68,13 +68,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 icon: <ExclamationCircleFilled />,
                 content: t('components.managerPageContainer.batchDeleteConfirm'),
                 onOk() {
-                    props
+                    return props
                         .delete({ ids: selectedEntities.map((entity) => entity.id) })
                         .then(() => {
                             void message.success(t('components.managerPageContainer.batchDeleteSuccess'));
                             entityTableRef?.current?.refreshData();
                         })
-                        .finally(() => {
+                        .catch(() => {
                             void message.error(t('components.managerPageContainer.batchDeleteFailed'));
                         })
                 },
