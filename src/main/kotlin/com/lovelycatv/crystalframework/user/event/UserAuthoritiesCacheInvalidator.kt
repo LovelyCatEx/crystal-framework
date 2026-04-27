@@ -6,13 +6,20 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 /**
  * Listens to [UserAuthoritiesCacheInvalidationEvent]s and drops the affected
@@ -31,10 +38,14 @@ class UserAuthoritiesCacheInvalidator(
 ) {
     private val logger = logger()
 
+    private val coroutineScope = CoroutineScope(
+        Executors.newScheduledThreadPool(4).asCoroutineDispatcher()
+    )
+
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     fun handle(event: UserAuthoritiesCacheInvalidationEvent) {
-        runBlocking(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             when (event) {
                 is UserAuthoritiesInvalidationEvent -> {
                     invalidate(event.userId)
@@ -66,7 +77,7 @@ class UserAuthoritiesCacheInvalidator(
                         .map { it.memberId }
                         .toSet()
                     if (memberIds.isEmpty()) {
-                        return@runBlocking
+                        return@launch
                     }
                     val userIds = tenantMemberRepository
                         .findAllById(memberIds)
@@ -80,7 +91,9 @@ class UserAuthoritiesCacheInvalidator(
     }
 
     private suspend fun invalidate(userId: Long) {
-        runCatching { userRbacQueryService.clearUserAuthoritiesCache(userId) }
-            .onFailure { logger.warn("failed to invalidate authorities cache for user $userId", it) }
+        runCatching {
+            userRbacQueryService.clearUserAuthoritiesCache(userId)
+            logger.debug("User $userId authorities cache invalidated")
+        }.onFailure { logger.warn("failed to invalidate authorities cache for user $userId", it) }
     }
 }
