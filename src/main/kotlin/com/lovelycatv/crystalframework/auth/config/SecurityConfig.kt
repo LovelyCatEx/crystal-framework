@@ -9,8 +9,6 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -169,9 +167,7 @@ class SecurityConfig(
             CustomAuthFilter(
                 unauthorizedPathPatterns = unauthorizedPathPatterns,
                 getUserAuthorities = { userId, tenantId ->
-                    runBlocking(Dispatchers.IO) {
-                        userRbacQueryService.getUserAuthorities(userId, tenantId)
-                    }
+                    userRbacQueryService.getUserAuthorities(userId, tenantId)
                 },
                 getJWTSignKey = {
                     jwtSignKeyStore.getSignKey()

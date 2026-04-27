@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.vertex.log.logger
 import io.jsonwebtoken.ExpiredJwtException
+import kotlinx.coroutines.reactor.mono
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -22,7 +23,7 @@ import reactor.core.publisher.Mono
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
-    val getUserAuthorities: (userId: Long, tenantId: Long?) -> Collection<GrantedAuthority>,
+    val getUserAuthorities: suspend (userId: Long, tenantId: Long?) -> Collection<GrantedAuthority>,
     val getJWTSignKey: () -> String,
 ) : WebFilter {
     private val logger = logger()
@@ -33,7 +34,6 @@ class CustomAuthFilter(
     ): Mono<Void> {
         val requestPath = exchange.request.path.pathWithinApplication()
 
-        // Check if the path matches any unauthorized endpoint pattern
         val isUnauthorized = unauthorizedPathPatterns.any { pattern ->
             pattern.matches(requestPath)
         }
@@ -44,38 +44,38 @@ class CustomAuthFilter(
 
         val authorization = exchange.request.headers["Authorization"]
             ?.firstOrNull()
-            ?.replace("Bearer ", "")
+            ?.removePrefix("Bearer ")
             ?.trim()
-            ?: throw UnauthorizedException("Authorization header is missing")
+            ?: return Mono.error(UnauthorizedException("Authorization header is missing"))
 
         val claims = try {
             JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
         } catch (e: Exception) {
-            if (e is ExpiredJwtException) {
-                throw UnauthorizedException("token expired")
+            return if (e is ExpiredJwtException) {
+                Mono.error(UnauthorizedException("token expired"))
             } else {
                 logger.error("unexpected token parse exception", e)
-                throw UnauthorizedException("invalid token pattern")
+                Mono.error(UnauthorizedException("invalid token pattern"))
             }
         }
 
         val userId = claims["userId"]
             ?.toString()
-            ?.toLong()
-            ?: throw UnauthorizedException("userId is missing")
+            ?.toLongOrNull()
+            ?: return Mono.error(UnauthorizedException("userId is missing"))
 
         val tenantId = claims["tenantId"]
             ?.toString()
-            ?.toLong()
+            ?.toLongOrNull()
 
-        val token = UsernamePasswordAuthenticationToken(
-            claims.subject,
-            null,
-            getUserAuthorities.invoke(userId, tenantId)
-        )
+        val subject = claims.subject
 
-        return chain.filter(exchange).contextWrite {
-            ReactiveSecurityContextHolder.withAuthentication(token)
-        }
+        return mono { getUserAuthorities(userId, tenantId) }
+            .flatMap { authorities ->
+                val token = UsernamePasswordAuthenticationToken(subject, null, authorities)
+                chain.filter(exchange).contextWrite {
+                    ReactiveSecurityContextHolder.withAuthentication(token)
+                }
+            }
     }
 }
