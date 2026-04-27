@@ -8,7 +8,6 @@
 package com.lovelycatv.crystalframework.auth.filter
 
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.vertex.log.logger
 import io.jsonwebtoken.ExpiredJwtException
@@ -71,15 +70,9 @@ class CustomAuthFilter(
 
         val subject = claims.subject
 
-        val userAuthentication = UserAuthentication(
-            userId = userId,
-            username = subject,
-            tenantId = tenantId,
-        )
-
         return mono { getUserAuthorities(userId, tenantId) }
             .flatMap { authorities ->
-                val token = UsernamePasswordAuthenticationToken(userAuthentication, null, authorities)
+                val token = UsernamePasswordAuthenticationToken(subject, null, authorities)
                 chain.filter(exchange).contextWrite {
                     ReactiveSecurityContextHolder.withAuthentication(token)
                 }

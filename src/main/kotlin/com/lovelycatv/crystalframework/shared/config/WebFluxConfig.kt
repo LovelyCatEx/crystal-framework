@@ -1,12 +1,14 @@
 package com.lovelycatv.crystalframework.shared.config
 
+import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.utils.JwtUtil
+import com.lovelycatv.crystalframework.user.service.UserService
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.MethodParameter
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.http.codec.json.JacksonJsonDecoder
 import org.springframework.http.codec.json.JacksonJsonEncoder
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.config.ApiVersionConfigurer
 import org.springframework.web.reactive.config.WebFluxConfigurer
@@ -14,11 +16,14 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 class WebFluxConfig(
+    private val userService: UserService,
     private val jsonMapper: JsonMapper,
+    private val jwtSignKeyStore: JWTSignKeyStore
 ) : WebFluxConfigurer {
     override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
         configurer.setDefaultVersion("1")
@@ -48,11 +53,40 @@ class WebFluxConfig(
                 bindingContext: BindingContext,
                 exchange: ServerWebExchange,
             ): Mono<Any> {
-                return ReactiveSecurityContextHolder
-                    .getContext()
-                    .mapNotNull { it.authentication }
-                    .mapNotNull { it.principal as? UserAuthentication }
+                val webRequest = exchange.request
+                    ?: return Mono.empty()
+                val token: String = webRequest.headers?.get("Authorization")?.firstOrNull()
+                    ?: return Mono.empty()
+
+                val claims = try {
+                    JwtUtil.parseToken(jwtSignKeyStore.getSignKey(), token)
+                } catch (_: Exception) {
+                    null
+                } ?: return Mono.empty()
+
+                val userId = try {
+                    claims.get("userId", String::class.java).toLong()
+                } catch (_: Exception) {
+                    null
+                }
+
+                val tenantId = try {
+                    claims.get("tenantId", String::class.java).toLong()
+                } catch (_: Exception) {
+                    null
+                }
+
+                return if (userId != null) {
+                    UserAuthentication(
+                        userId = userId,
+                        username = claims.subject,
+                        tenantId = tenantId
+                    ).toMono()
+                } else {
+                    Mono.empty()
+                }
             }
+
         })
 
         super.configureArgumentResolvers(configurer)
