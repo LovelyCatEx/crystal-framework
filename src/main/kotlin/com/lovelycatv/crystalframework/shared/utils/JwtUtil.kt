@@ -10,21 +10,32 @@ package com.lovelycatv.crystalframework.shared.utils
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtBuilder
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import java.security.MessageDigest
 import java.util.*
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 
 object JwtUtil {
+    /**
+     * Derive a SecretKey from a raw [signKey] string.
+     *
+     * HS512 requires at least 64-byte keys. We always feed the raw bytes through
+     * SHA-512 so that any user provided string (e.g. UUID) yields a 64-byte key
+     * suitable for [io.jsonwebtoken.Jwts.SIG.HS512].
+     */
+    private fun deriveSecretKey(signKey: String): SecretKey {
+        val digest = MessageDigest.getInstance("SHA-512").digest(signKey.toByteArray(Charsets.UTF_8))
+        return SecretKeySpec(digest, "HmacSHA512")
+    }
+
     fun buildJwtToken(
-        signKey: String?,
+        signKey: String,
         subject: String,
         authorities: Set<String>,
         expiration: Long,
         customClaims: (JwtBuilder.() -> Unit)? = null
-    ): String? {
-        val authorityStr = StringBuilder()
-        for (authority in authorities) {
-            authorityStr.append(authority).append(",")
-        }
+    ): String {
+        val authorityStr = authorities.joinToString(",")
 
         val builder = Jwts
             .builder()
@@ -32,19 +43,18 @@ object JwtUtil {
 
         customClaims?.invoke(builder)
 
-        builder
-            .setSubject(subject)
-            .setExpiration(Date(System.currentTimeMillis() + expiration))
-            .signWith(SignatureAlgorithm.HS512, signKey)
+        return builder
+            .subject(subject)
+            .expiration(Date(System.currentTimeMillis() + expiration))
+            .signWith(deriveSecretKey(signKey), Jwts.SIG.HS512)
             .compact()
-
-        return builder.compact()
     }
 
     fun parseToken(signKey: String, token: String): Claims {
         return Jwts.parser()
-            .setSigningKey(signKey)
-            .parseClaimsJws(token.replace("Bearer ", ""))
-            .getBody()
+            .verifyWith(deriveSecretKey(signKey))
+            .build()
+            .parseSignedClaims(token.removePrefix("Bearer ").trim())
+            .payload
     }
 }
