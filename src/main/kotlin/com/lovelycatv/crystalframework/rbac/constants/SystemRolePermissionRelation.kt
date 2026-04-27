@@ -13,6 +13,8 @@ object SystemRolePermissionRelation {
             SystemPermission.COMPONENT_DASHBOARD_BUSINESS_STATISTICS,
             SystemPermission.COMPONENT_DASHBOARD_SYSTEM_METRICS,
             SystemPermission.COMPONENT_DASHBOARD_MY_TENANTS,
+            SystemPermission.ACTION_DASHBOARD_BUSINESS_STATISTICS_READ,
+            SystemPermission.ACTION_DASHBOARD_SYSTEM_METRICS_READ,
             // User
             SystemPermission.MENU_USER_MANAGER,
             SystemPermission.ACTION_USER_READ,

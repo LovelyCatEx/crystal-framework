@@ -145,6 +145,9 @@ object SystemPermission {
     const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
     const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"
 
+    const val ACTION_DASHBOARD_BUSINESS_STATISTICS_READ = "dashboard.business.statistics.read"
+    const val ACTION_DASHBOARD_SYSTEM_METRICS_READ = "dashboard.system.metrics.read"
+
     /**
      * resolve permission from string declaration
      *
