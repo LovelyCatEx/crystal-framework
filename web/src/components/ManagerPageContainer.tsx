@@ -51,6 +51,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     // New / Edit Modal
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingItem, setEditingItem] = useState<ENTITY | null>(null);
+    const [submitting, setSubmitting] = useState(false);
     const [form] = Form.useForm();
 
     // Selector
@@ -110,25 +111,27 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     };
 
     const handleAddOrUpdateEdit = (values: ENTITY) => {
-        if (editingItem) {
-            props.update(values).then(() => {
-                entityTableRef?.current?.refreshData();
-                void message.success(t('components.managerPageContainer.updateSuccess', { entityName: props.entityName }));
-            }).catch(() => {
-                void message.error(t('components.managerPageContainer.updateFailed', { entityName: props.entityName }));
-            })
-        } else {
-            props.create(values).then(() => {
-                entityTableRef?.current?.refreshData();
-                void message.success(t('components.managerPageContainer.createSuccess', { entityName: props.entityName }));
-            }).catch(() => {
-                void message.error(t('components.managerPageContainer.createFailed', { entityName: props.entityName }));
-            })
-        }
+        const isEditing = !!editingItem;
+        const action = isEditing ? props.update(values) : props.create(values);
 
-        setIsModalVisible(false);
-        setEditingItem(null);
-        form.resetFields();
+        setSubmitting(true);
+        action.then(() => {
+            entityTableRef?.current?.refreshData();
+            void message.success(t(
+                isEditing ? 'components.managerPageContainer.updateSuccess' : 'components.managerPageContainer.createSuccess',
+                { entityName: props.entityName }
+            ));
+            setIsModalVisible(false);
+            setEditingItem(null);
+            form.resetFields();
+        }).catch(() => {
+            void message.error(t(
+                isEditing ? 'components.managerPageContainer.updateFailed' : 'components.managerPageContainer.createFailed',
+                { entityName: props.entityName }
+            ));
+        }).finally(() => {
+            setSubmitting(false);
+        });
     };
 
     useImperativeHandle(ref, () => {
@@ -236,12 +239,17 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             <Modal
                 title={(editingItem ? t('components.managerPageContainer.edit') : t('components.managerPageContainer.create')) + restProps.entityName}
                 open={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
+                onCancel={() => {
+                    if (submitting) return;
+                    setIsModalVisible(false);
+                }}
                 onOk={() => form.submit()}
                 width={800}
                 centered
+                confirmLoading={submitting}
+                maskClosable={!submitting}
                 okButtonProps={{ className: "rounded-lg h-10 px-6" }}
-                cancelButtonProps={{ className: "rounded-lg h-10 px-6" }}
+                cancelButtonProps={{ className: "rounded-lg h-10 px-6", disabled: submitting }}
             >
                 <Form form={form} layout="vertical" onFinish={handleAddOrUpdateEdit} className="mt-4">
                     {/* Hidden Id field */}
