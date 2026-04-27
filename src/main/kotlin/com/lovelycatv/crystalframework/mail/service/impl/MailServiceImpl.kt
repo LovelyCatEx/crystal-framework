@@ -126,9 +126,17 @@ class MailServiceImpl(
                 val timeout = 5000
                 this["mail.transport.protocol"] = "smtp"
                 this["mail.smtp.auth"] = "true"
-                this["mail.smtp.ssl.enable"] = mailSettings.smtp.ssl.toString()
-                this["mail.smtp.starttls.required"] = "true"
-                this["mail.smtp.ssl.trust"] = "*"
+                if (mailSettings.smtp.ssl) {
+                    // SMTPS (typically port 465)
+                    this["mail.smtp.ssl.enable"] = "true"
+                    this["mail.smtp.starttls.enable"] = "false"
+                } else {
+                    // Plain SMTP with STARTTLS upgrade (typically port 587)
+                    this["mail.smtp.ssl.enable"] = "false"
+                    this["mail.smtp.starttls.enable"] = "true"
+                    this["mail.smtp.starttls.required"] = "true"
+                }
+                this["mail.smtp.ssl.trust"] = mailSettings.smtp.host
                 this["mail.smtp.connectiontimeout"] = "$timeout"
                 this["mail.smtp.timeout"] = "$timeout"
                 this["mail.smtp.writetimeout"] = "$timeout"
