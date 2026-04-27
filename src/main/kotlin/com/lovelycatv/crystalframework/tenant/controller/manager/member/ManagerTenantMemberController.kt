@@ -36,9 +36,10 @@ class ManagerTenantMemberController(
 >(
     tenantMemberManagerService,
     createPermission = SystemPermission.ACTION_TENANT_MEMBER_CREATE,
-    // Tenant-scoped users cannot create members directly; the create hook below
-    // enforces system-permission-only access. Members are normally added via invitations.
-    scopedCreatePermission = "",
+    // Tenant-scoped users cannot create members directly; new members must come
+    // through the invitation flow. DISABLED_SCOPED_PERMISSION makes that explicit
+    // both here and inside the parent's standard create branch.
+    scopedCreatePermission = DISABLED_SCOPED_PERMISSION,
     readPermission = SystemPermission.ACTION_TENANT_MEMBER_READ,
     scopedReadPermission = TenantPermission.ACTION_TENANT_MEMBER_READ_PEM,
     updatePermission = SystemPermission.ACTION_TENANT_MEMBER_UPDATE,
@@ -50,11 +51,14 @@ class ManagerTenantMemberController(
         userAuthentication: UserAuthentication,
         dto: ManagerCreateTenantMemberDTO
     ): ApiResponse<*>? {
-        if (RbacUtils.hasAuthority(this.createPermission)) {
-            tenantMemberManagerService.create(dto)
-        } else {
+        // Only system-permission holders may create a member here; tenant-scoped users
+        // must go through invitations. Falling back to the parent's standard logic would
+        // also reach the same conclusion thanks to DISABLED_SCOPED_PERMISSION, but
+        // returning a non-null response keeps the contract obvious.
+        if (!RbacUtils.hasAuthority(this.createPermission)) {
             throw ForbiddenException()
         }
+        tenantMemberManagerService.create(dto)
         return ApiResponse.success(null)
     }
 

@@ -29,6 +29,11 @@ abstract class StandardTenantManagerController<
 >(
     protected val managerService: SERVICE,
     protected val createPermission: String,
+    /**
+     * Tenant-scoped permission required to perform the action against your own tenant.
+     * Pass [DISABLED_SCOPED_PERMISSION] (or any blank string) to disable scoped access entirely;
+     * in that case only holders of the corresponding system permission can call the endpoint.
+     */
     protected val scopedCreatePermission: String,
     protected val readPermission: String,
     protected val scopedReadPermission: String,
@@ -37,6 +42,16 @@ abstract class StandardTenantManagerController<
     protected val deletePermission: String,
     protected val scopedDeletePermission: String
 ) {
+    companion object {
+        /** Sentinel for [scopedCreatePermission] etc. meaning "tenant-scoped users are not allowed". */
+        const val DISABLED_SCOPED_PERMISSION: String = ""
+    }
+
+    private suspend fun hasScopedAuthority(authority: String): Boolean {
+        if (authority.isBlank()) return false
+        return RbacUtils.hasAuthority(authority)
+    }
+
     @GetMapping("/list", version = "1")
     suspend fun readAll(
         userAuthentication: UserAuthentication,
@@ -47,7 +62,7 @@ abstract class StandardTenantManagerController<
 
         if (RbacUtils.hasAuthority(this.readPermission)) {
             return ApiResponse.success(managerService.findAllByTenantId(tenantId))
-        } else if (RbacUtils.hasAuthority(this.scopedReadPermission)) {
+        } else if (hasScopedAuthority(this.scopedReadPermission)) {
             if (tenantId == userAuthentication.tenantId) {
                 return ApiResponse.success(managerService.findAllByTenantId(tenantId))
             } else {
@@ -78,7 +93,7 @@ abstract class StandardTenantManagerController<
 
         if (RbacUtils.hasAuthority(this.createPermission)) {
             managerService.create(dto)
-        } else if (RbacUtils.hasAuthority(this.scopedCreatePermission)) {
+        } else if (hasScopedAuthority(this.scopedCreatePermission)) {
             userAuthentication.assertTenantIdNotNull()
             if (dto.tenantId == userAuthentication.tenantId) {
                 managerService.create(dto)
@@ -111,7 +126,7 @@ abstract class StandardTenantManagerController<
 
         if (RbacUtils.hasAuthority(this.readPermission)) {
             return ApiResponse.success(managerService.query(dto))
-        } else if (RbacUtils.hasAuthority(this.scopedReadPermission)) {
+        } else if (hasScopedAuthority(this.scopedReadPermission)) {
             if (dto.tenantId == userAuthentication.tenantId) {
                 return ApiResponse.success(managerService.query(dto))
             } else {
@@ -142,7 +157,7 @@ abstract class StandardTenantManagerController<
 
         if (RbacUtils.hasAuthority(this.updatePermission)) {
             managerService.update(dto)
-        } else if (RbacUtils.hasAuthority(this.scopedUpdatePermission)) {
+        } else if (hasScopedAuthority(this.scopedUpdatePermission)) {
             userAuthentication.assertTenantIdNotNull()
             if (managerService.checkIsRelated(dto.id, userAuthentication.tenantId!!)) {
                 managerService.update(dto)
@@ -175,7 +190,7 @@ abstract class StandardTenantManagerController<
 
         if (RbacUtils.hasAuthority(this.deletePermission)) {
             managerService.deleteByDTO(dto)
-        } else if (RbacUtils.hasAuthority(this.scopedDeletePermission)) {
+        } else if (hasScopedAuthority(this.scopedDeletePermission)) {
             userAuthentication.assertTenantIdNotNull()
             if (managerService.checkIsRelated(dto.ids, userAuthentication.tenantId!!)) {
                 managerService.deleteByDTO(dto)
