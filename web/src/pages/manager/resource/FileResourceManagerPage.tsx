@@ -22,7 +22,7 @@ export function FileResourceManagerPage() {
     const columns = useFileResourceTableColumns();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filterType]);
 
     const handleDownloadFileEntity = async (record: FileResource) => {

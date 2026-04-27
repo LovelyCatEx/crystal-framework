@@ -13,7 +13,7 @@ import {useTranslation} from "react-i18next";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
 import type {BaseEntity} from "../types/BaseEntity.ts";
-import {EntityTable, type EntityTableProps, type EntityTableRef} from "./EntityTable.tsx";
+import {EntityTable, type EntityTableProps, type EntityTableRef, type EntityTableRefreshOptions} from "./EntityTable.tsx";
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
@@ -136,8 +136,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     useImperativeHandle(ref, () => {
         return {
-            refreshData: () => {
-                entityTableRef?.current?.refreshData?.();
+            refreshData: (options?: EntityTableRefreshOptions) => {
+                entityTableRef?.current?.refreshData?.(options);
             },
             openModal: () => {
                 openModal();

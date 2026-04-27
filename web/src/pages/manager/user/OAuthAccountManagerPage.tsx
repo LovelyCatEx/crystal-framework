@@ -17,7 +17,7 @@ export function OAuthAccountManagerPage() {
     const columns = useOAuthAccountTableColumns();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filterPlatform]);
 
     return (

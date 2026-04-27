@@ -42,7 +42,7 @@ export function TenantRoleManagerPage() {
 
     const handleTenantChange = (tenantId: string | null) => {
         setSelectedTenantId(tenantId);
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     };
 
     const handleOpenAddModal = () => {

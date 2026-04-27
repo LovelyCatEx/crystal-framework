@@ -23,7 +23,7 @@ export function TenantMemberManagerPage() {
     const columns = useTenantMemberTableColumns();
 
     useEffect(() => {
-        pageRef.current?.refreshData();
+        pageRef.current?.refreshData({ resetPage: true });
     }, [filterStatus, selectedTenantId]);
 
     const statusOptions = [

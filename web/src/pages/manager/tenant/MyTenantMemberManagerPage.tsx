@@ -23,7 +23,7 @@ export function MyTenantMemberManagerPage() {
     const currentTenantId = currentTenant?.tenantId ?? null;
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filterStatus]);
 
     const statusOptions = [

@@ -31,7 +31,7 @@ export function TenantManagerPage() {
     }, []);
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filterStatus]);
 
     const statusOptions = [

@@ -23,7 +23,7 @@ export function TenantPermissionManagerPage() {
     const columns = useTenantPermissionTableColumns();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filterType]);
 
     const typeOptions = [

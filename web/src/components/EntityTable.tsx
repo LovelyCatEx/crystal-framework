@@ -7,6 +7,7 @@ import React, {
     useCallback,
     useEffect,
     useImperativeHandle,
+    useRef,
     useState
 } from "react";
 import {Flex, Input, message, Space, Table, type TableProps} from "antd";
@@ -41,8 +42,12 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     }
 }
 
+export interface EntityTableRefreshOptions {
+    resetPage?: boolean;
+}
+
 export interface EntityTableRef {
-    refreshData: () => void;
+    refreshData: (options?: EntityTableRefreshOptions) => void;
 }
 
 export type EntityTableReturnType =
@@ -70,15 +75,17 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // Search
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    const refreshData = useCallback((overrideKeyword?: string) => {
+    // When refreshData explicitly resets page, suppress the immediate effect re-fire that
+    // would otherwise be triggered by the setCurrentPage(1) state change.
+    const skipNextPageEffectRef = useRef(false);
+
+    const fireQuery = useCallback((page: number, pageSize: number, keyword: string) => {
         setRefreshing(true);
 
-        const effectiveKeyword = overrideKeyword !== undefined ? overrideKeyword : searchKeyword;
-
         props.query({
-            page: currentPage,
-            pageSize: currentPageSize,
-            searchKeyword: effectiveKeyword.length > 0 ? effectiveKeyword : undefined,
+            page: page,
+            pageSize: pageSize,
+            searchKeyword: keyword.length > 0 ? keyword : undefined,
             ...Object.assign(
                 {},
                 ...([
@@ -95,16 +102,30 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         }).finally(() => {
             setRefreshing(false);
         })
-    }, [currentPage, currentPageSize, props, searchKeyword, t])
+    }, [props, t]);
+
+    const refreshData = useCallback((options?: EntityTableRefreshOptions & { overrideKeyword?: string }) => {
+        const targetPage = options?.resetPage ? 1 : currentPage;
+        if (options?.resetPage && currentPage !== 1) {
+            skipNextPageEffectRef.current = true;
+            setCurrentPage(1);
+        }
+        const effectiveKeyword = options?.overrideKeyword !== undefined ? options.overrideKeyword : searchKeyword;
+        fireQuery(targetPage, currentPageSize, effectiveKeyword);
+    }, [currentPage, currentPageSize, searchKeyword, fireQuery]);
 
     const handleSearch = (keyword: string) => {
         setSearchKeyword(keyword);
-        refreshData(keyword);
+        refreshData({ resetPage: true, overrideKeyword: keyword });
     }
 
     useEffect(() => {
+        if (skipNextPageEffectRef.current) {
+            skipNextPageEffectRef.current = false;
+            return;
+        }
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        refreshData();
+        fireQuery(currentPage, currentPageSize, searchKeyword);
     }, [currentPage, currentPageSize])
 
     const tableColumns: (ColumnGroupType<ENTITY> | ColumnType<ENTITY>)[] = [

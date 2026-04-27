@@ -21,7 +21,7 @@ export function UserPermissionManagerPage() {
     const columns = useUserPermissionTableColumns();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.()
+        pageRef?.current?.refreshData?.({ resetPage: true })
     }, [filterPermissionType]);
 
     return (

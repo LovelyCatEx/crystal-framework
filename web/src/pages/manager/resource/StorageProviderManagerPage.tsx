@@ -18,7 +18,7 @@ export function StorageProviderManagerPage() {
     const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.()
+        pageRef?.current?.refreshData?.({ resetPage: true })
     }, [filterType]);
 
     const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {

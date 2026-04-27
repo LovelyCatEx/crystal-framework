@@ -99,7 +99,7 @@ export function MailTemplateManagerPage() {
     }, []);
 
     useEffect(() => {
-        pageRef?.current?.refreshData?.();
+        pageRef?.current?.refreshData?.({ resetPage: true });
     }, [selectedTypeId]);
 
     const handleActiveChange = (active: boolean, row: MailTemplate) => {
