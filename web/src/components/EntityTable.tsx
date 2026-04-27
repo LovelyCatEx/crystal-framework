@@ -79,7 +79,17 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // would otherwise be triggered by the setCurrentPage(1) state change.
     const skipNextPageEffectRef = useRef(false);
 
+    // Race protection: only the latest in-flight request is allowed to commit its result.
+    const requestSeqRef = useRef(0);
+    const mountedRef = useRef(true);
+    useEffect(() => {
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
     const fireQuery = useCallback((page: number, pageSize: number, keyword: string) => {
+        const seq = ++requestSeqRef.current;
         setRefreshing(true);
 
         props.query({
@@ -95,11 +105,14 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 )
             )
         }).then((res) => {
+            if (!mountedRef.current || seq !== requestSeqRef.current) return;
             setTotal(res.total);
             setData(res.records);
         }).catch(() => {
+            if (!mountedRef.current || seq !== requestSeqRef.current) return;
             void message.error(t('components.entityTable.fetchError', { entityName: props.entityName }))
         }).finally(() => {
+            if (!mountedRef.current || seq !== requestSeqRef.current) return;
             setRefreshing(false);
         })
     }, [props, t]);
