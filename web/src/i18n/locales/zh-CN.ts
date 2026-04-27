@@ -1733,6 +1733,7 @@ export const zhCN = {
   },
 
   enums: {
+    unknown: '未知',
     tenantMemberStatus: {
       0: '未激活',
       1: '已离职',

@@ -1736,6 +1736,7 @@ export const enUS = {
   },
 
   enums: {
+    unknown: 'Unknown',
     tenantMemberStatus: {
       0: 'Inactive',
       1: 'Resigned',

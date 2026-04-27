@@ -1,41 +1,54 @@
 import i18n from "./index.ts";
 
+function translateEnum(namespace: string, value: string | number): string {
+    const key = `enums.${namespace}.${value}`;
+    const translated = i18n.t(key);
+    if (translated === key) {
+        if (import.meta.env.DEV) {
+            console.warn(`[i18n] missing enum translation: ${key}`);
+        }
+        const fallback = i18n.t('enums.unknown');
+        return fallback === 'enums.unknown' ? String(value) : `${fallback} (${value})`;
+    }
+    return translated;
+}
+
 export function getTenantMemberStatus(status: number): string {
-    return i18n.t(`enums.tenantMemberStatus.${status}`);
+    return translateEnum('tenantMemberStatus', status);
 }
 
 export function getTenantStatus(status: number): string {
-    return i18n.t(`enums.tenantStatus.${status}`);
+    return translateEnum('tenantStatus', status);
 }
 
 export function getResourceFileType(type: number): string {
-    return i18n.t(`enums.resourceFileType.${type}`);
+    return translateEnum('resourceFileType', type);
 }
 
 export function getDepartmentMemberRoleType(roleType: number): string {
-    return i18n.t(`enums.departmentMemberRoleType.${roleType}`);
+    return translateEnum('departmentMemberRoleType', roleType);
 }
 
 export function getActuatorMetric(metric: string): string {
-    return i18n.t(`enums.actuatorMetrics.${metric}`);
+    return translateEnum('actuatorMetrics', metric);
 }
 
 export function getTenantPermissionType(type: number): string {
-    return i18n.t(`enums.tenantPermissionType.${type}`);
+    return translateEnum('tenantPermissionType', type);
 }
 
 export function getPermissionType(type: number): string {
-    return i18n.t(`enums.permissionType.${type}`);
+    return translateEnum('permissionType', type);
 }
 
 export function getSystemSettingsItemValueType(type: string): string {
-    return i18n.t(`enums.systemSettingsItemValueType.${type}`);
+    return translateEnum('systemSettingsItemValueType', type);
 }
 
 export function getStorageProviderType(type: number): string {
-    return i18n.t(`enums.storageProviderType.${type}`);
+    return translateEnum('storageProviderType', type);
 }
 
 export function getOAuthPlatform(platform: number): string {
-    return i18n.t(`enums.oAuthPlatform.${platform}`);
+    return translateEnum('oAuthPlatform', platform);
 }
