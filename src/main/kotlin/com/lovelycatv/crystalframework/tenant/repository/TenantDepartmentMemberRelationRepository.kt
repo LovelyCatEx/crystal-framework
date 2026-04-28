@@ -12,6 +12,8 @@ import reactor.core.publisher.Mono
 interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepartmentMemberRelationEntity> {
     fun findAllByDepartmentId(departmentId: Long): Flux<TenantDepartmentMemberRelationEntity>
 
+    fun findAllByDepartmentIdIn(departmentIds: Collection<Long>): Flux<TenantDepartmentMemberRelationEntity>
+
     fun findAllByMemberId(memberId: Long): Flux<TenantDepartmentMemberRelationEntity>
 
     fun findByDepartmentIdAndMemberId(departmentId: Long, memberId: Long): Mono<TenantDepartmentMemberRelationEntity>

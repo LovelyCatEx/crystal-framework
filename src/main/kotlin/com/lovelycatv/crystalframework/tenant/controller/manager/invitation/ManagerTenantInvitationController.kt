@@ -95,7 +95,7 @@ class ManagerTenantInvitationController(
             tenantInvitationManagerService.update(dto)
         } else if (RbacUtils.hasAuthority(this.scopedUpdatePermission)) {
             userAuthentication.assertTenantIdNotNull()
-            if (tenantInvitationManagerService.checkIsRelated(dto.id, userAuthentication.tenantId!!)) {
+            if (tenantInvitationManagerService.checkIsRelatedToRootParent(dto.id, userAuthentication.tenantId!!)) {
                 // Could not update the creator
                 tenantInvitationManagerService.update(dto.apply {
                     this.creatorMemberId = null

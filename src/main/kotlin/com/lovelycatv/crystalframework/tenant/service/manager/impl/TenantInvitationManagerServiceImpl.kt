@@ -47,7 +47,7 @@ class TenantInvitationManagerServiceImpl(
         ).apply { newEntity() }
 
         return tenantInvitationRepository.save(entity).awaitFirstOrNull()
-            ?: throw com.lovelycatv.crystalframework.shared.exception.BusinessException("Could not create invitation")
+            ?: throw BusinessException("Could not create invitation")
     }
 
     override suspend fun applyDTOToEntity(
@@ -61,15 +61,6 @@ class TenantInvitationManagerServiceImpl(
             dto.requiresReviewing?.let { requiresReviewing = it }
             dto.creatorMemberId?.let { creatorMemberId = it }
         }
-    }
-
-    override suspend fun checkIsRelated(ids: Collection<Long>, tenantId: Long): Boolean {
-        for (id in ids) {
-            if (this.getByIdOrNull(id)?.tenantId != tenantId) {
-                return false
-            }
-        }
-        return true
     }
 
     private fun generateInvitationCode(tenantId: Long): String {

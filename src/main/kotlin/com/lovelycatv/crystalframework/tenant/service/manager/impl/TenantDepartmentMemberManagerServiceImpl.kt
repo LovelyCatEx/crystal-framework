@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.Tenan
 import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.user.service.UserManagerService
@@ -26,7 +27,7 @@ import kotlin.reflect.KClass
 class TenantDepartmentMemberManagerServiceImpl(
     private val tenantDepartmentMemberRelationRepository: TenantDepartmentMemberRelationRepository,
     private val tenantMemberRepository: TenantMemberRepository,
-    private val tenantDepartmentRepository: com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentRepository,
+    private val tenantDepartmentManagerService: TenantDepartmentManagerService,
     private val userManagerService: UserManagerService,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
@@ -104,11 +105,10 @@ class TenantDepartmentMemberManagerServiceImpl(
         )
     }
 
-    override suspend fun checkIsRelated(ids: Collection<Long>, tenantId: Long): Boolean {
+    override suspend fun checkIsRelatedToRootParent(ids: Collection<Long>, rootParentId: Long): Boolean {
         for (id in ids) {
             val relation = this.getByIdOrNull(id) ?: return false
-            val department = tenantDepartmentRepository.findById(relation.departmentId).awaitFirstOrNull()
-            if (department?.tenantId != tenantId) {
+            if (!tenantDepartmentManagerService.checkIsRelatedToRootParent(relation.departmentId, rootParentId)) {
                 return false
             }
         }
@@ -116,6 +116,10 @@ class TenantDepartmentMemberManagerServiceImpl(
     }
 
     override suspend fun findAllByTenantId(tenantId: Long): List<TenantDepartmentMemberRelationEntity> {
-        throw IllegalStateException("Not implemented yet")
+        val departmentIds = tenantDepartmentManagerService.findAllByTenantId(tenantId).map { it.id }
+        if (departmentIds.isEmpty()) return emptyList()
+        return tenantDepartmentMemberRelationRepository
+            .findAllByDepartmentIdIn(departmentIds)
+            .awaitListWithTimeout()
     }
 }

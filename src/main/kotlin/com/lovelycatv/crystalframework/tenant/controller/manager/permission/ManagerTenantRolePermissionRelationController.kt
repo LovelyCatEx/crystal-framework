@@ -36,7 +36,7 @@ class ManagerTenantRolePermissionRelationController(
             return ApiResponse.Companion.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM)) {
             userAuthentication.assertTenantIdNotNull()
-            if (tenantRoleManagerService.checkIsRelated(roleId, userAuthentication.tenantId!!)) {
+            if (tenantRoleManagerService.checkIsRelatedToRootParent(roleId, userAuthentication.tenantId!!)) {
                 return ApiResponse.Companion.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
             } else {
                 throw UnauthorizedException()
@@ -57,7 +57,7 @@ class ManagerTenantRolePermissionRelationController(
             tenantRolePermissionRelationService.setRolePermissions(dto.roleId, dto.permissionIds)
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_ROLE_PERMISSION_UPDATE_PEM)) {
             userAuthentication.assertTenantIdNotNull()
-            if (tenantRoleManagerService.checkIsRelated(dto.roleId, userAuthentication.tenantId!!)) {
+            if (tenantRoleManagerService.checkIsRelatedToRootParent(dto.roleId, userAuthentication.tenantId!!)) {
                 tenantRolePermissionRelationService.setRolePermissions(dto.roleId, dto.permissionIds)
             } else {
                 throw UnauthorizedException()
