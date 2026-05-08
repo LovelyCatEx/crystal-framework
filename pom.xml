@@ -39,8 +39,26 @@
     <properties>
         <java.version>17</java.version>
         <kotlin.version>2.2.21</kotlin.version>
+        <snailjob.version>1.10.0</snailjob.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-starter</artifactId>
+            <version>${snailjob.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-retry-core</artifactId>
+            <version>${snailjob.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-client-job-core</artifactId>
+            <version>${snailjob.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>

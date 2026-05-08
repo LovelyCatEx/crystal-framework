@@ -118,3 +118,10 @@ server:
         domain: ${COOKIE_DOMAIN}
   forward-headers-strategy: framework
   port: ${BACKEND_PORT}
+snail-job:
+  server:
+    host: 127.0.0.1
+    port: ${SNAILJOB_SERVER_PORT}
+  namespace: ${SNAILJOB_NAMESPACE_ID}
+  group: ${SNAILJOB_GROUP_NAME}
+  token: ${SNAILJOB_GROUP_TOKEN}

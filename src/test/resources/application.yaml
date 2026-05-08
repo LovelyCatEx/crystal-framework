@@ -2,26 +2,36 @@ spring:
   application:
     name: springboot-template
   r2dbc:
-    url: r2dbc:postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    url: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
     pool:
-      initial-size: 20
+      initial-size: 5
+      min-idle: 5
       max-size: 40
       max-idle-time: 30m
-    #      validation-query: SELECT 1
-    properties:
-      preferQueryMode: simple
+      max-acquire-time: 5s
+      max-create-connection-time: 5s
+      validation-query: SELECT 1
+      validation-depth: REMOTE
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
   security:
     oauth2:
       client:
         provider:
           github:
             user-name-attribute: login
-          qq:
+          google:
+            user-name-attribute: name
+          oicq:
             authorization-uri: https://graph.qq.com/oauth2.0/authorize
             token-uri: https://graph.qq.com/oauth2.0/token
             user-info-uri: https://graph.qq.com/user/get_user_info
@@ -31,13 +41,20 @@ spring:
             client-id: ${OAUTH_GITHUB_CLIENT_ID}
             client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
             scope: read:user
-            redirect-uri: http://localhost:5173/auth/oauth2-code
+            redirect-uri: ${OAUTH_GITHUB_REDIRECT_URL}
+            authorization-grant-type: authorization_code
           oicq:
             provider: oicq
             client-id: ${OAUTH_OICQ_CLIENT_ID}
             client-secret: ${OAUTH_OICQ_CLIENT_SECRET}
             scope: get_user_info
-            redirect-uri: http://127.0.0.1:5173/auth/oauth2-code
+            redirect-uri: ${OAUTH_OICQ_REDIRECT_URL}
+            authorization-grant-type: authorization_code
+          google:
+            provider: google
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URL}
             authorization-grant-type: authorization_code
 
   http:
@@ -46,19 +63,65 @@ spring:
   webflux:
     multipart:
       max-in-memory-size: 10MB
-
+  reactor:
+    debug-agent:
+      enabled: true
+  session:
+    timeout: 30m
+    redis:
+      namespace: crystalframework:session
 crystalframework:
+  auth:
+    jwt:
+      expiration: 7d
   resource:
     avatar:
       supported-content-types:
         - image/png
         - image/jpeg
         - image/webp
+    tenant-icon:
+      supported-content-types:
+        - image/png
+        - image/jpeg
+        - image/webp
+  sharding:
+    snowflake:
+      start-point: 0
+      timestamp-length: 41
+      data-center-id-length: 5
+      worker-id-length: 5
+      sequence-id-length: 12
+      gene-id-length: 0
+      data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
+      worker-id: ${SNOWFLAKE_WORKER_ID:0}
+      actual-gene-length: 0
 
 logging:
   level:
     root: info
     org.springframework.security: info
     org.springframework.web: info
+    org.springframework.transaction: info
     org.springframework.r2dbc: info
+    io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
+    com.lovelycatv.crystalframework.shared.exception: debug
+server:
+  reactive:
+    session:
+      cookie:
+        secure: true
+        path: /
+        http-only: true
+        same-site: none
+        domain: ${COOKIE_DOMAIN}
+  forward-headers-strategy: framework
+  port: ${BACKEND_PORT}
+snail-job:
+  server:
+    host: 127.0.0.1
+    port: ${SNAILJOB_SERVER_PORT}
+  namespace: ${SNAILJOB_NAMESPACE_ID}
+  group: ${SNAILJOB_GROUP_NAME}
+  token: ${SNAILJOB_GROUP_TOKEN}

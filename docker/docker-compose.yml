@@ -55,6 +55,38 @@ services:
       timeout: 5s
       retries: 5
 
+  snailjob:
+    container_name: crystalframework-snailjob
+    build:
+      context: ./snail-job
+      dockerfile: Dockerfile
+    environment:
+      - SNAILJOB_DATASOURCE_HOST=postgres
+      - SNAILJOB_DATASOURCE_PORT=${POSTGRES_PORT}
+      - SNAILJOB_DATASOURCE_DATABASE=${POSTGRES_DATABASE}
+      - SNAILJOB_DATASOURCE_USERNAME=${POSTGRES_USERNAME}
+      - SNAILJOB_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SNAILJOB_REDIS_HOST=redis
+      - SNAILJOB_REDIS_PORT=${REDIS_PORT}
+      - SNAILJOB_REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "${SNAILJOB_SERVER_WEB_PORT}:8080"
+      - "${SNAILJOB_SERVER_PORT}:17888"
+    volumes:
+      - ./config/snail-job:/app/config:ro
+    networks:
+      - crystalframework_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${SNAILJOB_SERVER_PORT}/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     container_name: crystalframework-backend
     build:
