@@ -40,7 +40,7 @@ class TenantMailModuleConfigure(
 
         templates.add(
             preProcessMailTemplateDeclaration.invoke(
-                TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate,
+                tenantMailTemplateConfigure.configureUserJoinReview(),
                 TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.name,
                 TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.type
             )
