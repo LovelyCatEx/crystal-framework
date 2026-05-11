@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 /**
  * Marker for entities that live inside a scope (e.g. a tenant or a department).
  *
@@ -14,5 +16,6 @@ package com.lovelycatv.crystalframework.shared.entity
  * walked up recursively.
  */
 interface ScopedEntity<PARENT_ID> {
+    @JsonIgnore
     fun getDirectParentId(): PARENT_ID
 }
