@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
+import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
@@ -38,6 +39,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
@@ -107,19 +109,25 @@ class UserServiceImpl(
             }
             .flatMap { userEntity ->
                 tenantMono
-                    .flatMap<UserDetails> {
-                        userEntity.setAuthenticatedTenant(it)
+                    .flatMap<UserDetails> { tenantEntity ->
+                        userEntity.setAuthenticatedTenant(tenantEntity)
                         flux {
-                            tenantMemberRelationService
+                            val targetMember = tenantMemberRelationService
                                 .getUserTenantMembers(userEntity.id)
-                                .forEach { this.send(it) }
+                                .find { it.tenantId == tenantEntity.id }
+
+                            if (targetMember != null) {
+                                this.send(targetMember)
+                            } else {
+                                Flux.error<TenantMemberEntity>(BusinessException("You are not the member of the tenant"))
+                            }
                         }.collectList()
                             .flatMap {
                                 val memberRecord = it.find { it.tenantId == tenantIdStr.toLong() && it.memberUserId == userEntity.id }
                                 if (memberRecord == null) {
-                                    Mono.error(BusinessException("You are not the member of the target tenant"))
+                                    Mono.error(BusinessException("You are not the member of the tenant"))
                                 } else if (memberRecord.getRealStatus() != TenantMemberStatus.ACTIVE) {
-                                    Mono.error(BusinessException("Your account is reviewing or closed by the target tenant"))
+                                    Mono.error(BusinessException("Your account is reviewing or closed by the tenant"))
                                 } else {
                                     Mono.empty()
                                 }
