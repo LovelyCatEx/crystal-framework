@@ -24,4 +24,5 @@ EXPOSE 17888
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:17888/actuator/health || exit 1
 
-ENTRYPOINT ["sh", "-c", "java -jar /app/snail-job-server.jar --spring.config.location=file:/app/config/application.yaml"]
+
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=200", "-jar", "/app/snail-job-server.jar", "--spring.config.location=file:/app/config/application.yaml"]
