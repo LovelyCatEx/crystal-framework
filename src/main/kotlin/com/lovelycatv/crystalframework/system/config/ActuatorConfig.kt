@@ -12,7 +12,7 @@ class ActuatorConfig {
     fun webEndpointProperties(): WebEndpointProperties {
         val properties = WebEndpointProperties()
         properties.setBasePath("/api/v1/actuator")
-        properties.exposure.include = mutableSetOf("*")
+        properties.exposure.include = mutableSetOf("health")
         return properties
     }
 }

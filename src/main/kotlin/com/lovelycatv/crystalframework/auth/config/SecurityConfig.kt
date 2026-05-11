@@ -135,7 +135,11 @@ class SecurityConfig(
                         pathPatternParser.parse("/login/oauth2/code/${it}"),
                         pathPatternParser.parse("/oauth2/authorization/${it}")
                     )
-                } + listOf(pathPatternParser.parse("/login"))
+                } +
+                listOf(
+                    pathPatternParser.parse("/login"),
+                    pathPatternParser.parse("/api/*/actuator/**")
+                )
 
         // custom authentications
         http.authorizeExchange { authorizeExchangeSpec ->
