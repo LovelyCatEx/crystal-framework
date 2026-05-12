@@ -9,6 +9,8 @@ object SystemRolePermissionRelation {
                 ?: throw IllegalStateException("could not call member property ${it.name} in ${SystemPermission::class.qualifiedName}")
         },
         SystemRole.ROLE_ADMIN to listOf(
+            // System
+            SystemPermission.ACTION_SYSTEM_MAINTENANCE_ACCESS,
             // Dashboard
             SystemPermission.COMPONENT_DASHBOARD_BUSINESS_STATISTICS,
             SystemPermission.COMPONENT_DASHBOARD_SYSTEM_METRICS,

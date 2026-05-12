@@ -1,5 +1,5 @@
 import {doGet, doPost} from "./system-request.ts";
-import type {GetSystemSettingsSchemaData} from "../types/system-settings.types.ts";
+import type {GetSystemSettingsSchemaData, SystemMaintenanceStatusVO} from "../types/system-settings.types.ts";
 
 export function getSystemSettingsSchema() {
     return doGet<GetSystemSettingsSchemaData>('/api/manager/settings/schema')
@@ -10,7 +10,7 @@ export function updateSystemSettings(settings: Record<string, string | null>) {
 }
 
 export function getSystemMaintenanceMode() {
-    return doGet<boolean>('/api/manager/system/maintenance')
+    return doGet<SystemMaintenanceStatusVO>('/api/manager/system/maintenance')
 }
 
 

@@ -39,48 +39,53 @@ class CustomAuthFilter(
             pattern.matches(requestPath)
         }
 
-        if (isUnauthorized) {
-            return chain.filter(exchange)
+        val authorization = if (!isUnauthorized) {
+            exchange.request.headers["Authorization"]
+                ?.firstOrNull()
+                ?.replace("Bearer ", "")
+                ?.trim()
+                ?: throw UnauthorizedException("Authorization header is missing")
+        } else {
+            // Unauthorized does not require an Authorization header.
+            null
         }
 
-        val authorization = exchange.request.headers["Authorization"]
-            ?.firstOrNull()
-            ?.replace("Bearer ", "")
-            ?.trim()
-            ?: throw UnauthorizedException("Authorization header is missing")
-
-        val claims = try {
-            JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
-        } catch (e: Exception) {
-            if (e is ExpiredJwtException) {
-                throw UnauthorizedException("token expired")
-            } else {
-                logger.error("unexpected token parse exception", e)
-                throw UnauthorizedException("invalid token pattern")
+        return if (authorization != null) {
+            val claims = try {
+                JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
+            } catch (e: Exception) {
+                if (e is ExpiredJwtException) {
+                    throw UnauthorizedException("token expired")
+                } else {
+                    logger.error("unexpected token parse exception", e)
+                    throw UnauthorizedException("invalid token pattern")
+                }
             }
-        }
 
-        val userId = claims["userId"]
-            ?.toString()
-            ?.toLong()
-            ?: throw UnauthorizedException("userId is missing")
+            val userId = claims["userId"]
+                ?.toString()
+                ?.toLong()
+                ?: throw UnauthorizedException("userId is missing")
 
-        val tenantId = claims["tenantId"]
-            ?.toString()
-            ?.toLong()
+            val tenantId = claims["tenantId"]
+                ?.toString()
+                ?.toLong()
 
-        return mono {
-            getUserAuthorities.invoke(userId, tenantId)
-        }.flatMap {
-            val token = UsernamePasswordAuthenticationToken(
-                claims.subject,
-                null,
-                it
-            )
+            mono {
+                getUserAuthorities.invoke(userId, tenantId)
+            }.flatMap {
+                val token = UsernamePasswordAuthenticationToken(
+                    claims.subject,
+                    null,
+                    it
+                )
 
-            chain.filter(exchange).contextWrite {
-                ReactiveSecurityContextHolder.withAuthentication(token)
+                chain.filter(exchange).contextWrite {
+                    ReactiveSecurityContextHolder.withAuthentication(token)
+                }
             }
+        } else {
+            chain.filter(exchange)
         }
     }
 }

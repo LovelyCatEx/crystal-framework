@@ -4,7 +4,9 @@ import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.system.controller.dto.SwitchSystemMaintenanceModeDTO
+import com.lovelycatv.crystalframework.system.filter.SystemMaintenanceGuardFilter
 import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
@@ -65,8 +67,15 @@ class ReadinessController(
     }
 
     @GetMapping("/maintenance")
-    fun getSystemMaintenance(): ApiResponse<*> {
-        return ApiResponse.success(isInMaintenance())
+    suspend fun getSystemMaintenance(): ApiResponse<*> {
+        val canAccess = RbacUtils.hasAuthority(SystemMaintenanceGuardFilter.MAINTENANCE_ACCESS_PERMISSION)
+
+        return ApiResponse.success(
+            object {
+                val canAccess = canAccess
+                val maintenanceMode = isInMaintenance()
+            }
+        )
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_MAINTENANCE_UPDATE}')")
