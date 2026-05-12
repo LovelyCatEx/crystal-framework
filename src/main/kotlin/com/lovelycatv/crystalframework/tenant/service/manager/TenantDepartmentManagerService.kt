@@ -28,7 +28,11 @@ interface TenantDepartmentManagerService : BaseTenantResourceManagerService<
             dto = dto,
             isAdvanceQuery = { true },
             doAdvanceQuery = { readDto, limit, offset ->
-                val total = getRepository().countAdvanceSearch(readDto.searchKeyword, readDto.tenantId!!, readDto.parentId).awaitFirstOrNull() ?: 0
+                val total = getRepository().countAdvanceSearch(
+                    readDto.searchKeyword,
+                    readDto.tenantId,
+                    readDto.parentId
+                ).awaitFirstOrNull() ?: 0
                 val records = getRepository().advanceSearch(
                     readDto.searchKeyword,
                     readDto.tenantId,
