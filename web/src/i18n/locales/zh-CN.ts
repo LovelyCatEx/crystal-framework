@@ -1274,6 +1274,12 @@ export const zhCN = {
       exportConfig: '导出配置',
       maintenanceMode: '维护模式',
       switchMaintenanceModeFailed: '无法切换维护模式',
+      maintenanceConfirmEnableTitle: '确认开启维护模式',
+      maintenanceConfirmEnableContent: '开启维护模式后，普通用户将无法访问系统。确定要继续吗？',
+      maintenanceConfirmDisableTitle: '确认关闭维护模式',
+      maintenanceConfirmDisableContent: '关闭维护模式后，所有用户将恢复正常访问。确定要继续吗？',
+      maintenanceConfirmOk: '确认',
+      maintenanceConfirmCancel: '取消',
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'bootstrap.autoCheckRbacTableData': '自动校验 RBAC 表数据',
@@ -1492,6 +1498,10 @@ export const zhCN = {
       readonlyMode: '以只读模式继续',
       readonlyBadge: '只读模式',
       editModeBadge: '正在以编辑模式访问'
+    },
+
+    maintenanceBanner: {
+      message: '系统当前处于维护模式，普通用户暂时无法访问部分功能。',
     },
 
     themeColorPicker: {
