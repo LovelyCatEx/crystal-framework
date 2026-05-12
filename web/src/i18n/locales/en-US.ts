@@ -1277,6 +1277,12 @@ export const enUS = {
       exportConfig: 'Export Config',
       maintenanceMode: 'Maintenance Mode',
       switchMaintenanceModeFailed: 'Failed to switch maintenance mode',
+      maintenanceConfirmEnableTitle: 'Enable Maintenance Mode',
+      maintenanceConfirmEnableContent: 'Enabling maintenance mode will prevent regular users from accessing the system. Are you sure you want to continue?',
+      maintenanceConfirmDisableTitle: 'Disable Maintenance Mode',
+      maintenanceConfirmDisableContent: 'Disabling maintenance mode will restore access for all users. Are you sure you want to continue?',
+      maintenanceConfirmOk: 'Confirm',
+      maintenanceConfirmCancel: 'Cancel',
       keys: {
         'basic.baseUrl': 'API Base URL',
         'bootstrap.autoCheckRbacTableData': 'Auto Check RBAC Table Data',
@@ -1495,6 +1501,10 @@ export const enUS = {
       readonlyMode: 'Continue in Read-only Mode',
       readonlyBadge: 'Read-only Mode',
       editModeBadge: 'Accessing in Edit Mode'
+    },
+
+    maintenanceBanner: {
+      message: 'System is currently in maintenance mode. Some features may be unavailable for regular users.',
     },
 
     themeColorPicker: {

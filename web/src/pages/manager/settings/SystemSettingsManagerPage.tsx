@@ -5,11 +5,11 @@ import {
     updateSystemMaintenanceMode,
     updateSystemSettings
 } from "@/api/system-settings.api.ts";
-import {Button, Card, Col, Form, Input, InputNumber, message, Row, Switch} from "antd";
+import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Row, Switch} from "antd";
 import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
 import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
-import {ApiOutlined, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
+import {ApiOutlined, ExclamationCircleFilled, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
@@ -27,6 +27,7 @@ export function SystemSettingsManagerPage() {
 
     const {maintenanceMode: isInMaintenance, mutate: mutateMaintenance} = useMaintenanceStatus();
 
+    const [modal, contextHolder] = Modal.useModal();
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -83,15 +84,32 @@ export function SystemSettingsManagerPage() {
     };
 
     const switchMaintenanceMode = () => {
-        updateSystemMaintenanceMode(!isInMaintenance)
-            .then(() => {
-                void mutateMaintenance();
-            })
-            .catch(() => message.error(t('pages.systemSettingsManager.switchMaintenanceModeFailed')));
+        modal.confirm({
+            title: isInMaintenance
+                ? t('pages.systemSettingsManager.maintenanceConfirmDisableTitle')
+                : t('pages.systemSettingsManager.maintenanceConfirmEnableTitle'),
+            icon: <ExclamationCircleFilled />,
+            content: isInMaintenance
+                ? t('pages.systemSettingsManager.maintenanceConfirmDisableContent')
+                : t('pages.systemSettingsManager.maintenanceConfirmEnableContent'),
+            okText: t('pages.systemSettingsManager.maintenanceConfirmOk'),
+            cancelText: t('pages.systemSettingsManager.maintenanceConfirmCancel'),
+            centered: true,
+            onOk() {
+                return updateSystemMaintenanceMode(!isInMaintenance)
+                    .then(() => {
+                        void mutateMaintenance();
+                    })
+                    .catch(() => {
+                        void message.error(t('pages.systemSettingsManager.switchMaintenanceModeFailed'));
+                    });
+            },
+        });
     };
 
     return (
         <>
+            {contextHolder}
             <ActionBarComponent
                 title={t('pages.systemSettingsManager.title')}
                 subtitle={t('pages.systemSettingsManager.subtitle')}

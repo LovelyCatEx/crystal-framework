@@ -3,6 +3,7 @@ import {Result, Spin} from "antd";
 import {MaintenancePage} from "@/pages/MaintenancePage.tsx";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 import {useTranslation} from "react-i18next";
+import {MaintenanceBanner} from "@/components/MaintenanceBanner.tsx";
 
 /**
  * Wraps children with a maintenance mode check.
@@ -44,5 +45,10 @@ export function MaintenanceGuard({children}: { children: React.ReactNode }) {
     }
 
     // All clear (not in maintenance, or user has access privilege)
-    return children;
+    return (
+        <>
+            {children}
+            <MaintenanceBanner />
+        </>
+    );
 }
