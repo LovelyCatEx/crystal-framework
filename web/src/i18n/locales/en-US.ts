@@ -1275,6 +1275,8 @@ export const enUS = {
       operation: 'Operation',
       importConfig: 'Import Config',
       exportConfig: 'Export Config',
+      maintenanceMode: 'Maintenance Mode',
+      switchMaintenanceModeFailed: 'Failed to switch maintenance mode',
       keys: {
         'basic.baseUrl': 'API Base URL',
         'bootstrap.autoCheckRbacTableData': 'Auto Check RBAC Table Data',

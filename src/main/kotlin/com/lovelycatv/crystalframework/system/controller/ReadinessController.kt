@@ -4,18 +4,23 @@ import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.system.controller.dto.SwitchSystemMaintenanceModeDTO
 import com.lovelycatv.crystalframework.system.types.RedisConstants
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
+import jakarta.validation.Valid
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.availability.AvailabilityChangeEvent
 import org.springframework.boot.availability.ReadinessState
 import org.springframework.context.ApplicationContext
+import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -44,7 +49,7 @@ class ReadinessController(
         redisMessageListenerContainer
             .receive(maintenanceTopic)
             .subscribe { message ->
-                val status = message.message
+                val status = message.message.replace("\"", "")
                 if (status == maintenanceTopicMessageTrue) {
                     setRefusing()
                 } else if (status == maintenanceTopicMessageFalse) {
@@ -59,12 +64,19 @@ class ReadinessController(
             }
     }
 
+    @GetMapping("/maintenance")
+    fun getSystemMaintenance(): ApiResponse<*> {
+        return ApiResponse.success(isInMaintenance())
+    }
+
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_MAINTENANCE_UPDATE}')")
     @PostMapping("/maintenance")
-    fun setSystemMaintenance(
-        @RequestParam("enabled") enabled: Boolean
+    suspend fun setSystemMaintenance(
+        @ModelAttribute
+        @Valid
+        dto: SwitchSystemMaintenanceModeDTO
     ): ApiResponse<*> {
-        if (enabled) {
+        if (dto.enable) {
             setRefusing()
             reactiveRedisTemplate
                 .convertAndSend(maintenanceTopic.topic, maintenanceTopicMessageTrue)
@@ -76,11 +88,17 @@ class ReadinessController(
                 .subscribe()
         }
 
-        return ApiResponse.success(enabled)
+        return ApiResponse.success(true, "success")
     }
 
+    @EventListener
+    fun onReadinessEvent(event: AvailabilityChangeEvent<ReadinessState>) {
+        logger.warn("SYSTEM READINESS STATUS CHANGED TO ==> ${event.state.name}")
+        readinessState = event.getState()
+    }
 
     companion object {
+        private var readinessState: ReadinessState = ReadinessState.REFUSING_TRAFFIC
         private var appCtx: ApplicationContext? = null
 
         private fun getAppCtx(): ApplicationContext {
@@ -89,6 +107,10 @@ class ReadinessController(
             } else {
                 return appCtx!!
             }
+        }
+
+        fun isInMaintenance(): Boolean {
+            return this.readinessState == ReadinessState.REFUSING_TRAFFIC
         }
 
         fun setRefusing() {

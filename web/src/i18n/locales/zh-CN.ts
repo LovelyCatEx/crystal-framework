@@ -1272,6 +1272,8 @@ export const zhCN = {
       operation: '操作',
       importConfig: '导入配置',
       exportConfig: '导出配置',
+      maintenanceMode: '维护模式',
+      switchMaintenanceModeFailed: '无法切换维护模式',
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'bootstrap.autoCheckRbacTableData': '自动校验 RBAC 表数据',
