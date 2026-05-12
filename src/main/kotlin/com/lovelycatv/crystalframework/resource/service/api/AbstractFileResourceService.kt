@@ -145,5 +145,7 @@ abstract class AbstractFileResourceService(
         progressReporter: ((Int) -> Unit)? = null
     ): Exception?
 
-    open fun destroy() {}
+    open fun destroy() {
+        // Release resources
+    }
 }

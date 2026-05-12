@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.resource.controller
 
-import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
@@ -19,8 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.io.File
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @Validated
 @RestController
@@ -50,26 +47,20 @@ class LocalFileResourceController(
         val file = localService.getFile(fileResourceEntity.objectKey)
             ?: throw BusinessException("File not found: ${fileResourceEntity.objectKey}")
 
-        return buildFileResponse(file, fileResourceEntity)
+        return buildFileResponse(file)
     }
 
     private fun buildFileResponse(
-        file: File,
-        fileResourceEntity: FileResourceEntity
+        file: File
     ): ResponseEntity<Resource> {
         val resource = FileSystemResource(file)
 
         val contentType = try {
             java.nio.file.Files.probeContentType(file.toPath())
                 ?: "application/octet-stream"
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             "application/octet-stream"
         }
-
-        val encodedFileName = URLEncoder.encode(
-            "${fileResourceEntity.fileName}.${fileResourceEntity.fileExtension}",
-            StandardCharsets.UTF_8
-        ).replace("+", "%20")
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_TYPE, contentType)

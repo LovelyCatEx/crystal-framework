@@ -45,7 +45,7 @@ class TenantDepartmentMemberManagerServiceImpl(
 
     override suspend fun create(dto: ManagerCreateTenantDepartmentMemberDTO): TenantDepartmentMemberRelationEntity {
         // Check if member exists
-        val member = tenantMemberRepository.findById(dto.memberId).awaitFirstOrNull()
+        tenantMemberRepository.findById(dto.memberId).awaitFirstOrNull()
             ?: throw BusinessException("Member with ID ${dto.memberId} not found")
 
         // Check if relation already exists

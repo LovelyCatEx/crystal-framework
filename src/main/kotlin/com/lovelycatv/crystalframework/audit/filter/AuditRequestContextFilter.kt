@@ -12,7 +12,6 @@ import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
 import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange

@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config
 
 import com.lovelycatv.vertex.log.logger
-import io.r2dbc.spi.Statement
 import net.sf.jsqlparser.expression.LongValue
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression

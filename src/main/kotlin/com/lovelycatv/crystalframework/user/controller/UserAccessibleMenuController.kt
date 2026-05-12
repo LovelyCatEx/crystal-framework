@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.user.controller.vo.UserAccessibleResourceVO
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
-import com.lovelycatv.crystalframework.user.service.UserService
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

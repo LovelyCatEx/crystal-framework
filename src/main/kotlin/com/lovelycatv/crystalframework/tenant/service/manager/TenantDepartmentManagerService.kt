@@ -26,7 +26,7 @@ interface TenantDepartmentManagerService : BaseTenantResourceManagerService<
     ): PaginatedResponseData<TenantDepartmentEntity> {
         return super.query(
             dto = dto,
-            isAdvanceQuery = { dto.tenantId != null || dto.searchKeyword != null || dto.parentId != null },
+            isAdvanceQuery = { true },
             doAdvanceQuery = { readDto, limit, offset ->
                 val total = getRepository().countAdvanceSearch(readDto.searchKeyword, readDto.tenantId!!, readDto.parentId).awaitFirstOrNull() ?: 0
                 val records = getRepository().advanceSearch(

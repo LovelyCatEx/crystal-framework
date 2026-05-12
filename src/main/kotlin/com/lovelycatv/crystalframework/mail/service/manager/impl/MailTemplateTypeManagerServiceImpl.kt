@@ -1,10 +1,10 @@
 package com.lovelycatv.crystalframework.mail.service.manager.impl
 
+import com.lovelycatv.crystalframework.mail.controller.manager.type.dto.ManagerCreateMailTemplateTypeDTO
+import com.lovelycatv.crystalframework.mail.controller.manager.type.dto.ManagerUpdateMailTemplateTypeDTO
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateTypeManagerService
-import com.lovelycatv.crystalframework.mail.controller.manager.type.dto.ManagerCreateMailTemplateTypeDTO
-import com.lovelycatv.crystalframework.mail.controller.manager.type.dto.ManagerUpdateMailTemplateTypeDTO
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator

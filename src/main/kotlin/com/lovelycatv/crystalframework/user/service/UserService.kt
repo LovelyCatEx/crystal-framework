@@ -1,12 +1,10 @@
 package com.lovelycatv.crystalframework.user.service
 
 import com.lovelycatv.crystalframework.cache.service.CachedBaseService
-import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
-import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.transaction.annotation.Transactional

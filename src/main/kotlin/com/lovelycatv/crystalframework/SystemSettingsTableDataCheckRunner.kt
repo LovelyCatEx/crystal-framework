@@ -39,7 +39,7 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
                 val declaration = keyWithDeclarationMap[it.configKey]!!
 
                 val testResult = try {
-                    val t = when (declaration.valueType) {
+                    when (declaration.valueType) {
                         SystemSettingsItemValueType.STRING -> {
                             // Already is a string
                             copiedConfigValue
@@ -53,13 +53,7 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
                         SystemSettingsItemValueType.BOOLEAN -> {
                             copiedConfigValue.toBooleanStrictOrNull()
                         }
-                    }
-
-                    if (t != null) {
-                        true
-                    } else {
-                        throw IllegalStateException("")
-                    }
+                    } != null
                 } catch (_: Exception) {
                     false
                 }
@@ -77,8 +71,8 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
             }
         }
 
-        if (failedItems.isNotEmpty()) {
-            throw IllegalStateException("There were ${failedItems.size} failed system settings item(s). tips: ${SystemSettingsItemValueType.BOOLEAN} only supports \"true\" or \"false\"")
+        check(!(failedItems.isNotEmpty())) {
+            "There were ${failedItems.size} failed system settings item(s). tips: ${SystemSettingsItemValueType.BOOLEAN} only supports \"true\" or \"false\""
         }
 
         logger.info("=".repeat(64))

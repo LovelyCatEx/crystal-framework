@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.tenant.service
 import com.lovelycatv.crystalframework.cache.service.CachedBaseService
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRepository
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.transaction.annotation.Transactional
 
 interface TenantInvitationService : CachedBaseService<TenantInvitationRepository, TenantInvitationEntity> {

@@ -71,24 +71,7 @@ class UserServiceImpl(
     override fun findByUsername(username: String): Mono<UserDetails> {
         val (realUsername, tenantIdStr) = username.split(":")
 
-        val tenantMono: Mono<TenantEntity> = with(tenantIdStr.toLong()) {
-            mono {
-                if (this@with > 0) {
-                    val tenant = tenantService.getByIdOrThrow(
-                        this@with,
-                        BusinessException("tenant $tenantIdStr is not found")
-                    )
-
-                    if (tenant.getRealStatus() == TenantStatus.ACTIVE) {
-                        tenant
-                    } else {
-                        throw BusinessException("tenant is inactive or closed")
-                    }
-                } else {
-                    null
-                }
-            }
-        }
+        val tenantMono: Mono<TenantEntity> = getTenantMonoById(tenantIdStr.toLong())
 
         return this@UserServiceImpl
             .getRepository()
@@ -108,35 +91,58 @@ class UserServiceImpl(
                 }
             }
             .flatMap { userEntity ->
-                tenantMono
-                    .flatMap<UserDetails> { tenantEntity ->
-                        userEntity.setAuthenticatedTenant(tenantEntity)
-                        flux {
-                            val targetMember = tenantMemberRelationService
-                                .getUserTenantMembers(userEntity.id)
-                                .find { it.tenantId == tenantEntity.id }
+                checkIsTenantValid(userEntity, tenantMono)
+            }
+    }
 
-                            if (targetMember != null) {
-                                this.send(targetMember)
-                            } else {
-                                Flux.error<TenantMemberEntity>(BusinessException("You are not the member of the tenant"))
-                            }
-                        }.collectList()
-                            .flatMap {
-                                val memberRecord = it.find { it.tenantId == tenantIdStr.toLong() && it.memberUserId == userEntity.id }
-                                if (memberRecord == null) {
-                                    Mono.error(BusinessException("You are not the member of the tenant"))
-                                } else if (memberRecord.getRealStatus() != TenantMemberStatus.ACTIVE) {
-                                    Mono.error(BusinessException("Your account is reviewing or closed by the tenant"))
-                                } else {
-                                    Mono.empty()
-                                }
-                            }
+    private fun checkIsTenantValid(userEntity: UserEntity, tenantMono: Mono<TenantEntity>): Mono<UserDetails> {
+        return tenantMono
+            .flatMap<UserDetails> { tenantEntity ->
+                userEntity.setAuthenticatedTenant(tenantEntity)
+                flux {
+                    val targetMember = tenantMemberRelationService
+                        .getUserTenantMembers(userEntity.id)
+                        .find { it.tenantId == tenantEntity.id }
+
+                    if (targetMember != null) {
+                        this.send(targetMember)
+                    } else {
+                        Flux.error<TenantMemberEntity>(BusinessException("You are not the member of the tenant"))
                     }
-                    .switchIfEmpty {
-                        userEntity.toMono()
+                }.collectList()
+                    .flatMap {
+                        val memberRecord = it.find { it.memberUserId == userEntity.id }
+                        if (memberRecord == null) {
+                            Mono.error(BusinessException("You are not the member of the tenant"))
+                        } else if (memberRecord.getRealStatus() != TenantMemberStatus.ACTIVE) {
+                            Mono.error(BusinessException("Your account is reviewing or closed by the tenant"))
+                        } else {
+                            Mono.empty()
+                        }
                     }
             }
+            .switchIfEmpty {
+                userEntity.toMono()
+            }
+    }
+
+    private fun getTenantMonoById(tenantId: Long): Mono<TenantEntity> {
+        return mono {
+            if (tenantId > 0) {
+                val tenant = tenantService.getByIdOrThrow(
+                    tenantId,
+                    BusinessException("tenant $tenantId is not found")
+                )
+
+                if (tenant.getRealStatus() == TenantStatus.ACTIVE) {
+                    tenant
+                } else {
+                    throw BusinessException("tenant is inactive or closed")
+                }
+            } else {
+                null
+            }
+        }
     }
 
     @Transactional(rollbackFor = [Exception::class])
@@ -377,10 +383,8 @@ class UserServiceImpl(
             .findByUsername(username)
             .awaitSingleOrNull()
 
-        if (existingUser != null) {
-            if (existingUser.username == username) {
-                throw BusinessException("User $username already exists")
-            }
+        if (existingUser != null && existingUser.username == username) {
+            throw BusinessException("User $username already exists")
         }
 
         val user = this.getRepository().save(

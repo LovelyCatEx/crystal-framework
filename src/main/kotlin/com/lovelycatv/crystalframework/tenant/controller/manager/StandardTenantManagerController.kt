@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.crystalframework.tenant.controller.manager.StandardTenantManagerController.Companion.DISABLED_SCOPED_PERMISSION
 import com.lovelycatv.crystalframework.tenant.service.manager.BaseTenantResourceManagerService
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
