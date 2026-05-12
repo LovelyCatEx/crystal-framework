@@ -39,48 +39,56 @@ class CustomAuthFilter(
             pattern.matches(requestPath)
         }
 
-        if (isUnauthorized) {
-            return chain.filter(exchange)
-        }
-
         val authorization = exchange.request.headers["Authorization"]
             ?.firstOrNull()
             ?.replace("Bearer ", "")
             ?.trim()
-            ?: throw UnauthorizedException("Authorization header is missing")
 
-        val claims = try {
-            JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
-        } catch (e: Exception) {
-            if (e is ExpiredJwtException) {
-                throw UnauthorizedException("token expired")
-            } else {
-                logger.error("unexpected token parse exception", e)
-                throw UnauthorizedException("invalid token pattern")
-            }
+        // Unauthorized does not require an Authorization header.
+        if (!isUnauthorized && authorization == null) {
+            exchange.request.headers["Authorization"]
+                ?.firstOrNull()
+                ?.replace("Bearer ", "")
+                ?.trim()
+                ?: throw UnauthorizedException("Authorization header is missing")
         }
 
-        val userId = claims["userId"]
-            ?.toString()
-            ?.toLong()
-            ?: throw UnauthorizedException("userId is missing")
-
-        val tenantId = claims["tenantId"]
-            ?.toString()
-            ?.toLong()
-
-        return mono {
-            getUserAuthorities.invoke(userId, tenantId)
-        }.flatMap {
-            val token = UsernamePasswordAuthenticationToken(
-                claims.subject,
-                null,
-                it
-            )
-
-            chain.filter(exchange).contextWrite {
-                ReactiveSecurityContextHolder.withAuthentication(token)
+        return if (authorization != null) {
+            val claims = try {
+                JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
+            } catch (e: Exception) {
+                if (e is ExpiredJwtException) {
+                    throw UnauthorizedException("token expired")
+                } else {
+                    logger.error("unexpected token parse exception", e)
+                    throw UnauthorizedException("invalid token pattern")
+                }
             }
+
+            val userId = claims["userId"]
+                ?.toString()
+                ?.toLong()
+                ?: throw UnauthorizedException("userId is missing")
+
+            val tenantId = claims["tenantId"]
+                ?.toString()
+                ?.toLong()
+
+            mono {
+                getUserAuthorities.invoke(userId, tenantId)
+            }.flatMap {
+                val token = UsernamePasswordAuthenticationToken(
+                    claims.subject,
+                    null,
+                    it
+                )
+
+                chain.filter(exchange).contextWrite {
+                    ReactiveSecurityContextHolder.withAuthentication(token)
+                }
+            }
+        } else {
+            chain.filter(exchange)
         }
     }
 }

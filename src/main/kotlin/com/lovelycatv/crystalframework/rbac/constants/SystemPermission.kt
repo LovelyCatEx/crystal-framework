@@ -34,6 +34,9 @@ object SystemPermission {
     const val ACTION_SYSTEM_SETTINGS_READ = "settings.read"
     const val ACTION_SYSTEM_SETTINGS_UPDATE = "settings.update"
 
+    const val ACTION_SYSTEM_MAINTENANCE_ACCESS = "maintenance.access"
+    const val ACTION_SYSTEM_MAINTENANCE_UPDATE = "maintenance.update"
+
     const val ACTION_OAUTH_ACCOUNT_CREATE = "oauth.account.create"
     const val ACTION_OAUTH_ACCOUNT_READ = "oauth.account.read"
     const val ACTION_OAUTH_ACCOUNT_UPDATE = "oauth.account.update"

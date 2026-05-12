@@ -1272,6 +1272,8 @@ export const zhCN = {
       operation: '操作',
       importConfig: '导入配置',
       exportConfig: '导出配置',
+      maintenanceMode: '维护模式',
+      switchMaintenanceModeFailed: '无法切换维护模式',
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'bootstrap.autoCheckRbacTableData': '自动校验 RBAC 表数据',
@@ -1336,6 +1338,16 @@ export const zhCN = {
       title: '哎呀！路径丢失了',
       description: '您访问的页面可能已被移动、删除或不存在。',
       backToHome: '返回首页'
+    },
+    maintenance: {
+      documentTitle: '维护中',
+      title: '系统维护中',
+      description: '我们正在进行系统升级与维护，请稍后再试。',
+      hint: '维护期间所有功能暂不可用，感谢您的耐心等待。'
+    },
+    serviceUnavailable: {
+      title: '服务不可用',
+      description: '无法连接到服务器，请检查网络后刷新页面。'
     },
   },
 

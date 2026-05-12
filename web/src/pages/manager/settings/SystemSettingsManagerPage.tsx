@@ -1,13 +1,18 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
-import {getSystemSettingsSchema, updateSystemSettings} from "@/api/system-settings.api.ts";
+import {
+    getSystemSettingsSchema,
+    updateSystemMaintenanceMode,
+    updateSystemSettings
+} from "@/api/system-settings.api.ts";
 import {Button, Card, Col, Form, Input, InputNumber, message, Row, Switch} from "antd";
 import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
 import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
-import {ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
+import {ApiOutlined, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
+import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 
 export function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -19,6 +24,8 @@ export function SystemSettingsManagerPage() {
         () => getSystemSettingsSchema().then((res) => res.data),
         () => void message.error(t('pages.systemSettingsManager.fetchFailed'))
     )
+
+    const {maintenanceMode: isInMaintenance, mutate: mutateMaintenance} = useMaintenanceStatus();
 
     const [form] = Form.useForm();
 
@@ -75,6 +82,14 @@ export function SystemSettingsManagerPage() {
         downloadJson(content, "settings")
     };
 
+    const switchMaintenanceMode = () => {
+        updateSystemMaintenanceMode(!isInMaintenance)
+            .then(() => {
+                void mutateMaintenance();
+            })
+            .catch(() => message.error(t('pages.systemSettingsManager.switchMaintenanceModeFailed')));
+    };
+
     return (
         <>
             <ActionBarComponent
@@ -114,6 +129,21 @@ export function SystemSettingsManagerPage() {
                     >
                         {t('pages.systemSettingsManager.exportConfig')}
                     </Button>
+                    {isInMaintenance ? (
+                        <Button
+                            icon={<ApiOutlined />}
+                            onClick={switchMaintenanceMode}
+                        >
+                            {t('pages.systemSettingsManager.maintenanceMode')}
+                        </Button>
+                    ) : (
+                        <Button
+                            icon={<ToolOutlined />}
+                            onClick={switchMaintenanceMode}
+                        >
+                            {t('pages.systemSettingsManager.maintenanceMode')}
+                        </Button>
+                    )}
                 </div>
             </Card>
 

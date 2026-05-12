@@ -1,6 +1,7 @@
 import {ConfigProvider, theme} from "antd";
 import {Route, Routes} from "react-router-dom";
 import {RequireAuthComponent} from "./components/RequireAuthComponent.tsx";
+import {MaintenanceGuard} from "./components/MaintenanceGuard.tsx";
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
 import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
 import {HomePage} from "./pages/home/HomePage.tsx";
@@ -53,20 +54,22 @@ function App() {
 
   return (
       <ConfigProvider theme={themeConfig}>
-          <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route
-                  path="/manager/*"
-                  element={
-                      <RequireAuthComponent>
-                          <ManagerContainerPage parentPath="/manager" />
-                      </RequireAuthComponent>
-                  }
-              />
-              <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
-              <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <MaintenanceGuard>
+              <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route
+                      path="/manager/*"
+                      element={
+                          <RequireAuthComponent>
+                              <ManagerContainerPage parentPath="/manager" />
+                          </RequireAuthComponent>
+                      }
+                  />
+                  <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
+                  <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+          </MaintenanceGuard>
       </ConfigProvider>
   )
 }

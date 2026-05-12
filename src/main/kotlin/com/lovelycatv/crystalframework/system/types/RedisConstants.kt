@@ -9,6 +9,8 @@ object RedisConstants {
 
     const val SYSTEM_SETTINGS_REFRESH_TOPIC = "crystalframework:system-settings:refresh"
 
+    const val SYSTEM_MAINTENANCE_TOPIC = "crystalframework:system-maintenance:refresh"
+
     fun getRequestRegisterEmailCodeKey(email: String) = "register-email-code:$email"
 
     fun getRequestResetPasswordEmailCodeKey(email: String) = "reset-password-email-code:$email"

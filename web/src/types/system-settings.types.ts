@@ -19,3 +19,8 @@ export enum SystemSettingsItemValueType {
     DECIMAL = 'DECIMAL',
     BOOLEAN = 'BOOLEAN',
 }
+
+export interface SystemMaintenanceStatusVO {
+    canAccess: boolean;
+    maintenanceMode: boolean
+}

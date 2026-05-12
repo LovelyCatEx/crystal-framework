@@ -10,6 +10,7 @@ package com.lovelycatv.crystalframework.audit.filter
 
 import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
 import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
+import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -30,7 +31,7 @@ import reactor.core.publisher.Mono
  * existing `LoggerFilter`), the security chain, the controller method, any AOP
  * aspects wrapped around it, and the services it calls.
  */
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(GlobalConstants.FilterPriority.AUDIT_FILTER)
 @Component
 class AuditRequestContextFilter(
     private val snowIdGenerator: SnowIdGenerator
