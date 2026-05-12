@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
@@ -14,11 +13,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelatio
 import com.lovelycatv.crystalframework.tenant.repository.TenantPermissionRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantRolePermissionRelationRepository
-import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
-import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
-import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
-import com.lovelycatv.crystalframework.tenant.service.TenantRoleService
-import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
@@ -44,7 +39,6 @@ class TenantServiceImpl(
     private val tenantPermissionRepository: TenantPermissionRepository,
     private val tenantRolePermissionRelationRepository: TenantRolePermissionRelationRepository,
     private val tenantMemberRoleRelationRepository: TenantMemberRoleRelationRepository,
-    memberService: TenantMemberService,
     private val tenantRoleService: TenantRoleService,
 ) : TenantService {
     private val logger = logger()
@@ -160,7 +154,7 @@ class TenantServiceImpl(
             throw BusinessException("could not upload tenant icon", result.exception)
         }
 
-        val updatedTenant = withUpdateEntityContext(tenant) {
+        withUpdateEntityContext(tenant) {
             tenant.icon = result.fileResourceEntity.id
             this.getRepository().save(tenant).awaitFirstOrNull()
                 ?: throw BusinessException("Could not update tenant icon")

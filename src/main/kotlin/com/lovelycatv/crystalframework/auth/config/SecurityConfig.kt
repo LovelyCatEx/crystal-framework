@@ -9,8 +9,6 @@ import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -51,7 +49,7 @@ class SecurityConfig(
                 logger.warn("Authentication failure: ${exception.localizedMessage}", exception)
 
                 exchange.response.statusCode = HttpStatus.OK
-                exchange.response.headers.set("Content-Type", "application/json")
+                exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
                 exchange.response.writeWith(
                     Mono.just(
                         exchange.response.bufferFactory().wrap(
@@ -68,7 +66,7 @@ class SecurityConfig(
                 logger.warn("Access denied: ${exchange.request.path}", exception)
 
                 exchange.response.statusCode = HttpStatus.OK
-                exchange.response.headers.set("Content-Type", "application/json")
+                exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
                 exchange.response.writeWith(
                     exchange.response.bufferFactory().wrap(
                         ApiResponse
@@ -83,7 +81,7 @@ class SecurityConfig(
         http.oauth2Login {
             it.authenticationSuccessHandler { exchange, authentication ->
                 exchange.exchange.response.statusCode = HttpStatus.OK
-                exchange.exchange.response.headers.set("Content-Type", "application/json")
+                exchange.exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
 
                 val result = userAuthorizationService.processOAuth2AuthenticationSuccess(authentication)
 
@@ -100,7 +98,7 @@ class SecurityConfig(
                 logger.warn("OAuth2 authorization failed", exception)
 
                 exchange.exchange.response.statusCode = HttpStatus.OK
-                exchange.exchange.response.headers.set("Content-Type", "application/json")
+                exchange.exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
                 exchange.exchange.response.writeWith(
                     exchange.exchange.response.bufferFactory().wrap(
                         ApiResponse
@@ -184,5 +182,10 @@ class SecurityConfig(
 
 
         return http.build()
+    }
+
+    companion object {
+        const val CONTENT_TYPE = "Content-Type"
+        const val APPLICATION_JSON = "application/json"
     }
 }

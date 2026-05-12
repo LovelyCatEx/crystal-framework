@@ -7,8 +7,6 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.*
 import reactor.core.publisher.Mono
 import java.time.Duration
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
 
 interface RedisService {
     fun hasKey(key: String): Mono<Boolean>
@@ -40,10 +38,6 @@ interface RedisService {
     fun <T: Any> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T>
 
     fun <T: Any> asKVStore(): ExpiringKVStore<String, T> {
-        val executor = Executors.newSingleThreadExecutor { r ->
-            Thread(r, "redis-blocking-thread").apply { isDaemon = true }
-        }
-
         return object : ExpiringKVStore<String, T> {
             override fun set(key: String, value: T, expiration: Long) {
                 runBlocking(Dispatchers.IO) {
@@ -93,6 +87,7 @@ interface RedisService {
                 get() = keys.size
 
             override fun clear() {
+                throw UnsupportedOperationException("Redis cannot be cleared")
             }
         }
     }

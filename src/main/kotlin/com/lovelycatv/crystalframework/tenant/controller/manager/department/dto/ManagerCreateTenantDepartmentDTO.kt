@@ -2,10 +2,9 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.department.dto
 
 import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerCreateTenantResourceDTO
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 
- data class ManagerCreateTenantDepartmentDTO(
+data class ManagerCreateTenantDepartmentDTO(
     override val tenantId: Long,
 
     @field:NotBlank(message = "Name is required")

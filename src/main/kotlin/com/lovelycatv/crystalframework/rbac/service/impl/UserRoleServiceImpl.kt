@@ -6,7 +6,6 @@ import com.lovelycatv.crystalframework.rbac.service.UserRoleService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
-import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass

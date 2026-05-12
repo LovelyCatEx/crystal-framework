@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
 import org.reactivestreams.Publisher
 import org.slf4j.Logger
-import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils

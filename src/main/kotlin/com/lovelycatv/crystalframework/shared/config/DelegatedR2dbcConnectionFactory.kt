@@ -18,7 +18,7 @@ class DelegatedR2dbcConnectionFactory(private val delegate: ConnectionFactory) :
             }
 
             else -> {
-                throw IllegalStateException("Unsupported publisher type ${created::class.qualifiedName} when creating connection")
+                error("Unsupported publisher type ${created::class.qualifiedName} when creating connection")
             }
         }
     }

@@ -5,5 +5,4 @@ import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface MailTemplateCategoryRepository : BaseRepository<MailTemplateCategoryEntity> {
-}
+interface MailTemplateCategoryRepository : BaseRepository<MailTemplateCategoryEntity>

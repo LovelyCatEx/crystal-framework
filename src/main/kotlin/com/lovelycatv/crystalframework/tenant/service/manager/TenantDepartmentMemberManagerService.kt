@@ -1,7 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
-import com.lovelycatv.crystalframework.cache.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerDeleteTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerReadTenantDepartmentMemberDTO
@@ -9,9 +10,6 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.department.memb
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.vo.TenantDepartmentMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
-import com.lovelycatv.crystalframework.tenant.service.TenantRelationshipCheckService
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface TenantDepartmentMemberManagerService : BaseTenantResourceManagerService<

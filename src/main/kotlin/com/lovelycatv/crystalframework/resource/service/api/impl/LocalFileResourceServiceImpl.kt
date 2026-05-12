@@ -82,7 +82,4 @@ class LocalFileResourceServiceImpl(
         return baseDirectory.resolve(normalizedObjectKey).normalize()
     }
 
-    override fun destroy() {
-        super.destroy()
-    }
 }

@@ -13,12 +13,7 @@ import com.lovelycatv.crystalframework.tenant.service.TenantRolePermissionRelati
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantRoleManagerService
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Validated
 @RestController
@@ -33,11 +28,11 @@ class ManagerTenantRolePermissionRelationController(
         @RequestParam roleId: Long
     ): ApiResponse<*> {
         if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_ROLE_PERMISSION_RELATION_READ)) {
-            return ApiResponse.Companion.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
+            return ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM)) {
             userAuthentication.assertTenantIdNotNull()
             if (tenantRoleManagerService.checkIsRelatedToRootParent(roleId, userAuthentication.tenantId!!)) {
-                return ApiResponse.Companion.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
+                return ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
             } else {
                 throw UnauthorizedException()
             }
@@ -65,6 +60,6 @@ class ManagerTenantRolePermissionRelationController(
         } else {
             throw ForbiddenException()
         }
-        return ApiResponse.Companion.success(null)
+        return ApiResponse.success(null)
     }
 }

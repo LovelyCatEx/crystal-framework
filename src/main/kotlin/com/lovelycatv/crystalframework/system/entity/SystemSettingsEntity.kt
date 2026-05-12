@@ -14,5 +14,4 @@ class SystemSettingsEntity(
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
-) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
-}
+) : BaseEntity(id, createdTime, modifiedTime, deletedTime)

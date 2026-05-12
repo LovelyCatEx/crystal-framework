@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
  * know the outermost scope should use `checkIsRelatedToRootParent` so the chain can be
  * walked up recursively.
  */
-interface ScopedEntity<PARENT_ID> {
+fun interface ScopedEntity<PARENT_ID> {
     @JsonIgnore
     fun getDirectParentId(): PARENT_ID
 }

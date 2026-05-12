@@ -11,7 +11,6 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.Mana
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.TenantMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
-import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRoleRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService

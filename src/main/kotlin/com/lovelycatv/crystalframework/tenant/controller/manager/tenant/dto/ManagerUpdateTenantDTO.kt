@@ -1,11 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
-import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
 
- data class ManagerUpdateTenantDTO(
+data class ManagerUpdateTenantDTO(
     override val id: Long,
 
     @field:Size(max = 64, message = "Name length cannot exceed 64 characters")

@@ -18,6 +18,7 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
 
     suspend fun getSettings(key: String, absentValue: (absentOrNull: Boolean) -> String?): String?
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun <R> getSettings(
         declaration: SystemSettingsItemDeclaration
     ): R? {

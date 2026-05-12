@@ -23,7 +23,7 @@ class ManagerUserRoleRelationController(
         userAuthentication: UserAuthentication,
         @RequestParam userId: Long
     ): ApiResponse<*> {
-        return ApiResponse.Companion.success(userRoleRelationService.getUserRoles(userId))
+        return ApiResponse.success(userRoleRelationService.getUserRoles(userId))
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_ROLE_UPDATE}')")
@@ -35,6 +35,6 @@ class ManagerUserRoleRelationController(
         dto: SetUserRolesDTO
     ): ApiResponse<*> {
         userRoleRelationService.setUserRoles(dto.userId, dto.roleIds)
-        return ApiResponse.Companion.success(null)
+        return ApiResponse.success(null)
     }
 }

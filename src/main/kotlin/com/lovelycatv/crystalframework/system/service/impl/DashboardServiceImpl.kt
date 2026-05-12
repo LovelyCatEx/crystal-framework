@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Service
-import sun.management.BaseOperatingSystemImpl
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.net.InetAddress
@@ -284,6 +283,8 @@ class DashboardServiceImpl(
     }
 
     suspend fun getDatabaseVersion(): String {
+        val unknownDatabaseStr = "Unknown Database"
+
         return try {
             val metadata = databaseClient.connectionFactory.metadata
             val databaseName = metadata.name.lowercase()
@@ -312,16 +313,16 @@ class DashboardServiceImpl(
                             .fetch()
                             .first()
                             .awaitFirstOrNull()
-                        result?.get("version") as? String ?: "Unknown Database"
-                    } catch (e: Exception) {
-                        "Unknown Database"
+                        result?.get("version") as? String ?: unknownDatabaseStr
+                    } catch (_: Exception) {
+                        unknownDatabaseStr
                     }
                 }
             }
 
             versionStr
-        } catch (e: Exception) {
-            "Unknown Database"
+        } catch (_: Exception) {
+            unknownDatabaseStr
         }
     }
 

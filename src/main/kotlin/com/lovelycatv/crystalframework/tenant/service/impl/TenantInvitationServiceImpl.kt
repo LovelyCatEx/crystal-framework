@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.tenant.service.impl
 import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
-import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO

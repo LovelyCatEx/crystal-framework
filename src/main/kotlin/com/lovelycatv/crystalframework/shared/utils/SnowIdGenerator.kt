@@ -32,20 +32,20 @@ class SnowIdGenerator(
     private val maxWorkers: Long
  
     init {
-        if (timestampLength + dataCenterIdLength + workerIdLength + sequenceIdLength + geneIdLength != 63) {
-            throw IllegalArgumentException("Id length must be 64 in total.")
+        require(timestampLength + dataCenterIdLength + workerIdLength + sequenceIdLength + geneIdLength == 63) {
+            "Id length must be 64 in total."
         }
  
         maxSequence = 1L shl sequenceIdLength
         maxDataCenters = 1L shl dataCenterIdLength
         maxWorkers = 1L shl workerIdLength
- 
-        if (dataCenterId >= maxDataCenters) {
-            throw IllegalArgumentException("Data center id out of range, max $maxDataCenters but current $dataCenterId")
+
+        require(dataCenterId < maxDataCenters) {
+            "Data center id out of range, max $maxDataCenters but current $dataCenterId"
         }
- 
-        if (workerId >= maxWorkers) {
-            throw IllegalArgumentException("Worker id out of range, max $maxWorkers but current $workerId")
+
+        require(workerId < maxWorkers) {
+            "Worker id out of range, max $maxWorkers but current $workerId"
         }
     }
  
@@ -63,10 +63,13 @@ class SnowIdGenerator(
  
         if (currentTimestamp <= borrowedTimestamp) {
             currentTimestamp = borrowedTimestamp
-        } else if (currentTimestamp < lastTimestamp) {
-            throw IllegalStateException("Clock moved backwards. Refusing to generate id for timestamp $currentTimestamp. Latest generated at $lastTimestamp")
+        } else {
+            check(currentTimestamp >= lastTimestamp) {
+                "Clock moved backwards. Refusing to generate id for timestamp $currentTimestamp. Latest generated at $lastTimestamp"
+            }
         }
- 
+
+
         if (currentTimestamp == lastTimestamp) {
             with(gene) {
                 val original = (sequenceMap[this] ?: 0)

@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 
 @Service
