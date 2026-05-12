@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.filter
 
+import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
 import org.reactivestreams.Publisher
@@ -20,7 +21,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(GlobalConstants.FilterPriority.LOGGER_FILTER)
 @Component
 class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
     private val logger = logger()

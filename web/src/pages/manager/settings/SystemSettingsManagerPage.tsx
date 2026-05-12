@@ -1,7 +1,6 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {useSWRComposition, useSWRState} from "@/compositions/swr.ts";
+import {useSWRComposition} from "@/compositions/swr.ts";
 import {
-    getSystemMaintenanceMode,
     getSystemSettingsSchema,
     updateSystemMaintenanceMode,
     updateSystemSettings
@@ -13,6 +12,7 @@ import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "
 import {ApiOutlined, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
+import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 
 export function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -25,10 +25,7 @@ export function SystemSettingsManagerPage() {
         () => void message.error(t('pages.systemSettingsManager.fetchFailed'))
     )
 
-    const [isInMaintenance, setInMaintenance] = useSWRState(
-        'maintenanceMode',
-        () => getSystemMaintenanceMode(),
-    )
+    const {maintenanceMode: isInMaintenance, mutate: mutateMaintenance} = useMaintenanceStatus();
 
     const [form] = Form.useForm();
 
@@ -88,7 +85,7 @@ export function SystemSettingsManagerPage() {
     const switchMaintenanceMode = () => {
         updateSystemMaintenanceMode(!isInMaintenance)
             .then(() => {
-                setInMaintenance(!isInMaintenance);
+                void mutateMaintenance();
             })
             .catch(() => message.error(t('pages.systemSettingsManager.switchMaintenanceModeFailed')));
     };

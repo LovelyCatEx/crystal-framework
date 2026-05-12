@@ -1342,6 +1342,16 @@ export const enUS = {
       description: 'The page you are looking for might have been moved, deleted, or does not exist.',
       backToHome: 'Back to Home'
     },
+    maintenance: {
+      documentTitle: 'Maintenance',
+      title: 'Under Maintenance',
+      description: 'We are performing system upgrades and maintenance. Please try again later.',
+      hint: 'All features are temporarily unavailable during maintenance. Thank you for your patience.'
+    },
+    serviceUnavailable: {
+      title: 'Service Unavailable',
+      description: 'Unable to connect to the server. Please check your network and refresh the page.'
+    },
   },
 
   components: {
