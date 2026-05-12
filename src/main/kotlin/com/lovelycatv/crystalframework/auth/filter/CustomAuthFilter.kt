@@ -39,15 +39,18 @@ class CustomAuthFilter(
             pattern.matches(requestPath)
         }
 
-        val authorization = if (!isUnauthorized) {
+        val authorization = exchange.request.headers["Authorization"]
+            ?.firstOrNull()
+            ?.replace("Bearer ", "")
+            ?.trim()
+
+        // Unauthorized does not require an Authorization header.
+        if (!isUnauthorized && authorization == null) {
             exchange.request.headers["Authorization"]
                 ?.firstOrNull()
                 ?.replace("Bearer ", "")
                 ?.trim()
                 ?: throw UnauthorizedException("Authorization header is missing")
-        } else {
-            // Unauthorized does not require an Authorization header.
-            null
         }
 
         return if (authorization != null) {

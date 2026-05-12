@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.system.controller
 
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -66,6 +67,7 @@ class ReadinessController(
             }
     }
 
+    @Unauthorized
     @GetMapping("/maintenance")
     suspend fun getSystemMaintenance(): ApiResponse<*> {
         val canAccess = RbacUtils.hasAuthority(SystemMaintenanceGuardFilter.MAINTENANCE_ACCESS_PERMISSION)
