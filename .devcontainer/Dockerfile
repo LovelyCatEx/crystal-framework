@@ -2,6 +2,9 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN sed -i 's@//ports.ubuntu.com@//mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || \
+    sed -i 's@//archive.ubuntu.com@//mirrors.tuna.tsinghua.edu.cn@g' /etc/apt/sources.list
+
 # Install essentials
 RUN apt-get update && apt-get install -y \
     curl \
@@ -9,11 +12,10 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     zip \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates
 
 # Install JDK 17
-RUN apt-get update && apt-get install -y openjdk-17-jdk \
+RUN apt-get install -y openjdk-17-jdk \
     && rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
