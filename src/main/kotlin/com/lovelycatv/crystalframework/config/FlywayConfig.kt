@@ -16,9 +16,10 @@ class FlywayConfig {
         return BeanFactoryPostProcessor { _: ConfigurableListableBeanFactory ->
             val logger = LoggerFactory.getLogger(FlywayConfig::class.java)
 
-            val url = environment.resolveRequiredPlaceholders(
-                "jdbc:postgresql://\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DATABASE}"
-            )
+            val url = environment.getProperty("spring.datasource.url")
+                ?: environment.resolveRequiredPlaceholders(
+                    "jdbc:postgresql://\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DATABASE}"
+                )
             val username = environment.getProperty("spring.datasource.username")
                 ?: environment.getProperty("POSTGRES_USERNAME")
             val password = environment.getProperty("spring.datasource.password")

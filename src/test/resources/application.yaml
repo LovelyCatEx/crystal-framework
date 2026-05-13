@@ -2,9 +2,9 @@ spring:
   application:
     name: springboot-template
   r2dbc:
-    url: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
-    username: ${POSTGRES_USERNAME}
-    password: ${POSTGRES_PASSWORD}
+    url: r2dbc:postgresql://localhost:5432/db
+    username: postgres
+    password: 123456
     pool:
       initial-size: 5
       min-idle: 5
@@ -14,11 +14,15 @@ spring:
       max-create-connection-time: 5s
       validation-query: SELECT 1
       validation-depth: REMOTE
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db
+    username: postgres
+    password: 123456
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+      host: localhost
+      port: 6379
+      password: 123456
       lettuce:
         pool:
           max-active: 8
@@ -38,23 +42,23 @@ spring:
         registration:
           github:
             provider: github
-            client-id: ${OAUTH_GITHUB_CLIENT_ID}
-            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
+            client-id: your-github-client-id
+            client-secret: your-github-client-secret
             scope: read:user
-            redirect-uri: ${OAUTH_GITHUB_REDIRECT_URL}
+            redirect-uri: http://localhost:5173/auth/oauth2-code
             authorization-grant-type: authorization_code
           oicq:
             provider: oicq
-            client-id: ${OAUTH_OICQ_CLIENT_ID}
-            client-secret: ${OAUTH_OICQ_CLIENT_SECRET}
+            client-id: your-qq-client-id
+            client-secret: your-qq-client-secret
             scope: get_user_info
-            redirect-uri: ${OAUTH_OICQ_REDIRECT_URL}
+            redirect-uri: http://127.0.0.1:5173/auth/oauth2-code
             authorization-grant-type: authorization_code
           google:
             provider: google
-            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
-            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URL}
+            client-id: your-google-client-id
+            client-secret: your-google-client-secret
+            redirect-uri: http://localhost:5173/auth/oauth2-code
             authorization-grant-type: authorization_code
 
   http:
@@ -93,20 +97,21 @@ crystalframework:
       worker-id-length: 5
       sequence-id-length: 12
       gene-id-length: 0
-      data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
-      worker-id: ${SNOWFLAKE_WORKER_ID:0}
+      data-center-id: 0
+      worker-id: 0
       actual-gene-length: 0
 
 logging:
   level:
     root: info
+    org.flywaydb: info
     org.springframework.security: info
     org.springframework.web: info
     org.springframework.transaction: info
     org.springframework.r2dbc: info
     io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
-    com.lovelycatv.crystalframework.shared.exception: debug
+    com.lovelycatv.crystalframework.shared.exception: info
 server:
   reactive:
     session:
@@ -115,13 +120,13 @@ server:
         path: /
         http-only: true
         same-site: none
-        domain: ${COOKIE_DOMAIN}
+        domain: localhost
   forward-headers-strategy: framework
-  port: ${BACKEND_PORT}
+  port: 8080
 snail-job:
   server:
-    host: 127.0.0.1
-    port: ${SNAILJOB_SERVER_PORT}
-  namespace: ${SNAILJOB_NAMESPACE_ID}
-  group: ${SNAILJOB_GROUP_NAME}
-  token: ${SNAILJOB_GROUP_TOKEN}
+    host: localhost
+    port: 17888
+  namespace: CRh3mSYLf46rzyr7IU01jYfDNSLKre6H
+  group: CrystalFramework
+  token: SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj

@@ -11,16 +11,6 @@
     <option name="MAIN_CLASS_NAME" value="com.lovelycatv.crystalframework.SpringbootTemplateApplicationTests" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
-    <envs>
-      <env name="POSTGRES_DATABASE" value="db" />
-      <env name="POSTGRES_HOST" value="localhost" />
-      <env name="POSTGRES_PASSWORD" value="123456" />
-      <env name="POSTGRES_PORT" value="5432" />
-      <env name="POSTGRES_USERNAME" value="postgres" />
-      <env name="REDIS_HOST" value="localhost" />
-      <env name="REDIS_PASSWORD" value="123456" />
-      <env name="REDIS_PORT" value="6379" />
-    </envs>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
