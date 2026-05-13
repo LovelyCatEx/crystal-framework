@@ -1,0 +1,27 @@
+{
+  "name": "Crystal Framework Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev-server",
+  "workspaceFolder": "/crystalframework",
+  "forwardPorts": [8080, 5432, 6379, 8180, 17888],
+  "customizations": {
+    "jetbrains": {
+      "backend": "IntelliJ"
+    }
+  },
+  "remoteEnv": {
+    "POSTGRES_HOST": "${localEnv:POSTGRES_HOST:postgres}",
+    "POSTGRES_PORT": "${localEnv:POSTGRES_PORT:5432}",
+    "POSTGRES_USERNAME": "${localEnv:POSTGRES_USERNAME:postgres}",
+    "POSTGRES_PASSWORD": "${localEnv:POSTGRES_PASSWORD:123456}",
+    "POSTGRES_DATABASE": "${localEnv:POSTGRES_DATABASE:db}",
+    "REDIS_HOST": "${localEnv:REDIS_HOST:redis}",
+    "REDIS_PORT": "${localEnv:REDIS_PORT:6379}",
+    "REDIS_PASSWORD": "${localEnv:REDIS_PASSWORD:123456}",
+    "SNAILJOB_SERVER_PORT": "${localEnv:SNAILJOB_SERVER_PORT:17888}",
+    "SNAILJOB_NAMESPACE_ID": "${localEnv:SNAILJOB_NAMESPACE_ID:CRh3mSYLf46rzyr7IU01jYfDNSLKre6H}",
+    "SNAILJOB_GROUP_NAME": "${localEnv:SNAILJOB_GROUP_NAME:CrystalFramework}",
+    "SNAILJOB_GROUP_TOKEN": "${localEnv:SNAILJOB_GROUP_TOKEN:SJ_Wyz3dmsdbDOkDujOTSSoBjGQP1BMsVnj}",
+    "KOTLIN_DAEMON_CLIENT_ALIVE_PATH": "/tmp/kotlin-daemon"
+  }
+}

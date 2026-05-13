@@ -121,7 +121,7 @@ server:
   port: ${BACKEND_PORT}
 snail-job:
   server:
-    host: 127.0.0.1
+    host: ${SNAILJOB_SERVER_HOST}
     port: ${SNAILJOB_SERVER_PORT}
   namespace: ${SNAILJOB_NAMESPACE_ID}
   group: ${SNAILJOB_GROUP_NAME}

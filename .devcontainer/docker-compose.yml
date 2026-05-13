@@ -1,0 +1,84 @@
+name: crystalframework-devc
+services:
+  dev-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/crystalframework:cached
+    command: sleep infinity
+    networks:
+      - devnet
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - devnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.2
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - devnet
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  snailjob:
+    build:
+      context: ../docker/dev/snail-job
+      dockerfile: Dockerfile
+    environment:
+      SNAILJOB_DATASOURCE_HOST: ${POSTGRES_HOST}
+      SNAILJOB_DATASOURCE_PORT: ${POSTGRES_PORT}
+      SNAILJOB_DATASOURCE_DATABASE: ${POSTGRES_DATABASE}
+      SNAILJOB_DATASOURCE_USERNAME: ${POSTGRES_USERNAME}
+      SNAILJOB_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${SNAILJOB_SERVER_WEB_PORT}:8080"
+      - "${SNAILJOB_SERVER_PORT}:17888"
+    volumes:
+      - ../docker/dev/config/snail-job:/app/config:ro
+    networks:
+      - devnet
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  devnet:
+    driver: bridge
