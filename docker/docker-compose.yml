@@ -1,10 +1,8 @@
 name: crystalframework
 services:
   postgres:
+    image: postgres:15
     container_name: crystalframework-postgres
-    build:
-      context: ./postgres
-      dockerfile: Dockerfile
     environment:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -125,8 +123,10 @@ services:
     networks:
       - crystalframework_network
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
     container_name: crystalframework-frontend

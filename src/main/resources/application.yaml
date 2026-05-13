@@ -100,6 +100,7 @@ crystalframework:
 logging:
   level:
     root: info
+    org.flywaydb: info
     org.springframework.security: info
     org.springframework.web: info
     org.springframework.transaction: info
