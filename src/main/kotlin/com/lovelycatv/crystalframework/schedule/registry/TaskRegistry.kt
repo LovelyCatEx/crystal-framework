@@ -54,13 +54,4 @@ class TaskRegistry {
     fun contains(name: String): Boolean {
         return tasks.containsKey(name)
     }
-
-    companion object {
-        /**
-         * Get task name from a ScheduledTask instance.
-         */
-        fun getTaskName(task: ScheduledTask): String {
-            return ScheduleTaskDefinition.from(task).name
-        }
-    }
 }

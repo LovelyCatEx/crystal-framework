@@ -27,9 +27,6 @@ class CheckAndClearUnrelatedPermissionsTask(
     private val logger = LoggerFactory.getLogger(CheckAndClearUnrelatedPermissionsTask::class.java)
 
     override suspend fun execute(context: TaskExecutionContext): TaskResult {
-        val taskName = TaskRegistry.getTaskName(this)
-        logger.info("[$taskName] Starting execution, executionId: ${context.executionId}")
-
         val allPermissions = userPermissionService
             .getRepository()
             .findAll()
@@ -57,7 +54,8 @@ class CheckAndClearUnrelatedPermissionsTask(
         }
 
         val message = "Removed ${toBeRemovedPermissions.size} unrelated permissions"
-        logger.info("[$taskName] $message")
+
+        logger.info(message)
 
         return TaskResult.Success(message = message, data = toBeRemovedPermissions)
     }
