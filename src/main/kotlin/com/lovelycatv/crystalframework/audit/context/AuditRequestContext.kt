@@ -59,6 +59,14 @@ object AuditRequestContext {
     }
 
     /**
+     * Retrieve the snapshot from a reactor [ContextView]. Use this from reactive
+     * operators like [Mono.deferContextual] where a coroutine context is not available.
+     */
+    fun from(ctx: reactor.util.context.ContextView): AuditRequestInfo? {
+        return if (ctx.hasKey(KEY)) ctx.get(KEY) else null
+    }
+
+    /**
      * Attach [info] to [exchange] and produce a reactor `Context` transformer that
      * also writes the same value into the reactor context. Intended for the capture
      * filter only.

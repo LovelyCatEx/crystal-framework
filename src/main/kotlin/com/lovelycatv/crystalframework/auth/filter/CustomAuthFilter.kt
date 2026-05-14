@@ -9,6 +9,7 @@ package com.lovelycatv.crystalframework.auth.filter
 
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
+import com.lovelycatv.crystalframework.shared.utils.reactor.contextMerge
 import com.lovelycatv.vertex.log.logger
 import io.jsonwebtoken.ExpiredJwtException
 import kotlinx.coroutines.reactor.mono
@@ -92,9 +93,9 @@ class CustomAuthFilter(
                     it
                 )
 
-                chain.filter(exchange).contextWrite {
+                chain.filter(exchange).contextMerge(
                     ReactiveSecurityContextHolder.withAuthentication(token)
-                }
+                )
             }
         } else {
             chain.filter(exchange)

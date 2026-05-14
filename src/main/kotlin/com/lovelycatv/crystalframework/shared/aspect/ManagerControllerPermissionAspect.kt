@@ -1,9 +1,8 @@
 package com.lovelycatv.crystalframework.shared.aspect
 
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
+import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.runBlocking
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -19,7 +18,7 @@ import reactor.core.publisher.Mono
 
 @Aspect
 @Component
-@Order(1)
+@Order(GlobalConstants.AspectPriority.MANAGER_CONTROLLER_PERMISSION_CHECK)
 class ManagerControllerPermissionAspect {
     private val logger = logger()
 
@@ -62,6 +61,7 @@ class ManagerControllerPermissionAspect {
                     )
                 }
 
+                @Suppress("UNCHECKED_CAST")
                 joinPoint.proceed() as Mono<Any>
             }
     }

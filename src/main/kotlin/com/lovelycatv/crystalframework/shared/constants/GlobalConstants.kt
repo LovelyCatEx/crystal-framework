@@ -13,6 +13,13 @@ object GlobalConstants {
         // After AuthFilter
         const val SYSTEM_MAINTENANCE_GUARD = Ordered.LOWEST_PRECEDENCE - 1000
 
-        const val AUDIT_FILTER = Ordered.HIGHEST_PRECEDENCE
+        // After LoggerFilter
+        const val AUDIT_FILTER = LOGGER_FILTER + 1000
+    }
+
+    object AspectPriority {
+        const val MANAGER_CONTROLLER_AUDIT = 0
+
+        const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
     }
 }
