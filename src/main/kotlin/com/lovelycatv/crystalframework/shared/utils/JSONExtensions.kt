@@ -20,6 +20,10 @@ fun Any?.toJSONString(objectMapper: ObjectMapper = com.lovelycatv.crystalframewo
     return if (this == null) "null" else objectMapper.writeValueAsString(this)
 }
 
+fun Any?.toPrettierJSONString(objectMapper: ObjectMapper = com.lovelycatv.crystalframework.shared.utils.objectMapper): String {
+    return if (this == null) "null" else objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
+}
+
 inline fun <reified T> String.parseObject(objectMapper: ObjectMapper = com.lovelycatv.crystalframework.shared.utils.objectMapper): T {
     return objectMapper.readValue(this, T::class.java)
 }

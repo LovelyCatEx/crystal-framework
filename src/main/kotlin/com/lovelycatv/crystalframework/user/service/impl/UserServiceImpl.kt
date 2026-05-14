@@ -69,7 +69,11 @@ class UserServiceImpl(
     }
 
     override fun findByUsername(username: String): Mono<UserDetails> {
-        val (realUsername, tenantIdStr) = username.split(":")
+        val (realUsername, tenantIdStr) = if (username.contains(":")) {
+            username.split(":")
+        } else {
+            listOf(username, "0")
+        }
 
         val tenantMono: Mono<TenantEntity> = getTenantMonoById(tenantIdStr.toLong())
 
