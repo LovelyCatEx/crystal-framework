@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.shared.aspect
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.runBlocking
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -14,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
 
 @Aspect
 @Component
@@ -22,7 +24,7 @@ class ManagerControllerPermissionAspect {
     private val logger = logger()
 
     @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
-    suspend fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
+    fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
         val controller = joinPoint.target
 
         // AopUtils.getTargetClass + AnnotationUtils.findAnnotation walk through CGLIB
@@ -50,18 +52,18 @@ class ManagerControllerPermissionAspect {
             return joinPoint.proceed()
         }
 
-        val authentication = ReactiveSecurityContextHolder
+        return ReactiveSecurityContextHolder
             .getContext()
             .mapNotNull { it.authentication }
-            .awaitSingle()
+            .flatMap { authentication ->
+                if (!hasAnyPermission(authentication, requiredPermissions)) {
+                    throw AccessDeniedException(
+                        "Access denied: Required any of permissions $requiredPermissions for this action"
+                    )
+                }
 
-        if (!hasAnyPermission(authentication, requiredPermissions)) {
-            throw AccessDeniedException(
-                "Access denied: Required any of permissions $requiredPermissions for method '$methodName'"
-            )
-        }
-
-        return joinPoint.proceed()
+                joinPoint.proceed() as Mono<Any>
+            }
     }
 
     private fun hasAnyPermission(
