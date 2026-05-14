@@ -53,18 +53,27 @@ class CustomAuthFilter(
                 ?: throw UnauthorizedException("Authorization header is missing")
         }
 
-        return if (authorization != null) {
-            val claims = try {
+        // fix: access unauthorized api with an invalid jwtKey will produce infinite loop.
+        val claims = if (authorization != null) {
+            try {
                 JwtUtil.parseToken(getJWTSignKey.invoke(), authorization)
             } catch (e: Exception) {
-                if (e is ExpiredJwtException) {
-                    throw UnauthorizedException("token expired")
+                if (!isUnauthorized) {
+                    if (e is ExpiredJwtException) {
+                        throw UnauthorizedException("token expired")
+                    } else {
+                        logger.error("unexpected token parse exception", e)
+                        throw UnauthorizedException("invalid token pattern")
+                    }
                 } else {
-                    logger.error("unexpected token parse exception", e)
-                    throw UnauthorizedException("invalid token pattern")
+                    null
                 }
             }
+        } else {
+            null
+        }
 
+        return if (authorization != null && claims != null) {
             val userId = claims["userId"]
                 ?.toString()
                 ?.toLong()
