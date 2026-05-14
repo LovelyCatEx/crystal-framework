@@ -11,6 +11,7 @@ import org.springframework.aop.support.AopUtils
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.annotation.Order
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
@@ -56,7 +57,7 @@ class ManagerControllerPermissionAspect {
             .mapNotNull { it.authentication }
             .flatMap { authentication ->
                 if (!hasAnyPermission(authentication, requiredPermissions)) {
-                    throw AccessDeniedException(
+                    throw AuthorizationDeniedException(
                         "Access denied: Required any of permissions $requiredPermissions for this action"
                     )
                 }
