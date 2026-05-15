@@ -35,7 +35,13 @@ export function ScriptEditorPage() {
         editorRef.current = editorInstance;
         monacoRef.current = monaco;
 
-        // 注册 Kotlin 代码提示
+        editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+            const code = editorInstance.getValue();
+            if (code) {
+                void checkCompilation(code);
+            }
+        });
+
         monaco.languages.registerCompletionItemProvider('kotlin', {
             triggerCharacters: ['.', ' '],
             provideCompletionItems: (model: unknown, position: unknown) => {
