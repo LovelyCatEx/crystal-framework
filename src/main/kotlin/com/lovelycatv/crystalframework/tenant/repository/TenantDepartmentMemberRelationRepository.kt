@@ -24,6 +24,8 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
         WHERE (:#{#departmentId == null} = true OR department_id = :departmentId)
         AND (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleType == null} = true OR role_type = :roleType)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -33,6 +35,8 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
         @Param("departmentId") departmentId: Long?,
         @Param("memberId") memberId: Long?,
         @Param("roleType") roleType: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantDepartmentMemberRelationEntity>
@@ -43,12 +47,16 @@ interface TenantDepartmentMemberRelationRepository : BaseRepository<TenantDepart
         WHERE (:#{#departmentId == null} = true OR department_id = :departmentId)
         AND (:#{#memberId == null} = true OR member_id = :memberId)
         AND (:#{#roleType == null} = true OR role_type = :roleType)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("departmentId") departmentId: Long?,
         @Param("memberId") memberId: Long?,
-        @Param("roleType") roleType: Int?
+        @Param("roleType") roleType: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     fun deleteByMemberIdIn(memberIds: Collection<Long>): Mono<Void>

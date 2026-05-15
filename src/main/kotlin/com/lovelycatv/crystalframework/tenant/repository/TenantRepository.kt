@@ -26,6 +26,8 @@ interface TenantRepository : BaseRepository<TenantEntity> {
             OR LOWER(address) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
         AND (:#{#status == null} = true OR status = :status)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -34,6 +36,8 @@ interface TenantRepository : BaseRepository<TenantEntity> {
     fun advanceSearch(
         @Param("keyword") keyword: String?,
         @Param("status") status: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantEntity>
@@ -50,11 +54,15 @@ interface TenantRepository : BaseRepository<TenantEntity> {
             OR LOWER(address) LIKE LOWER(CONCAT('%', :keyword, '%'))
         )
         AND (:#{#status == null} = true OR status = :status)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("status") status: Int?
+        @Param("status") status: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     @Query("SELECT COUNT(*) FROM tenants WHERE created_time >= :startTime AND created_time < :endTime")

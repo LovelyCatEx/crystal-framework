@@ -43,6 +43,8 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
            OR (LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#platform == null} = true OR platform = :platform)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -51,6 +53,8 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
     fun advanceSearch(
         keyword: String?,
         platform: Int?,
+        startTime: Long?,
+        endTime: Long?,
         limit: Int,
         offset: Int
     ): Flux<OAuthAccountEntity>
@@ -62,11 +66,15 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
            OR (LOWER(identifier) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(nickname) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#platform == null} = true OR platform = :platform)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         keyword: String?,
         platform: Int?,
+        startTime: Long?,
+        endTime: Long?,
     ): Mono<Long>
 
     fun findByPlatformAndIdentifier(platform: Int, identifier: String): Mono<OAuthAccountEntity>

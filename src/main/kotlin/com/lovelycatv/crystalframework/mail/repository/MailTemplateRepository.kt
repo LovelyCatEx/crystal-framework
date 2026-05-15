@@ -18,6 +18,8 @@ interface MailTemplateRepository : BaseRepository<MailTemplateEntity> {
         SELECT * FROM mail_templates 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#typeId == null} = true OR type_id = :typeId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -26,6 +28,8 @@ interface MailTemplateRepository : BaseRepository<MailTemplateEntity> {
     fun advanceSearch(
         @Param("keyword") keyword: String?,
         @Param("typeId") typeId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<MailTemplateEntity>
@@ -35,10 +39,14 @@ interface MailTemplateRepository : BaseRepository<MailTemplateEntity> {
         SELECT COUNT(*) FROM mail_templates 
         WHERE (:#{#keyword == null} = true OR LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#typeId == null} = true OR type_id = :typeId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("typeId") typeId: Long?
+        @Param("typeId") typeId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 }

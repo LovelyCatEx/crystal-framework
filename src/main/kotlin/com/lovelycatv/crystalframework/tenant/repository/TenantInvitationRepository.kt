@@ -27,6 +27,8 @@ interface TenantInvitationRepository : BaseRepository<TenantInvitationEntity> {
             OR CAST(id AS TEXT) = :keyword 
             OR invitation_code = :keyword)
         AND tenant_id = :tenantId
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -35,6 +37,8 @@ interface TenantInvitationRepository : BaseRepository<TenantInvitationEntity> {
     fun advanceSearch(
         @Param("keyword") keyword: String?,
         @Param("tenantId") tenantId: Long,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantInvitationEntity>
@@ -46,11 +50,15 @@ interface TenantInvitationRepository : BaseRepository<TenantInvitationEntity> {
             OR CAST(id AS TEXT) = :keyword 
             OR invitation_code = :keyword)
         AND tenant_id = :tenantId
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("tenantId") tenantId: Long
+        @Param("tenantId") tenantId: Long,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     fun getByInvitationCode(invitationCode: String): Mono<TenantInvitationEntity>

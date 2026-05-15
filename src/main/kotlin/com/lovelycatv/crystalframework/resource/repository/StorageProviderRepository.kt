@@ -16,6 +16,8 @@ interface StorageProviderRepository : BaseRepository<StorageProviderEntity> {
            OR (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -24,6 +26,8 @@ interface StorageProviderRepository : BaseRepository<StorageProviderEntity> {
     fun advanceSearch(
         keyword: String?,
         type: Int?,
+        startTime: Long?,
+        endTime: Long?,
         limit: Int,
         offset: Int
     ): Flux<StorageProviderEntity>
@@ -35,11 +39,15 @@ interface StorageProviderRepository : BaseRepository<StorageProviderEntity> {
            OR (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         keyword: String?,
         type: Int?,
+        startTime: Long?,
+        endTime: Long?,
     ): Mono<Long>
 
     fun findAllByActive(active: Boolean): Flux<StorageProviderEntity>

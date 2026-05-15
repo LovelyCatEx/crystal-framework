@@ -9,7 +9,7 @@ import React, {
     useRef,
     useState
 } from "react";
-import {Button, Card, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
+import {Button, Card, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
 import {DeleteOutlined, EditOutlined, ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
@@ -26,6 +26,9 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     editModalFormChildren?: React.ReactNode | JSX.Element | ((editingItem: ENTITY | null) => React.ReactNode | JSX.Element);
     editModalInitialValues?: object;
     showActionBar?: boolean;
+    readonlyMode?: boolean;
+    showRowActions?: boolean;
+    showTimeRangeFilter?: boolean;
 }
 
 export interface ManagerPageContainerRef extends EntityTableRef {
@@ -59,6 +62,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     // Selector
     const [selectedEntities, setSelectedEntities] = useState<ENTITY[]>([]);
     const [batchOperationType, setBatchOperationType] = useState(0);
+
+    // Time range filter
+    const [timeRange, setTimeRange] = useState<[number, number] | null>(null);
 
     const handleOnBatchOperationClick = useCallback(() => {
         if (batchOperationType === 1) {
@@ -155,10 +161,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     });
 
     const showActionBar = props.showActionBar !== false;
+    const readonlyMode = props.readonlyMode === true;
+    const showRowActions = props.showRowActions !== false;
 
     const { className, style, ...restProps } = props;
 
     const builtinTablePrefixActions = useMemo(() => {
+        if (readonlyMode) return restProps.tablePrefixActions ?? [];
         if (isCustomTableSelector) return restProps.tablePrefixActions;
         return [
             {
@@ -184,24 +193,51 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             },
             ...(restProps.tablePrefixActions ?? []),
         ];
-    }, [isCustomTableSelector, restProps.tablePrefixActions, t, handleOnBatchOperationClick]);
+    }, [readonlyMode, isCustomTableSelector, restProps.tablePrefixActions, t, handleOnBatchOperationClick]);
+
+    const showTimeRangeFilter = props.showTimeRangeFilter !== false;
 
     const builtinTableActions = useMemo(() => {
-        return [
+        const actions = [
             ...(restProps.tableActions ?? []),
-            {
-                label: t('components.managerPageContainer.action'),
-                children: <Button
-                    type="primary"
-                    onClick={() => entityTableRef.current?.refreshData()}
-                >
-                    {t('components.managerPageContainer.refresh')}
-                </Button>
-            },
         ];
-    }, [restProps.tableActions, t]);
+
+        if (showTimeRangeFilter) {
+            actions.push({
+                label: <span>{t('components.managerPageContainer.timeRange')}</span>,
+                children: <DatePicker.RangePicker
+                    showTime
+                    allowClear
+                    onChange={(dates) => {
+                        if (dates && dates[0] && dates[1]) {
+                            setTimeRange([dates[0].valueOf(), dates[1].valueOf()]);
+                        } else {
+                            setTimeRange(null);
+                        }
+                        setTimeout(() => entityTableRef.current?.refreshData({ resetPage: true }), 0);
+                    }}
+                />,
+                queryParamsProvider() {
+                    return timeRange ? { startTime: timeRange[0], endTime: timeRange[1] } : {};
+                }
+            });
+        }
+
+        actions.push({
+            label: t('components.managerPageContainer.action'),
+            children: <Button
+                type="primary"
+                onClick={() => entityTableRef.current?.refreshData()}
+            >
+                {t('components.managerPageContainer.refresh')}
+            </Button>
+        });
+
+        return actions;
+    }, [restProps.tableActions, t, showTimeRangeFilter, timeRange]);
 
     const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
+        if (readonlyMode) return { type: 'disabled' };
         if (isCustomTableSelector) return restProps.tableSelection;
         return {
             type: 'checkbox',
@@ -209,7 +245,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 setSelectedEntities(entities);
             }
         };
-    }, [isCustomTableSelector, restProps.tableSelection]);
+    }, [readonlyMode, isCustomTableSelector, restProps.tableSelection]);
 
     return (
         <div className={className} style={style}>
@@ -220,15 +256,17 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     titleActions={<>
                         {restProps.titleActions}
 
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined/>}
-                            size="large"
-                            className="rounded-xl h-12 shadow-lg"
-                            onClick={() => openModal()}
-                        >
-                            {t('components.managerPageContainer.addNew', { entityName: restProps.entityName })}
-                        </Button>
+                        {!readonlyMode && (
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined/>}
+                                size="large"
+                                className="rounded-xl h-12 shadow-lg"
+                                onClick={() => openModal()}
+                            >
+                                {t('components.managerPageContainer.addNew', { entityName: restProps.entityName })}
+                            </Button>
+                        )}
                     </>}
                 />
             )}
@@ -241,20 +279,22 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     query={restProps.query}
                     tablePrefixActions={builtinTablePrefixActions}
                     tableActions={builtinTableActions}
-                    tableRowActionsRender={(record) => (
+                    tableRowActionsRender={showRowActions ? (record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}
-                            <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                            <Popconfirm 
-                                title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })} 
-                                onConfirm={() => deleteModel(record.id)} 
-                                okText={t('components.managerPageContainer.confirm')} 
-                                cancelText={t('components.managerPageContainer.cancel')}
-                            >
-                                <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-                            </Popconfirm>
+                            {!readonlyMode && <>
+                                <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
+                                <Popconfirm 
+                                    title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })} 
+                                    onConfirm={() => deleteModel(record.id)} 
+                                    okText={t('components.managerPageContainer.confirm')} 
+                                    cancelText={t('components.managerPageContainer.cancel')}
+                                >
+                                    <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+                                </Popconfirm>
+                            </>}
                         </Space>
-                    )}
+                    ) : undefined}
                     tableSelection={builtinTableSelection}
                 />
             </Card>

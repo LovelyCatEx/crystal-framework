@@ -42,10 +42,23 @@ interface BaseManagerService<
                 doAdvanceQuery.invoke(dto, limit, offset)
             } else {
                 // Simple pagination
-                val total = this.getRepository().count().awaitFirstOrNull() ?: 0
-                val records = this.getRepository()
-                    .findAllByPage(limit, offset)
-                    .awaitListWithTimeout()
+                val hasTimeRange = dto.startTime != null && dto.endTime != null
+
+                val total = if (hasTimeRange) {
+                    this.getRepository().countWithTimeRange(dto.startTime!!, dto.endTime!!).awaitFirstOrNull() ?: 0
+                } else {
+                    this.getRepository().count().awaitFirstOrNull() ?: 0
+                }
+
+                val records = if (hasTimeRange) {
+                    this.getRepository()
+                        .findAllByPageWithTimeRange(dto.startTime!!, dto.endTime!!, limit, offset)
+                        .awaitListWithTimeout()
+                } else {
+                    this.getRepository()
+                        .findAllByPage(limit, offset)
+                        .awaitListWithTimeout()
+                }
 
                 dto.toPaginatedResponseData(
                     total = total,

@@ -1260,6 +1260,29 @@ export const zhCN = {
       title: '仪表盘',
       subtitle: '在此处查看系统基本信息'
     },
+    auditLogManager: {
+      title: '审计日志',
+      subtitle: '查看系统操作审计日志',
+      filter: {
+        action: '操作类型',
+        all: '全部',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户ID',
+        username: '用户名',
+        usernamePlaceholder: '输入用户名',
+        path: '操作路径',
+        pathPlaceholder: '输入路径',
+        remoteIp: 'IP地址',
+        remoteIpPlaceholder: '输入IP'
+      },
+      actionType: {
+        unknown: '未知',
+        create: '创建',
+        read: '读取',
+        update: '更新',
+        delete: '删除'
+      }
+    },
     systemSettingsManager: {
       title: '系统设置',
       subtitle: '管理系统配置信息',
@@ -1487,7 +1510,8 @@ export const zhCN = {
       batchDeleteFailed: '批量删除失败',
       execute: '执行',
       action: '操作',
-      refresh: '刷新'
+      refresh: '刷新',
+      timeRange: '时间范围'
     },
 
     protectedController: {
@@ -1664,6 +1688,15 @@ export const zhCN = {
         allowMultiple: '允许多模板',
         yes: '是',
         no: '否'
+      },
+      auditLog: {
+        userInfo: '操作用户',
+        action: '操作类型',
+        resourceType: '资源类型',
+        request: '请求信息',
+        status: '状态',
+        success: '成功',
+        failed: '失败'
       }
     },
     entityTable: {
@@ -1894,7 +1927,8 @@ export const zhCN = {
     mailTemplateType: '邮件模板类型',
     mailTemplateCategory: '邮件模板分类',
     myTenantMember: '组织成员',
-    myTenantRole: '角色'
+    myTenantRole: '角色',
+    auditLog: '审计日志'
   },
 
   menu: {
@@ -1936,6 +1970,7 @@ export const zhCN = {
       mailTemplates: '邮件模板管理',
       mailTemplateTypes: '邮件模板类型',
       mailTemplateCategories: '邮件模板分类',
+      auditLogs: '审计日志',
       settings: '系统设置'
     },
 

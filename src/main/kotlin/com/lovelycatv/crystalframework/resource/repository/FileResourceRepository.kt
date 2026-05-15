@@ -19,6 +19,8 @@ interface FileResourceRepository : BaseRepository<FileResourceEntity> {
            OR LOWER(md5) LIKE LOWER(CONCAT('%', :keyword, '%'))
            OR LOWER(object_key) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -27,6 +29,8 @@ interface FileResourceRepository : BaseRepository<FileResourceEntity> {
     fun advanceSearch(
         keyword: String?,
         type: Int?,
+        startTime: Long?,
+        endTime: Long?,
         limit: Int,
         offset: Int
     ): Flux<FileResourceEntity>
@@ -39,11 +43,15 @@ interface FileResourceRepository : BaseRepository<FileResourceEntity> {
            OR LOWER(md5) LIKE LOWER(CONCAT('%', :keyword, '%'))
            OR LOWER(object_key) LIKE LOWER(CONCAT('%', :keyword, '%'))))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         keyword: String?,
         type: Int?,
+        startTime: Long?,
+        endTime: Long?,
     ): Mono<Long>
 
     @Query("SELECT COUNT(*) FROM file_resources WHERE created_time >= :startTime AND created_time < :endTime")

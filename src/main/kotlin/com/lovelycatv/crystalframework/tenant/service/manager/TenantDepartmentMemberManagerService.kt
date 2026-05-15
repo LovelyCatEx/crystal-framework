@@ -32,13 +32,17 @@ interface TenantDepartmentMemberManagerService : BaseTenantResourceManagerServic
                 val total = getRepository().countAdvanceSearch(
                     readDto.departmentId,
                     readDto.memberId,
-                    readDto.roleType
+                    readDto.roleType,
+                    readDto.startTime,
+                    readDto.endTime
                 ).awaitFirstOrNull() ?: 0
 
                 val records = getRepository().advanceSearch(
                     readDto.departmentId,
                     readDto.memberId,
                     readDto.roleType,
+                    readDto.startTime,
+                    readDto.endTime,
                     limit,
                     offset
                 ).awaitListWithTimeout()
