@@ -17,6 +17,7 @@ import {
     updateThemeCSSVariables
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
+import {ScriptEditorPage} from "@/pages/manager/script/ScriptEditorPage.tsx";
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>(() => {
@@ -67,6 +68,7 @@ function App() {
                   />
                   <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
                   <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
+                  <Route path="/editor" element={<ScriptEditorPage />} />
                   <Route path="*" element={<NotFoundPage />} />
               </Routes>
           </MaintenanceGuard>
