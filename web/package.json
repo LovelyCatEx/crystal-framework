@@ -10,16 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "6.x",
-    "@codemirror/lang-java": "^6.0.1",
-    "@codemirror/theme-one-dark": "^6.1.2",
-    "@uiw/react-codemirror": "^4.23.0",
-    "antd": "^6.3.0",
+    "@ant-design/icons": "~6.2.3",
+    "@monaco-editor/react": "^4.7.0",
+    "antd": "^6.4.2",
     "axios": "^1.13.5",
     "dayjs": "^1.11.19",
     "i18next": "^25.8.18",
     "i18next-browser-languagedetector": "^8.2.1",
-    "kotlin-ts": "^0.0.7",
     "lucide-react": "^0.568.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -32,7 +29,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.4.24",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv": "^17.3.1",
@@ -44,6 +41,6 @@
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^8.0.12"
   }
 }

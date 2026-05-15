@@ -4,9 +4,6 @@ import './index.css'
 import './i18n'
 import App from "./App.tsx";
 import {BrowserRouter} from "react-router-dom";
-import {registerAllKotlinModules} from "kotlin-ts";
-
-registerAllKotlinModules()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -95,7 +95,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 ...([
                         ...(props.tableActions ?? []),
                         ...(props.tablePrefixActions ?? [])
-                    ].mapNotNull((action) => action.queryParamsProvider?.())
+                    ].map((action) => action.queryParamsProvider?.()).filter((v) => v != null)
                 )
             )
         }).then((res) => {
