@@ -16,17 +16,27 @@ export class LspClient {
 
     connect(url: string): Promise<void> {
         return new Promise((resolve, reject) => {
+            console.log('[LSP] Connecting to:', url);
             this.ws = new WebSocket(url);
             this.ws.onopen = () => {
+                console.log('[LSP] WebSocket connected');
                 this.initialize().then(() => {
                     this.initialized = true;
+                    console.log('[LSP] Initialized successfully');
                     resolve();
                 });
             };
-            this.ws.onerror = () => reject(new Error('WebSocket connection failed'));
-            this.ws.onmessage = (event) => this.handleMessage(event.data as string);
-            this.ws.onclose = () => {
+            this.ws.onerror = (e) => {
+                console.error('[LSP] WebSocket error:', e);
+                reject(new Error('WebSocket connection failed'));
+            };
+            this.ws.onclose = (e) => {
+                console.log('[LSP] WebSocket closed:', e.code, e.reason);
                 this.initialized = false;
+            };
+            this.ws.onmessage = (event) => {
+                console.log('[LSP] ← Received:', (event.data as string).substring(0, 200));
+                this.handleMessage(event.data as string);
             };
         });
     }
@@ -122,7 +132,11 @@ export class LspClient {
 
     private send(message: object) {
         if (this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
+            const text = JSON.stringify(message);
+            console.log('[LSP] → Sending:', text.substring(0, 200));
+            this.ws.send(text);
+        } else {
+            console.warn('[LSP] Cannot send, WebSocket not open. State:', this.ws?.readyState);
         }
     }
 
