@@ -1,8 +1,9 @@
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {Editor, type Monaco, type OnMount} from "@monaco-editor/react";
 import {Button, Card, Space, Tag} from "antd";
-import {CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined} from "@ant-design/icons";
+import {CheckCircleOutlined, CloseCircleOutlined, LinkOutlined, LoadingOutlined} from "@ant-design/icons";
 import {doPost} from "@/api/system-request.ts";
+import {LspClient, type LspCompletionItem, type LspDiagnosticsParams} from "./lsp-client.ts";
 
 interface CompileDiagnostic {
     severity: string;
@@ -27,14 +28,61 @@ export function ScriptEditorPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
     const monacoRef = useRef<Monaco | null>(null);
+    const lspClientRef = useRef<LspClient | null>(null);
     const [compiling, setCompiling] = useState(false);
     const [lastResult, setLastResult] = useState<CompileResult | null>(null);
+    const [lspConnected, setLspConnected] = useState(false);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const documentOpened = useRef(false);
+
+    // Connect to LSP on mount
+    useEffect(() => {
+        const client = new LspClient();
+        lspClientRef.current = client;
+
+        const wsUrl = `ws://${window.location.hostname}:${window.location.port || '8080'}/ws/lsp/kotlin`;
+
+        client.connect(wsUrl).then(() => {
+            setLspConnected(true);
+            // Open the document
+            client.openDocument(DEFAULT_CODE);
+            documentOpened.current = true;
+        }).catch(() => {
+            setLspConnected(false);
+        });
+
+        // Handle diagnostics from LSP
+        client.setOnDiagnostics((params: LspDiagnosticsParams) => {
+            if (monacoRef.current && editorRef.current) {
+                const model = editorRef.current.getModel();
+                if (model) {
+                    const markers = params.diagnostics.map((d) => ({
+                        severity: d.severity === 1
+                            ? monacoRef.current!.MarkerSeverity.Error
+                            : d.severity === 2
+                                ? monacoRef.current!.MarkerSeverity.Warning
+                                : monacoRef.current!.MarkerSeverity.Info,
+                        message: d.message,
+                        startLineNumber: d.range.start.line + 1,
+                        startColumn: d.range.start.character + 1,
+                        endLineNumber: d.range.end.line + 1,
+                        endColumn: d.range.end.character + 1,
+                    }));
+                    monacoRef.current!.editor.setModelMarkers(model, 'kotlin-lsp', markers);
+                }
+            }
+        });
+
+        return () => {
+            client.disconnect();
+        };
+    }, []);
 
     const handleEditorMount: OnMount = (editorInstance, monaco) => {
         editorRef.current = editorInstance;
         monacoRef.current = monaco;
 
+        // Ctrl+S → compile check
         editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
             const code = editorInstance.getValue();
             if (code) {
@@ -42,11 +90,12 @@ export function ScriptEditorPage() {
             }
         });
 
+        // Register LSP-backed completion provider
         monaco.languages.registerCompletionItemProvider('kotlin', {
-            triggerCharacters: ['.', ' '],
-            provideCompletionItems: (model: unknown, position: unknown) => {
-                const m = model as { getWordUntilPosition: (pos: unknown) => { startColumn: number; endColumn: number } };
+            triggerCharacters: ['.', ' ', '('],
+            provideCompletionItems: async (model: unknown, position: unknown) => {
                 const p = position as { lineNumber: number; column: number };
+                const m = model as { getWordUntilPosition: (pos: unknown) => { startColumn: number; endColumn: number } };
                 const word = m.getWordUntilPosition(position);
                 const range = {
                     startLineNumber: p.lineNumber,
@@ -55,60 +104,27 @@ export function ScriptEditorPage() {
                     endColumn: word.endColumn,
                 };
 
-                const keywords = [
-                    'fun', 'val', 'var', 'class', 'object', 'interface', 'abstract', 'open',
-                    'override', 'private', 'protected', 'public', 'internal',
-                    'if', 'else', 'when', 'for', 'while', 'do', 'return', 'break', 'continue',
-                    'try', 'catch', 'finally', 'throw', 'import', 'package',
-                    'data', 'sealed', 'enum', 'companion', 'suspend', 'inline', 'crossinline',
-                    'noinline', 'reified', 'typealias', 'lateinit', 'by', 'lazy',
-                    'null', 'true', 'false', 'this', 'super', 'is', 'as', 'in', 'out',
-                ];
+                const client = lspClientRef.current;
+                if (!client?.isConnected()) {
+                    return { suggestions: getStaticSuggestions(monaco, range) };
+                }
 
-                const builtins = [
-                    { label: 'println', insertText: 'println(${1})', detail: 'fun println(message: Any?)' },
-                    { label: 'print', insertText: 'print(${1})', detail: 'fun print(message: Any?)' },
-                    { label: 'listOf', insertText: 'listOf(${1})', detail: 'fun <T> listOf(vararg elements: T): List<T>' },
-                    { label: 'mutableListOf', insertText: 'mutableListOf(${1})', detail: 'fun <T> mutableListOf(vararg elements: T): MutableList<T>' },
-                    { label: 'mapOf', insertText: 'mapOf(${1})', detail: 'fun <K, V> mapOf(vararg pairs: Pair<K, V>): Map<K, V>' },
-                    { label: 'mutableMapOf', insertText: 'mutableMapOf(${1})', detail: 'fun <K, V> mutableMapOf(vararg pairs: Pair<K, V>): MutableMap<K, V>' },
-                    { label: 'setOf', insertText: 'setOf(${1})', detail: 'fun <T> setOf(vararg elements: T): Set<T>' },
-                    { label: 'arrayOf', insertText: 'arrayOf(${1})', detail: 'fun <T> arrayOf(vararg elements: T): Array<T>' },
-                    { label: 'require', insertText: 'require(${1})', detail: 'fun require(value: Boolean)' },
-                    { label: 'check', insertText: 'check(${1})', detail: 'fun check(value: Boolean)' },
-                    { label: 'repeat', insertText: 'repeat(${1:times}) {\n\t${2}\n}', detail: 'fun repeat(times: Int, action: (Int) -> Unit)' },
-                    { label: 'TODO', insertText: 'TODO("${1}")', detail: 'fun TODO(reason: String): Nothing' },
-                    { label: 'run', insertText: 'run {\n\t${1}\n}', detail: 'fun <R> run(block: () -> R): R' },
-                    { label: 'let', insertText: 'let { ${1:it} ->\n\t${2}\n}', detail: 'fun <T, R> T.let(block: (T) -> R): R' },
-                    { label: 'also', insertText: 'also { ${1:it} ->\n\t${2}\n}', detail: 'fun <T> T.also(block: (T) -> Unit): T' },
-                    { label: 'apply', insertText: 'apply {\n\t${1}\n}', detail: 'fun <T> T.apply(block: T.() -> Unit): T' },
-                    { label: 'with', insertText: 'with(${1}) {\n\t${2}\n}', detail: 'fun <T, R> with(receiver: T, block: T.() -> R): R' },
-                    { label: 'String', insertText: 'String', detail: 'class String' },
-                    { label: 'Int', insertText: 'Int', detail: 'class Int' },
-                    { label: 'Long', insertText: 'Long', detail: 'class Long' },
-                    { label: 'Double', insertText: 'Double', detail: 'class Double' },
-                    { label: 'Boolean', insertText: 'Boolean', detail: 'class Boolean' },
-                    { label: 'List', insertText: 'List<${1}>', detail: 'interface List<out E>' },
-                    { label: 'Map', insertText: 'Map<${1}, ${2}>', detail: 'interface Map<K, out V>' },
-                    { label: 'Set', insertText: 'Set<${1}>', detail: 'interface Set<out E>' },
-                ];
+                const items = await client.getCompletions(p.lineNumber, p.column);
 
-                const suggestions = [
-                    ...keywords.map((kw) => ({
-                        label: kw,
-                        kind: monaco.languages.CompletionItemKind.Keyword,
-                        insertText: kw,
-                        range,
-                    })),
-                    ...builtins.map((b) => ({
-                        label: b.label,
-                        kind: monaco.languages.CompletionItemKind.Function,
-                        insertText: b.insertText,
-                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                        detail: b.detail,
-                        range,
-                    })),
-                ];
+                if (items.length === 0) {
+                    return { suggestions: getStaticSuggestions(monaco, range) };
+                }
+
+                const suggestions = items.map((item: LspCompletionItem) => ({
+                    label: item.label,
+                    kind: mapCompletionKind(monaco, item.kind),
+                    insertText: item.insertText ?? item.label,
+                    insertTextRules: item.insertTextFormat === 2
+                        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                        : undefined,
+                    detail: item.detail,
+                    range,
+                }));
 
                 return { suggestions };
             }
@@ -120,11 +136,12 @@ export function ScriptEditorPage() {
 
         setCompiling(true);
         try {
-            const response = await doPost<CompileResult>('/api/script/compile-check', {sourceCode: code}, {'Content-Type': 'application/json'});
+            const response = await doPost<CompileResult>('/api/v1/script/compile-check', {sourceCode: code}, {'Content-Type': 'application/json'});
             const result = response.data!;
             setLastResult(result);
 
-            if (monacoRef.current && editorRef.current) {
+            // If LSP is not connected, use compile-check results for markers
+            if (!lspClientRef.current?.isConnected() && monacoRef.current && editorRef.current) {
                 const model = editorRef.current.getModel();
                 if (model) {
                     const markers = result.diagnostics.map((d) => ({
@@ -148,6 +165,12 @@ export function ScriptEditorPage() {
     }, []);
 
     const handleEditorChange = useCallback((value: string | undefined) => {
+        // Update LSP document
+        if (value && lspClientRef.current?.isConnected() && documentOpened.current) {
+            lspClientRef.current.updateDocument(value);
+        }
+
+        // Debounce compile check
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
@@ -170,8 +193,15 @@ export function ScriptEditorPage() {
             <div className="mb-4 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold">Kotlin Script Editor</h1>
+                    <p className="text-gray-500 mt-1">编写 Kotlin 代码，实时检查编译状态</p>
                 </div>
                 <Space>
+                    <Tag
+                        color={lspConnected ? 'green' : 'default'}
+                        icon={<LinkOutlined />}
+                    >
+                        {lspConnected ? 'LSP 已连接' : 'LSP 未连接'}
+                    </Tag>
                     {lastResult && (
                         <Tag
                             color={lastResult.success ? 'green' : 'red'}
@@ -202,9 +232,49 @@ export function ScriptEditorPage() {
                         automaticLayout: true,
                         tabSize: 4,
                         wordWrap: 'on',
+                        quickSuggestions: true,
+                        suggestOnTriggerCharacters: true,
                     }}
                 />
             </Card>
         </div>
     );
+}
+
+function mapCompletionKind(monaco: Monaco, kind?: number) {
+    // LSP CompletionItemKind → Monaco CompletionItemKind
+    switch (kind) {
+        case 1: return monaco.languages.CompletionItemKind.Text;
+        case 2: return monaco.languages.CompletionItemKind.Method;
+        case 3: return monaco.languages.CompletionItemKind.Function;
+        case 4: return monaco.languages.CompletionItemKind.Constructor;
+        case 5: return monaco.languages.CompletionItemKind.Field;
+        case 6: return monaco.languages.CompletionItemKind.Variable;
+        case 7: return monaco.languages.CompletionItemKind.Class;
+        case 8: return monaco.languages.CompletionItemKind.Interface;
+        case 9: return monaco.languages.CompletionItemKind.Module;
+        case 10: return monaco.languages.CompletionItemKind.Property;
+        case 13: return monaco.languages.CompletionItemKind.Enum;
+        case 14: return monaco.languages.CompletionItemKind.Keyword;
+        case 15: return monaco.languages.CompletionItemKind.Snippet;
+        default: return monaco.languages.CompletionItemKind.Text;
+    }
+}
+
+function getStaticSuggestions(monaco: Monaco, range: { startLineNumber: number; endLineNumber: number; startColumn: number; endColumn: number }) {
+    const keywords = [
+        'fun', 'val', 'var', 'class', 'object', 'interface', 'abstract', 'open',
+        'override', 'private', 'protected', 'public', 'internal',
+        'if', 'else', 'when', 'for', 'while', 'do', 'return', 'break', 'continue',
+        'try', 'catch', 'finally', 'throw', 'import', 'package',
+        'data', 'sealed', 'enum', 'companion', 'suspend', 'inline',
+        'null', 'true', 'false', 'this', 'super', 'is', 'as', 'in',
+    ];
+
+    return keywords.map((kw) => ({
+        label: kw,
+        kind: monaco.languages.CompletionItemKind.Keyword,
+        insertText: kw,
+        range,
+    }));
 }

@@ -38,6 +38,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/raw/, ''),
         },
+        '/ws': {
+          target: apiDomain.replace('http', 'ws'),
+          changeOrigin: true,
+          ws: true,
+        },
       }
     }
   }

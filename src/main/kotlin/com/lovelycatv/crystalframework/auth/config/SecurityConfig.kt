@@ -150,7 +150,7 @@ class SecurityConfig(
             }
 
             authorizeExchangeSpec
-                .pathMatchers(*(listOf("/login/oauth2/code/**") + unauthorizedPathPatterns.map { it.patternString }).toTypedArray())
+                .pathMatchers(*(listOf("/login/oauth2/code/**", "/ws/**") + unauthorizedPathPatterns.map { it.patternString }).toTypedArray())
                 .permitAll()
                 .anyExchange()
                 .authenticated()
