@@ -23,6 +23,8 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
         SELECT * FROM tenant_role_permission_relations 
         WHERE (:#{#roleId == null} = true OR role_id = :roleId)
         AND (:#{#permissionId == null} = true OR permission_id = :permissionId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -31,6 +33,8 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
     fun advanceSearch(
         @Param("roleId") roleId: Long?,
         @Param("permissionId") permissionId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantRolePermissionRelationEntity>
@@ -40,11 +44,15 @@ interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePerm
         SELECT COUNT(*) FROM tenant_role_permission_relations 
         WHERE (:#{#roleId == null} = true OR role_id = :roleId)
         AND (:#{#permissionId == null} = true OR permission_id = :permissionId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("roleId") roleId: Long?,
-        @Param("permissionId") permissionId: Long?
+        @Param("permissionId") permissionId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?
     ): Mono<Long>
 
     fun deleteByPermissionIdIn(permissionIds: Collection<Long>): Mono<Void>

@@ -18,6 +18,8 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -26,6 +28,8 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
     fun advanceSearch(
         @Param("keyword") keyword: String?,
         @Param("type") type: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantPermissionEntity>
@@ -36,11 +40,15 @@ interface TenantPermissionRepository : BaseRepository<TenantPermissionEntity> {
         WHERE (LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
            OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND (:#{#type == null} = true OR type = :type)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
-        @Param("type") type: Int?
+        @Param("type") type: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     fun findByNameIn(names: Collection<String>): Flux<TenantPermissionEntity>

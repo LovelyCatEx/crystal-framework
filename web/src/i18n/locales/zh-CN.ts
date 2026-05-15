@@ -1510,7 +1510,8 @@ export const zhCN = {
       batchDeleteFailed: '批量删除失败',
       execute: '执行',
       action: '操作',
-      refresh: '刷新'
+      refresh: '刷新',
+      timeRange: '时间范围'
     },
 
     protectedController: {

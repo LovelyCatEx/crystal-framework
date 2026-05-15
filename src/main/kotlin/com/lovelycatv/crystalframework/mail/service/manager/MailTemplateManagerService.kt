@@ -28,13 +28,15 @@ interface MailTemplateManagerService : CachedBaseManagerService<
         return super.query(
             dto,
             isAdvanceQuery = { dto ->
-                dto.searchKeyword != null || dto.typeId != null
+                dto.searchKeyword != null || dto.typeId != null || dto.startTime != null || dto.endTime != null
             },
             doAdvanceQuery = { dto, limit, offset ->
                 val total = this.getRepository()
                     .countAdvanceSearch(
                         dto.searchKeyword,
                         dto.typeId,
+                        dto.startTime,
+                        dto.endTime,
                     )
                     .awaitFirstOrNull()
                     ?: 0
@@ -42,6 +44,8 @@ interface MailTemplateManagerService : CachedBaseManagerService<
                 val records = this.getRepository().advanceSearch(
                     dto.searchKeyword,
                     dto.typeId,
+                    dto.startTime,
+                    dto.endTime,
                     limit,
                     offset
                 ).awaitListWithTimeout()

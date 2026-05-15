@@ -29,6 +29,8 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
             ))
         AND tenant_id = :tenantId
         AND (:#{#status == null} = true OR status = :status)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -38,6 +40,8 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
         @Param("keyword") keyword: String?,
         @Param("tenantId") tenantId: Long,
         @Param("status") status: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantMemberEntity>
@@ -55,12 +59,16 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
             ))
         AND tenant_id = :tenantId
         AND (:#{#status == null} = true OR status = :status)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
         @Param("tenantId") tenantId: Long,
-        @Param("status") status: Int?
+        @Param("status") status: Int?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     @Query("SELECT COUNT(*) FROM tenant_members WHERE created_time >= :startTime AND created_time < :endTime")

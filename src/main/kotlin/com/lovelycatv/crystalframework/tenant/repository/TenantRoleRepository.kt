@@ -25,6 +25,8 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
             OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND tenant_id = :tenantId
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -34,6 +36,8 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
         @Param("keyword") keyword: String?,
         @Param("tenantId") tenantId: Long,
         @Param("parentId") parentId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
         @Param("limit") limit: Int,
         @Param("offset") offset: Int
     ): Flux<TenantRoleEntity>
@@ -47,12 +51,16 @@ interface TenantRoleRepository : BaseRepository<TenantRoleEntity> {
             OR LOWER(description) LIKE LOWER(CONCAT('%', :keyword, '%')))
         AND tenant_id = :tenantId
         AND (:#{#parentId == null} = true OR parent_id = :parentId)
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
         @Param("keyword") keyword: String?,
         @Param("tenantId") tenantId: Long,
-        @Param("parentId") parentId: Long?
+        @Param("parentId") parentId: Long?,
+        @Param("startTime") startTime: Long?,
+        @Param("endTime") endTime: Long?,
     ): Mono<Long>
 
     fun findByName(name: String): Mono<TenantRoleEntity>

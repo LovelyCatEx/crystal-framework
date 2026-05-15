@@ -21,6 +21,8 @@ interface AuditLogRepository : BaseRepository<AuditLogEntity> {
         AND (:#{#action == null} = true OR action = :action)
         AND (:#{#path == null} = true OR LOWER(path) LIKE LOWER(CONCAT('%', :path, '%')))
         AND (:#{#remoteIp == null} = true OR LOWER(remote_ip) LIKE LOWER(CONCAT('%', :remoteIp, '%')))
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
         ORDER BY created_time DESC
         LIMIT :limit
         OFFSET :offset
@@ -33,6 +35,8 @@ interface AuditLogRepository : BaseRepository<AuditLogEntity> {
         action: Int?,
         path: String?,
         remoteIp: String?,
+        startTime: Long?,
+        endTime: Long?,
         limit: Int,
         offset: Int
     ): Flux<AuditLogEntity>
@@ -49,6 +53,8 @@ interface AuditLogRepository : BaseRepository<AuditLogEntity> {
         AND (:#{#action == null} = true OR action = :action)
         AND (:#{#path == null} = true OR LOWER(path) LIKE LOWER(CONCAT('%', :path, '%')))
         AND (:#{#remoteIp == null} = true OR LOWER(remote_ip) LIKE LOWER(CONCAT('%', :remoteIp, '%')))
+        AND (:#{#startTime == null} = true OR created_time >= :startTime)
+        AND (:#{#endTime == null} = true OR created_time <= :endTime)
     """
     )
     fun countAdvanceSearch(
@@ -57,7 +63,9 @@ interface AuditLogRepository : BaseRepository<AuditLogEntity> {
         username: String?,
         action: Int?,
         path: String?,
-        remoteIp: String?
+        remoteIp: String?,
+        startTime: Long?,
+        endTime: Long?
     ): Mono<Long>
 
     @Query(

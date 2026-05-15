@@ -28,7 +28,7 @@ interface AuditLogManagerService : CachedBaseManagerService<
         return super.query(
             dto,
             isAdvanceQuery = { dto ->
-                dto.searchKeyword != null || dto.userId != null || dto.username != null || dto.action != null || dto.path != null || dto.remoteIp != null
+                dto.searchKeyword != null || dto.userId != null || dto.username != null || dto.action != null || dto.path != null || dto.remoteIp != null || dto.startTime != null || dto.endTime != null
             },
             doAdvanceQuery = { dto, limit, offset ->
                 val total = this.getRepository()
@@ -38,7 +38,9 @@ interface AuditLogManagerService : CachedBaseManagerService<
                         dto.username,
                         dto.action,
                         dto.path,
-                        dto.remoteIp
+                        dto.remoteIp,
+                        dto.startTime,
+                        dto.endTime
                     )
                     .awaitFirstOrNull()
                     ?: 0
@@ -50,6 +52,8 @@ interface AuditLogManagerService : CachedBaseManagerService<
                     dto.action,
                     dto.path,
                     dto.remoteIp,
+                    dto.startTime,
+                    dto.endTime,
                     limit,
                     offset
                 ).awaitListWithTimeout()

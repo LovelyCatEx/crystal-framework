@@ -48,6 +48,26 @@ interface BaseRepository<ENTITY: BaseEntity> : R2dbcRepository<ENTITY, Long> {
 
     @Query("""
         SELECT * FROM #{#tableName}
+        WHERE created_time >= :startTime AND created_time <= :endTime
+        ORDER BY created_time DESC
+        LIMIT :limit
+        OFFSET :offset
+    """)
+    fun findAllByPageWithTimeRange(
+        @Param("startTime") startTime: Long,
+        @Param("endTime") endTime: Long,
+        @Param("limit") limit: Int,
+        @Param("offset") offset: Int,
+    ): Flux<ENTITY>
+
+    @Query("SELECT COUNT(*) FROM #{#tableName} WHERE created_time >= :startTime AND created_time <= :endTime")
+    fun countWithTimeRange(
+        @Param("startTime") startTime: Long,
+        @Param("endTime") endTime: Long,
+    ): Mono<Long>
+
+    @Query("""
+        SELECT * FROM #{#tableName}
         WHERE ? LIKE LOWER(CONCAT('%', :keyword, '%'))
         ORDER BY created_time DESC
         LIMIT :limit

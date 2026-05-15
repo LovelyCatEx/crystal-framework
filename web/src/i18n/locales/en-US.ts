@@ -1513,7 +1513,8 @@ export const enUS = {
       batchDeleteFailed: 'Batch delete failed',
       execute: 'Execute',
       action: 'Action',
-      refresh: 'Refresh'
+      refresh: 'Refresh',
+      timeRange: 'Time Range'
     },
 
     protectedController: {

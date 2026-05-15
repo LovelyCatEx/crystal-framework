@@ -7,6 +7,8 @@ data class ManagerReadAuditLogDTO(
     override val pageSize: Int,
     override val id: Long? = null,
     override val searchKeyword: String? = null,
+    override val startTime: Long? = null,
+    override val endTime: Long? = null,
     val userId: Long? = null,
     val username: String? = null,
     val action: Int? = null,

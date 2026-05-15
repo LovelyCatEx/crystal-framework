@@ -28,13 +28,15 @@ interface StorageProviderManagerService : CachedBaseManagerService<
         return super.query(
             dto,
             isAdvanceQuery = { dto ->
-                dto.searchKeyword != null || dto.type != null
+                dto.searchKeyword != null || dto.type != null || dto.startTime != null || dto.endTime != null
             },
             doAdvanceQuery = { dto, limit, offset ->
                 val total = this.getRepository()
                     .countAdvanceSearch(
                         dto.searchKeyword,
                         dto.type,
+                        dto.startTime,
+                        dto.endTime,
                     )
                     .awaitFirstOrNull()
                     ?: 0
@@ -42,6 +44,8 @@ interface StorageProviderManagerService : CachedBaseManagerService<
                 val records = this.getRepository().advanceSearch(
                     dto.searchKeyword,
                     dto.type,
+                    dto.startTime,
+                    dto.endTime,
                     limit,
                     offset
                 ).awaitListWithTimeout()
