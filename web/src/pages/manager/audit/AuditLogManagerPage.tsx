@@ -35,20 +35,16 @@ export function AuditLogManagerPage() {
                 title=""
                 subtitle=""
                 showActionBar={false}
+                readonlyMode={true}
+                showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
                 query={async (props: ManagerReadAuditLogDTO) => {
                     return (await AuditLogManagerController.query(props)).data!;
                 }}
-                delete={async (props) => {
-                    return (await AuditLogManagerController.delete(props)).data!;
-                }}
-                update={async () => {
-                    return null;
-                }}
-                create={async () => {
-                    return null;
-                }}
+                delete={async () => { return null; }}
+                update={async () => { return null; }}
+                create={async () => { return null; }}
                 tableActions={[
                     {
                         label: <span>{t('pages.auditLogManager.filter.action')}</span>,

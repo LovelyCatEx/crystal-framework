@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.audit.service.AuditLogManagerService
 import com.lovelycatv.crystalframework.rbac.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.ReadonlyManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/audit-log")
 class ManagerAuditLogController(
     managerService: AuditLogManagerService
-) : StandardManagerController<
+) : ReadonlyManagerController<
         AuditLogManagerService,
         AuditLogRepository,
         AuditLogEntity,

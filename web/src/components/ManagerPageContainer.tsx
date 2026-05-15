@@ -26,6 +26,8 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     editModalFormChildren?: React.ReactNode | JSX.Element | ((editingItem: ENTITY | null) => React.ReactNode | JSX.Element);
     editModalInitialValues?: object;
     showActionBar?: boolean;
+    readonlyMode?: boolean;
+    showRowActions?: boolean;
 }
 
 export interface ManagerPageContainerRef extends EntityTableRef {
@@ -155,10 +157,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     });
 
     const showActionBar = props.showActionBar !== false;
+    const readonlyMode = props.readonlyMode === true;
+    const showRowActions = props.showRowActions !== false;
 
     const { className, style, ...restProps } = props;
 
     const builtinTablePrefixActions = useMemo(() => {
+        if (readonlyMode) return restProps.tablePrefixActions ?? [];
         if (isCustomTableSelector) return restProps.tablePrefixActions;
         return [
             {
@@ -184,7 +189,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             },
             ...(restProps.tablePrefixActions ?? []),
         ];
-    }, [isCustomTableSelector, restProps.tablePrefixActions, t, handleOnBatchOperationClick]);
+    }, [readonlyMode, isCustomTableSelector, restProps.tablePrefixActions, t, handleOnBatchOperationClick]);
 
     const builtinTableActions = useMemo(() => {
         return [
@@ -202,6 +207,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     }, [restProps.tableActions, t]);
 
     const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
+        if (readonlyMode) return { type: 'disabled' };
         if (isCustomTableSelector) return restProps.tableSelection;
         return {
             type: 'checkbox',
@@ -209,7 +215,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 setSelectedEntities(entities);
             }
         };
-    }, [isCustomTableSelector, restProps.tableSelection]);
+    }, [readonlyMode, isCustomTableSelector, restProps.tableSelection]);
 
     return (
         <div className={className} style={style}>
@@ -220,15 +226,17 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     titleActions={<>
                         {restProps.titleActions}
 
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined/>}
-                            size="large"
-                            className="rounded-xl h-12 shadow-lg"
-                            onClick={() => openModal()}
-                        >
-                            {t('components.managerPageContainer.addNew', { entityName: restProps.entityName })}
-                        </Button>
+                        {!readonlyMode && (
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined/>}
+                                size="large"
+                                className="rounded-xl h-12 shadow-lg"
+                                onClick={() => openModal()}
+                            >
+                                {t('components.managerPageContainer.addNew', { entityName: restProps.entityName })}
+                            </Button>
+                        )}
                     </>}
                 />
             )}
@@ -241,20 +249,22 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     query={restProps.query}
                     tablePrefixActions={builtinTablePrefixActions}
                     tableActions={builtinTableActions}
-                    tableRowActionsRender={(record) => (
+                    tableRowActionsRender={showRowActions ? (record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}
-                            <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                            <Popconfirm 
-                                title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })} 
-                                onConfirm={() => deleteModel(record.id)} 
-                                okText={t('components.managerPageContainer.confirm')} 
-                                cancelText={t('components.managerPageContainer.cancel')}
-                            >
-                                <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-                            </Popconfirm>
+                            {!readonlyMode && <>
+                                <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
+                                <Popconfirm 
+                                    title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })} 
+                                    onConfirm={() => deleteModel(record.id)} 
+                                    okText={t('components.managerPageContainer.confirm')} 
+                                    cancelText={t('components.managerPageContainer.cancel')}
+                                >
+                                    <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+                                </Popconfirm>
+                            </>}
                         </Space>
-                    )}
+                    ) : undefined}
                     tableSelection={builtinTableSelection}
                 />
             </Card>
