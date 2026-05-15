@@ -1,5 +1,6 @@
 import {
     ApartmentOutlined,
+    AuditOutlined,
     CloudOutlined,
     DashboardOutlined,
     DatabaseOutlined,
@@ -39,6 +40,7 @@ import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRol
 import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
 import {TenantDepartmentManagerPage} from "@/pages/manager/tenant/TenantDepartmentManagerPage.tsx";
 import {TenantInvitationManagerPage} from "@/pages/manager/tenant/TenantInvitationManagerPage.tsx";
+import {AuditLogManagerPage} from "@/pages/manager/audit/AuditLogManagerPage.tsx";
 import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.tsx";
 import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
 import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
@@ -339,6 +341,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
                 </ProtectedControllerWarningWrapper>
             ),
             group: 'mail_template'
+        },
+        {
+            key: '/manager/audit-logs',
+            path: '/manager/audit-logs',
+            icon: <AuditOutlined />,
+            label: t('menu.admin.auditLogs'),
+            page: <AuditLogManagerPage />
         },
         {
             key: '/manager/settings',

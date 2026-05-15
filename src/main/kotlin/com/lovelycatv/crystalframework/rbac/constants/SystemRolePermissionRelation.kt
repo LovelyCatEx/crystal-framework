@@ -35,6 +35,9 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_READ,
             SystemPermission.MENU_MAIL_TEMPLATE_CATEGORY_MANAGER,
             SystemPermission.ACTION_MAIL_TEMPLATE_CATEGORY_READ,
+            // Audit log
+            SystemPermission.MENU_AUDIT_LOG_MANAGER,
+            SystemPermission.ACTION_AUDIT_LOG_READ,
             // System settings
             SystemPermission.MENU_SYSTEM_SETTINGS,
             SystemPermission.ACTION_SYSTEM_SETTINGS_READ,

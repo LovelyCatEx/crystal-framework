@@ -1263,6 +1263,29 @@ export const enUS = {
       title: 'Dashboard',
       subtitle: 'View system basic information here'
     },
+    auditLogManager: {
+      title: 'Audit Logs',
+      subtitle: 'View system operation audit logs',
+      filter: {
+        action: 'Action Type',
+        all: 'All',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        username: 'Username',
+        usernamePlaceholder: 'Enter username',
+        path: 'Path',
+        pathPlaceholder: 'Enter path',
+        remoteIp: 'IP Address',
+        remoteIpPlaceholder: 'Enter IP'
+      },
+      actionType: {
+        unknown: 'Unknown',
+        create: 'Create',
+        read: 'Read',
+        update: 'Update',
+        delete: 'Delete'
+      }
+    },
     systemSettingsManager: {
       title: 'System Settings',
       subtitle: 'Manage system configuration',
@@ -1667,6 +1690,15 @@ export const enUS = {
         allowMultiple: 'Allow Multiple',
         yes: 'Yes',
         no: 'No'
+      },
+      auditLog: {
+        userInfo: 'User',
+        action: 'Action',
+        resourceType: 'Resource Type',
+        request: 'Request',
+        status: 'Status',
+        success: 'Success',
+        failed: 'Failed'
       }
     },
     entityTable: {
@@ -1897,7 +1929,8 @@ export const enUS = {
     mailTemplateType: 'Mail Template Type',
     mailTemplateCategory: 'Mail Template Category',
     myTenantMember: 'Organization Member',
-    myTenantRole: 'Role'
+    myTenantRole: 'Role',
+    auditLog: 'Audit Log'
   },
 
   menu: {
@@ -1939,6 +1972,7 @@ export const enUS = {
       mailTemplates: 'Mail Template Management',
       mailTemplateTypes: 'Mail Template Types',
       mailTemplateCategories: 'Mail Template Categories',
+      auditLogs: 'Audit Logs',
       settings: 'System Settings'
     },
 

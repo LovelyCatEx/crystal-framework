@@ -144,6 +144,13 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
+    const val MENU_AUDIT_LOG_MANAGER = "audit.log:/manager/audit-logs"
+
+    const val ACTION_AUDIT_LOG_CREATE = "audit.log.create"
+    const val ACTION_AUDIT_LOG_READ = "audit.log.read"
+    const val ACTION_AUDIT_LOG_UPDATE = "audit.log.update"
+    const val ACTION_AUDIT_LOG_DELETE = "audit.log.delete"
+
     const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
     const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
     const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"
