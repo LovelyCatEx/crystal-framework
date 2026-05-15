@@ -136,7 +136,8 @@ class SecurityConfig(
                 } +
                 listOf(
                     pathPatternParser.parse("/login"),
-                    pathPatternParser.parse("/api/*/actuator/**")
+                    pathPatternParser.parse("/api/*/actuator/**"),
+                    pathPatternParser.parse("/ws/**")
                 )
 
         // custom authentications

@@ -100,7 +100,8 @@ crystalframework:
       data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
       worker-id: ${SNOWFLAKE_WORKER_ID:0}
       actual-gene-length: 0
-
+  script:
+    kls-path: ${KLS_PATH:tools/kls/server/bin/kotlin-language-server}
 logging:
   level:
     root: info
@@ -122,7 +123,7 @@ server:
         same-site: none
         domain: ${COOKIE_DOMAIN}
   forward-headers-strategy: framework
-  port: ${BACKEND_PORT}
+  port: ${BACKEND_PORT:8080}
 snail-job:
   server:
     host: ${SNAILJOB_SERVER_HOST}

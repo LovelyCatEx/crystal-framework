@@ -92,7 +92,7 @@ export function ScriptEditorPage() {
 
         // Register LSP-backed completion provider
         monaco.languages.registerCompletionItemProvider('kotlin', {
-            triggerCharacters: ['.', ' ', '('],
+            triggerCharacters: ['.', ' ', '(', '[', ']', '{', '=', ',', '<', '>', ':', '"', "'", 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
             provideCompletionItems: async (model: unknown, position: unknown) => {
                 const p = position as { lineNumber: number; column: number };
                 const m = model as { getWordUntilPosition: (pos: unknown) => { startColumn: number; endColumn: number } };
@@ -109,13 +109,29 @@ export function ScriptEditorPage() {
                     return { suggestions: getStaticSuggestions(monaco, range) };
                 }
 
-                const items = await client.getCompletions(p.lineNumber, p.column);
+                const items = await client.getCompletionsDebounced(p.lineNumber, p.column, 100);
 
                 if (items.length === 0) {
                     return { suggestions: getStaticSuggestions(monaco, range) };
                 }
 
-                const suggestions = items.map((item: LspCompletionItem) => ({
+                const sortedItems = items.sort((a, b) => {
+                    const priority = (kind: number | undefined): number => {
+                        switch (kind) {
+                            case 6: return 1; // Variable
+                            case 3: return 2; // Function
+                            case 12: return 3; // Property
+                            case 8: return 4; // Method
+                            case 4: return 5; // Constructor
+                            case 5: return 6; // Field
+                            case 2: return 7; // Constant
+                            default: return 10; // Other
+                        }
+                    };
+                    return priority(a.kind) - priority(b.kind);
+                });
+
+                const suggestions = sortedItems.map((item: LspCompletionItem) => ({
                     label: item.label,
                     kind: mapCompletionKind(monaco, item.kind),
                     insertText: item.insertText ?? item.label,
@@ -136,7 +152,7 @@ export function ScriptEditorPage() {
 
         setCompiling(true);
         try {
-            const response = await doPost<CompileResult>('/api/v1/script/compile-check', {sourceCode: code}, {'Content-Type': 'application/json'});
+            const response = await doPost<CompileResult>('/api/script/compile-check', {sourceCode: code}, {'Content-Type': 'application/json'});
             const result = response.data!;
             setLastResult(result);
 
@@ -271,10 +287,56 @@ function getStaticSuggestions(monaco: Monaco, range: { startLineNumber: number; 
         'null', 'true', 'false', 'this', 'super', 'is', 'as', 'in',
     ];
 
-    return keywords.map((kw) => ({
+    const sdkSnippets = [
+        {
+            label: 'CrystalFrameworkScript',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: [
+                'import com.lovelycatv.crystalframework.script.sdk.CrystalFrameworkScript',
+                'import com.lovelycatv.crystalframework.script.sdk.ScriptMetadata',
+                '',
+                'object ${1:MyScript} : CrystalFrameworkScript() {',
+                '    override val metadata = ScriptMetadata(',
+                '        scriptName = "${2:My Script}",',
+                '        scriptAuthor = "${3:Author}"',
+                '    )',
+                '',
+                '    private val logger = Logger(metadata.scriptName)',
+                '',
+                '    override suspend fun execute() {',
+                '        // Your script logic here',
+                '        $0',
+                '    }',
+                '}'
+            ].join('\n'),
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'Crystal Framework Script 模板',
+            documentation: '创建一个继承 CrystalFrameworkScript 的脚本类',
+        },
+        {
+            label: 'ScriptMetadata',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'ScriptMetadata(\n    scriptName = "${1:Script Name}",\n    scriptAuthor = "${2:Author}"\n)',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: 'ScriptMetadata 数据类',
+            documentation: '脚本元数据：包含脚本名称和作者信息',
+        },
+        {
+            label: 'import-sdk',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: 'import com.lovelycatv.crystalframework.script.sdk.CrystalFrameworkScript\nimport com.lovelycatv.crystalframework.script.sdk.ScriptMetadata',
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            detail: '导入 SDK 类',
+            documentation: '导入 CrystalFrameworkScript 和 ScriptMetadata',
+        },
+    ];
+
+    const keywordSuggestions = keywords.map((kw) => ({
         label: kw,
         kind: monaco.languages.CompletionItemKind.Keyword,
         insertText: kw,
         range,
     }));
+
+    return [...sdkSnippets, ...keywordSuggestions];
 }

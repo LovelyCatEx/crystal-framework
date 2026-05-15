@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/raw/, ''),
         },
         '/ws': {
-          target: apiDomain.replace('http', 'ws'),
+          target: apiDomain.replace(/^http/, 'ws'),
           changeOrigin: true,
           ws: true,
         },
