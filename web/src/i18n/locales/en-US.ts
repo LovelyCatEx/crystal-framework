@@ -1,5 +1,104 @@
 export const enUS = {
   pages: {
+    systemInitializePage: {
+      title: 'System Initialization',
+      loading: 'Loading...',
+      steps: {
+        adminAccount: 'Set Up Admin',
+        adminAccountDesc: 'Create admin account',
+        mailServer: 'Configure Email',
+        mailServerDesc: 'Set up mail server',
+        complete: 'Complete',
+        completeDesc: 'Start using the system'
+      },
+      adminAccount: {
+        title: 'Set Up Admin Account',
+        subtitle: 'Please set up the system administrator account and password',
+        form: {
+          username: {
+            placeholder: 'Admin Username',
+            required: 'Please enter admin username',
+            pattern: 'Username can only contain letters, numbers, and underscores',
+            max: 'Username cannot exceed 64 characters'
+          },
+          email: {
+            placeholder: 'Admin Email',
+            required: 'Please enter admin email',
+            type: 'Invalid email format',
+            max: 'Email cannot exceed 256 characters'
+          },
+          password: {
+            placeholder: 'Password',
+            required: 'Please enter password',
+            pattern: 'Password must be at least 8 characters with letters and numbers',
+            max: 'Password cannot exceed 128 characters'
+          },
+          confirmPassword: {
+            placeholder: 'Confirm Password',
+            required: 'Please confirm your password',
+            mismatch: 'The two passwords do not match'
+          }
+        },
+        messages: {
+          success: 'Admin account created successfully',
+          failed: 'Setup failed, please try again'
+        }
+      },
+      mailServer: {
+        title: 'Configure Mail Server',
+        subtitle: 'Set up system email sending service (optional)',
+        form: {
+          host: {
+            label: 'Server Address',
+            placeholder: 'smtp.example.com',
+            required: 'Please enter mail server address'
+          },
+          port: {
+            label: 'Port',
+            placeholder: '587'
+          },
+          username: {
+            label: 'Username',
+            placeholder: 'your-email@example.com',
+            required: 'Please enter mail username'
+          },
+          password: {
+            label: 'Password/Auth Code',
+            placeholder: 'Mail password or auth code',
+            required: 'Please enter mail password or auth code'
+          },
+          fromEmail: {
+            label: 'Sender Email',
+            placeholder: 'noreply@example.com',
+            required: 'Please enter sender email',
+            type: 'Invalid email format'
+          },
+          fromName: {
+            label: 'Sender Name',
+            required: 'Please enter sender name'
+          }
+        },
+        messages: {
+          success: 'Mail server configured successfully',
+          failed: 'Configuration failed, please try again'
+        }
+      },
+      complete: {
+        title: 'Initialization Complete',
+        subtitle: 'System has been successfully initialized, you can start using it',
+        nextSteps: 'Next Steps',
+        nextStepsList: {
+          login: 'Login with admin account',
+          settings: 'Configure system settings and mail templates',
+          tenant: 'Create tenant and invite members'
+        },
+        button: 'Go to Login Page',
+        message: 'System initialization complete',
+        messages: {
+          failed: 'System initialization failed, please try again'
+        }
+      }
+    },
     auth: {
       // AuthorizationPage
       authorization: {

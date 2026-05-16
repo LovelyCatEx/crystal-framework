@@ -1,5 +1,104 @@
 export const zhCN = {
   pages: {
+    systemInitializePage: {
+      title: '系统初始化',
+      loading: '加载中...',
+      steps: {
+        adminAccount: '设置管理员',
+        adminAccountDesc: '创建管理员账号',
+        mailServer: '配置邮件',
+        mailServerDesc: '设置邮件服务器',
+        complete: '完成初始化',
+        completeDesc: '开始使用系统'
+      },
+      adminAccount: {
+        title: '设置管理员账号',
+        subtitle: '请设置系统管理员的账号和密码',
+        form: {
+          username: {
+            placeholder: '管理员用户名',
+            required: '请输入管理员用户名',
+            pattern: '用户名只能包含字母、数字和下划线',
+            max: '用户名最多64个字符'
+          },
+          email: {
+            placeholder: '管理员邮箱',
+            required: '请输入管理员邮箱',
+            type: '请输入有效的邮箱地址',
+            max: '邮箱最多256个字符'
+          },
+          password: {
+            placeholder: '密码',
+            required: '请输入密码',
+            pattern: '密码至少8位，包含字母和数字',
+            max: '密码最多128个字符'
+          },
+          confirmPassword: {
+            placeholder: '确认密码',
+            required: '请确认密码',
+            mismatch: '两次输入的密码不一致'
+          }
+        },
+        messages: {
+          success: '管理员账号设置成功',
+          failed: '设置失败，请重试'
+        }
+      },
+      mailServer: {
+        title: '配置邮件服务器',
+        subtitle: '设置系统邮件发送服务（可选）',
+        form: {
+          host: {
+            label: '服务器地址',
+            placeholder: 'smtp.example.com',
+            required: '请输入邮件服务器地址'
+          },
+          port: {
+            label: '端口',
+            placeholder: '587'
+          },
+          username: {
+            label: '用户名',
+            placeholder: 'your-email@example.com',
+            required: '请输入邮件用户名'
+          },
+          password: {
+            label: '密码/授权码',
+            placeholder: '邮件密码或授权码',
+            required: '请输入邮件密码或授权码'
+          },
+          fromEmail: {
+            label: '发件人邮箱',
+            placeholder: 'noreply@example.com',
+            required: '请输入发件人邮箱',
+            type: '请输入有效的邮箱地址'
+          },
+          fromName: {
+            label: '发件人名称',
+            required: '请输入发件人名称'
+          }
+        },
+        messages: {
+          success: '邮件服务器配置成功',
+          failed: '配置失败，请重试'
+        }
+      },
+      complete: {
+        title: '初始化完成',
+        subtitle: '系统已成功初始化，您可以开始使用了',
+        nextSteps: '后续步骤',
+        nextStepsList: {
+          login: '使用管理员账号登录系统',
+          settings: '配置系统参数和邮件模板',
+          tenant: '创建租户并邀请成员'
+        },
+        button: '进入登录页',
+        message: '系统初始化完成',
+        messages: {
+          failed: '系统初始化失败，请重试'
+        }
+      }
+    },
     auth: {
       // AuthorizationPage
       authorization: {

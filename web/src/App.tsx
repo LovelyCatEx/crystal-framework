@@ -17,6 +17,7 @@ import {
     updateThemeCSSVariables
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
+import {SystemInitializePage} from "@/pages/SystemIntializePage.tsx";
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>(() => {
@@ -67,6 +68,7 @@ function App() {
                   />
                   <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
                   <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
+                  <Route path="/system-initialize" element={<SystemInitializePage />} />
                   <Route path="*" element={<NotFoundPage />} />
               </Routes>
           </MaintenanceGuard>
