@@ -15,9 +15,9 @@ spring:
       validation-query: SELECT 1
       validation-depth: REMOTE
   datasource:
-    url: jdbc:postgresql://localhost:5432/db
-    username: postgres
-    password: 123456
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
   data:
     redis:
       host: ${REDIS_HOST}

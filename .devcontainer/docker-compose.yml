@@ -6,7 +6,24 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/crystalframework:cached
-    command: sleep infinity
+      - ./.m2/repository:/root/.m2/repository
+    command: >
+      bash -c "
+        if [ ! -d /tmp/VertexLib/.git ]; then
+          git clone https://github.com/LovelyCatEx/VertexLib.git /tmp/VertexLib
+        fi &&
+        cd /tmp/VertexLib &&
+        export JAVA_HOME=\$(dirname \$(dirname \$(update-alternatives --list java | head -1))) &&
+        for i in 1 2 3 4 5; do
+          echo 'Maven attempt \$i/5' &&
+          mvn clean install -DskipTests -B && break ||
+          ([ \$i -lt 5 ] && echo 'Retry in 10s...' && sleep 10)
+        done &&
+        sleep infinity
+      "
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "5173:5173"
     networks:
       - devnet
     depends_on:
