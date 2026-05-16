@@ -1486,7 +1486,7 @@ export const enUS = {
     dashboard: {
       // DashboardPage
       greeting: {
-        earlyMorning: 'Good early morning',
+        earlyMorning: 'Get some rest early',
         morning: 'Good morning',
         lateMorning: 'Good late morning',
         afternoon: 'Good afternoon',

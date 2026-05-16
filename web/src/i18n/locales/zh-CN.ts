@@ -1483,7 +1483,7 @@ export const zhCN = {
     dashboard: {
       // DashboardPage
       greeting: {
-        earlyMorning: '凌晨好',
+        earlyMorning: '早点休息',
         morning: '早上好',
         lateMorning: '上午好',
         afternoon: '下午好',

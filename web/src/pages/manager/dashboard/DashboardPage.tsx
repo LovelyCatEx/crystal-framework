@@ -1,11 +1,14 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {Segmented} from "antd";
-import {useMemo, useState} from "react";
+import {Segmented, theme} from "antd";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {BusinessStatistics} from "@/components/dashboard/BusinessStatistics.tsx";
 import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
 import {MyJoinedTenants} from "@/components/dashboard/MyJoinedTenants.tsx";
+import {ClockCircleOutlined} from "@ant-design/icons";
+
+const { useToken } = theme;
 
 function getGreeting(t: ReturnType<typeof useTranslation>['t']): string {
     const hour = new Date().getHours();
@@ -19,6 +22,43 @@ function getGreeting(t: ReturnType<typeof useTranslation>['t']): string {
 const COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics";
 const COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics";
 const COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined";
+
+function LiveClock() {
+    const { token } = useToken();
+    const [time, setTime] = useState(new Date());
+    const timerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        timerRef.current = window.setInterval(() => {
+            setTime(new Date());
+        }, 1000);
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
+    }, []);
+
+    const formattedTime = time.toLocaleTimeString(undefined, { 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        second: "2-digit",
+        hour12: false 
+    });
+
+    return (
+        <div className="flex items-center gap-2">
+            <ClockCircleOutlined style={{ color: token.colorTextSecondary, fontSize: 20 }} />
+            <span 
+                className="text-lg font-medium mr-2"
+                style={{ color: token.colorText }}
+            >
+                {formattedTime}
+            </span>
+        </div>
+    );
+}
 
 export function DashboardPage() {
     const { t } = useTranslation();
@@ -56,7 +96,7 @@ export function DashboardPage() {
 
     return (
         <>
-            <ActionBarComponent title={greetingTitle} />
+            <ActionBarComponent title={greetingTitle} titleActions={<LiveClock />} />
 
             <div className="animate-in slide-in-from-bottom-4 duration-500">
                 {hasBusinessStatsPermission && (
