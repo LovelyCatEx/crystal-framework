@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.service.UserService
+import com.lovelycatv.vertex.log.logger
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.MethodParameter
 import org.springframework.http.codec.ServerCodecConfigurer
@@ -25,6 +26,8 @@ class WebFluxConfig(
     private val jsonMapper: JsonMapper,
     private val jwtSignKeyStore: JWTSignKeyStore
 ) : WebFluxConfigurer {
+    private val logger = logger()
+
     override fun configureApiVersioning(configurer: ApiVersionConfigurer) {
         configurer.setDefaultVersion("1")
         configurer.usePathSegment(1)
@@ -54,13 +57,13 @@ class WebFluxConfig(
                 exchange: ServerWebExchange,
             ): Mono<Any> {
                 val webRequest = exchange.request
-                    ?: return Mono.empty()
-                val token: String = webRequest.headers?.get("Authorization")?.firstOrNull()
+                val token: String = webRequest.headers.get("Authorization")?.firstOrNull()
                     ?: return Mono.empty()
 
                 val claims = try {
                     JwtUtil.parseToken(jwtSignKeyStore.getSignKey(), token)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    logger.warn("Could not parse token while resolving controller parameters", e)
                     null
                 } ?: return Mono.empty()
 

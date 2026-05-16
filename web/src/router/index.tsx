@@ -43,6 +43,7 @@ import {TenantInvitationManagerPage} from "@/pages/manager/tenant/TenantInvitati
 import {AuditLogManagerPage} from "@/pages/manager/audit/AuditLogManagerPage.tsx";
 import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.tsx";
 import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
+import {MailSendLogManagerPage} from "@/pages/manager/mail/MailSendLogManagerPage.tsx";
 import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
 import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
 import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
@@ -340,6 +341,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
                     <MailTemplateCategoryManagerPage />
                 </ProtectedControllerWarningWrapper>
             ),
+            group: 'mail_template'
+        },
+        {
+            key: '/manager/mail-send-logs',
+            path: '/manager/mail-send-logs',
+            icon: <MailOutlined />,
+            label: t('menu.admin.mailSendLogs'),
+            page: <MailSendLogManagerPage />,
             group: 'mail_template'
         },
         {

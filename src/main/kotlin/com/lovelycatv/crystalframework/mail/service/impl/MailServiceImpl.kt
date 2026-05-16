@@ -7,8 +7,10 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettings
 import com.lovelycatv.vertex.log.logger
+import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.annotation.Lazy
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mail.javamail.MimeMessageHelper
@@ -18,9 +20,13 @@ import java.util.*
 @Service
 class MailServiceImpl(
     private val systemSettingsService: SystemSettingsService,
-    private val mailTemplateService: MailTemplateService
+    private val mailTemplateService: MailTemplateService,
 ) : MailService {
     private val logger = logger()
+
+    @Lazy
+    @Resource
+    private lateinit var self: MailService
 
     private var mailSender: JavaMailSender? = null
 
@@ -67,7 +73,7 @@ class MailServiceImpl(
         templateTypeName: String,
         placeholders: Map<String, String?>
     ) {
-        this.sendMail(
+        self.sendMail(
             to,
             mailTemplateService.getAvailableTemplateByTypeName(templateTypeName),
             placeholders
@@ -79,7 +85,7 @@ class MailServiceImpl(
         templateName: String,
         placeholders: Map<String, String?>
     ) {
-        this.sendMail(
+        self.sendMail(
             to,
             mailTemplateService
                 .getRepository()
@@ -104,7 +110,7 @@ class MailServiceImpl(
         val title = resolvePlaceholders(template.title, placeholders)
         val content = resolvePlaceholders(template.content, placeholders)
 
-        this.sendMail(to, title, content)
+        self.sendMail(to, title, content)
     }
 
     private fun resolvePlaceholders(originalContent: String, placeholders: Map<String, String?>): String {

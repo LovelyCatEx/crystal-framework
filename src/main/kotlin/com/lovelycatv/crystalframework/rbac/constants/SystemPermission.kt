@@ -151,6 +151,10 @@ object SystemPermission {
     const val ACTION_AUDIT_LOG_UPDATE = "audit.log.update"
     const val ACTION_AUDIT_LOG_DELETE = "audit.log.delete"
 
+    const val MENU_MAIL_SEND_LOG_MANAGER = "mail.send.log:/manager/mail-send-logs"
+
+    const val ACTION_MAIL_SEND_LOG_READ = "mail.send.log.read"
+
     const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
     const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
     const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"

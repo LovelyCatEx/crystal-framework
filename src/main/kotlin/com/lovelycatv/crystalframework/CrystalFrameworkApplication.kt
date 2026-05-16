@@ -10,7 +10,7 @@ import reactor.core.publisher.Hooks
 
 @EnableConfigurationProperties
 @SpringBootApplication
-@EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableAsync
 @EnableSnailJob
 class SpringbootTemplateApplication

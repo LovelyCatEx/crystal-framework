@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
+import com.lovelycatv.crystalframework.mail.repository.MailSendLogRepository
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -36,6 +37,7 @@ class DashboardServiceImpl(
     private val tenantInvitationRepository: TenantInvitationRepository,
     private val tenantInvitationRecordRepository: TenantInvitationRecordRepository,
     private val oAuthAccountRepository: OAuthAccountRepository,
+    private val mailSendLogRepository: MailSendLogRepository,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val databaseClient: DatabaseClient,
     private val meterRegistry: MeterRegistry,
@@ -90,7 +92,10 @@ class DashboardServiceImpl(
             previousCount = oAuthAccountRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
         )
 
-        val totalMailSent = generateMockMailStat()
+        val totalMailSent = calculateStatItem(
+            currentCount = mailSendLogRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+            previousCount = mailSendLogRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+        )
 
         return BusinessStatsVO(
             totalUsers = totalUsers,
@@ -253,23 +258,6 @@ class DashboardServiceImpl(
 
         return BusinessStatsVO.StatItem(
             value = currentCount,
-            change = change,
-            changePercent = round(changePercent * 100) / 100
-        )
-    }
-
-    private fun generateMockMailStat(): BusinessStatsVO.StatItem {
-        val currentValue = Random.nextLong(5000, 15000)
-        val change = Random.nextLong(-1000, 2000)
-        val previousValue = currentValue - change
-        val changePercent = if (previousValue > 0) {
-            (change.toDouble() / previousValue) * 100
-        } else {
-            0.0
-        }
-
-        return BusinessStatsVO.StatItem(
-            value = currentValue,
             change = change,
             changePercent = round(changePercent * 100) / 100
         )

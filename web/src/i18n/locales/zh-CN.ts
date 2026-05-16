@@ -1382,6 +1382,22 @@ export const zhCN = {
         delete: '删除'
       }
     },
+    mailSendLogManager: {
+      title: '邮件发送日志',
+      subtitle: '查看系统邮件发送记录',
+      filter: {
+        keyword: '关键词',
+        keywordPlaceholder: '搜索收件人或主题',
+        toEmail: '收件人',
+        toEmailPlaceholder: '输入收件邮箱',
+        status: '状态',
+        all: '全部',
+        success: '成功',
+        failed: '失败',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户ID'
+      }
+    },
     systemSettingsManager: {
       title: '系统设置',
       subtitle: '管理系统配置信息',
@@ -1796,6 +1812,15 @@ export const zhCN = {
         status: '状态',
         success: '成功',
         failed: '失败'
+      },
+      mailSendLog: {
+        fromEmail: '发件人',
+        toEmail: '收件人',
+        subject: '主题',
+        user: '发送用户',
+        status: '状态',
+        success: '成功',
+        failed: '失败'
       }
     },
     entityTable: {
@@ -2027,7 +2052,8 @@ export const zhCN = {
     mailTemplateCategory: '邮件模板分类',
     myTenantMember: '组织成员',
     myTenantRole: '角色',
-    auditLog: '审计日志'
+    auditLog: '审计日志',
+    mailSendLog: '邮件发送日志'
   },
 
   menu: {
@@ -2069,6 +2095,7 @@ export const zhCN = {
       mailTemplates: '邮件模板管理',
       mailTemplateTypes: '邮件模板类型',
       mailTemplateCategories: '邮件模板分类',
+      mailSendLogs: '邮件发送日志',
       auditLogs: '审计日志',
       settings: '系统设置'
     },

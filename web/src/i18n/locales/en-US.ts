@@ -1385,6 +1385,22 @@ export const enUS = {
         delete: 'Delete'
       }
     },
+    mailSendLogManager: {
+      title: 'Mail Send Logs',
+      subtitle: 'View system mail send records',
+      filter: {
+        keyword: 'Keyword',
+        keywordPlaceholder: 'Search recipient or subject',
+        toEmail: 'Recipient',
+        toEmailPlaceholder: 'Enter recipient email',
+        status: 'Status',
+        all: 'All',
+        success: 'Success',
+        failed: 'Failed',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID'
+      }
+    },
     systemSettingsManager: {
       title: 'System Settings',
       subtitle: 'Manage system configuration',
@@ -1799,6 +1815,15 @@ export const enUS = {
         status: 'Status',
         success: 'Success',
         failed: 'Failed'
+      },
+      mailSendLog: {
+        fromEmail: 'From',
+        toEmail: 'To',
+        subject: 'Subject',
+        user: 'Sender',
+        status: 'Status',
+        success: 'Success',
+        failed: 'Failed'
       }
     },
     entityTable: {
@@ -2030,7 +2055,8 @@ export const enUS = {
     mailTemplateCategory: 'Mail Template Category',
     myTenantMember: 'Organization Member',
     myTenantRole: 'Role',
-    auditLog: 'Audit Log'
+    auditLog: 'Audit Log',
+    mailSendLog: 'Mail Send Log'
   },
 
   menu: {
@@ -2072,6 +2098,7 @@ export const enUS = {
       mailTemplates: 'Mail Template Management',
       mailTemplateTypes: 'Mail Template Types',
       mailTemplateCategories: 'Mail Template Categories',
+      mailSendLogs: 'Mail Send Logs',
       auditLogs: 'Audit Logs',
       settings: 'System Settings'
     },

@@ -25,8 +25,13 @@ spring:
       password: ${REDIS_PASSWORD}
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
+          min-idle: 8
+          max-idle: 16
+          max-active: 40
+          max-wait: 2s
+        shutdown-timeout: 100ms
+      timeout: 5s
+      connect-timeout: 3s
   security:
     oauth2:
       client:
@@ -74,6 +79,8 @@ spring:
     timeout: 30m
     redis:
       namespace: crystalframework:session
+  main:
+    allow-circular-references: true
 crystalframework:
   auth:
     jwt:
