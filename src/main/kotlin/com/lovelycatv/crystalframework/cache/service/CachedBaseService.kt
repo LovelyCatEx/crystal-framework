@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.cache.service
 import com.lovelycatv.crystalframework.cache.event.*
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.service.BaseService
-import com.lovelycatv.crystalframework.system.types.RedisConstants
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.repository.R2dbcRepository

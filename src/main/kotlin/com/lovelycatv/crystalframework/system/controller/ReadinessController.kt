@@ -8,7 +8,7 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.system.controller.dto.SwitchSystemMaintenanceModeDTO
 import com.lovelycatv.crystalframework.system.filter.SystemMaintenanceGuardFilter
-import com.lovelycatv.crystalframework.system.types.RedisConstants
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
 import jakarta.validation.Valid

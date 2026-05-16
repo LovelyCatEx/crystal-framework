@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.auth.stores
 
-import com.lovelycatv.crystalframework.system.types.RedisConstants
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 
 class JWTSignKeyStore(

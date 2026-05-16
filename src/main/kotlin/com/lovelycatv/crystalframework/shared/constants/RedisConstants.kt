@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.types
+package com.lovelycatv.crystalframework.shared.constants
 
 object RedisConstants {
     const val JWT_SIGN_KEY = "jwt_sign_key"
