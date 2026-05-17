@@ -56,7 +56,7 @@ services:
   snailjob:
     container_name: crystalframework-snailjob
     build:
-      context: dev/snail-job
+      context: ./snail-job
       dockerfile: Dockerfile
     environment:
       - SNAILJOB_DATASOURCE_HOST=postgres
@@ -92,7 +92,7 @@ services:
   backend:
     container_name: crystalframework-backend
     build:
-      context: ../
+      context: ../../
       dockerfile: Dockerfile
     environment:
       - POSTGRES_HOST=postgres
@@ -137,7 +137,7 @@ services:
   frontend:
     container_name: crystalframework-frontend
     build:
-      context: ../web
+      context: ../../web
       dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT}:80"
