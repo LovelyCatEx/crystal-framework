@@ -15,6 +15,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.http.codec.multipart.FilePart
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.lang.Exception
 
 abstract class AbstractFileResourceService(
     private val storageProvider: StorageProviderEntity,

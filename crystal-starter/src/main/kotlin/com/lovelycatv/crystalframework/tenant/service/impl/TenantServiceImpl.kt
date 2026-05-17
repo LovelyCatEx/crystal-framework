@@ -155,12 +155,12 @@ class TenantServiceImpl(
         }
 
         withUpdateEntityContext(tenant) {
-            tenant.icon = result.fileResourceEntity.id
+            tenant.icon = result.fileResourceEntity!!.id
             this.getRepository().save(tenant).awaitFirstOrNull()
                 ?: throw BusinessException("Could not update tenant icon")
         }
 
-        logger.info("Tenant $tenantId uploaded icon, resource details: ${result.fileResourceEntity.id}")
+        logger.info("Tenant $tenantId uploaded icon, resource details: ${result.fileResourceEntity!!.id}")
     }
 
     override suspend fun getMembersHasAllPermission(tenantId: Long, permissionNames: Collection<String>): List<TenantMemberEntity> {

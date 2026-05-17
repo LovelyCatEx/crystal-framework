@@ -11,6 +11,9 @@ import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.redis.core.ReactiveRedisTemplate
@@ -37,6 +40,14 @@ class SystemSettingsServiceImpl(
     private val instanceId = UUID.randomUUID().toString()
 
     private val refreshTopic = ChannelTopic(RedisConstants.SYSTEM_SETTINGS_REFRESH_TOPIC)
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    init {
+        coroutineScope.launch(Dispatchers.IO) {
+            getSystemSettings()
+        }
+    }
 
     @PostConstruct
     fun subscribeRefreshTopic() {
@@ -67,29 +78,45 @@ class SystemSettingsServiceImpl(
         reactiveRedisTemplate
             .convertAndSend(refreshTopic.topic, instanceId)
             .subscribe()
+
+        this.syncToCacheAsync()
     }
 
     override suspend fun getSystemSettings(): SystemSettings {
         return cachedSystemSettings ?: SystemSettings(
-            basic = SystemSettings.Basic(
-                baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!
-            ),
-            bootstrap = SystemSettings.Bootstrap(
-                autoCheckRbacTableData = getSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA)!!
-            ),
-            mail = SystemSettings.Mail(
-                smtp = SystemSettings.Mail.SMTP(
-                    host = getSettings(SystemSettingsConstants.Mail.SMTP.HOST)!!,
-                    port = getSettings<Long>(SystemSettingsConstants.Mail.SMTP.PORT)!!.toInt(),
-                    username = getSettings(SystemSettingsConstants.Mail.SMTP.USERNAME)!!,
-                    password = getSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD)!!,
-                    ssl = getSettings(SystemSettingsConstants.Mail.SMTP.SSL)!!,
-                    fromEmail = getSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL)!!,
-                )
-            )
+            basic = getSystemBasicSettings(),
+            bootstrap = getSystemBootstrapSettings(),
+            mail = getSystemMailSettings()
         ).also {
             this.cachedSystemSettings = it
+            this.syncToCacheAsync()
         }
+    }
+
+
+    override suspend fun getSystemBasicSettings(): SystemSettings.Basic {
+        return SystemSettings.Basic(
+            baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!
+        )
+    }
+
+    override suspend fun getSystemBootstrapSettings(): SystemSettings.Bootstrap {
+        return SystemSettings.Bootstrap(
+            autoCheckRbacTableData = getSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA)!!
+        )
+    }
+
+    override suspend fun getSystemMailSettings(): SystemSettings.Mail {
+        return SystemSettings.Mail(
+            smtp = SystemSettings.Mail.SMTP(
+                host = getSettings(SystemSettingsConstants.Mail.SMTP.HOST)!!,
+                port = getSettings<Long>(SystemSettingsConstants.Mail.SMTP.PORT)!!.toInt(),
+                username = getSettings(SystemSettingsConstants.Mail.SMTP.USERNAME)!!,
+                password = getSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD)!!,
+                ssl = getSettings(SystemSettingsConstants.Mail.SMTP.SSL)!!,
+                fromEmail = getSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL)!!,
+            )
+        )
     }
 
     override suspend fun updateSystemSettings(settings: SystemSettings) {
@@ -162,5 +189,25 @@ class SystemSettingsServiceImpl(
 
             newValue
         }
+    }
+
+    private fun syncToCacheAsync() {
+        coroutineScope.launch(Dispatchers.IO) {
+            this@SystemSettingsServiceImpl.syncToCache()
+        }
+    }
+
+    /**
+     * As some module could not access the system module directly.
+     *
+     * Some settings required by other modules will be shared in cache.
+     */
+    private suspend fun syncToCache() {
+        val basic = getSystemBasicSettings()
+
+        redisService.set(
+            RedisConstants.SYSTEM_NORMALIZED_BASE_URL,
+            basic.getNormalizedBaseUrl(false)
+        )
     }
 }

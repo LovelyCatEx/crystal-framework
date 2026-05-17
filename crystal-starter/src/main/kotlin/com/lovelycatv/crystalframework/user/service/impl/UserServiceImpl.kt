@@ -348,9 +348,9 @@ class UserServiceImpl(
 
         withInvalidateEntityCacheContext(userId) {
             this.getRepository()
-                .updateAvatar(userId, result.fileResourceEntity.id)
+                .updateAvatar(userId, result.fileResourceEntity!!.id)
                 .awaitFirstOrNull()
-                ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity.id}")
+                ?: throw BusinessException("could not upload avatar for user: $userId, fileEntityId: ${result.fileResourceEntity!!.id}")
         }
 
         logger.info("User $userId uploaded avatar, resource details: ${result.fileResourceEntity.toJSONString()}")
