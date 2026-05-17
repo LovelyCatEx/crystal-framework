@@ -3,9 +3,12 @@ package com.lovelycatv.crystalframework.shared.config
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
+import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.RedisSerializer
 
@@ -34,5 +37,19 @@ class RedisConfig {
         reactiveRedisConnectionFactory: ReactiveRedisConnectionFactory,
     ): ReactiveRedisMessageListenerContainer {
         return ReactiveRedisMessageListenerContainer(reactiveRedisConnectionFactory)
+    }
+
+    @Bean
+    fun redisTemplate(
+        redisConnectionFactory: RedisConnectionFactory,
+    ): RedisTemplate<String, Any> {
+        val template = RedisTemplate<String, Any>()
+        template.connectionFactory = redisConnectionFactory
+        template.keySerializer = RedisSerializer.string()
+        template.valueSerializer = GenericJackson2JsonRedisSerializer()
+        template.hashKeySerializer = RedisSerializer.string()
+        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+        template.afterPropertiesSet()
+        return template
     }
 }

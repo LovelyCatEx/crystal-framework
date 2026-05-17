@@ -2,86 +2,124 @@ package com.lovelycatv.crystalframework.shared.service.redis
 
 import org.springframework.data.redis.core.*
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Service
 class RedisServiceImpl(
-    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>
 ) : RedisService {
-    override fun hasKey(key: String): Mono<Boolean> {
-        return this.reactiveRedisTemplate.hasKey(key)
+
+    override fun hasKey(key: String): Boolean {
+        return redisTemplate.hasKey(key)
     }
 
-    override fun removeKey(vararg key: String): Mono<Long> {
-        return this.reactiveRedisTemplate.delete(*key)
+    override fun removeKey(vararg key: String): Long {
+        return redisTemplate.delete(key.toList())
     }
 
-    override fun <T: Any> opsForValue(): ReactiveValueOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForValue() as ReactiveValueOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForValue(): ValueOperations<String, T> {
+        return redisTemplate.opsForValue() as ValueOperations<String, T>
     }
 
-    override fun <T: Any> get(key: String): Mono<T> {
-        return this.opsForValue<T>()
-            .get(key)
+    override fun <T : Any> get(key: String): T? {
+        return opsForValue<T>().get(key)
     }
 
-    override fun <T: Any> set(key: String, value: T, duration: Duration?): Mono<Boolean> {
-        return if (duration != null) {
-            this.opsForValue<T>().set(key, value, duration)
+    override fun <T : Any> set(
+        key: String,
+        value: T,
+        duration: Duration?
+    ) {
+        if (duration != null) {
+            opsForValue<T>().set(key, value, duration)
         } else {
-            this.opsForValue<T>().set(key, value)
+            opsForValue<T>().set(key, value)
         }
     }
 
-    override fun <T: Any> setIfAbsent(key: String, value: T, duration: Duration?): Mono<Boolean> {
+    override fun <T : Any> setIfAbsent(
+        key: String,
+        value: T,
+        duration: Duration?
+    ): Boolean {
         return if (duration != null) {
-            this.opsForValue<T>().setIfAbsent(key, value, duration)
+            opsForValue<T>()
+                .setIfAbsent(key, value, duration)
         } else {
-            this.opsForValue<T>().setIfAbsent(key, value)
-        }
+            opsForValue<T>()
+                .setIfAbsent(key, value)
+        } ?: false
     }
 
-    override fun <T: Any> setIfPresent(key: String, value: T, duration: Duration?): Mono<Boolean> {
+    override fun <T : Any> setIfPresent(
+        key: String,
+        value: T,
+        duration: Duration?
+    ): Boolean {
         return if (duration != null) {
-            this.opsForValue<T>().setIfPresent(key, value, duration)
+            opsForValue<T>()
+                .setIfPresent(key, value, duration)
         } else {
-            this.opsForValue<T>().setIfPresent(key, value)
-        }
+            opsForValue<T>()
+                .setIfPresent(key, value)
+        } ?: false
     }
 
-    override fun <T: Any> setBit(key: String, offset: Long, value: Boolean): Mono<Boolean> {
-        return this.opsForValue<T>().setBit(key, offset, value)
+    override fun <T : Any> setBit(
+        key: String,
+        offset: Long,
+        value: Boolean
+    ): Boolean {
+        return opsForValue<T>()
+            .setBit(key, offset, value)
     }
 
-    override fun <K: Any, V: Any> opsForHash(): ReactiveHashOperations<String, K, V> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForHash<K, V>() as ReactiveHashOperations<String, K, V>
+    @Suppress("UNCHECKED_CAST")
+    override fun <K : Any, V : Any> opsForHash():
+            HashOperations<String, K, V> {
+
+        return redisTemplate.opsForHash<K, V>()
+                as HashOperations<String, K, V>
     }
 
-    override fun <T: Any> opsForList(): ReactiveListOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForList() as ReactiveListOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForList():
+            ListOperations<String, T> {
+
+        return redisTemplate.opsForList()
+                as ListOperations<String, T>
     }
 
-    override fun <T: Any> opsForSet(): ReactiveSetOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForSet() as ReactiveSetOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForSet():
+            SetOperations<String, T> {
+
+        return redisTemplate.opsForSet()
+                as SetOperations<String, T>
     }
 
-    override fun <T: Any> opsForZSet(): ReactiveZSetOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForZSet() as ReactiveZSetOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForZSet():
+            ZSetOperations<String, T> {
+
+        return redisTemplate.opsForZSet()
+                as ZSetOperations<String, T>
     }
 
-    override fun <T: Any> opsForGeo(): ReactiveGeoOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForGeo() as ReactiveGeoOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForGeo():
+            GeoOperations<String, T> {
+
+        return redisTemplate.opsForGeo()
+                as GeoOperations<String, T>
     }
 
-    override fun <T: Any> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T> {
-        @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForHyperLogLog() as ReactiveHyperLogLogOperations<String, T>
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : Any> opsForHyperLogLog():
+            HyperLogLogOperations<String, T> {
+
+        return redisTemplate.opsForHyperLogLog()
+                as HyperLogLogOperations<String, T>
     }
 }

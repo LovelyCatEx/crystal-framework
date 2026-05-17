@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -10,7 +11,7 @@ import java.time.Duration
 
 @Service
 class EmailCodeAuthServiceImpl(
-    private val redisService: RedisService,
+    private val redisService: ReactiveRedisService,
     private val mailService: MailService,
 ) : EmailCodeAuthService {
     override suspend fun checkCachedEmailCode(

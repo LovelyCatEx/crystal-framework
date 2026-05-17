@@ -1,93 +1,101 @@
 package com.lovelycatv.crystalframework.shared.service.redis
 
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.*
-import reactor.core.publisher.Mono
 import java.time.Duration
 
 interface RedisService {
-    fun hasKey(key: String): Mono<Boolean>
+    fun hasKey(key: String): Boolean
 
-    fun removeKey(vararg key: String): Mono<Long>
+    fun removeKey(vararg key: String): Long
 
-    fun <T: Any> opsForValue(): ReactiveValueOperations<String, T>
+    fun <T : Any> opsForValue(): ValueOperations<String, T>
 
-    fun <T: Any> get(key: String): Mono<T>
+    fun <T : Any> get(key: String): T?
 
-    fun <T: Any> set(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T : Any> set(
+        key: String,
+        value: T,
+        duration: Duration? = null
+    )
 
-    fun <T: Any> setIfAbsent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T : Any> setIfAbsent(
+        key: String,
+        value: T,
+        duration: Duration? = null
+    ): Boolean
 
-    fun <T: Any> setIfPresent(key: String, value: T, duration: Duration? = null): Mono<Boolean>
+    fun <T : Any> setIfPresent(
+        key: String,
+        value: T,
+        duration: Duration? = null
+    ): Boolean
 
-    fun <T: Any> setBit(key: String, offset: Long, value: Boolean): Mono<Boolean>
+    fun <T : Any> setBit(
+        key: String,
+        offset: Long,
+        value: Boolean
+    ): Boolean
 
-    fun <K: Any, V: Any> opsForHash(): ReactiveHashOperations<String, K, V>
+    fun <K : Any, V : Any> opsForHash(): HashOperations<String, K, V>
 
-    fun <T: Any> opsForList(): ReactiveListOperations<String, T>
+    fun <T : Any> opsForList(): ListOperations<String, T>
 
-    fun <T: Any> opsForSet(): ReactiveSetOperations<String, T>
+    fun <T : Any> opsForSet(): SetOperations<String, T>
 
-    fun <T: Any> opsForZSet(): ReactiveZSetOperations<String, T>
+    fun <T : Any> opsForZSet(): ZSetOperations<String, T>
 
-    fun <T: Any> opsForGeo(): ReactiveGeoOperations<String, T>
+    fun <T : Any> opsForGeo(): GeoOperations<String, T>
 
-    fun <T: Any> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T>
+    fun <T : Any> opsForHyperLogLog(): HyperLogLogOperations<String, T>
 
-    fun <T: Any> asKVStore(): ExpiringKVStore<String, T> {
+    fun <T : Any> asKVStore(): ExpiringKVStore<String, T> {
         return object : ExpiringKVStore<String, T> {
-            override fun set(key: String, value: T, expiration: Long) {
-                runBlocking(Dispatchers.IO) {
-                    opsForValue<T>()
-                        .set(key, value, Duration.ofMillis(expiration))
-                        .awaitFirstOrNull()
-                }
+
+            override fun set(
+                key: String,
+                value: T,
+                expiration: Long
+            ) {
+                this@RedisService.set(
+                    key,
+                    value,
+                    Duration.ofMillis(expiration)
+                )
             }
 
             override fun set(key: String, value: T) {
-                runBlocking(Dispatchers.IO) {
-                    opsForValue<T>()
-                        .set(key, value)
-                        .awaitFirstOrNull()
-                }
+                this@RedisService.set(key, value)
             }
 
             override fun containsKey(key: String): Boolean {
-                return runBlocking(Dispatchers.IO) {
-                    hasKey(key).awaitFirstOrNull() == true
-                }
+                return this@RedisService.hasKey(key)
             }
 
             override fun get(key: String): T? {
-                return runBlocking(Dispatchers.IO) {
-                    this@RedisService
-                        .get<T>(key)
-                        .awaitFirstOrNull()
-                }
+                return this@RedisService.get(key)
             }
 
             override fun remove(key: String): T? {
-                return runBlocking(Dispatchers.IO) {
-                    val v = get(key)
+                val value = get(key)
 
-                    if (v != null) {
-                        this@RedisService.removeKey(key).awaitFirstOrNull()
-                    }
-
-                    v
+                if (value != null) {
+                    this@RedisService.removeKey(key)
                 }
+
+                return value
             }
 
             override val keys: Set<String>
                 get() = emptySet()
+
             override val size: Int
                 get() = keys.size
 
             override fun clear() {
-                throw UnsupportedOperationException("Redis cannot be cleared")
+                throw UnsupportedOperationException(
+                    "Redis cannot be cleared"
+                )
             }
         }
     }

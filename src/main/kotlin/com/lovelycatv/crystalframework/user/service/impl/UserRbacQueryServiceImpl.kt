@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
@@ -22,7 +23,7 @@ class UserRbacQueryServiceImpl(
     private val tenantMemberRelationService: TenantMemberRelationService,
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantRolePermissionRelationService: TenantRolePermissionRelationService,
-    private val redisService: RedisService
+    private val redisService: ReactiveRedisService
 ) : UserRbacQueryService {
     override suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult {
         return UserRbacQueryResult(
