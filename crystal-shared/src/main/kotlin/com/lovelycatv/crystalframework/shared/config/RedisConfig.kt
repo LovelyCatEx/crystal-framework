@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.config
 
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
@@ -11,6 +13,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.RedisSerializer
+import tools.jackson.databind.ObjectMapper
 
 @Configuration
 class RedisConfig {
@@ -20,7 +23,9 @@ class RedisConfig {
     ): ReactiveRedisTemplate<String, Any> {
         val stringSerializer = RedisSerializer.string()
 
-        val jsonSerializer = GenericJackson2JsonRedisSerializer()
+        val jsonSerializer = GenericJackson2JsonRedisSerializer(
+            com.fasterxml.jackson.databind.ObjectMapper().registerKotlinModule()
+        )
 
         val serializationContext = RedisSerializationContext
             .newSerializationContext<String, Any>()
@@ -43,12 +48,16 @@ class RedisConfig {
     fun redisTemplate(
         redisConnectionFactory: RedisConnectionFactory,
     ): RedisTemplate<String, Any> {
+        val jsonSerializer = GenericJackson2JsonRedisSerializer(
+            com.fasterxml.jackson.databind.ObjectMapper().registerKotlinModule()
+        )
+
         val template = RedisTemplate<String, Any>()
         template.connectionFactory = redisConnectionFactory
         template.keySerializer = RedisSerializer.string()
-        template.valueSerializer = GenericJackson2JsonRedisSerializer()
+        template.valueSerializer = jsonSerializer
         template.hashKeySerializer = RedisSerializer.string()
-        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+        template.hashValueSerializer = jsonSerializer
         template.afterPropertiesSet()
         return template
     }

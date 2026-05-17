@@ -1,9 +1,10 @@
-package com.lovelycatv.crystalframework.system.types
+package com.lovelycatv.crystalframework.shared.types
 
 data class SystemSettings(
     val basic: Basic,
     val bootstrap: Bootstrap,
     val mail: Mail,
+    val security: Security,
 ) {
     data class Basic(
         val baseUrl: String,
@@ -34,5 +35,17 @@ data class SystemSettings(
             val ssl: Boolean,
             val fromEmail: String,
         )
+    }
+
+    data class Security(
+        val api: Api
+    ) {
+        data class Api(
+            val encrypt: Encrypt
+        ) {
+            data class Encrypt(
+                val enabled: Boolean,
+            )
+        }
     }
 }

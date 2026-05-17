@@ -40,6 +40,7 @@
         <module>crystal-schedule</module>
         <module>crystal-resource</module>
         <module>crystal-starter</module>
+        <module>crystal-encrypt</module>
     </modules>
 
     <scm>
@@ -75,6 +76,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-resource</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-encrypt</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>

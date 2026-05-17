@@ -1,0 +1,1 @@
+export const HEADER_API_ENCRYPTION_KEY = 'X-Secure-Key';

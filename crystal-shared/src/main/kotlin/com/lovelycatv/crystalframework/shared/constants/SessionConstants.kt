@@ -1,0 +1,5 @@
+package com.lovelycatv.crystalframework.shared.constants
+
+object SessionConstants {
+    const val API_ENCRYPT_RSA_PUB_KEY = "rsa_public_key"
+}

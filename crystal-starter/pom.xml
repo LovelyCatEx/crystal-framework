@@ -76,6 +76,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-resource</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-encrypt</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

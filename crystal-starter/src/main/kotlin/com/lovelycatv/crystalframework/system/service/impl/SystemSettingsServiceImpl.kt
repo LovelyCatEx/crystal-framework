@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
-import com.lovelycatv.crystalframework.system.types.SystemSettings
+import com.lovelycatv.crystalframework.shared.types.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
@@ -86,7 +86,8 @@ class SystemSettingsServiceImpl(
         return cachedSystemSettings ?: SystemSettings(
             basic = getSystemBasicSettings(),
             bootstrap = getSystemBootstrapSettings(),
-            mail = getSystemMailSettings()
+            mail = getSystemMailSettings(),
+            security = getSystemSecuritySettings(),
         ).also {
             this.cachedSystemSettings = it
             this.syncToCacheAsync()
@@ -119,6 +120,16 @@ class SystemSettingsServiceImpl(
         )
     }
 
+    override suspend fun getSystemSecuritySettings(): SystemSettings.Security {
+        return SystemSettings.Security(
+            api = SystemSettings.Security.Api(
+                encrypt = SystemSettings.Security.Api.Encrypt(
+                    enabled = getSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE)!!
+                )
+            )
+        )
+    }
+
     override suspend fun updateSystemSettings(settings: SystemSettings) {
         setSettings(SystemSettingsConstants.Basic.BASE_URL, settings.basic.baseUrl)
 
@@ -130,6 +141,8 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
         setSettings(SystemSettingsConstants.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+
+        setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
 
         this.refreshSystemSettings()
     }
@@ -203,11 +216,11 @@ class SystemSettingsServiceImpl(
      * Some settings required by other modules will be shared in cache.
      */
     private suspend fun syncToCache() {
-        val basic = getSystemBasicSettings()
+        val settings = getSystemSettings()
 
         redisService.set(
-            RedisConstants.SYSTEM_NORMALIZED_BASE_URL,
-            basic.getNormalizedBaseUrl(false)
+            RedisConstants.SYSTEM_SETTINGS,
+            settings
         )
     }
 }

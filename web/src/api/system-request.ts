@@ -3,6 +3,9 @@ import {getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
 import {menuPathLogin} from "@/router";
 import i18n from "@/i18n";
+import {HEADER_API_ENCRYPTION_KEY} from "@/utils/global-constants.ts";
+import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/ProtectedApp.tsx";
+import {RSAUtils} from "@/utils/rsa-utils.ts";
 
 export interface ApiResponse<T> {
     code: number;
@@ -27,9 +30,21 @@ export function emptyApiResponseAsync<T>() {
     } as ApiResponse<T>);
 }
 
-export function handleApiResponse<T>(response: ApiResponse<T>) {
+export async function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
-        return response;
+        const rsaPubKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY) || undefined;
+        if (rsaPubKey && response.data) {
+            const responseData = await RSAUtils.decrypt(response.data as string, rsaPubKey);
+            console.log("Decrypting data", responseData);
+            return {
+                code: response.code,
+                message: response.message,
+                data: responseData,
+            } as ApiResponse<T>;
+        } else {
+            void message.error("Could not decrypt response");
+            throw response;
+        }
     } else if (response.code === 401) {
         void message.warning(i18n.t('api.sessionExpired'));
         setTimeout(() => {
@@ -51,12 +66,17 @@ function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', he
     let preHeaders = headers || {};
 
     const authentication = getUserAuthentication();
+    const rsaPubKey = sessionStorage.getItem(RSA_PUBLIC_KEY_STORAGE_KEY) || undefined;
+
     if (authentication) {
         preHeaders = {
             'Authorization': 'Bearer ' + authentication.token,
             ...preHeaders
         };
     }
+
+    // @ts-ignore
+    preHeaders[`${HEADER_API_ENCRYPTION_KEY}`] = rsaPubKey;
 
     if (type === 'GET') {
         return preHeaders;

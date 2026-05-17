@@ -21,5 +21,7 @@ object GlobalConstants {
         const val MANAGER_CONTROLLER_AUDIT = 0
 
         const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
+
+        const val MAIL_SEND_LOG_RECORDER = 100
     }
 }
