@@ -5,7 +5,7 @@ import {UserOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 
 interface UserCardProps {
-    userId?: string;
+    userId?: string | null;
 }
 
 export function UserCard({ userId }: UserCardProps) {

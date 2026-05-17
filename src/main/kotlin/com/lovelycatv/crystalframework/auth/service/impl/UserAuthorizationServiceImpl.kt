@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.auth.config.AuthConfiguration
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
+import com.lovelycatv.crystalframework.auth.types.ProcessOAuth2AuthenticationSuccessResult
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -51,9 +52,13 @@ class UserAuthorizationServiceImpl(
         }
     }
 
-    override fun processOAuth2AuthenticationSuccess(authentication: Authentication): Mono<ApiResponse<*>> {
+    override fun processOAuth2AuthenticationSuccess(authentication: Authentication): Mono<ProcessOAuth2AuthenticationSuccessResult> {
         return if (authentication !is OAuth2AuthenticationToken) {
-            ApiResponse.internalServerError<Nothing>("could not process oauth2 login").toMono()
+            ProcessOAuth2AuthenticationSuccessResult(
+                user = null,
+                oauth2Account = null,
+                response = ApiResponse.internalServerError<Nothing>("could not process oauth2 login")
+            ).toMono()
         } else {
             val account = mono {
                 oAuthAccountService.getAccountFromOAuth2AuthenticationToken(authentication)
@@ -67,18 +72,26 @@ class UserAuthorizationServiceImpl(
 
                     if (userEntity != null) {
                         userEntity.map { userEntity ->
-                            ApiResponse.success(
-                                buildLoginSuccessResponse(userEntity)
-                            ) as ApiResponse<*>
+                            ProcessOAuth2AuthenticationSuccessResult(
+                                user = userEntity,
+                                oauth2Account = it,
+                                response = ApiResponse.success(
+                                    buildLoginSuccessResponse(userEntity)
+                                ) as ApiResponse<*>
+                            )
                         }
                     } else {
-                        ApiResponse.success(mapOf(
-                            "oauthAccountId" to it.id.toString(),
-                            "platform" to it.getRealPlatform().name,
-                            "identifier" to it.identifier,
-                            "nickname" to it.nickname,
-                            "avatar" to it.avatar
-                        )).toMono()
+                        ProcessOAuth2AuthenticationSuccessResult(
+                            user = null,
+                            oauth2Account = it,
+                            response = ApiResponse.success(mapOf(
+                                "oauthAccountId" to it.id.toString(),
+                                "platform" to it.getRealPlatform().name,
+                                "identifier" to it.identifier,
+                                "nickname" to it.nickname,
+                                "avatar" to it.avatar
+                            ))
+                        ).toMono()
                     }
                 }
         }

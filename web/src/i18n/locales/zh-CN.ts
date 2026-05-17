@@ -1398,6 +1398,27 @@ export const zhCN = {
         userIdPlaceholder: '输入用户ID'
       }
     },
+    userLoginLogManager: {
+      title: '用户登录日志',
+      subtitle: '查看用户登录记录',
+      filter: {
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户ID',
+        username: '用户名',
+        usernamePlaceholder: '输入用户名',
+        loginMethod: '登录方式',
+        status: '状态',
+        all: '全部',
+        success: '成功',
+        failed: '失败',
+        remoteIp: 'IP地址',
+        remoteIpPlaceholder: '输入IP地址'
+      },
+      loginMethod: {
+        password: '密码登录',
+        oauth2: 'OAuth2登录'
+      }
+    },
     systemSettingsManager: {
       title: '系统设置',
       subtitle: '管理系统配置信息',
@@ -1821,6 +1842,22 @@ export const zhCN = {
         status: '状态',
         success: '成功',
         failed: '失败'
+      },
+      userLoginLog: {
+        user: '用户',
+        loginMethod: '登录方式',
+        oauth2Username: 'OAuth2用户名',
+        remoteIp: 'IP地址',
+        userAgent: 'User Agent',
+        status: '状态',
+        success: '成功',
+        failed: '失败',
+        createdTime: '登录时间',
+        loginMethodTypes: {
+          password: '密码登录',
+          oauth2: 'OAuth2登录',
+          unknown: '未知'
+        }
       }
     },
     entityTable: {
@@ -2053,7 +2090,8 @@ export const zhCN = {
     myTenantMember: '组织成员',
     myTenantRole: '角色',
     auditLog: '审计日志',
-    mailSendLog: '邮件发送日志'
+    mailSendLog: '邮件发送日志',
+    userLoginLog: '用户登录日志'
   },
 
   menu: {
@@ -2097,6 +2135,7 @@ export const zhCN = {
       mailTemplateCategories: '邮件模板分类',
       mailSendLogs: '邮件发送日志',
       auditLogs: '审计日志',
+      userLoginLogs: '用户登录日志',
       settings: '系统设置'
     },
 

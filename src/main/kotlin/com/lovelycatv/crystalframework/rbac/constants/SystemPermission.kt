@@ -155,6 +155,10 @@ object SystemPermission {
 
     const val ACTION_MAIL_SEND_LOG_READ = "mail.send.log.read"
 
+    const val MENU_USER_LOGIN_LOG_MANAGER = "user.login.log:/manager/user-login-logs"
+
+    const val ACTION_USER_LOGIN_LOG_READ = "user.login.log.read"
+
     const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
     const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
     const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"

@@ -1401,6 +1401,27 @@ export const enUS = {
         userIdPlaceholder: 'Enter user ID'
       }
     },
+    userLoginLogManager: {
+      title: 'User Login Logs',
+      subtitle: 'View user login records',
+      filter: {
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        username: 'Username',
+        usernamePlaceholder: 'Enter username',
+        loginMethod: 'Login Method',
+        status: 'Status',
+        all: 'All',
+        success: 'Success',
+        failed: 'Failed',
+        remoteIp: 'IP Address',
+        remoteIpPlaceholder: 'Enter IP address'
+      },
+      loginMethod: {
+        password: 'Password Login',
+        oauth2: 'OAuth2 Login'
+      }
+    },
     systemSettingsManager: {
       title: 'System Settings',
       subtitle: 'Manage system configuration',
@@ -1824,6 +1845,22 @@ export const enUS = {
         status: 'Status',
         success: 'Success',
         failed: 'Failed'
+      },
+      userLoginLog: {
+        user: 'User',
+        loginMethod: 'Login Method',
+        oauth2Username: 'OAuth2 Username',
+        remoteIp: 'IP Address',
+        userAgent: 'User Agent',
+        status: 'Status',
+        success: 'Success',
+        failed: 'Failed',
+        createdTime: 'Login Time',
+        loginMethodTypes: {
+          password: 'Password Login',
+          oauth2: 'OAuth2 Login',
+          unknown: 'Unknown'
+        }
       }
     },
     entityTable: {
@@ -2056,7 +2093,8 @@ export const enUS = {
     myTenantMember: 'Organization Member',
     myTenantRole: 'Role',
     auditLog: 'Audit Log',
-    mailSendLog: 'Mail Send Log'
+    mailSendLog: 'Mail Send Log',
+    userLoginLog: 'User Login Log'
   },
 
   menu: {
@@ -2100,6 +2138,7 @@ export const enUS = {
       mailTemplateCategories: 'Mail Template Categories',
       mailSendLogs: 'Mail Send Logs',
       auditLogs: 'Audit Logs',
+      userLoginLogs: 'User Login Logs',
       settings: 'System Settings'
     },
 

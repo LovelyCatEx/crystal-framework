@@ -3,7 +3,7 @@ import type {UserProfileVO} from "@/types/user.types.ts";
 import {getUserProfile} from "@/api/user.api.ts";
 import {message} from "antd";
 
-export const useUserProfile = (userId?: string) => {
+export const useUserProfile = (userId?: string | null) => {
     const [userProfile, , isUserProfileLoading, refreshUserProfile] = useSWRState<UserProfileVO>(
         userId ? `getUserProfile?id=${userId}` : undefined,
         getUserProfile,

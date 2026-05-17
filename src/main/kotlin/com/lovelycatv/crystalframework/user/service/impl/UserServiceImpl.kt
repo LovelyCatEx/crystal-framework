@@ -68,6 +68,13 @@ class UserServiceImpl(
         return this.userRepository
     }
 
+    /**
+     * Why username split by ":"
+     *
+     * See: [com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter]
+     *
+     * @param username Pattern: Username:TenantId
+     */
     override fun findByUsername(username: String): Mono<UserDetails> {
         val (realUsername, tenantIdStr) = if (username.contains(":")) {
             username.split(":")

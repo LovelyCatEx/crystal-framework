@@ -1,5 +1,8 @@
 package com.lovelycatv.crystalframework.auth.config
 
+import com.lovelycatv.crystalframework.auth.converters.types.ClientRegistrationIdOAuthPlatformConverter
+import com.lovelycatv.crystalframework.auth.event.LoginMethod
+import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
 import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
@@ -10,6 +13,7 @@ import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -18,6 +22,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.util.pattern.PathPatternParser
@@ -33,6 +38,8 @@ class SecurityConfig(
     private val unauthorizedPathScanner: UnauthorizedPathScanner,
     private val reactiveAuthenticationManager: ReactiveAuthenticationManager,
     private val oauth2ClientProperties: OAuth2ClientProperties,
+    private val eventPublisher: ApplicationEventPublisher,
+    private val clientRegistrationIdOAuthPlatformConverter: ClientRegistrationIdOAuthPlatformConverter,
 ) {
     private val logger = logger()
     private val pathPatternParser = PathPatternParser()
@@ -85,10 +92,38 @@ class SecurityConfig(
 
                 val result = userAuthorizationService.processOAuth2AuthenticationSuccess(authentication)
 
+                result.subscribe { responseData ->
+                    val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
+                    val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
+
+                    val oauth2Token = authentication as OAuth2AuthenticationToken
+                    val clientRegistrationId = oauth2Token.authorizedClientRegistrationId
+                    val oauthPlatform = clientRegistrationIdOAuthPlatformConverter.convert(clientRegistrationId)
+                    val oauth2Username = responseData.oauth2Account?.nickname
+                    val oauth2AccountId = responseData.oauth2Account?.id
+
+                    eventPublisher.publishEvent(
+                        UserLoginEvent(
+                            source = this,
+                            userId = responseData.user?.id,
+                            username = responseData.user?.username,
+                            tenantId = null,
+                            loginMethod = LoginMethod.OAUTH2.code,
+                            oauth2Type = oauthPlatform?.typeId,
+                            oauth2Username = oauth2Username,
+                            oauth2AccountId = oauth2AccountId,
+                            success = true,
+                            errorMessage = null,
+                            remoteIp = remoteIp,
+                            userAgent = userAgent
+                        )
+                    )
+                }
+
                 exchange.exchange.response.writeWith(
                     result.map {
                         exchange.exchange.response.bufferFactory().wrap(
-                            it.toJSONString().toByteArray()
+                            it.response.toJSONString().toByteArray()
                         )
                     }
                 )
@@ -96,6 +131,26 @@ class SecurityConfig(
 
             it.authenticationFailureHandler { exchange, exception ->
                 logger.warn("OAuth2 authorization failed", exception)
+
+                val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
+                val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
+
+                eventPublisher.publishEvent(
+                    UserLoginEvent(
+                        source = this,
+                        userId = null,
+                        username = null,
+                        tenantId = null,
+                        loginMethod = LoginMethod.OAUTH2.code,
+                        oauth2Type = null,
+                        oauth2Username = null,
+                        oauth2AccountId = null,
+                        success = false,
+                        errorMessage = exception.localizedMessage ?: exception.message ?: "OAuth2 authorization failed",
+                        remoteIp = remoteIp,
+                        userAgent = userAgent
+                    )
+                )
 
                 exchange.exchange.response.statusCode = HttpStatus.OK
                 exchange.exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
@@ -161,7 +216,8 @@ class SecurityConfig(
             CustomLoginFilter(
                 "/api/v1/user/login",
                 reactiveAuthenticationManager,
-                userAuthorizationService
+                userAuthorizationService,
+                eventPublisher
             ),
             SecurityWebFiltersOrder.AUTHENTICATION
         )

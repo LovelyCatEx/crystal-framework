@@ -1,0 +1,27 @@
+package com.lovelycatv.crystalframework.auth.service.manager.impl
+
+import com.lovelycatv.crystalframework.auth.entity.UserLoginLogEntity
+import com.lovelycatv.crystalframework.auth.repository.UserLoginLogRepository
+import com.lovelycatv.crystalframework.auth.service.manager.UserLoginLogManagerService
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
+
+@Service
+class UserLoginLogManagerServiceImpl(
+    private val userLoginLogRepository: UserLoginLogRepository,
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
+) : UserLoginLogManagerService {
+    override val cacheStore: ExpiringKVStore<String, UserLoginLogEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<UserLoginLogEntity>>
+        get() = redisService.asKVStore()
+    override val entityClass: KClass<UserLoginLogEntity> = UserLoginLogEntity::class
+
+    override fun getRepository(): UserLoginLogRepository {
+        return this.userLoginLogRepository
+    }
+}

@@ -14,8 +14,8 @@ export interface PaginatedResponseData<T> {
 export interface BaseManagerReadDTO extends PageQuery {
     id?: string;
     searchKeyword?: string;
-    startTime?: number;
-    endTime?: number;
+    startTime?: string;
+    endTime?: string;
 }
 
 export interface BaseManagerDeleteDTO {

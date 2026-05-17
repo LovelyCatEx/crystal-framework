@@ -49,6 +49,7 @@ import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvi
 import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
 import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
 import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
+import {UserLoginLogManagerPage} from "@/pages/manager/auth/UserLoginLogManagerPage.tsx";
 import {ProtectedControllerWarningWrapper} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
@@ -362,6 +363,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <AuditOutlined />,
             label: t('menu.admin.auditLogs'),
             page: <AuditLogManagerPage />,
+            group: 'logs'
+        },
+        {
+            key: '/manager/user-login-logs',
+            path: '/manager/user-login-logs',
+            icon: <KeyOutlined />,
+            label: t('menu.admin.userLoginLogs'),
+            page: <UserLoginLogManagerPage />,
             group: 'logs'
         },
         {
