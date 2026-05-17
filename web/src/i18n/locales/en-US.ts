@@ -2109,7 +2109,8 @@ export const enUS = {
       system_storage: 'System Storage',
       mail_template: 'Mail Templates',
       tenant: 'Tenant Management',
-      i_tenant: 'Organization Management'
+      i_tenant: 'Organization Management',
+      logs: 'Log Management'
     }
   }
 };

@@ -2106,7 +2106,8 @@ export const zhCN = {
       system_storage: '系统储存',
       mail_template: '邮件模板',
       tenant: '租户管理',
-      i_tenant: '组织管理'
+      i_tenant: '组织管理',
+      logs: '日志管理'
     }
   },
 };

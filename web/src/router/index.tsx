@@ -91,6 +91,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'i_tenant',
             icon: <ShopOutlined />,
             label: t('menu.groups.i_tenant'),
+        },
+        {
+            name: 'logs',
+            icon: <AuditOutlined />,
+            label: t('menu.groups.logs'),
         }
     ];
 }
@@ -349,14 +354,15 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <MailOutlined />,
             label: t('menu.admin.mailSendLogs'),
             page: <MailSendLogManagerPage />,
-            group: 'mail_template'
+            group: 'logs'
         },
         {
             key: '/manager/audit-logs',
             path: '/manager/audit-logs',
             icon: <AuditOutlined />,
             label: t('menu.admin.auditLogs'),
-            page: <AuditLogManagerPage />
+            page: <AuditLogManagerPage />,
+            group: 'logs'
         },
         {
             key: '/manager/settings',
