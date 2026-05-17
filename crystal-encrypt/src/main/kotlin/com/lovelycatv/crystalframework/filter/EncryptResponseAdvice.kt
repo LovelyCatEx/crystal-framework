@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.filter
 
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
-import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -9,11 +8,9 @@ import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.encrypt.RSA
 import com.lovelycatv.vertex.log.logger
-import org.checkerframework.checker.units.qual.m
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.codec.ServerCodecConfigurer
-import org.springframework.session.data.redis.ReactiveRedisIndexedSessionRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.HandlerResult
 import org.springframework.web.reactive.HandlerResultHandler
@@ -29,7 +26,6 @@ import tools.jackson.databind.ObjectMapper
 class EncryptResponseAdvice(
     private val codecConfigurer: ServerCodecConfigurer,
     private val resolver: RequestedContentTypeResolver,
-    private val sessionRepository: ReactiveRedisIndexedSessionRepository,
     private val redisService: ReactiveRedisService,
     private val objectMapper: ObjectMapper
 ) : HandlerResultHandler {

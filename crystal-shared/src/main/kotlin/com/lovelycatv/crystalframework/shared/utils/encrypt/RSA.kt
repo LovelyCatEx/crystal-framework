@@ -14,65 +14,111 @@ import javax.crypto.spec.PSource
 
 object RSA {
 
-    private val oaep256Spec = OAEPParameterSpec(
+    private val spec = OAEPParameterSpec(
         "SHA-256",
         "MGF1",
-        MGF1ParameterSpec.SHA256,
+        MGF1ParameterSpec("SHA-256"),
         PSource.PSpecified.DEFAULT
     )
 
     fun generateKeyPair(): Pair<String, String> {
-        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(2048)
-        val keyPair = keyPairGenerator.generateKeyPair()
-        val publicKey = Base64.getEncoder().encodeToString(keyPair.public.encoded)
-        val privateKey = Base64.getEncoder().encodeToString(keyPair.private.encoded)
+        val generator =
+            KeyPairGenerator.getInstance("RSA")
+
+        generator.initialize(2048)
+
+        val pair =
+            generator.generateKeyPair()
+
+        val publicKey =
+            Base64.getEncoder()
+                .encodeToString(pair.public.encoded)
+
+        val privateKey =
+            Base64.getEncoder()
+                .encodeToString(pair.private.encoded)
+
         return Pair(publicKey, privateKey)
     }
 
-    fun encryptWithPublicKey(data: String, publicKeyStr: String): String {
-        val publicKey = getPublicKeyFromString(publicKeyStr)
-        val cipher = Cipher.getInstance("RSA/ECB/OAEPPadding")
+    fun encryptWithPublicKey(
+        data: String,
+        publicKeyStr: String
+    ): String {
+
+        val publicKey =
+            getPublicKeyFromString(publicKeyStr)
+
+        val cipher = Cipher.getInstance(
+            "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+        )
+
         cipher.init(
             Cipher.ENCRYPT_MODE,
-            publicKey,
-            oaep256Spec
+            publicKey
         )
-        val encryptedBytes = cipher.doFinal(
-            data.toByteArray(Charsets.UTF_8)
-        )
-        return Base64.getEncoder().encodeToString(encryptedBytes)
+
+        val encrypted =
+            cipher.doFinal(
+                data.toByteArray(Charsets.UTF_8)
+            )
+
+        return Base64.getEncoder()
+            .encodeToString(encrypted)
     }
 
-    fun decryptWithPrivateKey(encryptedData: String, privateKeyStr: String): String {
-        val privateKey = getPrivateKeyFromString(privateKeyStr)
-        val cipher = Cipher.getInstance("RSA/ECB/OAEPPadding")
+    fun decryptWithPrivateKey(
+        encryptedData: String,
+        privateKeyStr: String
+    ): String {
+
+        val privateKey =
+            getPrivateKeyFromString(privateKeyStr)
+
+        val cipher = Cipher.getInstance(
+            "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+        )
+
         cipher.init(
             Cipher.DECRYPT_MODE,
-            privateKey,
-            oaep256Spec
-        )
-        val decryptedBytes = cipher.doFinal(
-            Base64.getDecoder()
-                .decode(encryptedData)
+            privateKey
         )
 
-        return String(decryptedBytes, Charsets.UTF_8)
+        val decrypted =
+            cipher.doFinal(
+                Base64.getDecoder()
+                    .decode(encryptedData)
+            )
+
+        return String(
+            decrypted,
+            Charsets.UTF_8
+        )
     }
 
-    private fun getPublicKeyFromString(keyStr: String): PublicKey {
-        val keyBytes = Base64.getDecoder().decode(keyStr)
-        val keySpec = X509EncodedKeySpec(keyBytes)
-        return KeyFactory
-            .getInstance("RSA")
-            .generatePublic(keySpec)
+    private fun getPublicKeyFromString(
+        keyStr: String
+    ): PublicKey {
+
+        return KeyFactory.getInstance("RSA")
+            .generatePublic(
+                X509EncodedKeySpec(
+                    Base64.getDecoder()
+                        .decode(keyStr)
+                )
+            )
     }
 
-    private fun getPrivateKeyFromString(keyStr: String): PrivateKey {
-        val keyBytes = Base64.getDecoder().decode(keyStr)
-        val keySpec = PKCS8EncodedKeySpec(keyBytes)
-        return KeyFactory
-            .getInstance("RSA")
-            .generatePrivate(keySpec)
+    private fun getPrivateKeyFromString(
+        keyStr: String
+    ): PrivateKey {
+
+        return KeyFactory.getInstance("RSA")
+            .generatePrivate(
+                PKCS8EncodedKeySpec(
+                    Base64.getDecoder()
+                        .decode(keyStr)
+                )
+            )
     }
 }
