@@ -25,7 +25,7 @@ COPY --from=dependencies /app/mvnw .
 COPY --from=dependencies /app/pom.xml .
 COPY --from=dependencies /root/.m2 /root/.m2
 
-COPY src/ src/
+COPY crystal-starter/src/ src/
 
 RUN chmod +x mvnw && ./mvnw package -DskipTests
 
