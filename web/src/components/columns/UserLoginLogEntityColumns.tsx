@@ -139,15 +139,6 @@ export function useUserLoginLogTableColumns(): EntityTableColumns<UserLoginLogEn
                     )}
                 </Space>
             )
-        },
-        {
-            title: t('components.columns.userLoginLog.createdTime'),
-            dataIndex: "createdTime",
-            key: "createdTime",
-            width: 170,
-            render: (text: string) => (
-                <span className="text-xs font-mono">{text}</span>
-            )
         }
     ];
 }

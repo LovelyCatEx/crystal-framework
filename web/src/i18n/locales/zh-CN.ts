@@ -1852,7 +1852,6 @@ export const zhCN = {
         status: '状态',
         success: '成功',
         failed: '失败',
-        createdTime: '登录时间',
         loginMethodTypes: {
           password: '密码登录',
           oauth2: 'OAuth2登录',

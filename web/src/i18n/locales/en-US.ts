@@ -1855,7 +1855,6 @@ export const enUS = {
         status: 'Status',
         success: 'Success',
         failed: 'Failed',
-        createdTime: 'Login Time',
         loginMethodTypes: {
           password: 'Password Login',
           oauth2: 'OAuth2 Login',
