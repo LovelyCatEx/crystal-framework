@@ -1,4 +1,3 @@
-import React from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../types/entity-table.types.ts";
 import type {MailSendLogEntity} from "@/api/mail-send-log.api.ts";
@@ -12,7 +11,7 @@ import {useTranslation} from "react-i18next";
 
 function MailUserCell({userId}: { userId: string | null }) {
     const {data: user, isLoading} = useSWRComposition<User | null>(
-        userId ? `mail-user-${userId}` : null,
+        userId ? `mail-user-${userId}` : undefined,
         async () => {
             if (!userId) return null;
             return await UserManagerController.getById(userId);
@@ -49,9 +48,9 @@ export function useMailSendLogTableColumns(): EntityTableColumns<MailSendLogEnti
             dataIndex: "fromEmail",
             key: "fromEmail",
             width: 180,
-            render: (text: string) => (
-                <CopyableToolTip title={text}>
-                    <span className="text-xs font-mono">{text}</span>
+            render: (_: unknown, row: MailSendLogEntity) => (
+                <CopyableToolTip title={row.fromEmail}>
+                    <span className="text-xs font-mono">{row.fromEmail}</span>
                 </CopyableToolTip>
             )
         },
@@ -60,9 +59,9 @@ export function useMailSendLogTableColumns(): EntityTableColumns<MailSendLogEnti
             dataIndex: "toEmail",
             key: "toEmail",
             width: 180,
-            render: (text: string) => (
-                <CopyableToolTip title={text}>
-                    <span className="text-xs font-mono">{text}</span>
+            render: (_: unknown, row: MailSendLogEntity) => (
+                <CopyableToolTip title={row.toEmail}>
+                    <span className="text-xs font-mono">{row.toEmail}</span>
                 </CopyableToolTip>
             )
         },
@@ -71,9 +70,9 @@ export function useMailSendLogTableColumns(): EntityTableColumns<MailSendLogEnti
             dataIndex: "subject",
             key: "subject",
             width: 200,
-            render: (text: string) => (
-                <CopyableToolTip title={text}>
-                    <span className="text-xs truncate max-w-[180px]">{text}</span>
+            render: (_: unknown, row: MailSendLogEntity) => (
+                <CopyableToolTip title={row.subject}>
+                    <span className="text-xs truncate max-w-[180px]">{row.subject}</span>
                 </CopyableToolTip>
             )
         },

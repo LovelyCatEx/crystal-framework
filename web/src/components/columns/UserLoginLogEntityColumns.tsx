@@ -78,8 +78,8 @@ export function useUserLoginLogTableColumns(): EntityTableColumns<UserLoginLogEn
             dataIndex: "loginMethod",
             key: "loginMethod",
             width: 120,
-            render: (text: number) => {
-                const { label, color } = getLoginMethodLabel(text, t);
+            render: (_: unknown, record: UserLoginLogEntity) => {
+                const { label, color } = getLoginMethodLabel(record.loginMethod, t);
                 return <Tag color={color}>{label}</Tag>;
             }
         },
@@ -88,10 +88,10 @@ export function useUserLoginLogTableColumns(): EntityTableColumns<UserLoginLogEn
             dataIndex: "oauth2Username",
             key: "oauth2Username",
             width: 150,
-            render: (text: string | null) => (
-                text ? (
-                    <CopyableToolTip title={text}>
-                        <span className="text-xs font-mono truncate max-w-[130px] block">{text}</span>
+            render: (_: unknown, record: UserLoginLogEntity) => (
+                record.oauth2Username ? (
+                    <CopyableToolTip title={record.oauth2Username}>
+                        <span className="text-xs font-mono truncate max-w-[130px] block">{record.oauth2Username}</span>
                     </CopyableToolTip>
                 ) : <span className="text-xs text-gray-400">—</span>
             )
@@ -101,10 +101,10 @@ export function useUserLoginLogTableColumns(): EntityTableColumns<UserLoginLogEn
             dataIndex: "remoteIp",
             key: "remoteIp",
             width: 130,
-            render: (text: string | null) => (
-                text ? (
-                    <CopyableToolTip title={text}>
-                        <span className="text-xs font-mono">{text}</span>
+            render: (_: unknown, record: UserLoginLogEntity) => (
+                record.remoteIp ? (
+                    <CopyableToolTip title={record.remoteIp}>
+                        <span className="text-xs font-mono">{record.remoteIp}</span>
                     </CopyableToolTip>
                 ) : <span className="text-xs text-gray-400">—</span>
             )
@@ -114,10 +114,10 @@ export function useUserLoginLogTableColumns(): EntityTableColumns<UserLoginLogEn
             dataIndex: "userAgent",
             key: "userAgent",
             width: 200,
-            render: (text: string | null) => (
-                text ? (
-                    <CopyableToolTip title={text}>
-                        <span className="text-xs truncate max-w-[180px] block">{text}</span>
+            render: (_: unknown, record: UserLoginLogEntity) => (
+                record.userAgent ? (
+                    <CopyableToolTip title={record.userAgent}>
+                        <span className="text-xs truncate max-w-[180px] block">{record.userAgent}</span>
                     </CopyableToolTip>
                 ) : <span className="text-xs text-gray-400">—</span>
             )

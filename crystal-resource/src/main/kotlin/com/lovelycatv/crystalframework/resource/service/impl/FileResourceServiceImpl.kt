@@ -1,0 +1,93 @@
+package com.lovelycatv.crystalframework.resource.service.impl
+
+import com.lovelycatv.crystalframework.resource.config.ResourceModuleConfiguration
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
+import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
+import com.lovelycatv.crystalframework.resource.service.FileResourceService
+import com.lovelycatv.crystalframework.resource.service.StorageProviderService
+import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.resource.types.StorageProviderType
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
+
+@Service
+class FileResourceServiceImpl(
+    private val fileResourceRepository: FileResourceRepository,
+    private val snowIdGenerator: SnowIdGenerator,
+    private val storageProviderService: StorageProviderService,
+    private val resourceModuleConfiguration: ResourceModuleConfiguration,
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
+) : FileResourceService {
+    override fun getRepository(): FileResourceRepository {
+        return this.fileResourceRepository
+    }
+
+    override fun generateNextSnowId(gene: Long): Long {
+        return snowIdGenerator.nextId(gene)
+    }
+
+    override fun getResourceModuleConfiguration(): ResourceModuleConfiguration {
+        return this.resourceModuleConfiguration
+    }
+
+    override fun checkFileContentType(
+        fileType: ResourceFileType,
+        contentType: String
+    ): Boolean {
+        val config = this.getResourceModuleConfiguration()
+            .get(fileType)
+        return if (config != null) {
+            contentType in config.supportedContentTypes
+        } else {
+            false
+        }
+    }
+
+    override suspend fun getByMD5(md5: String): FileResourceEntity? {
+        return this.getRepository()
+            .findByMd5(md5)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun getFileDownloadUrl(entity: FileResourceEntity): String {
+        val provider = storageProviderService
+            .getByIdOrThrow(entity.storageProviderId)
+
+        if (provider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
+            // This path is related to LocalFileResourceController$readLocalFile
+            return "${redisService.get<String>(RedisConstants.SYSTEM_NORMALIZED_BASE_URL)}/file/local/${entity.id}"
+        }
+
+        val baseUrl = provider.baseUrl
+            .run {
+                if (this.endsWith("/")) {
+                    this
+                } else {
+                    "$this/"
+                }
+            }
+
+        val key = entity.objectKey.run {
+            if (this.startsWith("/")) {
+                this.replaceFirst("/", "")
+            } else {
+                this
+            }
+        }
+
+        return baseUrl + key
+    }
+
+    override val cacheStore: ExpiringKVStore<String, FileResourceEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<FileResourceEntity>>
+        get() = redisService.asKVStore()
+    override val entityClass: KClass<FileResourceEntity> = FileResourceEntity::class
+}

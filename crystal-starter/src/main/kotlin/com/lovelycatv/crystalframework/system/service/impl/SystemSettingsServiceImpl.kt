@@ -1,0 +1,213 @@
+package com.lovelycatv.crystalframework.system.service.impl
+
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
+import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
+import com.lovelycatv.crystalframework.system.service.SystemSettingsService
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.system.types.SystemSettings
+import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.vertex.log.logger
+import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
+import org.springframework.stereotype.Service
+import java.util.*
+import kotlin.reflect.KClass
+
+@Service
+class SystemSettingsServiceImpl(
+    private val systemSettingsRepository: SystemSettingsRepository,
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService,
+    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
+    override val eventPublisher: ApplicationEventPublisher,
+) : SystemSettingsService {
+    private val logger = logger()
+
+    @Volatile
+    private var cachedSystemSettings: SystemSettings? = null
+
+    private val instanceId = UUID.randomUUID().toString()
+
+    private val refreshTopic = ChannelTopic(RedisConstants.SYSTEM_SETTINGS_REFRESH_TOPIC)
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    init {
+        coroutineScope.launch(Dispatchers.IO) {
+            getSystemSettings()
+        }
+    }
+
+    @PostConstruct
+    fun subscribeRefreshTopic() {
+        redisMessageListenerContainer
+            .receive(refreshTopic)
+            .subscribe { message ->
+                val sender = message.message
+                if (sender == instanceId) {
+                    return@subscribe
+                }
+                logger.info("Received system settings refresh signal from instance $sender")
+                cachedSystemSettings = null
+            }
+    }
+
+    override fun getRepository(): SystemSettingsRepository {
+        return this.systemSettingsRepository
+    }
+
+    override val cacheStore: ExpiringKVStore<String, SystemSettingsEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<SystemSettingsEntity>>
+        get() = redisService.asKVStore()
+    override val entityClass: KClass<SystemSettingsEntity> = SystemSettingsEntity::class
+
+    override fun refreshSystemSettings() {
+        this.cachedSystemSettings = null
+        reactiveRedisTemplate
+            .convertAndSend(refreshTopic.topic, instanceId)
+            .subscribe()
+
+        this.syncToCacheAsync()
+    }
+
+    override suspend fun getSystemSettings(): SystemSettings {
+        return cachedSystemSettings ?: SystemSettings(
+            basic = getSystemBasicSettings(),
+            bootstrap = getSystemBootstrapSettings(),
+            mail = getSystemMailSettings()
+        ).also {
+            this.cachedSystemSettings = it
+            this.syncToCacheAsync()
+        }
+    }
+
+
+    override suspend fun getSystemBasicSettings(): SystemSettings.Basic {
+        return SystemSettings.Basic(
+            baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!
+        )
+    }
+
+    override suspend fun getSystemBootstrapSettings(): SystemSettings.Bootstrap {
+        return SystemSettings.Bootstrap(
+            autoCheckRbacTableData = getSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA)!!
+        )
+    }
+
+    override suspend fun getSystemMailSettings(): SystemSettings.Mail {
+        return SystemSettings.Mail(
+            smtp = SystemSettings.Mail.SMTP(
+                host = getSettings(SystemSettingsConstants.Mail.SMTP.HOST)!!,
+                port = getSettings<Long>(SystemSettingsConstants.Mail.SMTP.PORT)!!.toInt(),
+                username = getSettings(SystemSettingsConstants.Mail.SMTP.USERNAME)!!,
+                password = getSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD)!!,
+                ssl = getSettings(SystemSettingsConstants.Mail.SMTP.SSL)!!,
+                fromEmail = getSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL)!!,
+            )
+        )
+    }
+
+    override suspend fun updateSystemSettings(settings: SystemSettings) {
+        setSettings(SystemSettingsConstants.Basic.BASE_URL, settings.basic.baseUrl)
+
+        setSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA, settings.bootstrap.autoCheckRbacTableData.toString())
+
+        setSettings(SystemSettingsConstants.Mail.SMTP.HOST, settings.mail.smtp.host)
+        setSettings(SystemSettingsConstants.Mail.SMTP.PORT, settings.mail.smtp.port.toString())
+        setSettings(SystemSettingsConstants.Mail.SMTP.USERNAME, settings.mail.smtp.username)
+        setSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
+        setSettings(SystemSettingsConstants.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
+        setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+
+        this.refreshSystemSettings()
+    }
+
+    override suspend fun getSettings(key: String): SystemSettingsEntity? {
+        return this.getRepository()
+            .findByConfigKey(key)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun setSettings(key: String, value: String?) {
+        val existing = this.getSettings(key)
+
+        if (existing != null) {
+            // internalUpdate
+            this.getRepository().save(
+                existing.apply {
+                    this.configValue = value
+                }
+            ).awaitFirstOrNull()
+
+            logger.info("System settings $key updated to ${existing.configValue}")
+        } else {
+            // insert
+            this.getRepository().save(
+                SystemSettingsEntity(
+                    id = snowIdGenerator.nextId(),
+                    configKey = key,
+                    configValue = value
+                ) newEntity true
+            ).awaitFirstOrNull()
+
+            logger.info("System settings $key saved, value: $value")
+        }
+    }
+
+    override suspend fun getSettings(
+        key: String,
+        absentValue: (absentOrNull: Boolean) -> String?
+    ): String? {
+        val existing = this.getSettings(key)
+
+        return if (existing != null) {
+            if (existing.configValue != null) {
+                existing.configValue
+            } else {
+                val newValue = absentValue.invoke(false)
+
+                this.setSettings(key, newValue)
+
+                newValue
+            }
+        } else {
+            val newValue = absentValue.invoke(true)
+
+            this.setSettings(key, newValue)
+
+            newValue
+        }
+    }
+
+    private fun syncToCacheAsync() {
+        coroutineScope.launch(Dispatchers.IO) {
+            this@SystemSettingsServiceImpl.syncToCache()
+        }
+    }
+
+    /**
+     * As some module could not access the system module directly.
+     *
+     * Some settings required by other modules will be shared in cache.
+     */
+    private suspend fun syncToCache() {
+        val basic = getSystemBasicSettings()
+
+        redisService.set(
+            RedisConstants.SYSTEM_NORMALIZED_BASE_URL,
+            basic.getNormalizedBaseUrl(false)
+        )
+    }
+}
