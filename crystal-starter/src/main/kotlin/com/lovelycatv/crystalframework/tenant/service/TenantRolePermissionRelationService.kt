@@ -8,6 +8,8 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantRolePermissionRel
 interface TenantRolePermissionRelationService : CachedBaseService<TenantRolePermissionRelationRepository, TenantRolePermissionRelationEntity> {
     suspend fun getRolePermissions(roleId: Long): List<TenantPermissionEntity>
 
+    suspend fun getRolePermissions(roleIds: List<Long>): List<TenantPermissionEntity>
+
     suspend fun setRolePermissions(roleId: Long, permissionIds: List<Long>)
 
     suspend fun deleteByPermissionIdIn(permissionIds: Collection<Long>)

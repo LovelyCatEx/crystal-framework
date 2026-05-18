@@ -39,9 +39,19 @@ class TenantRolePermissionRelationServiceImpl(
             .findAllByRoleId(roleId)
             .awaitListWithTimeout()
 
-        return relationIds.mapNotNull {
-            tenantPermissionRepository.findById(it.permissionId).awaitFirstOrNull()
-        }
+        return tenantPermissionRepository
+            .findAllById(relationIds.map { it.permissionId })
+            .awaitListWithTimeout()
+    }
+
+    override suspend fun getRolePermissions(roleIds: List<Long>): List<TenantPermissionEntity> {
+        val relationIds = this.getRepository()
+            .findAllByRoleIdIn(roleIds)
+            .awaitListWithTimeout()
+
+        return tenantPermissionRepository
+            .findAllById(relationIds.map { it.permissionId })
+            .awaitListWithTimeout()
     }
 
     @Transactional

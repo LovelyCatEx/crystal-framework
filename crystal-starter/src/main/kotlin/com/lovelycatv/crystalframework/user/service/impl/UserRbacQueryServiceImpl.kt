@@ -43,18 +43,13 @@ class UserRbacQueryServiceImpl(
                 .getUserTenantMembers(userId)
                 .map { tenantMemberEntity ->
                     val memberId = tenantMemberEntity.id
-                    val roles = tenantMemberRoleRelationService
-                        .getMemberRolesRecursive(memberId)
+                    val roles = tenantMemberRoleRelationService.getMemberRolesRecursive(memberId)
 
                     UserTenantRbacQueryResult.Tenant(
                         tenantId = tenantMemberEntity.tenantId,
                         roles = roles,
-                        permissions = roles
-                            .flatMap {
-                                tenantRolePermissionRelationService
-                                    .getRolePermissions(it.id)
-                                    .toSet()
-                            }
+                        permissions = tenantRolePermissionRelationService
+                            .getRolePermissions(roles.map { it.id })
                             .distinctBy { it.id }
                             .toSet()
                     )

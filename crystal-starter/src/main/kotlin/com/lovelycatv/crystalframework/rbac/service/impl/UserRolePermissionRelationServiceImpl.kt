@@ -40,10 +40,9 @@ class UserRolePermissionRelationServiceImpl(
             .findByRoleId(roleId)
             .awaitListWithTimeout()
 
-        return relationIds.map {
-            userPermissionRepository.findById(it.permissionId).awaitFirstOrNull()
-                ?: throw BusinessException("permission with id $it not found")
-        }
+        return userPermissionRepository
+            .findAllById(relationIds.map { it.permissionId })
+            .awaitListWithTimeout()
     }
 
     @Transactional

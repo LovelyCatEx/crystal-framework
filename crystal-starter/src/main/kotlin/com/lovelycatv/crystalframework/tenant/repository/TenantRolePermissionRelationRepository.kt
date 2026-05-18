@@ -12,6 +12,8 @@ import reactor.core.publisher.Mono
 interface TenantRolePermissionRelationRepository : BaseRepository<TenantRolePermissionRelationEntity> {
     fun findAllByRoleId(roleId: Long): Flux<TenantRolePermissionRelationEntity>
 
+    fun findAllByRoleIdIn(roleIds: Collection<Long>): Flux<TenantRolePermissionRelationEntity>
+
     fun findAllByPermissionId(permissionId: Long): Flux<TenantRolePermissionRelationEntity>
 
     fun findAllByPermissionIdIn(permissionIds: Collection<Long>): Flux<TenantRolePermissionRelationEntity>
