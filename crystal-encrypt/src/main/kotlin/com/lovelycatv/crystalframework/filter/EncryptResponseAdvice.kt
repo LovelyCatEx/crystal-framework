@@ -126,7 +126,7 @@ class EncryptResponseAdvice(
             ApiResponse(
                 responseBody.code,
                 responseBody.message,
-                AES.encryptWithAES(json, aesKey)
+                "$2a$12$" + AES.encryptWithAES(json, aesKey)
             )
         } else {
             logger.warn("Response body is not ApiResponse, skipping encryption")

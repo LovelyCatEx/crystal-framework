@@ -3,7 +3,14 @@ import {getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
 import {menuPathLogin} from "@/router";
 import i18n from "@/i18n";
-import {AES_KEY_STORAGE_KEY, HEADER_API_AES_KEY, HEADER_API_ENCRYPTION_KEY, RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/global/constants.ts";
+import {
+    AES_KEY_STORAGE_KEY,
+    ENCRYPTED_DATA_PREFIX_IDENTIFIER,
+    HEADER_API_AES_KEY,
+    HEADER_API_ENCRYPTION_KEY,
+    RSA_PRIVATE_KEY_STORAGE_KEY,
+    RSA_PUBLIC_KEY_STORAGE_KEY
+} from "@/global/constants.ts";
 import {RSAUtils} from "@/utils/rsa-utils.ts";
 import {AESUtils} from "@/utils/aes-utils.ts";
 import type {AxiosResponse} from "axios";
@@ -47,26 +54,20 @@ async function extractAesKeyFromResponse(rawResult: AxiosResponse) {
 export async function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         const aesKey = sessionStorage.getItem(AES_KEY_STORAGE_KEY);
-        if (aesKey && response.data && typeof response.data === 'string') {
-            const decryptedJson = await AESUtils.decrypt(response.data, aesKey);
-            const parsed = JSON.parse(decryptedJson);
-            return {
-                code: parsed.code ?? response.code,
-                message: parsed.message ?? response.message,
-                data: parsed.data,
-            } as ApiResponse<T>;
-        } else if (!aesKey && response.data && typeof response.data === 'string') {
-            // Fallback: try RSA decrypt (shouldn't happen after key exchange)
-            const rsaPrivKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY);
-            if (rsaPrivKey) {
-                const decryptedJson = await RSAUtils.decrypt(response.data, rsaPrivKey);
+        if (aesKey && response.data && typeof response.data === 'string' && response.data.startsWith(ENCRYPTED_DATA_PREFIX_IDENTIFIER)) {
+            try {
+                const decryptedJson = await AESUtils.decrypt(response.data.substring(ENCRYPTED_DATA_PREFIX_IDENTIFIER.length), aesKey);
                 const parsed = JSON.parse(decryptedJson);
                 return {
                     code: parsed.code ?? response.code,
                     message: parsed.message ?? response.message,
                     data: parsed.data,
                 } as ApiResponse<T>;
+            } catch {
+                void message.error("Could not decrypt response");
+                throw response;
             }
+        } else if (!aesKey && response.data && typeof response.data === 'string' && response.data.startsWith(ENCRYPTED_DATA_PREFIX_IDENTIFIER)) {
             void message.error("Could not decrypt response");
             throw response;
         } else {

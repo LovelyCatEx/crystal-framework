@@ -6,7 +6,7 @@ export function getSystemSettingsSchema() {
 }
 
 export function updateSystemSettings(settings: Record<string, string | null>) {
-    return doPost('/api/manager/settings/update', settings)
+    return doPost('/api/manager/settings/update', settings, { 'Content-Type': 'application/json' })
 }
 
 export function getSystemMaintenanceMode() {

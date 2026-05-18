@@ -222,5 +222,7 @@ class SystemSettingsServiceImpl(
             RedisConstants.SYSTEM_SETTINGS,
             settings
         )
+
+        logger.info("System settings synchronized to cache")
     }
 }
