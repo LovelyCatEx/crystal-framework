@@ -32,14 +32,14 @@ export function emptyApiResponseAsync<T>() {
 
 export async function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
-        const rsaPubKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY) || undefined;
-        if (rsaPubKey && response.data) {
-            const responseData = await RSAUtils.decrypt(response.data as string, rsaPubKey);
-            console.log("Decrypting data", responseData);
+        const rsaPrivKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY) || undefined;
+        if (rsaPrivKey && response.data) {
+            const decryptedJson = await RSAUtils.decrypt(response.data as string, rsaPrivKey);
+            const parsed = JSON.parse(decryptedJson);
             return {
-                code: response.code,
-                message: response.message,
-                data: responseData,
+                code: parsed.code ?? response.code,
+                message: parsed.message ?? response.message,
+                data: parsed.data,
             } as ApiResponse<T>;
         } else {
             void message.error("Could not decrypt response");
@@ -75,7 +75,8 @@ function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', he
         };
     }
 
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     preHeaders[`${HEADER_API_ENCRYPTION_KEY}`] = rsaPubKey;
 
     if (type === 'GET') {
@@ -102,7 +103,7 @@ export async function doGet<T>(url: string, query: object = {}, headers: object 
     );
     const result = rawResult.data;
     console.log(`[G] ==> ${url}`, rawResult.data);
-    return handleApiResponse(result);
+    return await handleApiResponse(result);
 }
 
 export async function doPost<T>(url: string, body: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
@@ -114,7 +115,7 @@ export async function doPost<T>(url: string, body: object = {}, headers: object 
     );
     console.log(`[P] ==> ${url}`, rawResult.data);
     const result = rawResult.data;
-    return handleApiResponse(result);
+    return await handleApiResponse(result);
 }
 
 export async function doDelete<T>(url: string, query: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
@@ -134,7 +135,7 @@ export async function doPut<T>(url: string, body: object = {}, headers: object =
         preProcessHeaders('PUT', headers)
     );
     const result = rawResult.data;
-    return handleApiResponse(result);
+    return await handleApiResponse(result);
 }
 
 export async function doPatch<T>(url: string, body: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
@@ -144,5 +145,5 @@ export async function doPatch<T>(url: string, body: object = {}, headers: object
         preProcessHeaders('PATCH', headers)
     );
     const result = rawResult.data;
-    return handleApiResponse(result);
+    return await handleApiResponse(result);
 }

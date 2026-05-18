@@ -50,12 +50,13 @@ object RSA {
             getPublicKeyFromString(publicKeyStr)
 
         val cipher = Cipher.getInstance(
-            "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+            "RSA/ECB/OAEPPadding"
         )
 
         cipher.init(
             Cipher.ENCRYPT_MODE,
-            publicKey
+            publicKey,
+            spec
         )
 
         val encrypted =
@@ -76,12 +77,13 @@ object RSA {
             getPrivateKeyFromString(privateKeyStr)
 
         val cipher = Cipher.getInstance(
-            "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+            "RSA/ECB/OAEPPadding"
         )
 
         cipher.init(
             Cipher.DECRYPT_MODE,
-            privateKey
+            privateKey,
+            spec
         )
 
         val decrypted =

@@ -89,23 +89,22 @@ class EncryptResponseAdvice(
                 if (systemSettings.security.api.encrypt.enabled) {
                     // Api encryption enabled
                     sessionMono.flatMap { session ->
-                        val publicKey = session.getAttribute<String>(SessionConstants.API_ENCRYPT_RSA_PUB_KEY)
+                        // Always prefer the public key from the request header (most up-to-date)
+                        val publicKeyFromHeader = exchange.request.headers.get(HeadersConstants.X_SECURE_KEY)?.get(0)
+                        val publicKey = if (publicKeyFromHeader != null) {
+                            // Update session with latest key
+                            session.attributes[SessionConstants.API_ENCRYPT_RSA_PUB_KEY] = publicKeyFromHeader
+                            publicKeyFromHeader
+                        } else {
+                            // Fallback to session
+                            session.getAttribute<String>(SessionConstants.API_ENCRYPT_RSA_PUB_KEY)
+                        }
 
                         if (publicKey != null) {
                             process(originalBody, publicKey)
                         } else {
-                            // Get public key from header
-                            val publicKeyFromHeader = exchange.request.headers.get(HeadersConstants.X_SECURE_KEY)?.get(0)
-                            if (publicKeyFromHeader != null) {
-                                // Save into session
-                                session.attributes[SessionConstants.API_ENCRYPT_RSA_PUB_KEY] = publicKeyFromHeader
-
-                                process(originalBody, publicKey)
-                            } else {
-                                throw BusinessException("The server is protected by asymmetric encryption")
-                            }
+                            throw BusinessException("The server is protected by asymmetric encryption")
                         }
-
                     }
                 } else {
                     // Do nothing
@@ -126,6 +125,10 @@ class EncryptResponseAdvice(
         require(publicKey != null && validatePublicKey(publicKey)) {
             "Public key does not match required parameters"
         }
+
+        logger.info("AAAA: $publicKey")
+
+        logger.info("RSA public key length: ${publicKey.length}, first 20: ${publicKey.take(20)}")
 
         return if (originalBody is Mono<*>) {
             originalBody.map { responseBody ->

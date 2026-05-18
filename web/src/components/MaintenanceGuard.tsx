@@ -19,6 +19,7 @@ export function MaintenanceGuard({children}: { children: React.ReactNode }) {
 
     // Still fetching — keep showing spinner, never render children
     if (isLoading || (maintenanceMode === undefined && !error)) {
+        console.log(`加载: ${isLoading}, data: ${maintenanceMode}, err: ${error}`)
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <Spin size="large"/>
