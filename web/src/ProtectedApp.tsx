@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {RSAUtils} from "@/utils/rsa-utils.ts";
-
-export const RSA_PRIVATE_KEY_STORAGE_KEY = "RSA_PRIVATE_KEY";
-export const RSA_PUBLIC_KEY_STORAGE_KEY = "RSA_PUBLIC_KEY";
+import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/utils/global-constants.ts";
 
 export function ProtectedApp(props: { children: React.ReactNode }) {
     const [isKeyPairReady, setIsKeyPairReady] = useState(false);
@@ -12,8 +10,8 @@ export function ProtectedApp(props: { children: React.ReactNode }) {
         const initializeRSAKeys = async () => {
             try {
                 // Check if private key already exists in sessionStorage
-                let privateKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY);
-                let publicKey = sessionStorage.getItem(RSA_PUBLIC_KEY_STORAGE_KEY);
+                const privateKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY);
+                const publicKey = sessionStorage.getItem(RSA_PUBLIC_KEY_STORAGE_KEY);
 
                 if (!privateKey || !publicKey) {
                     console.log('No RSA key pair found, generating new one...');

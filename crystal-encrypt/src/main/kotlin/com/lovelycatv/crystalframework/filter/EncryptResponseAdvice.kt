@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.SystemSettings
+import com.lovelycatv.crystalframework.shared.utils.encrypt.AES
 import com.lovelycatv.crystalframework.shared.utils.encrypt.RSA
 import com.lovelycatv.vertex.log.logger
 import org.springframework.core.Ordered
@@ -21,6 +22,15 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import tools.jackson.databind.ObjectMapper
 
+/**
+ * Hybrid RSA+AES encryption for API responses.
+ *
+ * Flow:
+ * 1. Frontend sends RSA public key via X-Secure-Key header
+ * 2. Backend generates AES key, encrypts it with RSA public key, returns via X-Secure-AES-Key header
+ * 3. Backend encrypts response body with AES key
+ * 4. Subsequent requests: backend reuses AES key from session, frontend already has it
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class EncryptResponseAdvice(
@@ -51,33 +61,20 @@ class EncryptResponseAdvice(
                 originalBody,
                 result.returnTypeSource
             )
-
             return delegate.handleResult(exchange, newResult)
         }
 
-        // val systemSettings = redisService.get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
         val systemSettings = SystemSettings(
-            basic = SystemSettings.Basic(
-                baseUrl = "",
-            ),
-            bootstrap = SystemSettings.Bootstrap(
-                autoCheckRbacTableData = true
-            ),
+            basic = SystemSettings.Basic(baseUrl = ""),
+            bootstrap = SystemSettings.Bootstrap(autoCheckRbacTableData = true),
             mail = SystemSettings.Mail(
                 smtp = SystemSettings.Mail.SMTP(
-                    host = "",
-                    port = 0,
-                    username = "",
-                    password = "",
-                    ssl = true,
-                    fromEmail = ""
+                    host = "", port = 0, username = "", password = "", ssl = true, fromEmail = ""
                 )
             ),
             security = SystemSettings.Security(
                 api = SystemSettings.Security.Api(
-                    encrypt = SystemSettings.Security.Api.Encrypt(
-                        enabled = true
-                    )
+                    encrypt = SystemSettings.Security.Api.Encrypt(enabled = true)
                 )
             )
         ).toMono()
@@ -85,30 +82,34 @@ class EncryptResponseAdvice(
         val sessionMono = exchange.session
 
         val modifiedBody = systemSettings
-            .flatMap { systemSettings ->
-                if (systemSettings.security.api.encrypt.enabled) {
-                    // Api encryption enabled
-                    sessionMono.flatMap { session ->
-                        // Always prefer the public key from the request header (most up-to-date)
-                        val publicKeyFromHeader = exchange.request.headers.get(HeadersConstants.X_SECURE_KEY)?.get(0)
-                        val publicKey = if (publicKeyFromHeader != null) {
-                            // Update session with latest key
-                            session.attributes[SessionConstants.API_ENCRYPT_RSA_PUB_KEY] = publicKeyFromHeader
-                            publicKeyFromHeader
-                        } else {
-                            // Fallback to session
-                            session.getAttribute<String>(SessionConstants.API_ENCRYPT_RSA_PUB_KEY)
-                        }
+            .flatMap { settings ->
+                if (!settings.security.api.encrypt.enabled) {
+                    return@flatMap (originalBody as? Mono<*> ?: originalBody.toMono())
+                }
 
-                        if (publicKey != null) {
-                            process(originalBody, publicKey)
-                        } else {
-                            throw BusinessException("The server is protected by asymmetric encryption")
-                        }
+                sessionMono.flatMap { session ->
+                    // Try to get existing AES key from session
+                    var aesKey = session.getAttribute<String>(SessionConstants.API_ENCRYPT_AES_KEY)
+
+                    if (aesKey == null) {
+                        // No AES key yet — need RSA public key to establish one
+                        val rsaPublicKey = exchange.request.headers.get(HeadersConstants.X_SECURE_KEY)?.firstOrNull()
+                            ?: throw BusinessException("The server is protected by asymmetric encryption. Provide X-Secure-Key header.")
+
+                        // Generate new AES key
+                        aesKey = AES.generateSecretKey()
+
+                        // Store AES key in session
+                        session.attributes[SessionConstants.API_ENCRYPT_AES_KEY] = aesKey
+                        session.attributes[SessionConstants.API_ENCRYPT_RSA_PUB_KEY] = rsaPublicKey
+
+                        // Encrypt AES key with RSA public key and send via response header
+                        val encryptedAesKey = RSA.encryptWithPublicKey(aesKey, rsaPublicKey)
+                        exchange.response.headers.set(HeadersConstants.X_SECURE_AES_KEY, encryptedAesKey)
                     }
-                } else {
-                    // Do nothing
-                    originalBody as? Mono<*> ?: originalBody.toMono()
+
+                    // Encrypt response body with AES
+                    processWithAes(originalBody, aesKey)
                 }
             }
 
@@ -121,45 +122,27 @@ class EncryptResponseAdvice(
         return delegate.handleResult(exchange, newResult)
     }
 
-    private fun process(originalBody: Any, publicKey: String?): Mono<Any> {
-        require(publicKey != null && validatePublicKey(publicKey)) {
-            "Public key does not match required parameters"
-        }
-
-        logger.info("AAAA: $publicKey")
-
-        logger.info("RSA public key length: ${publicKey.length}, first 20: ${publicKey.take(20)}")
-
+    private fun processWithAes(originalBody: Any, aesKey: String): Mono<Any> {
         return if (originalBody is Mono<*>) {
             originalBody.map { responseBody ->
-                processPlain(responseBody, publicKey)
+                encryptResponseBody(responseBody, aesKey)
             }
         } else {
-            processPlain(originalBody, publicKey).toMono()
+            encryptResponseBody(originalBody, aesKey).toMono()
         }
     }
 
-    private fun processPlain(responseBody: Any, publicKey: String): Any {
-        require(validatePublicKey(publicKey)) {
-            "Public key does not match required parameters"
-        }
-
+    private fun encryptResponseBody(responseBody: Any, aesKey: String): Any {
         return if (responseBody is ApiResponse<*>) {
+            val json = objectMapper.writeValueAsString(responseBody)
             ApiResponse(
                 responseBody.code,
                 responseBody.message,
-                RSA.encryptWithPublicKey(
-                    objectMapper.writeValueAsString(responseBody),
-                    publicKey
-                )
+                AES.encryptWithAES(json, aesKey)
             )
         } else {
-            logger.warn("As the type of response body is not ${ApiResponse::class.qualifiedName}, the encryption will be skipped")
+            logger.warn("Response body is not ApiResponse, skipping encryption")
             responseBody
         }
-    }
-
-    private fun validatePublicKey(publicKey: String?): Boolean {
-        return !publicKey.isNullOrBlank()
     }
 }

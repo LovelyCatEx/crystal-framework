@@ -3,9 +3,11 @@ import {getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
 import {menuPathLogin} from "@/router";
 import i18n from "@/i18n";
-import {HEADER_API_ENCRYPTION_KEY} from "@/utils/global-constants.ts";
-import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/ProtectedApp.tsx";
+import {AES_KEY_STORAGE_KEY, HEADER_API_AES_KEY, HEADER_API_ENCRYPTION_KEY} from "@/utils/global-constants.ts";
+import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/utils/global-constants.ts";
 import {RSAUtils} from "@/utils/rsa-utils.ts";
+import {AESUtils} from "@/utils/aes-utils.ts";
+import type {AxiosResponse} from "axios";
 
 export interface ApiResponse<T> {
     code: number;
@@ -21,7 +23,6 @@ export function emptyApiResponse<T>() {
     } as ApiResponse<T>;
 }
 
-
 export function emptyApiResponseAsync<T>() {
     return Promise.resolve({
         code: 200,
@@ -30,20 +31,48 @@ export function emptyApiResponseAsync<T>() {
     } as ApiResponse<T>);
 }
 
+/**
+ * Extract AES key from response header if present (first request key exchange)
+ */
+async function extractAesKeyFromResponse(rawResult: AxiosResponse) {
+    const encryptedAesKey = rawResult.headers[HEADER_API_AES_KEY.toLowerCase()];
+    if (encryptedAesKey) {
+        const rsaPrivKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY);
+        if (rsaPrivKey) {
+            const aesKey = await RSAUtils.decrypt(encryptedAesKey, rsaPrivKey);
+            sessionStorage.setItem(AES_KEY_STORAGE_KEY, aesKey);
+        }
+    }
+}
+
 export async function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
-        const rsaPrivKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY) || undefined;
-        if (rsaPrivKey && response.data) {
-            const decryptedJson = await RSAUtils.decrypt(response.data as string, rsaPrivKey);
+        const aesKey = sessionStorage.getItem(AES_KEY_STORAGE_KEY);
+        if (aesKey && response.data && typeof response.data === 'string') {
+            const decryptedJson = await AESUtils.decrypt(response.data, aesKey);
             const parsed = JSON.parse(decryptedJson);
             return {
                 code: parsed.code ?? response.code,
                 message: parsed.message ?? response.message,
                 data: parsed.data,
             } as ApiResponse<T>;
-        } else {
+        } else if (!aesKey && response.data && typeof response.data === 'string') {
+            // Fallback: try RSA decrypt (shouldn't happen after key exchange)
+            const rsaPrivKey = sessionStorage.getItem(RSA_PRIVATE_KEY_STORAGE_KEY);
+            if (rsaPrivKey) {
+                const decryptedJson = await RSAUtils.decrypt(response.data, rsaPrivKey);
+                const parsed = JSON.parse(decryptedJson);
+                return {
+                    code: parsed.code ?? response.code,
+                    message: parsed.message ?? response.message,
+                    data: parsed.data,
+                } as ApiResponse<T>;
+            }
             void message.error("Could not decrypt response");
             throw response;
+        } else {
+            // Data is not encrypted (or null)
+            return response;
         }
     } else if (response.code === 401) {
         void message.warning(i18n.t('api.sessionExpired'));
@@ -63,10 +92,9 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
 }
 
 function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', headers: object | null) {
-    let preHeaders = headers || {};
+    let preHeaders: Record<string, string> = (headers || {}) as Record<string, string>;
 
     const authentication = getUserAuthentication();
-    const rsaPubKey = sessionStorage.getItem(RSA_PUBLIC_KEY_STORAGE_KEY) || undefined;
 
     if (authentication) {
         preHeaders = {
@@ -75,9 +103,11 @@ function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', he
         };
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    preHeaders[`${HEADER_API_ENCRYPTION_KEY}`] = rsaPubKey;
+    // Always send RSA public key (for AES key exchange on first request)
+    const rsaPubKey = sessionStorage.getItem(RSA_PUBLIC_KEY_STORAGE_KEY);
+    if (rsaPubKey) {
+        preHeaders[HEADER_API_ENCRYPTION_KEY] = rsaPubKey;
+    }
 
     if (type === 'GET') {
         return preHeaders;
@@ -101,6 +131,7 @@ export async function doGet<T>(url: string, query: object = {}, headers: object 
         query,
         preProcessHeaders('GET', headers)
     );
+    await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
     console.log(`[G] ==> ${url}`, rawResult.data);
     return await handleApiResponse(result);
@@ -113,6 +144,7 @@ export async function doPost<T>(url: string, body: object = {}, headers: object 
         body,
         preProcessHeaders('POST', headers)
     );
+    await extractAesKeyFromResponse(rawResult);
     console.log(`[P] ==> ${url}`, rawResult.data);
     const result = rawResult.data;
     return await handleApiResponse(result);
@@ -124,6 +156,7 @@ export async function doDelete<T>(url: string, query: object = {}, headers: obje
         query,
         preProcessHeaders('DELETE', headers)
     );
+    await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
     return handleApiResponse(result);
 }
@@ -134,6 +167,7 @@ export async function doPut<T>(url: string, body: object = {}, headers: object =
         body,
         preProcessHeaders('PUT', headers)
     );
+    await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
     return await handleApiResponse(result);
 }
@@ -144,6 +178,7 @@ export async function doPatch<T>(url: string, body: object = {}, headers: object
         body,
         preProcessHeaders('PATCH', headers)
     );
+    await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
     return await handleApiResponse(result);
 }
