@@ -10,10 +10,10 @@ import React, {
     useRef,
     useState
 } from "react";
-import {Flex, Input, message, Space, Table, type TableProps} from "antd";
+import {Button, Checkbox, Flex, Input, message, Popover, Space, Table, type TableProps} from "antd";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "../utils/datetime.utils.ts";
-import {SearchOutlined} from "@ant-design/icons";
+import {SearchOutlined, SettingOutlined} from "@ant-design/icons";
 import type {EntityTableColumn, EntityTableColumns} from "./types/entity-table.types.ts";
 import type {BaseManagerReadDTO, PaginatedResponseData} from "../types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
@@ -79,6 +79,18 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // Selection (controlled, so parent can reset visually)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+    // Column visibility
+    const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
+        const allKeys = new Set<string>();
+        props.columns.forEach(col => allKeys.add(col.key));
+        allKeys.add('createdTime');
+        if (props.tableRowActionsRender) {
+            allKeys.add('action');
+        }
+        return allKeys;
+    });
+    const [columnFilterOpen, setColumnFilterOpen] = useState(false);
+
     // When refreshData explicitly resets page, suppress the immediate effect re-fire that
     // would otherwise be triggered by the setCurrentPage(1) state change.
     const skipNextPageEffectRef = useRef(false);
@@ -132,43 +144,45 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         fireQuery(currentPage, currentPageSize, searchKeyword);
     }, [currentPage, currentPageSize])
 
-    const tableColumns: (ColumnGroupType<ENTITY> | ColumnType<ENTITY>)[] = [
+    const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
         ...props.columns,
-        ...[
-            ...[{
-                title: t('components.entityTable.recordTime'),
-                dataIndex: "createdTime",
-                key: "createdTime",
-                width: 240,
-                render: (_: unknown, row: ENTITY) => {
-                    return <Space orientation='vertical' size={0}>
-                        <span className="text-xs">{t('components.entityTable.createdTime')} {formatTimestamp(row.createdTime)}</span>
-                        <span className="text-xs">{t('components.entityTable.modifiedTime')} {formatTimestamp(row.modifiedTime)}</span>
-                    </Space>
-                }
-            }],
-            ...(props.tableRowActionsRender !== undefined ? [{
-                title: t('components.entityTable.action'),
-                dataIndex: "action",
-                key: 'action',
-                width: 120,
-                render: (_: unknown, record: ENTITY) => (
-                    props.tableRowActionsRender!(record)
-                ),
-            }] : []),
-        ] as EntityTableColumn<ENTITY, unknown>[]
-    ].map((column) => {
-        return {
-            title: column.title,
-            dataIndex: column.dataIndex,
-            key: column.key,
-            fixed: column.fixed,
-            width: column.width,
-            render: (data: unknown, row: ENTITY) => {
-                return column.render(data, row)
+        {
+            title: t('components.entityTable.recordTime'),
+            dataIndex: "createdTime",
+            key: "createdTime",
+            width: 240,
+            render: (_: unknown, row: ENTITY) => {
+                return <Space orientation='vertical' size={0}>
+                    <span className="text-xs">{t('components.entityTable.createdTime')} {formatTimestamp(row.createdTime)}</span>
+                    <span className="text-xs">{t('components.entityTable.modifiedTime')} {formatTimestamp(row.modifiedTime)}</span>
+                </Space>
             }
-        }
-    });
+        },
+        ...(props.tableRowActionsRender !== undefined ? [{
+            title: t('components.entityTable.action'),
+            dataIndex: "action",
+            key: 'action',
+            width: 120,
+            render: (_: unknown, record: ENTITY) => (
+                props.tableRowActionsRender!(record)
+            ),
+        }] : []),
+    ];
+
+    const tableColumns: (ColumnGroupType<ENTITY> | ColumnType<ENTITY>)[] = allColumns
+        .filter(column => visibleColumns.has(column.key))
+        .map((column) => {
+            return {
+                title: column.title,
+                dataIndex: column.dataIndex,
+                key: column.key,
+                fixed: column.fixed,
+                width: column.width,
+                render: (data: unknown, row: ENTITY) => {
+                    return column.render(data, row)
+                }
+            }
+        });
 
     useImperativeHandle(ref, () => {
         return {
@@ -191,6 +205,48 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             name: record.id,
         }),
     };
+
+    const handleColumnToggle = (columnKey: string, checked: boolean) => {
+        setVisibleColumns(prev => {
+            const newSet = new Set(prev);
+            if (checked) {
+                newSet.add(columnKey);
+            } else {
+                newSet.delete(columnKey);
+            }
+            return newSet;
+        });
+    };
+
+    const columnFilterContent = (
+        <div className="w-64">
+            <div className="mb-2 flex justify-between items-center">
+                <span className="font-medium">{t('components.entityTable.columnFilter.title')}</span>
+                <Button
+                    type="link"
+                    size="small"
+                    onClick={() => {
+                        const allKeys = new Set<string>();
+                        allColumns.forEach(col => allKeys.add(col.key));
+                        setVisibleColumns(allKeys);
+                    }}
+                >
+                    {t('components.entityTable.columnFilter.selectAll')}
+                </Button>
+            </div>
+            <Space direction="vertical" className="w-full">
+                {allColumns.map(column => (
+                    <Checkbox
+                        key={column.key}
+                        checked={visibleColumns.has(column.key)}
+                        onChange={(e) => handleColumnToggle(column.key, e.target.checked)}
+                    >
+                        {column.title}
+                    </Checkbox>
+                ))}
+            </Space>
+        </div>
+    );
 
     return (
         <>
@@ -226,6 +282,21 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                         {action.children}
                     </div>
                 ))}
+
+                <div className="flex flex-col space-y-2">
+                    <span>{t('components.entityTable.columnFilter.label')}</span>
+                    <Popover
+                        content={columnFilterContent}
+                        trigger="click"
+                        open={columnFilterOpen}
+                        onOpenChange={setColumnFilterOpen}
+                        placement="bottomRight"
+                    >
+                        <Button icon={<SettingOutlined />} className="rounded-xl">
+                            {t('components.entityTable.columnFilter.button')}
+                        </Button>
+                    </Popover>
+                </div>
             </Flex>
 
             <Table<ENTITY>

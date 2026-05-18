@@ -1886,6 +1886,12 @@ export const zhCN = {
       fetchError: '无法获取{{entityName}}列表',
       pagination: {
         total: '共 {{total}} 条记录',
+      },
+      columnFilter: {
+        label: '列设置',
+        button: '列筛选',
+        title: '显示列',
+        selectAll: '全选',
       }
     },
     jsonEditor: {

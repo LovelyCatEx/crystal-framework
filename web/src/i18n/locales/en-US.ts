@@ -1889,6 +1889,12 @@ export const enUS = {
       fetchError: 'Failed to fetch {{entityName}} list',
       pagination: {
         total: 'Total {{total}} Item(s)',
+      },
+      columnFilter: {
+        label: 'Column Settings',
+        button: 'Filter Columns',
+        title: 'Display Columns',
+        selectAll: 'Select All',
       }
     },
     jsonEditor: {
