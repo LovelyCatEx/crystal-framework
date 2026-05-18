@@ -1458,6 +1458,12 @@ export const zhCN = {
         'mail.smtp': 'SMTP 邮件服务',
         'security.api.encrypt': 'Api 安全设置',
       },
+      tabs: {
+        'basic': '基本',
+        'bootstrap': '启动',
+        'mail': '邮件',
+        'security': '安全',
+      },
       enums: {
         'security.api.encrypt.scope': {
           'ALL': '所有接口',

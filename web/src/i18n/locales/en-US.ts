@@ -1461,6 +1461,12 @@ export const enUS = {
         'mail.smtp': 'SMTP Mail Service',
         'security.api.encrypt': 'Api Security',
       },
+      tabs: {
+        'basic': 'Basic',
+        'bootstrap': 'Bootstrap',
+        'mail': 'Mail',
+        'security': 'Security',
+      },
       enums: {
         'security.api.encrypt.scope': {
           'ALL': 'All api',

@@ -28,3 +28,13 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
     ]);
 }
+
+export function useSettingsTabToTranslationMap(): Map<string, string> {
+    const { t } = useTranslation();
+    return new Map<string, string>([
+        ['basic', t('pages.systemSettingsManager.tabs.basic')],
+        ['bootstrap', t('pages.systemSettingsManager.tabs.bootstrap')],
+        ['mail', t('pages.systemSettingsManager.tabs.mail')],
+        ['security', t('pages.systemSettingsManager.tabs.security')],
+    ]);
+}

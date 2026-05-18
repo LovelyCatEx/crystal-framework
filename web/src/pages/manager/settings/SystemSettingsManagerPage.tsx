@@ -5,19 +5,106 @@ import {
     updateSystemMaintenanceMode,
     updateSystemSettings
 } from "@/api/system-settings.api.ts";
-import {Button, Card, Checkbox, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Switch} from "antd";
-import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
+import {Button, Card, Checkbox, Dropdown, Form, Input, InputNumber, message, Modal, Radio, Switch, Tabs, theme} from "antd";
+import type {MenuProps} from "antd";
+import type {GetSystemSettingsSchemaData, SystemSettingsSchema} from "@/types/system-settings.types.ts";
+import {SystemSettingsItemValueType} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
-import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
+import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap, useSettingsTabToTranslationMap} from "@/i18n/system-settings.tsx";
 import {ApiOutlined, ExclamationCircleFilled, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 
+const { useToken } = theme;
+
+function SettingsGroup(props: {
+    group: string;
+    items: [string, SystemSettingsSchema][];
+    loading: boolean;
+    isFirst: boolean;
+}) {
+    const { token } = useToken();
+    const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
+    const translatedGroup = settingsGroupToTranslationMap.get(props.group);
+
+    return (
+        <div className={props.isFirst ? "" : "mt-8"}>
+            <div className="flex items-center mb-6 pb-3 border-b border-slate-100">
+                {translatedGroup?.icon && (
+                    <span className="text-xl mr-3" style={{ color: token.colorPrimary }}>
+                        {translatedGroup.icon}
+                    </span>
+                )}
+                <h3 className="text-lg font-semibold text-slate-800">
+                    {translatedGroup?.label ?? props.group}
+                </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {props.items.map(([key, value]) => (
+                    <div key={key} className="bg-slate-50/50 rounded-xl p-4 hover:bg-slate-50 transition-colors">
+                        <SettingsItem 
+                            settingsKey={key} 
+                            schema={value}
+                            loading={props.loading}
+                        />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function buildTabItems(
+    data: GetSystemSettingsSchemaData,
+    settingsTabToTranslationMap: Map<string, string>,
+    isLoading: boolean,
+    refreshing: boolean
+) {
+    const tabs = Array.from(
+        new Set(
+            Object.values(data.items)
+                .map(item => item.tab)
+                .filter(tab => tab !== null)
+        )
+    ).sort();
+
+    return tabs.map(tab => {
+        const groupsInTab = data.groups.filter(group => 
+            Object.values(data.items).some(item => 
+                item.tab === tab && item.group === group
+            )
+        );
+
+        const groupElements = groupsInTab.map((group, index) => {
+            const items = Object.entries(data.items)
+                .filter(([_, value]) => value.group === group)
+                .sort(([, a], [, b]) => a.sort - b.sort);
+
+            return (
+                <SettingsGroup
+                    key={group}
+                    group={group}
+                    items={items}
+                    loading={isLoading || refreshing}
+                    isFirst={index === 0}
+                />
+            );
+        });
+
+        return {
+            key: tab,
+            label: settingsTabToTranslationMap.get(tab) ?? tab,
+            children: <div className="py-4">{groupElements}</div>
+        };
+    });
+}
+
 export function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
     const {t} = useTranslation();
-    const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
+    const settingsTabToTranslationMap = useSettingsTabToTranslationMap();
 
     const { data, isLoading, mutate } = useSWRComposition(
         'settings-schema',
@@ -114,111 +201,76 @@ export function SystemSettingsManagerPage() {
                 title={t('pages.systemSettingsManager.title')}
                 subtitle={t('pages.systemSettingsManager.subtitle')}
                 titleActions={
-                    <Button
-                        type="primary"
-                        icon={<SaveOutlined />}
-                        size="large"
-                        className="rounded-xl h-12 shadow-lg"
-                        onClick={() => {
-                            form.submit();
-                        }}
-                    >
-                        {t('pages.systemSettingsManager.saveSettings')}
-                    </Button>
+                    <div className="flex items-center space-x-3">
+                        <Dropdown
+                            menu={{
+                                items: [
+                                    {
+                                        key: 'import',
+                                        label: t('pages.systemSettingsManager.importConfig'),
+                                        icon: <ImportOutlined />,
+                                        onClick: importSettings
+                                    },
+                                    {
+                                        key: 'export',
+                                        label: t('pages.systemSettingsManager.exportConfig'),
+                                        icon: <ExportOutlined />,
+                                        onClick: exportSettings
+                                    },
+                                    {
+                                        type: 'divider'
+                                    },
+                                    {
+                                        key: 'maintenance',
+                                        label: t('pages.systemSettingsManager.maintenanceMode'),
+                                        icon: isInMaintenance ? <ApiOutlined /> : <ToolOutlined />,
+                                        onClick: switchMaintenanceMode,
+                                        danger: isInMaintenance
+                                    }
+                                ] as MenuProps['items']
+                            }}
+                            placement="bottomRight"
+                        >
+                            <Button
+                                icon={<ToolOutlined />}
+                                size="large"
+                                className="rounded-xl h-12 px-6"
+                            >
+                                {t('pages.systemSettingsManager.operation')}
+                            </Button>
+                        </Dropdown>
+                        <Button
+                            type="primary"
+                            icon={<SaveOutlined />}
+                            size="large"
+                            className="rounded-xl h-12 px-8 shadow-lg"
+                            onClick={() => {
+                                form.submit();
+                            }}
+                        >
+                            {t('pages.systemSettingsManager.saveSettings')}
+                        </Button>
+                    </div>
                 }
             />
 
-            <Card className="mb-4">
-                <div className="text-lg font-bold mb-4 flex items-center space-x-2">
-                    <ToolOutlined />
-                    <span>{t('pages.systemSettingsManager.operation')}</span>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                    <Button
-                        icon={<ImportOutlined />}
-                        onClick={importSettings}
-                    >
-                        {t('pages.systemSettingsManager.importConfig')}
-                    </Button>
-                    <Button
-                        icon={<ExportOutlined />}
-                        onClick={exportSettings}
-                    >
-                        {t('pages.systemSettingsManager.exportConfig')}
-                    </Button>
-                    {isInMaintenance ? (
-                        <Button
-                            icon={<ApiOutlined />}
-                            onClick={switchMaintenanceMode}
-                        >
-                            {t('pages.systemSettingsManager.maintenanceMode')}
-                        </Button>
-                    ) : (
-                        <Button
-                            icon={<ToolOutlined />}
-                            onClick={switchMaintenanceMode}
-                        >
-                            {t('pages.systemSettingsManager.maintenanceMode')}
-                        </Button>
-                    )}
-                </div>
-            </Card>
-
-            <Form form={form} layout="vertical" onFinish={updateSettings}>
-                {data && (
-                    data.groups.map((group) => {
-                        const translatedGroup = settingsGroupToTranslationMap.get(group)
-                        return (
-                            <Card loading={isLoading || refreshing} key={group} className="mb-4">
-                                <div className="text-lg font-bold mb-4 flex items-center">
-                                    {translatedGroup?.icon ? (
-                                        <>
-                                            {translatedGroup.icon}
-                                            <span className="mr-2"></span>
-                                        </>
-                                    ) : null}
-
-                                    {translatedGroup?.label ?? group}
-                                </div>
-
-                                {(() => {
-                                    const items = Object.entries(data.items)
-                                        .filter(([_, value]) => value.group === group)
-                                        .sort(([, a], [, b]) => a.sort - b.sort);
-
-                                    const chunks = [];
-                                    for (let i = 0; i < items.length; i += 3) {
-                                        chunks.push(items.slice(i, i + 3));
-                                    }
-
-                                    return chunks.map((chunk, chunkIndex) => (
-                                        <Row gutter={[16, 16]} key={chunkIndex}>
-                                            {chunk.map(([key, value]) => (
-                                                <Col
-                                                    xs={24}
-                                                    sm={12}
-                                                    md={8}
-                                                    lg={8}
-                                                    xl={8}
-                                                    key={key}
-                                                >
-                                                    <SettingsItem settingsKey={key} schema={value} />
-                                                </Col>
-                                            ))}
-                                        </Row>
-                                    ));
-                                })()}
-                            </Card>
-                        )
-                    })
-                )}
-            </Form>
+            <div className="animate-in slide-in-from-bottom-4 duration-500">
+                <Card className="rounded-2xl shadow-sm border-none overflow-hidden mb-6" styles={{ body: { paddingTop: 8 } }}>
+                    <Form form={form} layout="vertical" onFinish={updateSettings}>
+                        {data && (
+                            <Tabs 
+                                items={buildTabItems(data, settingsTabToTranslationMap, isLoading, refreshing)} 
+                                className="settings-tabs" 
+                            />
+                        )}
+                    </Form>
+                </Card>
+            </div>
         </>
     )
 }
 
-function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema }) {
+function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema, loading?: boolean }) {
     const { t } = useTranslation();
     const [formItemProps, setFormItemProps] = useState<Record<string, unknown>>();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
@@ -227,27 +279,32 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
         <Form.Item
             key={props.settingsKey}
             name={props.settingsKey}
-            label={settingsKeyToTranslationMap.get(props.settingsKey) ?? props.settingsKey}
+            label={
+                <span className="text-sm font-medium text-slate-700">
+                    {settingsKeyToTranslationMap.get(props.settingsKey) ?? props.settingsKey}
+                </span>
+            }
+            className="mb-0"
             {...formItemProps}
         >
             {props.schema.valueType == SystemSettingsItemValueType.STRING ? (
-                <>
-                    <Input className="w-full rounded-lg h-8 flex items-center" placeholder={props.schema.defaultValue ?? ''} />
-                </>
+                <Input 
+                    className="rounded-lg h-10" 
+                    placeholder={props.schema.defaultValue ?? ''} 
+                    disabled={props.loading}
+                />
             ) : props.schema.valueType == SystemSettingsItemValueType.NUMBER ? (
-                <>
-                    <InputNumber
-                        className="w-full rounded-lg h-8 flex items-center"
-                        defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
-                    />
-                </>
+                <InputNumber
+                    className="w-full rounded-lg h-10"
+                    defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
+                    disabled={props.loading}
+                />
             ) : props.schema.valueType == SystemSettingsItemValueType.DECIMAL ? (
-                <>
-                    <InputNumber
-                        className="w-full rounded-lg h-8 flex items-center"
-                        defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
-                    />
-                </>
+                <InputNumber
+                    className="w-full rounded-lg h-10"
+                    defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
+                    disabled={props.loading}
+                />
             ) : props.schema.valueType == SystemSettingsItemValueType.BOOLEAN ? (
                 <>
                     {(() => {
@@ -258,35 +315,32 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
                         })
                         return <></>
                     })()}
-
-                    <Switch />
+                    <Switch disabled={props.loading} />
                 </>
             ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_SINGLE ? (
-                <>
-                    <Radio.Group
-                        options={(props.schema.enumValues ?? []).map((item) => {
-                            return {
-                                value: item,
-                                label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
-                            }
-                        })}
-                    />
-                </>
+                <Radio.Group
+                    className="flex flex-col space-y-2"
+                    disabled={props.loading}
+                    options={(props.schema.enumValues ?? []).map((item) => {
+                        return {
+                            value: item,
+                            label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                        }
+                    })}
+                />
             ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_MULTIPLE ? (
-                <>
-                    <Checkbox.Group
-                        options={(props.schema.enumValues ?? []).map((item) => {
-                            return {
-                                value: item,
-                                label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
-                            }
-                        })}
-                    />
-                </>
+                <Checkbox.Group
+                    className="flex flex-col space-y-2"
+                    disabled={props.loading}
+                    options={(props.schema.enumValues ?? []).map((item) => {
+                        return {
+                            value: item,
+                            label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                        }
+                    })}
+                />
             ) : (
-                <>
-                    <span>NO RENDER FOUND FOR THIS SETTINGS ITEM</span>
-                </>
+                <span className="text-red-500 text-sm">NO RENDER FOUND FOR THIS SETTINGS ITEM</span>
             )}
         </Form.Item>
     )
