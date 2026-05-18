@@ -1447,12 +1447,14 @@ export const zhCN = {
         'mail.smtp.host': '主机',
         'mail.smtp.port': '端口',
         'mail.smtp.ssl': '是否启用 SSL',
-        'mail.smtp.fromEmail': '发件地址'
+        'mail.smtp.fromEmail': '发件地址',
+        'security.api.encrypt.enabled': '是否启用',
       },
       groups: {
         'basic': '基本设置',
         'bootstrap': '启动设置项',
-        'mail.smtp': 'SMTP 邮件服务'
+        'mail.smtp': 'SMTP 邮件服务',
+        'security.api.encrypt': 'Api 安全设置',
       }
     },
     managerContainer: {

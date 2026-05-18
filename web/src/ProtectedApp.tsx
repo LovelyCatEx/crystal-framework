@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {RSAUtils} from "@/utils/rsa-utils.ts";
-import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/utils/global-constants.ts";
+import {RSA_PRIVATE_KEY_STORAGE_KEY, RSA_PUBLIC_KEY_STORAGE_KEY} from "@/global/constants.ts";
 
 export function ProtectedApp(props: { children: React.ReactNode }) {
     const [isKeyPairReady, setIsKeyPairReady] = useState(false);

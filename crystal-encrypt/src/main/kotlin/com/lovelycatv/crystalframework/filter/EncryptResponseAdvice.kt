@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.filter
 
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -64,20 +65,7 @@ class EncryptResponseAdvice(
             return delegate.handleResult(exchange, newResult)
         }
 
-        val systemSettings = SystemSettings(
-            basic = SystemSettings.Basic(baseUrl = ""),
-            bootstrap = SystemSettings.Bootstrap(autoCheckRbacTableData = true),
-            mail = SystemSettings.Mail(
-                smtp = SystemSettings.Mail.SMTP(
-                    host = "", port = 0, username = "", password = "", ssl = true, fromEmail = ""
-                )
-            ),
-            security = SystemSettings.Security(
-                api = SystemSettings.Security.Api(
-                    encrypt = SystemSettings.Security.Api.Encrypt(enabled = true)
-                )
-            )
-        ).toMono()
+        val systemSettings = redisService.get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
 
         val sessionMono = exchange.session
 
