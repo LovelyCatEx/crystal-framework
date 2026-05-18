@@ -7,9 +7,9 @@ import com.lovelycatv.crystalframework.auth.controller.manager.dto.ManagerUpdate
 import com.lovelycatv.crystalframework.auth.entity.UserLoginLogEntity
 import com.lovelycatv.crystalframework.auth.repository.UserLoginLogRepository
 import com.lovelycatv.crystalframework.auth.service.manager.UserLoginLogManagerService
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping

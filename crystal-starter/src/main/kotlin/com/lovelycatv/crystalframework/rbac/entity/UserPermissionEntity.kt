@@ -1,9 +1,9 @@
 package com.lovelycatv.crystalframework.rbac.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.lovelycatv.crystalframework.shared.types.PermissionType
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.types.PermissionType
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 

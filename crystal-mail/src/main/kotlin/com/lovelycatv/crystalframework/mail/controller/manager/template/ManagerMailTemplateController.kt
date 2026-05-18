@@ -7,9 +7,9 @@ import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.Mana
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateManagerService
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping

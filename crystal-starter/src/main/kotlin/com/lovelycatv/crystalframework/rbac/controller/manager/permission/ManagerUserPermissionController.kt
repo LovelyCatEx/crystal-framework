@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.rbac.controller.manager.permission
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerCreatePermissionDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerDeletePermissionDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerReadPermissionDTO
@@ -10,6 +9,7 @@ import com.lovelycatv.crystalframework.rbac.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.service.UserPermissionManagerService
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping

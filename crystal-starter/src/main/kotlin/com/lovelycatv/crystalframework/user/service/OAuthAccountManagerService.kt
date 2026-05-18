@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.user.service
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
+import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import com.lovelycatv.crystalframework.user.controller.manager.oauth.dto.ManagerCreateOAuthAccountDTO

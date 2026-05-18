@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantRolePermissionRelationService

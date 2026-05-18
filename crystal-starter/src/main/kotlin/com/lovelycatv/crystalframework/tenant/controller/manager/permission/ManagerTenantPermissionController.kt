@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.permission
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.permission.dto.ManagerCreateTenantPermissionDTO

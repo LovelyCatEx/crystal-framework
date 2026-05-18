@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.rbac.service
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.rbac.entity.UserRoleEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
+import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 
 interface UserRoleService : CachedBaseService<UserRoleRepository, UserRoleEntity> {
     suspend fun getAllRoles(): List<UserRoleEntity>

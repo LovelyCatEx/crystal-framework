@@ -3,12 +3,10 @@ package com.lovelycatv.crystalframework.rbac.job
 import com.lovelycatv.crystalframework.rbac.entity.UserPermissionEntity
 import com.lovelycatv.crystalframework.rbac.service.UserPermissionManagerService
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
-import com.lovelycatv.crystalframework.schedule.api.ScheduledTask
 import com.lovelycatv.crystalframework.schedule.annotations.ScheduledTaskMetadata
-import com.lovelycatv.crystalframework.schedule.api.context.TaskExecutionContext
+import com.lovelycatv.crystalframework.schedule.api.ScheduledTask
 import com.lovelycatv.crystalframework.schedule.api.TaskResult
-import com.lovelycatv.crystalframework.schedule.annotations.CronTaskExecutor
-import com.lovelycatv.crystalframework.schedule.registry.TaskRegistry
+import com.lovelycatv.crystalframework.schedule.api.context.TaskExecutionContext
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

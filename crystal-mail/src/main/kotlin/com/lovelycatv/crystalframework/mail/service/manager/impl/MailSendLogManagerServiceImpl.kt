@@ -1,7 +1,5 @@
 package com.lovelycatv.crystalframework.mail.service.manager.impl
 
-import com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerCreateMailSendLogDTO
-import com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerUpdateMailSendLogDTO
 import com.lovelycatv.crystalframework.mail.entity.MailSendLogEntity
 import com.lovelycatv.crystalframework.mail.repository.MailSendLogRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailSendLogManagerService

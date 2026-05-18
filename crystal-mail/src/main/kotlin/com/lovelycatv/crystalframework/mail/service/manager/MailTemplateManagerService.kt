@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.mail.service.manager
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerCreateMailTemplateDTO
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerDeleteMailTemplateDTO
 import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.ManagerReadMailTemplateDTO
@@ -8,6 +7,7 @@ import com.lovelycatv.crystalframework.mail.controller.manager.template.dto.Mana
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateRepository
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
+import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull

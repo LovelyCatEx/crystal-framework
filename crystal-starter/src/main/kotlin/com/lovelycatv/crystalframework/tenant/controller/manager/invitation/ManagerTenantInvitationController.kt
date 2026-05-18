@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.invitation
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException

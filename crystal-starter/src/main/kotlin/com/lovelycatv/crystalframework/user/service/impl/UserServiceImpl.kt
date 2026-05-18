@@ -1,16 +1,16 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
-import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
-import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService

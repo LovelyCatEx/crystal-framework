@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.mail.service
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
+import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 
 interface MailTemplateTypeService : CachedBaseService<MailTemplateTypeRepository, MailTemplateTypeEntity>

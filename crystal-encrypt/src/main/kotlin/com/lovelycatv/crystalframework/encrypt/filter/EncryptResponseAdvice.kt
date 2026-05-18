@@ -3,13 +3,10 @@ package com.lovelycatv.crystalframework.encrypt.filter
 import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
-import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
-import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.encrypt.AES
 import com.lovelycatv.crystalframework.shared.utils.encrypt.RSA
 import com.lovelycatv.vertex.log.logger
@@ -41,7 +38,6 @@ import tools.jackson.databind.ObjectMapper
 class EncryptResponseAdvice(
     private val codecConfigurer: ServerCodecConfigurer,
     private val resolver: RequestedContentTypeResolver,
-    private val redisService: RedisService,
     private val objectMapper: ObjectMapper,
     private val systemModuleClient: SystemModuleClient
 ) : HandlerResultHandler {

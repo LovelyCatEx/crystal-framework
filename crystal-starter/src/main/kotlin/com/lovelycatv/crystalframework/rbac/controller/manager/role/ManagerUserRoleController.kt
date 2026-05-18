@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.rbac.controller.manager.role
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerCreateRoleDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerDeleteRoleDTO
 import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerReadRoleDTO
@@ -10,6 +9,7 @@ import com.lovelycatv.crystalframework.rbac.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping

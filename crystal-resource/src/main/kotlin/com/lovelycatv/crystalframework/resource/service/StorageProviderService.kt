@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.resource.service
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
+import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 
 interface StorageProviderService : CachedBaseService<StorageProviderRepository, StorageProviderEntity>

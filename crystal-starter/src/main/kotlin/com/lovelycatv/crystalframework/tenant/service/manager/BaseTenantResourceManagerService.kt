@@ -1,12 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
-import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.entity.ScopedEntity
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
+import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.tenant.service.TenantRelationshipCheckService
 
 interface BaseTenantResourceManagerService<

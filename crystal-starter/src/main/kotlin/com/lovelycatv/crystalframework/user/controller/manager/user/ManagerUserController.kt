@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.user.controller.manager.user
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerCreateUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.user.dto.ManagerDeleteUserDTO

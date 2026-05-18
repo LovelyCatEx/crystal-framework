@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.role
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.StandardTenantManagerController
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO

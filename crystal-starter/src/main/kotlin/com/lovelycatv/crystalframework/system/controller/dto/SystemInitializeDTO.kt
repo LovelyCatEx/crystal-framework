@@ -1,11 +1,6 @@
 package com.lovelycatv.crystalframework.system.controller.dto
 
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.*
 
 data class SystemInitializeDTO(
     @field:NotBlank(message = "Username is required")

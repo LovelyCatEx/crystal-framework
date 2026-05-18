@@ -7,9 +7,9 @@ import com.lovelycatv.crystalframework.audit.controller.manager.dto.ManagerUpdat
 import com.lovelycatv.crystalframework.audit.entity.AuditLogEntity
 import com.lovelycatv.crystalframework.audit.repository.AuditLogRepository
 import com.lovelycatv.crystalframework.audit.service.AuditLogManagerService
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping

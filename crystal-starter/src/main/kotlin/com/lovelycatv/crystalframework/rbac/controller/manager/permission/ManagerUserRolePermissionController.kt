@@ -1,9 +1,9 @@
 package com.lovelycatv.crystalframework.rbac.controller.manager.permission
 
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.SetRolePermissionsDTO
 import com.lovelycatv.crystalframework.rbac.service.impl.UserRolePermissionRelationServiceImpl
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import jakarta.validation.Valid
