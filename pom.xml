@@ -42,6 +42,7 @@
         <module>crystal-starter</module>
         <module>crystal-encrypt</module>
         <module>crystal-shared-types</module>
+        <module>crystal-mail</module>
     </modules>
 
     <scm>
@@ -87,6 +88,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-encrypt</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-mail</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>

@@ -1,10 +1,10 @@
 package com.lovelycatv.crystalframework.mail.aspect
 
 import com.lovelycatv.crystalframework.mail.service.MailSendLogService
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
 import com.lovelycatv.crystalframework.shared.context.CurrentUserId
-import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import kotlin.coroutines.Continuation
@@ -22,7 +21,7 @@ import kotlin.coroutines.Continuation
 @Order(GlobalConstants.AspectPriority.MAIL_SEND_LOG_RECORDER)
 class MailSendLogAspect(
     private val mailSendLogService: MailSendLogService,
-    private val systemSettingsService: SystemSettingsService
+    private val systemModuleClient: SystemModuleClient,
 ) {
     private val logger = logger()
     private val mailLogScope = CoroutineScope(Dispatchers.IO)
@@ -54,7 +53,8 @@ class MailSendLogAspect(
                 try {
                     val userId = CurrentUserId.current()
                     val tenantId = CurrentTenantId.current()
-                    val fromEmail = systemSettingsService.getSystemSettings().mail.smtp.fromEmail
+                    val fromEmail = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail
+                        ?: throw IllegalStateException("System settings not initialized")
 
                     mailSendLogService.record(
                         fromEmail = fromEmail,

@@ -3,13 +3,14 @@ package com.lovelycatv.crystalframework.mail.service.impl
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity
 import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.mail.service.MailTemplateService
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -19,9 +20,10 @@ import java.util.*
 
 @Service
 class MailServiceImpl(
-    private val systemSettingsService: SystemSettingsService,
     private val mailTemplateService: MailTemplateService,
 ) : MailService {
+    @Autowired
+    private lateinit var systemModuleClient: SystemModuleClient
     private val logger = logger()
 
     @Lazy
@@ -36,7 +38,8 @@ class MailServiceImpl(
 
     override suspend fun getJavaMailSender(): JavaMailSender {
         if (this.mailSender == null) {
-            val settings = systemSettingsService.getSystemSettings()
+            val settings = systemModuleClient.getSystemSettings()
+                ?: throw IllegalStateException("System settings not initialized")
             logger.info("MailSender is creating, settings: ${settings.mail}")
             this.mailSender = createMailSender(settings.mail)
         }
@@ -48,7 +51,8 @@ class MailServiceImpl(
         try {
             val instance = this.getJavaMailSender()
 
-            val from = systemSettingsService.getSystemSettings().mail.smtp.fromEmail
+            val from = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail
+                ?: throw IllegalStateException("System settings not initialized")
 
             val message: MimeMessage = instance.createMimeMessage()
 

@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.encrypt.filter
 
 import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
@@ -41,7 +42,8 @@ class EncryptResponseAdvice(
     private val codecConfigurer: ServerCodecConfigurer,
     private val resolver: RequestedContentTypeResolver,
     private val redisService: RedisService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val systemModuleClient: SystemModuleClient
 ) : HandlerResultHandler {
     private val logger = logger()
 
@@ -50,7 +52,7 @@ class EncryptResponseAdvice(
     }
 
     override fun supports(result: HandlerResult): Boolean {
-        val systemSettings = redisService.get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
+        val systemSettings = systemModuleClient.getSystemSettings()
         val encryptConfig = systemSettings?.security?.api?.encrypt
         val encryptionEnabled = encryptConfig?.enabled ?: false
 
