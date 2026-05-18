@@ -5,7 +5,7 @@ import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.mail.service.MailTemplateService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettings
+import com.lovelycatv.crystalframework.shared.types.SystemSettings
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage

@@ -65,6 +65,21 @@ object SystemSettingsConstants {
         }
     }
 
+    object Security {
+        object Api {
+            object Encrypt {
+                val ENABLE = SystemSettingsItemDeclaration(
+                    "security.api.encrypt.enabled",
+                    SystemSettingsItemValueType.BOOLEAN,
+                    true.toString(),
+                    1
+                )
+            }
+
+        }
+
+    }
+
     fun getAllDeclarations(): List<SystemSettingsItemDeclaration> {
         val declarations = mutableListOf<SystemSettingsItemDeclaration>()
         var nested = SystemSettingsConstants::class.nestedClasses

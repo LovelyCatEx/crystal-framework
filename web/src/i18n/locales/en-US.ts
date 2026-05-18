@@ -1450,12 +1450,14 @@ export const enUS = {
         'mail.smtp.host': 'Host',
         'mail.smtp.port': 'Port',
         'mail.smtp.ssl': 'Enable SSL',
-        'mail.smtp.fromEmail': 'From Email'
+        'mail.smtp.fromEmail': 'From Email',
+        'security.api.encrypt.enabled': 'Enabled',
       },
       groups: {
         'basic': 'Basic Settings',
         'bootstrap': 'Bootstrap Settings',
-        'mail.smtp': 'SMTP Mail Service'
+        'mail.smtp': 'SMTP Mail Service',
+        'security.api.encrypt': 'Api Security',
       }
     },
     managerContainer: {

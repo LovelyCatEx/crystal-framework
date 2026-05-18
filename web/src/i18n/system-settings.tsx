@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import {InfoCircleOutlined, MailOutlined, SettingOutlined} from "@ant-design/icons";
+import {InfoCircleOutlined, LockOutlined, MailOutlined, SettingOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 
 export function useSettingsKeyToTranslationMap(): Map<string, string> {
@@ -13,6 +13,7 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['mail.smtp.port', t('pages.systemSettingsManager.keys.mail.smtp.port')],
         ['mail.smtp.ssl', t('pages.systemSettingsManager.keys.mail.smtp.ssl')],
         ['mail.smtp.fromEmail', t('pages.systemSettingsManager.keys.mail.smtp.fromEmail')],
+        ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
     ]);
 }
 
@@ -21,6 +22,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
     return new Map<string, {label: string, icon?: ReactNode}>([
         ['basic', { label: t('pages.systemSettingsManager.groups.basic'), icon: <InfoCircleOutlined /> }],
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
-        ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }]
+        ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
+        ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
     ]);
 }

@@ -7,20 +7,34 @@ import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.RedisSerializer
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import tools.jackson.module.kotlin.kotlinModule
 
 @Configuration
 class RedisConfig {
+
+    private fun createJsonRedisSerializer(): GenericJacksonJsonRedisSerializer {
+        return GenericJacksonJsonRedisSerializer.builder()
+            .enableDefaultTyping(
+                BasicPolymorphicTypeValidator.builder()
+                    .allowIfBaseType(Any::class.java)
+                    .build()
+            )
+            .customize { builder ->
+                builder.addModule(kotlinModule())
+            }
+            .build()
+    }
+
     @Bean
     fun reactiveRedisTemplate(
         reactiveRedisConnectionFactory: ReactiveRedisConnectionFactory,
     ): ReactiveRedisTemplate<String, Any> {
         val stringSerializer = RedisSerializer.string()
-
-        val jsonSerializer = GenericJackson2JsonRedisSerializer()
+        val jsonSerializer = createJsonRedisSerializer()
 
         val serializationContext = RedisSerializationContext
             .newSerializationContext<String, Any>()
@@ -43,12 +57,14 @@ class RedisConfig {
     fun redisTemplate(
         redisConnectionFactory: RedisConnectionFactory,
     ): RedisTemplate<String, Any> {
+        val jsonSerializer = createJsonRedisSerializer()
+
         val template = RedisTemplate<String, Any>()
         template.connectionFactory = redisConnectionFactory
         template.keySerializer = RedisSerializer.string()
-        template.valueSerializer = GenericJackson2JsonRedisSerializer()
+        template.valueSerializer = jsonSerializer
         template.hashKeySerializer = RedisSerializer.string()
-        template.hashValueSerializer = GenericJackson2JsonRedisSerializer()
+        template.hashValueSerializer = jsonSerializer
         template.afterPropertiesSet()
         return template
     }

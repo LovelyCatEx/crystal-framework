@@ -8,7 +8,9 @@ import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.types.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -62,7 +64,9 @@ class FileResourceServiceImpl(
 
         if (provider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
             // This path is related to LocalFileResourceController$readLocalFile
-            return "${redisService.get<String>(RedisConstants.SYSTEM_NORMALIZED_BASE_URL)}/file/local/${entity.id}"
+            val systemSettings = redisService.get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
+                ?: throw BusinessException("System settings not found")
+            return "${systemSettings.basic.getNormalizedBaseUrl(false)}/file/local/${entity.id}"
         }
 
         val baseUrl = provider.baseUrl

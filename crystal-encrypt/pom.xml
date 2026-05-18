@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>crystal-audit</artifactId>
+    <artifactId>crystal-encrypt</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,5 +61,6 @@
             <artifactId>crystal-shared</artifactId>
         </dependency>
     </dependencies>
+
 
 </project>

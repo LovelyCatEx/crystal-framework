@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.mail.aspect
 
 import com.lovelycatv.crystalframework.mail.service.MailSendLogService
+import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
 import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
@@ -18,7 +19,7 @@ import kotlin.coroutines.Continuation
 
 @Aspect
 @Component
-@Order(100)
+@Order(GlobalConstants.AspectPriority.MAIL_SEND_LOG_RECORDER)
 class MailSendLogAspect(
     private val mailSendLogService: MailSendLogService,
     private val systemSettingsService: SystemSettingsService
