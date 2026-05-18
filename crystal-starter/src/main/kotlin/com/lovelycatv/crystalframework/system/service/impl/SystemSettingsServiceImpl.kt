@@ -6,9 +6,11 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
@@ -22,6 +24,8 @@ import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.reflect.KClass
 
 @Service
@@ -76,11 +80,13 @@ class SystemSettingsServiceImpl(
 
     override fun refreshSystemSettings() {
         this.cachedSystemSettings = null
+
+        this.syncToCacheAsync()
+
         reactiveRedisTemplate
             .convertAndSend(refreshTopic.topic, instanceId)
             .subscribe()
 
-        this.syncToCacheAsync()
     }
 
     override suspend fun getSystemSettings(): SystemSettings {
@@ -152,6 +158,26 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())
 
         this.refreshSystemSettings()
+    }
+
+    override suspend fun updateSystemSettings(settings: Map<String, String?>) {
+        val declarationsByKey = SystemSettingsConstants
+            .getAllDeclarations()
+            .associateBy { it.key }
+
+        settings.forEach { (key, value) ->
+            val declaration = declarationsByKey[key]
+                ?: throw BusinessException("setting key '$key' is not declared")
+            if (value != null && !declaration.valueType.matches(value)) {
+                throw BusinessException(
+                    "setting '$key' expects ${declaration.valueType.name.lowercase()} but got '$value'"
+                )
+            }
+        }
+
+        settings.forEach { (key, value) ->
+            this.setSettings(key, value)
+        }
     }
 
     override suspend fun getSettings(key: String): SystemSettingsEntity? {
@@ -231,5 +257,14 @@ class SystemSettingsServiceImpl(
         )
 
         logger.info("System settings synchronized to cache")
+    }
+
+    private fun SystemSettingsItemValueType.matches(raw: String): Boolean = when (this) {
+        SystemSettingsItemValueType.STRING -> true
+        SystemSettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
+        SystemSettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
+        SystemSettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
+        SystemSettingsItemValueType.ENUM_SINGLE -> true
+        SystemSettingsItemValueType.ENUM_MULTIPLE -> true
     }
 }

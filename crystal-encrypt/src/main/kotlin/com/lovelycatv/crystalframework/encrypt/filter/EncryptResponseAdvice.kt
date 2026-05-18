@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.encrypt.AES
 import com.lovelycatv.crystalframework.shared.utils.encrypt.RSA
@@ -50,7 +51,8 @@ class EncryptResponseAdvice(
 
     override fun supports(result: HandlerResult): Boolean {
         val systemSettings = redisService.get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
-        val encryptionEnabled = systemSettings?.security?.api?.encrypt?.enabled ?: false
+        val encryptConfig = systemSettings?.security?.api?.encrypt
+        val encryptionEnabled = encryptConfig?.enabled ?: false
 
         if (!encryptionEnabled) {
             return false
@@ -59,10 +61,32 @@ class EncryptResponseAdvice(
         val handler = result.handler
 
         if (handler is HandlerMethod) {
-            val methodHasAnnotation = handler.method.isAnnotationPresent(EncryptedResponseData::class.java)
-            val classHasAnnotation = handler.beanType.isAnnotationPresent(EncryptedResponseData::class.java)
+            // Check scope first
+            return when (encryptConfig.scope) {
+                ApiEncryptionScope.ALL -> {
+                    // ALL mode: encrypt all endpoints regardless of annotation
+                    true
+                }
+                ApiEncryptionScope.ALL_ANNOTATED -> {
+                    // ALL_ANNOTATED mode: encrypt only annotated endpoints, regardless of level
+                    val methodAnnotation = handler.method.getAnnotation(EncryptedResponseData::class.java)
+                    val classAnnotation = handler.beanType.getAnnotation(EncryptedResponseData::class.java)
+                    methodAnnotation != null || classAnnotation != null
+                }
+                ApiEncryptionScope.BY_ANNOTATED_LEVEL -> {
+                    // BY_ANNOTATED_LEVEL mode: encrypt only annotated endpoints with securityLevel <= system's securityLevel
+                    val methodAnnotation = handler.method.getAnnotation(EncryptedResponseData::class.java)
+                    val classAnnotation = handler.beanType.getAnnotation(EncryptedResponseData::class.java)
+                    val annotation = methodAnnotation ?: classAnnotation
 
-            return methodHasAnnotation || classHasAnnotation
+                    if (annotation == null) {
+                        false
+                    } else {
+                        // Higher number = higher security level, encrypt endpoints at or below system's level
+                        annotation.securityLevel <= encryptConfig.securityLevel
+                    }
+                }
+            }
         } else {
             logger.error("As the handler type is not supported, the response encryption will be skipped. Type: ${handler::class.qualifiedName}")
         }

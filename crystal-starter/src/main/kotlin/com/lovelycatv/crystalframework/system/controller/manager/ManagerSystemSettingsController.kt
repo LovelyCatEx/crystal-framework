@@ -61,33 +61,8 @@ class ManagerSystemSettingsController(
     suspend fun updateSystemSettings(
         @RequestBody dto: Map<String, String?>
     ): ApiResponse<*> {
-        val declarationsByKey = SystemSettingsConstants
-            .getAllDeclarations()
-            .associateBy { it.key }
-
-        dto.forEach { (key, value) ->
-            val declaration = declarationsByKey[key]
-                ?: throw BusinessException("setting key '$key' is not declared")
-            if (value != null && !declaration.valueType.matches(value)) {
-                throw BusinessException(
-                    "setting '$key' expects ${declaration.valueType.name.lowercase()} but got '$value'"
-                )
-            }
-        }
-
-        dto.forEach { (key, value) ->
-            systemSettingsService.setSettings(key, value)
-        }
+        systemSettingsService.updateSystemSettings(dto)
 
         return ApiResponse.success(null)
-    }
-
-    private fun SystemSettingsItemValueType.matches(raw: String): Boolean = when (this) {
-        SystemSettingsItemValueType.STRING -> true
-        SystemSettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
-        SystemSettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
-        SystemSettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
-        SystemSettingsItemValueType.ENUM_SINGLE -> true
-        SystemSettingsItemValueType.ENUM_MULTIPLE -> true
     }
 }

@@ -23,6 +23,8 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
 
     suspend fun updateSystemSettings(settings: SystemSettings)
 
+    suspend fun updateSystemSettings(settings: Map<String, String?>)
+
     suspend fun getSettings(key: String): SystemSettingsEntity?
 
     suspend fun getSettings(key: String, absentValue: (absentOrNull: Boolean) -> String?): String?
