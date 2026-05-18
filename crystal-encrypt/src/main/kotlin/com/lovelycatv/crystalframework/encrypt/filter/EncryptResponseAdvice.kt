@@ -59,7 +59,16 @@ class EncryptResponseAdvice(
         val handler = result.handler
 
         if (handler is HandlerMethod) {
-            // Check scope first
+            val methodAnnotation = handler.method.getAnnotation(EncryptedResponseData::class.java)
+            val classAnnotation = handler.beanType.getAnnotation(EncryptedResponseData::class.java)
+            val annotation = methodAnnotation ?: classAnnotation
+
+            // Check whether disabled
+            if (annotation != null && annotation.disabled) {
+                return false
+            }
+
+            // Then check scope
             return when (encryptConfig.scope) {
                 ApiEncryptionScope.ALL -> {
                     // ALL mode: encrypt all endpoints regardless of annotation
@@ -67,16 +76,10 @@ class EncryptResponseAdvice(
                 }
                 ApiEncryptionScope.ALL_ANNOTATED -> {
                     // ALL_ANNOTATED mode: encrypt only annotated endpoints, regardless of level
-                    val methodAnnotation = handler.method.getAnnotation(EncryptedResponseData::class.java)
-                    val classAnnotation = handler.beanType.getAnnotation(EncryptedResponseData::class.java)
                     methodAnnotation != null || classAnnotation != null
                 }
                 ApiEncryptionScope.BY_ANNOTATED_LEVEL -> {
                     // BY_ANNOTATED_LEVEL mode: encrypt only annotated endpoints with securityLevel <= system's securityLevel
-                    val methodAnnotation = handler.method.getAnnotation(EncryptedResponseData::class.java)
-                    val classAnnotation = handler.beanType.getAnnotation(EncryptedResponseData::class.java)
-                    val annotation = methodAnnotation ?: classAnnotation
-
                     if (annotation == null) {
                         false
                     } else {

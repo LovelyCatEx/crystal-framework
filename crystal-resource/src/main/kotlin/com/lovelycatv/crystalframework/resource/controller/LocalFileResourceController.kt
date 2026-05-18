@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.resource.controller
 
+import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
@@ -29,6 +30,7 @@ class LocalFileResourceController(
 ) {
     @Unauthorized
     @GetMapping("/local/{fileId}")
+    @EncryptedResponseData(disabled = true)
     suspend fun readLocalFile(
         @PathVariable fileId: Long
     ): ResponseEntity<Resource> {
