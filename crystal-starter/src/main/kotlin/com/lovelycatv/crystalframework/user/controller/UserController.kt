@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.controller
 
+import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -91,6 +92,7 @@ class UserController(
 
     @Unauthorized
     @GetMapping("/profile")
+    @EncryptedResponseData
     suspend fun getUserProfile(
         userAuthentication: UserAuthentication?,
         @RequestParam("id", required = false, defaultValue = "0")

@@ -99,8 +99,8 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
 
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ApiResponse<*> {
-        logger.error("An unexpected exception occurred", e)
+        logger.error("An unexpected exception occurred, message: ${e.localizedMessage ?: e.message}", e)
 
-        return ApiResponse.internalServerError<Nothing>(e.localizedMessage ?: e.message ?: "")
+        return ApiResponse.internalServerError<Nothing>("internal server error")
     }
 }
