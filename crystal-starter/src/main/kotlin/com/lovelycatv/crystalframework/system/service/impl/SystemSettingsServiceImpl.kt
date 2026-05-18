@@ -176,6 +176,8 @@ class SystemSettingsServiceImpl(
         settings.forEach { (key, value) ->
             this.setSettings(key, value)
         }
+
+        this.refreshSystemSettings()
     }
 
     override suspend fun getSettings(key: String): SystemSettingsEntity? {
