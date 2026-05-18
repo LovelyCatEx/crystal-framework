@@ -14,6 +14,8 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['mail.smtp.ssl', t('pages.systemSettingsManager.keys.mail.smtp.ssl')],
         ['mail.smtp.fromEmail', t('pages.systemSettingsManager.keys.mail.smtp.fromEmail')],
         ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
+        ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
+        ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
     ]);
 }
 
@@ -24,5 +26,15 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
+    ]);
+}
+
+export function useSettingsTabToTranslationMap(): Map<string, string> {
+    const { t } = useTranslation();
+    return new Map<string, string>([
+        ['basic', t('pages.systemSettingsManager.tabs.basic')],
+        ['bootstrap', t('pages.systemSettingsManager.tabs.bootstrap')],
+        ['mail', t('pages.systemSettingsManager.tabs.mail')],
+        ['security', t('pages.systemSettingsManager.tabs.security')],
     ]);
 }

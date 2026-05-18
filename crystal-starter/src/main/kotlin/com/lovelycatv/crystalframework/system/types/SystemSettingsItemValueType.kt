@@ -4,5 +4,7 @@ enum class SystemSettingsItemValueType {
     STRING,
     NUMBER,
     DECIMAL,
-    BOOLEAN
+    BOOLEAN,
+    ENUM_SINGLE,
+    ENUM_MULTIPLE,
 }

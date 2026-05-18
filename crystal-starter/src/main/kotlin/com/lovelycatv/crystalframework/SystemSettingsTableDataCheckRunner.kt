@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework
 
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
@@ -38,6 +39,7 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
             if (copiedConfigValue != null) {
                 val declaration = keyWithDeclarationMap[it.configKey]!!
 
+                var testErrorMessage: String? = null
                 val testResult = try {
                     when (declaration.valueType) {
                         SystemSettingsItemValueType.STRING -> {
@@ -53,8 +55,24 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
                         SystemSettingsItemValueType.BOOLEAN -> {
                             copiedConfigValue.toBooleanStrictOrNull()
                         }
+                        SystemSettingsItemValueType.ENUM_SINGLE -> {
+                            if (declaration.enumValues != null) {
+                                copiedConfigValue in declaration.enumValues
+                            } else {
+                                throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
+                            }
+                        }
+                        SystemSettingsItemValueType.ENUM_MULTIPLE -> {
+                            val parsed = copiedConfigValue.parseObject<List<String>>()
+                            if (declaration.enumValues != null) {
+                                parsed.all { it in declaration.enumValues }
+                            } else {
+                                throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
+                            }
+                        }
                     } != null
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    testErrorMessage = e.localizedMessage ?: e.message ?: "${it.configKey} = ${it.configValue}"
                     false
                 }
 
@@ -62,7 +80,7 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
                     logger.info("  √ ${it.configKey} = $copiedConfigValue")
                     null
                 } else {
-                    logger.info("  × ${it.configKey} = $copiedConfigValue (expect: ${declaration.valueType})")
+                    logger.info("  × ${it.configKey} = $copiedConfigValue (expectedType: ${declaration.valueType}, enums: ${declaration.enumValues?.joinToString(" | ")}, message: $testErrorMessage)")
                     it
                 }
             } else {

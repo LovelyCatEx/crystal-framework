@@ -6,7 +6,8 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
-import com.lovelycatv.crystalframework.shared.types.SystemSettings
+import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
+import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
@@ -124,7 +125,11 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Security(
             api = SystemSettings.Security.Api(
                 encrypt = SystemSettings.Security.Api.Encrypt(
-                    enabled = getSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE)!!
+                    enabled = getSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE)!! ,
+                    scope = ApiEncryptionScope.valueOf(
+                        getSettings<String>(SystemSettingsConstants.Security.Api.Encrypt.SCOPE)!!
+                    ),
+                    securityLevel = getSettings<Long>(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt(),
                 )
             )
         )
@@ -143,6 +148,8 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
 
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)
+        setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())
 
         this.refreshSystemSettings()
     }

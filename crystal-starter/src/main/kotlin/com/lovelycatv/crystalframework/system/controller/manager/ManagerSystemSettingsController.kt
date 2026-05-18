@@ -30,6 +30,12 @@ class ManagerSystemSettingsController(
                 "valueType" to it.valueType.name,
                 "value" to systemSettingsService.getSettings(it.key)?.configValue,
                 "defaultValue" to it.defaultValue,
+                "enumValues" to it.enumValues,
+                "tab" to if (it.key.contains(".")) {
+                    it.key.split(".")[0]
+                } else {
+                    null
+                },
                 "group" to if (it.key.contains(".")) {
                     it.key.split(".")
                         .dropLast(1)
@@ -81,5 +87,7 @@ class ManagerSystemSettingsController(
         SystemSettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
         SystemSettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
         SystemSettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
+        SystemSettingsItemValueType.ENUM_SINGLE -> true
+        SystemSettingsItemValueType.ENUM_MULTIPLE -> true
     }
 }

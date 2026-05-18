@@ -1452,12 +1452,27 @@ export const enUS = {
         'mail.smtp.ssl': 'Enable SSL',
         'mail.smtp.fromEmail': 'From Email',
         'security.api.encrypt.enabled': 'Enabled',
+        'security.api.encrypt.scope': 'Scope',
+        'security.api.encrypt.securityLevel': 'Security Level',
       },
       groups: {
         'basic': 'Basic Settings',
         'bootstrap': 'Bootstrap Settings',
         'mail.smtp': 'SMTP Mail Service',
         'security.api.encrypt': 'Api Security',
+      },
+      tabs: {
+        'basic': 'Basic',
+        'bootstrap': 'Bootstrap',
+        'mail': 'Mail',
+        'security': 'Security',
+      },
+      enums: {
+        'security.api.encrypt.scope': {
+          'ALL': 'All api',
+          'ALL_ANNOTATED': 'All annotated api',
+          'BY_ANNOTATED_LEVEL': 'Only api matches the security level',
+        }
       }
     },
     managerContainer: {
