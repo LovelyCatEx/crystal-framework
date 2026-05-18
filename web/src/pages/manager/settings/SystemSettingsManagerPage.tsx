@@ -30,20 +30,20 @@ function SettingsGroup(props: {
 
     return (
         <div className={props.isFirst ? "" : "mt-8"}>
-            <div className="flex items-center mb-6 pb-3 border-b border-slate-100">
+            <div className="flex items-center mb-6 pb-3" style={{ borderBottom: `1px solid ${token.colorBorder}` }}>
                 {translatedGroup?.icon && (
                     <span className="text-xl mr-3" style={{ color: token.colorPrimary }}>
                         {translatedGroup.icon}
                     </span>
                 )}
-                <h3 className="text-lg font-semibold text-slate-800">
+                <h3 className="text-lg font-semibold" style={{ color: token.colorTextHeading }}>
                     {translatedGroup?.label ?? props.group}
                 </h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {props.items.map(([key, value]) => (
-                    <div key={key} className="bg-slate-50/50 rounded-xl p-4 hover:bg-slate-50 transition-colors">
+                    <div key={key} className="bg-slate-50/50 dark:bg-slate-200/5 rounded-xl p-4 hover:bg-slate-50 dark:hover:bg-slate-200/10 transition-colors">
                         <SettingsItem 
                             settingsKey={key} 
                             schema={value}
@@ -271,6 +271,7 @@ export function SystemSettingsManagerPage() {
 }
 
 function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema, loading?: boolean }) {
+    const { token } = useToken();
     const { t } = useTranslation();
     const [formItemProps, setFormItemProps] = useState<Record<string, unknown>>();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
@@ -280,7 +281,7 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
             key={props.settingsKey}
             name={props.settingsKey}
             label={
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-sm font-medium" style={{ color: token.colorTextSecondary }}>
                     {settingsKeyToTranslationMap.get(props.settingsKey) ?? props.settingsKey}
                 </span>
             }
