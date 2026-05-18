@@ -5,62 +5,62 @@ import kotlin.reflect.full.memberProperties
 object SystemSettingsConstants {
     object Basic {
         val BASE_URL = SystemSettingsItemDeclaration(
-            "basic.baseUrl",
-            SystemSettingsItemValueType.STRING,
-            "http://localhost:8080/api/v1",
+            key = "basic.baseUrl",
+            valueType = SystemSettingsItemValueType.STRING,
+            defaultValue = "http://localhost:8080/api/v1",
         )
     }
 
     object Bootstrap {
         val AUTO_CHECK_RBAC_TABLE_DATA = SystemSettingsItemDeclaration(
-            "bootstrap.autoCheckRbacTableData",
-            SystemSettingsItemValueType.BOOLEAN,
-            true.toString()
+            key = "bootstrap.autoCheckRbacTableData",
+            valueType = SystemSettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString()
         )
     }
 
     object Mail {
         object SMTP {
             val HOST = SystemSettingsItemDeclaration(
-                "mail.smtp.host",
-                SystemSettingsItemValueType.STRING,
-                "127.0.0.1",
-                1
+                key = "mail.smtp.host",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "127.0.0.1",
+                sort = 1
             )
 
             val PORT = SystemSettingsItemDeclaration(
-                "mail.smtp.port",
-                SystemSettingsItemValueType.NUMBER,
-                465.toString(),
-                2
+                key = "mail.smtp.port",
+                valueType = SystemSettingsItemValueType.NUMBER,
+                defaultValue = 465.toString(),
+                sort = 2
             )
 
             val USERNAME = SystemSettingsItemDeclaration(
-                "mail.smtp.username",
-                SystemSettingsItemValueType.STRING,
-                "username",
-                3
+                key = "mail.smtp.username",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "username",
+                sort = 3
             )
 
             val PASSWORD = SystemSettingsItemDeclaration(
-                "mail.smtp.password",
-                SystemSettingsItemValueType.STRING,
-                "password",
-                4
+                key = "mail.smtp.password",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "password",
+                sort = 4
             )
 
             val FROM_EMAIL = SystemSettingsItemDeclaration(
-                "mail.smtp.fromEmail",
-                SystemSettingsItemValueType.STRING,
-                "user@example.com",
-                5
+                key = "mail.smtp.fromEmail",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "user@example.com",
+                sort = 5
             )
 
             val SSL = SystemSettingsItemDeclaration(
-                "mail.smtp.ssl",
-                SystemSettingsItemValueType.BOOLEAN,
-                true.toString(),
-                6
+                key = "mail.smtp.ssl",
+                valueType = SystemSettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 6
             )
         }
     }
@@ -69,13 +69,27 @@ object SystemSettingsConstants {
         object Api {
             object Encrypt {
                 val ENABLE = SystemSettingsItemDeclaration(
-                    "security.api.encrypt.enabled",
-                    SystemSettingsItemValueType.BOOLEAN,
-                    true.toString(),
-                    1
+                    key = "security.api.encrypt.enabled",
+                    valueType =  SystemSettingsItemValueType.BOOLEAN,
+                    defaultValue = true.toString(),
+                    sort = 1
+                )
+
+                val SCOPE = SystemSettingsItemDeclaration(
+                    key = "security.api.encrypt.scope",
+                    valueType =  SystemSettingsItemValueType.ENUM_SINGLE,
+                    defaultValue = "ALL",
+                    sort = 2,
+                    enumValues = listOf("ALL", "ALL_ANNOTATED", "BY_ANNOTATED_LEVEL")
+                )
+
+                val SECURITY_LEVEL = SystemSettingsItemDeclaration(
+                    key = "security.api.encrypt.securityLevel",
+                    valueType = SystemSettingsItemValueType.NUMBER,
+                    defaultValue = 1.toString(),
+                    sort = 3
                 )
             }
-
         }
 
     }

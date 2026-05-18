@@ -60,6 +60,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-shared</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-shared-types</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

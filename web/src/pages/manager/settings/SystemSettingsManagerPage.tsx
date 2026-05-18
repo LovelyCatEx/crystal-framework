@@ -5,7 +5,7 @@ import {
     updateSystemMaintenanceMode,
     updateSystemSettings
 } from "@/api/system-settings.api.ts";
-import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Row, Switch} from "antd";
+import {Button, Card, Checkbox, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Switch} from "antd";
 import {SystemSettingsItemValueType, type SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
 import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap} from "@/i18n/system-settings.tsx";
@@ -219,6 +219,7 @@ export function SystemSettingsManagerPage() {
 }
 
 function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema }) {
+    const { t } = useTranslation();
     const [formItemProps, setFormItemProps] = useState<Record<string, unknown>>();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
 
@@ -259,6 +260,28 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
                     })()}
 
                     <Switch />
+                </>
+            ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_SINGLE ? (
+                <>
+                    <Radio.Group
+                        options={(props.schema.enumValues ?? []).map((item) => {
+                            return {
+                                value: item,
+                                label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                            }
+                        })}
+                    />
+                </>
+            ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_MULTIPLE ? (
+                <>
+                    <Checkbox.Group
+                        options={(props.schema.enumValues ?? []).map((item) => {
+                            return {
+                                value: item,
+                                label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                            }
+                        })}
+                    />
                 </>
             ) : (
                 <>

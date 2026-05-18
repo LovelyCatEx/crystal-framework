@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>crystal-encrypt</artifactId>
+    <artifactId>crystal-shared-types</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,17 +54,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-shared-types</artifactId>
-        </dependency>
-    </dependencies>
-
 
 </project>

@@ -41,6 +41,7 @@
         <module>crystal-resource</module>
         <module>crystal-starter</module>
         <module>crystal-encrypt</module>
+        <module>crystal-shared-types</module>
     </modules>
 
     <scm>
@@ -61,6 +62,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-shared-types</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>

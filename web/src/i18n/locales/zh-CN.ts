@@ -1449,12 +1449,21 @@ export const zhCN = {
         'mail.smtp.ssl': '是否启用 SSL',
         'mail.smtp.fromEmail': '发件地址',
         'security.api.encrypt.enabled': '是否启用',
+        'security.api.encrypt.scope': '作用域',
+        'security.api.encrypt.securityLevel': '安全等级',
       },
       groups: {
         'basic': '基本设置',
         'bootstrap': '启动设置项',
         'mail.smtp': 'SMTP 邮件服务',
         'security.api.encrypt': 'Api 安全设置',
+      },
+      enums: {
+        'security.api.encrypt.scope': {
+          'ALL': '所有接口',
+          'ALL_ANNOTATED': '所有被修饰的接口',
+          'BY_ANNOTATED_LEVEL': '仅限安全等级匹配的接口',
+        }
       }
     },
     managerContainer: {

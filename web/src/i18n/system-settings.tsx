@@ -14,6 +14,8 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['mail.smtp.ssl', t('pages.systemSettingsManager.keys.mail.smtp.ssl')],
         ['mail.smtp.fromEmail', t('pages.systemSettingsManager.keys.mail.smtp.fromEmail')],
         ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
+        ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
+        ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
     ]);
 }
 

@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
-import com.lovelycatv.crystalframework.shared.types.SystemSettings
+import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.encrypt.AES
 import com.lovelycatv.crystalframework.shared.utils.encrypt.RSA
 import com.lovelycatv.vertex.log.logger

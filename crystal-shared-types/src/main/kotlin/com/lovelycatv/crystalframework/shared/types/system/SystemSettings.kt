@@ -1,4 +1,6 @@
-package com.lovelycatv.crystalframework.shared.types
+package com.lovelycatv.crystalframework.shared.types.system
+
+import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 
 data class SystemSettings(
     val basic: Basic,
@@ -45,6 +47,8 @@ data class SystemSettings(
         ) {
             data class Encrypt(
                 val enabled: Boolean,
+                val scope: ApiEncryptionScope,
+                val securityLevel: Int,
             )
         }
     }
