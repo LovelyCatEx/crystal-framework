@@ -53,8 +53,7 @@ class MailSendLogAspect(
                 try {
                     val userId = CurrentUserId.current()
                     val tenantId = CurrentTenantId.current()
-                    val fromEmail = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail
-                        ?: throw IllegalStateException("System settings not initialized")
+                    val fromEmail = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail ?: ""
 
                     mailSendLogService.record(
                         fromEmail = fromEmail,

@@ -61,7 +61,7 @@ class SystemInitializeServiceImpl(
         userRepository.save(userEntity).awaitFirstOrNull()
             ?: throw RuntimeException("Could not create root user")
 
-        userRoleRelationService.setUserRolesByNames(userEntity.id, listOf(SystemRole.ROLE_ROOT, SystemRole.ROLE_ADMIN, SystemRole.ROLE_USER))
+        userRoleRelationService.setUserRolesByNames(userEntity.id, listOf(SystemRole.ROLE_ROOT))
 
         systemSettingsService.setSettings(SystemSettingsConstants.Mail.SMTP.HOST, smtpHost)
         systemSettingsService.setSettings(SystemSettingsConstants.Mail.SMTP.PORT, smtpPort.toString())
