@@ -151,15 +151,35 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     }, [waterMarkInfo, loggedUser.userProfile]);
 
     const watermarkFontColor = useMemo(() => {
-        if (!waterMarkInfo?.fontColor) return '#00000026';
+        const isDark = themeMode === 'dark';
+        const defaultColor = isDark ? '#ffffff26' : '#00000026'; // 暗色模式用白色，亮色模式用黑色
+        
+        if (!waterMarkInfo?.fontColor) return defaultColor;
+        
+        let alpha = '18';
         
         const rgbaMatch = waterMarkInfo.fontColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
         if (rgbaMatch) {
-            const [, r, g, b, a] = rgbaMatch;
+            const [, , , , a] = rgbaMatch;
+            alpha = a ? Math.round(parseFloat(a) * 255).toString(16).padStart(2, '0') : 'ff';
+        } else if (waterMarkInfo.fontColor.startsWith('#')) {
+            const hex = waterMarkInfo.fontColor.replace('#', '');
+            if (hex.length === 8) {
+                alpha = hex.slice(6, 8);
+            } else if (hex.length === 4) {
+                alpha = hex.charAt(3).repeat(2);
+            }
+        }
+        
+        if (isDark) {
+            return `#ffffff${alpha}`;
+        }
+        
+        if (rgbaMatch) {
+            const [, r, g, b] = rgbaMatch;
             const red = parseInt(r).toString(16).padStart(2, '0');
             const green = parseInt(g).toString(16).padStart(2, '0');
             const blue = parseInt(b).toString(16).padStart(2, '0');
-            const alpha = a ? Math.round(parseFloat(a) * 255).toString(16).padStart(2, '0') : 'ff';
             return `#${red}${green}${blue}${alpha}`;
         }
         
@@ -167,8 +187,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             return waterMarkInfo.fontColor;
         }
         
-        return '#00000026';
-    }, [waterMarkInfo?.fontColor]);
+        return defaultColor;
+    }, [waterMarkInfo?.fontColor, themeMode]);
 
     const handleThemeChange = (theme: ThemeColor) => {
         setCurrentThemeKey(theme.key);
