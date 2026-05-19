@@ -13,7 +13,9 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
@@ -41,6 +43,9 @@ class DashboardServiceImpl(
     private val databaseClient: DatabaseClient,
     private val meterRegistry: MeterRegistry,
 ) : DashboardService {
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private var serverNameCache: Pair<String, Long>? = null
+    private val serverNameCacheTTL = 10 * 60 * 1000L
 
     override suspend fun getDashboardStats(timeRange: String): DashboardStatsVO {
         val businessStats = getBusinessStats(timeRange)
@@ -53,58 +58,75 @@ class DashboardServiceImpl(
     }
 
     override suspend fun getBusinessStats(timeRange: String): BusinessStatsVO {
+
         val (currentStartTime, previousStartTime) = calculateTimeRange(timeRange)
         val now = System.currentTimeMillis()
 
-        val totalUsers = calculateStatItem(
-            currentCount = userRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = userRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalUsers = coroutineScope.async {
+            calculateStatItem(
+                currentCount = userRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = userRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalTenants = calculateStatItem(
-            currentCount = tenantRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = tenantRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalTenants = coroutineScope.async {
+            calculateStatItem(
+                currentCount = tenantRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = tenantRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalTenantMembers = calculateStatItem(
-            currentCount = tenantMemberRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = tenantMemberRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalTenantMembers = coroutineScope.async {
+            calculateStatItem(
+                currentCount = tenantMemberRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = tenantMemberRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalFileResources = calculateStatItem(
-            currentCount = fileResourceRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = fileResourceRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalFileResources = coroutineScope.async {
+            calculateStatItem(
+                currentCount = fileResourceRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = fileResourceRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalInvitations = calculateStatItem(
-            currentCount = tenantInvitationRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = tenantInvitationRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalInvitations = coroutineScope.async {
+            calculateStatItem(
+                currentCount = tenantInvitationRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = tenantInvitationRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalInvitationRecords = calculateStatItem(
-            currentCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalInvitationRecords = coroutineScope.async {
+            calculateStatItem(
+                currentCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalOAuthAccounts = calculateStatItem(
-            currentCount = oAuthAccountRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = oAuthAccountRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalOAuthAccounts = coroutineScope.async {
+            calculateStatItem(
+                currentCount = oAuthAccountRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = oAuthAccountRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
-        val totalMailSent = calculateStatItem(
-            currentCount = mailSendLogRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-            previousCount = mailSendLogRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
-        )
+        val totalMailSent = coroutineScope.async {
+            calculateStatItem(
+                currentCount = mailSendLogRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = mailSendLogRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+            )
+        }
 
         return BusinessStatsVO(
-            totalUsers = totalUsers,
-            totalTenants = totalTenants,
-            totalTenantMembers = totalTenantMembers,
-            totalFileResources = totalFileResources,
-            totalMailSent = totalMailSent,
-            totalInvitations = totalInvitations,
-            totalInvitationRecords = totalInvitationRecords,
-            totalOAuthAccounts = totalOAuthAccounts
+            totalUsers = totalUsers.await(),
+            totalTenants = totalTenants.await(),
+            totalTenantMembers = totalTenantMembers.await(),
+            totalFileResources = totalFileResources.await(),
+            totalMailSent = totalMailSent.await(),
+            totalInvitations = totalInvitations.await(),
+            totalInvitationRecords = totalInvitationRecords.await(),
+            totalOAuthAccounts = totalOAuthAccounts.await(),
         )
     }
 
@@ -129,11 +151,19 @@ class DashboardServiceImpl(
         val uptime = ManagementFactory.getRuntimeMXBean().uptime
 
         val serverName = withContext(Dispatchers.IO) {
-            System.getenv("HOSTNAME")
-                ?: System.getenv("COMPUTER_NAME")
-                ?: InetAddress.getLocalHost().canonicalHostName
-                ?: InetAddress.getLocalHost().hostName
-                ?: "unknown"
+            if (serverNameCache != null && System.currentTimeMillis() - serverNameCache!!.second < serverNameCacheTTL) {
+                serverNameCache!!.first
+            } else {
+                val name = System.getenv("HOSTNAME")
+                    ?: System.getenv("COMPUTER_NAME")
+                    ?: InetAddress.getLocalHost().canonicalHostName
+                    ?: InetAddress.getLocalHost().hostName
+                    ?: "unknown"
+
+                serverNameCache = name to System.currentTimeMillis()
+
+                name
+            }
         }
 
         val dbActiveConnections = try {
