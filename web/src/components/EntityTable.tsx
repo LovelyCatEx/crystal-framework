@@ -18,6 +18,7 @@ import type {EntityTableColumn, EntityTableColumns} from "./types/entity-table.t
 import type {BaseManagerReadDTO, PaginatedResponseData} from "../types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
 import {useTranslation} from "react-i18next";
+import {useDebounce} from "@/compositions/use-debounce.ts";
 
 export interface EntityTableProps<ENTITY extends BaseEntity> {
     entityName: string;
@@ -95,7 +96,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // would otherwise be triggered by the setCurrentPage(1) state change.
     const skipNextPageEffectRef = useRef(false);
 
-    const fireQuery = useCallback((page: number, pageSize: number, keyword: string) => {
+    const fireQuery = useDebounce((page: number, pageSize: number, keyword: string) => {
         setRefreshing(true);
 
         props.query({
@@ -118,7 +119,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         }).finally(() => {
             setRefreshing(false);
         })
-    }, [props, t]);
+    })
 
     const refreshData = useCallback((options?: EntityTableRefreshOptions & { overrideKeyword?: string }) => {
         const targetPage = options?.resetPage ? 1 : currentPage;
@@ -234,7 +235,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                     {t('components.entityTable.columnFilter.selectAll')}
                 </Button>
             </div>
-            <Space direction="vertical" className="w-full">
+            <Space orientation="vertical" className="w-full">
                 {allColumns.map(column => (
                     <Checkbox
                         key={column.key}

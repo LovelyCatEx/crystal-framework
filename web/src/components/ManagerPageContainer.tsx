@@ -242,7 +242,6 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     allowEmpty={[false, true]}
                     onChange={(dates) => {
                         if (dates && dates[0]) {
-                            // 允许结束时间为空，表示"直到现在"
                             setTimeRange([dates[0].valueOf(), dates[1]?.valueOf() ?? null]);
                         } else {
                             setTimeRange(null);
@@ -252,8 +251,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 />,
                 queryParamsProvider() {
                     if (!timeRange) return {};
-                    // 如果结束时间为 null，使用当前时间
-                    return { 
+                    return {
                         startTime: timeRange[0], 
                         endTime: timeRange[1] ?? Date.now() 
                     };
@@ -348,7 +346,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 width={800}
                 centered
                 confirmLoading={submitting}
-                maskClosable={!submitting}
+                mask={{ closable: !submitting }}
                 okButtonProps={{ className: "rounded-lg h-10 px-6" }}
                 cancelButtonProps={{ className: "rounded-lg h-10 px-6", disabled: submitting }}
             >

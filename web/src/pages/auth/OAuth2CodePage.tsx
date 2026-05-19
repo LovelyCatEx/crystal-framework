@@ -263,7 +263,7 @@ function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
     return (
         <div className="space-y-6">
             <Card className="bg-blue-50 border-blue-200">
-                <Space direction="vertical" size="middle" className="w-full">
+                <Space orientation="vertical" size="middle" className="w-full">
                     <div className="text-sm text-gray-500">{t('pages.auth.oauth2.bind.currentUser.label')}</div>
                     <Space>
                         <Avatar

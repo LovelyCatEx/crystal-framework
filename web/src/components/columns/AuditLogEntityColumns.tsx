@@ -37,7 +37,7 @@ function AuditUserCell({ userId, username }: { userId: string; username: string 
             <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
                 <Space size={8} className="cursor-pointer">
                     <AvatarResource fileEntityId={user.avatar} />
-                    <Space direction="vertical" size={0}>
+                    <Space orientation="vertical" size={0}>
                         <span className="text-xs font-mono font-bold">{user.nickname}</span>
                         <span className="text-xs text-gray-400">@{user.username}</span>
                     </Space>

@@ -56,7 +56,7 @@ export function StorageProviderConfigEditor({ value, onChange, placeholder }: St
     };
 
     return (
-        <Space direction="vertical" className="w-full" size="middle">
+        <Space orientation="vertical" className="w-full" size="middle">
             <Space className="w-full">
                 <Select
                     placeholder={t('components.storageProviderConfig.selectTemplate')}
