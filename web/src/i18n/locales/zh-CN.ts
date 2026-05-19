@@ -1664,7 +1664,26 @@ export const zhCN = {
       execute: '执行',
       action: '操作',
       refresh: '刷新',
-      timeRange: '时间范围'
+      timeRange: '时间范围',
+      startTime: '开始时间',
+      tillNow: '直到现在',
+      last5Minutes: '最近 5 分钟',
+      last10Minutes: '最近 10 分钟',
+      last15Minutes: '最近 15 分钟',
+      last30Minutes: '最近 30 分钟',
+      last1Hour: '最近 1 小时',
+      last2Hours: '最近 2 小时',
+      last3Hours: '最近 3 小时',
+      last4Hours: '最近 4 小时',
+      last8Hours: '最近 8 小时',
+      last12Hours: '最近 12 小时',
+      last1Day: '最近 1 天',
+      last3Days: '最近 3 天',
+      last5Days: '最近 5 天',
+      last7Days: '最近 7 天',
+      last14Days: '最近 14 天',
+      last30Days: '最近 30 天',
+      todayToNow: '今天开始到现在'
     },
 
     protectedController: {

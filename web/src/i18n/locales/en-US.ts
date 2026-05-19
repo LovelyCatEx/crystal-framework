@@ -1667,7 +1667,26 @@ export const enUS = {
       execute: 'Execute',
       action: 'Action',
       refresh: 'Refresh',
-      timeRange: 'Time Range'
+      timeRange: 'Time Range',
+      startTime: 'Start Time',
+      tillNow: 'Till Now',
+      last5Minutes: 'Last 5 Minutes',
+      last10Minutes: 'Last 10 Minutes',
+      last15Minutes: 'Last 15 Minutes',
+      last30Minutes: 'Last 30 Minutes',
+      last1Hour: 'Last 1 Hour',
+      last2Hours: 'Last 2 Hours',
+      last3Hours: 'Last 3 Hours',
+      last4Hours: 'Last 4 Hours',
+      last8Hours: 'Last 8 Hours',
+      last12Hours: 'Last 12 Hours',
+      last1Day: 'Last 1 Day',
+      last3Days: 'Last 3 Days',
+      last5Days: 'Last 5 Days',
+      last7Days: 'Last 7 Days',
+      last14Days: 'Last 14 Days',
+      last30Days: 'Last 30 Days',
+      todayToNow: 'Today to Now'
     },
 
     protectedController: {

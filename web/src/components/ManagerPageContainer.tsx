@@ -16,6 +16,9 @@ import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarCompo
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
 import type {BaseEntity} from "../types/BaseEntity.ts";
 import {EntityTable, type EntityTableProps, type EntityTableRef, type EntityTableRefreshOptions} from "./EntityTable.tsx";
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import type { TimeRangePickerProps } from 'antd';
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
@@ -64,7 +67,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const [batchOperationType, setBatchOperationType] = useState(0);
 
     // Time range filter
-    const [timeRange, setTimeRange] = useState<[number, number] | null>(null);
+    const [timeRange, setTimeRange] = useState<[number, number | null] | null>(null);
 
     const handleOnBatchOperationClick = useCallback(() => {
         if (batchOperationType === 1) {
@@ -197,6 +200,32 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     const showTimeRangeFilter = props.showTimeRangeFilter !== false;
 
+    const rangePresets: TimeRangePickerProps['presets'] = useMemo(() => {
+        const now = dayjs();
+        return [
+            {
+                label: t('components.managerPageContainer.todayToNow'),
+                value: () => [dayjs().startOf('day'), dayjs()] as [Dayjs, Dayjs]
+            },
+            { label: t('components.managerPageContainer.last5Minutes'), value: [now.add(-5, 'minute'), now] },
+            { label: t('components.managerPageContainer.last10Minutes'), value: [now.add(-10, 'minute'), now] },
+            { label: t('components.managerPageContainer.last15Minutes'), value: [now.add(-15, 'minute'), now] },
+            { label: t('components.managerPageContainer.last30Minutes'), value: [now.add(-30, 'minute'), now] },
+            { label: t('components.managerPageContainer.last1Hour'), value: [now.add(-1, 'hour'), now] },
+            { label: t('components.managerPageContainer.last2Hours'), value: [now.add(-2, 'hour'), now] },
+            { label: t('components.managerPageContainer.last3Hours'), value: [now.add(-3, 'hour'), now] },
+            { label: t('components.managerPageContainer.last4Hours'), value: [now.add(-4, 'hour'), now] },
+            { label: t('components.managerPageContainer.last8Hours'), value: [now.add(-8, 'hour'), now] },
+            { label: t('components.managerPageContainer.last12Hours'), value: [now.add(-12, 'hour'), now] },
+            { label: t('components.managerPageContainer.last1Day'), value: [now.add(-1, 'day'), now] },
+            { label: t('components.managerPageContainer.last3Days'), value: [now.add(-3, 'day'), now] },
+            { label: t('components.managerPageContainer.last5Days'), value: [now.add(-5, 'day'), now] },
+            { label: t('components.managerPageContainer.last7Days'), value: [now.add(-7, 'day'), now] },
+            { label: t('components.managerPageContainer.last14Days'), value: [now.add(-14, 'day'), now] },
+            { label: t('components.managerPageContainer.last30Days'), value: [now.add(-30, 'day'), now] },
+        ];
+    }, [t]);
+
     const builtinTableActions = useMemo(() => {
         const actions = [
             ...(restProps.tableActions ?? []),
@@ -208,9 +237,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 children: <DatePicker.RangePicker
                     showTime
                     allowClear
+                    presets={rangePresets}
+                    placeholder={[t('components.managerPageContainer.startTime'), t('components.managerPageContainer.tillNow')]}
+                    allowEmpty={[false, true]}
                     onChange={(dates) => {
-                        if (dates && dates[0] && dates[1]) {
-                            setTimeRange([dates[0].valueOf(), dates[1].valueOf()]);
+                        if (dates && dates[0]) {
+                            // 允许结束时间为空，表示"直到现在"
+                            setTimeRange([dates[0].valueOf(), dates[1]?.valueOf() ?? null]);
                         } else {
                             setTimeRange(null);
                         }
@@ -218,7 +251,12 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     }}
                 />,
                 queryParamsProvider() {
-                    return timeRange ? { startTime: timeRange[0], endTime: timeRange[1] } : {};
+                    if (!timeRange) return {};
+                    // 如果结束时间为 null，使用当前时间
+                    return { 
+                        startTime: timeRange[0], 
+                        endTime: timeRange[1] ?? Date.now() 
+                    };
                 }
             });
         }
@@ -234,7 +272,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
         });
 
         return actions;
-    }, [restProps.tableActions, t, showTimeRangeFilter, timeRange]);
+    }, [restProps.tableActions, t, showTimeRangeFilter, timeRange, rangePresets]);
 
     const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
         if (readonlyMode) return { type: 'disabled' };
