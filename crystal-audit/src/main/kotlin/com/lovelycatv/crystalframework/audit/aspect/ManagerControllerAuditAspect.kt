@@ -128,8 +128,8 @@ class ManagerControllerAuditAspect(
         while (current != null && current != Any::class.java) {
             val genericSuper = current.genericSuperclass
             if (genericSuper is ParameterizedType) {
-                val rawType = genericSuper.rawType
-                if (rawType == StandardManagerController::class.java) {
+                val rawType = genericSuper.rawType as? Class<*>
+                if (rawType != null && StandardManagerController::class.java.isAssignableFrom(rawType)) {
                     // ENTITY is the 3rd type argument (index 2)
                     val entityType = genericSuper.actualTypeArguments[2]
                     return entityType as? Class<*>
