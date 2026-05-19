@@ -36,7 +36,7 @@ object SystemSettingsConstants {
             val FONT_COLOR = SystemSettingsItemDeclaration(
                 key = "basic.waterMark.fontColor",
                 valueType = SystemSettingsItemValueType.STRING,
-                defaultValue = "#00000026",
+                defaultValue = "#00000018",
                 sort = 4
             )
         }

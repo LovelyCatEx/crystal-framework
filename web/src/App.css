@@ -1,8 +1,16 @@
-.ant-input-affix-wrapper {
+.ant-input, .ant-input-affix-wrapper, .ant-input-number {
     z-index: 100!important;
 }
 
 .ant-btn {
+    z-index: 100!important;
+}
+
+.ant-radio, .ant-radio-wrapper {
+    z-index: 100!important;
+}
+
+.ant-switch {
     z-index: 100!important;
 }
 
@@ -11,5 +19,9 @@
 }
 
 .ant-tag {
+    z-index: 100!important;
+}
+
+.ant-tabs-nav-list {
     z-index: 100!important;
 }

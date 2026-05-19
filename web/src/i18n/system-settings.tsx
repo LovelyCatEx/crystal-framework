@@ -1,5 +1,11 @@
 import type {ReactNode} from "react";
-import {InfoCircleOutlined, LockOutlined, MailOutlined, SettingOutlined} from "@ant-design/icons";
+import {
+    CopyrightCircleOutlined,
+    InfoCircleOutlined,
+    LockOutlined,
+    MailOutlined,
+    SettingOutlined
+} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 
 export function useSettingsKeyToTranslationMap(): Map<string, string> {
@@ -27,7 +33,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
     const { t } = useTranslation();
     return new Map<string, {label: string, icon?: ReactNode}>([
         ['basic', { label: t('pages.systemSettingsManager.groups.basic'), icon: <InfoCircleOutlined /> }],
-        ['basic.waterMark', { label: t('pages.systemSettingsManager.groups.basic.waterMark'), icon: <InfoCircleOutlined /> }],
+        ['basic.waterMark', { label: t('pages.systemSettingsManager.groups.basic.waterMark'), icon: <CopyrightCircleOutlined /> }],
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],

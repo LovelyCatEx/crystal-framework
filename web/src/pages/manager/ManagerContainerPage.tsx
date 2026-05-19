@@ -151,9 +151,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     }, [waterMarkInfo, loggedUser.userProfile]);
 
     const watermarkFontColor = useMemo(() => {
-        if (!waterMarkInfo?.fontColor) return '#00000026'; // rgba(0,0,0,.15) 的十六进制表示
+        if (!waterMarkInfo?.fontColor) return '#00000026';
         
-        // 将 RGBA 字符串转换为十六进制颜色（#RRGGBBAA 格式）
         const rgbaMatch = waterMarkInfo.fontColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
         if (rgbaMatch) {
             const [, r, g, b, a] = rgbaMatch;
@@ -164,7 +163,6 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             return `#${red}${green}${blue}${alpha}`;
         }
         
-        // 如果已经是十六进制格式，直接返回
         if (waterMarkInfo.fontColor.startsWith('#')) {
             return waterMarkInfo.fontColor;
         }
@@ -384,12 +382,13 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 </Sider>
 
                 {/* Main Router View */}
-                <Content
-                    className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
-                >
-                    {waterMarkInfo?.enabled ? (
-                        <Watermark 
-                            className="h-full" 
+                {waterMarkInfo?.enabled ? (
+
+                    <Content
+                        className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
+                    >
+                        <Watermark
+                            className="h-full p-6"
                             content={watermarkContent}
                             font={{ color: watermarkFontColor }}
                             zIndex={10}
@@ -404,7 +403,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 ))}
                             </Routes>
                         </Watermark>
-                    ) : (
+
+                    </Content>
+                ) : (
+                    <Content
+                        className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
+                    >
                         <Routes>
                             {availableMenus.map((menu) => (
                                 <Route
@@ -414,9 +418,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 />
                             ))}
                         </Routes>
-                    )}
-
-                </Content>
+                    </Content>
+                )}
 
                 {/* Mobile Menu Overlay */}
                 {mobileMenuOpen && (
