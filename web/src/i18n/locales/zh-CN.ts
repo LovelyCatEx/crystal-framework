@@ -1441,6 +1441,7 @@ export const zhCN = {
       maintenanceConfirmCancel: '取消',
       keys: {
         'basic.baseUrl': 'API 基本地址',
+        'basic.waterMark.enabled': '是否显示水印',
         'bootstrap.autoCheckRbacTableData': '自动校验 RBAC 表数据',
         'mail.smtp.username': '用户名',
         'mail.smtp.password': '密码',
@@ -1454,6 +1455,7 @@ export const zhCN = {
       },
       groups: {
         'basic': '基本设置',
+        'basic.waterMark': '水印设置',
         'bootstrap': '启动设置项',
         'mail.smtp': 'SMTP 邮件服务',
         'security.api.encrypt': 'Api 安全设置',

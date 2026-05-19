@@ -10,7 +10,12 @@ data class SystemSettings(
 ) {
     data class Basic(
         val baseUrl: String,
+        val waterMark: WaterMark,
     ) {
+        data class WaterMark(
+            val enabled: Boolean,
+        )
+
         fun getNormalizedBaseUrl(withSuffix: Boolean = false): String {
             return baseUrl.removeSuffix("/").run {
                 if (withSuffix) {

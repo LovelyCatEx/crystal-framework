@@ -8,6 +8,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.system.controller.dto.SwitchSystemMaintenanceModeDTO
+import com.lovelycatv.crystalframework.system.controller.vo.MaintenanceInfoVO
 import com.lovelycatv.crystalframework.system.filter.SystemMaintenanceGuardFilter
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
@@ -64,14 +65,15 @@ class ReadinessController(
 
     @Unauthorized
     @GetMapping("/maintenance")
-    suspend fun getSystemMaintenance(): ApiResponse<*> {
-        val canAccess = RbacUtils.hasAuthority(SystemMaintenanceGuardFilter.MAINTENANCE_ACCESS_PERMISSION)
+    suspend fun getSystemMaintenance(): ApiResponse<MaintenanceInfoVO> {
+        val canAccessInMaintenance = RbacUtils.hasAuthority(SystemMaintenanceGuardFilter.MAINTENANCE_ACCESS_PERMISSION)
+        val isInMaintenance = isInMaintenance()
 
         return ApiResponse.success(
-            object {
-                val canAccess = canAccess
-                val maintenanceMode = isInMaintenance()
-            }
+            MaintenanceInfoVO(
+                canAccess = !isInMaintenance || canAccessInMaintenance,
+                maintenanceMode = isInMaintenance
+        )
         )
     }
 

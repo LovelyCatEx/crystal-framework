@@ -6,6 +6,7 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
     const { t } = useTranslation();
     return new Map<string, string>([
         ['basic.baseUrl', t('pages.systemSettingsManager.keys.basic.baseUrl')],
+        ['basic.waterMark.enabled', t('pages.systemSettingsManager.keys.basic.waterMark.enabled')],
         ['bootstrap.autoCheckRbacTableData', t('pages.systemSettingsManager.keys.bootstrap.autoCheckRbacTableData')],
         ['mail.smtp.username', t('pages.systemSettingsManager.keys.mail.smtp.username')],
         ['mail.smtp.password', t('pages.systemSettingsManager.keys.mail.smtp.password')],
@@ -23,6 +24,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
     const { t } = useTranslation();
     return new Map<string, {label: string, icon?: ReactNode}>([
         ['basic', { label: t('pages.systemSettingsManager.groups.basic'), icon: <InfoCircleOutlined /> }],
+        ['basic.waterMark', { label: t('pages.systemSettingsManager.groups.basic.waterMark'), icon: <InfoCircleOutlined /> }],
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],

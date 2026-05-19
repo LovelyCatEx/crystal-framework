@@ -9,6 +9,15 @@ object SystemSettingsConstants {
             valueType = SystemSettingsItemValueType.STRING,
             defaultValue = "http://localhost:8080/api/v1",
         )
+
+        object WaterMark {
+            val ENABLED = SystemSettingsItemDeclaration(
+                key = "basic.waterMark.enabled",
+                valueType = SystemSettingsItemValueType.BOOLEAN,
+                defaultValue = false.toString(),
+                sort = 1
+            )
+        }
     }
 
     object Bootstrap {

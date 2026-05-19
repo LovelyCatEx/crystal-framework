@@ -1444,6 +1444,7 @@ export const enUS = {
       maintenanceConfirmCancel: 'Cancel',
       keys: {
         'basic.baseUrl': 'API Base URL',
+        'basic.waterMark.enabled': 'Show Watermark',
         'bootstrap.autoCheckRbacTableData': 'Auto Check RBAC Table Data',
         'mail.smtp.username': 'Username',
         'mail.smtp.password': 'Password',
@@ -1457,6 +1458,7 @@ export const enUS = {
       },
       groups: {
         'basic': 'Basic Settings',
+        'basic.waterMark': 'Watermark Settings',
         'bootstrap': 'Bootstrap Settings',
         'mail.smtp': 'SMTP Mail Service',
         'security.api.encrypt': 'Api Security',
