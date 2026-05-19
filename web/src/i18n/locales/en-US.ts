@@ -1445,6 +1445,9 @@ export const enUS = {
       keys: {
         'basic.baseUrl': 'API Base URL',
         'basic.waterMark.enabled': 'Show Watermark',
+        'basic.waterMark.type': 'Watermark Type',
+        'basic.waterMark.customValue': 'Custom Watermark Content',
+        'basic.waterMark.fontColor': 'Watermark Font Color',
         'bootstrap.autoCheckRbacTableData': 'Auto Check RBAC Table Data',
         'mail.smtp.username': 'Username',
         'mail.smtp.password': 'Password',
@@ -1474,6 +1477,11 @@ export const enUS = {
           'ALL': 'All api',
           'ALL_ANNOTATED': 'All annotated api',
           'BY_ANNOTATED_LEVEL': 'Only api matches the security level',
+        },
+        'basic.waterMark.type': {
+          'SYSTEM_NAME': 'System Name',
+          'USER_NAME': 'User Name',
+          'CUSTOM': 'Custom',
         }
       }
     },

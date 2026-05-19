@@ -6,5 +6,8 @@ data class SystemIntegratedInfoVO(
 ) {
     data class WaterMark(
         val enabled: Boolean,
+        val type: String,
+        val customValue: String,
+        val fontColor: String,
     )
 }

@@ -17,6 +17,28 @@ object SystemSettingsConstants {
                 defaultValue = false.toString(),
                 sort = 1
             )
+
+            val TYPE = SystemSettingsItemDeclaration(
+                key = "basic.waterMark.type",
+                valueType = SystemSettingsItemValueType.ENUM_SINGLE,
+                defaultValue = "SYSTEM_NAME",
+                sort = 2,
+                enumValues = listOf("SYSTEM_NAME", "USER_NAME", "CUSTOM")
+            )
+
+            val CUSTOM_VALUE = SystemSettingsItemDeclaration(
+                key = "basic.waterMark.customValue",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 3
+            )
+
+            val FONT_COLOR = SystemSettingsItemDeclaration(
+                key = "basic.waterMark.fontColor",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "#00000026",
+                sort = 4
+            )
         }
     }
 

@@ -1,4 +1,4 @@
-import {Avatar, Button, Divider, Dropdown, Layout, Menu, message, Space, Spin} from "antd";
+import {Avatar, Button, Divider, Dropdown, Layout, Menu, message, Space, Spin, Watermark} from "antd";
 import {
     DownOutlined,
     LoadingOutlined,
@@ -36,6 +36,7 @@ import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {theme} from "antd";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
+import {useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
 const { useToken } = theme;
 
 function TenantSwitcher() {
@@ -120,6 +121,7 @@ function TenantSwitcher() {
 }
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
+    const { waterMarkInfo } = useSystemIntegrated()
     const { token } = useToken();
     const { t } = useTranslation();
 
@@ -132,6 +134,43 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const watermarkContent = useMemo(() => {
+        if (!waterMarkInfo?.enabled) return '';
+        
+        switch (waterMarkInfo.type) {
+            case 'SYSTEM_NAME':
+                return ProjectDisplayName;
+            case 'USER_NAME':
+                return loggedUser.userProfile?.nickname || loggedUser.userProfile?.username || '';
+            case 'CUSTOM':
+                return waterMarkInfo.customValue;
+            default:
+                return ProjectDisplayName;
+        }
+    }, [waterMarkInfo, loggedUser.userProfile]);
+
+    const watermarkFontColor = useMemo(() => {
+        if (!waterMarkInfo?.fontColor) return '#00000026'; // rgba(0,0,0,.15) 的十六进制表示
+        
+        // 将 RGBA 字符串转换为十六进制颜色（#RRGGBBAA 格式）
+        const rgbaMatch = waterMarkInfo.fontColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+            const [, r, g, b, a] = rgbaMatch;
+            const red = parseInt(r).toString(16).padStart(2, '0');
+            const green = parseInt(g).toString(16).padStart(2, '0');
+            const blue = parseInt(b).toString(16).padStart(2, '0');
+            const alpha = a ? Math.round(parseFloat(a) * 255).toString(16).padStart(2, '0') : 'ff';
+            return `#${red}${green}${blue}${alpha}`;
+        }
+        
+        // 如果已经是十六进制格式，直接返回
+        if (waterMarkInfo.fontColor.startsWith('#')) {
+            return waterMarkInfo.fontColor;
+        }
+        
+        return '#00000026';
+    }, [waterMarkInfo?.fontColor]);
 
     const handleThemeChange = (theme: ThemeColor) => {
         setCurrentThemeKey(theme.key);
@@ -348,15 +387,35 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 <Content
                     className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
                 >
-                    <Routes>
-                        {availableMenus.map((menu) => (
-                            <Route
-                                key={menu.key.toString()}
-                                path={menu.path.replace(parentPath, "")}
-                                element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
-                            />
-                        ))}
-                    </Routes>
+                    {waterMarkInfo?.enabled ? (
+                        <Watermark 
+                            className="h-full" 
+                            content={watermarkContent}
+                            font={{ color: watermarkFontColor }}
+                            zIndex={10}
+                        >
+                            <Routes>
+                                {availableMenus.map((menu) => (
+                                    <Route
+                                        key={menu.key.toString()}
+                                        path={menu.path.replace(parentPath, "")}
+                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                    />
+                                ))}
+                            </Routes>
+                        </Watermark>
+                    ) : (
+                        <Routes>
+                            {availableMenus.map((menu) => (
+                                <Route
+                                    key={menu.key.toString()}
+                                    path={menu.path.replace(parentPath, "")}
+                                    element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                />
+                            ))}
+                        </Routes>
+                    )}
+
                 </Content>
 
                 {/* Mobile Menu Overlay */}

@@ -25,7 +25,10 @@ class SystemIntegratedInfoController(
             SystemIntegratedInfoVO(
                 maintenance = readinessController.getSystemMaintenance().data!!,
                 waterMark = SystemIntegratedInfoVO.WaterMark(
-                    enabled = systemSettings.basic.waterMark.enabled
+                    enabled = systemSettings.basic.waterMark.enabled,
+                    type = systemSettings.basic.waterMark.type,
+                    customValue = systemSettings.basic.waterMark.customValue,
+                    fontColor = systemSettings.basic.waterMark.fontColor
                 )
             )
         )

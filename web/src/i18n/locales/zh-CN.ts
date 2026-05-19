@@ -1442,6 +1442,9 @@ export const zhCN = {
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'basic.waterMark.enabled': '是否显示水印',
+        'basic.waterMark.type': '水印类型',
+        'basic.waterMark.customValue': '自定义水印内容',
+        'basic.waterMark.fontColor': '水印字体颜色',
         'bootstrap.autoCheckRbacTableData': '自动校验 RBAC 表数据',
         'mail.smtp.username': '用户名',
         'mail.smtp.password': '密码',
@@ -1471,6 +1474,11 @@ export const zhCN = {
           'ALL': '所有接口',
           'ALL_ANNOTATED': '所有被修饰的接口',
           'BY_ANNOTATED_LEVEL': '仅限安全等级匹配的接口',
+        },
+        'basic.waterMark.type': {
+          'SYSTEM_NAME': '系统名称',
+          'USER_NAME': '用户名称',
+          'CUSTOM': '自定义',
         }
       }
     },

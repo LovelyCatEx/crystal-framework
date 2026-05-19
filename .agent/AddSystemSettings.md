@@ -35,6 +35,7 @@ i18n 文件位于 web/i18n/locales 中，格式严格，禁止出现漏写的情
 1. key 必须定义为 'pages.systemSettingsManager.keys.${keyPath}'，例如 key 'mail.smtp.host' 对应 i18n 中的 'pages.systemSettingsManager.keys.mail.smtp.host'。
 2. group 必须定义为 'pages.systemSettingsManager.groups.${groupName}'，例如 group 'mail.smtp' 对应 i18n 中的 'pages.systemSettingsManager.groups.mail.smtp'。
 3. tab 必须定义为 'pages.systemSettingsManager.tabs.${tabName}'，例如 tab 'mail' 对应 i18n 中的 'pages.systemSettingsManager.tabs.mail'。
+4. 如果值类型是 ENUM_*，必须与后端定义的在 i18n 中对应 'pages.systemSettingsManager.enums.${key}.${enumName}'。
 
 ## 执行步骤
 

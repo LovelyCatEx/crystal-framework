@@ -104,7 +104,10 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Basic(
             baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!,
             waterMark = SystemSettings.Basic.WaterMark(
-                enabled = getSettings(SystemSettingsConstants.Basic.WaterMark.ENABLED)!!
+                enabled = getSettings(SystemSettingsConstants.Basic.WaterMark.ENABLED)!!,
+                type = getSettings(SystemSettingsConstants.Basic.WaterMark.TYPE)!!,
+                customValue = getSettings(SystemSettingsConstants.Basic.WaterMark.CUSTOM_VALUE)!!,
+                fontColor = getSettings(SystemSettingsConstants.Basic.WaterMark.FONT_COLOR)!!
             )
         )
     }
@@ -145,6 +148,9 @@ class SystemSettingsServiceImpl(
     override suspend fun updateSystemSettings(settings: SystemSettings) {
         setSettings(SystemSettingsConstants.Basic.BASE_URL, settings.basic.baseUrl)
         setSettings(SystemSettingsConstants.Basic.WaterMark.ENABLED, settings.basic.waterMark.enabled.toString())
+        setSettings(SystemSettingsConstants.Basic.WaterMark.TYPE, settings.basic.waterMark.type)
+        setSettings(SystemSettingsConstants.Basic.WaterMark.CUSTOM_VALUE, settings.basic.waterMark.customValue)
+        setSettings(SystemSettingsConstants.Basic.WaterMark.FONT_COLOR, settings.basic.waterMark.fontColor)
 
         setSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA, settings.bootstrap.autoCheckRbacTableData.toString())
 

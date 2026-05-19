@@ -7,6 +7,9 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
     return new Map<string, string>([
         ['basic.baseUrl', t('pages.systemSettingsManager.keys.basic.baseUrl')],
         ['basic.waterMark.enabled', t('pages.systemSettingsManager.keys.basic.waterMark.enabled')],
+        ['basic.waterMark.type', t('pages.systemSettingsManager.keys.basic.waterMark.type')],
+        ['basic.waterMark.customValue', t('pages.systemSettingsManager.keys.basic.waterMark.customValue')],
+        ['basic.waterMark.fontColor', t('pages.systemSettingsManager.keys.basic.waterMark.fontColor')],
         ['bootstrap.autoCheckRbacTableData', t('pages.systemSettingsManager.keys.bootstrap.autoCheckRbacTableData')],
         ['mail.smtp.username', t('pages.systemSettingsManager.keys.mail.smtp.username')],
         ['mail.smtp.password', t('pages.systemSettingsManager.keys.mail.smtp.password')],

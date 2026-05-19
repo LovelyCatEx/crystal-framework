@@ -1,6 +1,7 @@
 import {ConfigProvider, theme} from "antd";
 import {Route, Routes} from "react-router-dom";
 import {RequireAuthComponent} from "./components/RequireAuthComponent.tsx";
+import type {MaintenanceStatus} from "./components/MaintenanceGuard.tsx";
 import {MaintenanceGuard} from "./components/MaintenanceGuard.tsx";
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
 import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
@@ -18,6 +19,46 @@ import {
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {SystemInitializePage} from "@/pages/SystemIntializePage.tsx";
+import {SystemIntegratedProvider, useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
+import './App.css';
+
+function AppRoutes() {
+    return (
+        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route
+                path="/manager/*"
+                element={
+                    <RequireAuthComponent>
+                        <ManagerContainerPage parentPath="/manager" />
+                    </RequireAuthComponent>
+                }
+            />
+            <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
+            <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
+            <Route path="/system-initialize" element={<SystemInitializePage />} />
+            <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+    );
+}
+
+function AppContent() {
+    const {maintenanceInfo, isLoading, error} = useSystemIntegrated();
+
+    // Calculate maintenance status based on integrated info
+    const maintenanceStatus: MaintenanceStatus = (() => {
+        if (isLoading) return 'loading';
+        if (error) return 'disconnected';
+        if (maintenanceInfo?.maintenanceMode && !maintenanceInfo?.canAccess) return 'maintenance';
+        return 'pass';
+    })();
+
+    return (
+        <MaintenanceGuard mode="fromData" status={maintenanceStatus}>
+            <AppRoutes />
+        </MaintenanceGuard>
+    );
+}
 
 function App() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColor>(() => {
@@ -55,23 +96,9 @@ function App() {
 
   return (
       <ConfigProvider theme={themeConfig}>
-          <MaintenanceGuard>
-              <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route
-                      path="/manager/*"
-                      element={
-                          <RequireAuthComponent>
-                              <ManagerContainerPage parentPath="/manager" />
-                          </RequireAuthComponent>
-                      }
-                  />
-                  <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
-                  <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
-                  <Route path="/system-initialize" element={<SystemInitializePage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-          </MaintenanceGuard>
+          <SystemIntegratedProvider>
+              <AppContent />
+          </SystemIntegratedProvider>
       </ConfigProvider>
   )
 }
