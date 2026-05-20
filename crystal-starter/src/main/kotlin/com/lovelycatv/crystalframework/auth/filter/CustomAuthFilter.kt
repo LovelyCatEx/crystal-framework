@@ -7,6 +7,7 @@
  */
 package com.lovelycatv.crystalframework.auth.filter
 
+import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.shared.utils.reactor.contextMerge
@@ -74,31 +75,36 @@ class CustomAuthFilter(
             null
         }
 
-        return if (authorization != null && claims != null) {
-            val userId = claims["userId"]
-                ?.toString()
-                ?.toLong()
-                ?: throw UnauthorizedException("userId is missing")
+        return exchange.session.flatMap { session ->
+            if (authorization != null && claims != null) {
+                val userId = claims["userId"]
+                    ?.toString()
+                    ?.toLong()
+                    ?: throw UnauthorizedException("userId is missing")
 
-            val tenantId = claims["tenantId"]
-                ?.toString()
-                ?.toLong()
+                val tenantId = claims["tenantId"]
+                    ?.toString()
+                    ?.toLong()
 
-            mono {
-                getUserAuthorities.invoke(userId, tenantId)
-            }.flatMap {
-                val token = UsernamePasswordAuthenticationToken(
-                    claims.subject,
-                    null,
-                    it
-                )
+                session.attributes[SessionConstants.AUDIT_USER_ID] = userId
+                session.attributes[SessionConstants.AUDIT_TENANT_ID] = tenantId ?: 0L
 
-                chain.filter(exchange).contextMerge(
-                    ReactiveSecurityContextHolder.withAuthentication(token)
-                )
+                mono {
+                    getUserAuthorities.invoke(userId, tenantId)
+                }.flatMap {
+                    val token = UsernamePasswordAuthenticationToken(
+                        claims.subject,
+                        null,
+                        it
+                    )
+
+                    chain.filter(exchange).contextMerge(
+                        ReactiveSecurityContextHolder.withAuthentication(token)
+                    )
+                }
+            } else {
+                chain.filter(exchange)
             }
-        } else {
-            chain.filter(exchange)
         }
     }
 }

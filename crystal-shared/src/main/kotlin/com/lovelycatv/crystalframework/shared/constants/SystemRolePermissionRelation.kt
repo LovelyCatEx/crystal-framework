@@ -44,6 +44,9 @@ object SystemRolePermissionRelation {
             // System settings
             SystemPermission.MENU_SYSTEM_SETTINGS,
             SystemPermission.ACTION_SYSTEM_SETTINGS_READ,
+            // Monitor
+            SystemPermission.MENU_MONITOR_SESSIONS,
+            SystemPermission.ACTION_MONITOR_SESSIONS_READ,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard
