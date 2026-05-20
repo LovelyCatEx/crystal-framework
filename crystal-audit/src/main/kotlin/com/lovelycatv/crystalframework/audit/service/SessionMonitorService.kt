@@ -6,5 +6,5 @@ import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 interface SessionMonitorService {
     suspend fun getSessionsCount(): Long
 
-    suspend fun getSessions(page: Int, pageSize: Int): PaginatedResponseData<SessionDescription>
+    suspend fun getSessions(page: Int, pageSize: Int, sessionId: String?): PaginatedResponseData<SessionDescription>
 }

@@ -87,7 +87,7 @@ class CustomAuthFilter(
                     ?.toLong()
 
                 session.attributes[SessionConstants.AUDIT_USER_ID] = userId
-                session.attributes[SessionConstants.AUDIT_TENANT_ID] = tenantId ?: "0"
+                session.attributes[SessionConstants.AUDIT_TENANT_ID] = tenantId ?: 0L
 
                 mono {
                     getUserAuthorities.invoke(userId, tenantId)

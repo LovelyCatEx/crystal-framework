@@ -75,10 +75,6 @@ spring:
   reactor:
     debug-agent:
       enabled: true
-  session:
-    timeout: 30m
-    redis:
-      namespace: crystalframework:session
   main:
     allow-circular-references: true
 crystalframework:
