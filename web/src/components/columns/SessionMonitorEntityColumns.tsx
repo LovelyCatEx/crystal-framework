@@ -10,6 +10,110 @@ import {UserCard} from "../card/pop/UserCard.tsx";
 import {AvatarResource} from "../AvatarResource.tsx";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {Tenant} from "@/types/tenant.types.ts";
+import {DesktopOutlined, GlobalOutlined} from "@ant-design/icons";
+
+function parseUserAgent(userAgent: string): { os: string; browser: string; device: string } | null {
+    if (!userAgent) return null;
+
+    const ua = userAgent;
+
+    let os = "Unknown";
+    if (ua.includes("Windows NT 10.0")) os = "Windows 10";
+    else if (ua.includes("Windows NT 6.1")) os = "Windows 7";
+    else if (ua.includes("Windows NT 6.2")) os = "Windows 8";
+    else if (ua.includes("Windows NT 6.3")) os = "Windows 8.1";
+    else if (ua.includes("Windows NT")) os = "Windows";
+    else if (ua.includes("Mac OS X")) os = "macOS";
+    else if (ua.includes("iPhone")) os = "iOS";
+    else if (ua.includes("iPad")) os = "iPadOS";
+    else if (ua.includes("Android")) os = "Android";
+    else if (ua.includes("Linux")) os = "Linux";
+
+    let browser = "Unknown";
+    if (ua.includes("Edg/")) browser = "Edge";
+    else if (ua.includes("Firefox/")) browser = "Firefox";
+    else if (ua.includes("Safari/") && !ua.includes("Chrome/") && !ua.includes("Edg/")) browser = "Safari";
+    else if (ua.includes("Chrome/")) browser = "Chrome";
+    else if (ua.includes("MSIE") || ua.includes("Trident/")) browser = "IE";
+
+    let device = "PC";
+    if (ua.includes("iPhone") || ua.includes("Android") && ua.includes("Mobile")) device = "Mobile";
+    else if (ua.includes("iPad")) device = "Tablet";
+
+    return { os, browser, device };
+}
+
+function SessionUserAgentCell({ userAgent }: { userAgent: string }) {
+    const parsed = parseUserAgent(userAgent);
+
+    const getOsColor = (os: string) => {
+        switch (os) {
+            case "Windows 10":
+            case "Windows 7":
+            case "Windows 8":
+            case "Windows 8.1":
+            case "Windows":
+                return "blue";
+            case "macOS":
+                return "purple";
+            case "iOS":
+                return "green";
+            case "Android":
+                return "orange";
+            case "Linux":
+                return "cyan";
+            default:
+                return "default";
+        }
+    };
+
+    const getBrowserColor = (browser: string) => {
+        switch (browser) {
+            case "Chrome":
+                return "success";
+            case "Edge":
+                return "processing";
+            case "Firefox":
+                return "orange";
+            case "Safari":
+                return "cyan";
+            case "IE":
+                return "red";
+            default:
+                return "default";
+        }
+    };
+
+    if (!userAgent) {
+        return <span className="text-gray-400">-</span>;
+    }
+
+    return (
+        <CopyableToolTip title={userAgent}>
+            <Space size={4} wrap>
+                {parsed && (
+                    <>
+                        {parsed.device === "Mobile" && (
+                            <Tag color="gold">📱 Mobile</Tag>
+                        )}
+                        {parsed.device === "Tablet" && (
+                            <Tag color="gold">📟 Tablet</Tag>
+                        )}
+                        <Tag color={getOsColor(parsed.os)}>
+                            <DesktopOutlined /> {parsed.os}
+                        </Tag>
+                        <Tag color={getBrowserColor(parsed.browser)}>
+                            <GlobalOutlined /> {parsed.browser}
+                        </Tag>
+                    </>
+                )}
+                {!parsed && (
+                    <Tag color="default">Unknown</Tag>
+                )}
+            </Space>
+        </CopyableToolTip>
+    );
+}
 
 function SessionUserCell({ userId }: { userId: number }) {
     const userIdStr = userId.toString();
@@ -81,10 +185,10 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
             title: t('components.columns.sessionMonitor.sessionId'),
             dataIndex: "sessionId",
             key: "sessionId",
-            width: 200,
+            width: 120,
             render: (_: unknown, record: SessionDescription) => (
                 <CopyableToolTip title={record.sessionId}>
-                    <Tag color="purple" className="text-xs font-mono">{record.sessionId.substring(0, 16)}...</Tag>
+                    <Tag color="purple" className="text-xs font-mono">{record.sessionId}</Tag>
                 </CopyableToolTip>
             )
         },
@@ -92,7 +196,7 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
             title: t('components.columns.sessionMonitor.user'),
             dataIndex: "userId",
             key: "userId",
-            width: 150,
+            width: 200,
             render: (_: unknown, record: SessionDescription) => (
                 <SessionUserCell userId={record.userId} />
             )
@@ -101,7 +205,7 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
             title: t('components.columns.sessionMonitor.tenant'),
             dataIndex: "tenantId",
             key: "tenantId",
-            width: 120,
+            width: 200,
             render: (_: unknown, record: SessionDescription) => (
                 <SessionTenantCell tenantId={record.tenantId} />
             )
@@ -110,10 +214,10 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
             title: t('components.columns.sessionMonitor.remoteIp'),
             dataIndex: "remoteIp",
             key: "remoteIp",
-            width: 130,
+            width: 180,
             render: (_: unknown, record: SessionDescription) => (
                 <CopyableToolTip title={record.remoteIp}>
-                    <Tag color="blue" className="text-xs">{record.remoteIp}</Tag>
+                    <Tag color="blue">{record.remoteIp}</Tag>
                 </CopyableToolTip>
             )
         },
@@ -121,11 +225,12 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
             title: t('components.columns.sessionMonitor.userAgent'),
             dataIndex: "userAgent",
             key: "userAgent",
-            width: 200,
+
             render: (_: unknown, record: SessionDescription) => (
-                <CopyableToolTip title={record.userAgent}>
-                    <span className="text-xs truncate max-w-[180px] block">{record.userAgent}</span>
-                </CopyableToolTip>
+                <Space orientation="vertical" size={2}>
+                    <SessionUserAgentCell userAgent={record.userAgent} />
+                    <span>{record.userAgent}</span>
+                </Space>
             )
         }
     ];
