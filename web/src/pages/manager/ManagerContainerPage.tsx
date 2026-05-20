@@ -19,14 +19,17 @@ import type {DragEndEvent} from '@dnd-kit/core';
 import {closestCenter, DndContext, PointerSensor, useSensor} from '@dnd-kit/core';
 import {arrayMove, horizontalListSortingStrategy, SortableContext, useSortable,} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
-import {ThemeColorPickerModal} from "@/components/ThemeColorPickerModal.tsx";
+import {ThemeSettingsModal} from "@/components/ThemeSettingsModal.tsx";
 import {ThemeModeSelector} from "@/components/ThemeModeSelector.tsx";
 import {
+    getStoredTabEnabled,
+    getStoredTabSize,
     getStoredThemeKey,
     getStoredThemeMode,
     setStoredThemeKey,
     setStoredThemeMode,
     THEME_MODE_STORAGE_KEY,
+    type ThemeTabSize,
     updateThemeCSSVariables
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
@@ -141,7 +144,7 @@ interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className, ...props }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: props['data-node-key'],
     });
 
@@ -149,7 +152,7 @@ const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className
         ...props.style,
         transform: CSS.Translate.toString(transform),
         transition,
-        cursor: 'move',
+        cursor: isDragging ? 'move' : 'pointer',
     };
 
     return React.cloneElement(props.children as React.ReactElement<any>, {
@@ -160,7 +163,7 @@ const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className
     });
 };
 
-function ManagerPageTabs({ availableMenus }: { availableMenus: RouteItem[] }) {
+function ManagerPageTabs({ availableMenus, tabSize }: { availableMenus: RouteItem[], tabSize?: ThemeTabSize }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [tabs, setTabs] = useState<TabItem[]>([]);
@@ -238,7 +241,7 @@ function ManagerPageTabs({ availableMenus }: { availableMenus: RouteItem[] }) {
     return (
         <Tabs
             type={editMode ? 'editable-card' : 'line'}
-            size="small"
+            size={tabSize}
             hideAdd
             activeKey={tabs.find(tab => location.pathname.startsWith(tab.key))?.key}
             onChange={handleTabChange}
@@ -299,6 +302,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [themeModalOpen, setThemeModalOpen] = useState(false);
     const [currentThemeKey, setCurrentThemeKey] = useState<string>(getStoredThemeKey);
     const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
+    const [themeTabsEnabled, setThemeTabsEnabled] = useState<boolean>(getStoredTabEnabled)
+    const [themeTabSize, setThemeTabSize] = useState<ThemeTabSize>(getStoredTabSize() as ThemeTabSize)
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -572,9 +577,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     <Content
                         className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10 flex flex-col`}
                     >
-                        <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
-                            <ManagerPageTabs availableMenus={availableMenus} />
-                        </div>
+                        {themeTabsEnabled && (
+                            <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
+                                <ManagerPageTabs availableMenus={availableMenus} tabSize={themeTabSize} />
+                            </div>
+                        )}
                         <Watermark
                             className="flex-1 p-6 overflow-auto"
                             content={watermarkContent}
@@ -597,9 +604,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     <Content
                         className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10 flex flex-col`}
                     >
-                        <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
-                            <ManagerPageTabs availableMenus={availableMenus} />
-                        </div>
+                        {themeTabsEnabled && (
+                            <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
+                                <ManagerPageTabs availableMenus={availableMenus} tabSize={themeTabSize} />
+                            </div>
+                        )}
                         <div className="flex-1 p-6 overflow-auto">
                             <Routes>
                                 {availableMenus.map((menu) => (
@@ -654,11 +663,15 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 )}
             </Layout>
 
-            <ThemeColorPickerModal
+            <ThemeSettingsModal
                 open={themeModalOpen}
                 currentThemeKey={currentThemeKey}
+                enableTabs={themeTabsEnabled}
+                tabSize={themeTabSize}
                 onClose={() => setThemeModalOpen(false)}
                 onThemeChange={handleThemeChange}
+                onTabsEnabledChange={(enabled) => setThemeTabsEnabled(enabled)}
+                onTabSizeChange={(size) => setThemeTabSize(size)}
             />
         </Layout>
     );

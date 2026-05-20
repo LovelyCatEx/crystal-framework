@@ -1490,7 +1490,7 @@ export const enUS = {
       current: 'Current',
       switching: 'Switching...',
       userProfile: 'User Profile',
-      customTheme: 'Custom Theme',
+      customTheme: 'Theme Settings',
       logout: 'Logout',
       menu: 'Menu',
       switchSuccess: 'Switched to {{tenantName}}',
@@ -1713,9 +1713,22 @@ export const enUS = {
       message: 'System is currently in maintenance mode. Some features may be unavailable for regular users.',
     },
 
-    themeColorPicker: {
-      title: 'Custom Theme Color',
-      description: 'Choose your favorite theme color, it will be applied to the entire system interface'
+    themeSettings: {
+      title: 'Theme Settings',
+      themeColor: {
+        title: 'Custom Theme Color',
+        description: 'Choose your preferred theme color, which will be applied to the entire system interface'
+      },
+      tabs: {
+        title: 'Tabs',
+        enableTabs: 'Enable Tabs',
+        enableTabsDesc: 'Show historically opened pages at the top of the page',
+        tabSize: 'Tab Size',
+        tabSizeDesc: 'Tab size option',
+        sizeSmall: 'Small',
+        sizeMiddle: 'Medium',
+        sizeLarge: 'Large',
+      }
     },
 
     storageProviderConfig: {

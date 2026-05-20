@@ -1487,7 +1487,7 @@ export const zhCN = {
       current: '当前',
       switching: '切换中...',
       userProfile: '个人中心',
-      customTheme: '自定义主题',
+      customTheme: '主题设置',
       logout: '退出登录',
       menu: '菜单',
       switchSuccess: '已切换到 {{tenantName}}',
@@ -1710,9 +1710,22 @@ export const zhCN = {
       message: '系统当前处于维护模式，普通用户暂时无法访问部分功能。',
     },
 
-    themeColorPicker: {
-      title: '自定义主题色',
-      description: '选择你喜欢的主题色，将会应用到整个系统界面'
+    themeSettings: {
+      title: '主题设置',
+      themeColor: {
+        title: '自定义主题色',
+        description: '选择你喜欢的主题色，将会应用到整个系统界面'
+      },
+      tabs: {
+        title: '标签页',
+        enableTabs: '启用标签页',
+        enableTabsDesc: '将会在页面上方展示历史打开的页面',
+        tabSize: '标签页大小',
+        tabSizeDesc: '标签页选项卡尺寸',
+        sizeSmall: '小',
+        sizeMiddle: '中',
+        sizeLarge: '大',
+      }
     },
 
     storageProviderConfig: {

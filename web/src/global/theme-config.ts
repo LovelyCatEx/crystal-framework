@@ -1,8 +1,11 @@
 import type {ThemeColor, ThemeConfig, ThemeMode} from "@/types/theme.types.ts";
 
-export const THEME_STORAGE_KEY = 'app-theme-color-key';
-export const THEME_MODE_STORAGE_KEY = 'app-theme-mode-key';
+export const THEME_STORAGE_KEY = 'app-theme-color';
+export const THEME_MODE_STORAGE_KEY = 'app-theme-mode';
+export const THEME_TAB_ENABLED = 'app-theme-tab-enabled';
+export const THEME_TAB_SIZE = 'app-theme-tab-size';
 
+export type ThemeTabSize = 'small' | 'middle' | 'large';
 export const themeColors: ThemeColor[] = [
     {
         key: 'pink',
@@ -63,6 +66,8 @@ export const themeColors: ThemeColor[] = [
 ];
 
 export const defaultThemeColor = themeColors[0];
+export const defaultThemeTabEnabled = true;
+export const defaultThemeTabSize: ThemeTabSize = 'small';
 
 export function getStoredThemeKey(): string {
     return localStorage.getItem(THEME_STORAGE_KEY) || defaultThemeColor.key;
@@ -107,6 +112,26 @@ export function getStoredThemeMode(): ThemeMode {
 
 export function setStoredThemeMode(mode: ThemeMode): void {
     localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+}
+
+export function getStoredTabEnabled(): boolean {
+    const stored = localStorage.getItem(THEME_TAB_ENABLED);
+    if (stored === null) {
+        return defaultThemeTabEnabled;
+    }
+    return stored === 'true';
+}
+
+export function setStoredTabEnabled(enabled: boolean): void {
+    localStorage.setItem(THEME_TAB_ENABLED, String(enabled));
+}
+
+export function getStoredTabSize(): string {
+    return localStorage.getItem(THEME_TAB_SIZE) || defaultThemeTabSize;
+}
+
+export function setStoredTabSize(size: string): void {
+    localStorage.setItem(THEME_TAB_SIZE, size);
 }
 
 export function updateThemeCSSVariables(themeColor: ThemeColor, themeMode: ThemeMode = 'light'): void {
