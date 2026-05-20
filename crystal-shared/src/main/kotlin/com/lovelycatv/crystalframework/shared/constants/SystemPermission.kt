@@ -166,6 +166,9 @@ object SystemPermission {
     const val ACTION_DASHBOARD_BUSINESS_STATISTICS_READ = "dashboard.business.statistics.read"
     const val ACTION_DASHBOARD_SYSTEM_METRICS_READ = "dashboard.system.metrics.read"
 
+    const val MENU_MONITOR_SESSIONS = "monitor.sessions:/manager/sessions"
+    const val ACTION_MONITOR_SESSIONS_READ = "monitor.sessions.read"
+
     /**
      * resolve permission from string declaration
      *

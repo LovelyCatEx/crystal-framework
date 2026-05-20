@@ -13,6 +13,10 @@ object RedisConstants {
 
     const val SYSTEM_SETTINGS = "system-settings"
 
+    object SpringSession {
+        const val EXPIRATIONS = "spring:session:sessions:expirations"
+    }
+
     fun getRequestRegisterEmailCodeKey(email: String) = "register-email-code:$email"
 
     fun getRequestResetPasswordEmailCodeKey(email: String) = "reset-password-email-code:$email"

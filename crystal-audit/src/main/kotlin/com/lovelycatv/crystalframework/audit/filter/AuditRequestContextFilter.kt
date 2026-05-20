@@ -11,6 +11,7 @@ package com.lovelycatv.crystalframework.audit.filter
 import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
 import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -38,17 +39,26 @@ class AuditRequestContextFilter(
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
+
+        val remoteIp = resolveRemoteIp(exchange)
+        val userAgent = request.headers.getFirst("User-Agent")
+
         val info = AuditRequestInfo(
             requestId = snowIdGenerator.nextId(),
             httpMethod = request.method.name(),
             path = request.path.pathWithinApplication().value(),
-            remoteIp = resolveRemoteIp(exchange),
-            userAgent = request.headers.getFirst("User-Agent")
+            remoteIp = remoteIp,
+            userAgent = userAgent
         )
 
-        return chain
-            .filter(exchange)
-            .contextWrite(AuditRequestContext.install(exchange, info))
+        return exchange.session.flatMap { session ->
+            session.attributes[SessionConstants.AUDIT_REMOTE_IP] = remoteIp ?: ""
+            session.attributes[SessionConstants.AUDIT_USER_AGENT] = userAgent ?: ""
+
+            chain
+                .filter(exchange)
+                .contextWrite(AuditRequestContext.install(exchange, info))
+        }
     }
 
     /**
