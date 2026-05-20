@@ -1,22 +1,33 @@
-import {Avatar, Button, Divider, Dropdown, Layout, Menu, message, Space, Spin, Watermark} from "antd";
+import React, {useEffect, useMemo, useState} from "react";
+import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, theme, Watermark} from "antd";
 import {
+    BgColorsOutlined,
+    CheckOutlined,
     DownOutlined,
+    EditOutlined,
+    LeftOutlined,
     LoadingOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
+    RightOutlined,
     ShopOutlined,
-    UserOutlined, UserSwitchOutlined, BgColorsOutlined
+    UserOutlined,
+    UserSwitchOutlined
 } from "@ant-design/icons";
+import type {DragEndEvent} from '@dnd-kit/core';
+import {closestCenter, DndContext, PointerSensor, useSensor} from '@dnd-kit/core';
+import {arrayMove, horizontalListSortingStrategy, SortableContext, useSortable,} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities';
 import {ThemeColorPickerModal} from "@/components/ThemeColorPickerModal.tsx";
 import {ThemeModeSelector} from "@/components/ThemeModeSelector.tsx";
 import {
     getStoredThemeKey,
-    setStoredThemeKey,
-    updateThemeCSSVariables,
     getStoredThemeMode,
+    setStoredThemeKey,
     setStoredThemeMode,
-    THEME_MODE_STORAGE_KEY
+    THEME_MODE_STORAGE_KEY,
+    updateThemeCSSVariables
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
@@ -24,7 +35,6 @@ import {useTranslation} from "react-i18next";
 import {Content, Header} from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import {clearUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
-import {useEffect, useMemo, useState} from "react";
 import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {computeAccessibleMenus, getMenuGroups, menuPathLogin, menuPathProfile, type RouteItem} from "@/router";
@@ -34,9 +44,9 @@ import type {UserTenantVO} from "@/types/tenant.types.ts";
 import {switchTenant} from "@/api/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
-import {theme} from "antd";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 import {useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
+
 const { useToken } = theme;
 
 function TenantSwitcher() {
@@ -117,6 +127,163 @@ function TenantSwitcher() {
             <LoadingOutlined />
             <span className="hidden sm:inline">{t('pages.managerContainer.switching')}</span>
         </Space>
+    );
+}
+
+interface TabItem {
+    key: string;
+    label: string;
+    path: string;
+}
+
+interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
+    'data-node-key': string;
+}
+
+const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className, ...props }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: props['data-node-key'],
+    });
+
+    const style: React.CSSProperties = {
+        ...props.style,
+        transform: CSS.Translate.toString(transform),
+        transition,
+        cursor: 'move',
+    };
+
+    return React.cloneElement(props.children as React.ReactElement<any>, {
+        ref: setNodeRef,
+        style,
+        ...attributes,
+        ...listeners,
+    });
+};
+
+function ManagerPageTabs({ availableMenus }: { availableMenus: RouteItem[] }) {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [tabs, setTabs] = useState<TabItem[]>([]);
+    const [editMode, setEditMode] = useState<boolean>(false);
+
+    const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
+
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const matchedMenu = availableMenus.find((item) => currentPath.startsWith(item.key as string));
+
+        if (matchedMenu) {
+            setTabs(prev => {
+                const existingIndex = prev.findIndex(tab => tab.key === matchedMenu.key);
+                const newTab: TabItem = {
+                    key: matchedMenu.key as string,
+                    label: matchedMenu.label,
+                    path: currentPath
+                };
+
+                if (existingIndex >= 0) {
+                    const newTabs = [...prev];
+                    newTabs[existingIndex] = newTab;
+                    return newTabs;
+                }
+
+                return [...prev, newTab];
+            });
+        }
+    }, [location.pathname, availableMenus]);
+
+    const handleTabChange = (key: string) => {
+        const tab = tabs.find(t => t.key === key);
+        if (tab) {
+            navigate(tab.path);
+        }
+    };
+
+    const handleTabRemove = (targetKey: string) => {
+        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        const newTabs = tabs.filter(tab => tab.key !== targetKey);
+
+        if (newTabs.length && location.pathname === tabs[targetIndex]?.path) {
+            const nextTab = newTabs[targetIndex] || newTabs[targetIndex - 1];
+            navigate(nextTab.path);
+        }
+
+        setTabs(newTabs);
+    };
+
+    const onDragEnd = ({ active, over }: DragEndEvent) => {
+        if (active.id !== over?.id) {
+            setTabs((prev) => {
+                const activeIndex = prev.findIndex((i) => i.key === active.id);
+                const overIndex = prev.findIndex((i) => i.key === over?.id);
+                return arrayMove(prev, activeIndex, overIndex);
+            });
+        }
+    };
+
+    const renderTabBarExtra = () => {
+        if (tabs.length === 0) return null;
+
+        return (
+            <Button
+                type={editMode ? 'primary' : 'text'}
+                size="small"
+                icon={editMode ? <CheckOutlined /> : <EditOutlined />}
+                onClick={() => setEditMode(!editMode)}
+                className="mr-2"
+            />
+        );
+    }
+
+    return (
+        <Tabs
+            type={editMode ? 'editable-card' : 'line'}
+            size="small"
+            hideAdd
+            activeKey={tabs.find(tab => location.pathname.startsWith(tab.key))?.key}
+            onChange={handleTabChange}
+            onEdit={(targetKey, action) => {
+                if (action === 'remove') {
+                    handleTabRemove(targetKey as string);
+                }
+            }}
+            items={tabs.map(tab => {
+                const menu = availableMenus.find(m => m.key === tab.key);
+                return {
+                    key: tab.key,
+                    label: (
+                        <span className="flex items-center gap-2">
+                            {menu?.icon}
+                            {tab.label}
+                        </span>
+                    ),
+                };
+            })}
+            className={`manager-tabs ${!editMode ? 'ml-4' : ''}`}
+            renderTabBar={(tabBarProps, DefaultTabBar) =>{
+                if (editMode) {
+                    return <DefaultTabBar {...tabBarProps} />;
+                }
+
+                return (
+                    <DndContext sensors={[sensor]} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
+                        <SortableContext items={tabs.map((i) => i.key)} strategy={horizontalListSortingStrategy}>
+                            <DefaultTabBar {...tabBarProps}>
+                                {(node) => (
+                                    <DraggableTabNode
+                                        {...(node as React.ReactElement<DraggableTabPaneProps>).props}
+                                        key={node.key}
+                                    >
+                                        {node}
+                                    </DraggableTabNode>
+                                )}
+                            </DefaultTabBar>
+                        </SortableContext>
+                    </DndContext>
+                )
+            }}
+            tabBarExtraContent={renderTabBarExtra()}
+        />
     );
 }
 
@@ -292,7 +459,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     }, [availableMenus, location.pathname]);
 
     return (
-        <Layout className="min-h-screen">
+        <Layout className="min-h-screen h-[100vh] overflow-auto">
             <Header
                 className="fixed top-0 left-0 w-full h-16 px-6 flex items-center justify-between z-50 backdrop-blur-md border-b shadow-sm"
                 style={{ borderColor: token.colorBorder }}
@@ -371,25 +538,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     trigger={null}
                     collapsible
                     collapsed={collapsed}
-                    className="hidden md:block overflow-auto h-[calc(100vh-64px)] fixed left-0 border-r"
+                    className="hidden md:block overflow-hidden h-[calc(100vh-64px)] fixed left-0 border-r"
                     style={{ borderColor: token.colorBorder }}
                 >
-                    <div className="flex items-center justify-between px-4 py-2">
-                        {!collapsed && <span className="text-sm text-gray-800"></span>}
-
-                        {/* Left-Side Menu Collapse Button */}
-                        <Button
-                            type="text"
-                            size="small"
-                            onClick={() => setCollapsed(!collapsed)}
-                            className={`w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors ${collapsed ? 'mx-auto' : ''}`}
-                        >
-                            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                        </Button>
-                    </div>
-
-                    <Divider className="mt-0 mb-0" plain />
-
                     <Menu
                         mode="inline"
                         selectedKeys={selectedKeys.map((e) => e.key.toString())}
@@ -397,18 +548,35 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                         onOpenChange={setOpenKeys}
                         items={menuItems}
                         onClick={handleMenuClick}
-                        className="py-4 px-2 border-none"
+                        className="p-2 border-none h-full overflow-auto"
                     />
                 </Sider>
 
+                <Button
+                    type="default"
+                    size="small"
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="duration-75 fixed hidden md:flex items-center justify-center w-6 h-6 rounded-full shadow-md hover:shadow-lg transition-all z-50 border border-gray-200"
+                    style={{
+                        left: collapsed ? 80 : 260,
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        padding: 0,
+                        minWidth: 24,
+                    }}
+                    icon={collapsed ? <RightOutlined /> : <LeftOutlined />}
+                />
+
                 {/* Main Router View */}
                 {waterMarkInfo?.enabled ? (
-
                     <Content
-                        className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
+                        className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10 flex flex-col`}
                     >
+                        <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
+                            <ManagerPageTabs availableMenus={availableMenus} />
+                        </div>
                         <Watermark
-                            className="h-full p-6"
+                            className="flex-1 p-6 overflow-auto"
                             content={watermarkContent}
                             font={{ color: watermarkFontColor }}
                             zIndex={10}
@@ -427,17 +595,22 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     </Content>
                 ) : (
                     <Content
-                        className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10`}
+                        className={`transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[260px]'} relative z-10 flex flex-col`}
                     >
-                        <Routes>
-                            {availableMenus.map((menu) => (
-                                <Route
-                                    key={menu.key.toString()}
-                                    path={menu.path.replace(parentPath, "")}
-                                    element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
-                                />
-                            ))}
-                        </Routes>
+                        <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
+                            <ManagerPageTabs availableMenus={availableMenus} />
+                        </div>
+                        <div className="flex-1 p-6 overflow-auto">
+                            <Routes>
+                                {availableMenus.map((menu) => (
+                                    <Route
+                                        key={menu.key.toString()}
+                                        path={menu.path.replace(parentPath, "")}
+                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                    />
+                                ))}
+                            </Routes>
+                        </div>
                     </Content>
                 )}
 

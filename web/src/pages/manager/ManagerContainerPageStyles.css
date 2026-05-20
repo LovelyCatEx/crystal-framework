@@ -25,6 +25,19 @@
     border-right: 3px solid var(--theme-color-primary, #FF8DA1) !important;
 }
 
+/* Tabs Styles */
+.manager-tabs .ant-tabs-tab {
+    border-radius: 0 !important;
+}
+
+.manager-tabs .ant-tabs-tab:not(.ant-tabs-tab-active) {
+    background-color: transparent !important;
+}
+
+.manager-tabs .ant-tabs-nav {
+    margin: 0 !important;
+}
+
 /* Mobile Menu Animations */
 .mobile-menu-overlay {
     animation: fadeIn 0.2s ease-in-out;
