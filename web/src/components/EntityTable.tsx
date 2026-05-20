@@ -6,7 +6,7 @@ import React, {
     type ReactNode,
     useCallback,
     useEffect,
-    useImperativeHandle,
+    useImperativeHandle, useMemo,
     useRef,
     useState
 } from "react";
@@ -33,6 +33,7 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         children: React.ReactNode | JSX.Element,
         queryParamsProvider?: () => object
     }[];
+    showRecordTimeColumn?: boolean;
     tableRowActionsRender?: (record: ENTITY) => ReactNode;
     columns: EntityTableColumns<ENTITY>;
     query: <T extends BaseManagerReadDTO>(props: T) => Promise<PaginatedResponseData<ENTITY>>;
@@ -147,7 +148,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
         ...props.columns,
-        {
+        ...(!!props.showRecordTimeColumn ? [{
             title: t('components.entityTable.recordTime'),
             dataIndex: "createdTime",
             key: "createdTime",
@@ -158,7 +159,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                     <span className="text-xs">{t('components.entityTable.modifiedTime')} {formatTimestamp(row.modifiedTime)}</span>
                 </Space>
             }
-        },
+        }] : []),
         ...(props.tableRowActionsRender !== undefined ? [{
             title: t('components.entityTable.action'),
             dataIndex: "action",
@@ -169,6 +170,21 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             ),
         }] : []),
     ];
+
+    const tableActions = useMemo(() => {
+        return [
+            ...(props.tableActions ?? []),
+            {
+                label: t('components.managerPageContainer.action'),
+                children: <Button
+                    type="primary"
+                    onClick={() => refreshData()}
+                >
+                    {t('components.managerPageContainer.refresh')}
+                </Button>
+            }
+        ]
+    }, [props.tableActions])
 
     const tableColumns: (ColumnGroupType<ENTITY> | ColumnType<ENTITY>)[] = allColumns
         .filter(column => visibleColumns.has(column.key))
@@ -277,7 +293,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                     />
                 </div>
 
-                {props.tableActions?.map((action, index) => (
+                {tableActions.map((action, index) => (
                     <div key={index} className="flex flex-col space-y-2">
                         <span>{action.label}</span>
                         {action.children}

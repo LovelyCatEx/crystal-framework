@@ -6,8 +6,9 @@ import {
     DatabaseOutlined,
     FileOutlined,
     FolderOutlined,
-    KeyOutlined,
+    KeyOutlined, LineChartOutlined,
     MailOutlined,
+    MonitorOutlined,
     SafetyOutlined,
     SettingOutlined,
     ShopOutlined,
@@ -50,6 +51,7 @@ import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManage
 import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
 import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
 import {UserLoginLogManagerPage} from "@/pages/manager/auth/UserLoginLogManagerPage.tsx";
+import {SessionMonitorPage} from "@/pages/manager/monitor/SessionMonitorPage.tsx";
 import {ProtectedControllerWarningWrapper} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
@@ -97,6 +99,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'logs',
             icon: <AuditOutlined />,
             label: t('menu.groups.logs'),
+        },
+        {
+            name: 'monitor',
+            icon: <LineChartOutlined />,
+            label: t('menu.groups.monitor'),
         }
     ];
 }
@@ -348,6 +355,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
                 </ProtectedControllerWarningWrapper>
             ),
             group: 'mail_template'
+        },
+        {
+            key: '/manager/sessions',
+            path: '/manager/sessions',
+            icon: <MonitorOutlined />,
+            label: t('menu.admin.sessions'),
+            page: <SessionMonitorPage />,
+            group: 'monitor'
         },
         {
             key: '/manager/mail-send-logs',

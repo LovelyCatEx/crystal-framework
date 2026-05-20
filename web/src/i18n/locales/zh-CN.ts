@@ -1,4 +1,6 @@
-export const zhCN = {
+import type {I18nRules} from "@/i18n/locales/i18n-rules.ts";
+
+export const zhCN: I18nRules = {
   pages: {
     systemInitializePage: {
       title: '系统初始化',
@@ -1541,6 +1543,11 @@ export const zhCN = {
       title: '服务不可用',
       description: '无法连接到服务器，请检查网络后刷新页面。'
     },
+    sessionMonitor: {
+      title: '在线会话监控',
+      subtitle: '查看当前系统中的在线会话列表',
+      entityName: '会话'
+    },
   },
 
   components: {
@@ -1916,6 +1923,13 @@ export const zhCN = {
           oauth2: 'OAuth2登录',
           unknown: '未知'
         }
+      },
+      sessionMonitor: {
+        sessionId: '会话ID',
+        user: '用户',
+        tenant: '租户',
+        remoteIp: 'IP地址',
+        userAgent: 'User Agent'
       }
     },
     entityTable: {
@@ -2155,7 +2169,8 @@ export const zhCN = {
     myTenantRole: '角色',
     auditLog: '审计日志',
     mailSendLog: '邮件发送日志',
-    userLoginLog: '用户登录日志'
+    userLoginLog: '用户登录日志',
+    sessionMonitor: '会话'
   },
 
   menu: {
@@ -2200,7 +2215,8 @@ export const zhCN = {
       mailSendLogs: '邮件发送日志',
       auditLogs: '审计日志',
       userLoginLogs: '用户登录日志',
-      settings: '系统设置'
+      settings: '系统设置',
+      sessions: '在线会话'
     },
 
     // 菜单分组
@@ -2210,7 +2226,8 @@ export const zhCN = {
       mail_template: '邮件模板',
       tenant: '租户管理',
       i_tenant: '组织管理',
-      logs: '日志管理'
+      logs: '日志管理',
+      monitor: '系统监控'
     }
   },
 };

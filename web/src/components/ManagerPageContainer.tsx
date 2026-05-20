@@ -9,16 +9,22 @@ import React, {
     useRef,
     useState
 } from "react";
-import {Button, Card, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
+import type {TimeRangePickerProps} from 'antd';
+import {Button, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
 import {DeleteOutlined, EditOutlined, ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "../types/api.types.ts";
 import type {BaseEntity} from "../types/BaseEntity.ts";
-import {EntityTable, type EntityTableProps, type EntityTableRef, type EntityTableRefreshOptions} from "./EntityTable.tsx";
+import {
+    EntityTable,
+    type EntityTableProps,
+    type EntityTableRef,
+    type EntityTableRefreshOptions
+} from "./EntityTable.tsx";
+import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import type { TimeRangePickerProps } from 'antd';
+import {StandardCard} from "@/components/StandardCard.tsx";
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
@@ -259,16 +265,6 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             });
         }
 
-        actions.push({
-            label: t('components.managerPageContainer.action'),
-            children: <Button
-                type="primary"
-                onClick={() => entityTableRef.current?.refreshData()}
-            >
-                {t('components.managerPageContainer.refresh')}
-            </Button>
-        });
-
         return actions;
     }, [restProps.tableActions, t, showTimeRangeFilter, timeRange, rangePresets]);
 
@@ -307,7 +303,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 />
             )}
 
-            <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <StandardCard>
                 <EntityTable
                     ref={entityTableRef}
                     entityName={restProps.entityName}
@@ -333,7 +329,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     ) : undefined}
                     tableSelection={builtinTableSelection}
                 />
-            </Card>
+            </StandardCard>
 
             <Modal
                 title={(editingItem ? t('components.managerPageContainer.edit') : t('components.managerPageContainer.create')) + restProps.entityName}

@@ -1,4 +1,6 @@
-export const enUS = {
+import type {I18nRules} from "@/i18n/locales/i18n-rules.ts";
+
+export const enUS: I18nRules = {
   pages: {
     systemInitializePage: {
       title: 'System Initialization',
@@ -1544,6 +1546,11 @@ export const enUS = {
       title: 'Service Unavailable',
       description: 'Unable to connect to the server. Please check your network and refresh the page.'
     },
+    sessionMonitor: {
+      title: 'Online Sessions Monitor',
+      subtitle: 'View the list of online sessions in the system',
+      entityName: 'Session'
+    },
   },
 
   components: {
@@ -1919,6 +1926,13 @@ export const enUS = {
           oauth2: 'OAuth2 Login',
           unknown: 'Unknown'
         }
+      },
+      sessionMonitor: {
+        sessionId: 'Session ID',
+        user: 'User',
+        tenant: 'Tenant',
+        remoteIp: 'IP Address',
+        userAgent: 'User Agent'
       }
     },
     entityTable: {
@@ -2158,7 +2172,8 @@ export const enUS = {
     myTenantRole: 'Role',
     auditLog: 'Audit Log',
     mailSendLog: 'Mail Send Log',
-    userLoginLog: 'User Login Log'
+    userLoginLog: 'User Login Log',
+    sessionMonitor: 'Session'
   },
 
   menu: {
@@ -2203,7 +2218,8 @@ export const enUS = {
       mailSendLogs: 'Mail Send Logs',
       auditLogs: 'Audit Logs',
       userLoginLogs: 'User Login Logs',
-      settings: 'System Settings'
+      settings: 'System Settings',
+      sessions: 'Online Sessions'
     },
 
     // Menu groups
@@ -2213,7 +2229,8 @@ export const enUS = {
       mail_template: 'Mail Templates',
       tenant: 'Tenant Management',
       i_tenant: 'Organization Management',
-      logs: 'Log Management'
+      logs: 'Log Management',
+      monitor: 'System Monitor'
     }
   }
 };
