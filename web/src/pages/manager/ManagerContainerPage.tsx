@@ -262,7 +262,7 @@ function ManagerPageTabs({ availableMenus, tabSize }: { availableMenus: RouteIte
                     ),
                 };
             })}
-            className={`manager-tabs ${!editMode ? 'ml-4' : ''}`}
+            className={`manager-tabs ${!editMode ? 'ml-4' : ''} select-none`}
             renderTabBar={(tabBarProps, DefaultTabBar) =>{
                 if (editMode) {
                     return <DefaultTabBar {...tabBarProps} />;
@@ -587,6 +587,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                             content={watermarkContent}
                             font={{ color: watermarkFontColor }}
                             zIndex={10}
+                            style={{ overflow: 'auto!important' }}
                         >
                             <Routes>
                                 {availableMenus.map((menu) => (
