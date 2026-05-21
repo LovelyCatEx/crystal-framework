@@ -149,6 +149,12 @@ jobs:
           zip -r ../../frontend-dist-${{ needs.prepare.outputs.release_version }}.zip .
           cd ../..
 
+      - name: Prepare additional release assets
+        run: |
+          mkdir -p ./artifacts/release-assets
+          cp ./.devcontainer/docker-compose.yml ./artifacts/release-assets/docker-compose.yml
+          cp ./.env.example ./artifacts/release-assets/.env
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -159,4 +165,6 @@ jobs:
           files: |
             ./artifacts/backend-jar/*.jar
             ./frontend-dist-${{ needs.prepare.outputs.release_version }}.zip
+            ./artifacts/release-assets/docker-compose.yml
+            ./artifacts/release-assets/.env
           generate_release_notes: true

@@ -2,11 +2,11 @@ name: CrystalFramework - Backend Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "release" "develop" ]
     paths-ignore:
       - 'web/**'
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "release", "develop" ]
     paths-ignore:
       - 'web/**'
 
