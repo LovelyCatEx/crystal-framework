@@ -1,9 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.config
 
-import com.lovelycatv.crystalframework.mail.config.MailModuleConfigure
-import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.config.TenantMailTemplateConfigure
+import com.lovelycatv.crystalframework.sdk.mail.config.MailModuleConfigure
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateCategoryDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateTypeDeclaration
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import org.springframework.context.annotation.Configuration
 

@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.mail.types
+package com.lovelycatv.crystalframework.sdk.mail.types
 
 data class MailTemplateDeclaration(
     val name: String,
