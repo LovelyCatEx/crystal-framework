@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>ext-playground</artifactId>
-    <version>0.0.1</version>
+    <version>${ext.playground.version}</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
