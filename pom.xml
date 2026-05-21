@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.lovelycatv.crystalframework</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.1</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>crystalframework-core</name>
     <description>Crystal Framework</description>
@@ -18,8 +18,8 @@
 
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -28,7 +28,7 @@
         <developer>
             <id>lovelycat</id>
             <name>LovelyCat</name>
-            <email>mail@lovelycatv.com</email>
+            <email>pjrbuyvi@gmail.com</email>
             <organization>Atomic Matrix</organization>
             <organizationUrl>https://lovelycatv.com</organizationUrl>
         </developer>
@@ -46,8 +46,8 @@
     </modules>
 
     <scm>
-        <connection>scm:git:git://github.com/LovelyCatEx/crystal-framework.git</connection>
-        <developerConnection>scm:git:ssh://github.com/LovelyCatEx/crystal-framework.git</developerConnection>
+        <connection>scm:git:https://github.com/LovelyCatEx/crystal-framework.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/LovelyCatEx/crystal-framework.git</developerConnection>
         <tag>HEAD</tag>
         <url>https://github.com/LovelyCatEx/crystal-framework</url>
     </scm>
@@ -56,7 +56,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <module.version>0.0.1</module.version>
+        <revision>1.0.0</revision>
     </properties>
 
     <dependencyManagement>
@@ -64,37 +64,37 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared-types</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-audit</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-schedule</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-resource</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-encrypt</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-mail</artifactId>
-                <version>${module.version}</version>
+                <version>${revision}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -439,6 +439,31 @@
                         <phase>test-compile</phase>
                         <goals>
                             <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten-clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
                         </goals>
                     </execution>
                 </executions>

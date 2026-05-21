@@ -39,3 +39,4 @@ docker/.env
 /deploy
 .narrafork/
 .worktrees/
+.flattened-pom.xml
