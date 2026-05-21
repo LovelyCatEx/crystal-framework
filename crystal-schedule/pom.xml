@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.lovelycatv.crystalframework</groupId>
         <artifactId>core</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
 
     <artifactId>crystal-schedule</artifactId>

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.lovelycatv.crystalframework</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
     <name>crystalframework-core</name>
     <description>Crystal Framework</description>
@@ -56,6 +56,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
+        <module.version>0.0.1</module.version>
     </properties>
 
     <dependencyManagement>
@@ -63,37 +64,37 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared-types</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-audit</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-schedule</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-resource</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-encrypt</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-mail</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${module.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
