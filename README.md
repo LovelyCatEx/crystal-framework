@@ -8,8 +8,9 @@
 
 <br>
 <div>
-    <img alt="github-action-build" src="https://img.shields.io/github/actions/workflow/status/LovelyCatEx/crystal-framework/crystalframework-backend.yml?label=backend" />
-    <img alt="github-action-build" src="https://img.shields.io/github/actions/workflow/status/LovelyCatEx/crystal-framework/crystalframework-frontend.yml?label=frontend" />
+    <img alt="Backend-Build-Check" src="https://img.shields.io/github/actions/workflow/status/LovelyCatEx/crystal-framework/backend-build-check.yml?label=backend" />
+    <img alt="Frontend-Build-Check" src="https://img.shields.io/github/actions/workflow/status/LovelyCatEx/crystal-framework/frontend-build-check.yml?label=frontend" />
+    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/LovelyCatEx/crystal-framework?label=latest release&color=blue" />
 </div>
 <div>
     <img alt="license" src="https://img.shields.io/github/license/LovelyCatEx/crystal-framework">
