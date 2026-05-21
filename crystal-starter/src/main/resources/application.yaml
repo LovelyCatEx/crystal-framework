@@ -78,13 +78,6 @@ spring:
   main:
     allow-circular-references: true
 crystalframework:
-  scan:
-    base-packages:
-      - io.github.lovelycatex
-    entity-packages:
-      - io.github.lovelycatex
-    r2dbc-repository-packages:
-      - io.github.lovelycatex
   auth:
     jwt:
       expiration: 7d

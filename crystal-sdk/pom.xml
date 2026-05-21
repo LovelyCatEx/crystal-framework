@@ -9,8 +9,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>ext-playground</artifactId>
-    <version>${ext.playground.version}</version>
+    <artifactId>crystal-sdk</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,9 +58,12 @@
     <dependencies>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-sdk</artifactId>
+            <artifactId>crystal-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-shared-types</artifactId>
         </dependency>
     </dependencies>
-
 
 </project>
