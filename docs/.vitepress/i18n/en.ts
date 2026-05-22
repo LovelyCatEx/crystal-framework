@@ -9,6 +9,8 @@ export const enThemeConfig: DefaultTheme.Config = {
       text: 'Develop',
       items: [
         { text: 'Develop Guidance', link: '/en/develop-guide' },
+        { text: 'Project Structure', link: '/en/structure-introduction' },
+        { text: 'Quick Start', link: '/en/quick-start' },
       ]
     },
     {
