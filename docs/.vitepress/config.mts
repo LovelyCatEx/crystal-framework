@@ -4,6 +4,7 @@ import { zhThemeConfig, enThemeConfig } from './i18n'
 export default defineConfig({
   title: "CrystalFramework Docs",
   description: "A modern front-end and back-end framework based on kotlin-springboot4 webflux r2dbc.",
+  base: '/crystal-framework/',
   themeConfig: {
     socialLinks: [
       { icon: 'github', link: 'https://github.com/LovelyCatEx/crystal-framework' }
@@ -23,6 +24,6 @@ export default defineConfig({
     }
   },
   sitemap: {
-    hostname: 'http://localhost:5174'
+    hostname: 'https://lovelycatex.github.io/crystal-framework'
   }
 })
