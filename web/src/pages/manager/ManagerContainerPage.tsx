@@ -49,6 +49,7 @@ import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 import {useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
+import {MANAGER_PAGE_TABS_EXPIRES_IN, MANAGER_PAGE_TABS_STORAGE_KEY_PREFIX} from "@/global/constants.ts";
 
 const { useToken } = theme;
 
@@ -139,6 +140,13 @@ interface TabItem {
     path: string;
 }
 
+interface StoredManagerTabs {
+    expiresAt: number;
+    tabs: TabItem[];
+}
+
+
+
 interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
     'data-node-key': string;
 }
@@ -163,15 +171,99 @@ const DraggableTabNode: React.FC<Readonly<DraggableTabPaneProps>> = ({ className
     });
 };
 
-function ManagerPageTabs({ availableMenus, tabSize }: { availableMenus: RouteItem[], tabSize?: ThemeTabSize }) {
+function isValidManagerTab(item: unknown): item is TabItem {
+    return (
+        typeof item === 'object' &&
+        item !== null &&
+        typeof (item as TabItem).key === 'string' &&
+        typeof (item as TabItem).label === 'string' &&
+        typeof (item as TabItem).path === 'string'
+    );
+}
+
+function getStoredManagerTabs(storageKey?: string): TabItem[] {
+    if (!storageKey) return [];
+
+    try {
+        const stored = localStorage.getItem(storageKey);
+        if (!stored) return [];
+
+        const parsed = JSON.parse(stored) as StoredManagerTabs | TabItem[];
+        if (Array.isArray(parsed)) {
+            return parsed.filter(isValidManagerTab);
+        }
+
+        if (typeof parsed !== 'object' || parsed === null || !Array.isArray(parsed.tabs)) {
+            return [];
+        }
+
+        if (Date.now() > parsed.expiresAt) {
+            localStorage.removeItem(storageKey);
+            return [];
+        }
+
+        return parsed.tabs.filter(isValidManagerTab);
+    } catch {
+        return [];
+    }
+}
+
+function setStoredManagerTabs(storageKey: string, tabs: TabItem[]) {
+    const stored: StoredManagerTabs = {
+        expiresAt: Date.now() + MANAGER_PAGE_TABS_EXPIRES_IN,
+        tabs,
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(stored));
+}
+
+function getAvailableTab(tab: TabItem, availableMenus: RouteItem[]): TabItem | null {
+    const menu = availableMenus.find((item) => item.key === tab.key);
+    if (!menu) return null;
+
+    return {
+        key: menu.key as string,
+        label: menu.label,
+        path: tab.path.startsWith(menu.key as string) ? tab.path : menu.path,
+    };
+}
+
+function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, storageKey }: { availableMenus: RouteItem[], availableMenusLoading: boolean, tabSize?: ThemeTabSize, storageKey?: string }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [tabs, setTabs] = useState<TabItem[]>([]);
     const [editMode, setEditMode] = useState<boolean>(false);
+    const [storageReady, setStorageReady] = useState<boolean>(false);
+    const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
 
     const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
 
     useEffect(() => {
+        if (!storageKey) {
+            setHydratedStorageKey(null);
+            setStorageReady(true);
+            return;
+        }
+
+        if (availableMenusLoading) {
+            setHydratedStorageKey(null);
+            setStorageReady(false);
+            return;
+        }
+
+        const storedTabs = getStoredManagerTabs(storageKey)
+            .map(tab => getAvailableTab(tab, availableMenus))
+            .filter((tab): tab is TabItem => tab !== null);
+
+        setStoredManagerTabs(storageKey, storedTabs);
+        setTabs(storedTabs);
+        setHydratedStorageKey(storageKey);
+        setStorageReady(true);
+    }, [storageKey, availableMenus, availableMenusLoading]);
+
+    useEffect(() => {
+        if (!storageReady || (storageKey && hydratedStorageKey !== storageKey)) return;
+
         const currentPath = location.pathname;
         const matchedMenu = availableMenus.find((item) => currentPath.startsWith(item.key as string));
 
@@ -193,7 +285,12 @@ function ManagerPageTabs({ availableMenus, tabSize }: { availableMenus: RouteIte
                 return [...prev, newTab];
             });
         }
-    }, [location.pathname, availableMenus]);
+    }, [location.pathname, availableMenus, storageReady, storageKey, hydratedStorageKey]);
+
+    useEffect(() => {
+        if (!storageKey || !storageReady || hydratedStorageKey !== storageKey) return;
+        setStoredManagerTabs(storageKey, tabs);
+    }, [storageKey, storageReady, hydratedStorageKey, tabs]);
 
     const handleTabChange = (key: string) => {
         const tab = tabs.find(t => t.key === key);
@@ -296,6 +393,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const { t } = useTranslation();
 
     const loggedUser = useLoggedUser();
+    const userTenants = useUserTenants();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openKeys, setOpenKeys] = useState<string[]>([]);
@@ -384,6 +482,14 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const availableMenus = useMemo(() => {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t);
     }, [loggedUser.accessibleMenuPaths, t]);
+
+    const managerTabsStorageKey = useMemo(() => {
+        const userId = loggedUser.userProfile?.id;
+        if (!userId) return undefined;
+
+        const tenantId = userTenants.currentTenant?.tenantId ?? 'personal';
+        return `${MANAGER_PAGE_TABS_STORAGE_KEY_PREFIX}:${userId}:${tenantId}`;
+    }, [loggedUser.userProfile?.id, userTenants.currentTenant?.tenantId]);
 
     const menuGroups = useMemo(() => getMenuGroups(t), [t]);
 
@@ -579,7 +685,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     >
                         {themeTabsEnabled && (
                             <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
-                                <ManagerPageTabs availableMenus={availableMenus} tabSize={themeTabSize} />
+                                <ManagerPageTabs
+                                    availableMenus={availableMenus}
+                                    availableMenusLoading={loggedUser.isAccessibleMenusLoading}
+                                    tabSize={themeTabSize}
+                                    storageKey={managerTabsStorageKey}
+                                />
                             </div>
                         )}
                         <Watermark
@@ -607,7 +718,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     >
                         {themeTabsEnabled && (
                             <div className="sticky top-0 w-full z-20" style={{ backgroundColor: token.colorBgContainer }}>
-                                <ManagerPageTabs availableMenus={availableMenus} tabSize={themeTabSize} />
+                                <ManagerPageTabs
+                                    availableMenus={availableMenus}
+                                    availableMenusLoading={loggedUser.isAccessibleMenusLoading}
+                                    tabSize={themeTabSize}
+                                    storageKey={managerTabsStorageKey}
+                                />
                             </div>
                         )}
                         <div className="flex-1 p-6 overflow-auto">
