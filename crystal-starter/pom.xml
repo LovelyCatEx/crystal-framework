@@ -88,6 +88,11 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-mail</artifactId>
         </dependency>
+        <!-- External Modules -->
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>ext-playground</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

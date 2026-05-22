@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.tenant.constants.TenantRoleDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerUpdateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
@@ -79,11 +79,11 @@ class TenantRoleManagerServiceImpl(
                 tenantId = tenantId,
                 name = declaration.name,
                 description = declaration.description,
-                parentId = declaration.parentRole?.let {
+                parentId = declaration.parentRoleName?.let { parentRoleName ->
                     val parentRoleEntity = getRepository()
-                        .findByTenantIdAndName(tenantId, it.name)
+                        .findByTenantIdAndName(tenantId, parentRoleName)
                         .awaitFirstOrNull()
-                        ?: createFromDeclaration(tenantId, it)
+                        ?: throw BusinessException("Tenant parent role $parentRoleName not found")
 
                     parentRoleEntity.id
                 }

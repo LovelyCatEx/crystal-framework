@@ -7,9 +7,10 @@ import com.lovelycatv.crystalframework.mail.repository.MailTemplateCategoryRepos
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateRepository
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateManagerService
-import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.config.MailModuleConfigure
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateCategoryDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateTypeDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout

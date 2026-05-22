@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.types
+package com.lovelycatv.crystalframework.sdk.system.settings.types
 
 enum class SystemSettingsItemValueType {
     STRING,

@@ -40,7 +40,7 @@ class MailSendLogAspect(
 
         var success = true
         var errorMessage: String? = null
-        var result: Any? = null
+        var result: Any?
 
         try {
             result = joinPoint.proceed()

@@ -70,29 +70,25 @@ class UserAuthorizationServiceImpl(
                         userService.getRepository().findById(it)
                     }
 
-                    if (userEntity != null) {
-                        userEntity.map { userEntity ->
-                            ProcessOAuth2AuthenticationSuccessResult(
-                                user = userEntity,
-                                oauth2Account = it,
-                                response = ApiResponse.success(
-                                    buildLoginSuccessResponse(userEntity)
-                                ) as ApiResponse<*>
-                            )
-                        }
-                    } else {
+                    userEntity?.map { userEntity ->
                         ProcessOAuth2AuthenticationSuccessResult(
-                            user = null,
+                            user = userEntity,
                             oauth2Account = it,
-                            response = ApiResponse.success(mapOf(
-                                "oauthAccountId" to it.id.toString(),
-                                "platform" to it.getRealPlatform().name,
-                                "identifier" to it.identifier,
-                                "nickname" to it.nickname,
-                                "avatar" to it.avatar
-                            ))
-                        ).toMono()
-                    }
+                            response = ApiResponse.success(
+                                buildLoginSuccessResponse(userEntity)
+                            ) as ApiResponse<*>
+                        )
+                    } ?: ProcessOAuth2AuthenticationSuccessResult(
+                        user = null,
+                        oauth2Account = it,
+                        response = ApiResponse.success(mapOf(
+                            "oauthAccountId" to it.id.toString(),
+                            "platform" to it.getRealPlatform().name,
+                            "identifier" to it.identifier,
+                            "nickname" to it.nickname,
+                            "avatar" to it.avatar
+                        ))
+                    ).toMono()
                 }
         }
     }

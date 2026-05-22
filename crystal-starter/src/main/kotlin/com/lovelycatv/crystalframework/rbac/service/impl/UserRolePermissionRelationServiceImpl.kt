@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.rbac.entity.UserRolePermissionRelationEnt
 import com.lovelycatv.crystalframework.rbac.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
-import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout

@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.constants
 
-import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateCategoryDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateTypeDeclaration
 
 object TenantMailDeclaration {
     const val VARIABLE_USERNAME = "username"

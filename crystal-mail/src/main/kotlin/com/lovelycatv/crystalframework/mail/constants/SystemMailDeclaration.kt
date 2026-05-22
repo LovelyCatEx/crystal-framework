@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.mail.constants
 
-import com.lovelycatv.crystalframework.mail.types.MailTemplateCategoryDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateDeclaration
-import com.lovelycatv.crystalframework.mail.types.MailTemplateTypeDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateCategoryDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateDeclaration
+import com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateTypeDeclaration
 
 object SystemMailDeclaration {
     const val VARIABLE_EMAIL_CODE = "code"

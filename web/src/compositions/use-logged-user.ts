@@ -1,32 +1,26 @@
 import {getUserAccessibleMenus} from "../api/user.api.ts";
-import {useSWRState} from "./swr.ts";
+import {useSWRComposition} from "./swr.ts";
+import type {ApiResponse} from "@/api/system-request.ts";
 import {message} from "antd";
-import {useMemo} from "react";
 import {getUserAuthentication} from "../utils/token.utils.ts";
 import {useCurrentUserProfile} from "@/compositions/use-user-profile.ts";
 import type {UserAccessibleResourceVO} from "@/types/user.types.ts";
 
 export const useLoggedUser = () => {
-    const hasAuthToken = useMemo(() => {
-        const auth = getUserAuthentication();
-        return !!auth && !auth.expired;
-    }, []);
+    const auth = getUserAuthentication();
+    const hasAuthToken = !!auth && !auth.expired;
 
     const { userProfile, refreshUserProfile } = useCurrentUserProfile();
 
-    const [accessibleResources] = useSWRState<UserAccessibleResourceVO>(
+    const { data: accessibleResourcesResponse, isLoading: isAccessibleMenusLoading } = useSWRComposition<ApiResponse<UserAccessibleResourceVO>>(
         hasAuthToken ? 'getUserAccessibleMenus' : undefined,
         getUserAccessibleMenus,
         () => void message.error("无法获取资源列表")
     );
 
-    const accessibleMenuPaths = useMemo(() => {
-        return accessibleResources?.menus ?? []
-    }, [accessibleResources]);
+    const accessibleResources = accessibleResourcesResponse?.data ?? null;
+    const accessibleMenuPaths = accessibleResources?.menus ?? [];
+    const accessibleComponentPaths = accessibleResources?.components ?? [];
 
-    const accessibleComponentPaths = useMemo(() => {
-        return accessibleResources?.components ?? []
-    }, [accessibleResources]);
-
-    return { userProfile, accessibleMenuPaths, accessibleComponentPaths, refreshUserProfile, hasAuthToken };
+    return { userProfile, accessibleMenuPaths, accessibleComponentPaths, refreshUserProfile, hasAuthToken, isAccessibleMenusLoading };
 }

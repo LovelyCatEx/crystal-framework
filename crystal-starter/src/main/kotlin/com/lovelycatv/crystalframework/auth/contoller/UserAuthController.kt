@@ -43,8 +43,9 @@ class UserAuthController(
 
         userAuthorizationService.clearUserAuthorityCache(userAuthentication.userId)
 
+        // Fixed: Using legacy redisService instead of reactiveRedisService
         // Prevents dead redis lock produces consistent blocking
-        delay(100)
+        // delay(100.milliseconds)
 
         return ApiResponse.success(
             userWithTenant?.let {

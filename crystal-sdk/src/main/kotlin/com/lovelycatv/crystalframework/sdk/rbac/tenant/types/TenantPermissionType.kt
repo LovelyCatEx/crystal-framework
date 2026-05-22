@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.types
+package com.lovelycatv.crystalframework.sdk.rbac.tenant.types
 
 enum class TenantPermissionType(val typeId: Int) {
     ACTION(0),

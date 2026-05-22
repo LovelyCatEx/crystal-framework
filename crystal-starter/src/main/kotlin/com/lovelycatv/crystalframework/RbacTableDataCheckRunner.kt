@@ -6,10 +6,7 @@ import com.lovelycatv.crystalframework.rbac.entity.UserRolePermissionRelationEnt
 import com.lovelycatv.crystalframework.rbac.service.UserPermissionManagerService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.constants.SystemRole
-import com.lovelycatv.crystalframework.shared.constants.SystemRolePermissionRelation
-import com.lovelycatv.crystalframework.shared.types.PermissionType
+import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
@@ -20,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import kotlin.reflect.full.memberProperties
 
 @Order(2)
 @Component
@@ -30,6 +26,7 @@ class RbacTableDataCheckRunner(
     private val userRolePermissionRelationService: UserRolePermissionRelationService,
     private val snowIdGenerator: SnowIdGenerator,
     private val systemSettingsService: SystemSettingsService,
+    private val systemRbacRegistry: SystemRbacRegistry,
 ) : CommandLineRunner {
     private val logger = logger()
 
@@ -39,60 +36,54 @@ class RbacTableDataCheckRunner(
         }
 
         if (!systemSettings.bootstrap.autoCheckRbacTableData) {
-            logger.info("${RbacTableDataCheckRunner::class.simpleName} is skipped by system settings, " +
+            logger.info(
+                "${RbacTableDataCheckRunner::class.simpleName} is skipped by system settings, " +
                     "if you want to keep the consistency of RBAC table data, " +
                     "please set ${SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA.key} to true"
             )
             return
         }
 
-        val permissions = SystemPermission::class.memberProperties
-
-        val permissionsByTypes = permissions.groupBy { permissionProperty ->
-            PermissionType.entries.find {
-                permissionProperty.name.lowercase().startsWith(it.name.lowercase())
-            } ?: throw IllegalStateException("Invalid name of permission declaration: ${permissionProperty.name}")
-        }
-
-        val roles = SystemRole::class.memberProperties
+        val permissions = systemRbacRegistry.permissionDeclarations()
+        val roles = systemRbacRegistry.roleDeclarations()
+        val explicitBindings = systemRbacRegistry.rolePermissionBindings().associateBy { it.roleName }
+        val grantAllRoles = systemRbacRegistry.grantAllRoleNames()
 
         logger.info("=".repeat(64))
-        logger.info("Total ${roles.size} role(s) and ${permissions.size} permission(s) detected.")
+        logger.info("Total ${roles.size} role(s) and ${permissions.size} permission(s) detected from registry.")
 
         logger.info("starting permissions check...")
 
-        val permissionsInDatabase = permissionsByTypes.flatMap { (type, permissions) ->
+        val permissionsInDatabase = permissions.groupBy { it.type }.flatMap { (type, declarations) ->
             logger.info("${type.name} permission(s):")
 
-            permissions.map { permission ->
-                val permissionPropertyName = permission.name
-                val permissionKey = permission.getter.call() as? String?
-                    ?: throw IllegalStateException("$permissionPropertyName is not a valid permission declaration.")
-
-                val (name, description, path) = SystemPermission.resolvePermissionDeclaration(permissionKey)
-
+            declarations.map { declaration ->
                 val existing = runBlocking(Dispatchers.IO) {
                     userPermissionManagerService
                         .getRepository()
-                        .findByName(name)
+                        .findByName(declaration.name)
                         .awaitFirstOrNull()
                 }
 
                 if (existing != null) {
-                    logger.info("  √ $permissionPropertyName = $permissionKey (description: $description, path: $path)")
+                    logger.info(
+                        "  √ ${declaration.name} (description: ${declaration.description}, path: ${declaration.path})"
+                    )
                     existing
                 } else {
                     runBlocking(Dispatchers.IO) {
                         userPermissionManagerService.create(
                             ManagerCreatePermissionDTO(
-                                name = name,
-                                description = description,
-                                type = type.typeId,
-                                path = path,
+                                name = declaration.name,
+                                description = declaration.description,
+                                type = declaration.type.typeId,
+                                path = declaration.path,
                             )
                         )
                     }.also {
-                        logger.info("  * $permissionPropertyName = $permissionKey (description: ${description}, path: $path)")
+                        logger.info(
+                            "  * ${declaration.name} (description: ${declaration.description}, path: ${declaration.path})"
+                        )
                     }
                 }
             }
@@ -100,50 +91,49 @@ class RbacTableDataCheckRunner(
 
         logger.info("starting roles check...")
         val rolesInDatabase = roles.map { role ->
-            val rolePropertyName = role.name
-            val roleName = role.getter.call() as? String?
-                ?: throw IllegalStateException("$rolePropertyName is not a valid role declaration.")
-            val roleDescription = roleName
-
             val existing = runBlocking(Dispatchers.IO) {
                 userRoleManagerService
                     .getRepository()
-                    .findByName(roleName)
+                    .findByName(role.name)
                     .awaitFirstOrNull()
             }
 
             if (existing != null) {
-                logger.info("  √ $rolePropertyName = $roleName (description: $roleDescription)")
+                logger.info("  √ ${role.name} (description: ${role.description})")
                 existing
             } else {
                 runBlocking(Dispatchers.IO) {
                     userRoleManagerService.create(
                         ManagerCreateRoleDTO(
-                            name = roleName,
-                            description = roleDescription
+                            name = role.name,
+                            description = role.description,
                         )
                     )
                 }.also {
-                    logger.info("  * $rolePropertyName = $roleName (description: $roleDescription)")
+                    logger.info("  * ${role.name} (description: ${role.description})")
                 }
             }
         }.associateBy { it.name }
 
         logger.info("starting role permission relations check...")
-        val roleWithPermissionsMap = SystemRolePermissionRelation.mapping
-            .mapKeys { (roleName) ->
-                rolesInDatabase[roleName]
-                    ?: throw IllegalStateException("Role $roleName is not found in database but declared in ${SystemRolePermissionRelation::class.qualifiedName}")
-            }
-            .mapValues { (_, permissionNames) ->
-                permissionNames.map { permissionName ->
-                    val (name) = SystemPermission.resolvePermissionDeclaration(permissionName)
-                    permissionsInDatabase[name]
-                        ?: throw IllegalStateException("Permission $name is not found in database but declared in ${SystemRolePermissionRelation::class.qualifiedName}")
-                }
+
+        val roleToPermissionNames = linkedMapOf<String, LinkedHashSet<String>>()
+        explicitBindings.forEach { (roleName, binding) ->
+            roleToPermissionNames.getOrPut(roleName) { linkedSetOf() }.addAll(binding.permissionNames)
+        }
+        grantAllRoles.forEach { roleName ->
+            roleToPermissionNames.getOrPut(roleName) { linkedSetOf() }.addAll(permissions.map { it.name })
+        }
+
+        roleToPermissionNames.forEach { (roleName, permissionNames) ->
+            val userRole = rolesInDatabase[roleName]
+                ?: throw IllegalStateException("Role $roleName is not found in database but declared in registry")
+
+            val userPermissions = permissionNames.map { permissionName ->
+                permissionsInDatabase[permissionName]
+                    ?: throw IllegalStateException("Permission $permissionName is not found in database but declared in registry")
             }
 
-        roleWithPermissionsMap.forEach { (userRole, userPermissions) ->
             logger.info("${userPermissions.size} permission(s) are related to role ${userRole.name}")
 
             val permissionsRoleAlreadyHas = runBlocking(Dispatchers.IO) {
@@ -151,7 +141,9 @@ class RbacTableDataCheckRunner(
                     .getRolePermissions(userRole.id)
                     .also {
                         it.forEach { permissionEntity ->
-                            logger.info("  √ ${permissionEntity.name} (description: ${permissionEntity.description}, path: ${permissionEntity.path})")
+                            logger.info(
+                                "  √ ${permissionEntity.name} (description: ${permissionEntity.description}, path: ${permissionEntity.path})"
+                            )
                         }
                     }
                     .map { it.id }
@@ -173,11 +165,13 @@ class RbacTableDataCheckRunner(
                             UserRolePermissionRelationEntity(
                                 id = snowIdGenerator.nextId(),
                                 roleId = userRole.id,
-                                permissionId = absent.id
-                            ) newEntity true
+                                permissionId = absent.id,
+                            ).apply { newEntity() }
                         )
                         .awaitFirstOrNull()
-                        ?: throw IllegalStateException("could not save user role permission relation, role: ${userRole.name}(${userRole.id}), permission: ${absent.name}(${absent.id})")
+                        ?: throw IllegalStateException(
+                            "could not save user role permission relation, role: ${userRole.name}(${userRole.id}), permission: ${absent.name}(${absent.id})"
+                        )
                 }
             }.map { it.permissionId }
 
@@ -192,4 +186,5 @@ class RbacTableDataCheckRunner(
 
         logger.info("=".repeat(64))
     }
+
 }

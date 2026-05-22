@@ -2,13 +2,25 @@ name: CrystalFramework - Backend Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "release", "develop" ]
     paths-ignore:
       - 'web/**'
+      - '.devcontainer/**'
+      - '.agent/**'
+      - '.run/**'
+      - 'docker/**'
+      - 'docs/**'
+      - 'readme/**'
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "release", "develop" ]
     paths-ignore:
       - 'web/**'
+      - '.devcontainer/**'
+      - '.agent/**'
+      - '.run/**'
+      - 'docker/**'
+      - 'docs/**'
+      - 'readme/**'
 
 jobs:
   build:

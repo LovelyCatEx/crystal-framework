@@ -138,6 +138,20 @@ docker compose up --scale dev-server=0 -d
 
 到这里你可以直接启动后端项目，数据库将会自动初始化。
 
-## 0x03 开源协议
+## 0x03 贡献说明
+
+### 分支说明
+1. master: 最新发布的版本在此分支
+2. release: 预发布分支 ，由 develop 流转至此
+3. develop: 开发分支，任何贡献必须 Fork 此分支进行开发
+
+### 贡献规则
+
+1. 首先从当前的 **develop** 分支 Fork 到你的仓库。
+2. 在你的仓库对本项目进行修改。
+3. 提出 Pull Request(PR) 到 **develop** 分支。
+4. (非必须) PR 的标题请遵守如下命名规范: [Commit 信息编写规范](https://www.conventionalcommits.org/zh-hans/v1.0.0/)
+
+## 0x04 开源协议
 
 本项目使用 [MIT](https://opensource.org/licenses/MIT) 开源协议，感谢所有贡献者的支持和贡献！

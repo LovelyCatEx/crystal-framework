@@ -1,5 +1,5 @@
 import {del, get, patch, post, put} from "./request.ts";
-import {getUserAuthentication} from "../utils/token.utils.ts";
+import {clearUserAuthentication, getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
 import {menuPathLogin} from "@/router";
 import i18n from "@/i18n";
@@ -77,6 +77,9 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
     } else if (response.code === 401) {
         void message.warning(i18n.t('api.sessionExpired'));
         setTimeout(() => {
+            // Fix: infinite redirect to login page
+            clearUserAuthentication();
+            
             const url = new URL(window.location.origin + menuPathLogin);
             url.searchParams.set('redirectTo', window.location.href);
             window.location.href = url.toString();

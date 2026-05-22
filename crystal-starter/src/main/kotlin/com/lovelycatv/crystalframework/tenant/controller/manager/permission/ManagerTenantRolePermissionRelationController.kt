@@ -27,12 +27,12 @@ class ManagerTenantRolePermissionRelationController(
         userAuthentication: UserAuthentication,
         @RequestParam roleId: Long
     ): ApiResponse<*> {
-        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_ROLE_PERMISSION_RELATION_READ)) {
-            return ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
+        return if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_ROLE_PERMISSION_RELATION_READ)) {
+            ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM)) {
             userAuthentication.assertTenantIdNotNull()
             if (tenantRoleManagerService.checkIsRelatedToRootParent(roleId, userAuthentication.tenantId!!)) {
-                return ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
+                ApiResponse.success(tenantRolePermissionRelationService.getRolePermissions(roleId))
             } else {
                 throw UnauthorizedException()
             }
