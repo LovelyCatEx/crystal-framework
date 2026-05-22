@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.config
 
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.TenantRbacRegistry
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.config.TenantRbacConfigurer
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.TenantRbacRegistry
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.config.TenantRbacConfigurer
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.rbac.entity.UserRolePermissionRelationEnt
 import com.lovelycatv.crystalframework.rbac.service.UserPermissionManagerService
 import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
 import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
-import com.lovelycatv.crystalframework.sdk.rbac.RbacRegistry
+import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
@@ -26,7 +26,7 @@ class RbacTableDataCheckRunner(
     private val userRolePermissionRelationService: UserRolePermissionRelationService,
     private val snowIdGenerator: SnowIdGenerator,
     private val systemSettingsService: SystemSettingsService,
-    private val rbacRegistry: RbacRegistry,
+    private val systemRbacRegistry: SystemRbacRegistry,
 ) : CommandLineRunner {
     private val logger = logger()
 
@@ -44,10 +44,10 @@ class RbacTableDataCheckRunner(
             return
         }
 
-        val permissions = rbacRegistry.permissionDeclarations()
-        val roles = rbacRegistry.roleDeclarations()
-        val explicitBindings = rbacRegistry.rolePermissionBindings().associateBy { it.roleName }
-        val grantAllRoles = rbacRegistry.grantAllRoleNames()
+        val permissions = systemRbacRegistry.permissionDeclarations()
+        val roles = systemRbacRegistry.roleDeclarations()
+        val explicitBindings = systemRbacRegistry.rolePermissionBindings().associateBy { it.roleName }
+        val grantAllRoles = systemRbacRegistry.grantAllRoleNames()
 
         logger.info("=".repeat(64))
         logger.info("Total ${roles.size} role(s) and ${permissions.size} permission(s) detected from registry.")

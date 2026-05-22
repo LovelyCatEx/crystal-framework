@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.constants
 
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantRoleDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils
 
 object TenantRole {

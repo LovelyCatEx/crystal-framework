@@ -1,9 +1,9 @@
-package com.lovelycatv.crystalframework.sdk.rbac.types
+package com.lovelycatv.crystalframework.sdk.rbac.system.types
 
-data class RbacPermissionDeclaration(
+data class SystemRbacPermissionDeclaration(
     val name: String,
     val description: String = name,
-    val type: RbacPermissionType,
+    val type: SystemPermissionType,
     val path: String? = null,
     val module: String? = null,
 ) {
@@ -12,11 +12,11 @@ data class RbacPermissionDeclaration(
             name: String,
             description: String = name,
             module: String? = null,
-        ): RbacPermissionDeclaration {
-            return RbacPermissionDeclaration(
+        ): SystemRbacPermissionDeclaration {
+            return SystemRbacPermissionDeclaration(
                 name = name,
                 description = description,
-                type = RbacPermissionType.ACTION,
+                type = SystemPermissionType.ACTION,
                 module = module,
             )
         }
@@ -26,11 +26,11 @@ data class RbacPermissionDeclaration(
             path: String,
             description: String = name,
             module: String? = null,
-        ): RbacPermissionDeclaration {
-            return RbacPermissionDeclaration(
+        ): SystemRbacPermissionDeclaration {
+            return SystemRbacPermissionDeclaration(
                 name = name,
                 description = description,
-                type = RbacPermissionType.MENU,
+                type = SystemPermissionType.MENU,
                 path = path,
                 module = module,
             )
@@ -41,11 +41,11 @@ data class RbacPermissionDeclaration(
             path: String,
             description: String = name,
             module: String? = null,
-        ): RbacPermissionDeclaration {
-            return RbacPermissionDeclaration(
+        ): SystemRbacPermissionDeclaration {
+            return SystemRbacPermissionDeclaration(
                 name = name,
                 description = description,
-                type = RbacPermissionType.COMPONENT,
+                type = SystemPermissionType.COMPONENT,
                 path = path,
                 module = module,
             )

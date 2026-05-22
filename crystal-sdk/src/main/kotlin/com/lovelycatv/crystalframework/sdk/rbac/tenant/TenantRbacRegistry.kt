@@ -1,8 +1,8 @@
-package com.lovelycatv.crystalframework.sdk.tenant.rbac
+package com.lovelycatv.crystalframework.sdk.rbac.tenant
 
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantPermissionDeclaration
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantRoleDeclaration
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantRolePermissionBindingDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRolePermissionBindingDeclaration
 
 class TenantRbacRegistry {
     private val permissions = linkedMapOf<String, TenantPermissionDeclaration>()

@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.TenantRbacRegistry
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantPermissionDeclaration
-import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantRoleDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.TenantRbacRegistry
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO

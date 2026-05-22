@@ -1,16 +1,16 @@
-package com.lovelycatv.crystalframework.sdk.rbac
+package com.lovelycatv.crystalframework.sdk.rbac.system
 
-import com.lovelycatv.crystalframework.sdk.rbac.types.RbacPermissionDeclaration
-import com.lovelycatv.crystalframework.sdk.rbac.types.RbacRoleDeclaration
-import com.lovelycatv.crystalframework.sdk.rbac.types.RbacRolePermissionBindingDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRbacPermissionDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRoleDeclaration
+import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRolePermissionBindingDeclaration
 
-class RbacRegistry {
-    private val permissions = linkedMapOf<String, RbacPermissionDeclaration>()
-    private val roles = linkedMapOf<String, RbacRoleDeclaration>()
+class SystemRbacRegistry {
+    private val permissions = linkedMapOf<String, SystemRbacPermissionDeclaration>()
+    private val roles = linkedMapOf<String, SystemRoleDeclaration>()
     private val rolePermissionBindings = linkedMapOf<String, LinkedHashSet<String>>()
     private val grantAllRoles = linkedSetOf<String>()
 
-    fun permission(permission: RbacPermissionDeclaration) {
+    fun permission(permission: SystemRbacPermissionDeclaration) {
         val permissionName = permission.name.trim()
         if (permissionName.isBlank()) {
             return
@@ -22,11 +22,11 @@ class RbacRegistry {
         )
     }
 
-    fun permissions(permissions: Iterable<RbacPermissionDeclaration>) {
+    fun permissions(permissions: Iterable<SystemRbacPermissionDeclaration>) {
         permissions.forEach { permission(it) }
     }
 
-    fun role(role: RbacRoleDeclaration) {
+    fun role(role: SystemRoleDeclaration) {
         val roleName = role.name.trim()
         if (roleName.isBlank()) {
             return
@@ -38,7 +38,7 @@ class RbacRegistry {
         )
     }
 
-    fun roles(roles: Iterable<RbacRoleDeclaration>) {
+    fun roles(roles: Iterable<SystemRoleDeclaration>) {
         roles.forEach { role(it) }
     }
 
@@ -82,17 +82,17 @@ class RbacRegistry {
         }
     }
 
-    fun permissionDeclarations(): List<RbacPermissionDeclaration> {
+    fun permissionDeclarations(): List<SystemRbacPermissionDeclaration> {
         return permissions.values.toList()
     }
 
-    fun roleDeclarations(): List<RbacRoleDeclaration> {
+    fun roleDeclarations(): List<SystemRoleDeclaration> {
         return roles.values.toList()
     }
 
-    fun rolePermissionBindings(): List<RbacRolePermissionBindingDeclaration> {
+    fun rolePermissionBindings(): List<SystemRolePermissionBindingDeclaration> {
         return rolePermissionBindings.map { (roleName, permissionNames) ->
-            RbacRolePermissionBindingDeclaration(
+            SystemRolePermissionBindingDeclaration(
                 roleName = roleName,
                 permissionNames = permissionNames.toSet(),
             )

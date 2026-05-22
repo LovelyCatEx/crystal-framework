@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.rbac.config
 
-import com.lovelycatv.crystalframework.sdk.rbac.RbacRegistry
-import com.lovelycatv.crystalframework.sdk.rbac.config.RbacConfigurer
+import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
+import com.lovelycatv.crystalframework.sdk.rbac.system.config.SystemRbacConfigurer
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration
 class RbacRegistryConfiguration {
     @Bean
     fun rbacRegistry(
-        rbacConfigurers: ObjectProvider<RbacConfigurer>
-    ): RbacRegistry {
-        return RbacRegistry().apply {
-            rbacConfigurers.orderedStream().forEach { it.configure(this) }
+        systemRbacConfigurers: ObjectProvider<SystemRbacConfigurer>
+    ): SystemRbacRegistry {
+        return SystemRbacRegistry().apply {
+            systemRbacConfigurers.orderedStream().forEach { it.configure(this) }
         }
     }
 }
