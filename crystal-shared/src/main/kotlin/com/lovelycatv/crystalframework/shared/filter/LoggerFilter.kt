@@ -47,7 +47,7 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
 
     class RequestDecorator(
         private val id: Long,
-        private val originalRequest: ServerHttpRequest,
+        originalRequest: ServerHttpRequest,
         private val response: ServerHttpResponse,
         private val logger: Logger
     ) : ServerHttpRequestDecorator(originalRequest) {

@@ -230,11 +230,11 @@ abstract class StandardTenantManagerController<
     ): ApiResponse<*> {
         customQuery(userAuthentication, dto)?.let { return it }
 
-        if (RbacUtils.hasAuthority(this.readPermission)) {
-            return ApiResponse.success(buildQueryResponse(dto))
+        return if (RbacUtils.hasAuthority(this.readPermission)) {
+            ApiResponse.success(buildQueryResponse(dto))
         } else if (hasScopedAuthority(this.scopedReadPermission)) {
             if (isQueryInScope(dto, userAuthentication)) {
-                return ApiResponse.success(buildQueryResponse(dto))
+                ApiResponse.success(buildQueryResponse(dto))
             } else {
                 throw UnauthorizedException()
             }

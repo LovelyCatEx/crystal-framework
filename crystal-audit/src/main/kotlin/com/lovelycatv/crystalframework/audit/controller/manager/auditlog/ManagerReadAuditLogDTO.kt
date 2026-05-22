@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.audit.controller.manager.auditlog.dto
+package com.lovelycatv.crystalframework.audit.controller.manager.auditlog
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 

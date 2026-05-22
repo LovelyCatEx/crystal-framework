@@ -6,6 +6,7 @@ import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
 import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.milliseconds
 
 class KotlinReactiveExtensions private constructor()
 
@@ -16,7 +17,7 @@ suspend fun <T: Any> Flux<T>.awaitListWithTimeout(
         // !!! IMPORTANT !!!
         val disposable = this.subscribe()
 
-        val result: List<T>? = withTimeoutOrNull(timeout.toMillis()) {
+        val result: List<T>? = withTimeoutOrNull(timeout.toMillis().milliseconds) {
             this@awaitListWithTimeout
                 .subscribeOn(Schedulers.boundedElastic())
                 .collectList()
