@@ -79,7 +79,7 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
         setTimeout(() => {
             // Fix: infinite redirect to login page
             clearUserAuthentication();
-            
+
             const url = new URL(window.location.origin + menuPathLogin);
             url.searchParams.set('redirectTo', window.location.href);
             window.location.href = url.toString();

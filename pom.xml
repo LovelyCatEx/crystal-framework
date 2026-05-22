@@ -43,8 +43,8 @@
         <module>crystal-encrypt</module>
         <module>crystal-shared-types</module>
         <module>crystal-mail</module>
-        <module>ext-playground</module>
         <module>crystal-sdk</module>
+        <module>ext-playground</module>
     </modules>
 
     <scm>

@@ -17,5 +17,12 @@ export const enThemeConfig: DefaultTheme.Config = {
         { text: 'Deploy Guidance', link: '/en/deploy-guide' },
       ]
     }
-  ]
+  ],
+  footer: {
+    message: 'Released under the MIT License.',
+    copyright: 'Copyright © 2025-2026 LovelyCat.'
+  },
+  search: {
+    provider: 'local'
+  },
 }
