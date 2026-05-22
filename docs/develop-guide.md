@@ -105,7 +105,7 @@ docker compose up --scale dev-server=0 -d
 
 ### 二次开发
 
-1. 打开项目根目录下的 `pom.xml`，按以下步骤配置：
+**步骤1. 打开项目根目录下的 `pom.xml`，按以下步骤配置：**
 
 ```xml{12}
 <modules>
@@ -123,7 +123,7 @@ docker compose up --scale dev-server=0 -d
 </modules>
 ```
 
-2. 在 `<properties>` 标签中添加版本属性：
+**步骤2. 在 `<properties>` 标签中添加版本属性：**
 
 ```xml{7}
 <properties>
@@ -136,7 +136,7 @@ docker compose up --scale dev-server=0 -d
 </properties>
 ```
 
-3. 在 `<dependencyManagement>` 标签中添加依赖管理：
+**步骤3. 在 `<dependencyManagement>` 标签中添加依赖管理：**
 
 ```xml{5-9}
 package io.github.lovelycatex.myproject
@@ -153,7 +153,7 @@ class MyProjectModule : InitializingBean {
 }
 ```
 
-4. 在项目根目录下创建新模块文件夹，结构如下：
+**步骤4. 在项目根目录下创建新模块文件夹：**
 
 ```
 my-project/
@@ -174,7 +174,7 @@ my-project/
                     └── org.springframework.boot.autoconfigure.AutoConfiguration.imports
 ```
 
-5. 创建模块的 pom.xml
+**步骤5. 创建模块的 pom.xml**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -244,7 +244,7 @@ my-project/
 </project>
 ```
 
-6. 修改 `crystal-starter/pom.xml`
+**步骤6. 修改 `crystal-starter/pom.xml`**
 
 ```xml{35-38}
 <dependencies>
@@ -288,7 +288,7 @@ my-project/
 </dependencies>
 ```
 
-7. 创建模块主类 ExtDemoModule.kt
+**步骤7. 创建模块主类 MyProjectDemoModule.kt**
 
 ```kotlin
 package io.github.lovelycatex.myproject
@@ -305,7 +305,7 @@ class MyProjectModule : InitializingBean {
 }
 ```
 
-8. 创建自动配置类 DemoAutoConfiguration.kt
+**步骤8. 创建自动配置类 MyProjectAutoConfiguration.kt**
 
 ```kotlin
 package io.github.lovelycatex.myproject
@@ -329,7 +329,7 @@ class MyProjectAutoConfiguration {
 }
 ```
 
-9. 创建 Spring 自动配置文件
+**步骤9. 创建 Spring 自动配置文件**
 
 在 `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 中添加：
 
@@ -337,7 +337,7 @@ class MyProjectAutoConfiguration {
 io.github.lovelycatex.myproject.MyProjectAutoConfiguration
 ```
 
-10. 验证模块
+**步骤10. 验证模块**
 
 完成上述步骤后，执行以下命令验证模块是否能正常构建：
 
