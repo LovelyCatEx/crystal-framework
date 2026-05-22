@@ -1,7 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.constants
 
+import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantPermissionDeclaration
+import com.lovelycatv.crystalframework.sdk.tenant.rbac.types.TenantPermissionType
 import com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils
-import com.lovelycatv.crystalframework.tenant.types.TenantPermissionType
 
 object TenantPermission {
     // My Tenant Dashboard
