@@ -1,7 +1,5 @@
 package com.lovelycatv.crystalframework.shared.constants
 
-import com.lovelycatv.crystalframework.shared.types.PermissionType
-
 object SystemPermission {
     const val MENU_PERMISSION_MANAGER = "permission:/manager/user-permissions"
     const val MENU_ROLE_MANAGER = "role:/manager/user-roles"
@@ -168,36 +166,4 @@ object SystemPermission {
 
     const val MENU_MONITOR_SESSIONS = "monitor.sessions:/manager/sessions"
     const val ACTION_MONITOR_SESSIONS_READ = "monitor.sessions.read"
-
-    /**
-     * resolve permission from string declaration
-     *
-     * @param str declaration, eg: "user:/manager/users"
-     * @return (name, description, path)
-     */
-    fun resolvePermissionDeclaration(str: String): Triple<String, String, String?> {
-        val type = if (str.contains(":")) {
-            PermissionType.MENU
-        } else if (str.contains("@")) {
-            PermissionType.COMPONENT
-        } else {
-            PermissionType.ACTION
-        }
-
-        return when (type) {
-            PermissionType.ACTION -> {
-                Triple(str, str, null)
-            }
-
-            PermissionType.MENU -> {
-                val (readPermissionKey, path) = str.split(":")
-                Triple(readPermissionKey, readPermissionKey, path)
-            }
-
-            PermissionType.COMPONENT -> {
-                val (readPermissionKey, path) = str.split("@")
-                Triple(readPermissionKey, readPermissionKey, path)
-            }
-        }
-    }
 }
