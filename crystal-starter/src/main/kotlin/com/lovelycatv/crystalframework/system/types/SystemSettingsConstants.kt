@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.system.types
 
+import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
+import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
 import kotlin.reflect.full.memberProperties
 
 object SystemSettingsConstants {
@@ -125,6 +127,10 @@ object SystemSettingsConstants {
 
     }
 
+    @Deprecated(
+        message = "Use SystemSettingsRegistry instead",
+        replaceWith = ReplaceWith("systemSettingsRegistry.settingDeclarations()")
+    )
     fun getAllDeclarations(): List<SystemSettingsItemDeclaration> {
         val declarations = mutableListOf<SystemSettingsItemDeclaration>()
         var nested = SystemSettingsConstants::class.nestedClasses

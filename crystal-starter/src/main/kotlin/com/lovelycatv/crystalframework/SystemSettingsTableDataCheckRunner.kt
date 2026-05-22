@@ -1,10 +1,10 @@
 package com.lovelycatv.crystalframework
 
+import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
+import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -14,16 +14,19 @@ import org.springframework.stereotype.Component
 
 @Order(1)
 @Component
-class SystemSettingsTableDataCheckRunner(private val systemSettingsService: SystemSettingsService) : CommandLineRunner {
+class SystemSettingsTableDataCheckRunner(
+    private val systemSettingsService: SystemSettingsService,
+    private val systemSettingsRegistry: SystemSettingsRegistry,
+) : CommandLineRunner {
     private val logger = logger()
 
     override fun run(vararg args: String) {
         logger.info("=".repeat(64))
         logger.info("Starting system settings table data checker...")
 
-        val declarations = SystemSettingsConstants.getAllDeclarations()
+        val declarations = systemSettingsRegistry.settingDeclarations()
 
-        logger.info("${declarations.size} system settings declaration(s) detected.")
+        logger.info("${declarations.size} system settings declaration(s) detected from registry.")
 
         val allSettings = runBlocking(Dispatchers.IO) {
             systemSettingsService
@@ -56,19 +59,15 @@ class SystemSettingsTableDataCheckRunner(private val systemSettingsService: Syst
                             copiedConfigValue.toBooleanStrictOrNull()
                         }
                         SystemSettingsItemValueType.ENUM_SINGLE -> {
-                            if (declaration.enumValues != null) {
-                                copiedConfigValue in declaration.enumValues
-                            } else {
-                                throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
-                            }
+                            val enumValues = declaration.enumValues
+                                ?: throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
+                            copiedConfigValue in enumValues
                         }
                         SystemSettingsItemValueType.ENUM_MULTIPLE -> {
+                            val enumValues = declaration.enumValues
+                                ?: throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
                             val parsed = copiedConfigValue.parseObject<List<String>>()
-                            if (declaration.enumValues != null) {
-                                parsed.all { it in declaration.enumValues }
-                            } else {
-                                throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
-                            }
+                            parsed.all { it in enumValues }
                         }
                     } != null
                 } catch (e: Exception) {

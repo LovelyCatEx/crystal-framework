@@ -1,11 +1,10 @@
 package com.lovelycatv.crystalframework.system.controller.manager
 
+import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import io.micrometer.observation.KeyValuesConvention
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -15,12 +14,12 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/settings")
 class ManagerSystemSettingsController(
     private val systemSettingsService: SystemSettingsService,
-    private val keyValuesConvention: KeyValuesConvention
+    private val systemSettingsRegistry: SystemSettingsRegistry,
 ) {
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_READ}')")
     @GetMapping("/schema")
     suspend fun getSystemSettings(): ApiResponse<*> {
-        val declarations = SystemSettingsConstants.getAllDeclarations()
+        val declarations = systemSettingsRegistry.settingDeclarations()
 
         val mapping = declarations.associate {
             it.key to mapOf(
