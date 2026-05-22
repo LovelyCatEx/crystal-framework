@@ -11,7 +11,6 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Range
 import org.springframework.session.data.redis.ReactiveRedisIndexedSessionRepository
 import org.springframework.stereotype.Service
-import java.util.Optional
 import kotlin.math.ceil
 
 @Service

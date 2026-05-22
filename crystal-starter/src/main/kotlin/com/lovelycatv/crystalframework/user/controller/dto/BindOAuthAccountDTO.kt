@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.user.controller.dto
 
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 
 data class BindOAuthAccountDTO(

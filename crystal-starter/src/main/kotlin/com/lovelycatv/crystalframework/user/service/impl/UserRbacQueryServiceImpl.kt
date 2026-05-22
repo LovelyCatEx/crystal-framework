@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantRolePermissionRelationService
-import com.lovelycatv.crystalframework.tenant.types.TenantPermissionType
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionType
 import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.result.UserRbacQueryResult
 import com.lovelycatv.crystalframework.user.service.result.UserTenantRbacQueryResult

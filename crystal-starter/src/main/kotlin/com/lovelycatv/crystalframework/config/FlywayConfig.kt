@@ -18,7 +18,7 @@ class FlywayConfig {
 
             val url = environment.getProperty("spring.datasource.url")
                 ?: environment.resolveRequiredPlaceholders(
-                    "jdbc:postgresql://\${POSTGRES_HOST}:\${POSTGRES_PORT}/\${POSTGRES_DATABASE}"
+                    $$"jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
                 )
             val username = environment.getProperty("spring.datasource.username")
                 ?: environment.getProperty("POSTGRES_USERNAME")

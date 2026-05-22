@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
+import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
+import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
@@ -10,7 +12,6 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.crystalframework.system.types.SystemSettingsItemValueType
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
@@ -33,6 +34,7 @@ class SystemSettingsServiceImpl(
     private val redisService: RedisService,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
+    private val systemSettingsRegistry: SystemSettingsRegistry,
     override val eventPublisher: ApplicationEventPublisher,
 ) : SystemSettingsService {
     private val logger = logger()
@@ -169,9 +171,7 @@ class SystemSettingsServiceImpl(
     }
 
     override suspend fun updateSystemSettings(settings: Map<String, String?>) {
-        val declarationsByKey = SystemSettingsConstants
-            .getAllDeclarations()
-            .associateBy { it.key }
+        val declarationsByKey = systemSettingsRegistry.declarationMap()
 
         settings.forEach { (key, value) ->
             val declaration = declarationsByKey[key]

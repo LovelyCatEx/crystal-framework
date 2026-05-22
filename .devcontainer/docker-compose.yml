@@ -1,4 +1,4 @@
-name: crystalframework-devc
+name: crystalframework-dev-container
 services:
   dev-server:
     build:
@@ -23,9 +23,9 @@ services:
       "
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
-      - "5173:5173"
+      - "${FRONTEND_PORT}:5173"
     networks:
-      - devnet
+      - crystalframework-dev-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,7 +43,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - devnet
+      - crystalframework-dev-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
@@ -58,7 +58,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - devnet
+      - crystalframework-dev-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 3s
@@ -81,7 +81,7 @@ services:
     volumes:
       - ../docker/dev/config/snail-job:/app/config:ro
     networks:
-      - devnet
+      - crystalframework-dev-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -97,5 +97,5 @@ volumes:
   redis_data:
 
 networks:
-  devnet:
+  crystalframework-dev-network:
     driver: bridge

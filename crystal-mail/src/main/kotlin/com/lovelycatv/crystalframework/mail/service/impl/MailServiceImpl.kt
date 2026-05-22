@@ -21,9 +21,8 @@ import java.util.*
 @Service
 class MailServiceImpl(
     private val mailTemplateService: MailTemplateService,
+    private val systemModuleClient: SystemModuleClient
 ) : MailService {
-    @Autowired
-    private lateinit var systemModuleClient: SystemModuleClient
     private val logger = logger()
 
     @Lazy

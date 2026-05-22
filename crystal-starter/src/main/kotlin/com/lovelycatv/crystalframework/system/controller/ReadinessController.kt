@@ -49,16 +49,22 @@ class ReadinessController(
             .receive(maintenanceTopic)
             .subscribe { message ->
                 val status = message.message.replace("\"", "")
-                if (status == maintenanceTopicMessageTrue) {
-                    setRefusing()
-                } else if (status == maintenanceTopicMessageFalse) {
-                    setAccepting()
-                } else {
-                    logger.warn(
-                        "Message from ${maintenanceTopic.topic} was abort, " +
-                                "message: $status, but accept $maintenanceTopicMessageTrue " +
-                                "and $maintenanceTopicMessageFalse only."
-                    )
+                when (status) {
+                    maintenanceTopicMessageTrue -> {
+                        setRefusing()
+                    }
+
+                    maintenanceTopicMessageFalse -> {
+                        setAccepting()
+                    }
+
+                    else -> {
+                        logger.warn(
+                            "Message from ${maintenanceTopic.topic} was abort, " +
+                                    "message: $status, but accept $maintenanceTopicMessageTrue " +
+                                    "and $maintenanceTopicMessageFalse only."
+                        )
+                    }
                 }
             }
     }

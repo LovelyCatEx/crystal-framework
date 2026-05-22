@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.audit.controller.manager.auditlog.dto
+package com.lovelycatv.crystalframework.audit.controller.manager.auditlog
 
 /**
  * Audit logs are created automatically by the system, not manually.

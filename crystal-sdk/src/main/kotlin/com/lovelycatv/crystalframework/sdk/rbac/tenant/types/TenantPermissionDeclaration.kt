@@ -1,6 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.constants
-
-import com.lovelycatv.crystalframework.tenant.types.TenantPermissionType
+package com.lovelycatv.crystalframework.sdk.rbac.tenant.types
 
 data class TenantPermissionDeclaration(
     val name: String,

@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.constants
 
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils
 
 object TenantRole {
@@ -9,17 +10,17 @@ object TenantRole {
 
     val ADMIN = TenantRoleDeclaration(
         name = "admin",
-        parentRole = MEMBER
+        parentRoleName = MEMBER.name
     )
 
     val SUPER_ADMIN = TenantRoleDeclaration(
         name = "super_admin",
-        parentRole = ADMIN
+        parentRoleName = ADMIN.name
     )
 
     val ROOT = TenantRoleDeclaration(
         name = "root",
-        parentRole = SUPER_ADMIN
+        parentRoleName = SUPER_ADMIN.name
     )
 
     fun allRoles(): List<TenantRoleDeclaration> {
