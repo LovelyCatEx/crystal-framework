@@ -14,6 +14,7 @@ export const enThemeConfig: DefaultTheme.Config = {
         { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
         { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
         { text: 'Mail Template', link: '/en/develop/sdk/mail-template' },
+        { text: 'Database Migration', link: '/en/develop/db-migration' },
       ]
     },
     {
@@ -25,6 +26,7 @@ export const enThemeConfig: DefaultTheme.Config = {
         { text: 'System Permission', link: '/en/contribute/system-permission' },
         { text: 'Tenant Permission', link: '/en/contribute/tenant-permission' },
         { text: 'Mail Template', link: '/en/contribute/mail-template' },
+        { text: 'Database Migration', link: '/en/contribute/db-migration' },
       ]
     },
     {

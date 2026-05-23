@@ -14,6 +14,7 @@ export const zhThemeConfig: DefaultTheme.Config = {
         { text: '系统权限', link: '/develop/sdk/system-permission' },
         { text: '租户权限', link: '/develop/sdk/tenant-permission' },
         { text: '邮件模板', link: '/develop/sdk/mail-template' },
+        { text: '数据库迁移', link: '/develop/db-migration' },
       ]
     },
     {
@@ -25,6 +26,7 @@ export const zhThemeConfig: DefaultTheme.Config = {
         { text: '系统权限', link: '/contribute/system-permission' },
         { text: '租户权限', link: '/contribute/tenant-permission' },
         { text: '邮件模板', link: '/contribute/mail-template' },
+        { text: '数据库迁移', link: '/contribute/db-migration' },
       ]
     },
     {

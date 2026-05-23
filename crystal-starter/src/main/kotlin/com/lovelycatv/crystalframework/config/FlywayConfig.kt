@@ -13,7 +13,7 @@ class FlywayConfig {
 
     @Bean
     fun flywayMigrationExecutor(environment: Environment): BeanFactoryPostProcessor {
-        return BeanFactoryPostProcessor { _: ConfigurableListableBeanFactory ->
+        return BeanFactoryPostProcessor { beanFactory: ConfigurableListableBeanFactory ->
             val logger = LoggerFactory.getLogger(FlywayConfig::class.java)
 
             val url = environment.getProperty("spring.datasource.url")
@@ -27,7 +27,11 @@ class FlywayConfig {
 
             logger.info("Flyway: Starting database migration...")
 
-            val flyway = Flyway.configure()
+            val classLoader = beanFactory.beanClassLoader
+                ?: FlywayConfig::class.java.classLoader
+                ?: error("No classloader available for Flyway")
+
+            val flyway = Flyway.configure(classLoader)
                 .dataSource(url, username, password)
                 .locations("classpath:db/migration")
                 .baselineOnMigrate(true)
