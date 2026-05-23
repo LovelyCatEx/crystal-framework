@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Card, Col, Row, Segmented, Switch, theme} from "antd";
+import {Card, Col, Row, Select, Switch, theme} from "antd";
 import {LineChartOutlined} from "@ant-design/icons";
 import * as echarts from "echarts";
 import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
@@ -11,30 +11,41 @@ import type {MetricPoint} from "../types/system-monitor.types.ts";
 
 const {useToken} = theme;
 
+function formatBytes(v: number): string {
+    if (v === 0) return "0";
+    const k = 1024;
+    const sizes = ["", "K", "M", "G", "T"];
+    const i = Math.min(Math.floor(Math.log(Math.abs(v)) / Math.log(k)), sizes.length - 1);
+    return (v / Math.pow(k, i)).toFixed(i > 0 ? 1 : 0) + " " + sizes[i] + "B";
+}
+
 const METRICS: MetricChartConfig[] = [
     {type: "CPU_USAGE", labelKey: "pages.systemMonitor.metrics.cpuUsage", color: "#3b82f6", yMin: 0, yMax: 100},
     {type: "CPU_LOAD_AVERAGE", labelKey: "pages.systemMonitor.metrics.cpuLoadAverage", color: "#8b5cf6"},
-    {type: "CPU_PROCESSORS", labelKey: "pages.systemMonitor.metrics.cpuProcessors", color: "#06b6d4"},
-    {type: "MEMORY_TOTAL", labelKey: "pages.systemMonitor.metrics.memoryTotal", color: "#10b981"},
-    {type: "MEMORY_USED", labelKey: "pages.systemMonitor.metrics.memoryUsed", color: "#34d399"},
-    {type: "JVM_HEAP_MAX", labelKey: "pages.systemMonitor.metrics.jvmHeapMax", color: "#f59e0b"},
-    {type: "JVM_HEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmHeapUsed", color: "#f97316"},
-    {type: "JVM_NONHEAP_COMMITTED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapCommitted", color: "#ef4444"},
-    {type: "JVM_NONHEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapUsed", color: "#dc2626"},
-    {type: "DISK_TOTAL", labelKey: "pages.systemMonitor.metrics.diskTotal", color: "#6366f1"},
-    {type: "DISK_USED", labelKey: "pages.systemMonitor.metrics.diskUsed", color: "#818cf8"},
+    {type: "MEMORY_USED", labelKey: "pages.systemMonitor.metrics.memoryUsed", color: "#34d399", formatValue: formatBytes},
+    {type: "JVM_HEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmHeapUsed", color: "#f97316", formatValue: formatBytes},
+    {type: "JVM_NONHEAP_COMMITTED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapCommitted", color: "#ef4444", formatValue: formatBytes},
+    {type: "JVM_NONHEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapUsed", color: "#dc2626", formatValue: formatBytes},
+    {type: "DISK_USED", labelKey: "pages.systemMonitor.metrics.diskUsed", color: "#818cf8", formatValue: formatBytes},
     {type: "DB_CONNECTIONS_ACTIVE", labelKey: "pages.systemMonitor.metrics.dbConnectionsActive", color: "#ec4899"},
-    {type: "DB_CONNECTIONS_MAX", labelKey: "pages.systemMonitor.metrics.dbConnectionsMax", color: "#f472b6"},
     {type: "GC_COUNT", labelKey: "pages.systemMonitor.metrics.gcCount", color: "#14b8a6"},
-    {type: "GC_TIME", labelKey: "pages.systemMonitor.metrics.gcTime", color: "#2dd4bf"},
+    {type: "GC_TIME", labelKey: "pages.systemMonitor.metrics.gcTime", color: "#2dd4bf", formatValue: v => v.toFixed(0) + " ms"},
 ];
 
-const DURATION_OPTIONS = [
-    {label: "1m", value: "1m"},
-    {label: "5m", value: "5m"},
-    {label: "15m", value: "15m"},
-    {label: "30m", value: "30m"},
-    {label: "1h", value: "1h"},
+const DURATION_OPTIONS: {labelKey: string; value: string}[] = [
+    {labelKey: "pages.systemMonitor.durations.m1", value: "1m"},
+    {labelKey: "pages.systemMonitor.durations.m5", value: "5m"},
+    {labelKey: "pages.systemMonitor.durations.m15", value: "15m"},
+    {labelKey: "pages.systemMonitor.durations.m30", value: "30m"},
+    {labelKey: "pages.systemMonitor.durations.h1", value: "1h"},
+    {labelKey: "pages.systemMonitor.durations.h3", value: "3h"},
+    {labelKey: "pages.systemMonitor.durations.h5", value: "5h"},
+    {labelKey: "pages.systemMonitor.durations.h12", value: "12h"},
+    {labelKey: "pages.systemMonitor.durations.d1", value: "1d"},
+    {labelKey: "pages.systemMonitor.durations.d3", value: "3d"},
+    {labelKey: "pages.systemMonitor.durations.d5", value: "5d"},
+    {labelKey: "pages.systemMonitor.durations.d7", value: "7d"},
+    {labelKey: "pages.systemMonitor.durations.d14", value: "14d"},
 ];
 
 export function SystemMonitorPage() {
@@ -97,7 +108,13 @@ export function SystemMonitorPage() {
                                 {t('pages.systemMonitor.syncCrosshair')}
                             </span>
                         </div>
-                        <Segmented options={DURATION_OPTIONS} value={duration} onChange={v => setDuration(v as string)} size="small" />
+                        <Select
+                            options={DURATION_OPTIONS.map(o => ({label: t(o.labelKey), value: o.value}))}
+                            value={duration}
+                            onChange={setDuration}
+                            size="small"
+                            style={{width: 100}}
+                        />
                     </div>
                 }
             >
@@ -108,7 +125,7 @@ export function SystemMonitorPage() {
                                 <div style={{fontSize: 13, fontWeight: 600, marginBottom: 4, color: token.colorTextSecondary}}>
                                     {t(m.labelKey)}
                                 </div>
-                                <MetricChart config={m} data={dataMap[m.type] ?? []} />
+                                <MetricChart config={m} data={dataMap[m.type] ?? []} duration={duration} />
                             </div>
                         </Col>
                     ))}
