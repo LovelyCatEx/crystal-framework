@@ -11,6 +11,14 @@ export const enThemeConfig: DefaultTheme.Config = {
         { text: 'Quick Start', link: '/en/develop/quick-start' },
         { text: 'Development Guide', link: '/en/develop/develop-guide' },
         {
+          text: 'Frontend',
+          items: [
+            { text: 'Create Plugin', link: '/en/develop/frontend/create-plugin' },
+            { text: 'Add Page', link: '/en/develop/frontend/add-page' },
+            { text: 'API Integration', link: '/en/develop/frontend/api-integration' },
+          ]
+        },
+        {
           text: 'Database',
           items: [
             { text: 'Add Entity', link: '/en/develop/add-entity' },

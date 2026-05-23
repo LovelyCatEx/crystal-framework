@@ -11,6 +11,14 @@ export const zhThemeConfig: DefaultTheme.Config = {
         { text: '快速开始', link: '/develop/quick-start' },
         { text: '开发指引', link: '/develop/develop-guide' },
         {
+          text: '前端',
+          items: [
+            { text: '创建插件', link: '/develop/frontend/create-plugin' },
+            { text: '添加页面', link: '/develop/frontend/add-page' },
+            { text: 'API 对接', link: '/develop/frontend/api-integration' },
+          ]
+        },
+        {
           text: '数据库',
           items: [
             { text: '添加实体类', link: '/develop/add-entity' },
