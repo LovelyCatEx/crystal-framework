@@ -27,6 +27,7 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
                     subtitle: '实时查看服务器 CPU、内存、磁盘和 JVM 等系统指标',
                     chartTitle: '指标趋势',
                     syncCrosshair: '同步十字',
+                    columns: {auto: '自动'},
                     durations: {
                         m1: '1 分钟',
                         m5: '5 分钟',
@@ -69,6 +70,7 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
                     subtitle: 'Real-time view of CPU, memory, disk, JVM and other system metrics',
                     chartTitle: 'Metrics Trend',
                     syncCrosshair: 'Sync Crosshair',
+                    columns: {auto: 'Auto'},
                     durations: {
                         m1: '1 Minute',
                         m5: '5 Minutes',

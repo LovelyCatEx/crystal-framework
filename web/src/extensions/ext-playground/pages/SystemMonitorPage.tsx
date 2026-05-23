@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Card, Col, Row, Select, Switch, theme} from "antd";
+import {Card, Col, Row, Segmented, Select, Switch, theme} from "antd";
 import {LineChartOutlined} from "@ant-design/icons";
 import * as echarts from "echarts";
 import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
@@ -54,7 +54,10 @@ export function SystemMonitorPage() {
     const [duration, setDuration] = useState("1m");
     const [dataMap, setDataMap] = useState<Record<string, MetricPoint[]>>({});
     const [syncEnabled, setSyncEnabled] = useState(true);
+    const [columns, setColumns] = useState<string>("auto");
     const timerRef = useRef<number | null>(null);
+
+    const colSpan = columns === "1" ? 24 : columns === "2" ? 12 : columns === "3" ? 8 : undefined;
 
     const fetchAll = useCallback(async () => {
         const results = await Promise.all(
@@ -108,7 +111,19 @@ export function SystemMonitorPage() {
                                 {t('pages.systemMonitor.syncCrosshair')}
                             </span>
                         </div>
-                        <Select
+                        <div className="flex items-center gap-2">
+                            <Segmented
+                                options={[
+                                    {value: "auto", label: t('pages.systemMonitor.columns.auto')},
+                                    {value: "1", label: "1"},
+                                    {value: "2", label: "2"},
+                                    {value: "3", label: "3"},
+                                ]}
+                                value={columns}
+                                onChange={v => setColumns(v as string)}
+                                size="small"
+                            />
+                            <Select
                             options={DURATION_OPTIONS.map(o => ({label: t(o.labelKey), value: o.value}))}
                             value={duration}
                             onChange={setDuration}
@@ -120,7 +135,7 @@ export function SystemMonitorPage() {
             >
                 <Row gutter={[12, 12]}>
                     {METRICS.map(m => (
-                        <Col xs={24} sm={24} lg={12} xxl={8} key={m.type}>
+                        <Col {...(colSpan ? {xs: 24, sm: colSpan, md: colSpan, lg: colSpan, xxl: colSpan} : {xs: 24, sm: 24, lg: 12, xxl: 8})} key={m.type}>
                             <div className="p-3 rounded-xl" style={{background: "#fafafa"}}>
                                 <div style={{fontSize: 13, fontWeight: 600, marginBottom: 4, color: token.colorTextSecondary}}>
                                     {t(m.labelKey)}
