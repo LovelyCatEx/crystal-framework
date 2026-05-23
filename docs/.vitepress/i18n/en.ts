@@ -10,15 +10,10 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Quick Start', link: '/en/develop/quick-start' },
         { text: 'Development Guide', link: '/en/develop/develop-guide' },
-        {
-          text: 'SDK Documentation',
-          items: [
-            { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
-            { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
-            { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
-            { text: 'Mail Template', link: '/en/develop/sdk/mail-template' },
-          ]
-        },
+        { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
+        { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
+        { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
+        { text: 'Mail Template', link: '/en/develop/sdk/mail-template' },
       ]
     },
     {
@@ -26,6 +21,10 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Quick Start', link: '/en/contribute/quick-start' },
         { text: 'Project Structure', link: '/en/contribute/structure-introduction' },
+        { text: 'System Settings', link: '/en/contribute/system-settings' },
+        { text: 'System Permission', link: '/en/contribute/system-permission' },
+        { text: 'Tenant Permission', link: '/en/contribute/tenant-permission' },
+        { text: 'Mail Template', link: '/en/contribute/mail-template' },
       ]
     },
     {

@@ -42,4 +42,10 @@ export interface IMenuRegistry {
     addPublicMenu(item: PluginRouteItem): void;
 
     addTopLevelRoute(route: PluginTopLevelRoute): void;
+
+    addSystemSettingsKey(key: string): void;
+
+    addSystemSettingsGroup(group: string): void;
+
+    addSystemSettingsTab(tab: string): void;
 }
