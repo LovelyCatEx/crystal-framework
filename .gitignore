@@ -40,3 +40,4 @@ docker/.env
 .narrafork/
 .worktrees/
 .flattened-pom.xml
+/ext
