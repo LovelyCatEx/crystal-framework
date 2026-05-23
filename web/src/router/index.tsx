@@ -111,10 +111,6 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
     ];
 }
 
-function toRouteItems(items: PluginRouteItem[]): RouteItem[] {
-    return items as RouteItem[];
-}
-
 function toTranslatedMenuGroups(t: TFunction): MenuGroup[] {
     return pluginRegistry.menuGroups.map(g => ({
         ...g,

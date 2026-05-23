@@ -7,11 +7,13 @@ const pluginModules = import.meta.glob<{ default: CrystalWebPlugin }>(
     {eager: true}
 );
 
+type FlatEntry = { lng: string; ns: string; key: string; value: string };
+
 function flattenResources(
     lang: string,
     resources: PluginI18nResources[string],
-): Array<{ lng: string; ns: string; key: string; value: unknown }> {
-    const entries: Array<{ lng: string; ns: string; key: string; value: unknown }> = [];
+): FlatEntry[] {
+    const entries: FlatEntry[] = [];
 
     function walk(prefix: string, obj: Record<string, unknown>) {
         for (const [key, value] of Object.entries(obj)) {
@@ -19,7 +21,7 @@ function flattenResources(
             if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
                 walk(path, value as Record<string, unknown>);
             } else {
-                entries.push({lng: lang, ns: 'translation', key: path, value});
+                entries.push({lng: lang, ns: 'translation', key: path, value: String(value ?? '')});
             }
         }
     }

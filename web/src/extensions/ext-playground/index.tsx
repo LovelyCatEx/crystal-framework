@@ -14,7 +14,7 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
             key: '/manager/ext-playground',
             path: '/manager/ext-playground',
             icon: <ToolOutlined />,
-            label: 'menu.extPlayground',
+            label: 'menu.admin.extPlayground',
             page: <PlaygroundPage />,
             group: 'playground',
         });
@@ -23,7 +23,7 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
             key: '/manager/ext-playground',
             path: '/manager/ext-playground',
             icon: <ToolOutlined />,
-            label: 'menu.extPlayground',
+            label: 'menu.pub.extPlayground',
             page: <PlaygroundPage />,
             group: 'playground',
         });
@@ -37,10 +37,15 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
     i18nResources: {
         'zh-CN': {
             menu: {
+                admin: {
+                    extPlayground: '扩展演示',
+                },
+                pub: {
+                    extPlayground: '扩展演示',
+                },
                 groups: {
                     playground: '演示',
                 },
-                extPlayground: '扩展演示',
             },
             pages: {
                 extPlayground: {
@@ -52,10 +57,15 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
         },
         'en-US': {
             menu: {
+                admin: {
+                    extPlayground: 'Ext Playground',
+                },
+                pub: {
+                    extPlayground: 'Ext Playground',
+                },
                 groups: {
                     playground: 'Playground',
                 },
-                extPlayground: 'Ext Playground',
             },
             pages: {
                 extPlayground: {
