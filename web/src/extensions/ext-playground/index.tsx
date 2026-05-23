@@ -1,36 +1,16 @@
-import {AppstoreOutlined, ToolOutlined} from "@ant-design/icons";
+import {MonitorOutlined} from "@ant-design/icons";
 import type {CrystalWebPlugin} from "@/plugin/types.ts";
-import {PlaygroundPage} from "./pages/PlaygroundPage.tsx";
+import {SystemMonitorPage} from "./pages/SystemMonitorPage.tsx";
 
 const extPlaygroundPlugin: CrystalWebPlugin = {
     configure(registry) {
-        registry.addMenuGroup({
-            name: 'playground',
-            icon: <AppstoreOutlined />,
-            label: 'menu.groups.playground',
-        });
-
         registry.addAdminMenu({
-            key: '/manager/ext-playground',
-            path: '/manager/ext-playground',
-            icon: <ToolOutlined />,
-            label: 'menu.admin.extPlayground',
-            page: <PlaygroundPage />,
-            group: 'playground',
-        });
-
-        registry.addPublicMenu({
-            key: '/manager/ext-playground',
-            path: '/manager/ext-playground',
-            icon: <ToolOutlined />,
-            label: 'menu.pub.extPlayground',
-            page: <PlaygroundPage />,
-            group: 'playground',
-        });
-
-        registry.addTopLevelRoute({
-            path: '/ext-playground',
-            element: <PlaygroundPage />,
+            key: '/manager/ext/system-monitor',
+            path: '/manager/ext/system-monitor',
+            icon: <MonitorOutlined />,
+            label: 'menu.admin.systemMonitor',
+            page: <SystemMonitorPage />,
+            group: 'monitor',
         });
     },
 
@@ -38,40 +18,26 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
         'zh-CN': {
             menu: {
                 admin: {
-                    extPlayground: '扩展演示',
-                },
-                pub: {
-                    extPlayground: '扩展演示',
-                },
-                groups: {
-                    playground: '演示',
+                    systemMonitor: '系统监控',
                 },
             },
             pages: {
-                extPlayground: {
-                    title: '扩展演示',
-                    description: '这是一个来自 <code>ext-playground</code> 插件的演示页面。它展示了插件系统无需修改框架源码即可注入路由、菜单和页面的能力。',
-                    secondary: '来自 ext-playground 插件的问候！',
+                systemMonitor: {
+                    title: '系统监控',
+                    subtitle: '实时查看服务器 CPU、内存、磁盘和 JVM 等系统指标',
                 },
             },
         },
         'en-US': {
             menu: {
                 admin: {
-                    extPlayground: 'Ext Playground',
-                },
-                pub: {
-                    extPlayground: 'Ext Playground',
-                },
-                groups: {
-                    playground: 'Playground',
+                    systemMonitor: 'System Monitor',
                 },
             },
             pages: {
-                extPlayground: {
-                    title: 'Ext Playground',
-                    description: 'This is a demo page from the <code>ext-playground</code> plugin. It demonstrates the plugin system\'s ability to inject routes, menus, and pages without modifying the framework source code.',
-                    secondary: 'Hello from ext-playground plugin!',
+                systemMonitor: {
+                    title: 'System Monitor',
+                    subtitle: 'Real-time view of CPU, memory, disk, JVM and other system metrics',
                 },
             },
         },
