@@ -1736,6 +1736,16 @@ export const zhCN: I18nRules = {
         sizeSmall: '小',
         sizeMiddle: '中',
         sizeLarge: '大',
+      },
+      pageAnimation: {
+        title: '页面动画',
+        description: '选择页面切换时的过渡动画效果',
+        none: '无',
+        fade: '淡入淡出',
+        slideLeft: '左滑入',
+        slideRight: '右滑入',
+        slideUp: '上滑入',
+        scale: '缩放',
       }
     },
 

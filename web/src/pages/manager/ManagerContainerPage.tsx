@@ -24,17 +24,19 @@ import {CSS} from '@dnd-kit/utilities';
 import {ThemeSettingsModal} from "@/components/ThemeSettingsModal.tsx";
 import {ThemeModeSelector} from "@/components/ThemeModeSelector.tsx";
 import {
+    getStoredPageAnimation,
     getStoredTabEnabled,
     getStoredTabSize,
     getStoredThemeKey,
     getStoredThemeMode,
+    setStoredPageAnimation,
     setStoredThemeKey,
     setStoredThemeMode,
     THEME_MODE_STORAGE_KEY,
     type ThemeTabSize,
     updateThemeCSSVariables
 } from "@/global/theme-config.ts";
-import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
+import type {PageAnimationType, ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Content, Header} from "antd/es/layout/layout";
@@ -320,7 +322,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
         const newTabs = tabs.slice(targetIndex);
 
-        const currentStillExists = newTabs.some(tab => location.pathname.startsWith(tab.key));
+        const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
+        const currentStillExists = currentTabKey ? newTabs.some(tab => tab.key === currentTabKey) : false;
         if (!currentStillExists) {
             navigate(newTabs[0].path);
         }
@@ -332,7 +335,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
         const newTabs = tabs.slice(0, targetIndex + 1);
 
-        const currentStillExists = newTabs.some(tab => location.pathname.startsWith(tab.key));
+        const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
+        const currentStillExists = currentTabKey ? newTabs.some(tab => tab.key === currentTabKey) : false;
         if (!currentStillExists) {
             navigate(newTabs[newTabs.length - 1].path);
         }
@@ -493,6 +497,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
     const [themeTabsEnabled, setThemeTabsEnabled] = useState<boolean>(getStoredTabEnabled)
     const [themeTabSize, setThemeTabSize] = useState<ThemeTabSize>(getStoredTabSize() as ThemeTabSize)
+    const [pageAnimation, setPageAnimation] = useState<PageAnimationType>(getStoredPageAnimation)
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -569,6 +574,13 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             newValue: mode,
         }));
     };
+
+    const handlePageAnimationChange = (animation: PageAnimationType) => {
+        setPageAnimation(animation);
+        setStoredPageAnimation(animation);
+    };
+
+    const pageAnimationClass = pageAnimation === 'none' ? '' : `page-animation-${pageAnimation}`;
 
     const availableMenus = useMemo(() => {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t);
@@ -796,7 +808,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                     <Route
                                         key={menu.key.toString()}
                                         path={menu.path.replace(parentPath, "")}
-                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                        element={
+                                            <div key={location.key} className={pageAnimationClass}>
+                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                            </div>
+                                        }
                                     />
                                 ))}
                             </Routes>
@@ -823,7 +839,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                     <Route
                                         key={menu.key.toString()}
                                         path={menu.path.replace(parentPath, "")}
-                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                        element={
+                                            <div key={location.key} className={pageAnimationClass}>
+                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                            </div>
+                                        }
                                     />
                                 ))}
                             </Routes>
@@ -876,10 +896,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 currentThemeKey={currentThemeKey}
                 enableTabs={themeTabsEnabled}
                 tabSize={themeTabSize}
+                pageAnimation={pageAnimation}
                 onClose={() => setThemeModalOpen(false)}
                 onThemeChange={handleThemeChange}
                 onTabsEnabledChange={(enabled) => setThemeTabsEnabled(enabled)}
                 onTabSizeChange={(size) => setThemeTabSize(size)}
+                onPageAnimationChange={handlePageAnimationChange}
             />
         </Layout>
     );
