@@ -1,4 +1,4 @@
-import {ToolOutlined, AppstoreOutlined} from "@ant-design/icons";
+import {AppstoreOutlined, ToolOutlined} from "@ant-design/icons";
 import type {CrystalWebPlugin} from "@/plugin/types.ts";
 import {PlaygroundPage} from "./pages/PlaygroundPage.tsx";
 

@@ -1,3 +1,5 @@
+export type PageAnimationType = 'none' | 'fade' | 'slide-left' | 'slide-right' | 'slide-up' | 'scale';
+
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeColor {

@@ -34,6 +34,7 @@ import {
 import type {TenantProfileVO} from "@/types/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
+
 const { useToken } = theme;
 
 const { Title, Text } = Typography;

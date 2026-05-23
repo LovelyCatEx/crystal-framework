@@ -1,4 +1,4 @@
-import {Button, Card, Descriptions, Space, Tag} from "antd";
+import {Button, Card, Descriptions, Space, Tag, theme} from "antd";
 import {TenantIdSelector} from "@/components/selector/TenantIdSelector.tsx";
 import type {Tenant} from "@/types/tenant.types.ts";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
@@ -9,7 +9,7 @@ import {RedoOutlined, ShopOutlined} from "@ant-design/icons";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
 import {AvatarResource} from "@/components/AvatarResource.tsx";
-import {theme} from "antd";
+
 const { useToken } = theme;
 
 const TENANT_ID_STORAGE_KEY = 'selected_tenant_id';

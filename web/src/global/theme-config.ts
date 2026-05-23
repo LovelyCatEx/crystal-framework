@@ -1,9 +1,10 @@
-import type {ThemeColor, ThemeConfig, ThemeMode} from "@/types/theme.types.ts";
+import type {PageAnimationType, ThemeColor, ThemeConfig, ThemeMode} from "@/types/theme.types.ts";
 
 export const THEME_STORAGE_KEY = 'app-theme-color';
 export const THEME_MODE_STORAGE_KEY = 'app-theme-mode';
 export const THEME_TAB_ENABLED = 'app-theme-tab-enabled';
 export const THEME_TAB_SIZE = 'app-theme-tab-size';
+export const THEME_PAGE_ANIMATION = 'app-theme-page-animation';
 
 export type ThemeTabSize = 'small' | 'middle' | 'large';
 export const themeColors: ThemeColor[] = [
@@ -132,6 +133,16 @@ export function getStoredTabSize(): string {
 
 export function setStoredTabSize(size: string): void {
     localStorage.setItem(THEME_TAB_SIZE, size);
+}
+
+export const defaultThemePageAnimation: PageAnimationType = 'fade';
+
+export function getStoredPageAnimation(): PageAnimationType {
+    return (localStorage.getItem(THEME_PAGE_ANIMATION) as PageAnimationType) || defaultThemePageAnimation;
+}
+
+export function setStoredPageAnimation(animation: PageAnimationType): void {
+    localStorage.setItem(THEME_PAGE_ANIMATION, animation);
 }
 
 export function updateThemeCSSVariables(themeColor: ThemeColor, themeMode: ThemeMode = 'light'): void {

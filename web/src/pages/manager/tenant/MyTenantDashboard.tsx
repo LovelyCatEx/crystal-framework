@@ -11,7 +11,7 @@ import {
     UserOutlined
 } from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
-import {getTenantStatus, getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
+import {getTenantMemberStatus, getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useState} from "react";
 import {getUserProfile} from "@/api/user.api.ts";

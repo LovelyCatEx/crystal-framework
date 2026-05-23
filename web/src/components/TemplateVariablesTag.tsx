@@ -1,7 +1,7 @@
-import { Tag, message } from "antd";
-import { CopyOutlined } from "@ant-design/icons";
-import type { MailTemplateType } from "../types/mail.types.ts";
-import { useTranslation } from "react-i18next";
+import {message, Tag} from "antd";
+import {CopyOutlined} from "@ant-design/icons";
+import type {MailTemplateType} from "../types/mail.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface TemplateVariablesTagProps {
     templateType: MailTemplateType | null;

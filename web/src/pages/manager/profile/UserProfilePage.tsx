@@ -48,6 +48,7 @@ import type {UserOAuthAccountVO} from "@/types/user-oauth.types.ts";
 import {OAuthPlatform} from "@/types/oauth-account.types.ts";
 import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
 import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
+
 const { useToken } = theme;
 
 const { Password } = Input;
@@ -169,7 +170,7 @@ const SecuritySettings = () => {
             await requestPasswordResetEmailCode(email);
             void message.success(t('pages.userProfile.security.passwordModal.codeSendSuccess'));
             setPasswordCountdown(60);
-        } catch (error) {
+        } catch {
             void message.error(t('pages.userProfile.security.passwordModal.codeSendFailed'));
         } finally {
             setPasswordSendingCode(false);
@@ -182,7 +183,7 @@ const SecuritySettings = () => {
             await resetPassword(values);
             void message.success(t('pages.userProfile.security.passwordModal.updateSuccess'));
             handleClosePasswordModal();
-        } catch (error) {
+        } catch {
             void message.error(t('pages.userProfile.security.passwordModal.codeSendFailed'));
         } finally {
             setPasswordLoading(false);
@@ -229,7 +230,7 @@ const SecuritySettings = () => {
             await requestResetEmailAddressEmailCode(newEmail);
             void message.success(t('pages.userProfile.security.emailModal.codeSendSuccess'));
             setEmailCountdown(60);
-        } catch (error) {
+        } catch {
             void message.error(t('pages.userProfile.security.emailModal.codeSendFailed'));
         } finally {
             setEmailSendingCode(false);
@@ -243,7 +244,7 @@ const SecuritySettings = () => {
             void message.success(t('pages.userProfile.security.emailModal.updateSuccess'));
             handleCloseEmailModal();
             await loggedUser.refreshUserProfile();
-        } catch (error) {
+        } catch {
             void message.error(t('pages.userProfile.security.emailModal.codeSendFailed'));
         } finally {
             setEmailLoading(false);

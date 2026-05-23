@@ -10,7 +10,6 @@ import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl

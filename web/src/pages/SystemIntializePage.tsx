@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Card, Form, Input, message, Row, Col, Steps, Typography, Spin } from 'antd';
-import { LockOutlined, MailOutlined, UserOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { ProjectDisplayName } from '@/global/global-settings.ts';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher.tsx';
-import { checkSystemInitialized, initializeSystem } from '@/api/system-initialize.api.ts';
+import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Button, Card, Col, Form, Input, message, Row, Spin, Steps, Typography} from 'antd';
+import {CheckCircleOutlined, LockOutlined, MailOutlined, UserOutlined} from '@ant-design/icons';
+import {useTranslation} from 'react-i18next';
+import {ProjectDisplayName} from '@/global/global-settings.ts';
+import {LanguageSwitcher} from '@/components/LanguageSwitcher.tsx';
+import {checkSystemInitialized, initializeSystem} from '@/api/system-initialize.api.ts';
 
 const { Password } = Input;
 const { Title, Text } = Typography;

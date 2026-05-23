@@ -1,5 +1,5 @@
-import { doGet, doPost } from "./system-request.ts";
-import type { TenantProfileVO } from "../types/tenant.types.ts";
+import {doGet, doPost} from "./system-request.ts";
+import type {TenantProfileVO} from "../types/tenant.types.ts";
 
 export function getTenantProfile(tenantId?: string) {
     const params = tenantId ? { tenantId } : {};

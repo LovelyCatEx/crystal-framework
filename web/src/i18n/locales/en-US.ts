@@ -1497,6 +1497,10 @@ export const enUS: I18nRules = {
       menu: 'Menu',
       switchSuccess: 'Switched to {{tenantName}}',
       switchFailed: 'Failed to switch to {{tenantName}}',
+      tabClose: 'Close',
+      tabCloseOthers: 'Close Others',
+      tabCloseLeft: 'Close Left',
+      tabCloseRight: 'Close Right',
     },
     tenantInvitation: {
       title: 'Join Organization',
@@ -1735,6 +1739,16 @@ export const enUS: I18nRules = {
         sizeSmall: 'Small',
         sizeMiddle: 'Medium',
         sizeLarge: 'Large',
+      },
+      pageAnimation: {
+        title: 'Page Animation',
+        description: 'Select transition animation for page switching',
+        none: 'None',
+        fade: 'Fade',
+        slideLeft: 'Slide Left',
+        slideRight: 'Slide Right',
+        slideUp: 'Slide Up',
+        scale: 'Scale',
       }
     },
 

@@ -2,9 +2,10 @@ import {Button, Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantPermissionDTO,
-    type ManagerUpdateTenantPermissionDTO,
-    type ManagerReadTenantPermissionDTO
+    type ManagerReadTenantPermissionDTO,
+    type ManagerUpdateTenantPermissionDTO
 } from "@/api/tenant-permission.api.ts";
+import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 import {TenantPermissionType} from "@/types/tenant-permission.types.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
@@ -12,7 +13,6 @@ import {useTenantPermissionTableColumns} from "@/components/columns/TenantPermis
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
-import type {TenantPermission} from "@/types/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
 
 export function TenantPermissionManagerPage() {

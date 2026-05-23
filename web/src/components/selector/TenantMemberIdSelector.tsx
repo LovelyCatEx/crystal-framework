@@ -1,10 +1,10 @@
 import {UserOutlined} from "@ant-design/icons";
 import {forwardRef} from "react";
 import {useTranslation} from "react-i18next";
+import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantMemberTableColumns} from "../columns/TenantMemberEntityColumns.tsx";
 import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
-import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 
 interface TenantMemberIdSelectorProps {

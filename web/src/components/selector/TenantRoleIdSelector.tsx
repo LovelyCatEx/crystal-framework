@@ -1,10 +1,10 @@
 import {SafetyCertificateOutlined} from "@ant-design/icons";
 import {forwardRef} from "react";
 import {useTranslation} from "react-i18next";
+import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantRoleTableColumns} from "../columns/TenantRoleEntityColumns.tsx";
 import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
-import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import type {TenantRole} from "@/types/tenat-role.types.ts";
 
 interface TenantRoleIdSelectorProps {

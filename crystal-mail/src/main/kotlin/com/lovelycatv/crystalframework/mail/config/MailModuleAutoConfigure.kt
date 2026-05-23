@@ -98,7 +98,7 @@ class MailModuleAutoConfigure(
                  e
             } else {
                  logger.info("√ ${categoryDeclaration.name}")
-                allCategoriesInDatabase[categoryDeclaration.name]!!
+                allCategoriesInDatabase[categoryDeclaration.name] ?: throw IllegalStateException("Mail template category '${categoryDeclaration.name}' not found in database after creation")
             }
         }
 
@@ -119,7 +119,7 @@ class MailModuleAutoConfigure(
                         name = typeDeclaration.name,
                         description = typeDeclaration.description,
                         variables = variables,
-                        categoryId = categoryWithEntityMap[typeDeclaration.categoryDeclaration]!!.id,
+                        categoryId = categoryWithEntityMap[typeDeclaration.categoryDeclaration]?.id ?: throw IllegalStateException("Mail template category entity not found for type '${typeDeclaration.name}'"),
                         allowMultiple = typeDeclaration.allowMultiple
                     ) newEntity true
                 ).awaitFirstOrNull() ?: throw BusinessException("Could not create mail template type ${typeDeclaration.name}")
@@ -129,7 +129,7 @@ class MailModuleAutoConfigure(
                 e
             } else {
                 logger.info("√ ${typeDeclaration.name} (variables: $variables, allowMultiple: ${typeDeclaration.allowMultiple})")
-                allTypesInDatabase[typeDeclaration.name]!!
+                allTypesInDatabase[typeDeclaration.name] ?: throw IllegalStateException("Mail template type '${typeDeclaration.name}' not found in database after creation")
             }
         }
 
@@ -144,7 +144,7 @@ class MailModuleAutoConfigure(
             if (!allTemplatesInDatabase.containsKey(templateDeclaration.name)) {
                 mailTemplateManagerService.create(
                     ManagerCreateMailTemplateDTO(
-                        typeId = typeWithEntityMap[templateDeclaration.type]!!.id,
+                        typeId = typeWithEntityMap[templateDeclaration.type]?.id ?: throw IllegalStateException("Mail template type entity not found for template '${templateDeclaration.name}'"),
                         name = templateDeclaration.name,
                         description = templateDeclaration.description,
                         title = templateDeclaration.title,

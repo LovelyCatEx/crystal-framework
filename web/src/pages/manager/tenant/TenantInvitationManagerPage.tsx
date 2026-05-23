@@ -2,15 +2,15 @@ import {Button, Col, DatePicker, Form, InputNumber, message, Row, Switch, Toolti
 import dayjs from "dayjs";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
+    InvitationManagerController,
     type ManagerCreateInvitationDTO,
-    type ManagerUpdateInvitationDTO,
-    InvitationManagerController
+    type ManagerUpdateInvitationDTO
 } from "@/api/invitation.api.ts";
 import {useRef, useState} from "react";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
-import {PlusOutlined, LinkOutlined} from "@ant-design/icons";
+import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector, TenantMemberIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 

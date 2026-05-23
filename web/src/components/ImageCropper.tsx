@@ -1,7 +1,13 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Modal, Slider, Button, Space } from 'antd';
-import { ZoomInOutlined, ZoomOutOutlined, RotateLeftOutlined, RotateRightOutlined, ReloadOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Button, Modal, Slider, Space} from 'antd';
+import {
+    ReloadOutlined,
+    RotateLeftOutlined,
+    RotateRightOutlined,
+    ZoomInOutlined,
+    ZoomOutOutlined
+} from '@ant-design/icons';
+import {useTranslation} from 'react-i18next';
 
 export type CropShape = 'rect' | 'circle';
 
