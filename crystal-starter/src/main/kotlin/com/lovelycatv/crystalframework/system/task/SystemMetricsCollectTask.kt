@@ -14,7 +14,7 @@ import java.lang.management.ManagementFactory
 
 @Component
 @ScheduledTaskMetadata(name = "SystemMetricsCollectTask", description = "Collect system metrics every second", group = "system")
-@CronTaskExecutor(cron = "0/1 * * * * ?")
+@CronTaskExecutor(cron = "0/1 * * * * ?", enableLog = false)
 class SystemMetricsCollectTask(
     private val eventPublisher: ApplicationEventPublisher,
     private val meterRegistry: MeterRegistry,
