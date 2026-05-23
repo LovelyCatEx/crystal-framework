@@ -26,10 +26,10 @@ const METRICS: MetricChartConfig[] = [
     {type: "JVM_HEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmHeapUsed", color: "#f97316", formatValue: formatBytes},
     {type: "JVM_NONHEAP_COMMITTED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapCommitted", color: "#ef4444", formatValue: formatBytes},
     {type: "JVM_NONHEAP_USED", labelKey: "pages.systemMonitor.metrics.jvmNonHeapUsed", color: "#dc2626", formatValue: formatBytes},
-    {type: "DISK_USED", labelKey: "pages.systemMonitor.metrics.diskUsed", color: "#818cf8", formatValue: formatBytes},
-    {type: "DB_CONNECTIONS_ACTIVE", labelKey: "pages.systemMonitor.metrics.dbConnectionsActive", color: "#ec4899"},
     {type: "GC_COUNT", labelKey: "pages.systemMonitor.metrics.gcCount", color: "#14b8a6"},
     {type: "GC_TIME", labelKey: "pages.systemMonitor.metrics.gcTime", color: "#2dd4bf", formatValue: v => v.toFixed(0) + " ms"},
+    {type: "DISK_USED", labelKey: "pages.systemMonitor.metrics.diskUsed", color: "#818cf8", formatValue: formatBytes},
+    {type: "DB_CONNECTIONS_ACTIVE", labelKey: "pages.systemMonitor.metrics.dbConnectionsActive", color: "#ec4899"},
 ];
 
 const DURATION_OPTIONS: {labelKey: string; value: string}[] = [
@@ -120,7 +120,7 @@ export function SystemMonitorPage() {
             >
                 <Row gutter={[12, 12]}>
                     {METRICS.map(m => (
-                        <Col xs={24} md={12} xxl={8} key={m.type}>
+                        <Col xs={24} sm={24} lg={12} xxl={8} key={m.type}>
                             <div className="p-3 rounded-xl" style={{background: "#fafafa"}}>
                                 <div style={{fontSize: 13, fontWeight: 600, marginBottom: 4, color: token.colorTextSecondary}}>
                                     {t(m.labelKey)}
