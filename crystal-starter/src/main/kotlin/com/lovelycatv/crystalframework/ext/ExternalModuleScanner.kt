@@ -4,9 +4,9 @@ import com.lovelycatv.crystalframework.sdk.CrystalFrameworkModule
 import com.lovelycatv.vertex.log.logger
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.annotation.AnnotationConfigUtils
 import org.springframework.context.annotation.ScannedGenericBeanDefinition
 import org.springframework.core.Ordered

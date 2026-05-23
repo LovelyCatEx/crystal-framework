@@ -1,8 +1,8 @@
-import { Button, Card, Space, Typography } from "antd";
-import { EditOutlined, EyeOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import {Button, Card, Space, Typography} from "antd";
+import {EditOutlined, EyeOutlined} from "@ant-design/icons";
+import {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
 
 const { Text } = Typography;
 

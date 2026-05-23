@@ -3,6 +3,8 @@ import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, them
 import {
     BgColorsOutlined,
     CheckOutlined,
+    CloseCircleOutlined,
+    CloseOutlined,
     DownOutlined,
     EditOutlined,
     LeftOutlined,
@@ -22,17 +24,19 @@ import {CSS} from '@dnd-kit/utilities';
 import {ThemeSettingsModal} from "@/components/ThemeSettingsModal.tsx";
 import {ThemeModeSelector} from "@/components/ThemeModeSelector.tsx";
 import {
+    getStoredPageAnimation,
     getStoredTabEnabled,
     getStoredTabSize,
     getStoredThemeKey,
     getStoredThemeMode,
+    setStoredPageAnimation,
     setStoredThemeKey,
     setStoredThemeMode,
     THEME_MODE_STORAGE_KEY,
     type ThemeTabSize,
     updateThemeCSSVariables
 } from "@/global/theme-config.ts";
-import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
+import type {PageAnimationType, ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Content, Header} from "antd/es/layout/layout";
@@ -50,6 +54,8 @@ import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 import {useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
 import {MANAGER_PAGE_TABS_EXPIRES_IN, MANAGER_PAGE_TABS_STORAGE_KEY_PREFIX} from "@/global/constants.ts";
+import {ContextMenu} from "@/components/contextmenu";
+import type {ContextMenuItem} from "@/components/contextmenu";
 
 const { useToken } = theme;
 
@@ -231,6 +237,7 @@ function getAvailableTab(tab: TabItem, availableMenus: RouteItem[]): TabItem | n
 function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, storageKey }: { availableMenus: RouteItem[], availableMenusLoading: boolean, tabSize?: ThemeTabSize, storageKey?: string }) {
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [tabs, setTabs] = useState<TabItem[]>([]);
     const [editMode, setEditMode] = useState<boolean>(false);
     const [storageReady, setStorageReady] = useState<boolean>(false);
@@ -311,6 +318,39 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         setTabs(newTabs);
     };
 
+    const handleCloseLeft = (targetKey: string) => {
+        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        const newTabs = tabs.slice(targetIndex);
+
+        const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
+        const currentStillExists = currentTabKey ? newTabs.some(tab => tab.key === currentTabKey) : false;
+        if (!currentStillExists) {
+            navigate(newTabs[0].path);
+        }
+
+        setTabs(newTabs);
+    };
+
+    const handleCloseRight = (targetKey: string) => {
+        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        const newTabs = tabs.slice(0, targetIndex + 1);
+
+        const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
+        const currentStillExists = currentTabKey ? newTabs.some(tab => tab.key === currentTabKey) : false;
+        if (!currentStillExists) {
+            navigate(newTabs[newTabs.length - 1].path);
+        }
+
+        setTabs(newTabs);
+    };
+
+    const handleCloseOthers = (targetKey: string) => {
+        const targetTab = tabs.find(tab => tab.key === targetKey);
+        if (!targetTab) return;
+
+        setTabs([targetTab]);
+        navigate(targetTab.path);
+    };
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         if (active.id !== over?.id) {
             setTabs((prev) => {
@@ -347,15 +387,70 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                     handleTabRemove(targetKey as string);
                 }
             }}
-            items={tabs.map(tab => {
+            items={tabs.map((tab, index) => {
                 const menu = availableMenus.find(m => m.key === tab.key);
+                const isFirst = index === 0;
+                const isLast = index === tabs.length - 1;
+                const isOnly = tabs.length === 1;
+
+                const contextMenuItems: ContextMenuItem[] = [
+                    {
+                        key: 'close',
+                        label: t('pages.managerContainer.tabClose'),
+                        icon: <CloseOutlined />,
+                        shortcut: { mac: '⌃W', win: 'Alt+W', binding: 'mod+w' },
+                    },
+                    { key: 'tab-divider', divider: true },
+                    {
+                        key: 'close-others',
+                        label: t('pages.managerContainer.tabCloseOthers'),
+                        icon: <CloseCircleOutlined />,
+                        disabled: isOnly,
+                        shortcut: { mac: '⌃⇧W', win: 'Alt+Shift+W', binding: 'mod+shift+w' },
+                    },
+                    {
+                        key: 'close-left',
+                        label: t('pages.managerContainer.tabCloseLeft'),
+                        icon: <LeftOutlined />,
+                        disabled: isFirst,
+                        shortcut: { mac: '⌃⇧[', win: 'Alt+Shift+[', binding: 'mod+shift+bracketleft' },
+                    },
+                    {
+                        key: 'close-right',
+                        label: t('pages.managerContainer.tabCloseRight'),
+                        icon: <RightOutlined />,
+                        disabled: isLast,
+                        shortcut: { mac: '⌃⇧]', win: 'Alt+Shift+]', binding: 'mod+shift+bracketright' },
+                    },
+                ];
+
                 return {
                     key: tab.key,
                     label: (
-                        <span className="flex items-center gap-2">
-                            {menu?.icon}
-                            {tab.label}
-                        </span>
+                        <ContextMenu
+                            items={contextMenuItems}
+                            onAction={(menuKey) => {
+                                switch (menuKey) {
+                                    case 'close':
+                                        handleTabRemove(tab.key);
+                                        break;
+                                    case 'close-others':
+                                        handleCloseOthers(tab.key);
+                                        break;
+                                    case 'close-left':
+                                        handleCloseLeft(tab.key);
+                                        break;
+                                    case 'close-right':
+                                        handleCloseRight(tab.key);
+                                        break;
+                                }
+                            }}
+                        >
+                            <span className="flex items-center gap-2">
+                                {menu?.icon}
+                                {tab.label}
+                            </span>
+                        </ContextMenu>
                     ),
                 };
             })}
@@ -402,6 +497,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
     const [themeTabsEnabled, setThemeTabsEnabled] = useState<boolean>(getStoredTabEnabled)
     const [themeTabSize, setThemeTabSize] = useState<ThemeTabSize>(getStoredTabSize() as ThemeTabSize)
+    const [pageAnimation, setPageAnimation] = useState<PageAnimationType>(getStoredPageAnimation)
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -478,6 +574,13 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             newValue: mode,
         }));
     };
+
+    const handlePageAnimationChange = (animation: PageAnimationType) => {
+        setPageAnimation(animation);
+        setStoredPageAnimation(animation);
+    };
+
+    const pageAnimationClass = pageAnimation === 'none' ? '' : `page-animation-${pageAnimation}`;
 
     const availableMenus = useMemo(() => {
         return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t);
@@ -705,7 +808,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                     <Route
                                         key={menu.key.toString()}
                                         path={menu.path.replace(parentPath, "")}
-                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                        element={
+                                            <div key={location.key} className={pageAnimationClass}>
+                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                            </div>
+                                        }
                                     />
                                 ))}
                             </Routes>
@@ -732,7 +839,11 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                     <Route
                                         key={menu.key.toString()}
                                         path={menu.path.replace(parentPath, "")}
-                                        element={menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                        element={
+                                            <div key={location.key} className={pageAnimationClass}>
+                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                            </div>
+                                        }
                                     />
                                 ))}
                             </Routes>
@@ -785,10 +896,12 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                 currentThemeKey={currentThemeKey}
                 enableTabs={themeTabsEnabled}
                 tabSize={themeTabSize}
+                pageAnimation={pageAnimation}
                 onClose={() => setThemeModalOpen(false)}
                 onThemeChange={handleThemeChange}
                 onTabsEnabledChange={(enabled) => setThemeTabsEnabled(enabled)}
                 onTabSizeChange={(size) => setThemeTabSize(size)}
+                onPageAnimationChange={handlePageAnimationChange}
             />
         </Layout>
     );

@@ -65,6 +65,52 @@
     }
 }
 
+/* Page Transition Animations */
+.page-animation-fade {
+    animation: pageFadeIn 0.3s ease-out;
+}
+
+.page-animation-slide-left {
+    animation: pageSlideLeftIn 0.3s ease-out;
+}
+
+.page-animation-slide-right {
+    animation: pageSlideRightIn 0.3s ease-out;
+}
+
+.page-animation-slide-up {
+    animation: pageSlideUpIn 0.35s ease-out;
+}
+
+.page-animation-scale {
+    animation: pageScaleIn 0.3s ease-out;
+}
+
+@keyframes pageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pageSlideLeftIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageSlideRightIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageSlideUpIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pageScaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* Mobile Menu Scrollbar */
 .mobile-menu-panel::-webkit-scrollbar {
     display: none;

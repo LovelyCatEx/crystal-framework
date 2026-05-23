@@ -6,7 +6,8 @@ import {
     DatabaseOutlined,
     FileOutlined,
     FolderOutlined,
-    KeyOutlined, LineChartOutlined,
+    KeyOutlined,
+    LineChartOutlined,
     MailOutlined,
     MonitorOutlined,
     SafetyOutlined,
@@ -60,6 +61,8 @@ import {MailTemplateCategoryManagerController} from "@/api/mail-template-categor
 import type {TFunction} from "i18next";
 import {pluginRegistry} from "@/plugin/registry.ts";
 import type {PluginRouteItem} from "@/plugin/types.ts";
+// 为了向后兼容，保留旧的导出（使用默认翻译函数）
+import i18n from "@/i18n";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -438,8 +441,6 @@ export function computeAccessibleMenus(accessiblePathList: string[], t: TFunctio
     ];
 }
 
-// 为了向后兼容，保留旧的导出（使用默认翻译函数）
-import i18n from "@/i18n";
 export const menuGroups = getMenuGroups(i18n.t.bind(i18n));
 export const publicMenus = getPublicMenus(i18n.t.bind(i18n));
 export const tenantMenus = getTenantMenus(i18n.t.bind(i18n));

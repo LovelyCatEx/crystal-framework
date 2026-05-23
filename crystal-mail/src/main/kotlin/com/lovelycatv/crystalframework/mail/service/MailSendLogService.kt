@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.mail.service
 
-interface MailSendLogService {
+fun interface MailSendLogService {
     suspend fun record(
         fromEmail: String,
         toEmail: String,

@@ -1,6 +1,6 @@
-import { Card, theme } from "antd";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import {Card, theme} from "antd";
+import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import {
     CloudOutlined,
     FileOutlined,
@@ -11,8 +11,8 @@ import {
     TeamOutlined,
     UserOutlined
 } from "@ant-design/icons";
-import { getBusinessStats } from "@/api/dashboard.api.ts";
-import type { BusinessStatsVO } from "@/types/dashboard.types.ts";
+import {getBusinessStats} from "@/api/dashboard.api.ts";
+import type {BusinessStatsVO} from "@/types/dashboard.types.ts";
 
 const { useToken } = theme;
 

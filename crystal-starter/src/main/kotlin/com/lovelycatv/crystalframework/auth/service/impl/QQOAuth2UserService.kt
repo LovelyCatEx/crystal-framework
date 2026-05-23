@@ -42,8 +42,8 @@ class QQOAuth2UserService(
                     .retrieve()
                     .bodyToMono(Map::class.java)
                     .map { userInfo ->
-
                         val attributes = HashMap<String, Any>()
+                        @Suppress("UNCHECKED_CAST")
                         attributes.putAll(userInfo as Map<String, Any>)
                         attributes["openid"] = openId
 

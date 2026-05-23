@@ -1,5 +1,5 @@
 package com.lovelycatv.crystalframework.sdk
 
-interface CrystalFrameworkModule {
+fun interface CrystalFrameworkModule {
     fun onEnabled()
 }

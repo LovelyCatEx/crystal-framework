@@ -1,12 +1,5 @@
 import {Button, Space, Spin} from "antd";
-import {
-    type ForwardedRef,
-    forwardRef,
-    type ReactNode,
-    useEffect,
-    useImperativeHandle,
-    useState
-} from "react";
+import {type ForwardedRef, forwardRef, type ReactNode, useEffect, useImperativeHandle, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {EntitySelectorModal} from "./EntitySelector.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";

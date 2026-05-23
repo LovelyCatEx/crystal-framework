@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.schedule.api.context.TaskExecutionContext
  * Abstract interface for scheduled tasks.
  * All concrete scheduled task logic should implement this interface.
  */
-interface ScheduledTask {
+fun interface ScheduledTask {
     /**
      * Core execution logic of the task.
      *

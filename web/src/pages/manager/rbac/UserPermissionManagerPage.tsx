@@ -1,9 +1,6 @@
 import {Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {
-    type ManagerCreatePermissionDTO,
-    type ManagerReadPermissionDTO
-} from "@/api/user-permission.api.ts";
+import {type ManagerCreatePermissionDTO, type ManagerReadPermissionDTO} from "@/api/user-permission.api.ts";
 import type {UserPermission} from "@/types/user-permission.types.ts";
 import {PermissionType} from "@/types/user-permission.types.ts";
 import {useEffect, useRef, useState} from "react";

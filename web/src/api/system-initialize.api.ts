@@ -1,4 +1,4 @@
-import { doGet, doPost } from "./system-request.ts";
+import {doGet, doPost} from "./system-request.ts";
 
 export interface InitializeSystemDTO {
   username: string;

@@ -10,7 +10,8 @@ import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
 import type {TenantDepartment} from "@/types/tenant-department.types.ts";
 import {UserCard} from "@/components/card/pop";
 import {AvatarResource} from "@/components/AvatarResource.tsx";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
+
 const { Text } = Typography;
 
 const MemberInfoDisplay: React.FC<{ tenantId: string, memberId: string }> = ({ tenantId, memberId }) => {

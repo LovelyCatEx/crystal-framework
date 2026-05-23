@@ -1,10 +1,10 @@
 import React from "react";
-import { Button, message } from "antd";
+import {Button, message} from "antd";
 import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
-import { getOAuth2LoginUrl } from "../utils/oauth2";
-import { OAuthPlatform } from "../types/oauth-account.types";
+import {getOAuth2LoginUrl} from "../utils/oauth2";
+import {OAuthPlatform} from "../types/oauth-account.types";
 import {PLATFORM_REGISTRATION_ID_MAP} from "../global/constants.ts";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
 
 interface OAuthLoginButtonProps {
     platform: OAuthPlatform;
