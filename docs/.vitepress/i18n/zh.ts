@@ -6,9 +6,26 @@ export const zhThemeConfig: DefaultTheme.Config = {
   ],
   sidebar: [
     {
-      text: '开发指南',
+      text: '二次开发',
       items: [
-        { text: '开发指引', link: '/develop-guide' },
+        { text: '快速开始', link: '/develop/quick-start' },
+        { text: '开发指引', link: '/develop/develop-guide' },
+        {
+          text: 'SDK 文档',
+          items: [
+            { text: '系统设置项', link: '/develop/sdk/system-settings' },
+            { text: '系统权限', link: '/develop/sdk/system-permission' },
+            { text: '租户权限', link: '/develop/sdk/tenant-permission' },
+            { text: '邮件模板', link: '/develop/sdk/mail-template' },
+          ]
+        },
+      ]
+    },
+    {
+      text: '源码贡献',
+      items: [
+        { text: '快速开始', link: '/contribute/quick-start' },
+        { text: '项目结构', link: '/contribute/structure-introduction' },
       ]
     },
     {
@@ -17,5 +34,12 @@ export const zhThemeConfig: DefaultTheme.Config = {
         { text: '部署指引', link: '/deploy-guide' },
       ]
     }
-  ]
+  ],
+  footer: {
+    message: '以 MIT License 发布',
+    copyright: 'Copyright © 2025-2026 LovelyCat.'
+  },
+  search: {
+    provider: 'local'
+  },
 }

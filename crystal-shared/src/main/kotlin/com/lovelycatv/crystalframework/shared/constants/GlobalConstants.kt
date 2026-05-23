@@ -24,4 +24,8 @@ object GlobalConstants {
 
         const val MAIL_SEND_LOG_RECORDER = 100
     }
+
+    object ExtModule {
+        const val DEFAULT_MODULE_DIR = "./ext/"
+    }
 }
