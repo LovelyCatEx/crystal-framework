@@ -20,6 +20,7 @@ import {
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {SystemInitializePage} from "@/pages/SystemIntializePage.tsx";
 import {SystemIntegratedProvider, useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
+import {pluginRegistry} from "@/plugin/registry.ts";
 import './App.css';
 
 function AppRoutes() {
@@ -37,6 +38,9 @@ function AppRoutes() {
             <Route path="/auth/*" element={<AuthorizationPage parentPath="/auth" />} />
             <Route path="/tenant/invitation" element={<TenantInvitationPage />} />
             <Route path="/system-initialize" element={<SystemInitializePage />} />
+            {pluginRegistry.topLevelRoutes.map(route => (
+                <Route key={route.path} path={route.path} element={route.element} />
+            ))}
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );

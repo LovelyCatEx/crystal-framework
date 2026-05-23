@@ -43,7 +43,6 @@
         <module>crystal-encrypt</module>
         <module>crystal-shared-types</module>
         <module>crystal-mail</module>
-        <module>ext-playground</module>
         <module>crystal-sdk</module>
     </modules>
 
@@ -58,8 +57,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.0.0</revision>
-        <ext.playground.version>0.0.1</ext.playground.version>
+        <revision>1.2.0</revision>
     </properties>
 
     <dependencyManagement>
@@ -103,12 +101,6 @@
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-sdk</artifactId>
                 <version>${revision}</version>
-            </dependency>
-            <!-- External Modules -->
-            <dependency>
-                <groupId>com.lovelycatv.crystalframework</groupId>
-                <artifactId>ext-playground</artifactId>
-                <version>${ext.playground.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -5,14 +5,14 @@ layout: home
 hero:
   name: "CrystalFramework"
   text: "Docs"
-  tagline: v1.1.0
+  tagline: v1.2.0
   actions:
     - theme: brand
-      text: 开发文档
-      link: /develop-guide.md
+      text: 二次开发
+      link: /develop/quick-start
     - theme: alt
-      text: 部署文档
-      link: /deploy-guide.md
+      text: 源码贡献
+      link: /contribute/quick-start
 
 features:
   - title: 认证授权体系

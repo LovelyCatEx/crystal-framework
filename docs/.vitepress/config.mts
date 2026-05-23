@@ -5,10 +5,15 @@ export default defineConfig({
   title: "CrystalFramework Docs",
   description: "A modern front-end and back-end framework based on kotlin-springboot4 webflux r2dbc.",
   base: '/crystal-framework/',
+  lastUpdated: true,
   themeConfig: {
+    logo: '/logo.svg',
     socialLinks: [
       { icon: 'github', link: 'https://github.com/LovelyCatEx/crystal-framework' }
-    ]
+    ],
+    editLink: {
+      pattern: 'https://github.com/LovelyCatEx/crystal-framework/edit/develop/docs/:path'
+    }
   },
   locales: {
     root: {
@@ -25,5 +30,8 @@ export default defineConfig({
   },
   sitemap: {
     hostname: 'https://lovelycatex.github.io/crystal-framework'
+  },
+  markdown: {
+    lineNumbers: true
   }
 })

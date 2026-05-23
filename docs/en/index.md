@@ -5,14 +5,14 @@ layout: home
 hero:
   name: "CrystalFramework Docs"
   text: ""
-  tagline: v1.1.0
+  tagline: v1.2.0
   actions:
     - theme: brand
-      text: Develop Docs
-      link: /en/develop-guide.md
+      text: Plugin Dev
+      link: /en/develop/quick-start
     - theme: alt
-      text: Deploy Docs
-      link: /en/deploy-guide.md
+      text: Source Contribution
+      link: /en/contribute/quick-start
 
 features:
   - title: Authentication & Authorization
