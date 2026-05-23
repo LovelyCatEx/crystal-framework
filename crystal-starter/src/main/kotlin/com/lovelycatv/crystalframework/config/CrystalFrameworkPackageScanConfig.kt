@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.config
 
 import com.lovelycatv.crystalframework.sdk.config.CrystalFrameworkPackageScanConfigurer
-import com.lovelycatv.crystalframework.sdk.config.CrystalFrameworkPackageScanRegistry
+import com.lovelycatv.crystalframework.sdk.CrystalFrameworkPackageScanRegistry
 import com.lovelycatv.vertex.log.logger
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory

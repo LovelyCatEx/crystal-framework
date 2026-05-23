@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.sdk.config
+package com.lovelycatv.crystalframework.sdk
 
 import kotlin.reflect.KClass
 
