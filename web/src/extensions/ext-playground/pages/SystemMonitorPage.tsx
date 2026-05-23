@@ -115,14 +115,17 @@ export function SystemMonitorPage() {
                             <Segmented
                                 options={[
                                     {value: "auto", label: t('pages.systemMonitor.columns.auto')},
-                                    {value: "1", label: "1"},
-                                    {value: "2", label: "2"},
-                                    {value: "3", label: "3"},
+                                    {value: "1", label: t('pages.systemMonitor.columns.col1')},
+                                    {value: "2", label: t('pages.systemMonitor.columns.col2')},
+                                    {value: "3", label: t('pages.systemMonitor.columns.col3')},
                                 ]}
                                 value={columns}
                                 onChange={v => setColumns(v as string)}
                                 size="small"
                             />
+                            <span style={{fontSize: 13, color: token.colorTextSecondary, whiteSpace: "nowrap"}}>
+                                {t('pages.systemMonitor.timeRange')}:
+                            </span>
                             <Select
                             options={DURATION_OPTIONS.map(o => ({label: t(o.labelKey), value: o.value}))}
                             value={duration}
@@ -130,6 +133,7 @@ export function SystemMonitorPage() {
                             size="small"
                             style={{width: 100}}
                         />
+                    </div>
                     </div>
                 }
             >

@@ -66,5 +66,5 @@ export function MetricChart({config, data, duration}: { config: MetricChartConfi
         chartRef.current.setOption({dataset: {source}});
     }, [data]);
 
-    return <div ref={domRef} style={{width: "100%", height: 160}} />;
+    return <div ref={domRef} style={{width: "100%", height: 180}} />;
 }
