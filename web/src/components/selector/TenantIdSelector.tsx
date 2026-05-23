@@ -1,11 +1,11 @@
 import {ShopOutlined} from "@ant-design/icons";
 import {forwardRef} from "react";
 import {useTranslation} from "react-i18next";
+import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantTableColumns} from "../columns/TenantEntityColumns.tsx";
 import {TenantManagerController} from "@/api/tenant.api.ts";
 import type {Tenant} from "@/types/tenant.types.ts";
-import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 
 interface TenantIdSelectorProps {
     value?: string | null;

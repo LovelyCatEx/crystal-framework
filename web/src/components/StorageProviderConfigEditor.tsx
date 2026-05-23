@@ -1,7 +1,7 @@
-import { Button, Select, Space, Tooltip } from "antd";
-import { JsonEditor } from "./JsonEditor.tsx";
-import { useState } from "react";
-import {FileImageOutlined, CloudOutlined, FolderOutlined} from "@ant-design/icons";
+import {Button, Select, Space, Tooltip} from "antd";
+import {JsonEditor} from "./JsonEditor.tsx";
+import {useState} from "react";
+import {CloudOutlined, FileImageOutlined, FolderOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 
 interface StorageProviderConfigEditorProps {

@@ -2,8 +2,8 @@ import {Button, Col, Form, Input, message, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     FileResourceManagerController,
-    type ManagerCreateFileResourceDTO,
     getResourceFileDownloadUrlById,
+    type ManagerCreateFileResourceDTO,
     type ManagerReadFileResourceDTO
 } from "@/api/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";

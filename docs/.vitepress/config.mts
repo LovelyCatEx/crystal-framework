@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitepress'
-import { zhThemeConfig, enThemeConfig } from './i18n'
+import {defineConfig} from 'vitepress'
+import {enThemeConfig, zhThemeConfig} from './i18n'
 
 export default defineConfig({
   title: "CrystalFramework Docs",

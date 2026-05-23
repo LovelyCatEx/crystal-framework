@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Dropdown, Button } from 'antd';
-import { GlobalOutlined, CheckOutlined } from '@ant-design/icons';
+import {useEffect, useState} from 'react';
+import {Button, Dropdown} from 'antd';
+import {CheckOutlined, GlobalOutlined} from '@ant-design/icons';
 import i18n from '@/i18n';
 
 interface Language {

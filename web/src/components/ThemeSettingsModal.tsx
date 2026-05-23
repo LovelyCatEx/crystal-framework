@@ -1,11 +1,12 @@
 import {Modal, Radio, Space, Switch, Tabs, Tag} from "antd";
 import {CheckOutlined} from "@ant-design/icons";
 import {
-    themeColors,
     getThemeByKey,
+    setStoredTabEnabled,
+    setStoredTabSize,
     setStoredThemeKey,
-    type ThemeTabSize,
-    setStoredTabEnabled, setStoredTabSize
+    themeColors,
+    type ThemeTabSize
 } from "@/global/theme-config.ts";
 import type {ThemeColor} from "@/types/theme.types.ts";
 import {useTranslation} from "react-i18next";

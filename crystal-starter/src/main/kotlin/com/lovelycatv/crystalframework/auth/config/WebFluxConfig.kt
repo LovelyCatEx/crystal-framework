@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.auth.config
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
-import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.MethodParameter
@@ -22,7 +21,6 @@ import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 class WebFluxConfig(
-    private val userService: UserService,
     private val jsonMapper: JsonMapper,
     private val jwtSignKeyStore: JWTSignKeyStore
 ) : WebFluxConfigurer {
@@ -68,13 +66,13 @@ class WebFluxConfig(
                 } ?: return Mono.empty()
 
                 val userId = try {
-                    claims.get("userId", String::class.java).toLong()
+                    claims["userId", String::class.java].toLong()
                 } catch (_: Exception) {
                     null
                 }
 
                 val tenantId = try {
-                    claims.get("tenantId", String::class.java).toLong()
+                    claims["tenantId", String::class.java].toLong()
                 } catch (_: Exception) {
                     null
                 }

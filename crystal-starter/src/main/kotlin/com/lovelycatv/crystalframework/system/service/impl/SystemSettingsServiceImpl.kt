@@ -49,7 +49,7 @@ class SystemSettingsServiceImpl(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     init {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             getSystemSettings()
         }
     }
@@ -248,7 +248,7 @@ class SystemSettingsServiceImpl(
     }
 
     private fun syncToCacheAsync() {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             this@SystemSettingsServiceImpl.syncToCache()
         }
     }

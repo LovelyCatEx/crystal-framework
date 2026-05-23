@@ -1,9 +1,9 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
-import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerDeleteTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerReadTenantRoleDTO

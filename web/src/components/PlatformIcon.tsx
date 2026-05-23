@@ -1,8 +1,8 @@
 import React from "react";
 import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
-import { Space, Tag } from "antd";
-import { OAuthPlatform } from "../types/oauth-account.types";
-import { getOAuthPlatform } from "@/i18n/enum-helpers.ts";
+import {Space, Tag} from "antd";
+import {OAuthPlatform} from "../types/oauth-account.types";
+import {getOAuthPlatform} from "@/i18n/enum-helpers.ts";
 
 interface PlatformIconProps {
     platform: OAuthPlatform | string;

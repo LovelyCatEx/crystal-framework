@@ -1,9 +1,9 @@
 import {Col, Form, Input, Row} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
-    TenantTireTypeManagerController,
     type ManagerCreateTenantTireTypeDTO,
-    type ManagerReadTenantTireTypeDTO
+    type ManagerReadTenantTireTypeDTO,
+    TenantTireTypeManagerController
 } from "@/api/tenant-tire-type.api.ts";
 import {useRef} from "react";
 import {useTenantTireTypeTableColumns} from "@/components/columns/TenantTireTypeEntityColumns.tsx";

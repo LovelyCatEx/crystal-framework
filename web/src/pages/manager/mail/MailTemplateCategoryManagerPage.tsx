@@ -5,9 +5,7 @@ import {
     type ManagerReadMailTemplateCategoryDTO
 } from "@/api/mail-template-category.api.ts";
 import {useRef} from "react";
-import {
-    useMailTemplateCategoryTableColumns
-} from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
+import {useMailTemplateCategoryTableColumns} from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
 import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import type {MailTemplateCategory} from "@/types/mail.types.ts";
 import {useTranslation} from "react-i18next";

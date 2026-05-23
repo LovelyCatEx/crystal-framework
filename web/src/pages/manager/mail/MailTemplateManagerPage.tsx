@@ -1,17 +1,17 @@
-import { Col, Form, Input, Row, Select, Switch, Tag, message } from "antd";
-import { ManagerPageContainer, type ManagerPageContainerRef } from "@/components/ManagerPageContainer.tsx";
+import {Col, Form, Input, message, Row, Select, Switch, Tag} from "antd";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     MailTemplateManagerController,
     type ManagerCreateMailTemplateDTO,
     type ManagerReadMailTemplateDTO
 } from "@/api/mail-template.api.ts";
-import { useEffect, useRef, useState } from "react";
-import type { MailTemplateType, MailTemplate } from "@/types/mail.types.ts";
-import { useMailTemplateTableColumns } from "@/components/columns/MailTemplateEntityColumns.tsx";
-import { MailTemplateTypeManagerController } from "@/api/mail-template-type.api.ts";
-import { HtmlEditor } from "@/components/HtmlEditor.tsx";
-import { CopyOutlined } from "@ant-design/icons";
-import type { EntityTableColumns } from "@/components/types/entity-table.types.ts";
+import {useEffect, useRef, useState} from "react";
+import type {MailTemplate, MailTemplateType} from "@/types/mail.types.ts";
+import {useMailTemplateTableColumns} from "@/components/columns/MailTemplateEntityColumns.tsx";
+import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
+import {HtmlEditor} from "@/components/HtmlEditor.tsx";
+import {CopyOutlined} from "@ant-design/icons";
+import type {EntityTableColumns} from "@/components/types/entity-table.types.ts";
 import {useTranslation} from "react-i18next";
 
 interface TemplateVariablesProps {

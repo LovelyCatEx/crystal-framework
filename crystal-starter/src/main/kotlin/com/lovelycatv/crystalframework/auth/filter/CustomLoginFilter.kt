@@ -10,7 +10,6 @@ import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpMethod
@@ -21,7 +20,6 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import kotlin.time.Duration.Companion.milliseconds
 
 class CustomLoginFilter(
     defaultFilterProcessesUrl: String,
@@ -63,9 +61,8 @@ class CustomLoginFilter(
 
             logger.info("User ${loggedUser.username}#${loggedUser.id} is logged in with password")
 
-            coroutineScope.launch(Dispatchers.IO) {
+            coroutineScope.launch {
                 userAuthorizationService.clearUserAuthorityCache(loggedUser.id)
-                delay(100.milliseconds)
             }
 
             val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress

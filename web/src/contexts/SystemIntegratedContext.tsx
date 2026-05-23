@@ -2,11 +2,7 @@ import type React from "react";
 import {createContext, useContext} from "react";
 import useSWR from "swr";
 import {getSystemIntegratedInfo} from "@/api/system-integrated.api.ts";
-import type {
-    SystemIntegratedInfoVO,
-    MaintenanceInfoVO,
-    WaterMarkInfo
-} from "@/types/system-integrated.types.ts";
+import type {MaintenanceInfoVO, SystemIntegratedInfoVO, WaterMarkInfo} from "@/types/system-integrated.types.ts";
 
 interface SystemIntegratedContextValue {
     integratedInfo: SystemIntegratedInfoVO | undefined;

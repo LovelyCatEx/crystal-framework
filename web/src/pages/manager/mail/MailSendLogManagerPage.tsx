@@ -1,9 +1,6 @@
 import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {
-    MailSendLogManagerController,
-    type ManagerReadMailSendLogDTO,
-} from "@/api/mail-send-log.api.ts";
+import {MailSendLogManagerController, type ManagerReadMailSendLogDTO,} from "@/api/mail-send-log.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useMailSendLogTableColumns} from "@/components/columns/MailSendLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";

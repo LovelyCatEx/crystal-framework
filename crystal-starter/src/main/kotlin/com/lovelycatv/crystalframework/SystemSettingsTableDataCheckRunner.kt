@@ -40,7 +40,7 @@ class SystemSettingsTableDataCheckRunner(
         val failedItems = allSettings.mapNotNull {
             val copiedConfigValue = it.configValue
             if (copiedConfigValue != null) {
-                val declaration = keyWithDeclarationMap[it.configKey]!!
+                val declaration = keyWithDeclarationMap[it.configKey] ?: throw IllegalStateException("System settings declaration not found for key: ${it.configKey}")
 
                 var testErrorMessage: String? = null
                 val testResult = try {
@@ -88,7 +88,7 @@ class SystemSettingsTableDataCheckRunner(
             }
         }
 
-        check(!(failedItems.isNotEmpty())) {
+        check(failedItems.isEmpty()) {
             "There were ${failedItems.size} failed system settings item(s). tips: ${SystemSettingsItemValueType.BOOLEAN} only supports \"true\" or \"false\""
         }
 

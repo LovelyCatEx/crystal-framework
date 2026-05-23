@@ -1,17 +1,38 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useSWRComposition} from "@/compositions/swr.ts";
-import {
-    getSystemSettingsSchema,
-    updateSystemMaintenanceMode,
-    updateSystemSettings
-} from "@/api/system-settings.api.ts";
-import {Button, Card, Checkbox, Dropdown, Form, Input, InputNumber, message, Modal, Radio, Switch, Tabs, theme} from "antd";
+import {getSystemSettingsSchema, updateSystemMaintenanceMode, updateSystemSettings} from "@/api/system-settings.api.ts";
 import type {MenuProps} from "antd";
+import {
+    Button,
+    Card,
+    Checkbox,
+    Dropdown,
+    Form,
+    Input,
+    InputNumber,
+    message,
+    Modal,
+    Radio,
+    Switch,
+    Tabs,
+    theme
+} from "antd";
 import type {GetSystemSettingsSchemaData, SystemSettingsSchema} from "@/types/system-settings.types.ts";
 import {SystemSettingsItemValueType} from "@/types/system-settings.types.ts";
 import {useEffect, useState} from "react";
-import {useSettingsGroupToTranslationMap, useSettingsKeyToTranslationMap, useSettingsTabToTranslationMap} from "@/i18n/system-settings.tsx";
-import {ApiOutlined, ExclamationCircleFilled, ExportOutlined, ImportOutlined, SaveOutlined, ToolOutlined} from "@ant-design/icons";
+import {
+    useSettingsGroupToTranslationMap,
+    useSettingsKeyToTranslationMap,
+    useSettingsTabToTranslationMap
+} from "@/i18n/system-settings.tsx";
+import {
+    ApiOutlined,
+    ExclamationCircleFilled,
+    ExportOutlined,
+    ImportOutlined,
+    SaveOutlined,
+    ToolOutlined
+} from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";

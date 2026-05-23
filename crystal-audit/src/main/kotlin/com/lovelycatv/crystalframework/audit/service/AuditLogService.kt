@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 
-interface AuditLogService {
+fun interface AuditLogService {
     suspend fun record(
         userAuthentication: UserAuthentication,
         auditRequestInfo: AuditRequestInfo?,
