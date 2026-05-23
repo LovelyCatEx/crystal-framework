@@ -74,12 +74,12 @@ pnpm dev
 
 ### 3. Open in Browser
 
-Navigate to [http://localhost:5173](http://localhost:5173). Log in with the default admin account (auto-initialized on first startup) to access the admin dashboard.
+Navigate to the frontend dev server address. Log in with the default admin account (auto-initialized on first startup) to access the admin dashboard.
 
 ## Verification
 
 1. Backend health check: `curl http://localhost:8080/api/v1/actuator/health`
-2. Frontend: `http://localhost:5173`
+2. Frontend: visit the frontend dev server address
 
 ## Submit a PR
 
