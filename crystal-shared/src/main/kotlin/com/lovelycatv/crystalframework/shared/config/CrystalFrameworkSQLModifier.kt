@@ -7,18 +7,31 @@ import net.sf.jsqlparser.expression.operators.relational.IsNullExpression
 import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.Column
+import net.sf.jsqlparser.schema.Table
 import net.sf.jsqlparser.statement.delete.Delete
 import net.sf.jsqlparser.statement.select.PlainSelect
 import net.sf.jsqlparser.statement.update.Update
+import java.util.concurrent.ConcurrentHashMap
 
 object CrystalFrameworkSQLModifier {
     private val logger = logger()
+    private val baseEntityTables = ConcurrentHashMap<String, Boolean>()
+
+    fun registerBaseEntityTables(tables: Collection<String>) {
+        tables.forEach { baseEntityTables[it.lowercase()] = true }
+    }
 
     fun processSql(p0: String): String {
         val statement = try {
             CCJSqlParserUtil.parse(p0)
         } catch (e: Exception) {
             throw IllegalArgumentException("Error while parsing SQL from $p0", e)
+        }
+
+        val tableName = extractTargetTableName(statement)
+        if (tableName != null && !baseEntityTables.containsKey(tableName)) {
+            logger.debug("Skipping non-BaseEntity table [{}]", tableName)
+            return p0
         }
 
         var modified = true
@@ -50,6 +63,18 @@ object CrystalFrameworkSQLModifier {
         }
 
         return sql
+    }
+
+    private fun extractTargetTableName(statement: Any): String? {
+        return when (statement) {
+            is PlainSelect -> {
+                val fromItem = statement.fromItem
+                if (fromItem is Table) fromItem.name.lowercase() else null
+            }
+            is Update -> statement.table.name.lowercase()
+            is Delete -> statement.table.name.lowercase()
+            else -> null
+        }
     }
 
     fun addSoftDeleteConditionWithParser(statement: PlainSelect): String {
