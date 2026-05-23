@@ -10,6 +10,21 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Quick Start', link: '/en/develop/quick-start' },
         { text: 'Development Guide', link: '/en/develop/develop-guide' },
+        {
+          text: 'Frontend',
+          items: [
+            { text: 'Create Plugin', link: '/en/develop/frontend/create-plugin' },
+            { text: 'Add Page', link: '/en/develop/frontend/add-page' },
+            { text: 'API Integration', link: '/en/develop/frontend/api-integration' },
+          ]
+        },
+        {
+          text: 'Database',
+          items: [
+            { text: 'Add Entity', link: '/en/develop/add-entity' },
+            { text: 'Database Migration', link: '/en/develop/db-migration' },
+          ]
+        },
         { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
         { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
         { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
@@ -21,6 +36,13 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Quick Start', link: '/en/contribute/quick-start' },
         { text: 'Project Structure', link: '/en/contribute/structure-introduction' },
+        {
+          text: 'Database',
+          items: [
+            { text: 'Add Entity', link: '/en/contribute/add-entity' },
+            { text: 'Database Migration', link: '/en/contribute/db-migration' },
+          ]
+        },
         { text: 'System Settings', link: '/en/contribute/system-settings' },
         { text: 'System Permission', link: '/en/contribute/system-permission' },
         { text: 'Tenant Permission', link: '/en/contribute/tenant-permission' },

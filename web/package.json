@@ -17,6 +17,7 @@
     "antd": "^6.3.0",
     "axios": "^1.13.5",
     "dayjs": "^1.11.19",
+    "echarts": "^6.1.0",
     "i18next": "^25.8.18",
     "i18next-browser-languagedetector": "^8.2.1",
     "kotlin-ts": "^0.0.7",
