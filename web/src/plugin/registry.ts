@@ -6,6 +6,9 @@ class MenuRegistryImpl implements IMenuRegistry {
     private _tenantMenus: PluginRouteItem[] = [];
     private _publicMenus: PluginRouteItem[] = [];
     private _topLevelRoutes: PluginTopLevelRoute[] = [];
+    private _systemSettingsKeys: string[] = [];
+    private _systemSettingsGroups: string[] = [];
+    private _systemSettingsTabs: string[] = [];
 
     addMenuGroup(group: PluginMenuGroup): void {
         this._menuGroups.push(group);
@@ -27,6 +30,24 @@ class MenuRegistryImpl implements IMenuRegistry {
         this._topLevelRoutes.push(route);
     }
 
+    addSystemSettingsKey(key: string): void {
+        if (!this._systemSettingsKeys.includes(key)) {
+            this._systemSettingsKeys.push(key);
+        }
+    }
+
+    addSystemSettingsGroup(group: string): void {
+        if (!this._systemSettingsGroups.includes(group)) {
+            this._systemSettingsGroups.push(group);
+        }
+    }
+
+    addSystemSettingsTab(tab: string): void {
+        if (!this._systemSettingsTabs.includes(tab)) {
+            this._systemSettingsTabs.push(tab);
+        }
+    }
+
     get menuGroups(): PluginMenuGroup[] {
         return this._menuGroups;
     }
@@ -45,6 +66,18 @@ class MenuRegistryImpl implements IMenuRegistry {
 
     get topLevelRoutes(): PluginTopLevelRoute[] {
         return this._topLevelRoutes;
+    }
+
+    get systemSettingsKeys(): string[] {
+        return this._systemSettingsKeys;
+    }
+
+    get systemSettingsGroups(): string[] {
+        return this._systemSettingsGroups;
+    }
+
+    get systemSettingsTabs(): string[] {
+        return this._systemSettingsTabs;
     }
 }
 
