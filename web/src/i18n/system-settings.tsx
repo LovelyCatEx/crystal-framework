@@ -7,10 +7,25 @@ import {
     SettingOutlined
 } from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
+import {pluginRegistry} from "@/plugin/registry.ts";
+
+function usePluginSystemSettingsKeys(): string[] {
+    return pluginRegistry.systemSettingsKeys;
+}
+
+function usePluginSystemSettingsGroups(): string[] {
+    return pluginRegistry.systemSettingsGroups;
+}
+
+function usePluginSystemSettingsTabs(): string[] {
+    return pluginRegistry.systemSettingsTabs;
+}
 
 export function useSettingsKeyToTranslationMap(): Map<string, string> {
     const { t } = useTranslation();
-    return new Map<string, string>([
+    const pluginKeys = usePluginSystemSettingsKeys();
+
+    const map = new Map<string, string>([
         ['basic.baseUrl', t('pages.systemSettingsManager.keys.basic.baseUrl')],
         ['basic.waterMark.enabled', t('pages.systemSettingsManager.keys.basic.waterMark.enabled')],
         ['basic.waterMark.type', t('pages.systemSettingsManager.keys.basic.waterMark.type')],
@@ -27,25 +42,53 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
         ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
     ]);
+
+    for (const key of pluginKeys) {
+        if (!map.has(key)) {
+            map.set(key, t(`pages.systemSettingsManager.keys.${key}`));
+        }
+    }
+
+    return map;
 }
 
 export function useSettingsGroupToTranslationMap(): Map<string, {label: string, icon?: ReactNode}> {
     const { t } = useTranslation();
-    return new Map<string, {label: string, icon?: ReactNode}>([
+    const pluginGroups = usePluginSystemSettingsGroups();
+
+    const map = new Map<string, {label: string, icon?: ReactNode}>([
         ['basic', { label: t('pages.systemSettingsManager.groups.basic'), icon: <InfoCircleOutlined /> }],
         ['basic.waterMark', { label: t('pages.systemSettingsManager.groups.basic.waterMark'), icon: <CopyrightCircleOutlined /> }],
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
     ]);
+
+    for (const group of pluginGroups) {
+        if (!map.has(group)) {
+            map.set(group, { label: t(`pages.systemSettingsManager.groups.${group}`) });
+        }
+    }
+
+    return map;
 }
 
 export function useSettingsTabToTranslationMap(): Map<string, string> {
     const { t } = useTranslation();
-    return new Map<string, string>([
+    const pluginTabs = usePluginSystemSettingsTabs();
+
+    const map = new Map<string, string>([
         ['basic', t('pages.systemSettingsManager.tabs.basic')],
         ['bootstrap', t('pages.systemSettingsManager.tabs.bootstrap')],
         ['mail', t('pages.systemSettingsManager.tabs.mail')],
         ['security', t('pages.systemSettingsManager.tabs.security')],
     ]);
+
+    for (const tab of pluginTabs) {
+        if (!map.has(tab)) {
+            map.set(tab, t(`pages.systemSettingsManager.tabs.${tab}`));
+        }
+    }
+
+    return map;
 }
