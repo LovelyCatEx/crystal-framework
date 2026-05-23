@@ -1,36 +1,16 @@
-import {AppstoreOutlined, ToolOutlined} from "@ant-design/icons";
+import {MonitorOutlined} from "@ant-design/icons";
 import type {CrystalWebPlugin} from "@/plugin/types.ts";
-import {PlaygroundPage} from "./pages/PlaygroundPage.tsx";
+import {SystemMonitorPage} from "./pages/SystemMonitorPage.tsx";
 
 const extPlaygroundPlugin: CrystalWebPlugin = {
     configure(registry) {
-        registry.addMenuGroup({
-            name: 'playground',
-            icon: <AppstoreOutlined />,
-            label: 'menu.groups.playground',
-        });
-
         registry.addAdminMenu({
-            key: '/manager/ext-playground',
-            path: '/manager/ext-playground',
-            icon: <ToolOutlined />,
-            label: 'menu.admin.extPlayground',
-            page: <PlaygroundPage />,
-            group: 'playground',
-        });
-
-        registry.addPublicMenu({
-            key: '/manager/ext-playground',
-            path: '/manager/ext-playground',
-            icon: <ToolOutlined />,
-            label: 'menu.pub.extPlayground',
-            page: <PlaygroundPage />,
-            group: 'playground',
-        });
-
-        registry.addTopLevelRoute({
-            path: '/ext-playground',
-            element: <PlaygroundPage />,
+            key: '/manager/ext/system-monitor',
+            path: '/manager/ext/system-monitor',
+            icon: <MonitorOutlined />,
+            label: 'menu.admin.systemMonitor',
+            page: <SystemMonitorPage />,
+            group: 'monitor',
         });
     },
 
@@ -38,40 +18,88 @@ const extPlaygroundPlugin: CrystalWebPlugin = {
         'zh-CN': {
             menu: {
                 admin: {
-                    extPlayground: '扩展演示',
-                },
-                pub: {
-                    extPlayground: '扩展演示',
-                },
-                groups: {
-                    playground: '演示',
+                    systemMonitor: '系统监控',
                 },
             },
             pages: {
-                extPlayground: {
-                    title: '扩展演示',
-                    description: '这是一个来自 <code>ext-playground</code> 插件的演示页面。它展示了插件系统无需修改框架源码即可注入路由、菜单和页面的能力。',
-                    secondary: '来自 ext-playground 插件的问候！',
+                systemMonitor: {
+                    title: '系统监控',
+                    subtitle: '实时查看服务器 CPU、内存、磁盘和 JVM 等系统指标',
+                    chartTitle: '指标趋势',
+                    timeRange: '时间范围',
+                    syncCrosshair: '同步十字',
+                    columns: {auto: '自动', col1: '1 列', col2: '2 列', col3: '3 列'},
+                    durations: {
+                        m1: '1 分钟',
+                        m5: '5 分钟',
+                        m15: '15 分钟',
+                        m30: '30 分钟',
+                        h1: '1 小时',
+                        h3: '3 小时',
+                        h5: '5 小时',
+                        h12: '12 小时',
+                        d1: '1 天',
+                        d3: '3 天',
+                        d5: '5 天',
+                        d7: '7 天',
+                        d14: '14 天',
+                    },
+                    metrics: {
+                        cpuUsage: 'CPU 使用率 (%)',
+                        cpuLoadAverage: 'CPU 负载',
+                        memoryUsed: '内存使用 (GB)',
+                        jvmHeapUsed: 'JVM 堆使用 (GB)',
+                        jvmNonHeapCommitted: 'JVM 非堆已分配 (GB)',
+                        jvmNonHeapUsed: 'JVM 非堆使用 (GB)',
+                        diskUsed: '磁盘使用 (GB)',
+                        dbConnectionsActive: '数据库活跃连接',
+                        gcCount: 'GC 次数',
+                        gcTime: 'GC 时间 (ms)',
+                    },
                 },
             },
         },
         'en-US': {
             menu: {
                 admin: {
-                    extPlayground: 'Ext Playground',
-                },
-                pub: {
-                    extPlayground: 'Ext Playground',
-                },
-                groups: {
-                    playground: 'Playground',
+                    systemMonitor: 'System Monitor',
                 },
             },
             pages: {
-                extPlayground: {
-                    title: 'Ext Playground',
-                    description: 'This is a demo page from the <code>ext-playground</code> plugin. It demonstrates the plugin system\'s ability to inject routes, menus, and pages without modifying the framework source code.',
-                    secondary: 'Hello from ext-playground plugin!',
+                systemMonitor: {
+                    title: 'System Monitor',
+                    subtitle: 'Real-time view of CPU, memory, disk, JVM and other system metrics',
+                    chartTitle: 'Metrics Trend',
+                    timeRange: 'Time Range',
+                    syncCrosshair: 'Sync Crosshair',
+                    columns: {auto: 'Auto', col1: '1 Col', col2: '2 Cols', col3: '3 Cols'},
+                    durations: {
+                        m1: '1 Minute',
+                        m5: '5 Minutes',
+                        m15: '15 Minutes',
+                        m30: '30 Minutes',
+                        h1: '1 Hour',
+                        h3: '3 Hours',
+                        h5: '5 Hours',
+                        h12: '12 Hours',
+                        d1: '1 Day',
+                        d3: '3 Days',
+                        d5: '5 Days',
+                        d7: '7 Days',
+                        d14: '14 Days',
+                    },
+                    metrics: {
+                        cpuUsage: 'CPU Usage',
+                        cpuLoadAverage: 'CPU Load Average',
+                        memoryUsed: 'Memory Used',
+                        jvmHeapUsed: 'JVM Heap Used',
+                        jvmNonHeapCommitted: 'JVM NonHeap Committed',
+                        jvmNonHeapUsed: 'JVM NonHeap Used',
+                        diskUsed: 'Disk Used',
+                        dbConnectionsActive: 'DB Connections Active',
+                        gcCount: 'GC Count',
+                        gcTime: 'GC Time',
+                    },
                 },
             },
         },

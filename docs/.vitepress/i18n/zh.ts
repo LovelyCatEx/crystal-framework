@@ -10,6 +10,21 @@ export const zhThemeConfig: DefaultTheme.Config = {
       items: [
         { text: '快速开始', link: '/develop/quick-start' },
         { text: '开发指引', link: '/develop/develop-guide' },
+        {
+          text: '前端',
+          items: [
+            { text: '创建插件', link: '/develop/frontend/create-plugin' },
+            { text: '添加页面', link: '/develop/frontend/add-page' },
+            { text: 'API 对接', link: '/develop/frontend/api-integration' },
+          ]
+        },
+        {
+          text: '数据库',
+          items: [
+            { text: '添加实体类', link: '/develop/add-entity' },
+            { text: '数据库迁移', link: '/develop/db-migration' },
+          ]
+        },
         { text: '系统设置项', link: '/develop/sdk/system-settings' },
         { text: '系统权限', link: '/develop/sdk/system-permission' },
         { text: '租户权限', link: '/develop/sdk/tenant-permission' },
@@ -21,6 +36,13 @@ export const zhThemeConfig: DefaultTheme.Config = {
       items: [
         { text: '快速开始', link: '/contribute/quick-start' },
         { text: '项目结构', link: '/contribute/structure-introduction' },
+        {
+          text: '数据库',
+          items: [
+            { text: '添加实体类', link: '/contribute/add-entity' },
+            { text: '数据库迁移', link: '/contribute/db-migration' },
+          ]
+        },
         { text: '系统设置项', link: '/contribute/system-settings' },
         { text: '系统权限', link: '/contribute/system-permission' },
         { text: '租户权限', link: '/contribute/tenant-permission' },

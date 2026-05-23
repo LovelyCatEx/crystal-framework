@@ -43,12 +43,16 @@ class SpringCronTaskAdapter(
                     val executionId = UUID.randomUUID().toString()
                     val context = DefaultTaskExecutionContext(executionId = executionId)
 
-                    logger.info("[SpringCron] Executing task: ${definition.name}, executionId: $executionId")
+                    if (triggerAnnotation.enableLog) {
+                        logger.info("[SpringCron] Executing task: ${definition.name}, executionId: $executionId")
+                    }
 
                     try {
                         when (val result = definition.task.execute(context)) {
                             is TaskResult.Success -> {
-                                logger.info("[SpringCron] Task ${definition.name} executed successfully: ${result.message}")
+                                if (triggerAnnotation.enableLog) {
+                                    logger.info("[SpringCron] Task ${definition.name} executed successfully: ${result.message}")
+                                }
                             }
                             is TaskResult.Failure -> {
                                 logger.error("[SpringCron] Task ${definition.name} failed: ${result.message}", result.exception)
@@ -62,6 +66,8 @@ class SpringCronTaskAdapter(
             CronTrigger(triggerAnnotation.cron)
         )
 
-        logger.info("[SpringCron] Registered task: ${definition.name} with cron: ${triggerAnnotation.cron}")
+        if (triggerAnnotation.enableLog) {
+            logger.info("[SpringCron] Registered task: ${definition.name} with cron: ${triggerAnnotation.cron}")
+        }
     }
 }

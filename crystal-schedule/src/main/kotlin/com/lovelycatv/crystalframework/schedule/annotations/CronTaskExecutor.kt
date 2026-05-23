@@ -14,5 +14,10 @@ annotation class CronTaskExecutor(
      * Example: "0 0 * * * ?" means execute every hour.
      * If empty, the task will not be registered as a Spring Cron task.
      */
-    val cron: String = ""
+    val cron: String = "",
+    /**
+     * Whether to log execution info (start/success).
+     * Error logs are always output regardless of this flag.
+     */
+    val enableLog: Boolean = true,
 )
