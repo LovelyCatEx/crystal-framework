@@ -52,6 +52,8 @@ import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 import {useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
 import {MANAGER_PAGE_TABS_EXPIRES_IN, MANAGER_PAGE_TABS_STORAGE_KEY_PREFIX} from "@/global/constants.ts";
+import {ContextMenu} from "@/components/contextmenu";
+import type {ContextMenuItem} from "@/components/contextmenu";
 
 const { useToken } = theme;
 
@@ -240,7 +242,6 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
     const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
 
     const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
-    const isMac = useMemo(() => /mac/i.test(navigator.platform), []);
 
     useEffect(() => {
         if (!storageKey) {
@@ -346,37 +347,6 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         setTabs([targetTab]);
         navigate(targetTab.path);
     };
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const modifier = isMac ? e.ctrlKey : e.altKey;
-            if (!modifier) return;
-
-            const currentPath = location.pathname;
-            const activeKey = tabs.find(tab => currentPath.startsWith(tab.key))?.key;
-            if (!activeKey) return;
-
-            const key = e.key.toLowerCase();
-
-            if (key === 'w' && !e.shiftKey) {
-                e.preventDefault();
-                handleTabRemove(activeKey);
-            } else if (key === 'w' && e.shiftKey) {
-                e.preventDefault();
-                handleCloseOthers(activeKey);
-            } else if (e.code === 'BracketLeft' && e.shiftKey) {
-                e.preventDefault();
-                handleCloseLeft(activeKey);
-            } else if (e.code === 'BracketRight' && e.shiftKey) {
-                e.preventDefault();
-                handleCloseRight(activeKey);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [tabs, location.pathname, isMac]);
-
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         if (active.id !== over?.id) {
             setTabs((prev) => {
@@ -419,85 +389,64 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                 const isLast = index === tabs.length - 1;
                 const isOnly = tabs.length === 1;
 
-                const shortcut = (mac: string, win: string) => isMac ? mac : win;
-
-                const contextMenuItems = [
+                const contextMenuItems: ContextMenuItem[] = [
                     {
                         key: 'close',
-                        label: (
-                            <div className="flex items-center justify-between gap-8 w-full">
-                                <span>{t('pages.managerContainer.tabClose')}</span>
-                                <span className="text-gray-400 text-xs">{shortcut('⌃W', 'Alt+W')}</span>
-                            </div>
-                        ),
+                        label: t('pages.managerContainer.tabClose'),
                         icon: <CloseOutlined />,
+                        shortcut: { mac: '⌃W', win: 'Alt+W', binding: 'mod+w' },
                     },
-                    { type: 'divider' as const, key: 'tab-divider' },
+                    { key: 'tab-divider', divider: true },
                     {
                         key: 'close-others',
-                        label: (
-                            <div className="flex items-center justify-between gap-8 w-full">
-                                <span>{t('pages.managerContainer.tabCloseOthers')}</span>
-                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧W', 'Alt+Shift+W')}</span>
-                            </div>
-                        ),
+                        label: t('pages.managerContainer.tabCloseOthers'),
                         icon: <CloseCircleOutlined />,
                         disabled: isOnly,
+                        shortcut: { mac: '⌃⇧W', win: 'Alt+Shift+W', binding: 'mod+shift+w' },
                     },
                     {
                         key: 'close-left',
-                        label: (
-                            <div className="flex items-center justify-between gap-8 w-full">
-                                <span>{t('pages.managerContainer.tabCloseLeft')}</span>
-                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧[', 'Alt+Shift+[')}</span>
-                            </div>
-                        ),
+                        label: t('pages.managerContainer.tabCloseLeft'),
                         icon: <LeftOutlined />,
                         disabled: isFirst,
+                        shortcut: { mac: '⌃⇧[', win: 'Alt+Shift+[', binding: 'mod+shift+bracketleft' },
                     },
                     {
                         key: 'close-right',
-                        label: (
-                            <div className="flex items-center justify-between gap-8 w-full">
-                                <span>{t('pages.managerContainer.tabCloseRight')}</span>
-                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧]', 'Alt+Shift+]')}</span>
-                            </div>
-                        ),
+                        label: t('pages.managerContainer.tabCloseRight'),
                         icon: <RightOutlined />,
                         disabled: isLast,
+                        shortcut: { mac: '⌃⇧]', win: 'Alt+Shift+]', binding: 'mod+shift+bracketright' },
                     },
                 ];
 
                 return {
                     key: tab.key,
                     label: (
-                        <Dropdown
-                            trigger={['contextMenu']}
-                            menu={{
-                                items: contextMenuItems,
-                                onClick: ({ key: menuKey }) => {
-                                    switch (menuKey) {
-                                        case 'close':
-                                            handleTabRemove(tab.key);
-                                            break;
-                                        case 'close-others':
-                                            handleCloseOthers(tab.key);
-                                            break;
-                                        case 'close-left':
-                                            handleCloseLeft(tab.key);
-                                            break;
-                                        case 'close-right':
-                                            handleCloseRight(tab.key);
-                                            break;
-                                    }
-                                },
+                        <ContextMenu
+                            items={contextMenuItems}
+                            onAction={(menuKey) => {
+                                switch (menuKey) {
+                                    case 'close':
+                                        handleTabRemove(tab.key);
+                                        break;
+                                    case 'close-others':
+                                        handleCloseOthers(tab.key);
+                                        break;
+                                    case 'close-left':
+                                        handleCloseLeft(tab.key);
+                                        break;
+                                    case 'close-right':
+                                        handleCloseRight(tab.key);
+                                        break;
+                                }
                             }}
                         >
                             <span className="flex items-center gap-2">
                                 {menu?.icon}
                                 {tab.label}
                             </span>
-                        </Dropdown>
+                        </ContextMenu>
                     ),
                 };
             })}
