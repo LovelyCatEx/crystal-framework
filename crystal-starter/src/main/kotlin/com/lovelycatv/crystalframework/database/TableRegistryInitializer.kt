@@ -4,16 +4,17 @@ import com.lovelycatv.crystalframework.sdk.database.TableRegistry
 import com.lovelycatv.crystalframework.sdk.database.config.TableConfigurer
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkSQLModifier
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
-import jakarta.annotation.PostConstruct
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class TableRegistryInitializer(
-    private val configurers: List<TableConfigurer> = emptyList(),
+    configurers: List<TableConfigurer> = emptyList(),
 ) {
 
-    @PostConstruct
-    fun init() {
+    init {
         val registry = TableRegistry()
 
         registry.register(TableConstants.TABLE_USERS)

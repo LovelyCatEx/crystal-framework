@@ -66,13 +66,16 @@ object CrystalFrameworkSQLModifier {
     }
 
     private fun extractTargetTableName(statement: Any): String? {
+        fun stripQuotes(name: String): String {
+            return name.removeSurrounding("\"").removeSurrounding("`")
+        }
         return when (statement) {
             is PlainSelect -> {
                 val fromItem = statement.fromItem
-                if (fromItem is Table) fromItem.name.lowercase() else null
+                if (fromItem is Table) stripQuotes(fromItem.name).lowercase() else null
             }
-            is Update -> statement.table.name.lowercase()
-            is Delete -> statement.table.name.lowercase()
+            is Update -> stripQuotes(statement.table.name).lowercase()
+            is Delete -> stripQuotes(statement.table.name).lowercase()
             else -> null
         }
     }
