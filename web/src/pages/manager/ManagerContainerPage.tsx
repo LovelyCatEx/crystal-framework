@@ -3,6 +3,8 @@ import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, them
 import {
     BgColorsOutlined,
     CheckOutlined,
+    CloseCircleOutlined,
+    CloseOutlined,
     DownOutlined,
     EditOutlined,
     LeftOutlined,
@@ -231,12 +233,14 @@ function getAvailableTab(tab: TabItem, availableMenus: RouteItem[]): TabItem | n
 function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, storageKey }: { availableMenus: RouteItem[], availableMenusLoading: boolean, tabSize?: ThemeTabSize, storageKey?: string }) {
     const location = useLocation();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [tabs, setTabs] = useState<TabItem[]>([]);
     const [editMode, setEditMode] = useState<boolean>(false);
     const [storageReady, setStorageReady] = useState<boolean>(false);
     const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
 
     const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } });
+    const isMac = useMemo(() => /mac/i.test(navigator.platform), []);
 
     useEffect(() => {
         if (!storageKey) {
@@ -311,6 +315,68 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         setTabs(newTabs);
     };
 
+    const handleCloseLeft = (targetKey: string) => {
+        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        const newTabs = tabs.slice(targetIndex);
+
+        const currentStillExists = newTabs.some(tab => location.pathname.startsWith(tab.key));
+        if (!currentStillExists) {
+            navigate(newTabs[0].path);
+        }
+
+        setTabs(newTabs);
+    };
+
+    const handleCloseRight = (targetKey: string) => {
+        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        const newTabs = tabs.slice(0, targetIndex + 1);
+
+        const currentStillExists = newTabs.some(tab => location.pathname.startsWith(tab.key));
+        if (!currentStillExists) {
+            navigate(newTabs[newTabs.length - 1].path);
+        }
+
+        setTabs(newTabs);
+    };
+
+    const handleCloseOthers = (targetKey: string) => {
+        const targetTab = tabs.find(tab => tab.key === targetKey);
+        if (!targetTab) return;
+
+        setTabs([targetTab]);
+        navigate(targetTab.path);
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const modifier = isMac ? e.ctrlKey : e.altKey;
+            if (!modifier) return;
+
+            const currentPath = location.pathname;
+            const activeKey = tabs.find(tab => currentPath.startsWith(tab.key))?.key;
+            if (!activeKey) return;
+
+            const key = e.key.toLowerCase();
+
+            if (key === 'w' && !e.shiftKey) {
+                e.preventDefault();
+                handleTabRemove(activeKey);
+            } else if (key === 'w' && e.shiftKey) {
+                e.preventDefault();
+                handleCloseOthers(activeKey);
+            } else if (e.code === 'BracketLeft' && e.shiftKey) {
+                e.preventDefault();
+                handleCloseLeft(activeKey);
+            } else if (e.code === 'BracketRight' && e.shiftKey) {
+                e.preventDefault();
+                handleCloseRight(activeKey);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [tabs, location.pathname, isMac]);
+
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         if (active.id !== over?.id) {
             setTabs((prev) => {
@@ -347,15 +413,91 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                     handleTabRemove(targetKey as string);
                 }
             }}
-            items={tabs.map(tab => {
+            items={tabs.map((tab, index) => {
                 const menu = availableMenus.find(m => m.key === tab.key);
+                const isFirst = index === 0;
+                const isLast = index === tabs.length - 1;
+                const isOnly = tabs.length === 1;
+
+                const shortcut = (mac: string, win: string) => isMac ? mac : win;
+
+                const contextMenuItems = [
+                    {
+                        key: 'close',
+                        label: (
+                            <div className="flex items-center justify-between gap-8 w-full">
+                                <span>{t('pages.managerContainer.tabClose')}</span>
+                                <span className="text-gray-400 text-xs">{shortcut('⌃W', 'Alt+W')}</span>
+                            </div>
+                        ),
+                        icon: <CloseOutlined />,
+                    },
+                    { type: 'divider' as const, key: 'tab-divider' },
+                    {
+                        key: 'close-others',
+                        label: (
+                            <div className="flex items-center justify-between gap-8 w-full">
+                                <span>{t('pages.managerContainer.tabCloseOthers')}</span>
+                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧W', 'Alt+Shift+W')}</span>
+                            </div>
+                        ),
+                        icon: <CloseCircleOutlined />,
+                        disabled: isOnly,
+                    },
+                    {
+                        key: 'close-left',
+                        label: (
+                            <div className="flex items-center justify-between gap-8 w-full">
+                                <span>{t('pages.managerContainer.tabCloseLeft')}</span>
+                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧[', 'Alt+Shift+[')}</span>
+                            </div>
+                        ),
+                        icon: <LeftOutlined />,
+                        disabled: isFirst,
+                    },
+                    {
+                        key: 'close-right',
+                        label: (
+                            <div className="flex items-center justify-between gap-8 w-full">
+                                <span>{t('pages.managerContainer.tabCloseRight')}</span>
+                                <span className="text-gray-400 text-xs">{shortcut('⌃⇧]', 'Alt+Shift+]')}</span>
+                            </div>
+                        ),
+                        icon: <RightOutlined />,
+                        disabled: isLast,
+                    },
+                ];
+
                 return {
                     key: tab.key,
                     label: (
-                        <span className="flex items-center gap-2">
-                            {menu?.icon}
-                            {tab.label}
-                        </span>
+                        <Dropdown
+                            trigger={['contextMenu']}
+                            menu={{
+                                items: contextMenuItems,
+                                onClick: ({ key: menuKey }) => {
+                                    switch (menuKey) {
+                                        case 'close':
+                                            handleTabRemove(tab.key);
+                                            break;
+                                        case 'close-others':
+                                            handleCloseOthers(tab.key);
+                                            break;
+                                        case 'close-left':
+                                            handleCloseLeft(tab.key);
+                                            break;
+                                        case 'close-right':
+                                            handleCloseRight(tab.key);
+                                            break;
+                                    }
+                                },
+                            }}
+                        >
+                            <span className="flex items-center gap-2">
+                                {menu?.icon}
+                                {tab.label}
+                            </span>
+                        </Dropdown>
                     ),
                 };
             })}

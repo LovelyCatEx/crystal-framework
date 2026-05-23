@@ -1494,6 +1494,10 @@ export const zhCN: I18nRules = {
       menu: '菜单',
       switchSuccess: '已切换到 {{tenantName}}',
       switchFailed: '切换到 {{tenantName}} 失败',
+      tabClose: '关闭',
+      tabCloseOthers: '关闭其他',
+      tabCloseLeft: '关闭左侧',
+      tabCloseRight: '关闭右侧',
     },
     tenantInvitation: {
       title: '加入组织',

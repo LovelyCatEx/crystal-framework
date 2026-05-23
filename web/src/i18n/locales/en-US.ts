@@ -1497,6 +1497,10 @@ export const enUS: I18nRules = {
       menu: 'Menu',
       switchSuccess: 'Switched to {{tenantName}}',
       switchFailed: 'Failed to switch to {{tenantName}}',
+      tabClose: 'Close',
+      tabCloseOthers: 'Close Others',
+      tabCloseLeft: 'Close Left',
+      tabCloseRight: 'Close Right',
     },
     tenantInvitation: {
       title: 'Join Organization',
