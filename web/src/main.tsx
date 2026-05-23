@@ -6,8 +6,10 @@ import App from "./App.tsx";
 import {BrowserRouter} from "react-router-dom";
 import {registerAllKotlinModules} from "kotlin-ts";
 import {ProtectedApp} from "@/ProtectedApp.tsx";
+import {loadPlugins} from "@/plugin/loader.ts";
 
 registerAllKotlinModules()
+loadPlugins()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

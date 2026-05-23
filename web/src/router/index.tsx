@@ -58,6 +58,8 @@ import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts"
 import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
 import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
 import type {TFunction} from "i18next";
+import {pluginRegistry} from "@/plugin/registry.ts";
+import type {PluginRouteItem} from "@/plugin/types.ts";
 
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile"
@@ -104,8 +106,27 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'monitor',
             icon: <LineChartOutlined />,
             label: t('menu.groups.monitor'),
-        }
+        },
+        ...toTranslatedMenuGroups(t),
     ];
+}
+
+function toRouteItems(items: PluginRouteItem[]): RouteItem[] {
+    return items as RouteItem[];
+}
+
+function toTranslatedMenuGroups(t: TFunction): MenuGroup[] {
+    return pluginRegistry.menuGroups.map(g => ({
+        ...g,
+        label: t(g.label),
+    }));
+}
+
+function toTranslatedRouteItems(t: TFunction, items: PluginRouteItem[]): RouteItem[] {
+    return items.map(item => ({
+        ...item,
+        label: t(item.label),
+    })) as RouteItem[];
 }
 
 export function getPublicMenus(t: TFunction): RouteItem[] {
@@ -123,7 +144,8 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
-        }
+        },
+        ...toTranslatedRouteItems(t, pluginRegistry.publicMenus),
     ];
 }
 
@@ -185,6 +207,7 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             page: <MyTenantProfilePage />,
             group: 'i_tenant',
         },
+        ...toTranslatedRouteItems(t, pluginRegistry.tenantMenus),
     ];
 }
 
@@ -356,6 +379,7 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             ),
             group: 'mail_template'
         },
+        ...toTranslatedRouteItems(t, pluginRegistry.adminMenus),
         {
             key: '/manager/sessions',
             path: '/manager/sessions',
@@ -394,7 +418,7 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <SettingOutlined />,
             label: t('menu.admin.settings'),
             page: <SystemSettingsManagerPage />
-        }
+        },
     ];
 }
 
