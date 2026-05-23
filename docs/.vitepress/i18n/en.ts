@@ -6,27 +6,26 @@ export const enThemeConfig: DefaultTheme.Config = {
   ],
   sidebar: [
     {
-      text: 'Develop',
+      text: 'Plugin Dev',
       items: [
-        { text: 'Develop Guidance', link: '/en/develop-guide' },
-        { text: 'Project Structure', link: '/en/structure-introduction' },
-        { text: 'Quick Start', link: '/en/quick-start' },
+        { text: 'Quick Start', link: '/en/develop/quick-start' },
+        { text: 'Development Guide', link: '/en/develop/develop-guide' },
         {
           text: 'SDK Documentation',
           items: [
-            { text: 'Package Scanner', link: '/en/sdk/package-scanner' },
-            { text: 'System Settings', link: '/en/sdk/system-settings' },
-            { text: 'System Permission', link: '/en/sdk/system-permission' },
-            { text: 'Tenant Permission', link: '/en/sdk/tenant-permission' },
-            { text: 'Mail Template', link: '/en/sdk/mail-template' },
+            { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
+            { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
+            { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
+            { text: 'Mail Template', link: '/en/develop/sdk/mail-template' },
           ]
         },
-        {
-          text: 'Contribution Docs',
-          items: [
-
-          ]
-        },
+      ]
+    },
+    {
+      text: 'Source Contribution',
+      items: [
+        { text: 'Quick Start', link: '/en/contribute/quick-start' },
+        { text: 'Project Structure', link: '/en/contribute/structure-introduction' },
       ]
     },
     {

@@ -6,27 +6,26 @@ export const zhThemeConfig: DefaultTheme.Config = {
   ],
   sidebar: [
     {
-      text: '开发指南',
+      text: '二次开发',
       items: [
-        { text: '开发指引', link: '/develop-guide' },
-        { text: '项目结构', link: '/structure-introduction' },
-        { text: '快速开始', link: '/quick-start' },
+        { text: '快速开始', link: '/develop/quick-start' },
+        { text: '开发指引', link: '/develop/develop-guide' },
         {
           text: 'SDK 文档',
           items: [
-            { text: '包扫描器', link: '/sdk/package-scanner' },
-            { text: '系统设置项', link: '/sdk/system-settings' },
-            { text: '系统权限', link: '/sdk/system-permission' },
-            { text: '租户权限', link: '/sdk/tenant-permission' },
-            { text: '邮件模板', link: '/sdk/mail-template' },
+            { text: '系统设置项', link: '/develop/sdk/system-settings' },
+            { text: '系统权限', link: '/develop/sdk/system-permission' },
+            { text: '租户权限', link: '/develop/sdk/tenant-permission' },
+            { text: '邮件模板', link: '/develop/sdk/mail-template' },
           ]
         },
-        {
-          text: '贡献文档',
-          items: [
-
-          ]
-        },
+      ]
+    },
+    {
+      text: '源码贡献',
+      items: [
+        { text: '快速开始', link: '/contribute/quick-start' },
+        { text: '项目结构', link: '/contribute/structure-introduction' },
       ]
     },
     {
