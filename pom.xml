@@ -44,6 +44,7 @@
         <module>crystal-shared-types</module>
         <module>crystal-mail</module>
         <module>crystal-sdk</module>
+        <module>crystal-monitor</module>
     </modules>
 
     <scm>
@@ -100,6 +101,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-sdk</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-monitor</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

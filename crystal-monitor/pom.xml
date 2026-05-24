@@ -9,7 +9,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>crystal-starter</artifactId>
+    <artifactId>crystal-monitor</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,10 +20,6 @@
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
 
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -66,31 +62,7 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-shared-types</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-audit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-schedule</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-resource</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-encrypt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-mail</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-monitor</artifactId>
+            <artifactId>crystal-sdk</artifactId>
         </dependency>
     </dependencies>
 

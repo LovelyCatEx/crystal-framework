@@ -53,6 +53,7 @@ import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemb
 import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
 import {UserLoginLogManagerPage} from "@/pages/manager/auth/UserLoginLogManagerPage.tsx";
 import {SessionMonitorPage} from "@/pages/manager/monitor/SessionMonitorPage.tsx";
+import {SystemMonitorPage} from "@/pages/manager/monitor/SystemMonitorPage.tsx";
 import {ProtectedControllerWarningWrapper} from "@/components/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
@@ -385,6 +386,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <MonitorOutlined />,
             label: t('menu.admin.sessions'),
             page: <SessionMonitorPage />,
+            group: 'monitor'
+        },
+        {
+            key: '/manager/monitor/system-metrics',
+            path: '/manager/monitor/system-metrics',
+            icon: <LineChartOutlined />,
+            label: t('menu.admin.systemMonitor'),
+            page: <SystemMonitorPage />,
             group: 'monitor'
         },
         {

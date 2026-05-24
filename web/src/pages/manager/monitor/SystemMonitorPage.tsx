@@ -5,9 +5,9 @@ import {LineChartOutlined} from "@ant-design/icons";
 import * as echarts from "echarts";
 import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {MetricChart, type MetricChartConfig} from "../components/MetricChart.tsx";
-import {queryMetric} from "../api/system-monitor.api.ts";
-import type {MetricPoint} from "../types/system-monitor.types.ts";
+import {MetricChart, type MetricChartConfig} from "@/components/dashboard/MetricChart.tsx";
+import {queryMetric} from "@/api/system-monitor.api.ts";
+import type {MetricPoint} from "@/api/system-monitor.api.ts";
 
 const {useToken} = theme;
 

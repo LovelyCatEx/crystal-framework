@@ -9,6 +9,8 @@
 + feat(web): 引入系统监控插件，新增系统监控页面。
 + feat(schedule): `@CronTaskExecutor` 支持开启/关闭日志输出。
 + feat(system): 新增 `SystemMetricsEvent` 事件与 `SystemMetricsCollectTask` 定时任务。
++ refactor(monitor): 新增 crystal-monitor 模块，将系统监控从插件迁移为一级模块。
++ refactor(web): 将系统监控前端页面从 extension 合并为 manager 内建页面。
 + docs: 新增前端页面开发相关文档。
 
 ## v1.2.2
