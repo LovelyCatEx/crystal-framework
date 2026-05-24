@@ -1552,6 +1552,41 @@ export const zhCN: I18nRules = {
       subtitle: '查看当前系统中的在线会话列表',
       entityName: '会话'
     },
+    systemMonitor: {
+      title: '系统监控',
+      subtitle: '实时查看服务器 CPU、内存、磁盘和 JVM 等系统指标',
+      chartTitle: '指标趋势',
+      timeRange: '时间范围',
+      syncCrosshair: '同步十字',
+      columns: {auto: '自动', col1: '1 列', col2: '2 列', col3: '3 列'},
+      durations: {
+        m1: '1 分钟',
+        m5: '5 分钟',
+        m15: '15 分钟',
+        m30: '30 分钟',
+        h1: '1 小时',
+        h3: '3 小时',
+        h5: '5 小时',
+        h12: '12 小时',
+        d1: '1 天',
+        d3: '3 天',
+        d5: '5 天',
+        d7: '7 天',
+        d14: '14 天',
+      },
+      metrics: {
+        cpuUsage: 'CPU 使用率 (%)',
+        cpuLoadAverage: 'CPU 负载',
+        memoryUsed: '内存使用 (GB)',
+        jvmHeapUsed: 'JVM 堆使用 (GB)',
+        jvmNonHeapCommitted: 'JVM 非堆已分配 (GB)',
+        jvmNonHeapUsed: 'JVM 非堆使用 (GB)',
+        diskUsed: '磁盘使用 (GB)',
+        dbConnectionsActive: '数据库活跃连接',
+        gcCount: 'GC 次数',
+        gcTime: 'GC 时间 (ms)',
+      },
+    },
   },
 
   components: {
@@ -2230,7 +2265,8 @@ export const zhCN: I18nRules = {
       auditLogs: '审计日志',
       userLoginLogs: '用户登录日志',
       settings: '系统设置',
-      sessions: '在线会话'
+      sessions: '在线会话',
+      systemMonitor: '系统监控'
     },
 
     // 菜单分组

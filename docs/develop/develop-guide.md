@@ -1,4 +1,4 @@
-# 二次开发指引
+# 开发指引
 
 Crystal Framework 支持两种开发模式：**集成模式** 与 **非集成模式**。
 
@@ -185,12 +185,7 @@ cp target/my-plugin-1.0-SNAPSHOT.jar /path/to/crystal-framework/ext/
 
 ## SDK 功能模块
 
-框架提供了一系列 SDK 功能模块，方便插件使用框架的既有能力。点击以下链接查看详细文档：
-
-- [系统设置项](./sdk/system-settings)
-- [系统权限](./sdk/system-permission)
-- [租户权限](./sdk/tenant-permission)
-- [邮件模板](./sdk/mail-template)
+框架提供了一系列 SDK 功能模块，方便插件使用框架的既有能力。例如系统设置项、系统权限、租户权限、邮件模板等，详细说明请阅读本文档中对应的文档页面。
 
 ## 集成模式说明
 

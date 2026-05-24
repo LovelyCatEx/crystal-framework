@@ -1,4 +1,4 @@
-# Source Contribution Quick Start
+# Quick Start
 
 ## Prerequisites
 

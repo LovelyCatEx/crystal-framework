@@ -25,6 +25,16 @@ export const zhThemeConfig: DefaultTheme.Config = {
             { text: '数据库迁移', link: '/develop/db-migration' },
           ]
         },
+        {
+          text: '控制器',
+          items: [
+            { text: 'ApiResponse', link: '/develop/controller/api-response' },
+            { text: '普通控制器', link: '/develop/controller/generic-controller' },
+            { text: '标准化控制器', link: '/develop/controller/standard-manager-controller' },
+            { text: '只读标准化控制器', link: '/develop/controller/readonly-manager-controller' },
+            { text: '异常处理', link: '/develop/controller/exception-handling' },
+          ]
+        },
         { text: '系统设置项', link: '/develop/sdk/system-settings' },
         { text: '系统权限', link: '/develop/sdk/system-permission' },
         { text: '租户权限', link: '/develop/sdk/tenant-permission' },
@@ -43,6 +53,16 @@ export const zhThemeConfig: DefaultTheme.Config = {
             { text: '数据库迁移', link: '/contribute/db-migration' },
           ]
         },
+        {
+          text: '控制器',
+          items: [
+            { text: 'ApiResponse', link: '/contribute/controller/api-response' },
+            { text: '普通控制器', link: '/contribute/controller/generic-controller' },
+            { text: '标准化控制器', link: '/contribute/controller/standard-manager-controller' },
+            { text: '只读标准化控制器', link: '/contribute/controller/readonly-manager-controller' },
+            { text: '异常处理', link: '/contribute/controller/exception-handling' },
+          ]
+        },
         { text: '系统设置项', link: '/contribute/system-settings' },
         { text: '系统权限', link: '/contribute/system-permission' },
         { text: '租户权限', link: '/contribute/tenant-permission' },
@@ -54,7 +74,8 @@ export const zhThemeConfig: DefaultTheme.Config = {
       items: [
         { text: '部署指引', link: '/deploy-guide' },
       ]
-    }
+    },
+    { text: '更新日志', link: '/change-logs' },
   ],
   footer: {
     message: '以 MIT License 发布',
