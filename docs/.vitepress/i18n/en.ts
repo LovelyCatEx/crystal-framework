@@ -74,7 +74,8 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Deploy Guidance', link: '/en/deploy-guide' },
       ]
-    }
+    },
+    { text: 'Change Logs', link: '/en/change-logs' },
   ],
   footer: {
     message: 'Released under the MIT License.',

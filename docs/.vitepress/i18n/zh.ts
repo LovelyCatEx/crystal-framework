@@ -74,7 +74,8 @@ export const zhThemeConfig: DefaultTheme.Config = {
       items: [
         { text: '部署指引', link: '/deploy-guide' },
       ]
-    }
+    },
+    { text: '更新日志', link: '/change-logs' },
   ],
   footer: {
     message: '以 MIT License 发布',
