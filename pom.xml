@@ -44,6 +44,7 @@
         <module>crystal-shared-types</module>
         <module>crystal-mail</module>
         <module>crystal-sdk</module>
+        <module>crystal-monitor</module>
     </modules>
 
     <scm>
@@ -57,7 +58,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.2.3</revision>
+        <revision>1.3.0</revision>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +101,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-sdk</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-monitor</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

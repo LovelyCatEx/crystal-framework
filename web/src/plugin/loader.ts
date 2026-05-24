@@ -3,7 +3,7 @@ import {pluginRegistry} from "./registry.ts";
 import i18n from "@/i18n";
 
 const pluginModules = import.meta.glob<{ default: CrystalWebPlugin }>(
-    '../extensions/*/index.{ts,tsx}',
+    '../../extensions/*/index.{ts,tsx}',
     {eager: true}
 );
 

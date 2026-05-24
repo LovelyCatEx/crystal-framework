@@ -1,4 +1,4 @@
-# Plugin Development Guide
+# Development Guide
 
 Crystal Framework supports two development modes: **Integrated Mode** and **Standalone Mode**.
 

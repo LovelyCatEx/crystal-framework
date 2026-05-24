@@ -88,6 +88,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-monitor</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

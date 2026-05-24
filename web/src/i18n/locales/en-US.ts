@@ -1555,6 +1555,41 @@ export const enUS: I18nRules = {
       subtitle: 'View the list of online sessions in the system',
       entityName: 'Session'
     },
+    systemMonitor: {
+      title: 'System Monitor',
+      subtitle: 'Real-time view of CPU, memory, disk, JVM and other system metrics',
+      chartTitle: 'Metrics Trend',
+      timeRange: 'Time Range',
+      syncCrosshair: 'Sync Crosshair',
+      columns: {auto: 'Auto', col1: '1 Col', col2: '2 Cols', col3: '3 Cols'},
+      durations: {
+        m1: '1 Minute',
+        m5: '5 Minutes',
+        m15: '15 Minutes',
+        m30: '30 Minutes',
+        h1: '1 Hour',
+        h3: '3 Hours',
+        h5: '5 Hours',
+        h12: '12 Hours',
+        d1: '1 Day',
+        d3: '3 Days',
+        d5: '5 Days',
+        d7: '7 Days',
+        d14: '14 Days',
+      },
+      metrics: {
+        cpuUsage: 'CPU Usage',
+        cpuLoadAverage: 'CPU Load Average',
+        memoryUsed: 'Memory Used',
+        jvmHeapUsed: 'JVM Heap Used',
+        jvmNonHeapCommitted: 'JVM NonHeap Committed',
+        jvmNonHeapUsed: 'JVM NonHeap Used',
+        diskUsed: 'Disk Used',
+        dbConnectionsActive: 'DB Connections Active',
+        gcCount: 'GC Count',
+        gcTime: 'GC Time',
+      },
+    },
   },
 
   components: {
@@ -2233,7 +2268,8 @@ export const enUS: I18nRules = {
       auditLogs: 'Audit Logs',
       userLoginLogs: 'User Login Logs',
       settings: 'System Settings',
-      sessions: 'Online Sessions'
+      sessions: 'Online Sessions',
+      systemMonitor: 'System Monitor'
     },
 
     // Menu groups

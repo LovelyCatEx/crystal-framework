@@ -25,6 +25,16 @@ export const enThemeConfig: DefaultTheme.Config = {
             { text: 'Database Migration', link: '/en/develop/db-migration' },
           ]
         },
+        {
+          text: 'Controllers',
+          items: [
+            { text: 'ApiResponse', link: '/en/develop/controller/api-response' },
+            { text: 'Generic Controller', link: '/en/develop/controller/generic-controller' },
+            { text: 'StandardManagerController', link: '/en/develop/controller/standard-manager-controller' },
+            { text: 'ReadOnly ManagerController', link: '/en/develop/controller/readonly-manager-controller' },
+            { text: 'Exception Handling', link: '/en/develop/controller/exception-handling' },
+          ]
+        },
         { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
         { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
         { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
@@ -43,6 +53,16 @@ export const enThemeConfig: DefaultTheme.Config = {
             { text: 'Database Migration', link: '/en/contribute/db-migration' },
           ]
         },
+        {
+          text: 'Controllers',
+          items: [
+            { text: 'ApiResponse', link: '/en/contribute/controller/api-response' },
+            { text: 'Generic Controller', link: '/en/contribute/controller/generic-controller' },
+            { text: 'StandardManagerController', link: '/en/contribute/controller/standard-manager-controller' },
+            { text: 'ReadOnly ManagerController', link: '/en/contribute/controller/readonly-manager-controller' },
+            { text: 'Exception Handling', link: '/en/contribute/controller/exception-handling' },
+          ]
+        },
         { text: 'System Settings', link: '/en/contribute/system-settings' },
         { text: 'System Permission', link: '/en/contribute/system-permission' },
         { text: 'Tenant Permission', link: '/en/contribute/tenant-permission' },
@@ -54,7 +74,8 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Deploy Guidance', link: '/en/deploy-guide' },
       ]
-    }
+    },
+    { text: 'Change Logs', link: '/en/change-logs' },
   ],
   footer: {
     message: 'Released under the MIT License.',
