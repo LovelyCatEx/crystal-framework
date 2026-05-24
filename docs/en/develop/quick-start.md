@@ -1,4 +1,4 @@
-# Plugin Development Quick Start
+# Quick Start
 
 ## Prerequisites
 
