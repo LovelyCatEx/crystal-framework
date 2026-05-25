@@ -319,11 +319,26 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
 
     const handleTabRemove = (targetKey: string) => {
         pendingRemoveRef.current = targetKey;
+
+        const targetTab = tabs.find(tab => tab.key === targetKey);
+        const isRemovingActive = targetTab && location.pathname.startsWith(targetTab.key);
+
         setTabs(prev => prev.filter(tab => tab.key !== targetKey));
+
+        if (isRemovingActive) {
+            const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+            const newTabs = tabs.filter(tab => tab.key !== targetKey);
+            if (newTabs.length > 0) {
+                const nextTab = newTabs[Math.min(targetIndex, newTabs.length - 1)];
+                navigate(nextTab.path);
+            }
+        }
     };
 
     const handleCloseLeft = (targetKey: string) => {
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        if (targetIndex <= 0) return; // No tabs to the left
+
         const newTabs = tabs.slice(targetIndex);
 
         const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
@@ -337,6 +352,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
 
     const handleCloseRight = (targetKey: string) => {
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        if (targetIndex >= tabs.length - 1) return; // No tabs to the right
+
         const newTabs = tabs.slice(0, targetIndex + 1);
 
         const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
@@ -349,6 +366,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
     };
 
     const handleCloseOthers = (targetKey: string) => {
+        if (tabs.length <= 1) return; // No other tabs to close
+
         const targetTab = tabs.find(tab => tab.key === targetKey);
         if (!targetTab) return;
 
@@ -396,6 +415,7 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                 const isFirst = index === 0;
                 const isLast = index === tabs.length - 1;
                 const isOnly = tabs.length === 1;
+                const isActiveTab = location.pathname.startsWith(tab.key);
 
                 const contextMenuItems: ContextMenuItem[] = [
                     {
@@ -433,6 +453,7 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                     key: tab.key,
                     label: (
                         <ContextMenu
+                            isActive={isActiveTab}
                             items={contextMenuItems}
                             onAction={(menuKey) => {
                                 switch (menuKey) {
