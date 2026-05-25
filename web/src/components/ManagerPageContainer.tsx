@@ -73,7 +73,16 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const [batchOperationType, setBatchOperationType] = useState(0);
 
     // Time range filter
-    const [timeRange, setTimeRange] = useState<[number, number | null] | null>(null);
+    const [timeRange, setTimeRange] = useState<[number, number | null] | null>(() => {
+        const startTime = props.initialQueryValues?.startTime;
+        const endTime = props.initialQueryValues?.endTime;
+        if (startTime !== undefined) {
+            const start = typeof startTime === 'number' ? startTime : Number(startTime);
+            const end = endTime !== undefined ? (typeof endTime === 'number' ? endTime : Number(endTime)) : null;
+            if (!Number.isNaN(start)) return [start, end && !Number.isNaN(end) ? end : null];
+        }
+        return null;
+    });
 
     const handleOnBatchOperationClick = useCallback(() => {
         if (batchOperationType === 1) {
@@ -244,6 +253,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     showTime
                     allowClear
                     presets={rangePresets}
+                    defaultValue={timeRange ? [dayjs(timeRange[0]), timeRange[1] ? dayjs(timeRange[1]) : null] : undefined}
                     placeholder={[t('components.managerPageContainer.startTime'), t('components.managerPageContainer.tillNow')]}
                     allowEmpty={[false, true]}
                     onChange={(dates) => {
@@ -328,6 +338,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         </Space>
                     ) : undefined}
                     tableSelection={builtinTableSelection}
+                    queryParamsSync={restProps.queryParamsSync}
+                    initialQueryValues={restProps.initialQueryValues}
                 />
             </StandardCard>
 

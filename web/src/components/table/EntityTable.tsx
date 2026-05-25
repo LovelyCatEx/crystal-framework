@@ -42,7 +42,23 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         type: 'disabled' | RowSelectionType;
         onChange?: (records: ENTITY[]) => void;
         isDisabled?: (record: ENTITY) => boolean;
-    }
+    };
+    /**
+     * Callback to sync query params to URL.
+     * Provided by useManagerQueryParams().syncToUrl
+     */
+    queryParamsSync?: (params: Record<string, unknown>) => void;
+    /**
+     * Initial values for built-in query fields (page, pageSize, searchKeyword).
+     * Typically provided from URL search params via useManagerQueryParams().
+     */
+    initialQueryValues?: {
+        page?: number;
+        pageSize?: number;
+        searchKeyword?: string;
+        startTime?: number | string;
+        endTime?: number | string;
+    };
 }
 
 export interface EntityTableRefreshOptions {
@@ -72,12 +88,12 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     const [refreshing, setRefreshing] = useState(false);
 
     // Pagination
-    const [currentPage, setCurrentPage] = useState(1);
-    const [currentPageSize, setCurrentPageSize] = useState(20);
+    const [currentPage, setCurrentPage] = useState(props.initialQueryValues?.page ?? 1);
+    const [currentPageSize, setCurrentPageSize] = useState(props.initialQueryValues?.pageSize ?? 20);
     const [total, setTotal] = useState(0);
 
     // Search
-    const [searchKeyword, setSearchKeyword] = useState('');
+    const [searchKeyword, setSearchKeyword] = useState(props.initialQueryValues?.searchKeyword ?? '');
 
     // Selection (controlled, so parent can reset visually)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -101,19 +117,26 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     const fireQuery = useDebounce((page: number, pageSize: number, keyword: string) => {
         setRefreshing(true);
 
-        props.query({
+        const actionParams = Object.assign(
+            {},
+            ...([
+                    ...(props.tableActions ?? []),
+                    ...(props.tablePrefixActions ?? [])
+                ].mapNotNull((action) => action.queryParamsProvider?.())
+            )
+        );
+
+        const queryParams = {
             page: page,
             pageSize: pageSize,
             searchKeyword: keyword.length > 0 ? keyword : undefined,
-            ...Object.assign(
-                {},
-                ...([
-                        ...(props.tableActions ?? []),
-                        ...(props.tablePrefixActions ?? [])
-                    ].mapNotNull((action) => action.queryParamsProvider?.())
-                )
-            )
-        }).then((res) => {
+            ...actionParams
+        };
+
+        // Sync query params to URL
+        props.queryParamsSync?.(queryParams);
+
+        props.query(queryParams).then((res) => {
             setTotal(res.total);
             setData(res.records);
         }).catch(() => {
@@ -282,6 +305,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                         placeholder={t('components.entityTable.searchPlaceholder', { entityName: props.entityName })}
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="w-full rounded-xl"
+                        defaultValue={props.initialQueryValues?.searchKeyword}
                         onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
                         allowClear
                         onChange={(e) => {
