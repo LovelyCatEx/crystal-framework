@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, theme, Watermark} from "antd";
 import {
     BgColorsOutlined,
@@ -299,7 +299,18 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         setStoredManagerTabs(storageKey, tabs);
     }, [storageKey, storageReady, hydratedStorageKey, tabs]);
 
+    const pendingRemoveRef = useRef<string | null>(null);
+
     const handleTabChange = (key: string) => {
+        // When removing a tab, Tabs internally fires onChange with the removed tab's key
+        // before React processes the setTabs state update. handleTabChange reads the stale
+        // tabs closure (still containing the removed tab) and navigates to it, which triggers
+        // the sync effect that re-adds the tab.
+        // Track the pending removal key via ref to skip this spurious onChange.
+        if (key === pendingRemoveRef.current) {
+            pendingRemoveRef.current = null;
+            return;
+        }
         const tab = tabs.find(t => t.key === key);
         if (tab) {
             navigate(tab.path);
@@ -307,15 +318,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
     };
 
     const handleTabRemove = (targetKey: string) => {
-        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
-        const newTabs = tabs.filter(tab => tab.key !== targetKey);
-
-        if (newTabs.length && location.pathname === tabs[targetIndex]?.path) {
-            const nextTab = newTabs[targetIndex] || newTabs[targetIndex - 1];
-            navigate(nextTab.path);
-        }
-
-        setTabs(newTabs);
+        pendingRemoveRef.current = targetKey;
+        setTabs(prev => prev.filter(tab => tab.key !== targetKey));
     };
 
     const handleCloseLeft = (targetKey: string) => {
@@ -398,6 +402,7 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                         key: 'close',
                         label: t('pages.managerContainer.tabClose'),
                         icon: <CloseOutlined />,
+                        disabled: isOnly,
                         shortcut: { mac: '⌃W', win: 'Alt+W', binding: 'mod+w' },
                     },
                     { key: 'tab-divider', divider: true },
