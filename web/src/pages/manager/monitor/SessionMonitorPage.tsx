@@ -7,7 +7,7 @@ import type {SessionDescription} from "@/types/system/session.types.ts";
 import type {BaseManagerReadDTO} from "@/types/api.types.ts";
 import {StandardCard} from "@/components/card/StandardCard.tsx";
 
-export function SessionMonitorPage() {
+export default function SessionMonitorPage() {
     const {t} = useTranslation();
     const columns = useSessionMonitorTableColumns();
 

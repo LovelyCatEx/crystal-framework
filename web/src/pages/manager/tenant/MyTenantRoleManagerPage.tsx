@@ -14,7 +14,7 @@ import {PlusOutlined} from "@ant-design/icons";
 import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
 import {useTranslation} from "react-i18next";
 
-export function MyTenantRoleManagerPage() {
+export default function MyTenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;

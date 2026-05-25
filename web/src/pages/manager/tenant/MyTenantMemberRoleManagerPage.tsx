@@ -18,7 +18,7 @@ interface TransferItem {
     description: string;
 }
 
-export function MyTenantMemberRoleManagerPage() {
+export default function MyTenantMemberRoleManagerPage() {
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;
     const {t} = useTranslation();

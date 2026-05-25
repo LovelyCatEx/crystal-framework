@@ -41,7 +41,7 @@ interface TreeNodeData extends DataNode {
     department: TenantDepartment;
 }
 
-export function TenantDepartmentManagerPage() {
+export default function TenantDepartmentManagerPage() {
     const { token } = theme.useToken();
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();

@@ -40,7 +40,7 @@ const { useToken } = theme;
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-export function MyTenantProfilePage() {
+export default function MyTenantProfilePage() {
     const { t } = useTranslation();
     const { token } = useToken();
 

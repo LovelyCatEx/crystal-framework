@@ -14,7 +14,7 @@ import {TenantDepartmentIdSelector} from "@/components/selector";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 
-export function MyTenantInvitationManagerPage() {
+export default function MyTenantInvitationManagerPage() {
     const { t } = useTranslation();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();

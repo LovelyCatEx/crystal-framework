@@ -6,7 +6,7 @@ import {LockOutlined, MailOutlined, UserOutlined} from '@ant-design/icons';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
 import {register, requestRegisterEmailCode} from '@/api/auth/auth.api.ts';
 import {buildDocumentTitle} from "@/global/global-settings.ts";
-import {menuPathLogin} from "@/router";
+import {menuPathLogin} from "@/router/paths.ts";
 
 const { Password } = Input;
 

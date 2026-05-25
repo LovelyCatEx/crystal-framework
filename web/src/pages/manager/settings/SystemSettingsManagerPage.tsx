@@ -122,7 +122,7 @@ function buildTabItems(
     });
 }
 
-export function SystemSettingsManagerPage() {
+export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
     const {t} = useTranslation();
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();

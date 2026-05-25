@@ -11,7 +11,7 @@ import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEdi
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 
-export function StorageProviderManagerPage() {
+export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
     const {t} = useTranslation();

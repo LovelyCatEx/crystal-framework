@@ -27,7 +27,7 @@ interface TransferItem {
     path?: string | null;
 }
 
-export function TenantRoleManagerPage() {
+export default function TenantRoleManagerPage() {
     const columns = useTenantRoleTableColumns();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);

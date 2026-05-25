@@ -16,7 +16,7 @@ interface TransferItem {
     description: string;
 }
 
-export function UserRoleRelationManagerPage() {
+export default function UserRoleRelationManagerPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [allRoles, setAllRoles] = useState<UserRole[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);

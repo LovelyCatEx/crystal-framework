@@ -13,7 +13,7 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useTranslation} from "react-i18next";
 
-export function MyTenantMemberManagerPage() {
+export default function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();

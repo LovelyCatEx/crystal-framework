@@ -18,7 +18,7 @@ interface TransferItem {
     description: string;
 }
 
-export function TenantMemberRoleManagerPage() {
+export default function TenantMemberRoleManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();
     const [members, setMembers] = useState<TenantMemberVO[]>([]);

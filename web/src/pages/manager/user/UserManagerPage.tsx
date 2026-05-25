@@ -4,7 +4,7 @@ import {type ManagerCreateUserDTO, UserManagerController} from "@/api/user/user.
 import {useUserTableColumns} from "@/components/columns/UserEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 
-export function UserManagerPage() {
+export default function UserManagerPage() {
     const {t} = useTranslation();
     const columns = useUserTableColumns();
 

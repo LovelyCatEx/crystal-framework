@@ -36,7 +36,7 @@ function getExpireStatus(expiresTime: string | null | undefined): { isExpired: b
     };
 }
 
-export function MyTenantDashboard() {
+export default function MyTenantDashboard() {
     const { t } = useTranslation();
     const { token } = useToken();
     const { joinedTenants, isJoinedTenantsLoading, currentTenant, currentTenantProfile } = useUserTenants();

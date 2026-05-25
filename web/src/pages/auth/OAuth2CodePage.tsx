@@ -1,7 +1,7 @@
 import {AuthCardLayout} from "./AuthorizationPage.tsx";
 import {useNavigate} from "react-router-dom";
 import {getQueryString} from "@/utils/url.utils.ts";
-import {menuPathDashboard, menuPathLogin} from "@/router";
+import {menuPathDashboard, menuPathLogin} from "@/router/paths.ts";
 import {Avatar, Button, Card, Form, Input, message, Space, Tabs} from "antd";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";

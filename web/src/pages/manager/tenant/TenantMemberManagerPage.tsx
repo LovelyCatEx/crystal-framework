@@ -15,7 +15,7 @@ import {PlusOutlined} from "@ant-design/icons";
 import {UserIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 
-export function TenantMemberManagerPage() {
+export default function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();

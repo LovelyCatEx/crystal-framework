@@ -15,7 +15,7 @@ import {PlusOutlined} from "@ant-design/icons";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 
-export function TenantPermissionManagerPage() {
+export default function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>();
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();

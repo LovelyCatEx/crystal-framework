@@ -2,7 +2,7 @@ import {useNavigate} from "react-router-dom";
 import {useEffect} from "react";
 import {ProjectDisplayName} from "@/global/global-settings.ts";
 import {getUserAuthentication} from "@/utils/token.utils.ts";
-import {menuPathLogin} from "@/router";
+import {menuPathLogin} from "@/router/paths.ts";
 
 export function HomePage() {
     const navigate = useNavigate();

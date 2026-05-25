@@ -702,7 +702,7 @@ function UserProfileCard() {
     )
 }
 
-export function UserProfilePage() {
+export default function UserProfilePage() {
     const { t } = useTranslation();
     
     const TAB_KEYS = {

@@ -15,7 +15,7 @@ import {DownloadOutlined} from "@ant-design/icons";
 import {downloadFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 
-export function FileResourceManagerPage() {
+export default function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
     const {t} = useTranslation();

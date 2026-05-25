@@ -84,7 +84,7 @@ function VariablesDisplay({ templateTypes, t }: VariablesDisplayProps) {
     );
 }
 
-export function MailTemplateManagerPage() {
+export default function MailTemplateManagerPage() {
     const { t } = useTranslation();
     const baseColumns = useMailTemplateTableColumns();
 

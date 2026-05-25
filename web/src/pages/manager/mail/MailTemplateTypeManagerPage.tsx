@@ -12,7 +12,7 @@ import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 
-export function MailTemplateTypeManagerPage() {
+export default function MailTemplateTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [categories, setCategories] = useState<MailTemplateCategory[]>([]);
     const { controller } = useProtectedController<MailTemplateType, ManagerCreateMailTemplateTypeDTO, ManagerReadMailTemplateTypeDTO>();

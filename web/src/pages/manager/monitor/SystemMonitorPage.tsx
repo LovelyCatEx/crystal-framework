@@ -48,7 +48,7 @@ const DURATION_OPTIONS: {labelKey: string; value: string}[] = [
     {labelKey: "pages.systemMonitor.durations.d14", value: "14d"},
 ];
 
-export function SystemMonitorPage() {
+export default function SystemMonitorPage() {
     const {t} = useTranslation();
     const {token} = useToken();
     const [duration, setDuration] = useState("1m");

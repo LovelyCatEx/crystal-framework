@@ -20,7 +20,7 @@ interface TransferItem {
     path?: string | null;
 }
 
-export function UserRoleManagerPage() {
+export default function UserRoleManagerPage() {
     const [allPermissions, setAllPermissions] = useState<UserPermission[]>([]);
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);

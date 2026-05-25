@@ -17,7 +17,7 @@ import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 
-export function TenantManagerPage() {
+export default function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
     const [filterStatus, setFilterStatus] = useState<number>();

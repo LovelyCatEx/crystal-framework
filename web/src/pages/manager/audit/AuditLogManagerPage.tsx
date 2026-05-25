@@ -6,7 +6,7 @@ import {useAuditLogTableColumns} from "@/components/columns/AuditLogEntityColumn
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 
-export function AuditLogManagerPage() {
+export default function AuditLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterAction, setFilterAction] = useState<number>();
     const [filterUserId, setFilterUserId] = useState<string>();

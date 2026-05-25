@@ -6,14 +6,20 @@ import {useEffect, useRef, useState} from "react";
 import {useUserLoginLogTableColumns} from "@/components/columns/UserLoginLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
-export function UserLoginLogManagerPage() {
+export default function UserLoginLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterUserId, setFilterUserId] = useState<string>();
-    const [filterUsername, setFilterUsername] = useState<string>();
-    const [filterLoginMethod, setFilterLoginMethod] = useState<number>();
-    const [filterSuccess, setFilterSuccess] = useState<string>();
-    const [filterRemoteIp, setFilterRemoteIp] = useState<string>();
+    const { getInitialParam, syncToUrl, initialQueryValues } = useManagerQueryParams();
+
+    const [filterUserId, setFilterUserId] = useState<string | undefined>(getInitialParam('userId'));
+    const [filterUsername, setFilterUsername] = useState<string | undefined>(getInitialParam('username'));
+    const [filterLoginMethod, setFilterLoginMethod] = useState<number | undefined>(() => {
+        const v = getInitialParam('loginMethod');
+        return v !== undefined ? Number.parseInt(v, 10) : undefined;
+    });
+    const [filterSuccess, setFilterSuccess] = useState<string | undefined>(getInitialParam('success'));
+    const [filterRemoteIp, setFilterRemoteIp] = useState<string | undefined>(getInitialParam('remoteIp'));
     const {t} = useTranslation();
     const columns = useUserLoginLogTableColumns();
 
@@ -37,6 +43,8 @@ export function UserLoginLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
                 query={async (props: ManagerReadUserLoginLogDTO) => {
                     return (await UserLoginLogManagerController.query(props)).data!;
                 }}
@@ -55,6 +63,7 @@ export function UserLoginLogManagerPage() {
                         children: <Input
                             style={{width: 140}}
                             placeholder={t('pages.userLoginLogManager.filter.userIdPlaceholder')}
+                            defaultValue={filterUserId}
                             allowClear
                             onPressEnter={(e) => setFilterUserId((e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
@@ -72,6 +81,7 @@ export function UserLoginLogManagerPage() {
                         children: <Input
                             style={{width: 140}}
                             placeholder={t('pages.userLoginLogManager.filter.usernamePlaceholder')}
+                            defaultValue={filterUsername}
                             allowClear
                             onPressEnter={(e) => setFilterUsername((e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
@@ -87,7 +97,7 @@ export function UserLoginLogManagerPage() {
                     {
                         label: <span>{t('pages.userLoginLogManager.filter.loginMethod')}</span>,
                         children: <Select
-                            defaultValue="-1"
+                            defaultValue={filterLoginMethod !== undefined ? String(filterLoginMethod) : "-1"}
                             style={{width: 120}}
                             options={[
                                 {value: '-1', label: t('pages.userLoginLogManager.filter.all')},
@@ -105,7 +115,7 @@ export function UserLoginLogManagerPage() {
                     {
                         label: <span>{t('pages.userLoginLogManager.filter.status')}</span>,
                         children: <Select
-                            defaultValue="all"
+                            defaultValue={filterSuccess ?? "all"}
                             style={{width: 100}}
                             options={[
                                 {value: 'all', label: t('pages.userLoginLogManager.filter.all')},
@@ -125,6 +135,7 @@ export function UserLoginLogManagerPage() {
                         children: <Input
                             style={{width: 140}}
                             placeholder={t('pages.userLoginLogManager.filter.remoteIpPlaceholder')}
+                            defaultValue={filterRemoteIp}
                             allowClear
                             onPressEnter={(e) => setFilterRemoteIp((e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {

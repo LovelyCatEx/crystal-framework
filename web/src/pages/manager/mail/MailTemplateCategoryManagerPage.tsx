@@ -10,7 +10,7 @@ import {useProtectedController} from "@/components/base/ProtectedControllerWarni
 import type {MailTemplateCategory} from "@/types/mail/mail.types.ts";
 import {useTranslation} from "react-i18next";
 
-export function MailTemplateCategoryManagerPage() {
+export default function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { controller } = useProtectedController<MailTemplateCategory, ManagerCreateMailTemplateCategoryDTO, ManagerReadMailTemplateCategoryDTO>();
     const {t} = useTranslation();

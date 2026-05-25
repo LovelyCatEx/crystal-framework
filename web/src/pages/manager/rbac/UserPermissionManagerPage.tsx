@@ -10,7 +10,7 @@ import {useProtectedController} from "@/components/base/ProtectedControllerWarni
 import {useTranslation} from "react-i18next";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 
-export function UserPermissionManagerPage() {
+export default function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPermissionType, setFilterPermissionType] = useState<number>()
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();

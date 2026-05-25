@@ -7,7 +7,7 @@ import {useMailSendLogTableColumns} from "@/components/columns/MailSendLogEntity
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 
-export function MailSendLogManagerPage() {
+export default function MailSendLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterKeyword, setFilterKeyword] = useState<string>();
     const [filterToEmail, setFilterToEmail] = useState<string>();

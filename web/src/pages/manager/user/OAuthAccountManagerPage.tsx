@@ -10,7 +10,7 @@ import {useOAuthAccountTableColumns} from "@/components/columns/OAuthAccountEnti
 import {UserIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 
-export function OAuthAccountManagerPage() {
+export default function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPlatform, setFilterPlatform] = useState<number>();
     const {t} = useTranslation();

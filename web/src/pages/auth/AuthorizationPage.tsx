@@ -5,7 +5,7 @@ import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {GithubOutlined} from '@ant-design/icons';
 import {ProjectDisplayName} from "@/global/global-settings.ts";
-import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router";
+import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router/paths.ts";
 import {OAuth2CodePage} from "./OAuth2CodePage.tsx";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 

@@ -8,7 +8,7 @@ import {login} from "@/api/auth/auth.api.ts";
 import {getUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
 import {getQueryString} from "@/utils/url.utils.ts";
 import {buildDocumentTitle} from "@/global/global-settings.ts";
-import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "@/router";
+import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "@/router/paths.ts";
 import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
 import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
 import {getJoinedTenants} from "@/api/tenant/tenant.api.ts";

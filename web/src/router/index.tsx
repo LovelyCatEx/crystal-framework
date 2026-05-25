@@ -18,42 +18,43 @@ import {
     UserOutlined,
     UserSwitchOutlined
 } from '@ant-design/icons';
-import {DashboardPage} from "../pages/manager/dashboard/DashboardPage.tsx";
-import {UserPermissionManagerPage} from "../pages/manager/rbac/UserPermissionManagerPage.tsx";
-import {UserRoleManagerPage} from "../pages/manager/rbac/UserRoleManagerPage.tsx";
-import {UserManagerPage} from "../pages/manager/user/UserManagerPage.tsx";
-import {UserRoleRelationManagerPage} from "../pages/manager/rbac/UserRoleRelationManagerPage.tsx";
-import type {MenuItemType} from "antd/es/menu/interface";
-import type {MenuGroup, MenuItem} from "../types/menu.types.ts";
-import {SystemSettingsManagerPage} from "../pages/manager/settings/SystemSettingsManagerPage.tsx";
-import {UserProfilePage} from "../pages/manager/profile/UserProfilePage.tsx";
-import {OAuthAccountManagerPage} from "../pages/manager/user/OAuthAccountManagerPage.tsx";
-import {FileResourceManagerPage} from "../pages/manager/resource/FileResourceManagerPage.tsx";
-import {StorageProviderManagerPage} from "../pages/manager/resource/StorageProviderManagerPage.tsx";
-import {MailTemplateCategoryManagerPage} from "../pages/manager/mail/MailTemplateCategoryManagerPage.tsx";
-import {MailTemplateTypeManagerPage} from "../pages/manager/mail/MailTemplateTypeManagerPage.tsx";
-import {MailTemplateManagerPage} from "../pages/manager/mail/MailTemplateManagerPage.tsx";
-import {TenantManagerPage} from "../pages/manager/tenant/TenantManagerPage.tsx";
-import {TenantTireTypeManagerPage} from "../pages/manager/tenant/TenantTireTypeManagerPage.tsx";
-import {TenantMemberManagerPage} from "../pages/manager/tenant/TenantMemberManagerPage.tsx";
-import {TenantPermissionManagerPage} from "../pages/manager/tenant/TenantPermissionManagerPage.tsx";
-import {TenantRoleManagerPage} from "../pages/manager/tenant/TenantRoleManagerPage.tsx";
-import {TenantRolePermissionManagerPage} from "../pages/manager/tenant/TenantRolePermissionManagerPage.tsx";
-import {TenantMemberRoleManagerPage} from "../pages/manager/tenant/TenantMemberRoleManagerPage.tsx";
-import {TenantDepartmentManagerPage} from "@/pages/manager/tenant/TenantDepartmentManagerPage.tsx";
-import {TenantInvitationManagerPage} from "@/pages/manager/tenant/TenantInvitationManagerPage.tsx";
-import {AuditLogManagerPage} from "@/pages/manager/audit/AuditLogManagerPage.tsx";
-import {MyTenantProfilePage} from "@/pages/manager/tenant/MyTenantProfilePage.tsx";
-import {MyTenantDashboard} from "@/pages/manager/tenant/MyTenantDashboard.tsx";
-import {MailSendLogManagerPage} from "@/pages/manager/mail/MailSendLogManagerPage.tsx";
-import {MyTenantMemberManagerPage} from "@/pages/manager/tenant/MyTenantMemberManagerPage.tsx";
-import {MyTenantInvitationManagerPage} from "@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx";
-import {MyTenantRoleManagerPage} from "@/pages/manager/tenant/MyTenantRoleManagerPage.tsx";
-import {MyTenantMemberRoleManagerPage} from "@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx";
-import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx";
-import {UserLoginLogManagerPage} from "@/pages/manager/auth/UserLoginLogManagerPage.tsx";
-import {SessionMonitorPage} from "@/pages/manager/monitor/SessionMonitorPage.tsx";
-import {SystemMonitorPage} from "@/pages/manager/monitor/SystemMonitorPage.tsx";
+import { lazy } from 'react';
+
+const DashboardPage = lazy(() => import("../pages/manager/dashboard/DashboardPage.tsx"));
+const UserPermissionManagerPage = lazy(() => import("../pages/manager/rbac/UserPermissionManagerPage.tsx"));
+const UserRoleManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleManagerPage.tsx"));
+const UserManagerPage = lazy(() => import("../pages/manager/user/UserManagerPage.tsx"));
+const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
+const SystemSettingsManagerPage = lazy(() => import("../pages/manager/settings/SystemSettingsManagerPage.tsx"));
+const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfilePage.tsx"));
+const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
+const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
+const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
+const MailTemplateCategoryManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateCategoryManagerPage.tsx"));
+const MailTemplateTypeManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateTypeManagerPage.tsx"));
+const MailTemplateManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateManagerPage.tsx"));
+const TenantManagerPage = lazy(() => import("../pages/manager/tenant/TenantManagerPage.tsx"));
+const TenantTireTypeManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireTypeManagerPage.tsx"));
+const TenantMemberManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberManagerPage.tsx"));
+const TenantPermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantPermissionManagerPage.tsx"));
+const TenantRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantRoleManagerPage.tsx"));
+const TenantRolePermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantRolePermissionManagerPage.tsx"));
+const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberRoleManagerPage.tsx"));
+const TenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/TenantDepartmentManagerPage.tsx"));
+const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/TenantInvitationManagerPage.tsx"));
+const AuditLogManagerPage = lazy(() => import("@/pages/manager/audit/AuditLogManagerPage.tsx"));
+const MyTenantProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantProfilePage.tsx"));
+const MyTenantDashboard = lazy(() => import("@/pages/manager/tenant/MyTenantDashboard.tsx"));
+const MailSendLogManagerPage = lazy(() => import("@/pages/manager/mail/MailSendLogManagerPage.tsx"));
+const MyTenantMemberManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMemberManagerPage.tsx"));
+const MyTenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx"));
+const MyTenantRoleManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantRoleManagerPage.tsx"));
+const MyTenantMemberRoleManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx"));
+const MyTenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx"));
+const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLoginLogManagerPage.tsx"));
+const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
+const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
+
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
@@ -62,15 +63,12 @@ import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-ca
 import type {TFunction} from "i18next";
 import {pluginRegistry} from "@/plugin/registry.ts";
 import type {PluginRouteItem} from "@/plugin/types.ts";
-// 为了向后兼容，保留旧的导出（使用默认翻译函数）
 import i18n from "@/i18n";
+import type {MenuGroup, MenuItem} from "@/types/menu.types.ts";
+import type {MenuItemType} from "antd/lib/menu/interface";
+import {menuPathDashboard, menuPathProfile} from "@/router/paths.ts";
 
-export const menuPathDashboard = "/manager/dashboard";
-export const menuPathProfile = "/manager/profile"
-export const menuPathLogin = "/auth/login"
-export const menuPathRegister = "/auth/register"
-export const menuPathResetPassword = "/auth/reset-password"
-export const menuPathOAuthCode = "/auth/oauth2-code"
+
 
 export type RouteItem = MenuItem & MenuItemType;
 
