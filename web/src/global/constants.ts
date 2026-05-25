@@ -1,4 +1,4 @@
-import {OAuthPlatform} from "../types/oauth-account.types";
+import {OAuthPlatform} from "../types/user/oauth-account.types.ts";
 
 export const PLATFORM_REGISTRATION_ID_MAP: Record<OAuthPlatform, string> = {
     [OAuthPlatform.GITHUB]: "github",

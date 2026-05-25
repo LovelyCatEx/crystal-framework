@@ -4,7 +4,7 @@ import {
     type ManagerCreateTenantTireTypeDTO,
     type ManagerReadTenantTireTypeDTO,
     TenantTireTypeManagerController
-} from "@/api/tenant-tire-type.api.ts";
+} from "@/api/tenant/tenant-tire-type.api.ts";
 import {useRef} from "react";
 import {useTenantTireTypeTableColumns} from "@/components/columns/TenantTireTypeEntityColumns.tsx";
 import {useTranslation} from "react-i18next";

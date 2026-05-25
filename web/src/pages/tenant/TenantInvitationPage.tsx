@@ -12,9 +12,9 @@ import {
     WarningOutlined
 } from '@ant-design/icons';
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {getTenantProfile} from "@/api/tenant-profile.api.ts";
-import {acceptTenantInvitation, queryTenantInvitationByCode} from "@/api/invitation.api.ts";
-import type {TenantProfileVO} from "@/types/tenant.types.ts";
+import {getTenantProfile} from "@/api/tenant/tenant-profile.api.ts";
+import {acceptTenantInvitation, queryTenantInvitationByCode} from "@/api/tenant/tenant-invitation.api.ts";
+import type {TenantProfileVO} from "@/types/tenant/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {buildDocumentTitle, ProjectDisplayName} from "@/global/global-settings.ts";
 import {useTranslation} from "react-i18next";

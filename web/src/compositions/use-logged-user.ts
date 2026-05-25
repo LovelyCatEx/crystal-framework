@@ -1,10 +1,10 @@
-import {getUserAccessibleMenus} from "../api/user.api.ts";
-import {useSWRComposition} from "./swr.ts";
+import {getUserAccessibleMenus} from "../api/user/user.api.ts";
+import {useSWRComposition} from "./use-swr.ts";
 import type {ApiResponse} from "@/api/system-request.ts";
 import {message} from "antd";
 import {getUserAuthentication} from "../utils/token.utils.ts";
 import {useCurrentUserProfile} from "@/compositions/use-user-profile.ts";
-import type {UserAccessibleResourceVO} from "@/types/user.types.ts";
+import type {UserAccessibleResourceVO} from "@/types/user/user.types.ts";
 
 export const useLoggedUser = () => {
     const auth = getUserAuthentication();

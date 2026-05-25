@@ -5,7 +5,7 @@ import {CheckCircleOutlined, LockOutlined, MailOutlined, UserOutlined} from '@an
 import {useTranslation} from 'react-i18next';
 import {ProjectDisplayName} from '@/global/global-settings.ts';
 import {LanguageSwitcher} from '@/components/LanguageSwitcher.tsx';
-import {checkSystemInitialized, initializeSystem} from '@/api/system-initialize.api.ts';
+import {checkSystemInitialized, initializeSystem} from '@/api/system/system-initialize.api.ts';
 
 const { Password } = Input;
 const { Title, Text } = Typography;

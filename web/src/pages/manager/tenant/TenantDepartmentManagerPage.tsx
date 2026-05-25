@@ -8,14 +8,14 @@ import {
     type ManagerCreateTenantDepartmentDTO,
     type ManagerUpdateTenantDepartmentDTO,
     TenantDepartmentManagerController
-} from "@/api/tenant-department.api.ts";
+} from "@/api/tenant/tenant-department.api.ts";
 import {
     DepartmentMemberRoleType,
     type ManagerReadTenantDepartmentMemberDTO,
     TenantDepartmentMemberManagerController
-} from "@/api/tenant-department-member.api.ts";
+} from "@/api/tenant/tenant-department-member.api.ts";
 import {getDepartmentMemberRoleType} from "@/i18n/enum-helpers.ts";
-import {TenantMemberManagerController} from "@/api/tenant-member.api.ts";
+import {TenantMemberManagerController} from "@/api/tenant/tenant-member.api.ts";
 import {useTenantMemberTableColumns} from "@/components/columns/TenantMemberEntityColumns.tsx";
 import {useTenantDepartmentMemberTableColumns} from "@/components/columns/TenantDepartmentMemberEntityColumns.tsx";
 
@@ -32,9 +32,9 @@ import type {Key} from "react";
 import {useEffect, useState} from "react";
 import type {DataNode} from "antd/es/tree";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
-import type {TenantDepartmentMemberVO} from "@/types/tenant-department-member.types.ts";
-import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
+import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
+import type {TenantDepartmentMemberVO} from "@/types/tenant/tenant-department-member.types.ts";
+import type {TenantMemberVO} from "@/types/tenant/tenant-member.types.ts";
 import {useTranslation} from "react-i18next";
 
 interface TreeNodeData extends DataNode {

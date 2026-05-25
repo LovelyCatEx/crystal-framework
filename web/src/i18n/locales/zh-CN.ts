@@ -1,4 +1,4 @@
-import type {I18nRules} from "@/i18n/locales/i18n-rules.ts";
+import type {I18nRules} from "@/i18n/i18n-rules.ts";
 
 export const zhCN: I18nRules = {
   pages: {

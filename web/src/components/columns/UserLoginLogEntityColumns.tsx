@@ -1,10 +1,10 @@
 import {Popover, Space, Spin, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {UserLoginLogEntity} from "@/api/user-login-log.api.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {UserLoginLogEntity} from "@/types/user/user-login-log.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {UserManagerController} from "@/api/user.api.ts";
-import type {User} from "@/types/user.types.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {UserManagerController} from "@/api/user/user.api.ts";
+import type {User} from "@/types/user/user.types.ts";
 import {UserCard} from "../card/pop/UserCard.tsx";
 import {AvatarResource} from "../AvatarResource.tsx";
 import {useTranslation} from "react-i18next";

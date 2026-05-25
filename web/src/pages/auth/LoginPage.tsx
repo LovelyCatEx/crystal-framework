@@ -4,16 +4,16 @@ import {useEffect, useState} from 'react';
 import {type NavigateFunction, useNavigate} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
 import {AuthCardLayout} from './AuthorizationPage.tsx';
-import {login} from "@/api/auth.api.ts";
+import {login} from "@/api/auth/auth.api.ts";
 import {getUserAuthentication, setUserAuthentication} from "@/utils/token.utils.ts";
 import {getQueryString} from "@/utils/url.utils.ts";
 import {buildDocumentTitle} from "@/global/global-settings.ts";
 import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "@/router";
 import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
-import {OAuthPlatform} from "@/types/oauth-account.types.ts";
-import {getJoinedTenants} from "@/api/tenant.api.ts";
-import type {UserTenantVO} from "@/types/tenant.types.ts";
-import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
+import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
+import {getJoinedTenants} from "@/api/tenant/tenant.api.ts";
+import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
+import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 
 interface LoginFormData {
     username: string,

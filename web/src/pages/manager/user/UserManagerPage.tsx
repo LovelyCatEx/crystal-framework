@@ -1,6 +1,6 @@
 import {Col, Form, Input, Row} from "antd";
 import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
-import {type ManagerCreateUserDTO, UserManagerController} from "@/api/user.api.ts";
+import {type ManagerCreateUserDTO, UserManagerController} from "@/api/user/user.api.ts";
 import {useUserTableColumns} from "@/components/columns/UserEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 

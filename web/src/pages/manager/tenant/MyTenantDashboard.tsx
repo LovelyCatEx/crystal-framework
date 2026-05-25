@@ -14,8 +14,8 @@ import {useTranslation} from "react-i18next";
 import {getTenantMemberStatus, getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useState} from "react";
-import {getUserProfile} from "@/api/user.api.ts";
-import type {UserProfileVO} from "@/types/user.types.ts";
+import {getUserProfile} from "@/api/user/user.api.ts";
+import type {UserProfileVO} from "@/types/user/user.types.ts";
 
 const { Title, Text } = Typography;
 const { useToken } = theme;

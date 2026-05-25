@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {User} from "@/types/user.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {User} from "@/types/user/user.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {AvatarResource} from "../AvatarResource.tsx";
 import {useTranslation} from "react-i18next";

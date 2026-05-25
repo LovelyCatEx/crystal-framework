@@ -1,7 +1,7 @@
 import {Card, Descriptions, Spin, Tag} from "antd";
-import type {MailTemplateType} from "@/types/mail.types.ts";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
+import type {MailTemplateType} from "@/types/mail/mail.types.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 

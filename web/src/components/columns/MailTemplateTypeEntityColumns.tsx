@@ -1,10 +1,10 @@
 import React, {type JSX} from "react";
 import {Space, Spin, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {MailTemplateCategory, MailTemplateType} from "@/types/mail.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {MailTemplateCategory, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
 import {useTranslation} from "react-i18next";
 
 function CategoryCell({ categoryId }: { categoryId: string }) {

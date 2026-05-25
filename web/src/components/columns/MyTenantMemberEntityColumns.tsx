@@ -1,11 +1,11 @@
 import React, {type JSX} from "react";
 import {Popover, Space, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {AvatarResource} from "../AvatarResource.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";
-import type {TenantMemberVO} from "@/types/tenant-member.types.ts";
+import type {TenantMemberVO} from "@/types/tenant/tenant-member.types.ts";
 import {useTranslation} from "react-i18next";
 
 export function useMyTenantMemberTableColumns(): EntityTableColumns<TenantMemberVO> {

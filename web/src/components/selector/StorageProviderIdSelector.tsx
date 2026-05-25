@@ -2,8 +2,8 @@ import {CloudOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useStorageProviderTableColumns} from "../columns/StorageProviderEntityColumns.tsx";
-import {StorageProviderManagerController} from "@/api/storage-provider.api.ts";
-import {type StorageProvider, StorageProviderType} from "@/types/storage-provider.types.ts";
+import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
+import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
 
 interface StorageProviderIdSelectorProps {
     value?: string | null;

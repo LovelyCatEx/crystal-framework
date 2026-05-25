@@ -2,7 +2,7 @@ import React from "react";
 import {Button, message} from "antd";
 import {GithubOutlined, GoogleOutlined, QqOutlined} from "@ant-design/icons";
 import {getOAuth2LoginUrl} from "../utils/oauth2";
-import {OAuthPlatform} from "../types/oauth-account.types";
+import {OAuthPlatform} from "../types/user/oauth-account.types.ts";
 import {PLATFORM_REGISTRATION_ID_MAP} from "../global/constants.ts";
 import {useTranslation} from "react-i18next";
 

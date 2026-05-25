@@ -4,14 +4,14 @@ import {
     MailTemplateManagerController,
     type ManagerCreateMailTemplateDTO,
     type ManagerReadMailTemplateDTO
-} from "@/api/mail-template.api.ts";
+} from "@/api/mail/mail-template.api.ts";
 import {useEffect, useRef, useState} from "react";
-import type {MailTemplate, MailTemplateType} from "@/types/mail.types.ts";
+import type {MailTemplate, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {useMailTemplateTableColumns} from "@/components/columns/MailTemplateEntityColumns.tsx";
-import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
 import {HtmlEditor} from "@/components/HtmlEditor.tsx";
 import {CopyOutlined} from "@ant-design/icons";
-import type {EntityTableColumns} from "@/components/types/entity-table.types.ts";
+import type {EntityTableColumns} from "@/components/table/entity-table.types.ts";
 import {useTranslation} from "react-i18next";
 
 interface TemplateVariablesProps {

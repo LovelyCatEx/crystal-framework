@@ -5,7 +5,7 @@ import {
     InvitationManagerController,
     type ManagerCreateInvitationDTO,
     type ManagerUpdateInvitationDTO
-} from "@/api/invitation.api.ts";
+} from "@/api/tenant/tenant-invitation.api.ts";
 import {useRef, useState} from "react";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";

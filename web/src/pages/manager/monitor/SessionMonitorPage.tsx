@@ -1,11 +1,11 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {EntityTable} from "@/components/EntityTable.tsx";
+import {EntityTable} from "@/components/table/EntityTable.tsx";
 import {useSessionMonitorTableColumns} from "@/components/columns/SessionMonitorEntityColumns.tsx";
-import {getOnlineSessions} from "@/api/session-monitor.api.ts";
+import {getOnlineSessions} from "@/api/monitor/session-monitor.api.ts";
 import {useTranslation} from "react-i18next";
-import type {SessionDescription} from "@/types/session.types.ts";
+import type {SessionDescription} from "@/types/system/session.types.ts";
 import type {BaseManagerReadDTO} from "@/types/api.types.ts";
-import {StandardCard} from "@/components/StandardCard.tsx";
+import {StandardCard} from "@/components/card/StandardCard.tsx";
 
 export function SessionMonitorPage() {
     const {t} = useTranslation();

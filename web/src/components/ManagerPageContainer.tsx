@@ -21,10 +21,10 @@ import {
     type EntityTableProps,
     type EntityTableRef,
     type EntityTableRefreshOptions
-} from "./EntityTable.tsx";
+} from "./table/EntityTable.tsx";
 import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
-import {StandardCard} from "@/components/StandardCard.tsx";
+import {StandardCard} from "@/components/card/StandardCard.tsx";
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 

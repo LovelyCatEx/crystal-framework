@@ -4,7 +4,7 @@ import {
     type ManagerCreateOAuthAccountDTO,
     type ManagerReadOAuthAccountDTO,
     OAuthAccountManagerController
-} from "@/api/oauth-account.api.ts";
+} from "@/api/user/oauth-account.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useOAuthAccountTableColumns} from "@/components/columns/OAuthAccountEntityColumns.tsx";
 import {UserIdSelector} from "@/components/selector";

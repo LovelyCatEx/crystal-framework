@@ -1,12 +1,12 @@
 import {Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {type ManagerCreatePermissionDTO, type ManagerReadPermissionDTO} from "@/api/user-permission.api.ts";
-import type {UserPermission} from "@/types/user-permission.types.ts";
-import {PermissionType} from "@/types/user-permission.types.ts";
+import {type ManagerCreatePermissionDTO, type ManagerReadPermissionDTO} from "@/api/user/rbac/user-permission.api.ts";
+import type {UserPermission} from "@/types/user/rbac/user-permission.types.ts";
+import {PermissionType} from "@/types/user/rbac/user-permission.types.ts";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import {useUserPermissionTableColumns} from "@/components/columns/UserPermissionEntityColumns.tsx";
-import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 

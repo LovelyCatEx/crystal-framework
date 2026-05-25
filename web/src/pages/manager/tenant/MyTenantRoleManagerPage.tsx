@@ -4,14 +4,14 @@ import {
     type ManagerCreateTenantRoleDTO,
     type ManagerUpdateTenantRoleDTO,
     TenantRoleManagerController
-} from "@/api/tenant-role.api.ts";
+} from "@/api/tenant/rbac/tenant-role.api.ts";
 import {useRef} from "react";
 import {useTenantRoleTableColumns} from "@/components/columns/TenantRoleEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.tsx";
 import {PlusOutlined} from "@ant-design/icons";
-import type {TenantRole} from "@/types/tenat-role.types.ts";
+import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
 import {useTranslation} from "react-i18next";
 
 export function MyTenantRoleManagerPage() {

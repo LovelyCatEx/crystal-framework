@@ -54,11 +54,11 @@ import {MyTenantDepartmentManagerPage} from "@/pages/manager/tenant/MyTenantDepa
 import {UserLoginLogManagerPage} from "@/pages/manager/auth/UserLoginLogManagerPage.tsx";
 import {SessionMonitorPage} from "@/pages/manager/monitor/SessionMonitorPage.tsx";
 import {SystemMonitorPage} from "@/pages/manager/monitor/SystemMonitorPage.tsx";
-import {ProtectedControllerWarningWrapper} from "@/components/ProtectedControllerWarningWrapper.tsx";
-import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
-import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
-import {MailTemplateTypeManagerController} from "@/api/mail-template-type.api.ts";
-import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
+import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
+import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
+import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
+import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
+import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
 import type {TFunction} from "i18next";
 import {pluginRegistry} from "@/plugin/registry.ts";
 import type {PluginRouteItem} from "@/plugin/types.ts";

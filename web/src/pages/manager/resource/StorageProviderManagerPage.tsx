@@ -4,9 +4,9 @@ import {
     type ManagerCreateStorageProviderDTO,
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
-} from "@/api/storage-provider.api.ts";
+} from "@/api/resource/storage-provider.api.ts";
 import React, {useEffect, useRef, useState} from "react";
-import {type StorageProvider, StorageProviderType} from "@/types/storage-provider.types.ts";
+import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEditor.tsx";
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
 import {useTranslation} from "react-i18next";

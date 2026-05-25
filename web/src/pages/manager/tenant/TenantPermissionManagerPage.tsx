@@ -4,15 +4,15 @@ import {
     type ManagerCreateTenantPermissionDTO,
     type ManagerReadTenantPermissionDTO,
     type ManagerUpdateTenantPermissionDTO
-} from "@/api/tenant-permission.api.ts";
-import type {TenantPermission} from "@/types/tenant-permission.types.ts";
-import {TenantPermissionType} from "@/types/tenant-permission.types.ts";
+} from "@/api/tenant/rbac/tenant-permission.api.ts";
+import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
+import {TenantPermissionType} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
 import {useTenantPermissionTableColumns} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
-import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 
 export function TenantPermissionManagerPage() {

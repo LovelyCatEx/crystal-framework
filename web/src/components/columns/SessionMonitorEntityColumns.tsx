@@ -1,15 +1,15 @@
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {SessionDescription} from "@/types/session.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {SessionDescription} from "@/types/system/session.types.ts";
 import {useTranslation} from "react-i18next";
 import {Popover, Space, Spin, Tag} from "antd";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {UserManagerController} from "@/api/user.api.ts";
-import type {User} from "@/types/user.types.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {UserManagerController} from "@/api/user/user.api.ts";
+import type {User} from "@/types/user/user.types.ts";
 import {UserCard} from "../card/pop/UserCard.tsx";
 import {AvatarResource} from "../AvatarResource.tsx";
-import {TenantManagerController} from "@/api/tenant.api.ts";
-import type {Tenant} from "@/types/tenant.types.ts";
+import {TenantManagerController} from "@/api/tenant/tenant.api.ts";
+import type {Tenant} from "@/types/tenant/tenant.types.ts";
 import {DesktopOutlined, GlobalOutlined} from "@ant-design/icons";
 
 function parseUserAgent(userAgent: string): { os: string; browser: string; device: string } | null {

@@ -5,8 +5,8 @@ import {PlusOutlined, RightOutlined, ShopOutlined, TeamOutlined,} from "@ant-des
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {getTenantProfile} from "@/api/tenant-profile.api.ts";
-import type {TenantProfileVO, UserTenantVO} from "@/types/tenant.types.ts";
+import {getTenantProfile} from "@/api/tenant/tenant-profile.api.ts";
+import type {TenantProfileVO, UserTenantVO} from "@/types/tenant/tenant.types.ts";
 
 const { useToken } = theme;
 

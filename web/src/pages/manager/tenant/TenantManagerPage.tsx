@@ -6,12 +6,12 @@ import {
     type ManagerReadTenantDTO,
     type ManagerUpdateTenantDTO,
     TenantManagerController
-} from "@/api/tenant.api.ts";
+} from "@/api/tenant/tenant.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useTenantTableColumns} from "@/components/columns/TenantEntityColumns.tsx";
-import {TenantTireTypeManagerController} from "@/api/tenant-tire-type.api.ts";
-import type {TenantTireType} from "@/types/tenant.types.ts";
-import {TenantStatus} from "@/types/tenant.types.ts";
+import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
+import type {TenantTireType} from "@/types/tenant/tenant.types.ts";
+import {TenantStatus} from "@/types/tenant/tenant.types.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";

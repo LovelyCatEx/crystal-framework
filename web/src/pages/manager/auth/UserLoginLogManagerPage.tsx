@@ -1,6 +1,7 @@
 import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {type ManagerReadUserLoginLogDTO, UserLoginLogManagerController,} from "@/api/user-login-log.api.ts";
+import {UserLoginLogManagerController} from "@/api/user/user-login-log.api.ts";
+import type {ManagerReadUserLoginLogDTO} from "@/types/user/user-login-log.types.ts";
 import {useEffect, useRef, useState} from "react";
 import {useUserLoginLogTableColumns} from "@/components/columns/UserLoginLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";

@@ -1,6 +1,6 @@
-import {useSWRState} from "@/compositions/swr.ts";
-import type {UserProfileVO} from "@/types/user.types.ts";
-import {getUserProfile} from "@/api/user.api.ts";
+import {useSWRState} from "@/compositions/use-swr.ts";
+import type {UserProfileVO} from "@/types/user/user.types.ts";
+import {getUserProfile} from "@/api/user/user.api.ts";
 import {message} from "antd";
 
 export const useUserProfile = (userId?: string | null) => {

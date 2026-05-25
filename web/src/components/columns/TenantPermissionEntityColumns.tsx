@@ -1,10 +1,10 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import type {TenantPermission} from "@/types/tenant-permission.types.ts";
+import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
 
 export function useTenantPermissionTableColumns(): EntityTableColumns<TenantPermission> {
