@@ -822,27 +822,29 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 />
                             </div>
                         )}
-                        <Watermark
-                            className="flex-1 p-6 overflow-auto"
-                            content={watermarkContent}
-                            font={{ color: watermarkFontColor }}
-                            zIndex={10}
-                            style={{ overflow: 'auto!important' }}
-                        >
-                            <Routes>
-                                {availableMenus.map((menu) => (
-                                    <Route
-                                        key={menu.key.toString()}
-                                        path={menu.path.replace(parentPath, "")}
-                                        element={
-                                            <div key={location.key} className={pageAnimationClass}>
-                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
-                                            </div>
-                                        }
-                                    />
-                                ))}
-                            </Routes>
-                        </Watermark>
+                        <div className="flex-1 overflow-auto">
+                            <Watermark
+                                content={watermarkContent}
+                                font={{ color: watermarkFontColor }}
+                                zIndex={10}
+                            >
+                                <div className="p-6">
+                                    <Routes>
+                                        {availableMenus.map((menu) => (
+                                            <Route
+                                                key={menu.key.toString()}
+                                                path={menu.path.replace(parentPath, "")}
+                                                element={
+                                                    <div key={location.key} className={pageAnimationClass}>
+                                                        {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                                    </div>
+                                                }
+                                            />
+                                        ))}
+                                    </Routes>
+                                </div>
+                            </Watermark>
+                        </div>
 
                     </Content>
                 ) : (
