@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Button, Dropdown} from 'antd';
 import {CheckOutlined, GlobalOutlined} from '@ant-design/icons';
-import i18n from '@/i18n';
+import i18n, {loadLanguageBundle} from '@/i18n';
 
 interface Language {
   key: string;
@@ -29,9 +29,10 @@ export function LanguageSwitcher() {
     }
   }, []);
 
-  const handleLanguageChange = (langKey: string) => {
+  const handleLanguageChange = async (langKey: string) => {
+    await loadLanguageBundle(langKey);
     setCurrentLang(langKey);
-    i18n.changeLanguage(langKey);
+    await i18n.changeLanguage(langKey);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, langKey);
   };
 
