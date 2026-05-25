@@ -38,6 +38,8 @@ docker/.env
 /data
 /deploy
 .narrafork/
+.kiro/
+.claude/
 .worktrees/
 .flattened-pom.xml
 /ext
