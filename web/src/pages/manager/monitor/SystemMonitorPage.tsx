@@ -6,8 +6,8 @@ import * as echarts from "echarts";
 import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {MetricChart, type MetricChartConfig} from "@/components/dashboard/MetricChart.tsx";
-import {queryMetric} from "@/api/system/system-monitor.api.ts";
-import type {MetricPoint} from "@/api/system/system-monitor.api.ts";
+import {batchQueryMetrics} from "@/api/monitor/system-monitor.api.ts";
+import type {MetricPoint} from "@/types/monitor/system-monitor.types.ts";
 
 const {useToken} = theme;
 
@@ -60,14 +60,17 @@ export default function SystemMonitorPage() {
     const colSpan = columns === "1" ? 24 : columns === "2" ? 12 : columns === "3" ? 8 : undefined;
 
     const fetchAll = useCallback(async () => {
-        const results = await Promise.all(
-            METRICS.map(m => queryMetric(m.type, duration).catch(() => null))
+        const res = await batchQueryMetrics(
+            METRICS.map(m => m.type),
+            duration,
         );
-        const map: Record<string, MetricPoint[]> = {};
-        results.forEach((res, i) => {
-            map[METRICS[i].type] = res?.data?.data ?? [];
-        });
-        setDataMap(map);
+        if (res?.data) {
+            const map: Record<string, MetricPoint[]> = {};
+            for (const m of METRICS) {
+                map[m.type] = res.data[m.type]?.data ?? [];
+            }
+            setDataMap(map);
+        }
     }, [duration]);
 
     useEffect(() => {

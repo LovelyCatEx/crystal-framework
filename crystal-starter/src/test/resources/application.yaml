@@ -92,6 +92,8 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+  monitor:
+    flush-interval-ms: 30000
   sharding:
     snowflake:
       start-point: 0

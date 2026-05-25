@@ -1,6 +1,6 @@
 import {useEffect, useRef} from "react";
 import * as echarts from "echarts";
-import type {MetricPoint} from "@/api/system/system-monitor.api.ts";
+import type {MetricPoint} from "@/types/monitor/system-monitor.types.ts";
 
 function timeFormat(duration: string): string {
     if (duration === "1m") return "{mm}:{ss}";
