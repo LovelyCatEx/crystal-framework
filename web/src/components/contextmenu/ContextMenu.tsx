@@ -28,6 +28,13 @@ interface ContextMenuProps {
     items: ContextMenuItem[];
     onAction: (key: string) => void;
     children: React.ReactNode;
+    /**
+     * When false, keyboard shortcuts for this context menu are suppressed.
+     * Used in tab bars where only the active tab should respond to keyboard shortcuts
+     * (e.g., Ctrl+W should close the active tab, not all tabs simultaneously).
+     * Right-click context menu actions are unaffected.
+     */
+    isActive?: boolean;
 }
 
 function isActionItem(item: ContextMenuItem): item is ContextMenuActionItem {
@@ -51,7 +58,7 @@ function matchesBinding(binding: string, e: KeyboardEvent): boolean {
     return e.key.toLowerCase() === keyPart || e.code.toLowerCase() === keyPart;
 }
 
-export function ContextMenu({ items, onAction, children }: ContextMenuProps) {
+export function ContextMenu({ items, onAction, children, isActive }: ContextMenuProps) {
     const itemsRef = useRef(items);
     itemsRef.current = items;
 
@@ -59,6 +66,9 @@ export function ContextMenu({ items, onAction, children }: ContextMenuProps) {
     onActionRef.current = onAction;
 
     useEffect(() => {
+        // Only the active tab's ContextMenu should handle keyboard shortcuts
+        if (isActive === false) return;
+
         const handleKeyDown = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
             if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
@@ -80,7 +90,7 @@ export function ContextMenu({ items, onAction, children }: ContextMenuProps) {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [isActive]);
 
     const menuItems: MenuProps['items'] = items.map(item => {
         if ('divider' in item && item.divider) {

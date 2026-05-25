@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, theme, Watermark} from "antd";
 import {
     BgColorsOutlined,
@@ -299,7 +299,18 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
         setStoredManagerTabs(storageKey, tabs);
     }, [storageKey, storageReady, hydratedStorageKey, tabs]);
 
+    const pendingRemoveRef = useRef<string | null>(null);
+
     const handleTabChange = (key: string) => {
+        // When removing a tab, Tabs internally fires onChange with the removed tab's key
+        // before React processes the setTabs state update. handleTabChange reads the stale
+        // tabs closure (still containing the removed tab) and navigates to it, which triggers
+        // the sync effect that re-adds the tab.
+        // Track the pending removal key via ref to skip this spurious onChange.
+        if (key === pendingRemoveRef.current) {
+            pendingRemoveRef.current = null;
+            return;
+        }
         const tab = tabs.find(t => t.key === key);
         if (tab) {
             navigate(tab.path);
@@ -307,19 +318,27 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
     };
 
     const handleTabRemove = (targetKey: string) => {
-        const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
-        const newTabs = tabs.filter(tab => tab.key !== targetKey);
+        pendingRemoveRef.current = targetKey;
 
-        if (newTabs.length && location.pathname === tabs[targetIndex]?.path) {
-            const nextTab = newTabs[targetIndex] || newTabs[targetIndex - 1];
-            navigate(nextTab.path);
+        const targetTab = tabs.find(tab => tab.key === targetKey);
+        const isRemovingActive = targetTab && location.pathname.startsWith(targetTab.key);
+
+        setTabs(prev => prev.filter(tab => tab.key !== targetKey));
+
+        if (isRemovingActive) {
+            const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+            const newTabs = tabs.filter(tab => tab.key !== targetKey);
+            if (newTabs.length > 0) {
+                const nextTab = newTabs[Math.min(targetIndex, newTabs.length - 1)];
+                navigate(nextTab.path);
+            }
         }
-
-        setTabs(newTabs);
     };
 
     const handleCloseLeft = (targetKey: string) => {
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        if (targetIndex <= 0) return; // No tabs to the left
+
         const newTabs = tabs.slice(targetIndex);
 
         const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
@@ -333,6 +352,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
 
     const handleCloseRight = (targetKey: string) => {
         const targetIndex = tabs.findIndex(tab => tab.key === targetKey);
+        if (targetIndex >= tabs.length - 1) return; // No tabs to the right
+
         const newTabs = tabs.slice(0, targetIndex + 1);
 
         const currentTabKey = tabs.find(tab => location.pathname.startsWith(tab.key))?.key;
@@ -345,6 +366,8 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
     };
 
     const handleCloseOthers = (targetKey: string) => {
+        if (tabs.length <= 1) return; // No other tabs to close
+
         const targetTab = tabs.find(tab => tab.key === targetKey);
         if (!targetTab) return;
 
@@ -392,12 +415,14 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                 const isFirst = index === 0;
                 const isLast = index === tabs.length - 1;
                 const isOnly = tabs.length === 1;
+                const isActiveTab = location.pathname.startsWith(tab.key);
 
                 const contextMenuItems: ContextMenuItem[] = [
                     {
                         key: 'close',
                         label: t('pages.managerContainer.tabClose'),
                         icon: <CloseOutlined />,
+                        disabled: isOnly,
                         shortcut: { mac: '⌃W', win: 'Alt+W', binding: 'mod+w' },
                     },
                     { key: 'tab-divider', divider: true },
@@ -428,6 +453,7 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
                     key: tab.key,
                     label: (
                         <ContextMenu
+                            isActive={isActiveTab}
                             items={contextMenuItems}
                             onAction={(menuKey) => {
                                 switch (menuKey) {
@@ -796,27 +822,29 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                 />
                             </div>
                         )}
-                        <Watermark
-                            className="flex-1 p-6 overflow-auto"
-                            content={watermarkContent}
-                            font={{ color: watermarkFontColor }}
-                            zIndex={10}
-                            style={{ overflow: 'auto!important' }}
-                        >
-                            <Routes>
-                                {availableMenus.map((menu) => (
-                                    <Route
-                                        key={menu.key.toString()}
-                                        path={menu.path.replace(parentPath, "")}
-                                        element={
-                                            <div key={location.key} className={pageAnimationClass}>
-                                                {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
-                                            </div>
-                                        }
-                                    />
-                                ))}
-                            </Routes>
-                        </Watermark>
+                        <div className="flex-1 overflow-auto">
+                            <Watermark
+                                content={watermarkContent}
+                                font={{ color: watermarkFontColor }}
+                                zIndex={10}
+                            >
+                                <div className="p-6">
+                                    <Routes>
+                                        {availableMenus.map((menu) => (
+                                            <Route
+                                                key={menu.key.toString()}
+                                                path={menu.path.replace(parentPath, "")}
+                                                element={
+                                                    <div key={location.key} className={pageAnimationClass}>
+                                                        {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
+                                                    </div>
+                                                }
+                                            />
+                                        ))}
+                                    </Routes>
+                                </div>
+                            </Watermark>
+                        </div>
 
                     </Content>
                 ) : (
