@@ -31,6 +31,7 @@ export default function SessionMonitorPage() {
                     entityName={t('pages.sessionMonitor.entityName')}
                     columns={columns}
                     query={handleQuery}
+                    hideRecordTimeColumn={true}
                 />
             </StandardCard>
         </>

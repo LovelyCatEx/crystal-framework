@@ -306,6 +306,7 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 | `tableActions`          | `array`                                              | 表格筛选条件（每个元素含 label、children、queryParamsProvider） |
 | `editModalFormChildren` | `ReactNode \| ((ENTITY) => ReactNode)`               | 新增/编辑弹窗的表单项                                      |
 | `showTimeRangeFilter`   | `boolean`                                            | 是否显示时间范围筛选器，默认 `true`                            |
+| `hideRecordTimeColumn`  | `boolean`                                            | 是否隐藏表格末尾自动追加的"记录时间"列，默认 `false`                  |
 
 注意 `tableActions` 中的 `queryParamsProvider` 会在查询时调用，返回值会和 `query` 的 DTO 合并。筛选条件变化时需手动触发 `pageRef.current.refreshData({resetPage: true})`（见现有页面示例）。
 

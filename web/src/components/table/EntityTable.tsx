@@ -1,4 +1,4 @@
-import type {BaseEntity} from "../../types/BaseEntity.ts";
+import type {BaseEntity} from "@/types/BaseEntity.ts";
 import React, {
     type ForwardedRef,
     forwardRef,
@@ -13,10 +13,10 @@ import React, {
 } from "react";
 import {Button, Checkbox, Flex, Input, message, Popover, Space, Table, type TableProps} from "antd";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
-import {formatTimestamp} from "../../utils/datetime.utils.ts";
+import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {SearchOutlined, SettingOutlined} from "@ant-design/icons";
 import type {EntityTableColumn, EntityTableColumns} from "./entity-table.types.ts";
-import type {BaseManagerReadDTO, PaginatedResponseData} from "../../types/api.types.ts";
+import type {BaseManagerReadDTO, PaginatedResponseData} from "@/types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
 import {useTranslation} from "react-i18next";
 import {useDebounce} from "@/compositions/use-debounce.ts";
@@ -34,7 +34,7 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         children: React.ReactNode | JSX.Element,
         queryParamsProvider?: () => object
     }[];
-    showRecordTimeColumn?: boolean;
+    hideRecordTimeColumn?: boolean;
     tableRowActionsRender?: (record: ENTITY) => ReactNode;
     columns: EntityTableColumns<ENTITY>;
     query: <T extends BaseManagerReadDTO>(props: T) => Promise<PaginatedResponseData<ENTITY>>;
@@ -184,7 +184,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
         ...props.columns,
-        ...(!!props.showRecordTimeColumn ? [{
+        ...(!!!props.hideRecordTimeColumn ? [{
             title: t('components.entityTable.recordTime'),
             dataIndex: "createdTime",
             key: "createdTime",

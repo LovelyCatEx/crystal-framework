@@ -172,6 +172,7 @@ create={async () => null}
 | `readonlyMode` | `boolean` | `false` | 只读模式，隐藏新增按钮、行内编辑/删除按钮，并禁用批量操作选择框 |
 | `showRowActions` | `boolean` | `true` | 是否显示每行的编辑/删除操作按钮 |
 | `showTimeRangeFilter` | `boolean` | `true` | 是否在过滤栏显示内置的时间范围选择器 |
+| `hideRecordTimeColumn` | `boolean` | `false` | 是否隐藏表格末尾自动追加的"记录时间"列 |
 
 ---
 

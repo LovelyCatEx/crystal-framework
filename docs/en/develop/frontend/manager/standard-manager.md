@@ -172,6 +172,7 @@ create={async () => null}
 | `readonlyMode` | `boolean` | `false` | Read-only mode: hides create button, row edit/delete buttons, and disables batch selection |
 | `showRowActions` | `boolean` | `true` | Whether to show per-row edit/delete action buttons |
 | `showTimeRangeFilter` | `boolean` | `true` | Whether to show the built-in time range picker in the filter bar |
+| `hideRecordTimeColumn` | `boolean` | `false` | Whether to hide the "Record Time" column that is automatically appended to the table |
 
 ---
 
