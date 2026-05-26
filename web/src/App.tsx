@@ -1,8 +1,8 @@
 import {ConfigProvider, theme} from "antd";
 import {Route, Routes} from "react-router-dom";
-import {RequireAuthComponent} from "./components/RequireAuthComponent.tsx";
-import type {MaintenanceStatus} from "./components/MaintenanceGuard.tsx";
-import {MaintenanceGuard} from "./components/MaintenanceGuard.tsx";
+import {RequireAuthComponent} from "./components/base/RequireAuthComponent.tsx";
+import type {MaintenanceStatus} from "./components/base/MaintenanceGuard.tsx";
+import {MaintenanceGuard} from "./components/base/MaintenanceGuard.tsx";
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
 import {ManagerContainerPage} from "./pages/manager/ManagerContainerPage.tsx";
 import {HomePage} from "./pages/home/HomePage.tsx";
@@ -19,7 +19,7 @@ import {
 } from "@/global/theme-config.ts";
 import type {ThemeColor, ThemeMode} from "@/types/theme.types.ts";
 import {SystemInitializePage} from "@/pages/SystemIntializePage.tsx";
-import {SystemIntegratedProvider, useSystemIntegrated} from "@/contexts/SystemIntegratedContext.tsx";
+import {SystemIntegratedProvider, useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 import {pluginRegistry} from "@/plugin/registry.ts";
 import './App.css';
 

@@ -1,7 +1,7 @@
 import {del, get, patch, post, put} from "./request.ts";
 import {clearUserAuthentication, getUserAuthentication} from "../utils/token.utils.ts";
 import {message} from "antd";
-import {menuPathLogin} from "@/router";
+import {menuPathLogin} from "@/router/paths.ts";
 import i18n from "@/i18n";
 import {
     AES_KEY_STORAGE_KEY,

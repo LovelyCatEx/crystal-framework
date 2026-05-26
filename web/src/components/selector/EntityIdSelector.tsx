@@ -3,7 +3,7 @@ import {type ForwardedRef, forwardRef, type ReactNode, useEffect, useImperativeH
 import {useTranslation} from "react-i18next";
 import {EntitySelectorModal} from "./EntitySelector.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {BaseManagerController} from "@/api/BaseManagerController.ts";
 
 interface EntityIdSelectorProps<ENTITY extends BaseEntity> {

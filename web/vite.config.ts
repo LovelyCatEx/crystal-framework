@@ -30,6 +30,34 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            console.log(`Chucking: ${id}`);
+            if (id.includes('node_modules')) {
+              if (id.includes('echarts') || id.includes('zrender')) {
+                return 'echarts';
+              } else if (id.includes('antd')) {
+                return 'antd';
+              } else if (id.includes('ant-design+icons-svg')) {
+                return 'antd-icons';
+              }
+
+              return 'vendor';
+            } else if (id.includes('src/')) {
+              if (id.includes('src/i18n/locales')) {
+                const match = id.match(/locales\/([^/]+)\./);
+                const lang = match ? match[1] : 'unknown';
+                return `lang-${lang}`;
+              }
+
+              return 'crystal-sources';
+            }
+          }
+        }
+      }
+    },
     server: {
       proxy: {
         '/api': {

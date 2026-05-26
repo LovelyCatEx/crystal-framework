@@ -1,7 +1,7 @@
 import {Modal} from "antd";
 import {useCallback, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {EntityTable, type EntityTableProps, type EntityTableRef} from "../EntityTable.tsx";
+import {EntityTable, type EntityTableProps, type EntityTableRef} from "../table/EntityTable.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 
 interface EntitySelectorModalProps<ENTITY extends BaseEntity> {

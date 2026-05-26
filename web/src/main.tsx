@@ -1,7 +1,7 @@
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 import './index.css'
-import './i18n'
+import {bootstrapI18n} from './i18n'
 import App from "./App.tsx";
 import {BrowserRouter} from "react-router-dom";
 import {registerAllKotlinModules} from "kotlin-ts";
@@ -11,12 +11,14 @@ import {loadPlugins} from "@/plugin/loader.ts";
 registerAllKotlinModules()
 loadPlugins()
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-      <BrowserRouter>
-          <ProtectedApp>
-              <App />
-          </ProtectedApp>
-      </BrowserRouter>
-  </StrictMode>
-)
+bootstrapI18n().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+        <BrowserRouter>
+            <ProtectedApp>
+                <App />
+            </ProtectedApp>
+        </BrowserRouter>
+    </StrictMode>
+  )
+})

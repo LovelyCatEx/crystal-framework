@@ -1,5 +1,5 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {getAvailableMetricsList} from "@/api/actuator.api.ts";
+import {getAvailableMetricsList} from "@/api/monitor/actuator.api.ts";
 import useSWR from "swr";
 import {ActuatorMetricRenderComponent} from "@/components/ActuatorMetricRenderComponent.tsx";
 import {sortByArrayOrder} from "@/utils/map.ts";

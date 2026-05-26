@@ -8,8 +8,8 @@ import {
     DesktopOutlined,
     ThunderboltOutlined
 } from "@ant-design/icons";
-import {getSystemMetrics} from "@/api/dashboard.api.ts";
-import type {SystemMetricsVO} from "@/types/dashboard.types.ts";
+import {getSystemMetrics} from "@/api/monitor/dashboard.api.ts";
+import type {SystemMetricsVO} from "@/types/monitor/dashboard.types.ts";
 
 const { useToken } = theme;
 

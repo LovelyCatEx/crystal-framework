@@ -1,8 +1,8 @@
-import {useSWRState} from "@/compositions/swr.ts";
+import {useSWRState} from "@/compositions/use-swr.ts";
 import {message} from "antd";
-import {getJoinedTenants} from "@/api/tenant.api.ts";
+import {getJoinedTenants} from "@/api/tenant/tenant.api.ts";
 import {useMemo} from "react";
-import {getTenantProfile} from "@/api/tenant-profile.api.ts";
+import {getTenantProfile} from "@/api/tenant/tenant-profile.api.ts";
 
 export const useUserTenants = () => {
     const [joinedTenants, , isJoinedTenantsLoading, refreshJoinedTenants] = useSWRState(

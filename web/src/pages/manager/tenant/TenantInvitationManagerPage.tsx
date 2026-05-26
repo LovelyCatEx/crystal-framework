@@ -5,7 +5,7 @@ import {
     InvitationManagerController,
     type ManagerCreateInvitationDTO,
     type ManagerUpdateInvitationDTO
-} from "@/api/invitation.api.ts";
+} from "@/api/tenant/tenant-invitation.api.ts";
 import {useRef, useState} from "react";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
@@ -14,7 +14,7 @@ import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector, TenantMemberIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 
-export function TenantInvitationManagerPage() {
+export default function TenantInvitationManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();

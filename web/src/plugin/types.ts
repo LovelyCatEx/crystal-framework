@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import type {I18nRules} from "@/i18n/locales/i18n-rules";
+import type {I18nRules} from "@/i18n/i18n-rules.ts";
 
 export interface PluginMenuGroup {
     name: string;

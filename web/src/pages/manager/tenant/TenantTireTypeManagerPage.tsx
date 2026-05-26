@@ -4,12 +4,12 @@ import {
     type ManagerCreateTenantTireTypeDTO,
     type ManagerReadTenantTireTypeDTO,
     TenantTireTypeManagerController
-} from "@/api/tenant-tire-type.api.ts";
+} from "@/api/tenant/tenant-tire-type.api.ts";
 import {useRef} from "react";
 import {useTenantTireTypeTableColumns} from "@/components/columns/TenantTireTypeEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 
-export function TenantTireTypeManagerPage() {
+export default function TenantTireTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const {t} = useTranslation();
     const columns = useTenantTireTypeTableColumns();

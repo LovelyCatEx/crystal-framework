@@ -1,6 +1,6 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {getSystemSettingsSchema, updateSystemMaintenanceMode, updateSystemSettings} from "@/api/system-settings.api.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {getSystemSettingsSchema, updateSystemMaintenanceMode, updateSystemSettings} from "@/api/system/system-settings.api.ts";
 import type {MenuProps} from "antd";
 import {
     Button,
@@ -17,8 +17,8 @@ import {
     Tabs,
     theme
 } from "antd";
-import type {GetSystemSettingsSchemaData, SystemSettingsSchema} from "@/types/system-settings.types.ts";
-import {SystemSettingsItemValueType} from "@/types/system-settings.types.ts";
+import type {GetSystemSettingsSchemaData, SystemSettingsSchema} from "@/types/system/system-settings.types.ts";
+import {SystemSettingsItemValueType} from "@/types/system/system-settings.types.ts";
 import {useEffect, useState} from "react";
 import {
     useSettingsGroupToTranslationMap,
@@ -122,7 +122,7 @@ function buildTabItems(
     });
 }
 
-export function SystemSettingsManagerPage() {
+export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
     const {t} = useTranslation();
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();

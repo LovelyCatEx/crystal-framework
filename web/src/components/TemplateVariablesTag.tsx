@@ -1,6 +1,6 @@
 import {message, Tag} from "antd";
 import {CopyOutlined} from "@ant-design/icons";
-import type {MailTemplateType} from "../types/mail.types.ts";
+import type {MailTemplateType} from "../types/mail/mail.types.ts";
 import {useTranslation} from "react-i18next";
 
 interface TemplateVariablesTagProps {

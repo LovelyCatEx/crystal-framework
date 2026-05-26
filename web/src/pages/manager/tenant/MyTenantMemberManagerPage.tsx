@@ -4,8 +4,8 @@ import {
     type ManagerCreateTenantMemberDTO,
     type ManagerUpdateTenantMemberDTO,
     TenantMemberManagerController,
-} from "@/api/tenant-member.api.ts";
-import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
+} from "@/api/tenant/tenant-member.api.ts";
+import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
 import {useMyTenantMemberTableColumns} from "@/components/columns/MyTenantMemberEntityColumns.tsx";
@@ -13,7 +13,7 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useTranslation} from "react-i18next";
 
-export function MyTenantMemberManagerPage() {
+export default function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();

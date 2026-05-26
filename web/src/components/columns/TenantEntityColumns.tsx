@@ -1,11 +1,11 @@
 import React, {type JSX} from "react";
 import {Space, Spin, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {Tenant, TenantTireType} from "@/types/tenant.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {Tenant, TenantTireType} from "@/types/tenant/tenant.types.ts";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {TenantTireTypeManagerController} from "@/api/tenant-tire-type.api.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ShopOutlined} from "@ant-design/icons";
 import {AvatarResource} from "@/components/AvatarResource.tsx";

@@ -4,8 +4,8 @@ import {useTranslation} from "react-i18next";
 import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantDepartmentTableColumns} from "../columns/TenantDepartmentEntityColumns.tsx";
-import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
+import {TenantDepartmentManagerController} from "@/api/tenant/tenant-department.api.ts";
+import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
 
 interface TenantDepartmentIdSelectorProps {
     value?: string | null;
