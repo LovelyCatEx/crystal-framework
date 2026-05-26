@@ -25,6 +25,7 @@ import {
 import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
 import {StandardCard} from "@/components/card/StandardCard.tsx";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
@@ -62,6 +63,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     const entityTableRef = useRef<EntityTableRef | null>(null);
 
+    // Default URL sync — handles searchKeyword, page, pageSize, startTime, endTime
+    // Pages that use useManagerQueryParams({ schema }) will pass their own syncToUrl / initialQueryValues,
+    // which take priority via the ?? fallback below.
+    const { syncToUrl: defaultSyncToUrl, initialQueryValues: defaultInitialQueryValues } = useManagerQueryParams();
+    const effectiveSyncToUrl = props.queryParamsSync ?? defaultSyncToUrl;
+    const effectiveInitialQueryValues = props.initialQueryValues ?? defaultInitialQueryValues;
+
     // New / Edit Modal
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingItem, setEditingItem] = useState<ENTITY | null>(null);
@@ -74,8 +82,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     // Time range filter
     const [timeRange, setTimeRange] = useState<[number, number | null] | null>(() => {
-        const startTime = props.initialQueryValues?.startTime;
-        const endTime = props.initialQueryValues?.endTime;
+        const startTime = effectiveInitialQueryValues?.startTime;
+        const endTime = effectiveInitialQueryValues?.endTime;
         if (startTime !== undefined) {
             const start = typeof startTime === 'number' ? startTime : Number(startTime);
             const end = endTime !== undefined ? (typeof endTime === 'number' ? endTime : Number(endTime)) : null;
@@ -339,8 +347,8 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         </Space>
                     ) : undefined}
                     tableSelection={builtinTableSelection}
-                    queryParamsSync={restProps.queryParamsSync}
-                    initialQueryValues={restProps.initialQueryValues}
+                    queryParamsSync={effectiveSyncToUrl}
+                    initialQueryValues={effectiveInitialQueryValues}
                 />
             </StandardCard>
 

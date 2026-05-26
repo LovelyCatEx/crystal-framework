@@ -7,7 +7,7 @@ import {
     type ManagerUpdateTenantDTO,
     TenantManagerController
 } from "@/api/tenant/tenant.api.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useTenantTableColumns} from "@/components/columns/TenantEntityColumns.tsx";
 import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
 import type {TenantTireType} from "@/types/tenant/tenant.types.ts";
@@ -16,11 +16,15 @@ import {JsonEditor} from "@/components/JsonEditor.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
+import {useState} from "react";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
-    const [filterStatus, setFilterStatus] = useState<number>();
+    const { filters, setFilter } = useManagerQueryParams({
+        schema: { status: 'number' }
+    });
     const {t} = useTranslation();
     const columns = useTenantTableColumns();
 
@@ -32,7 +36,7 @@ export default function TenantManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filterStatus]);
+    }, [filters.status]);
 
     const statusOptions = [
         { label: getTenantStatus(TenantStatus.REVIEWING), value: TenantStatus.REVIEWING },
@@ -211,23 +215,19 @@ export default function TenantManagerPage() {
                 };
                 return (await TenantManagerController.create(createProps)).data!
             }}
+            extraQueryParams={filters}
             tableActions={[
                 {
                     label: <span>{t('pages.tenantManager.filter.status')}</span>,
                     children: <Select
-                        defaultValue="-1"
+                        defaultValue={filters.status !== undefined ? String(filters.status) : '-1'}
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.tenantManager.filter.all') },
                             ...statusOptions
                         ]}
-                        onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}
+                        onChange={(value) => setFilter('status', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                    queryParamsProvider() {
-                        return {
-                            status: filterStatus
-                        };
-                    }
                 }
             ]}
         >

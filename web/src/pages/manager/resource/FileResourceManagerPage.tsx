@@ -6,7 +6,7 @@ import {
     type ManagerCreateFileResourceDTO,
     type ManagerReadFileResourceDTO
 } from "@/api/resource/file-resource.api.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {type FileResource, ResourceFileType} from "@/types/resource/file-resource.types.ts";
 import {getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
@@ -14,16 +14,19 @@ import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
 import {DownloadOutlined} from "@ant-design/icons";
 import {downloadFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterType, setFilterType] = useState<number>()
+    const { filters, setFilter } = useManagerQueryParams({
+        schema: { type: 'number' }
+    });
     const {t} = useTranslation();
     const columns = useFileResourceTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filterType]);
+    }, [filters.type]);
 
     const handleDownloadFileEntity = async (record: FileResource) => {
         const url = (await getResourceFileDownloadUrlById(record.id)).data;
@@ -119,12 +122,13 @@ export default function FileResourceManagerPage() {
             create={async (props) => {
                 return (await FileResourceManagerController.create(props as ManagerCreateFileResourceDTO)).data!
             }}
+            extraQueryParams={filters}
             tableActions={[
                 {
                     label: <span>{t('pages.fileResourceManager.filter.type')}</span>,
                     children: <Select
                         className="min-w-32"
-                        defaultValue="-1"
+                        defaultValue={filters.type !== undefined ? String(filters.type) : '-1'}
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.fileResourceManager.filter.all') },
@@ -137,13 +141,8 @@ export default function FileResourceManagerPage() {
                                 value: ResourceFileType.TENANT_ICON,
                             }
                         ]}
-                        onChange={(value) => setFilterType(Number.parseInt(value))}
+                        onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                    queryParamsProvider() {
-                        return {
-                            type: filterType === -1 ? undefined : filterType
-                        }
-                    }
                 }
             ]}
             tableRowActionsRender={(record) => (

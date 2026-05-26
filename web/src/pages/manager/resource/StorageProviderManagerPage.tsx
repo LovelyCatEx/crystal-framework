@@ -5,21 +5,24 @@ import {
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
 } from "@/api/resource/storage-provider.api.ts";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef} from "react";
 import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEditor.tsx";
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterType, setFilterType] = useState<number>()
+    const { filters, setFilter } = useManagerQueryParams({
+        schema: { type: 'number' }
+    });
     const {t} = useTranslation();
     const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filterType]);
+    }, [filters.type]);
 
     const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {
         StorageProviderManagerController
@@ -105,11 +108,12 @@ export default function StorageProviderManagerPage() {
             create={async (props) => {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
+            extraQueryParams={filters}
             tableActions={[
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select
-                        defaultValue="-1"
+                        defaultValue={filters.type !== undefined ? String(filters.type) : '-1'}
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.storageProviderManager.filter.all') },
@@ -126,13 +130,8 @@ export default function StorageProviderManagerPage() {
                                 value: StorageProviderType.TENCENT_COS,
                             }
                         ]}
-                        onChange={(value) => setFilterType(Number.parseInt(value))}
+                        onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                    queryParamsProvider() {
-                        return {
-                            type: filterType === -1 ? undefined : filterType
-                        }
-                    }
                 }
             ]}
         >

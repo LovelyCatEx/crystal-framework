@@ -3,23 +3,26 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {type ManagerCreatePermissionDTO, type ManagerReadPermissionDTO} from "@/api/user/rbac/user-permission.api.ts";
 import type {UserPermission} from "@/types/user/rbac/user-permission.types.ts";
 import {PermissionType} from "@/types/user/rbac/user-permission.types.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import TextArea from "antd/es/input/TextArea";
 import {useUserPermissionTableColumns} from "@/components/columns/UserPermissionEntityColumns.tsx";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterPermissionType, setFilterPermissionType] = useState<number>()
+    const { filters, setFilter } = useManagerQueryParams({
+        schema: { type: 'number' }
+    });
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
     const {t} = useTranslation();
     const columns = useUserPermissionTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filterPermissionType]);
+    }, [filters.type]);
 
     return (
         <ManagerPageContainer
@@ -82,11 +85,12 @@ export default function UserPermissionManagerPage() {
             create={async (props) => {
                 return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
+            extraQueryParams={filters}
             tableActions={[
                 {
                     label: <span>{t('pages.userPermissionManager.filter.type')}</span>,
                     children: <Select
-                        defaultValue="-1"
+                        defaultValue={filters.type !== undefined ? String(filters.type) : '-1'}
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.userPermissionManager.filter.all') },
@@ -94,13 +98,8 @@ export default function UserPermissionManagerPage() {
                             { value: '1', label: getPermissionType(PermissionType.MENU) },
                             { value: '2', label: getPermissionType(PermissionType.COMPONENT) },
                         ]}
-                        onChange={(value) => setFilterPermissionType(Number.parseInt(value))}
+                        onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                    queryParamsProvider() {
-                        return {
-                            type: filterPermissionType === -1 ? undefined : filterPermissionType
-                        }
-                    }
                 }
             ]}
         >

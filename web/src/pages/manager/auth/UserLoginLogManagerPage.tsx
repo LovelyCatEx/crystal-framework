@@ -11,7 +11,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function UserLoginLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
 
-    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+    const { filters, setFilter } = useManagerQueryParams({
         schema: {
             userId: 'string',
             username: 'string',
@@ -44,8 +44,6 @@ export default function UserLoginLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
-                queryParamsSync={syncToUrl}
-                initialQueryValues={initialQueryValues}
                 extraQueryParams={filters}
                 query={async (props: ManagerReadUserLoginLogDTO) => {
                     return (await UserLoginLogManagerController.query(props)).data!;

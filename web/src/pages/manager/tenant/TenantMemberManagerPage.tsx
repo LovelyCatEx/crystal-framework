@@ -14,17 +14,18 @@ import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDe
 import {PlusOutlined} from "@ant-design/icons";
 import {UserIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-    const [filterStatus, setFilterStatus] = useState<number>();
+    const { filters, setFilter } = useManagerQueryParams({ schema: { status: 'number' } });
     const {t} = useTranslation();
     const columns = useTenantMemberTableColumns();
 
     useEffect(() => {
         pageRef.current?.refreshData({ resetPage: true });
-    }, [filterStatus, selectedTenantId]);
+    }, [filters.status, selectedTenantId]);
 
     const statusOptions = [
         { label: getTenantMemberStatus(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
@@ -116,21 +117,17 @@ export default function TenantMemberManagerPage() {
                         {
                             label: <span>{t('pages.tenantMemberManager.filter.status')}</span>,
                             children: <Select
-                                defaultValue="-1"
+                                defaultValue={filters.status !== undefined ? String(filters.status) : '-1'}
                                 style={{ width: 120 }}
                                 options={[
                                     { value: '-1', label: t('pages.tenantMemberManager.filter.all') },
                                     ...statusOptions
                                 ]}
-                                onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}
+                                onChange={(value) => setFilter('status', value === '-1' ? undefined : Number.parseInt(value))}
                             />,
-                            queryParamsProvider() {
-                                return {
-                                    status: filterStatus
-                                };
-                            }
                         }
                     ]}
+                    extraQueryParams={filters}
                     delete={async (props) => {
                         return (await TenantMemberManagerController.delete(props)).data!
                     }}
