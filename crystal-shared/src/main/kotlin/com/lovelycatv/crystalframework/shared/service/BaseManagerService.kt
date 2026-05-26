@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.shared.service
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
@@ -10,6 +11,8 @@ import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.relational.core.query.Query
 
 interface BaseManagerService<
         REPOSITORY: BaseRepository<ENTITY>,
@@ -19,6 +22,36 @@ interface BaseManagerService<
         UPDATE_DTO: BaseManagerUpdateDTO,
         DELETE_DTO: BaseManagerDeleteDTO
 > : BaseService<REPOSITORY, ENTITY> {
+
+    /**
+     * Provide the [R2dbcEntityTemplate] for programmatic criteria-based queries.
+     *
+     * Override this in your service implementation by injecting and returning the
+     * [R2dbcEntityTemplate] bean. The default throws [UnsupportedOperationException]
+     * so that services which never use [query][BaseManagerReadDTO.query]-based queries
+     * are unaffected.
+     */
+    fun getEntityTemplate(): R2dbcEntityTemplate {
+        throw UnsupportedOperationException(
+            "${this::class.simpleName} does not provide an R2dbcEntityTemplate. " +
+            "Override getEntityTemplate() to enable query-node-based queries."
+        )
+    }
+
+    /**
+     * Returns the entity class for use with [R2dbcEntityTemplate].
+     *
+     * Override this in your service implementation. The default throws
+     * [UnsupportedOperationException] so that services which never use
+     * [query][BaseManagerReadDTO.query]-based queries are unaffected.
+     */
+    fun getEntityClass(): Class<ENTITY> {
+        throw UnsupportedOperationException(
+            "${this::class.simpleName} does not provide an entity class. " +
+            "Override getEntityClass() to enable query-node-based queries."
+        )
+    }
+
     suspend fun query(
         dto: READ_DTO,
         isAdvanceQuery: suspend (dto: READ_DTO) -> Boolean = { dto.searchKeyword != null },
@@ -37,6 +70,11 @@ interface BaseManagerService<
         } else {
             val limit = dto.pageSize
             val offset = (dto.page - 1) * dto.pageSize
+
+            // QueryNode tree takes highest priority over legacy advance query
+            if (dto.query != null) {
+                return queryWithNode(dto, limit, offset)
+            }
 
             if (isAdvanceQuery.invoke(dto)) {
                 doAdvanceQuery.invoke(dto, limit, offset)
@@ -66,6 +104,37 @@ interface BaseManagerService<
                 )
             }
         }
+    }
+
+    /**
+     * Execute a programmatic query by converting [dto.query] into a [Criteria]
+     * tree via [criteriaFromQueryNode], then running it through [R2dbcEntityTemplate].
+     */
+    private suspend fun queryWithNode(
+        dto: READ_DTO,
+        limit: Int,
+        offset: Int
+    ): PaginatedResponseData<ENTITY> {
+        val criteria = criteriaFromQueryNode(dto.query!!)
+        val template = getEntityTemplate()
+        val entityClass = getEntityClass()
+
+        val total = template
+            .count(Query.query(criteria), entityClass)
+            .awaitFirstOrNull() ?: 0L
+
+        val records = template
+            .select(
+                Query.query(criteria).limit(limit).offset(offset.toLong()),
+                entityClass
+            )
+            .collectList()
+            .awaitFirstOrNull() ?: emptyList()
+
+        return dto.toPaginatedResponseData(
+            total = total,
+            records = records
+        )
     }
 
     /**
