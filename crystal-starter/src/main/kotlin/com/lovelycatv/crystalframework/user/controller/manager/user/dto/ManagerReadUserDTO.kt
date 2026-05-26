@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.controller.manager.user.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
+import com.lovelycatv.crystalframework.shared.database.QueryNode
 
 data class ManagerReadUserDTO(
     override val page: Int,
@@ -9,6 +10,7 @@ data class ManagerReadUserDTO(
     override val searchKeyword: String? = null,
     override val startTime: Long? = null,
     override val endTime: Long? = null,
+    override val query: QueryNode? = null,
     val username: String? = null,
     val email: String? = null,
     val nickname: String? = null,
