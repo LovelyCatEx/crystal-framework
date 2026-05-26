@@ -16,6 +16,13 @@ export const enThemeConfig: DefaultTheme.Config = {
             { text: 'Create Plugin', link: '/en/develop/frontend/create-plugin' },
             { text: 'Add Page', link: '/en/develop/frontend/add-page' },
             { text: 'API Integration', link: '/en/develop/frontend/api-integration' },
+            {
+              text: 'Manager Pages',
+              items: [
+                { text: 'Standard Manager', link: '/en/develop/frontend/manager/standard-manager' },
+                { text: 'Custom Manager', link: '/en/develop/frontend/manager/custom-manager' },
+              ]
+            },
           ]
         },
         {
@@ -46,6 +53,12 @@ export const enThemeConfig: DefaultTheme.Config = {
       items: [
         { text: 'Quick Start', link: '/en/contribute/quick-start' },
         { text: 'Project Structure', link: '/en/contribute/structure-introduction' },
+        {
+          text: 'Frontend',
+          items: [
+            { text: 'API Integration', link: '/en/contribute/frontend/api-integration' },
+          ]
+        },
         {
           text: 'Database',
           items: [
