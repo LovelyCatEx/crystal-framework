@@ -532,6 +532,14 @@ export const zhCN: I18nRules = {
           label: '密码',
           required: '请输入密码'
         }
+      },
+      filter: {
+        username: '用户名',
+        usernamePlaceholder: '按用户名筛选',
+        email: '邮箱',
+        emailPlaceholder: '按邮箱筛选',
+        nickname: '昵称',
+        nicknamePlaceholder: '按昵称筛选',
       }
     },
     oauthAccountManager: {

@@ -535,6 +535,14 @@ export const enUS: I18nRules = {
           label: 'Password',
           required: 'Please enter password'
         }
+      },
+      filter: {
+        username: 'Username',
+        usernamePlaceholder: 'Filter by username',
+        email: 'Email',
+        emailPlaceholder: 'Filter by email',
+        nickname: 'Nickname',
+        nicknamePlaceholder: 'Filter by nickname',
       }
     },
     oauthAccountManager: {

@@ -6,5 +6,10 @@ data class ManagerReadUserDTO(
     override val page: Int,
     override val pageSize: Int,
     override val id: Long? = null,
-    override val searchKeyword: String? = null
+    override val searchKeyword: String? = null,
+    override val startTime: Long? = null,
+    override val endTime: Long? = null,
+    val username: String? = null,
+    val email: String? = null,
+    val nickname: String? = null,
 ) : BaseManagerReadDTO(page, pageSize)
