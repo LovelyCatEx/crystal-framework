@@ -59,6 +59,17 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         startTime?: number | string;
         endTime?: number | string;
     };
+    /**
+     * Extra query params to merge into every query request.
+     * Use this with useManagerQueryParams({ schema }) to avoid writing queryParamsProvider on each tableAction.
+     *
+     * @example
+     * const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+     *     schema: { userId: 'string', loginMethod: 'number' }
+     * });
+     * <EntityTable extraQueryParams={filters} queryParamsSync={syncToUrl} ... />
+     */
+    extraQueryParams?: Record<string, unknown>;
 }
 
 export interface EntityTableRefreshOptions {
@@ -130,7 +141,8 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             page: page,
             pageSize: pageSize,
             searchKeyword: keyword.length > 0 ? keyword : undefined,
-            ...actionParams
+            ...(props.extraQueryParams ?? {}),
+            ...actionParams,
         };
 
         // Sync query params to URL

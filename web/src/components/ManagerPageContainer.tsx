@@ -321,6 +321,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     query={restProps.query}
                     tablePrefixActions={builtinTablePrefixActions}
                     tableActions={builtinTableActions}
+                    extraQueryParams={restProps.extraQueryParams}
                     tableRowActionsRender={showRowActions ? (record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}
