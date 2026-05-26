@@ -20,6 +20,8 @@ import type {BaseManagerReadDTO, PaginatedResponseData} from "@/types/api.types.
 import type {RowSelectionType} from "antd/es/table/interface";
 import {useTranslation} from "react-i18next";
 import {useDebounce} from "@/compositions/use-debounce.ts";
+import {FilterBuilder} from "@/components/table/filter/FilterBuilder.tsx";
+import type {FilterableField, GroupNode} from "@/components/table/filter/filter-builder.types.ts";
 
 export interface EntityTableProps<ENTITY extends BaseEntity> {
     entityName: string;
@@ -34,6 +36,7 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         children: React.ReactNode | JSX.Element,
         queryParamsProvider?: () => object
     }[];
+    filterableFields?: FilterableField[];
     hideRecordTimeColumn?: boolean;
     tableRowActionsRender?: (record: ENTITY) => ReactNode;
     columns: EntityTableColumns<ENTITY>;
@@ -58,6 +61,7 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         searchKeyword?: string;
         startTime?: number | string;
         endTime?: number | string;
+        query?: unknown;
     };
     /**
      * Extra query params to merge into every query request.
@@ -125,6 +129,14 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // would otherwise be triggered by the setCurrentPage(1) state change.
     const skipNextPageEffectRef = useRef(false);
 
+    // Filter builder
+    const filterNodeRef = useRef<GroupNode | null>(
+        (() => {
+            const q = (props.initialQueryValues as { query?: unknown })?.query;
+            return q ? q as GroupNode : null;
+        })()
+    );
+
     const fireQuery = useDebounce((page: number, pageSize: number, keyword: string) => {
         setRefreshing(true);
 
@@ -143,6 +155,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             searchKeyword: keyword.length > 0 ? keyword : undefined,
             ...(props.extraQueryParams ?? {}),
             ...actionParams,
+            ...(filterNodeRef.current ? { query: filterNodeRef.current } : {}),
         };
 
         // Sync query params to URL
@@ -208,19 +221,36 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     ];
 
     const tableActions = useMemo(() => {
-        return [
+        const actions = [
             ...(props.tableActions ?? []),
-            {
-                label: t('components.managerPageContainer.action'),
-                children: <Button
-                    type="primary"
-                    onClick={() => refreshData()}
-                >
-                    {t('components.managerPageContainer.refresh')}
-                </Button>
-            }
-        ]
-    }, [props.tableActions])
+        ];
+
+        if (props.filterableFields) {
+            actions.push({
+                label: <span>{t('components.filterBuilder.filters')}</span>,
+                children: <FilterBuilder
+                    fields={props.filterableFields}
+                    defaultValue={filterNodeRef.current}
+                    onChange={(node) => {
+                        filterNodeRef.current = node;
+                        setTimeout(() => refreshData({ resetPage: true }), 0);
+                    }}
+                />,
+            });
+        }
+
+        actions.push({
+            label: t('components.managerPageContainer.action'),
+            children: <Button
+                type="primary"
+                onClick={() => refreshData()}
+            >
+                {t('components.managerPageContainer.refresh')}
+            </Button>
+        });
+
+        return actions;
+    }, [props.tableActions, props.filterableFields, t, refreshData])
 
     const tableColumns: (ColumnGroupType<ENTITY> | ColumnType<ENTITY>)[] = allColumns
         .filter(column => visibleColumns.has(column.key))

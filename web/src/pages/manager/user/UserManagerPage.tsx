@@ -3,20 +3,18 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {type ManagerCreateUserDTO, type ManagerReadUserDTO, UserManagerController} from "@/api/user/user.api.ts";
 import {useUserTableColumns} from "@/components/columns/UserEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
-import {useEffect, useRef} from "react";
-import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {useRef} from "react";
 
 export default function UserManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
-        schema: { username: 'string', email: 'string', nickname: 'string' }
-    });
     const {t} = useTranslation();
     const columns = useUserTableColumns();
 
-    useEffect(() => {
-        pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.username, filters.email, filters.nickname]);
+    const filterableFields = [
+        { field: 'username', type: 'text' as const, label: t('pages.userManager.filter.username') },
+        { field: 'email',    type: 'text' as const, label: t('pages.userManager.filter.email') },
+        { field: 'nickname', type: 'text' as const, label: t('pages.userManager.filter.nickname') },
+    ];
 
     return (
         <ManagerPageContainer
@@ -70,39 +68,7 @@ export default function UserManagerPage() {
             create={async (props) => {
                 return (await UserManagerController.create(props as ManagerCreateUserDTO)).data!
             }}
-            extraQueryParams={filters}
-            tableActions={[
-                {
-                    label: <span>{t('pages.userManager.filter.username')}</span>,
-                    children: <Input
-                        allowClear
-                        style={{ width: 180 }}
-                        placeholder={t('pages.userManager.filter.usernamePlaceholder')}
-                        defaultValue={filters.username as string | undefined}
-                        onChange={(e) => setFilter('username', e.target.value || undefined)}
-                    />,
-                },
-                {
-                    label: <span>{t('pages.userManager.filter.email')}</span>,
-                    children: <Input
-                        allowClear
-                        style={{ width: 180 }}
-                        placeholder={t('pages.userManager.filter.emailPlaceholder')}
-                        defaultValue={filters.email as string | undefined}
-                        onChange={(e) => setFilter('email', e.target.value || undefined)}
-                    />,
-                },
-                {
-                    label: <span>{t('pages.userManager.filter.nickname')}</span>,
-                    children: <Input
-                        allowClear
-                        style={{ width: 180 }}
-                        placeholder={t('pages.userManager.filter.nicknamePlaceholder')}
-                        defaultValue={filters.nickname as string | undefined}
-                        onChange={(e) => setFilter('nickname', e.target.value || undefined)}
-                    />,
-                },
-            ]}
+            filterableFields={filterableFields}
         >
 
         </ManagerPageContainer>

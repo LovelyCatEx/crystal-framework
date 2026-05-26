@@ -26,7 +26,6 @@ import type {Dayjs} from 'dayjs';
 import dayjs from 'dayjs';
 import {StandardCard} from "@/components/card/StandardCard.tsx";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
-
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
 export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps, EntityTableProps<ENTITY>, DivHTMLAttributes {
@@ -276,12 +275,13 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                 queryParamsProvider() {
                     if (!timeRange) return {};
                     return {
-                        startTime: timeRange[0], 
-                        endTime: timeRange[1] ?? Date.now() 
+                        startTime: timeRange[0],
+                        endTime: timeRange[1] ?? Date.now()
                     };
                 }
             });
         }
+
 
         return actions;
     }, [restProps.tableActions, t, showTimeRangeFilter, timeRange, rangePresets]);
@@ -330,6 +330,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     tablePrefixActions={builtinTablePrefixActions}
                     tableActions={builtinTableActions}
                     extraQueryParams={restProps.extraQueryParams}
+                    filterableFields={restProps.filterableFields}
                     tableRowActionsRender={showRowActions ? (record) => (
                         <Space>
                             {restProps.tableRowActionsRender?.(record)}

@@ -5,7 +5,7 @@ import {useSearchParams} from 'react-router-dom';
  * Reserved URL param keys used internally by EntityTable.
  * These are handled separately via initialQueryValues.
  */
-const RESERVED_KEYS: readonly string[] = ['page', 'pageSize', 'searchKeyword', 'startTime', 'endTime'];
+const RESERVED_KEYS: readonly string[] = ['page', 'pageSize', 'searchKeyword', 'startTime', 'endTime', 'query'];
 
 // ---------------------------------------------------------------------------
 // Schema-based filter types
@@ -77,6 +77,7 @@ export interface UseManagerQueryParamsReturn<S extends FilterSchema = FilterSche
         searchKeyword?: string;
         startTime?: number;
         endTime?: number;
+        query?: unknown;
     };
 
     /**
@@ -172,7 +173,7 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
     // Capture initial params on first render only (ref = no re-render on URL change)
     const initialParamsRef = useRef<Record<string, string> | null>(null);
     const initialQueryValuesRef = useRef<{
-        page?: number; pageSize?: number; searchKeyword?: string; startTime?: number; endTime?: number;
+        page?: number; pageSize?: number; searchKeyword?: string; startTime?: number; endTime?: number; query?: unknown;
     } | null>(null);
 
     if (initialParamsRef.current === null) {
@@ -198,6 +199,12 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
             } else if (key === 'endTime') {
                 const n = Number(value);
                 if (!Number.isNaN(n)) queryValues!.endTime = n;
+            } else if (key === 'query') {
+                try {
+                    queryValues!.query = JSON.parse(atob(value));
+                } catch {
+                    // ignore invalid base64
+                }
             }
         });
 
@@ -250,7 +257,15 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
         const newSearchParams = new URLSearchParams();
         for (const [key, value] of Object.entries(params)) {
             if (value === undefined || value === null || value === '') continue;
-            newSearchParams.set(key, String(value));
+            if (typeof value === 'object') {
+                try {
+                    newSearchParams.set(key, btoa(JSON.stringify(value)));
+                } catch {
+                    // skip non-serializable values
+                }
+            } else {
+                newSearchParams.set(key, String(value));
+            }
         }
 
         // Skip if nothing changed — prevents re-render loops
