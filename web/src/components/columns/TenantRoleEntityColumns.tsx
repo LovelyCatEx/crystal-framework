@@ -1,9 +1,9 @@
 import React, {type JSX, useEffect, useState} from "react";
 import {Space, Spin, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import type {TenantRole} from "@/types/tenat-role.types.ts";
-import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
+import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
+import {TenantRoleManagerController} from "@/api/tenant/rbac/tenant-role.api.ts";
 import {useTranslation} from "react-i18next";
 
 function ParentRoleNameTag({ tenantId, parentId }: { parentId: string, tenantId: string }) {

@@ -1,5 +1,5 @@
-import {getSystemMaintenanceMode} from "@/api/system-settings.api.ts";
-import type {SystemMaintenanceStatusVO} from "@/types/system-settings.types.ts";
+import {getSystemMaintenanceMode} from "@/api/system/system-settings.api.ts";
+import type {SystemMaintenanceStatusVO} from "@/types/system/system-settings.types.ts";
 import useSWR from "swr";
 
 /**

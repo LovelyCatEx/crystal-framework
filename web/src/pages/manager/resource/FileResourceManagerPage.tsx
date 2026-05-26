@@ -5,9 +5,9 @@ import {
     getResourceFileDownloadUrlById,
     type ManagerCreateFileResourceDTO,
     type ManagerReadFileResourceDTO
-} from "@/api/file-resource.api.ts";
+} from "@/api/resource/file-resource.api.ts";
 import {useEffect, useRef, useState} from "react";
-import {type FileResource, ResourceFileType} from "@/types/file-resource.types.ts";
+import {type FileResource, ResourceFileType} from "@/types/resource/file-resource.types.ts";
 import {getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
@@ -15,7 +15,7 @@ import {DownloadOutlined} from "@ant-design/icons";
 import {downloadFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 
-export function FileResourceManagerPage() {
+export default function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterType, setFilterType] = useState<number>()
     const {t} = useTranslation();

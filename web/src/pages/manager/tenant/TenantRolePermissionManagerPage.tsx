@@ -2,13 +2,13 @@ import {Button, Card, message, Modal, Space, Table, Tag, Transfer} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import type {Key} from "react";
 import {useEffect, useState} from "react";
-import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
-import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
-import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
+import {TenantRoleManagerController} from "@/api/tenant/rbac/tenant-role.api.ts";
+import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant/rbac/tenant-role-permission.api.ts";
+import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-import type {TenantRole} from "@/types/tenat-role.types.ts";
-import type {TenantPermission} from "@/types/tenant-permission.types.ts";
+import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
+import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
 
 interface TransferItem {
@@ -17,7 +17,7 @@ interface TransferItem {
     description: string;
 }
 
-export function TenantRolePermissionManagerPage() {
+export default function TenantRolePermissionManagerPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();
     const [roles, setRoles] = useState<TenantRole[]>([]);

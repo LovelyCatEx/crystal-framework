@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {StorageProvider} from "@/types/storage-provider.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import {getStorageProviderType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";

@@ -1,16 +1,16 @@
 import {AuthCardLayout} from "./AuthorizationPage.tsx";
 import {useNavigate} from "react-router-dom";
 import {getQueryString} from "@/utils/url.utils.ts";
-import {menuPathDashboard, menuPathLogin} from "@/router";
+import {menuPathDashboard, menuPathLogin} from "@/router/paths.ts";
 import {Avatar, Button, Card, Form, Input, message, Space, Tabs} from "antd";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {bindOAuthAccount, loginByOAuth2Code, registerFromOAuthAccount} from "@/api/auth.api.ts";
+import {bindOAuthAccount, loginByOAuth2Code, registerFromOAuthAccount} from "@/api/auth/auth.api.ts";
 import {setUserAuthentication} from "@/utils/token.utils.ts";
-import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth.types.ts";
+import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth/auth.types.ts";
 import {GithubOutlined, LockOutlined, UserOutlined} from "@ant-design/icons";
 import PlatformIcon from "../../components/PlatformIcon.tsx";
-import {getOAuthPlatformByName} from "@/types/oauth-account.types.ts";
+import {getOAuthPlatformByName} from "@/types/user/oauth-account.types.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 
 function isLoginResponse(res: OAuth2LoginResponse): res is LoginResponse {

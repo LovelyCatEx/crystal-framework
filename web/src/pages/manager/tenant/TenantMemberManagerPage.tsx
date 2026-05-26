@@ -4,8 +4,8 @@ import {
     type ManagerCreateTenantMemberDTO,
     type ManagerUpdateTenantMemberDTO,
     TenantMemberManagerController,
-} from "@/api/tenant-member.api.ts";
-import {TenantMemberStatus} from "@/types/tenant-member.types.ts";
+} from "@/api/tenant/tenant-member.api.ts";
+import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
 import {useEffect, useRef, useState} from "react";
 import {useTenantMemberTableColumns} from "@/components/columns/TenantMemberEntityColumns.tsx";
@@ -15,7 +15,7 @@ import {PlusOutlined} from "@ant-design/icons";
 import {UserIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 
-export function TenantMemberManagerPage() {
+export default function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<number>();

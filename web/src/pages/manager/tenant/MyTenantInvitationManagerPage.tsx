@@ -5,7 +5,7 @@ import {
     InvitationManagerController,
     type ManagerCreateInvitationDTO,
     type ManagerUpdateInvitationDTO
-} from "@/api/invitation.api.ts";
+} from "@/api/tenant/tenant-invitation.api.ts";
 import {useRef} from "react";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
@@ -14,7 +14,7 @@ import {TenantDepartmentIdSelector} from "@/components/selector";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 
-export function MyTenantInvitationManagerPage() {
+export default function MyTenantInvitationManagerPage() {
     const { t } = useTranslation();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();

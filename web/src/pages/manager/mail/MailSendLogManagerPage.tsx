@@ -1,12 +1,13 @@
 import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {MailSendLogManagerController, type ManagerReadMailSendLogDTO,} from "@/api/mail-send-log.api.ts";
+import {MailSendLogManagerController} from "@/api/mail/mail-send-log.api.ts";
+import type {ManagerReadMailSendLogDTO} from "@/types/mail/mail-send-log.types.ts";
 import {useEffect, useRef, useState} from "react";
 import {useMailSendLogTableColumns} from "@/components/columns/MailSendLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 
-export function MailSendLogManagerPage() {
+export default function MailSendLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterKeyword, setFilterKeyword] = useState<string>();
     const [filterToEmail, setFilterToEmail] = useState<string>();

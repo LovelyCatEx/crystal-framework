@@ -4,8 +4,8 @@ import {useTranslation} from "react-i18next";
 import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantTableColumns} from "../columns/TenantEntityColumns.tsx";
-import {TenantManagerController} from "@/api/tenant.api.ts";
-import type {Tenant} from "@/types/tenant.types.ts";
+import {TenantManagerController} from "@/api/tenant/tenant.api.ts";
+import type {Tenant} from "@/types/tenant/tenant.types.ts";
 
 interface TenantIdSelectorProps {
     value?: string | null;

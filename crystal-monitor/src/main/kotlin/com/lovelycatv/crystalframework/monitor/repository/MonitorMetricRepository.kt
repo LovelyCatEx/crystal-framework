@@ -25,6 +25,25 @@ class MonitorMetricRepository(
             .then()
     }
 
+    fun batchInsert(type: MetricType, points: List<MetricPoint>): Mono<Void> {
+        if (points.isEmpty()) return Mono.empty()
+
+        val values = points.indices.joinToString(", ") {
+            "(:value_${it}, :created_time_${it})"
+        }
+        val sql = """
+            INSERT INTO ${type.tableName} (value, created_time)
+            VALUES $values
+        """.trimIndent()
+
+        var spec = databaseClient.sql(sql)
+        points.forEachIndexed { i, point ->
+            spec = spec.bind("value_${i}", point.value)
+                .bind("created_time_${i}", point.timestamp)
+        }
+        return spec.then()
+    }
+
     fun findByTimeRange(
         type: MetricType,
         startTime: Long,
@@ -49,27 +68,4 @@ class MonitorMetricRepository(
             .all()
     }
 
-    fun findAggregation(
-        type: MetricType,
-        startTime: Long,
-        endTime: Long,
-    ): Mono<MetricAggregation> {
-        return databaseClient.sql(
-            """
-            SELECT AVG(value) AS avg, MAX(value) AS max, MIN(value) AS min
-            FROM ${type.tableName}
-            WHERE created_time BETWEEN :startTime AND :endTime
-            """.trimIndent()
-        )
-            .bind("startTime", startTime)
-            .bind("endTime", endTime)
-            .map { row, _ ->
-                MetricAggregation(
-                    avg = row.get("avg", Double::class.java),
-                    max = row.get("max", Double::class.java),
-                    min = row.get("min", Double::class.java),
-                )
-            }
-            .one()
-    }
 }

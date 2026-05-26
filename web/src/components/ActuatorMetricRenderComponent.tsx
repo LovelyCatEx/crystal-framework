@@ -1,7 +1,7 @@
 import {Card, Flex, Statistic, Tag} from "antd";
 import {type ReactNode, useEffect, useMemo, useState} from "react";
 import useSWR from "swr";
-import {getMetric} from "../api/actuator.api.ts";
+import {getMetric} from "../api/monitor/actuator.api.ts";
 import {getActuatorMetric} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 

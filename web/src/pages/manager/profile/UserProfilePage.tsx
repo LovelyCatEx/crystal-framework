@@ -38,14 +38,14 @@ import {
     resetPassword,
     type ResetPasswordDTO,
     unbindOAuthAccount
-} from "@/api/auth.api.ts";
-import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "@/api/user.api.ts";
+} from "@/api/auth/auth.api.ts";
+import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "@/api/user/user.api.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
-import {useSWRState} from "@/compositions/swr.ts";
-import {getUserOAuthAccounts} from "@/api/user-oauth.api.ts";
+import {useSWRState} from "@/compositions/use-swr.ts";
+import {getUserOAuthAccounts} from "@/api/user/user-oauth.api.ts";
 import PlatformIcon from "../../../components/PlatformIcon.tsx";
-import type {UserOAuthAccountVO} from "@/types/user-oauth.types.ts";
-import {OAuthPlatform} from "@/types/oauth-account.types.ts";
+import type {UserOAuthAccountVO} from "@/types/user/user-oauth.types.ts";
+import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
 import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
 import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
 
@@ -702,7 +702,7 @@ function UserProfileCard() {
     )
 }
 
-export function UserProfilePage() {
+export default function UserProfilePage() {
     const { t } = useTranslation();
     
     const TAB_KEYS = {

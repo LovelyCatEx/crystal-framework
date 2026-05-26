@@ -4,8 +4,8 @@ import {useTranslation} from "react-i18next";
 import type {EntityIdSelectorRef} from "./EntityIdSelector.tsx";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useTenantRoleTableColumns} from "../columns/TenantRoleEntityColumns.tsx";
-import {TenantRoleManagerController} from "@/api/tenant-role.api.ts";
-import type {TenantRole} from "@/types/tenat-role.types.ts";
+import {TenantRoleManagerController} from "@/api/tenant/rbac/tenant-role.api.ts";
+import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
 
 interface TenantRoleIdSelectorProps {
     tenantId: string;

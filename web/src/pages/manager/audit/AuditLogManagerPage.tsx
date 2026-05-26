@@ -1,12 +1,12 @@
 import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {AuditLogManagerController, type ManagerReadAuditLogDTO,} from "@/api/audit-log.api.ts";
+import {AuditLogManagerController, type ManagerReadAuditLogDTO,} from "@/api/audit/audit-log.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useAuditLogTableColumns} from "@/components/columns/AuditLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 
-export function AuditLogManagerPage() {
+export default function AuditLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterAction, setFilterAction] = useState<number>();
     const [filterUserId, setFilterUserId] = useState<string>();

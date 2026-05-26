@@ -6,16 +6,16 @@ import {
     type ManagerCreateTenantRoleDTO,
     type ManagerUpdateTenantRoleDTO,
     TenantRoleManagerController
-} from "@/api/tenant-role.api.ts";
+} from "@/api/tenant/rbac/tenant-role.api.ts";
 import {useTenantRoleTableColumns} from "@/components/columns/TenantRoleEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.tsx";
 import {PlusOutlined} from "@ant-design/icons";
-import type {TenantRole} from "@/types/tenat-role.types.ts";
-import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant-role-permission.api.ts";
-import {TenantPermissionManagerController} from "@/api/tenant-permission.api.ts";
-import {type TenantPermission} from "@/types/tenant-permission.types.ts";
+import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
+import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant/rbac/tenant-role-permission.api.ts";
+import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
+import {type TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 
@@ -27,7 +27,7 @@ interface TransferItem {
     path?: string | null;
 }
 
-export function TenantRoleManagerPage() {
+export default function TenantRoleManagerPage() {
     const columns = useTenantRoleTableColumns();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);

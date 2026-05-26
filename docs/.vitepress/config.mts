@@ -31,6 +31,9 @@ export default defineConfig({
   sitemap: {
     hostname: 'https://lovelycatex.github.io/crystal-framework'
   },
+  head: [
+    ['link', { rel: 'icon', href: '/crystal-framework/favicon.ico' }]
+  ],
   markdown: {
     lineNumbers: true
   }

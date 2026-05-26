@@ -60,7 +60,7 @@ function LiveClock() {
     );
 }
 
-export function DashboardPage() {
+export default function DashboardPage() {
     const { t } = useTranslation();
     const [timeRange, setTimeRange] = useState("1m");
     const { accessibleComponentPaths, userProfile } = useLoggedUser();

@@ -3,14 +3,14 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     type ManagerCreateMailTemplateCategoryDTO,
     type ManagerReadMailTemplateCategoryDTO
-} from "@/api/mail-template-category.api.ts";
+} from "@/api/mail/mail-template-category.api.ts";
 import {useRef} from "react";
 import {useMailTemplateCategoryTableColumns} from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
-import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
-import type {MailTemplateCategory} from "@/types/mail.types.ts";
+import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
+import type {MailTemplateCategory} from "@/types/mail/mail.types.ts";
 import {useTranslation} from "react-i18next";
 
-export function MailTemplateCategoryManagerPage() {
+export default function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { controller } = useProtectedController<MailTemplateCategory, ManagerCreateMailTemplateCategoryDTO, ManagerReadMailTemplateCategoryDTO>();
     const {t} = useTranslation();

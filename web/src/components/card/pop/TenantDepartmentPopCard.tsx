@@ -1,7 +1,7 @@
 import {Card, Descriptions, Popover, Spin, Tag} from "antd";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
-import {useSWRComposition} from "@/compositions/swr.ts";
-import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
+import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
+import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {TenantDepartmentManagerController} from "@/api/tenant/tenant-department.api.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 

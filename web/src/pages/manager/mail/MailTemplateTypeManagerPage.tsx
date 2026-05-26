@@ -3,16 +3,16 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     type ManagerCreateMailTemplateTypeDTO,
     type ManagerReadMailTemplateTypeDTO
-} from "@/api/mail-template-type.api.ts";
+} from "@/api/mail/mail-template-type.api.ts";
 import {useEffect, useRef, useState} from "react";
-import type {MailTemplateCategory, MailTemplateType} from "@/types/mail.types.ts";
+import type {MailTemplateCategory, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {useMailTemplateTypeTableColumns} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
-import {MailTemplateCategoryManagerController} from "@/api/mail-template-category.api.ts";
+import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
 import {JsonEditor} from "@/components/JsonEditor.tsx";
-import {useProtectedController} from "@/components/ProtectedControllerWarningWrapper.tsx";
+import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 
-export function MailTemplateTypeManagerPage() {
+export default function MailTemplateTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [categories, setCategories] = useState<MailTemplateCategory[]>([]);
     const { controller } = useProtectedController<MailTemplateType, ManagerCreateMailTemplateTypeDTO, ManagerReadMailTemplateTypeDTO>();

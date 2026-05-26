@@ -1,12 +1,12 @@
 import {Button, Card, Descriptions, Space, Tag, theme} from "antd";
 import {TenantIdSelector} from "@/components/selector/TenantIdSelector.tsx";
-import type {Tenant} from "@/types/tenant.types.ts";
+import type {Tenant} from "@/types/tenant/tenant.types.ts";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {RedoOutlined, ShopOutlined} from "@ant-design/icons";
-import {TenantManagerController} from "@/api/tenant.api.ts";
+import {TenantManagerController} from "@/api/tenant/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
 import {AvatarResource} from "@/components/AvatarResource.tsx";
 

@@ -4,13 +4,13 @@ import {
     type ManagerCreateOAuthAccountDTO,
     type ManagerReadOAuthAccountDTO,
     OAuthAccountManagerController
-} from "@/api/oauth-account.api.ts";
+} from "@/api/user/oauth-account.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useOAuthAccountTableColumns} from "@/components/columns/OAuthAccountEntityColumns.tsx";
 import {UserIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
 
-export function OAuthAccountManagerPage() {
+export default function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [filterPlatform, setFilterPlatform] = useState<number>();
     const {t} = useTranslation();

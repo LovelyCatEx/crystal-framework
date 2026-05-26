@@ -30,8 +30,8 @@ import {
     updateTenantProfile,
     type UpdateTenantProfileDTO,
     uploadTenantIcon
-} from "@/api/tenant-profile.api.ts";
-import type {TenantProfileVO} from "@/types/tenant.types.ts";
+} from "@/api/tenant/tenant-profile.api.ts";
+import type {TenantProfileVO} from "@/types/tenant/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
 
@@ -40,7 +40,7 @@ const { useToken } = theme;
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-export function MyTenantProfilePage() {
+export default function MyTenantProfilePage() {
     const { t } = useTranslation();
     const { token } = useToken();
 

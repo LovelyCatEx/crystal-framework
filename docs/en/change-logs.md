@@ -1,5 +1,16 @@
 # Change Logs
 
+## v1.4.0
+
+2026-05-26
+
++ **!refactor(web): Restructure frontend project directory layout.**
++ feat(web): Manager login log related pages now support URL query parameters.
++ chore(web): Adjust Rollup manual chunk splitting configuration.
++ perf(monitor): Optimize metrics data storage logic to reduce database I/O overhead.
++ perf(web): Dynamically load language files on demand.
++ docs: Add CLAUDE.md documentation.
+
 ## v1.3.1
 
 2026-05-25

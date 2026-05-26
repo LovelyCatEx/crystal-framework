@@ -1,7 +1,7 @@
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {UserPermission} from "@/types/user-permission.types.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {UserPermission} from "@/types/user/rbac/user-permission.types.ts";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";

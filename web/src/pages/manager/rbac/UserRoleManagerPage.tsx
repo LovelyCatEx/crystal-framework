@@ -2,13 +2,13 @@ import {Button, Col, Form, Input, message, Modal, Row, Tag, Transfer} from "antd
 import type {Key} from "react";
 import {useEffect, useState} from "react";
 import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
-import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user-role.api.ts";
+import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user/rbac/user-role.api.ts";
 import TextArea from "antd/es/input/TextArea";
 import {useUserRoleTableColumns} from "@/components/columns/UserRoleEntityColumns.tsx";
-import {getRolePermissions, setRolePermissions} from "@/api/user-role-permission.api.ts";
-import {UserPermissionManagerController} from "@/api/user-permission.api.ts";
-import {type UserPermission} from "@/types/user-permission.types.ts";
-import type {UserRole} from "@/types/user-role.types.ts";
+import {getRolePermissions, setRolePermissions} from "@/api/user/rbac/user-role-permission.api.ts";
+import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
+import {type UserPermission} from "@/types/user/rbac/user-permission.types.ts";
+import type {UserRole} from "@/types/user/rbac/user-role.types.ts";
 import {useTranslation} from "react-i18next";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 
@@ -20,7 +20,7 @@ interface TransferItem {
     path?: string | null;
 }
 
-export function UserRoleManagerPage() {
+export default function UserRoleManagerPage() {
     const [allPermissions, setAllPermissions] = useState<UserPermission[]>([]);
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);

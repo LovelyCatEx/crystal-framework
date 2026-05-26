@@ -1,8 +1,8 @@
 import React, {type JSX, useEffect, useState} from "react";
 import {Space, Spin, Tag} from "antd";
-import type {EntityTableColumns} from "../types/entity-table.types.ts";
-import type {TenantDepartment} from "@/types/tenant-department.types.ts";
-import {TenantDepartmentManagerController} from "@/api/tenant-department.api.ts";
+import type {EntityTableColumns} from "../table/entity-table.types.ts";
+import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
+import {TenantDepartmentManagerController} from "@/api/tenant/tenant-department.api.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 
