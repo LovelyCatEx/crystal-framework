@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 
 /**
  * [com.lovelycatv.crystalframework.shared.aspect.ManagerControllerPermissionAspect] is using the name of methods in this class.
@@ -48,10 +49,10 @@ abstract class StandardManagerController<
         return ApiResponse.success(null)
     }
 
-    @GetMapping("/query", version = "1")
+    @PostMapping("/query", version = "1")
     suspend fun read(
         userAuthentication: UserAuthentication,
-        @ModelAttribute
+        @RequestBody
         @Valid
         dto: READ_DTO
     ): ApiResponse<*> {
