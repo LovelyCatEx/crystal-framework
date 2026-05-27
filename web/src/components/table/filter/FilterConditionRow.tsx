@@ -1,5 +1,6 @@
 import {useCallback} from 'react';
-import {Button, DatePicker, Input, InputNumber, Select} from 'antd';
+import {Button, DatePicker, Input, Select} from 'antd';
+import {EnhancedNumberInput} from '@/components/EnhancedNumberInput.tsx';
 import {CloseOutlined} from '@ant-design/icons';
 import {useTranslation} from 'react-i18next';
 import type {FilterableField, FilterRowState} from './filter-builder.types.ts';
@@ -52,9 +53,9 @@ export function FilterConditionRow({row, fields, onUpdate, onDelete}: FilterCond
         );
       case 'number':
         return (
-          <InputNumber
+          <EnhancedNumberInput
             className="flex-1"
-            value={(value as number | null) ?? null}
+            value={value as string | number | null | undefined}
             onChange={(v) => onChange(v)}
             placeholder={t('components.filterBuilder.valuePlaceholder')}
           />
