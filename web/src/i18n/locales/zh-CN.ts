@@ -738,7 +738,11 @@ export const zhCN: I18nRules = {
       },
       filter: {
         status: '状态',
-        all: '全部'
+        all: '全部',
+        id: '成员 ID',
+        idPlaceholder: '输入成员 ID',
+        memberUserId: '用户 ID',
+        memberUserIdPlaceholder: '输入用户 ID'
       },
       modal: {
         memberUserId: {
@@ -948,7 +952,11 @@ export const zhCN: I18nRules = {
       subtitle: '管理当前组织成员信息',
       filter: {
         status: '状态',
-        all: '全部'
+        all: '全部',
+        id: '成员 ID',
+        idPlaceholder: '输入成员 ID',
+        memberUserId: '用户 ID',
+        memberUserIdPlaceholder: '输入用户 ID'
       },
       modal: {
         status: {

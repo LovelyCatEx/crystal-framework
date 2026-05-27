@@ -741,7 +741,11 @@ export const enUS: I18nRules = {
       },
       filter: {
         status: 'Status',
-        all: 'All'
+        all: 'All',
+        id: 'Member ID',
+        idPlaceholder: 'Enter member ID',
+        memberUserId: 'User ID',
+        memberUserIdPlaceholder: 'Enter user ID'
       },
       modal: {
         memberUserId: {
@@ -951,7 +955,11 @@ export const enUS: I18nRules = {
       subtitle: 'Manage members in current organization',
       filter: {
         status: 'Status',
-        all: 'All'
+        all: 'All',
+        id: 'Member ID',
+        idPlaceholder: 'Enter member ID',
+        memberUserId: 'User ID',
+        memberUserIdPlaceholder: 'Enter user ID'
       },
       modal: {
         status: {

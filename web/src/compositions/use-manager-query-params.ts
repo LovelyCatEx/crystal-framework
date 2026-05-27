@@ -269,13 +269,23 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
             }
         }
 
+        // Clean up schema-declared keys that are absent from the current params
+        // This ensures cleared filters are removed from the URL
+        if (schema) {
+            for (const schemaKey of Object.keys(schema)) {
+                if (!(schemaKey in params)) {
+                    newSearchParams.delete(schemaKey);
+                }
+            }
+        }
+
         // Skip if nothing changed — prevents re-render loops
         const newStr = newSearchParams.toString();
         const currentStr = new URLSearchParams(window.location.search).toString();
         if (newStr === currentStr) return;
 
         setSearchParams(newSearchParams, { replace: true });
-    }, [enabled, setSearchParams]);
+    }, [enabled, setSearchParams, schema]);
 
     const initialQueryValues = useMemo(() => initialQueryValuesRef.current ?? {}, []);
 

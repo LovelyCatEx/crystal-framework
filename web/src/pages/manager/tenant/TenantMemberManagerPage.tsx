@@ -1,4 +1,4 @@
-import {Button, Col, Form, Row, Select} from "antd";
+import {Button, Col, Form, Input, Row, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantMemberDTO,
@@ -19,13 +19,13 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function TenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number' } });
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number', id: 'string', memberUserId: 'string' } });
     const {t} = useTranslation();
     const columns = useTenantMemberTableColumns();
 
     useEffect(() => {
         pageRef.current?.refreshData({ resetPage: true });
-    }, [filters.status, selectedTenantId]);
+    }, [filters.status, filters.id, filters.memberUserId, selectedTenantId]);
 
     const statusOptions = [
         { label: getTenantMemberStatus(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
@@ -113,7 +113,6 @@ export default function TenantMemberManagerPage() {
                             tenantId: selectedTenantId
                         })).data!
                     }}
-                    searchKeywords={['member_user_id']}
                     filterableFields={[
                         {
                             field: 'status',
@@ -135,8 +134,32 @@ export default function TenantMemberManagerPage() {
                     initialQueryValues={initialQueryValues}
                     simpleFilters={[
                         { field: 'status', operator: 'eq', value: filters.status },
+                        { field: 'id', operator: 'eq', value: filters.id },
+                        { field: 'member_user_id', urlKey: 'memberUserId', operator: 'eq', value: filters.memberUserId },
                     ]}
                     tableActions={[
+                        {
+                            label: <span>{t('pages.tenantMemberManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.tenantMemberManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                        {
+                            label: <span>{t('pages.tenantMemberManager.filter.memberUserId')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.tenantMemberManager.filter.memberUserIdPlaceholder')}
+                                defaultValue={filters.memberUserId}
+                                allowClear
+                                onPressEnter={(e) => setFilter('memberUserId', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('memberUserId', undefined); }}
+                            />,
+                        },
                         {
                             label: <span>{t('pages.tenantMemberManager.filter.status')}</span>,
                             children: <Select
