@@ -38,8 +38,6 @@ class UserManagerServiceImpl(
 
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
-    override fun getEntityClass(): Class<UserEntity> = UserEntity::class.java
-
     override suspend fun create(dto: ManagerCreateUserDTO): UserEntity {
         userRepository.findByUsername(dto.username).awaitFirstOrNull()?.let {
             throw BusinessException("username '${dto.username}' is already taken")

@@ -22,7 +22,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { status: 'number' }
     });
     const {t} = useTranslation();
@@ -215,7 +215,16 @@ export default function TenantManagerPage() {
                 };
                 return (await TenantManagerController.create(createProps)).data!
             }}
-            extraQueryParams={filters}
+            filterableFields={[
+                { field: 'status',        type: 'number' as const, label: t('pages.tenantManager.filter.status') },
+                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+            ]}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'status', operator: 'eq', value: filters.status },
+            ]}
             tableActions={[
                 {
                     label: <span>{t('pages.tenantManager.filter.status')}</span>,

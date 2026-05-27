@@ -1,14 +1,13 @@
 package com.lovelycatv.crystalframework.mail.controller.manager.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
+import com.lovelycatv.crystalframework.shared.database.QueryNode
 
 data class ManagerReadMailSendLogDTO(
     override val page: Int,
     override val pageSize: Int,
     override val id: Long? = null,
-    override val searchKeyword: String? = null,
-    override val startTime: Long? = null,
-    override val endTime: Long? = null,
+    override val query: QueryNode? = null,
     val toEmail: String? = null,
     val success: Boolean? = null,
     val userId: Long? = null,

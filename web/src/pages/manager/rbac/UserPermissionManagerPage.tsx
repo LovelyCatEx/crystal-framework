@@ -13,7 +13,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { type: 'number' }
     });
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
@@ -85,7 +85,16 @@ export default function UserPermissionManagerPage() {
             create={async (props) => {
                 return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
-            extraQueryParams={filters}
+            filterableFields={[
+                { field: 'type',          type: 'number' as const, label: t('pages.userPermissionManager.filter.type') },
+                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+            ]}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type', operator: 'eq', value: filters.type },
+            ]}
             tableActions={[
                 {
                     label: <span>{t('pages.userPermissionManager.filter.type')}</span>,

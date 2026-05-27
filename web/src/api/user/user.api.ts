@@ -4,9 +4,7 @@ import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.t
 import {doGet, doPost} from "../system-request.ts";
 
 export interface ManagerReadUserDTO extends BaseManagerReadDTO {
-    username?: string | null;
-    email?: string | null;
-    nickname?: string | null;
+    // All filtering is done via query: GroupNode
 }
 
 export const UserManagerController = new BaseManagerController<

@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -23,6 +24,7 @@ class MailTemplateManagerServiceImpl(
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val mailTemplateTypeService: MailTemplateTypeService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : MailTemplateManagerService {
     override val cacheStore: ExpiringKVStore<String, MailTemplateEntity>
         get() = redisService.asKVStore()
@@ -33,6 +35,8 @@ class MailTemplateManagerServiceImpl(
     override fun getRepository(): MailTemplateRepository {
         return this.mailTemplateRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateMailTemplateDTO): MailTemplateEntity {
         return this.getRepository().save(

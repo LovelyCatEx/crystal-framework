@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.tenant.service.manager.TenantInvitationMa
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -22,6 +23,7 @@ class TenantInvitationManagerServiceImpl(
     private val redisService: RedisService,
     private val snowIdGenerator: SnowIdGenerator,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantInvitationManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantInvitationEntity>
         get() = redisService.asKVStore()
@@ -32,6 +34,8 @@ class TenantInvitationManagerServiceImpl(
     override fun getRepository(): TenantInvitationRepository {
         return this.tenantInvitationRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateInvitationDTO): TenantInvitationEntity {

@@ -7,14 +7,11 @@ open class BaseManagerReadDTO(
     override val page: Int,
     override val pageSize: Int,
     open val id: Long? = null,
-    open val searchKeyword: String? = null,
-    open val startTime: Long? = null,
-    open val endTime: Long? = null,
     /**
      * Root node of a structured query condition tree.
      *
-     * When provided, the query engine uses [R2dbcEntityTemplate] with the
-     * criteria built from this tree, bypassing all legacy SQL paths.
+     * All filtering is expressed through this tree. The query engine uses
+     * [R2dbcEntityTemplate] with the criteria built from this tree.
      *
      * The tree supports arbitrary AND/OR nesting via [GroupNode] and leaf
      * predicates via [ConditionNode]. Field names must match database column names.

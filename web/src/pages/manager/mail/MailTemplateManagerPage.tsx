@@ -91,7 +91,7 @@ export default function MailTemplateManagerPage() {
 
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { typeId: 'number' }
     });
 
@@ -139,7 +139,16 @@ export default function MailTemplateManagerPage() {
             title={t('pages.mailTemplateManager.title')}
             subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
-            extraQueryParams={filters}
+            filterableFields={[
+                { field: 'type_id',       type: 'number' as const, label: t('pages.mailTemplateManager.filter.templateType') },
+                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+            ]}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type_id', urlKey: 'typeId', operator: 'eq', value: filters.typeId },
+            ]}
             tableActions={[
                 {
                     label: t('pages.mailTemplateManager.filter.templateType'),

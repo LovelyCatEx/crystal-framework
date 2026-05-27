@@ -16,7 +16,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({ schema: { status: 'number' } });
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number' } });
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const {t} = useTranslation();
     const columns = useMyTenantMemberTableColumns();
@@ -96,6 +96,16 @@ export default function MyTenantMemberManagerPage() {
                             tenantId: currentTenantId
                         })).data!
                     }}
+                    filterableFields={[
+                        { field: 'status',        type: 'number' as const, label: t('pages.myTenantMemberManager.filter.status') },
+                        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+                    ]}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'status', operator: 'eq', value: filters.status },
+                    ]}
                     tableActions={[
                         {
                             label: <span>{t('pages.myTenantMemberManager.filter.status')}</span>,
@@ -110,7 +120,6 @@ export default function MyTenantMemberManagerPage() {
                             />,
                         }
                     ]}
-                    extraQueryParams={filters}
                     delete={async (props) => {
                         return (await TenantMemberManagerController.delete(props)).data!
                     }}

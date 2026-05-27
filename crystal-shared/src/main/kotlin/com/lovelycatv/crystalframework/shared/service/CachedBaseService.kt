@@ -16,8 +16,6 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
 
     val eventPublisher: ApplicationEventPublisher
 
-    val entityClass: KClass<ENTITY>
-
     fun buildCacheKey(entityId: Long): String {
         return "${RedisConstants.ENTITY_CACHE_BY_ID}$entityId"
     }

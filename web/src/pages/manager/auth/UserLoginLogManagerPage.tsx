@@ -11,7 +11,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function UserLoginLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
 
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: {
             userId: 'string',
             username: 'string',
@@ -27,6 +27,16 @@ export default function UserLoginLogManagerPage() {
     useEffect(() => {
         pageRef?.current?.refreshData?.({resetPage: true});
     }, [filters.userId, filters.username, filters.loginMethod, filters.success, filters.remoteIp]);
+
+    const filterableFields = [
+        { field: 'user_id',       type: 'number' as const, label: t('pages.userLoginLogManager.filter.userId') },
+        { field: 'username',      type: 'text'   as const, label: t('pages.userLoginLogManager.filter.username') },
+        { field: 'login_method',  type: 'number' as const, label: t('pages.userLoginLogManager.filter.loginMethod') },
+        { field: 'success',       type: 'text'   as const, label: t('pages.userLoginLogManager.filter.status') },
+        { field: 'remote_ip',     type: 'text'   as const, label: t('pages.userLoginLogManager.filter.remoteIp') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
 
     return (
         <>
@@ -44,14 +54,24 @@ export default function UserLoginLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
-                extraQueryParams={filters}
+                filterableFields={filterableFields}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                searchKeywords={['username', 'remote_ip']}
+                simpleFilters={[
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                    { field: 'username', operator: 'contains', value: filters.username },
+                    { field: 'login_method', urlKey: 'loginMethod', operator: 'eq', value: filters.loginMethod },
+                    { field: 'success', operator: 'eq', value: filters.success },
+                    { field: 'remote_ip', urlKey: 'remoteIp', operator: 'contains', value: filters.remoteIp },
+                ]}
                 query={async (props: ManagerReadUserLoginLogDTO) => {
                     return (await UserLoginLogManagerController.query(props)).data!;
                 }}
                 delete={async () => null}
                 update={async () => null}
                 create={async () => null}
-                tableActions={[
+                tablePrefixActions={[
                     {
                         label: <span>{t('pages.userLoginLogManager.filter.userId')}</span>,
                         children: <Input

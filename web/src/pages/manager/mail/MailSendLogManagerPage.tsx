@@ -10,9 +10,8 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function MailSendLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: {
-            keyword: 'string',
             toEmail: 'string',
             success: 'string',
             userId: 'string',
@@ -23,7 +22,15 @@ export default function MailSendLogManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({resetPage: true});
-    }, [filters.keyword, filters.toEmail, filters.success, filters.userId]);
+    }, [filters.toEmail, filters.success, filters.userId]);
+
+    const filterableFields = [
+        { field: 'to_email',      type: 'text'   as const, label: t('pages.mailSendLogManager.filter.toEmail') },
+        { field: 'success',       type: 'text'   as const, label: t('pages.mailSendLogManager.filter.status') },
+        { field: 'user_id',       type: 'number' as const, label: t('pages.mailSendLogManager.filter.userId') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
 
     return (
         <>
@@ -41,30 +48,22 @@ export default function MailSendLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
-                extraQueryParams={{
-                    ...filters,
-                    success: filters.success === 'true' ? true : filters.success === 'false' ? false : undefined,
-                }}
+                filterableFields={filterableFields}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                searchKeywords={['to_email']}
+                simpleFilters={[
+                    { field: 'to_email', urlKey: 'toEmail', operator: 'contains', value: filters.toEmail },
+                    { field: 'success', operator: 'eq', value: filters.success },
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                ]}
                 query={async (props: ManagerReadMailSendLogDTO) => {
                     return (await MailSendLogManagerController.query(props)).data!;
                 }}
                 delete={async () => null}
                 update={async () => null}
                 create={async () => null}
-                tableActions={[
-                    {
-                        label: <span>{t('pages.mailSendLogManager.filter.keyword')}</span>,
-                        children: <Input
-                            style={{width: 140}}
-                            placeholder={t('pages.mailSendLogManager.filter.keywordPlaceholder')}
-                            defaultValue={filters.keyword}
-                            allowClear
-                            onPressEnter={(e) => setFilter('keyword', (e.target as HTMLInputElement).value || undefined)}
-                            onChange={(e) => {
-                                if (e.target.value === '') setFilter('keyword', undefined);
-                            }}
-                        />,
-                    },
+                tablePrefixActions={[
                     {
                         label: <span>{t('pages.mailSendLogManager.filter.toEmail')}</span>,
                         children: <Input

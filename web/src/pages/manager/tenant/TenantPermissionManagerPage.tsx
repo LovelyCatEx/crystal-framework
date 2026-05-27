@@ -18,7 +18,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { type: 'number' }
     });
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
@@ -129,6 +129,16 @@ export default function TenantPermissionManagerPage() {
                 query={async (props) => {
                     return (await controller.query(props)).data!
                 }}
+                filterableFields={[
+                    { field: 'type',          type: 'number' as const, label: t('pages.tenantPermissionManager.filter.type') },
+                    { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                    { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+                ]}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                simpleFilters={[
+                    { field: 'type', operator: 'eq', value: filters.type },
+                ]}
                 tableActions={[
                     {
                         label: <span>{t('pages.tenantPermissionManager.filter.type')}</span>,
@@ -143,7 +153,6 @@ export default function TenantPermissionManagerPage() {
                         />,
                     }
                 ]}
-                extraQueryParams={filters}
                 delete={async (props) => {
                     return (await controller.delete(props)).data!
                 }}

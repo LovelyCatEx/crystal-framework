@@ -9,8 +9,7 @@ import React, {
     useRef,
     useState
 } from "react";
-import type {TimeRangePickerProps} from 'antd';
-import {Button, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
+import {Button, Form, Input, message, Modal, Popconfirm, Select, Space} from "antd";
 import {DeleteOutlined, EditOutlined, ExclamationCircleFilled, PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent, type ActionBarComponentProps} from "./ActionBarComponent.tsx";
@@ -22,8 +21,6 @@ import {
     type EntityTableRef,
     type EntityTableRefreshOptions
 } from "./table/EntityTable.tsx";
-import type {Dayjs} from 'dayjs';
-import dayjs from 'dayjs';
 import {StandardCard} from "@/components/card/StandardCard.tsx";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
@@ -38,7 +35,6 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     showActionBar?: boolean;
     readonlyMode?: boolean;
     showRowActions?: boolean;
-    showTimeRangeFilter?: boolean;
 }
 
 export interface ManagerPageContainerRef extends EntityTableRef {
@@ -63,9 +59,6 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     const entityTableRef = useRef<EntityTableRef | null>(null);
 
-    // Default URL sync — handles searchKeyword, page, pageSize, startTime, endTime
-    // Pages that use useManagerQueryParams({ schema }) will pass their own syncToUrl / initialQueryValues,
-    // which take priority via the ?? fallback below.
     const { syncToUrl: defaultSyncToUrl, initialQueryValues: defaultInitialQueryValues } = useManagerQueryParams();
     const effectiveSyncToUrl = props.queryParamsSync ?? defaultSyncToUrl;
     const effectiveInitialQueryValues = props.initialQueryValues ?? defaultInitialQueryValues;
@@ -80,23 +73,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const [selectedEntities, setSelectedEntities] = useState<ENTITY[]>([]);
     const [batchOperationType, setBatchOperationType] = useState(0);
 
-    // Time range filter
-    const [timeRange, setTimeRange] = useState<[number, number | null] | null>(() => {
-        const startTime = effectiveInitialQueryValues?.startTime;
-        const endTime = effectiveInitialQueryValues?.endTime;
-        if (startTime !== undefined) {
-            const start = typeof startTime === 'number' ? startTime : Number(startTime);
-            const end = endTime !== undefined ? (typeof endTime === 'number' ? endTime : Number(endTime)) : null;
-            if (!Number.isNaN(start)) return [start, end && !Number.isNaN(end) ? end : null];
-        }
-        return null;
-    });
-
     const handleOnBatchOperationClick = useCallback(() => {
         if (batchOperationType === 1) {
-            if (selectedEntities.length <= 0) {
-                return;
-            }
+            if (selectedEntities.length <= 0) return;
 
             modal.confirm({
                 title: t('components.managerPageContainer.batchDeleteTitle'),
@@ -182,9 +161,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     const showActionBar = props.showActionBar !== false;
     const readonlyMode = props.readonlyMode === true;
     const showRowActions = props.showRowActions !== false;
-    const showTimeRangeFilter = props.showTimeRangeFilter !== false;
 
-    // Only used to strip className/style from the div wrapper; everything else stays on props.
     const { className, style } = props;
 
     const builtinTablePrefixActions = useMemo(() => {
@@ -211,63 +188,6 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             ...(props.tablePrefixActions ?? []),
         ];
     }, [readonlyMode, isCustomTableSelector, props.tablePrefixActions, t, handleOnBatchOperationClick]);
-
-    const rangePresets: TimeRangePickerProps['presets'] = useMemo(() => {
-        const now = dayjs();
-        return [
-            { label: t('components.managerPageContainer.todayToNow'), value: () => [dayjs().startOf('day'), dayjs()] as [Dayjs, Dayjs] },
-            { label: t('components.managerPageContainer.last5Minutes'),  value: [now.add(-5,  'minute'), now] },
-            { label: t('components.managerPageContainer.last10Minutes'), value: [now.add(-10, 'minute'), now] },
-            { label: t('components.managerPageContainer.last15Minutes'), value: [now.add(-15, 'minute'), now] },
-            { label: t('components.managerPageContainer.last30Minutes'), value: [now.add(-30, 'minute'), now] },
-            { label: t('components.managerPageContainer.last1Hour'),     value: [now.add(-1,  'hour'),   now] },
-            { label: t('components.managerPageContainer.last2Hours'),    value: [now.add(-2,  'hour'),   now] },
-            { label: t('components.managerPageContainer.last3Hours'),    value: [now.add(-3,  'hour'),   now] },
-            { label: t('components.managerPageContainer.last4Hours'),    value: [now.add(-4,  'hour'),   now] },
-            { label: t('components.managerPageContainer.last8Hours'),    value: [now.add(-8,  'hour'),   now] },
-            { label: t('components.managerPageContainer.last12Hours'),   value: [now.add(-12, 'hour'),   now] },
-            { label: t('components.managerPageContainer.last1Day'),      value: [now.add(-1,  'day'),    now] },
-            { label: t('components.managerPageContainer.last3Days'),     value: [now.add(-3,  'day'),    now] },
-            { label: t('components.managerPageContainer.last5Days'),     value: [now.add(-5,  'day'),    now] },
-            { label: t('components.managerPageContainer.last7Days'),     value: [now.add(-7,  'day'),    now] },
-            { label: t('components.managerPageContainer.last14Days'),    value: [now.add(-14, 'day'),    now] },
-            { label: t('components.managerPageContainer.last30Days'),    value: [now.add(-30, 'day'),    now] },
-        ];
-    }, [t]);
-
-    const builtinTableActions = useMemo(() => {
-        const actions = [...(props.tableActions ?? [])];
-
-        if (showTimeRangeFilter) {
-            actions.push({
-                label: <span>{t('components.managerPageContainer.timeRange')}</span>,
-                children: (
-                    <DatePicker.RangePicker
-                        showTime
-                        allowClear
-                        presets={rangePresets}
-                        defaultValue={timeRange ? [dayjs(timeRange[0]), timeRange[1] ? dayjs(timeRange[1]) : null] : undefined}
-                        placeholder={[t('components.managerPageContainer.startTime'), t('components.managerPageContainer.tillNow')]}
-                        allowEmpty={[false, true]}
-                        onChange={(dates) => {
-                            if (dates && dates[0]) {
-                                setTimeRange([dates[0].valueOf(), dates[1]?.valueOf() ?? null]);
-                            } else {
-                                setTimeRange(null);
-                            }
-                            setTimeout(() => entityTableRef.current?.refreshData({ resetPage: true }), 0);
-                        }}
-                    />
-                ),
-                queryParamsProvider() {
-                    if (!timeRange) return {};
-                    return { startTime: timeRange[0], endTime: timeRange[1] ?? Date.now() };
-                },
-            });
-        }
-
-        return actions;
-    }, [props.tableActions, t, showTimeRangeFilter, timeRange, rangePresets]);
 
     const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
         if (readonlyMode) return { type: 'disabled' };
@@ -306,7 +226,6 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     ref={entityTableRef}
                     {...props}
                     tablePrefixActions={builtinTablePrefixActions}
-                    tableActions={builtinTableActions}
                     tableSelection={builtinTableSelection}
                     queryParamsSync={effectiveSyncToUrl}
                     initialQueryValues={effectiveInitialQueryValues}

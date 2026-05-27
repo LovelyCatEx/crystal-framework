@@ -3,7 +3,7 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {type ManagerCreateUserDTO, type ManagerReadUserDTO, UserManagerController} from "@/api/user/user.api.ts";
 import {useUserTableColumns} from "@/components/columns/UserEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function UserManagerPage() {
@@ -19,10 +19,16 @@ export default function UserManagerPage() {
         } as const,
     });
 
+    useEffect(() => {
+        pageRef.current?.refreshData({ resetPage: true });
+    }, [filters.username, filters.nickname]);
+
     const filterableFields = [
-        { field: 'username', type: 'text' as const, label: t('pages.userManager.filter.username') },
-        { field: 'email',    type: 'text' as const, label: t('pages.userManager.filter.email') },
-        { field: 'nickname', type: 'text' as const, label: t('pages.userManager.filter.nickname') },
+        { field: 'username',      type: 'text'   as const, label: t('pages.userManager.filter.username') },
+        { field: 'email',         type: 'text'   as const, label: t('pages.userManager.filter.email') },
+        { field: 'nickname',      type: 'text'   as const, label: t('pages.userManager.filter.nickname') },
+        { field: 'created_time',  type: 'number' as const, label: t('pages.userManager.filter.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('pages.userManager.filter.modifiedTime') },
     ];
 
     return (

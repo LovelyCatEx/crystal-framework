@@ -4,9 +4,12 @@ import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.r2dbc.repository.R2dbcRepository
+import kotlin.reflect.KClass
 
 interface BaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEntity> {
     fun getRepository(): REPOSITORY
+
+    val entityClass: KClass<ENTITY>
 
     suspend fun getByIdOrNull(
         id: Long?

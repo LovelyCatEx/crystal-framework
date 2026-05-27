@@ -15,8 +15,6 @@ export interface PaginatedResponseData<T> {
 
 export interface BaseManagerReadDTO extends PageQuery {
     id?: string;
-    startTime?: string;
-    endTime?: string;
     query?: GroupNode;
 }
 

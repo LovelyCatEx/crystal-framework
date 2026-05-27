@@ -14,7 +14,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { type: 'number' }
     });
     const {t} = useTranslation();
@@ -47,6 +47,12 @@ export default function StorageProviderManagerPage() {
         }
     });
 
+    const filterableFields = [
+        { field: 'type',          type: 'number' as const, label: t('pages.storageProviderManager.filter.type') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -54,6 +60,12 @@ export default function StorageProviderManagerPage() {
             title={t('pages.storageProviderManager.title')}
             subtitle={t('pages.storageProviderManager.subtitle')}
             columns={columnsWithActive}
+            filterableFields={filterableFields}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type', operator: 'eq', value: filters.type },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
@@ -108,8 +120,7 @@ export default function StorageProviderManagerPage() {
             create={async (props) => {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
-            extraQueryParams={filters}
-            tableActions={[
+            tablePrefixActions={[
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select

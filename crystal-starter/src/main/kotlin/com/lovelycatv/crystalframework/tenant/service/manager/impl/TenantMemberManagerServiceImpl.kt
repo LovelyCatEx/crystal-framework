@@ -22,6 +22,7 @@ import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -39,6 +40,7 @@ class TenantMemberManagerServiceImpl(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService,
     private val tenantMemberService: TenantMemberService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantMemberManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantMemberEntity>
         get() = redisService.asKVStore()
@@ -49,6 +51,8 @@ class TenantMemberManagerServiceImpl(
     override fun getRepository(): TenantMemberRepository {
         return this.tenantMemberRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateTenantMemberDTO): TenantMemberEntity {

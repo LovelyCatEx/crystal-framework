@@ -9,7 +9,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function AuditLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: {
             action: 'number',
             userId: 'string',
@@ -24,6 +24,16 @@ export default function AuditLogManagerPage() {
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filters.action, filters.userId, filters.username, filters.path, filters.remoteIp]);
+
+    const filterableFields = [
+        { field: 'user_id',       type: 'number' as const, label: t('pages.auditLogManager.filter.userId') },
+        { field: 'username',      type: 'text'   as const, label: t('pages.auditLogManager.filter.username') },
+        { field: 'action',        type: 'number' as const, label: t('pages.auditLogManager.filter.action') },
+        { field: 'path',          type: 'text'   as const, label: t('pages.auditLogManager.filter.path') },
+        { field: 'remote_ip',     type: 'text'   as const, label: t('pages.auditLogManager.filter.remoteIp') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
 
     return (
         <>
@@ -41,14 +51,24 @@ export default function AuditLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
-                extraQueryParams={filters}
+                filterableFields={filterableFields}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                searchKeywords={['username', 'path', 'remote_ip']}
+                simpleFilters={[
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                    { field: 'username', operator: 'contains', value: filters.username },
+                    { field: 'action', operator: 'eq', value: filters.action },
+                    { field: 'path', operator: 'contains', value: filters.path },
+                    { field: 'remote_ip', urlKey: 'remoteIp', operator: 'contains', value: filters.remoteIp },
+                ]}
                 query={async (props: ManagerReadAuditLogDTO) => {
                     return (await AuditLogManagerController.query(props)).data!;
                 }}
                 delete={async () => { return null; }}
                 update={async () => { return null; }}
                 create={async () => { return null; }}
-                tableActions={[
+                tablePrefixActions={[
                     {
                         label: <span>{t('pages.auditLogManager.filter.action')}</span>,
                         children: <Select

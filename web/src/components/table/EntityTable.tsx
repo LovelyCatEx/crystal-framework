@@ -11,7 +11,8 @@ import React, {
     useRef,
     useState
 } from "react";
-import {Button, Checkbox, Flex, Input, message, Popover, Space, Switch, Table, type TableProps} from "antd";
+import type {TimeRangePickerProps} from 'antd';
+import {Button, Checkbox, DatePicker, Flex, Input, message, Popover, Space, Switch, Table, type TableProps} from "antd";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {SearchOutlined, SettingOutlined} from "@ant-design/icons";
@@ -22,6 +23,8 @@ import {useTranslation} from "react-i18next";
 import {useDebounce} from "@/compositions/use-debounce.ts";
 import {FilterBuilder} from "@/components/table/filter/FilterBuilder.tsx";
 import type {ConditionNode, FilterableField, GroupNode} from "@/components/table/filter/filter-builder.types.ts";
+import type {Dayjs} from 'dayjs';
+import dayjs from 'dayjs';
 
 export interface EntityTableProps<ENTITY extends BaseEntity> {
     entityName: string;
@@ -39,36 +42,19 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     filterableFields?: FilterableField[];
     /**
      * Fields the global search box will OR against.
-     * A single search input is rendered; the typed value generates a GroupNode
-     * where each listed field gets a `contains` condition, all OR-ed together.
-     *
-     * This group is part of the "simple group" (AND-ed with simpleFilters).
-     * The simple group and the FilterBuilder group are combined via the AND/OR switch.
-     *
      * URL param: `searchKeyword=<value>`
-     *
-     * @example
-     * searchKeywords={['username', 'email', 'nickname']}
      */
     searchKeywords?: string[];
     /**
-     * Developer-provided per-field filter values that are AND-ed into the simple group.
-     * Each non-empty entry becomes a `contains` condition on the specified field.
-     *
-     * Manage the values externally (e.g. with useManagerQueryParams schema mode) and
-     * pass the current values here on every render. EntityTable re-fires the query
-     * whenever this prop changes (by reference).
-     *
-     * URL params: each field is stored as a flat param (`username=xxx`), managed by
-     * the caller via queryParamsSync / useManagerQueryParams.
-     *
-     * @example
-     * simpleFilters={[
-     *   { field: 'username', value: username },
-     *   { field: 'nickname', value: nickname },
-     * ]}
+     * Developer-provided per-field filter values AND-ed into the simple group.
+     * `urlKey` overrides the URL param name (defaults to `field`).
      */
-    simpleFilters?: { field: string; value: string | undefined }[];
+    simpleFilters?: { field: string; operator?: string; value: unknown; urlKey?: string }[];
+    /**
+     * Whether to show the built-in time range picker. Default: true.
+     * The selected range is AND-ed into the simple group as created_time GTE/LTE conditions.
+     */
+    showTimeRangeFilter?: boolean;
     hideRecordTimeColumn?: boolean;
     tableRowActionsRender?: (record: ENTITY) => ReactNode;
     columns: EntityTableColumns<ENTITY>;
@@ -81,7 +67,7 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     /** Callback to sync query params to URL. Provided by useManagerQueryParams().syncToUrl */
     queryParamsSync?: (params: Record<string, unknown>) => void;
     /**
-     * Initial values for built-in query fields.
+     * Initial values for built-in query fields (page, pageSize, searchKeyword, startTime, endTime, query).
      * Typically provided from URL search params via useManagerQueryParams().
      */
     initialQueryValues?: {
@@ -92,11 +78,6 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         endTime?: number | string;
         query?: unknown;
     };
-    /**
-     * Extra query params merged into every request as-is (not folded into the query GroupNode).
-     * Use for non-filter params like tenantId, etc.
-     */
-    extraQueryParams?: Record<string, unknown>;
 }
 
 export interface EntityTableRefreshOptions {
@@ -133,8 +114,21 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // Global search keyword
     const [searchKeyword, setSearchKeyword] = useState(props.initialQueryValues?.searchKeyword ?? '');
 
+    // Time range — initialised from URL params
+    const [timeRange, setTimeRange] = useState<[number, number | null] | null>(() => {
+        const st = props.initialQueryValues?.startTime;
+        const et = props.initialQueryValues?.endTime;
+        if (st !== undefined) {
+            const start = typeof st === 'number' ? st : Number(st);
+            const end = et !== undefined ? (typeof et === 'number' ? et : Number(et)) : null;
+            if (!Number.isNaN(start)) return [start, end && !Number.isNaN(end) ? end : null];
+        }
+        return null;
+    });
+    // Keep a ref so fireQuery (debounced) always sees the latest value
+    const timeRangeRef = useRef(timeRange);
+
     // AND/OR switch between the simple group and the FilterBuilder group.
-    // Only shown when both searchKeywords/simpleFilters and filterableFields are configured.
     const [combineWithAnd, setCombineWithAnd] = useState(true);
     const combineWithAndRef = useRef(true);
 
@@ -153,8 +147,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const skipNextPageEffectRef = useRef(false);
 
-    // FilterBuilder node (advanced filter UI) — stored in a ref so it survives re-renders
-    // without causing extra effect triggers.
+    // FilterBuilder node
     const filterNodeRef = useRef<GroupNode | null>(
         (() => {
             const q = (props.initialQueryValues as { query?: unknown })?.query;
@@ -162,7 +155,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         })()
     );
 
-    // Keep a stable ref to simpleFilters so the debounced fireQuery always sees the latest.
+    // Keep a stable ref to simpleFilters
     const simpleFiltersRef = useRef(props.simpleFilters);
     simpleFiltersRef.current = props.simpleFilters;
 
@@ -176,38 +169,44 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         const fields = props.searchKeywords;
         if (!fields || fields.length === 0 || keyword.trim() === '') return null;
         const conditions: ConditionNode[] = fields.map(field => ({
-            type: 'condition',
-            field,
-            operator: 'contains',
-            value: keyword.trim(),
+            type: 'condition', field, operator: 'contains', value: keyword.trim(),
         }));
         return { type: 'group', logic: 'or', children: conditions };
     };
 
     /**
-     * Build the simple group from keyword + simpleFilters, all AND-ed together.
+     * Build the simple group from keyword + simpleFilters + time range, all AND-ed together.
      *
      * Structure:
      *   AND(
      *     OR(username contains kw, email contains kw, ...),  ← keyword group (if any)
      *     username contains xxx,                              ← simpleFilters (if any)
      *     nickname contains yyy,
-     *     ...
+     *     created_time GTE startTime,                         ← time range (if any)
+     *     created_time LTE endTime,
      *   )
      *
      * Returns null when nothing is active.
      */
-    const buildSimpleGroup = (keyword: string, simpleFilters: typeof props.simpleFilters): GroupNode | null => {
+    const buildSimpleGroup = (
+        keyword: string,
+        simpleFilters: typeof props.simpleFilters,
+        startTime?: number,
+        endTime?: number,
+    ): GroupNode | null => {
         const parts: (GroupNode | ConditionNode)[] = [];
 
         const keywordGroup = buildKeywordGroup(keyword);
         if (keywordGroup) parts.push(keywordGroup);
 
-        simpleFilters?.forEach(({ field, value }) => {
-            if (value && value.trim() !== '') {
-                parts.push({ type: 'condition', field, operator: 'contains', value: value.trim() });
+        simpleFilters?.forEach(({ field, operator, value }) => {
+            if (value !== undefined && value !== null && value !== '') {
+                parts.push({ type: 'condition', field, operator: operator ?? 'contains', value });
             }
         });
+
+        if (startTime) parts.push({ type: 'condition', field: 'created_time', operator: 'gte', value: startTime });
+        if (endTime)   parts.push({ type: 'condition', field: 'created_time', operator: 'lte', value: endTime });
 
         if (parts.length === 0) return null;
         if (parts.length === 1) return parts[0] as GroupNode;
@@ -227,8 +226,10 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         simpleFilters: typeof props.simpleFilters,
         filterNode: GroupNode | null,
         useAnd: boolean,
+        startTime?: number,
+        endTime?: number,
     ): GroupNode | undefined => {
-        const simpleGroup = buildSimpleGroup(keyword, simpleFilters);
+        const simpleGroup = buildSimpleGroup(keyword, simpleFilters, startTime, endTime);
         const hasSimple = simpleGroup !== null;
         const hasFilter = filterNode !== null && filterNode.children.length > 0;
 
@@ -254,33 +255,37 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             {},
             ...[...(props.tableActions ?? []), ...(props.tablePrefixActions ?? [])]
                 .mapNotNull(action => action.queryParamsProvider?.())
+        ) as Record<string, unknown>;
+
+        const tr = timeRangeRef.current;
+        const startTime = tr ? tr[0] : undefined;
+        const endTime   = tr ? (tr[1] ?? Date.now()) : undefined;
+
+        const queryNode = buildQueryNode(
+            keyword, simpleFiltersRef.current, filterNodeRef.current, useAnd,
+            startTime, endTime,
         );
 
-        const queryNode = buildQueryNode(keyword, simpleFiltersRef.current, filterNodeRef.current, useAnd);
-
         // ── URL params ──
-        // searchKeyword and simpleFilter fields are stored as flat params.
-        // FilterBuilder is stored as `query` (base64 JSON).
-        // The merged queryNode is NOT written to the URL — it's only sent in the request.
+        // searchKeyword, simpleFilter fields, startTime, endTime stored as flat params.
+        // FilterBuilder stored as `query` (base64 JSON).
         const urlParams: Record<string, unknown> = {
             page,
             pageSize,
             ...(keyword.trim() ? { searchKeyword: keyword.trim() } : {}),
-            // simpleFilters: each field as a flat URL param
             ...Object.fromEntries(
                 (simpleFiltersRef.current ?? [])
-                    .filter(f => f.value && f.value.trim() !== '')
-                    .map(f => [f.field, f.value])
+                    .filter(f => f.value !== undefined && f.value !== null && f.value !== '')
+                    .map(f => [f.urlKey ?? f.field, f.value])
             ),
-            ...(props.extraQueryParams ?? {}),
+            ...(startTime ? { startTime } : {}),
+            ...(endTime   ? { endTime }   : {}),
             ...actionParams,
-            // FilterBuilder stored separately — not merged
             ...(filterNodeRef.current && filterNodeRef.current.children.length > 0
                 ? { query: filterNodeRef.current }
                 : {}),
         };
 
-        // Sync query params to URL
         props.queryParamsSync?.(urlParams);
 
         // ── Request params ──
@@ -288,7 +293,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         const requestParams = {
             page,
             pageSize,
-            ...(props.extraQueryParams ?? {}),
             ...actionParams,
             ...(queryNode ? { query: queryNode } : {}),
         };
@@ -320,7 +324,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         refreshData({ resetPage: true, overrideKeyword: keyword });
     };
 
-    // Re-fire when pagination changes
     useEffect(() => {
         if (skipNextPageEffectRef.current) {
             skipNextPageEffectRef.current = false;
@@ -330,7 +333,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         fireQuery(currentPage, currentPageSize, searchKeyword, combineWithAndRef.current);
     }, [currentPage, currentPageSize]);
 
-    // Re-fire when simpleFilters change (caller updates them externally)
     const prevSimpleFiltersRef = useRef(props.simpleFilters);
     useEffect(() => {
         if (prevSimpleFiltersRef.current === props.simpleFilters) return;
@@ -363,10 +365,61 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         }] : []),
     ];
 
-    // ── Table actions (FilterBuilder + Refresh) ──────────────────────────────
+    // ── Time range presets ───────────────────────────────────────────────────
+
+    const rangePresets: TimeRangePickerProps['presets'] = useMemo(() => {
+        const now = dayjs();
+        return [
+            { label: t('components.managerPageContainer.todayToNow'), value: () => [dayjs().startOf('day'), dayjs()] as [Dayjs, Dayjs] },
+            { label: t('components.managerPageContainer.last5Minutes'),  value: [now.add(-5,  'minute'), now] },
+            { label: t('components.managerPageContainer.last10Minutes'), value: [now.add(-10, 'minute'), now] },
+            { label: t('components.managerPageContainer.last15Minutes'), value: [now.add(-15, 'minute'), now] },
+            { label: t('components.managerPageContainer.last30Minutes'), value: [now.add(-30, 'minute'), now] },
+            { label: t('components.managerPageContainer.last1Hour'),     value: [now.add(-1,  'hour'),   now] },
+            { label: t('components.managerPageContainer.last2Hours'),    value: [now.add(-2,  'hour'),   now] },
+            { label: t('components.managerPageContainer.last3Hours'),    value: [now.add(-3,  'hour'),   now] },
+            { label: t('components.managerPageContainer.last4Hours'),    value: [now.add(-4,  'hour'),   now] },
+            { label: t('components.managerPageContainer.last8Hours'),    value: [now.add(-8,  'hour'),   now] },
+            { label: t('components.managerPageContainer.last12Hours'),   value: [now.add(-12, 'hour'),   now] },
+            { label: t('components.managerPageContainer.last1Day'),      value: [now.add(-1,  'day'),    now] },
+            { label: t('components.managerPageContainer.last3Days'),     value: [now.add(-3,  'day'),    now] },
+            { label: t('components.managerPageContainer.last5Days'),     value: [now.add(-5,  'day'),    now] },
+            { label: t('components.managerPageContainer.last7Days'),     value: [now.add(-7,  'day'),    now] },
+            { label: t('components.managerPageContainer.last14Days'),    value: [now.add(-14, 'day'),    now] },
+            { label: t('components.managerPageContainer.last30Days'),    value: [now.add(-30, 'day'),    now] },
+        ];
+    }, [t]);
+
+    // ── Table actions ────────────────────────────────────────────────────────
+
+    const showTimeRangeFilter = props.showTimeRangeFilter !== false;
 
     const tableActions = useMemo(() => {
         const actions = [...(props.tableActions ?? [])];
+
+        if (showTimeRangeFilter) {
+            actions.push({
+                label: <span>{t('components.managerPageContainer.timeRange')}</span>,
+                children: (
+                    <DatePicker.RangePicker
+                        showTime
+                        allowClear
+                        presets={rangePresets}
+                        defaultValue={timeRange ? [dayjs(timeRange[0]), timeRange[1] ? dayjs(timeRange[1]) : null] : undefined}
+                        placeholder={[t('components.managerPageContainer.startTime'), t('components.managerPageContainer.tillNow')]}
+                        allowEmpty={[false, true]}
+                        onChange={(dates) => {
+                            const next: [number, number | null] | null = dates && dates[0]
+                                ? [dates[0].valueOf(), dates[1]?.valueOf() ?? null]
+                                : null;
+                            timeRangeRef.current = next;
+                            setTimeRange(next);
+                            setTimeout(() => refreshData({ resetPage: true }), 0);
+                        }}
+                    />
+                ),
+            });
+        }
 
         if (props.filterableFields) {
             actions.push({
@@ -394,7 +447,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         });
 
         return actions;
-    }, [props.tableActions, props.filterableFields, t, refreshData]);
+    }, [props.tableActions, props.filterableFields, showTimeRangeFilter, timeRange, rangePresets, t, refreshData]);
 
     // ── Render helpers ───────────────────────────────────────────────────────
 

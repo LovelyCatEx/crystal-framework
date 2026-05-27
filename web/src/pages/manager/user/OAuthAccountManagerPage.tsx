@@ -13,7 +13,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { platform: 'number' }
     });
     const {t} = useTranslation();
@@ -23,6 +23,12 @@ export default function OAuthAccountManagerPage() {
         pageRef?.current?.refreshData?.({ resetPage: true });
     }, [filters.platform]);
 
+    const filterableFields = [
+        { field: 'platform',      type: 'number' as const, label: t('pages.oauthAccountManager.filter.platform') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -30,6 +36,12 @@ export default function OAuthAccountManagerPage() {
             title={t('pages.oauthAccountManager.title')}
             subtitle={t('pages.oauthAccountManager.subtitle')}
             columns={columns}
+            filterableFields={filterableFields}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'platform', operator: 'eq', value: filters.platform },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
@@ -94,8 +106,7 @@ export default function OAuthAccountManagerPage() {
             create={async (props) => {
                 return (await OAuthAccountManagerController.create(props as ManagerCreateOAuthAccountDTO)).data!;
             }}
-            extraQueryParams={filters}
-            tableActions={[
+            tablePrefixActions={[
                 {
                     label: <span>{t('pages.oauthAccountManager.filter.platform')}</span>,
                     children: <Select

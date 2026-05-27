@@ -18,7 +18,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter } = useManagerQueryParams({
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
         schema: { type: 'number' }
     });
     const {t} = useTranslation();
@@ -38,6 +38,12 @@ export default function FileResourceManagerPage() {
         }
     };
 
+    const filterableFields = [
+        { field: 'type',          type: 'number' as const, label: t('pages.fileResourceManager.filter.type') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -45,6 +51,12 @@ export default function FileResourceManagerPage() {
             title={t('pages.fileResourceManager.title')}
             subtitle={t('pages.fileResourceManager.subtitle')}
             columns={columns}
+            filterableFields={filterableFields}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type', operator: 'eq', value: filters.type },
+            ]}
             editModalFormChildren={
                 <>
                 <Row gutter={24}>
@@ -122,8 +134,7 @@ export default function FileResourceManagerPage() {
             create={async (props) => {
                 return (await FileResourceManagerController.create(props as ManagerCreateFileResourceDTO)).data!
             }}
-            extraQueryParams={filters}
-            tableActions={[
+            tablePrefixActions={[
                 {
                     label: <span>{t('pages.fileResourceManager.filter.type')}</span>,
                     children: <Select
