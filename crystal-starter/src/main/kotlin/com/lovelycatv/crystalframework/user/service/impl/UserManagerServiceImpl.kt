@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,7 @@ class UserManagerServiceImpl(
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val userRoleRelationService: UserRoleRelationService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : UserManagerService {
     override val cacheStore: ExpiringKVStore<String, UserEntity>
         get() = redisService.asKVStore()
@@ -32,9 +34,9 @@ class UserManagerServiceImpl(
         get() = redisService.asKVStore()
     override val entityClass: KClass<UserEntity> = UserEntity::class
 
-    override fun getRepository(): UserRepository {
-        return userRepository
-    }
+    override fun getRepository(): UserRepository = userRepository
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateUserDTO): UserEntity {
         userRepository.findByUsername(dto.username).awaitFirstOrNull()?.let {
@@ -65,7 +67,6 @@ class UserManagerServiceImpl(
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun batchDelete(ids: List<Long>) {
         super.batchDelete(ids)
-
         userRoleRelationService.deleteByUserIdIn(ids)
     }
 }

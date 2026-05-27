@@ -1,12 +1,8 @@
 package com.lovelycatv.crystalframework.shared.repository
 
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
-import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.data.repository.query.Param
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.lang.reflect.ParameterizedType
 import java.util.Locale.getDefault
 import kotlin.reflect.jvm.jvmErasure
@@ -39,51 +35,4 @@ interface BaseRepository<ENTITY: BaseEntity> : R2dbcRepository<ENTITY, Long> {
             ?: entityClass?.name?.lowercase(getDefault())
             ?: "UNKNOWN_ENTITY_TABLE_NAME"
     }
-
-    @Query("SELECT * FROM #{#tableName} ORDER BY created_time DESC LIMIT :limit OFFSET :offset")
-    fun findAllByPage(
-        @Param("limit") limit: Int,
-        @Param("offset") offset: Int,
-    ): Flux<ENTITY>
-
-    @Query("""
-        SELECT * FROM #{#tableName}
-        WHERE created_time >= :startTime AND created_time <= :endTime
-        ORDER BY created_time DESC
-        LIMIT :limit
-        OFFSET :offset
-    """)
-    fun findAllByPageWithTimeRange(
-        @Param("startTime") startTime: Long,
-        @Param("endTime") endTime: Long,
-        @Param("limit") limit: Int,
-        @Param("offset") offset: Int,
-    ): Flux<ENTITY>
-
-    @Query("SELECT COUNT(*) FROM #{#tableName} WHERE created_time >= :startTime AND created_time <= :endTime")
-    fun countWithTimeRange(
-        @Param("startTime") startTime: Long,
-        @Param("endTime") endTime: Long,
-    ): Mono<Long>
-
-    @Query("""
-        SELECT * FROM #{#tableName}
-        WHERE ? LIKE LOWER(CONCAT('%', :keyword, '%'))
-        ORDER BY created_time DESC
-        LIMIT :limit
-        OFFSET :offset
-    """)
-    fun searchByKeyword(
-        keyword: String,
-        limit: Int,
-        offset: Int
-    ): Flux<ENTITY>
-
-    @Query("""
-        SELECT COUNT(*) FROM #{#tableName}
-        WHERE ? LIKE LOWER(CONCAT('%', :keyword, '%'))
-    """)
-    fun countByKeyword(
-        keyword: String
-    ): Mono<Long>
 }

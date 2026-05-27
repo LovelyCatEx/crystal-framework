@@ -34,7 +34,7 @@ export class BaseManagerController<
     }
 
     query(dto: R) {
-        return doGet<PaginatedResponseData<ENTITY>>(`/api${this.baseUrl}/query`, dto);
+        return doPost<PaginatedResponseData<ENTITY>>(`/api${this.baseUrl}/query`, dto, {'Content-Type': 'application/json'});
     }
 
     update(dto: U) {

@@ -8,23 +8,26 @@ import {
 import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {TenantPermissionType} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useTenantPermissionTableColumns} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterType, setFilterType] = useState<number>();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: { type: 'number' }
+    });
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
     const {t} = useTranslation();
     const columns = useTenantPermissionTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filterType]);
+    }, [filters.type]);
 
     const typeOptions = [
         { label: getTenantPermissionType(TenantPermissionType.ACTION), value: TenantPermissionType.ACTION },
@@ -126,23 +129,28 @@ export default function TenantPermissionManagerPage() {
                 query={async (props) => {
                     return (await controller.query(props)).data!
                 }}
+                filterableFields={[
+                    { field: 'type',          type: 'number' as const, label: t('pages.tenantPermissionManager.filter.type') },
+                    { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                    { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+                ]}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                simpleFilters={[
+                    { field: 'type', operator: 'eq', value: filters.type },
+                ]}
                 tableActions={[
                     {
                         label: <span>{t('pages.tenantPermissionManager.filter.type')}</span>,
                         children: <Select
-                            defaultValue="-1"
+                            defaultValue={filters.type !== undefined ? String(filters.type) : '-1'}
                             style={{ width: 120 }}
                             options={[
                                 { value: '-1', label: t('pages.tenantPermissionManager.filter.all') },
                                 ...typeOptions
                             ]}
-                            onChange={(value) => setFilterType(value === '-1' ? undefined : Number.parseInt(value))}
+                            onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                type: filterType
-                            };
-                        }
                     }
                 ]}
                 delete={async (props) => {

@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -20,6 +21,7 @@ class MailTemplateTypeManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : MailTemplateTypeManagerService {
     override val cacheStore: ExpiringKVStore<String, MailTemplateTypeEntity>
         get() = redisService.asKVStore()
@@ -30,6 +32,8 @@ class MailTemplateTypeManagerServiceImpl(
     override fun getRepository(): MailTemplateTypeRepository {
         return this.mailTemplateTypeRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateMailTemplateTypeDTO): MailTemplateTypeEntity {
         return this.getRepository().save(

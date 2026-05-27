@@ -2,23 +2,35 @@ import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {MailSendLogManagerController} from "@/api/mail/mail-send-log.api.ts";
 import type {ManagerReadMailSendLogDTO} from "@/types/mail/mail-send-log.types.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useMailSendLogTableColumns} from "@/components/columns/MailSendLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function MailSendLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterKeyword, setFilterKeyword] = useState<string>();
-    const [filterToEmail, setFilterToEmail] = useState<string>();
-    const [filterSuccess, setFilterSuccess] = useState<string>();
-    const [filterUserId, setFilterUserId] = useState<string>();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: {
+            toEmail: 'string',
+            success: 'string',
+            userId: 'string',
+        }
+    });
     const {t} = useTranslation();
     const columns = useMailSendLogTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({resetPage: true});
-    }, [filterKeyword, filterToEmail, filterSuccess, filterUserId]);
+    }, [filters.toEmail, filters.success, filters.userId]);
+
+    const filterableFields = [
+        { field: 'to_email',      type: 'text'   as const, label: t('pages.mailSendLogManager.filter.toEmail') },
+        { field: 'success',       type: 'text'   as const, label: t('pages.mailSendLogManager.filter.status') },
+        { field: 'user_id',       type: 'number' as const, label: t('pages.mailSendLogManager.filter.userId') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
 
     return (
         <>
@@ -36,87 +48,60 @@ export default function MailSendLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
+                filterableFields={filterableFields}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                searchKeywords={['to_email']}
+                simpleFilters={[
+                    { field: 'to_email', urlKey: 'toEmail', operator: 'contains', value: filters.toEmail },
+                    { field: 'success', operator: 'eq', value: filters.success },
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                ]}
                 query={async (props: ManagerReadMailSendLogDTO) => {
                     return (await MailSendLogManagerController.query(props)).data!;
                 }}
-                delete={async () => {
-                    return null;
-                }}
-                update={async () => {
-                    return null;
-                }}
-                create={async () => {
-                    return null;
-                }}
-                tableActions={[
-                    {
-                        label: <span>{t('pages.mailSendLogManager.filter.keyword')}</span>,
-                        children: <Input
-                            style={{width: 140}}
-                            placeholder={t('pages.mailSendLogManager.filter.keywordPlaceholder')}
-                            allowClear
-                            onPressEnter={(e) => setFilterKeyword((e.target as HTMLInputElement).value || undefined)}
-                            onChange={(e) => {
-                                if (e.target.value === '') setFilterKeyword(undefined);
-                            }}
-                        />,
-                        queryParamsProvider() {
-                            return {
-                                keyword: filterKeyword
-                            };
-                        }
-                    },
+                delete={async () => null}
+                update={async () => null}
+                create={async () => null}
+                tablePrefixActions={[
                     {
                         label: <span>{t('pages.mailSendLogManager.filter.toEmail')}</span>,
                         children: <Input
                             style={{width: 180}}
                             placeholder={t('pages.mailSendLogManager.filter.toEmailPlaceholder')}
+                            defaultValue={filters.toEmail}
                             allowClear
-                            onPressEnter={(e) => setFilterToEmail((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('toEmail', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterToEmail(undefined);
+                                if (e.target.value === '') setFilter('toEmail', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                toEmail: filterToEmail
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.mailSendLogManager.filter.status')}</span>,
                         children: <Select
-                            defaultValue="all"
+                            defaultValue={filters.success ?? 'all'}
                             style={{width: 100}}
                             options={[
                                 {value: 'all', label: t('pages.mailSendLogManager.filter.all')},
                                 {value: 'true', label: t('pages.mailSendLogManager.filter.success')},
                                 {value: 'false', label: t('pages.mailSendLogManager.filter.failed')},
                             ]}
-                            onChange={(value) => setFilterSuccess(value === 'all' ? undefined : value)}
+                            onChange={(value) => setFilter('success', value === 'all' ? undefined : value)}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                success: filterSuccess === 'true' ? true : filterSuccess === 'false' ? false : undefined
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.mailSendLogManager.filter.userId')}</span>,
                         children: <Input
                             style={{width: 140}}
                             placeholder={t('pages.mailSendLogManager.filter.userIdPlaceholder')}
+                            defaultValue={filters.userId}
                             allowClear
-                            onPressEnter={(e) => setFilterUserId((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('userId', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterUserId(undefined);
+                                if (e.target.value === '') setFilter('userId', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                userId: filterUserId
-                            };
-                        }
                     }
                 ]}
             />

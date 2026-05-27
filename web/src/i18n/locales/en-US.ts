@@ -535,6 +535,14 @@ export const enUS: I18nRules = {
           label: 'Password',
           required: 'Please enter password'
         }
+      },
+      filter: {
+        username: 'Username',
+        usernamePlaceholder: 'Filter by username',
+        email: 'Email',
+        emailPlaceholder: 'Filter by email',
+        nickname: 'Nickname',
+        nicknamePlaceholder: 'Filter by nickname',
       }
     },
     oauthAccountManager: {
@@ -1992,6 +2000,9 @@ export const enUS: I18nRules = {
       search: 'Search',
       searchPlaceholder: 'Search {{entityName}}...',
       fetchError: 'Failed to fetch {{entityName}} list',
+      combineLogic: 'Combine Logic',
+      combineAnd: 'AND',
+      combineOr: 'OR',
       pagination: {
         total: 'Total {{total}} Item(s)',
       },
@@ -2000,6 +2011,35 @@ export const enUS: I18nRules = {
         button: 'Filter Columns',
         title: 'Display Columns',
         selectAll: 'Select All',
+      }
+    },
+    filterBuilder: {
+      filters: 'Filters',
+      addCondition: 'Add Condition',
+      fillRequired: 'Fill in all condition values',
+      addGroup: 'Add Group',
+      and: 'AND',
+      or: 'OR',
+      apply: 'Apply',
+      cancel: 'Cancel',
+      reset: 'Reset',
+      rootLogic: 'Group Logic',
+      group: 'Group',
+      noConditions: 'No conditions yet — add a condition or group',
+      selectField: 'Select Field',
+      selectOperator: 'Select Operator',
+      selectValue: 'Select Value',
+      valuePlaceholder: 'Enter value',
+      operators: {
+        eq: 'Equals',
+        ne: 'Not Equals',
+        contains: 'Contains',
+        like: 'Like',
+        gt: 'Greater Than',
+        gte: 'Greater Than or Equal',
+        lt: 'Less Than',
+        lte: 'Less Than or Equal',
+        in: 'In',
       }
     },
     jsonEditor: {

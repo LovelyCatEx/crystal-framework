@@ -16,6 +16,13 @@ export const zhThemeConfig: DefaultTheme.Config = {
             { text: '创建插件', link: '/develop/frontend/create-plugin' },
             { text: '添加页面', link: '/develop/frontend/add-page' },
             { text: 'API 对接', link: '/develop/frontend/api-integration' },
+            {
+              text: 'Manager 页面',
+              items: [
+                { text: '标准化 Manager', link: '/develop/frontend/manager/standard-manager' },
+                { text: '非标准化 Manager', link: '/develop/frontend/manager/custom-manager' },
+              ]
+            },
           ]
         },
         {
@@ -46,6 +53,12 @@ export const zhThemeConfig: DefaultTheme.Config = {
       items: [
         { text: '快速开始', link: '/contribute/quick-start' },
         { text: '项目结构', link: '/contribute/structure-introduction' },
+        {
+          text: '前端',
+          items: [
+            { text: 'API 对接', link: '/contribute/frontend/api-integration' },
+          ]
+        },
         {
           text: '数据库',
           items: [

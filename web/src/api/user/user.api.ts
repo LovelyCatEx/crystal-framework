@@ -3,10 +3,14 @@ import type {User, UserAccessibleResourceVO, UserProfileVO} from "@/types/user/u
 import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import {doGet, doPost} from "../system-request.ts";
 
+export interface ManagerReadUserDTO extends BaseManagerReadDTO {
+    // All filtering is done via query: GroupNode
+}
+
 export const UserManagerController = new BaseManagerController<
     User,
     ManagerCreateUserDTO,
-    BaseManagerReadDTO,
+    ManagerReadUserDTO,
     ManagerUpdateUserDTO
 >('/manager/user');
 

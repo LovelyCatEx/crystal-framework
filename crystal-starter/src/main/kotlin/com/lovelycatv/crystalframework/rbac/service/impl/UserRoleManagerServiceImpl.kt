@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -24,10 +25,13 @@ class UserRoleManagerServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val userRoleRelationService: UserRoleRelationService,
     private val userRolePermissionRelationService: UserRolePermissionRelationService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : UserRoleManagerService {
     override fun getRepository(): UserRoleRepository {
         return userRoleRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateRoleDTO): UserRoleEntity {
         val entity = UserRoleEntity(

@@ -6,11 +6,7 @@ import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.M
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerUpdateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
-import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface StorageProviderManagerService : CachedBaseManagerService<
         StorageProviderRepository,
@@ -19,42 +15,4 @@ interface StorageProviderManagerService : CachedBaseManagerService<
         ManagerReadStorageProviderDTO,
         ManagerUpdateStorageProviderDTO,
         ManagerDeleteStorageProviderDTO
-> {
-    override suspend fun query(
-        dto: ManagerReadStorageProviderDTO,
-        isAdvanceQuery: suspend (dto: ManagerReadStorageProviderDTO) -> Boolean,
-        doAdvanceQuery: suspend (dto: ManagerReadStorageProviderDTO, limit: Int, offset: Int) -> PaginatedResponseData<StorageProviderEntity>
-    ): PaginatedResponseData<StorageProviderEntity> {
-        return super.query(
-            dto,
-            isAdvanceQuery = { dto ->
-                dto.searchKeyword != null || dto.type != null || dto.startTime != null || dto.endTime != null
-            },
-            doAdvanceQuery = { dto, limit, offset ->
-                val total = this.getRepository()
-                    .countAdvanceSearch(
-                        dto.searchKeyword,
-                        dto.type,
-                        dto.startTime,
-                        dto.endTime,
-                    )
-                    .awaitFirstOrNull()
-                    ?: 0
-
-                val records = this.getRepository().advanceSearch(
-                    dto.searchKeyword,
-                    dto.type,
-                    dto.startTime,
-                    dto.endTime,
-                    limit,
-                    offset
-                ).awaitListWithTimeout()
-
-                dto.toPaginatedResponseData(
-                    total = total,
-                    records = records
-                )
-            }
-        )
-    }
-}
+>

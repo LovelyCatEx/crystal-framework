@@ -15,6 +15,7 @@ import com.lovelycatv.crystalframework.tenant.service.manager.TenantRoleManagerS
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -27,6 +28,7 @@ class TenantRoleManagerServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val tenantRolePermissionRelationService: TenantRolePermissionRelationService,
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantRoleManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantRoleEntity>
         get() = redisService.asKVStore()
@@ -37,6 +39,8 @@ class TenantRoleManagerServiceImpl(
     override fun getRepository(): TenantRoleRepository {
         return tenantRoleRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     suspend fun getOrCreate(dto: ManagerCreateTenantRoleDTO): TenantRoleEntity {
         val result = this.getRepository()

@@ -13,6 +13,7 @@ import {HtmlEditor} from "@/components/HtmlEditor.tsx";
 import {CopyOutlined} from "@ant-design/icons";
 import type {EntityTableColumns} from "@/components/table/entity-table.types.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 interface TemplateVariablesProps {
     templateType: MailTemplateType | null;
@@ -90,7 +91,9 @@ export default function MailTemplateManagerPage() {
 
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
-    const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: { typeId: 'number' }
+    });
 
     useEffect(() => {
         MailTemplateTypeManagerController.list().then((res) => {
@@ -100,7 +103,7 @@ export default function MailTemplateManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [selectedTypeId]);
+    }, [filters.typeId]);
 
     const handleActiveChange = (active: boolean, row: MailTemplate) => {
         MailTemplateManagerController
@@ -136,6 +139,16 @@ export default function MailTemplateManagerPage() {
             title={t('pages.mailTemplateManager.title')}
             subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
+            filterableFields={[
+                { field: 'type_id',       type: 'number' as const, label: t('pages.mailTemplateManager.filter.templateType') },
+                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+            ]}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type_id', urlKey: 'typeId', operator: 'eq', value: filters.typeId },
+            ]}
             tableActions={[
                 {
                     label: t('pages.mailTemplateManager.filter.templateType'),
@@ -144,17 +157,14 @@ export default function MailTemplateManagerPage() {
                             className="w-64"
                             placeholder={t('pages.mailTemplateManager.filter.placeholder')}
                             allowClear
-                            value={selectedTypeId}
-                            onChange={(value) => setSelectedTypeId(value)}
+                            value={filters.typeId ?? null}
+                            onChange={(value) => setFilter('typeId', value ?? undefined)}
                             options={templateTypes.map((type) => ({
                                 label: type.name,
                                 value: type.id,
                             }))}
                         />
                     ),
-                    queryParamsProvider: () => ({
-                        typeId: selectedTypeId ?? undefined,
-                    }),
                 },
             ]}
             editModalFormChildren={

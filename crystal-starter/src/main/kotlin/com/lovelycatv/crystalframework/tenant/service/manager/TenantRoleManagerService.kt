@@ -1,16 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
-import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerDeleteTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerReadTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.role.dto.ManagerUpdateTenantRoleDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantRoleEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantRoleRepository
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface TenantRoleManagerService : BaseTenantResourceManagerService<
         TenantRoleRepository,
@@ -21,32 +17,4 @@ interface TenantRoleManagerService : BaseTenantResourceManagerService<
         ManagerDeleteTenantRoleDTO
 > {
     suspend fun createFromDeclaration(tenantId: Long, declaration: TenantRoleDeclaration): TenantRoleEntity
-
-    override suspend fun query(
-        dto: ManagerReadTenantRoleDTO,
-        isAdvanceQuery: suspend (dto: ManagerReadTenantRoleDTO) -> Boolean,
-        doAdvanceQuery: suspend (dto: ManagerReadTenantRoleDTO, limit: Int, offset: Int) -> PaginatedResponseData<TenantRoleEntity>
-    ): PaginatedResponseData<TenantRoleEntity> {
-        return super.query(
-            dto = dto,
-            isAdvanceQuery = { it.tenantId != null || it.startTime != null || it.endTime != null },
-            doAdvanceQuery = { readDto, limit, offset ->
-                val total = getRepository().countAdvanceSearch(readDto.searchKeyword, readDto.tenantId!!, readDto.parentId, readDto.startTime, readDto.endTime).awaitFirstOrNull() ?: 0
-                val records = getRepository().advanceSearch(
-                    readDto.searchKeyword,
-                    readDto.tenantId,
-                    readDto.parentId,
-                    readDto.startTime,
-                    readDto.endTime,
-                    limit,
-                    offset
-                ).awaitListWithTimeout()
-
-                readDto.toPaginatedResponseData(
-                    total = total,
-                    records = records
-                )
-            }
-        )
-    }
 }

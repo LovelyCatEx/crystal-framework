@@ -3,13 +3,17 @@ package com.lovelycatv.crystalframework.shared.service
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
 import com.lovelycatv.crystalframework.shared.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.data.domain.Sort
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.relational.core.query.Criteria
+import org.springframework.data.relational.core.query.Query
 
 interface BaseManagerService<
         REPOSITORY: BaseRepository<ENTITY>,
@@ -19,102 +23,59 @@ interface BaseManagerService<
         UPDATE_DTO: BaseManagerUpdateDTO,
         DELETE_DTO: BaseManagerDeleteDTO
 > : BaseService<REPOSITORY, ENTITY> {
-    suspend fun query(
-        dto: READ_DTO,
-        isAdvanceQuery: suspend (dto: READ_DTO) -> Boolean = { dto.searchKeyword != null },
-        doAdvanceQuery: suspend (dto: READ_DTO, limit: Int, offset: Int) -> PaginatedResponseData<ENTITY> = this::defaultAdvanceQuery
-    ): PaginatedResponseData<ENTITY> {
-        return if (dto.id != null) {
-            // Find by id
-            val e = this.getByIdOrNull(dto.id!!)
-            PaginatedResponseData(
-                page = dto.page,
-                pageSize = dto.pageSize,
-                total = if (e != null) 1 else 0,
-                totalPages = if (e != null) 1 else 0,
-                records = if (e != null) listOf(e) else emptyList()
-            )
-        } else {
-            val limit = dto.pageSize
-            val offset = (dto.page - 1) * dto.pageSize
-
-            if (isAdvanceQuery.invoke(dto)) {
-                doAdvanceQuery.invoke(dto, limit, offset)
-            } else {
-                // Simple pagination
-                val hasTimeRange = dto.startTime != null && dto.endTime != null
-
-                val total = if (hasTimeRange) {
-                    this.getRepository().countWithTimeRange(dto.startTime!!, dto.endTime!!).awaitFirstOrNull() ?: 0
-                } else {
-                    this.getRepository().count().awaitFirstOrNull() ?: 0
-                }
-
-                val records = if (hasTimeRange) {
-                    this.getRepository()
-                        .findAllByPageWithTimeRange(dto.startTime!!, dto.endTime!!, limit, offset)
-                        .awaitListWithTimeout()
-                } else {
-                    this.getRepository()
-                        .findAllByPage(limit, offset)
-                        .awaitListWithTimeout()
-                }
-
-                dto.toPaginatedResponseData(
-                    total = total,
-                    records = records
-                )
-            }
-        }
-    }
 
     /**
-     * Fix: Caused by: java.lang.AssertionError: FUN LOCAL_FUNCTION_FOR_LAMBDA
+     * Provide the [R2dbcEntityTemplate] for programmatic criteria-based queries.
      *
-     *     name:<anonymous>
-     *
-     *     visibility:local
-     *
-     *     modality:FINAL <> (dto:READ_DTO of com.lovelycatv.crystalframework.shared.service.BaseManagerService, limit:kotlin.Int, offset:kotlin.Int)
-     *
-     *     returnType:com.lovelycatv.crystalframework.shared.request.PaginatedResponseData<ENTITY of com.lovelycatv.crystalframework.shared.service.BaseManagerService> [suspend]
-     *
-     *     in file BaseManagerService.kt has no continuation;
-     *
-     *     can't call FUN IR_EXTERNAL_DECLARATION_STUB
-     *
-     *     name:awaitFirstOrNull
-     *
-     *     visibility:public
-     *
-     *     modality:FINAL <T> (<this>:org.reactivestreams.Publisher<T of kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull>)
-     *
-     *     returnType:T of kotlinx.coroutines.reactive.AwaitKt.awaitFirstOrNull? [suspend]
-     *
-     * @param dto
-     * @param limit
-     * @param offset
-     * @return
+     * Override this in your service implementation by injecting and returning the
+     * [R2dbcEntityTemplate] bean.
      */
-    private suspend fun defaultAdvanceQuery(
-        dto: READ_DTO,
-        limit: Int,
-        offset: Int
-    ): PaginatedResponseData<ENTITY> {
-        val keyword = dto.searchKeyword ?: return PaginatedResponseData(
-            page = dto.page,
-            pageSize = dto.pageSize,
-            total = 0,
-            totalPages = 0,
-            records = emptyList()
-        )
+    fun getEntityTemplate(): R2dbcEntityTemplate
 
-        val total = this.getRepository().countByKeyword(keyword).awaitFirstOrNull() ?: 0
-        val records = this.getRepository().searchByKeyword(
-            keyword,
-            limit,
-            offset
-        ).awaitListWithTimeout()
+    /**
+     * Unified query method. All filtering is done via [QueryNode] criteria.
+     *
+     * - If [dto.id] is set → exact match on id (single result).
+     * - If [dto.query] is set → build criteria from the query tree.
+     * - Otherwise → no filter, simple pagination.
+     */
+    suspend fun query(dto: READ_DTO): PaginatedResponseData<ENTITY> {
+        val limit = dto.pageSize
+        val offset = (dto.page - 1) * dto.pageSize
+        val template = getEntityTemplate()
+
+        // Build criteria
+        val criteria: Criteria = when {
+            dto.id != null -> {
+                // Exact id match — use cached getByIdOrNull
+                val e = this.getByIdOrNull(dto.id!!)
+                return PaginatedResponseData(
+                    page = dto.page,
+                    pageSize = dto.pageSize,
+                    total = if (e != null) 1 else 0,
+                    totalPages = if (e != null) 1 else 0,
+                    records = if (e != null) listOf(e) else emptyList()
+                )
+            }
+            dto.query != null -> {
+                criteriaFromQueryNode(dto.query!!)
+            }
+            else -> {
+                Criteria.empty()
+            }
+        }
+
+        val baseQuery = Query.query(criteria)
+            .sort(Sort.by(Sort.Direction.DESC, "created_time"))
+
+        val total = template
+            .count(baseQuery, entityClass.java)
+            .awaitFirstOrNull() ?: 0L
+
+        val records = template
+            .select(baseQuery.limit(limit).offset(offset.toLong()), entityClass.java)
+            .collectList()
+            .awaitFirstOrNull() ?: emptyList()
 
         return dto.toPaginatedResponseData(
             total = total,

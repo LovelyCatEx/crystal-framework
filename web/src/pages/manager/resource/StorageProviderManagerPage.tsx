@@ -5,21 +5,24 @@ import {
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
 } from "@/api/resource/storage-provider.api.ts";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef} from "react";
 import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderConfigEditor} from "@/components/StorageProviderConfigEditor.tsx";
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterType, setFilterType] = useState<number>()
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: { type: 'number' }
+    });
     const {t} = useTranslation();
     const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filterType]);
+    }, [filters.type]);
 
     const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {
         StorageProviderManagerController
@@ -44,6 +47,12 @@ export default function StorageProviderManagerPage() {
         }
     });
 
+    const filterableFields = [
+        { field: 'type',          type: 'number' as const, label: t('pages.storageProviderManager.filter.type') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -51,6 +60,12 @@ export default function StorageProviderManagerPage() {
             title={t('pages.storageProviderManager.title')}
             subtitle={t('pages.storageProviderManager.subtitle')}
             columns={columnsWithActive}
+            filterableFields={filterableFields}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'type', operator: 'eq', value: filters.type },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>
@@ -105,11 +120,11 @@ export default function StorageProviderManagerPage() {
             create={async (props) => {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
-            tableActions={[
+            tablePrefixActions={[
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select
-                        defaultValue="-1"
+                        defaultValue={filters.type !== undefined ? String(filters.type) : '-1'}
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.storageProviderManager.filter.all') },
@@ -126,13 +141,8 @@ export default function StorageProviderManagerPage() {
                                 value: StorageProviderType.TENCENT_COS,
                             }
                         ]}
-                        onChange={(value) => setFilterType(Number.parseInt(value))}
+                        onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                    queryParamsProvider() {
-                        return {
-                            type: filterType === -1 ? undefined : filterType
-                        }
-                    }
                 }
             ]}
         >
