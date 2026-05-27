@@ -1997,6 +1997,9 @@ export const zhCN: I18nRules = {
       search: '搜索',
       searchPlaceholder: '搜索{{entityName}}...',
       fetchError: '无法获取{{entityName}}列表',
+      combineLogic: '组合逻辑',
+      combineAnd: '且',
+      combineOr: '或',
       pagination: {
         total: '共 {{total}} 条记录',
       },

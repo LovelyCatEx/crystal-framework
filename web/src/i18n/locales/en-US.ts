@@ -2000,6 +2000,9 @@ export const enUS: I18nRules = {
       search: 'Search',
       searchPlaceholder: 'Search {{entityName}}...',
       fetchError: 'Failed to fetch {{entityName}} list',
+      combineLogic: 'Combine Logic',
+      combineAnd: 'AND',
+      combineOr: 'OR',
       pagination: {
         total: 'Total {{total}} Item(s)',
       },

@@ -1,3 +1,5 @@
+import type {GroupNode} from '@/components/table/filter/filter-builder.types';
+
 export interface PageQuery {
     page: number;
     pageSize: number;
@@ -13,9 +15,9 @@ export interface PaginatedResponseData<T> {
 
 export interface BaseManagerReadDTO extends PageQuery {
     id?: string;
-    searchKeyword?: string;
     startTime?: string;
     endTime?: string;
+    query?: GroupNode;
 }
 
 export interface BaseManagerDeleteDTO {
