@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "CrystalFramework"
   text: "Docs"
-  tagline: v1.4.1
+  tagline: v1.5.0
   actions:
     - theme: brand
       text: 二次开发
