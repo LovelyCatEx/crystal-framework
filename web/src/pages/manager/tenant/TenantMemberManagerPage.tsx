@@ -114,6 +114,7 @@ export default function TenantMemberManagerPage() {
                         })).data!
                     }}
                     filterableFields={[
+                        { field: 'id', type: 'number' as const, label: t('pages.tenantMemberManager.filter.id') },
                         {
                             field: 'status',
                             type: 'number' as const,

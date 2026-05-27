@@ -14,16 +14,17 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { platform: 'number' }
+        schema: { platform: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const columns = useOAuthAccountTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.platform]);
+    }, [filters.platform, filters.id]);
 
     const filterableFields = [
+        { field: 'id', type: 'number' as const, label: t('pages.oauthAccountManager.filter.id') },
         {
             field: 'platform',
             type: 'number' as const,
@@ -57,6 +58,7 @@ export default function OAuthAccountManagerPage() {
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'platform', operator: 'eq', value: filters.platform },
             ]}
             editModalFormChildren={
@@ -124,6 +126,17 @@ export default function OAuthAccountManagerPage() {
                 return (await OAuthAccountManagerController.create(props as ManagerCreateOAuthAccountDTO)).data!;
             }}
             tableActions={[
+                {
+                    label: <span>{t('pages.oauthAccountManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.oauthAccountManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.oauthAccountManager.filter.platform')}</span>,
                     children: <Select

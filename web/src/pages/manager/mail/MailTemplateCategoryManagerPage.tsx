@@ -4,17 +4,23 @@ import {
     type ManagerCreateMailTemplateCategoryDTO,
     type ManagerReadMailTemplateCategoryDTO
 } from "@/api/mail/mail-template-category.api.ts";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {useMailTemplateCategoryTableColumns} from "@/components/columns/MailTemplateCategoryEntityColumns.tsx";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import type {MailTemplateCategory} from "@/types/mail/mail.types.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function MailTemplateCategoryManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
     const { controller } = useProtectedController<MailTemplateCategory, ManagerCreateMailTemplateCategoryDTO, ManagerReadMailTemplateCategoryDTO>();
     const {t} = useTranslation();
     const columns = useMailTemplateCategoryTableColumns();
+
+    useEffect(() => {
+        pageRef.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     return (
         <ManagerPageContainer
@@ -24,6 +30,24 @@ export default function MailTemplateCategoryManagerPage() {
             subtitle={t('pages.mailTemplateCategoryManager.subtitle')}
             columns={columns}
             searchKeywords={['name', 'description']}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
+            ]}
+            tableActions={[
+                {
+                    label: <span>{t('pages.mailTemplateCategoryManager.filter.id')}</span>,
+                    children: <Input
+                        className="rounded-xl"
+                        placeholder={t('pages.mailTemplateCategoryManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>

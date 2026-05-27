@@ -1,7 +1,7 @@
 import {Button, Col, Form, Input, message, Modal, Row, Tag, Transfer} from "antd";
 import type {Key} from "react";
-import {useEffect, useState} from "react";
-import {ManagerPageContainer} from "@/components/ManagerPageContainer.tsx";
+import {useEffect, useRef, useState} from "react";
+import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user/rbac/user-role.api.ts";
 import TextArea from "antd/es/input/TextArea";
 import {useUserRoleTableColumns} from "@/components/columns/UserRoleEntityColumns.tsx";
@@ -10,6 +10,7 @@ import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.a
 import {type UserPermission} from "@/types/user/rbac/user-permission.types.ts";
 import type {UserRole} from "@/types/user/rbac/user-role.types.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 
 interface TransferItem {
@@ -21,6 +22,8 @@ interface TransferItem {
 }
 
 export default function UserRoleManagerPage() {
+    const pageRef = useRef<ManagerPageContainerRef | null>(null);
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
     const [allPermissions, setAllPermissions] = useState<UserPermission[]>([]);
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);
@@ -89,7 +92,26 @@ export default function UserRoleManagerPage() {
                 title={t('pages.userRoleManager.title')}
                 subtitle={t('pages.userRoleManager.subtitle')}
                 columns={columns}
+                ref={pageRef}
                 searchKeywords={['name', 'description']}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                simpleFilters={[
+                    { field: 'id', operator: 'eq', value: filters.id },
+                ]}
+                tableActions={[
+                    {
+                        label: <span>{t('pages.userRoleManager.filter.id')}</span>,
+                        children: <Input
+                            className="rounded-xl"
+                            placeholder={t('pages.userRoleManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                        />,
+                    },
+                ]}
                 editModalFormChildren={
                     <>
                         <Row gutter={24}>

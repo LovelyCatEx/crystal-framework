@@ -1,4 +1,4 @@
-import {Button, Col, DatePicker, Form, InputNumber, message, Row, Spin, Switch, Tooltip} from "antd";
+import {Button, Col, DatePicker, Form, Input, InputNumber, message, Row, Spin, Switch, Tooltip} from "antd";
 import dayjs from "dayjs";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
@@ -6,13 +6,14 @@ import {
     type ManagerCreateInvitationDTO,
     type ManagerUpdateInvitationDTO
 } from "@/api/tenant/tenant-invitation.api.ts";
-import {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector} from "@/components/selector";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function MyTenantInvitationManagerPage() {
     const { t } = useTranslation();
@@ -20,6 +21,11 @@ export default function MyTenantInvitationManagerPage() {
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const currentTenantId = currentTenant?.tenantId ?? null;
     const columns = useTenantInvitationTableColumns();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     const handleOpenAddModal = () => {
         pageRef.current?.openModal();
@@ -80,6 +86,24 @@ export default function MyTenantInvitationManagerPage() {
                     showActionBar={false}
                     columns={columns}
                     searchKeywords={['invitation_code']}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'id', operator: 'eq', value: filters.id },
+                    ]}
+                    tableActions={[
+                        {
+                            label: <span>{t('pages.myTenantInvitationManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.myTenantInvitationManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e: React.KeyboardEvent<HTMLInputElement>) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                    ]}
                     tableRowActionsRender={(row) => (
                         <>
                             <Tooltip title={t('pages.myTenantInvitationManager.action.copyLinkTooltip')}>

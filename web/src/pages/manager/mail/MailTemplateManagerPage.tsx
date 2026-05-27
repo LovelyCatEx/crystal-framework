@@ -92,7 +92,7 @@ export default function MailTemplateManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { typeId: 'number' }
+        schema: { typeId: 'number', id: 'string' }
     });
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function MailTemplateManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.typeId]);
+    }, [filters.typeId, filters.id]);
 
     const handleActiveChange = (active: boolean, row: MailTemplate) => {
         MailTemplateManagerController
@@ -141,6 +141,7 @@ export default function MailTemplateManagerPage() {
             columns={columnsWithActive}
             searchKeywords={['name', 'title']}
             filterableFields={[
+                { field: 'id', type: 'number' as const, label: t('pages.mailTemplateManager.filter.id') },
                 {
                     field: 'type_id',
                     type: 'number' as const,
@@ -163,9 +164,21 @@ export default function MailTemplateManagerPage() {
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type_id', urlKey: 'typeId', operator: 'eq', value: filters.typeId },
             ]}
             tableActions={[
+                {
+                    label: <span>{t('pages.mailTemplateManager.filter.id')}</span>,
+                    children: <Input
+                        className="rounded-xl"
+                        placeholder={t('pages.mailTemplateManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: t('pages.mailTemplateManager.filter.templateType'),
                     children: (

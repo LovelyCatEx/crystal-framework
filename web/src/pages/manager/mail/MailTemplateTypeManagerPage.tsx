@@ -5,6 +5,7 @@ import {
     type ManagerReadMailTemplateTypeDTO
 } from "@/api/mail/mail-template-type.api.ts";
 import {useEffect, useRef, useState} from "react";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import type {MailTemplateCategory, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {useMailTemplateTypeTableColumns} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
 import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
@@ -18,6 +19,11 @@ export default function MailTemplateTypeManagerPage() {
     const { controller } = useProtectedController<MailTemplateType, ManagerCreateMailTemplateTypeDTO, ManagerReadMailTemplateTypeDTO>();
     const {t} = useTranslation();
     const columns = useMailTemplateTypeTableColumns();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     useEffect(() => {
         MailTemplateCategoryManagerController.list().then((res) => {
@@ -33,6 +39,24 @@ export default function MailTemplateTypeManagerPage() {
             subtitle={t('pages.mailTemplateTypeManager.subtitle')}
             columns={columns}
             searchKeywords={['name', 'description']}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
+            ]}
+            tableActions={[
+                {
+                    label: <span>{t('pages.mailTemplateTypeManager.filter.id')}</span>,
+                    children: <Input
+                        className="rounded-xl"
+                        placeholder={t('pages.mailTemplateTypeManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>

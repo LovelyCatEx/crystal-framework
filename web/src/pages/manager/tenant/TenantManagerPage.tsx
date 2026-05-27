@@ -23,7 +23,7 @@ export default function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [tireTypes, setTireTypes] = useState<TenantTireType[]>([]);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { status: 'number' }
+        schema: { status: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const columns = useTenantTableColumns();
@@ -36,7 +36,7 @@ export default function TenantManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.status]);
+    }, [filters.status, filters.id]);
 
     const statusOptions = [
         { label: getTenantStatus(TenantStatus.REVIEWING), value: TenantStatus.REVIEWING },
@@ -217,6 +217,7 @@ export default function TenantManagerPage() {
             }}
             searchKeywords={['name', 'description', 'contact_name']}
             filterableFields={[
+                { field: 'id', type: 'number' as const, label: t('pages.tenantManager.filter.id') },
                 {
                     field: 'status',
                     type: 'number' as const,
@@ -236,9 +237,21 @@ export default function TenantManagerPage() {
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'status', operator: 'eq', value: filters.status },
             ]}
             tableActions={[
+                {
+                    label: <span>{t('pages.tenantManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.tenantManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.tenantManager.filter.status')}</span>,
                     children: <Select

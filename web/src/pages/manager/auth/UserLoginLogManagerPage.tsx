@@ -18,6 +18,7 @@ export default function UserLoginLogManagerPage() {
             loginMethod: 'number',
             success: 'string',
             remoteIp: 'string',
+            id: 'string',
         }
     });
 
@@ -26,9 +27,10 @@ export default function UserLoginLogManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({resetPage: true});
-    }, [filters.userId, filters.username, filters.loginMethod, filters.success, filters.remoteIp]);
+    }, [filters.userId, filters.username, filters.loginMethod, filters.success, filters.remoteIp, filters.id]);
 
     const filterableFields = [
+        { field: 'id',            type: 'number' as const, label: t('pages.userLoginLogManager.filter.id') },
         { field: 'user_id',       type: 'number' as const, label: t('pages.userLoginLogManager.filter.userId') },
         { field: 'username',      type: 'text'   as const, label: t('pages.userLoginLogManager.filter.username') },
         {
@@ -74,7 +76,8 @@ export default function UserLoginLogManagerPage() {
                 initialQueryValues={initialQueryValues}
                 searchKeywords={['username', 'remote_ip']}
                 simpleFilters={[
-                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                    { field: 'id', operator: 'eq', value: filters.id },
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId },
                     { field: 'username', operator: 'contains', value: filters.username },
                     { field: 'login_method', urlKey: 'loginMethod', operator: 'eq', value: filters.loginMethod },
                     { field: 'success', operator: 'eq', value: filters.success },
@@ -87,6 +90,19 @@ export default function UserLoginLogManagerPage() {
                 update={async () => null}
                 create={async () => null}
                 tableActions={[
+                    {
+                        label: <span>{t('pages.userLoginLogManager.filter.id')}</span>,
+                        children: <Input
+                            style={{width: 160}}
+                            placeholder={t('pages.userLoginLogManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => {
+                                if (e.target.value === '') setFilter('id', undefined);
+                            }}
+                        />,
+                    },
                     {
                         label: <span>{t('pages.userLoginLogManager.filter.userId')}</span>,
                         children: <Input

@@ -15,14 +15,14 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { type: 'number' }
+        schema: { type: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filters.type]);
+    }, [filters.type, filters.id]);
 
     const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {
         StorageProviderManagerController
@@ -48,6 +48,7 @@ export default function StorageProviderManagerPage() {
     });
 
     const filterableFields = [
+        { field: 'id', type: 'number' as const, label: t('pages.storageProviderManager.filter.id') },
         {
             field: 'type',
             type: 'number' as const,
@@ -81,6 +82,7 @@ export default function StorageProviderManagerPage() {
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type', operator: 'eq', value: filters.type },
             ]}
             editModalFormChildren={
@@ -138,6 +140,17 @@ export default function StorageProviderManagerPage() {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
             tableActions={[
+                {
+                    label: <span>{t('pages.storageProviderManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.storageProviderManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select

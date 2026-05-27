@@ -543,6 +543,8 @@ export const enUS: I18nRules = {
         emailPlaceholder: 'Filter by email',
         nickname: 'Nickname',
         nicknamePlaceholder: 'Filter by nickname',
+        id: 'User ID',
+        idPlaceholder: 'Enter user ID',
       }
     },
     oauthAccountManager: {
@@ -576,7 +578,9 @@ export const enUS: I18nRules = {
       },
       filter: {
         platform: 'Platform',
-        all: 'All'
+        all: 'All',
+        id: 'Account ID',
+        idPlaceholder: 'Enter account ID',
       }
     },
     tenantManager: {
@@ -584,7 +588,9 @@ export const enUS: I18nRules = {
       subtitle: 'Manage system tenant information',
       filter: {
         status: 'Status',
-        all: 'All'
+        all: 'All',
+        id: 'Tenant ID',
+        idPlaceholder: 'Enter tenant ID',
       },
       modal: {
         name: {
@@ -653,6 +659,10 @@ export const enUS: I18nRules = {
     tenantTireTypeManager: {
       title: 'Tier Type Management',
       subtitle: 'Manage system tier types',
+      filter: {
+        id: 'Tier ID',
+        idPlaceholder: 'Enter tier ID',
+      },
       modal: {
         name: {
           label: 'Name',
@@ -670,6 +680,10 @@ export const enUS: I18nRules = {
     tenantRoleManager: {
       title: 'Tenant Role Management',
       subtitle: 'Manage system tenant roles',
+      filter: {
+        id: 'Role ID',
+        idPlaceholder: 'Enter role ID',
+      },
       action: {
         addNew: 'Add New Tenant Role',
         assignPermission: 'Assign Permission',
@@ -710,7 +724,9 @@ export const enUS: I18nRules = {
       },
       filter: {
         type: 'Permission Type',
-        all: 'All'
+        all: 'All',
+        id: 'Permission ID',
+        idPlaceholder: 'Enter permission ID',
       },
       modal: {
         name: {
@@ -762,6 +778,10 @@ export const enUS: I18nRules = {
     tenantInvitationManager: {
       title: 'Invitation Code Management',
       subtitle: 'Manage system tenant invitation codes',
+      filter: {
+        id: 'Invitation ID',
+        idPlaceholder: 'Enter invitation ID',
+      },
       addInvitationCode: 'Add Invitation Code',
       copyInvitationLink: 'Copy Invitation Link',
       copySuccess: 'Invitation link copied to clipboard',
@@ -932,6 +952,10 @@ export const enUS: I18nRules = {
     myTenantRoleManager: {
       title: 'My Role Management',
       subtitle: 'Manage roles for current organization',
+      filter: {
+        id: 'Role ID',
+        idPlaceholder: 'Enter role ID',
+      },
       action: {
         addNew: 'Add New Role'
       },
@@ -1000,6 +1024,10 @@ export const enUS: I18nRules = {
     myTenantInvitationManager: {
       title: 'My Organization Invitations',
       subtitle: 'Manage invitation codes for current organization',
+      filter: {
+        id: 'Invitation ID',
+        idPlaceholder: 'Enter invitation ID',
+      },
       action: {
         addNew: 'Add New Invitation',
         copyLink: 'Copy Invitation Link',
@@ -1095,7 +1123,9 @@ export const enUS: I18nRules = {
       subtitle: 'Manage system storage providers',
       filter: {
         type: 'Type',
-        all: 'All'
+        all: 'All',
+        id: 'Storage ID',
+        idPlaceholder: 'Enter storage ID',
       },
       columns: {
         active: 'Active Status'
@@ -1142,7 +1172,9 @@ export const enUS: I18nRules = {
       subtitle: 'Manage system file resources',
       filter: {
         type: 'Type',
-        all: 'All'
+        all: 'All',
+        id: 'File ID',
+        idPlaceholder: 'Enter file ID',
       },
       modal: {
         userId: {
@@ -1195,6 +1227,10 @@ export const enUS: I18nRules = {
     userRoleManager: {
       title: 'User Role Management',
       subtitle: 'Manage system user roles',
+      filter: {
+        id: 'Role ID',
+        idPlaceholder: 'Enter role ID',
+      },
       modal: {
         name: {
           label: 'Role Name',
@@ -1256,7 +1292,9 @@ export const enUS: I18nRules = {
       subtitle: 'Manage system user permissions',
       filter: {
         type: 'Type',
-        all: 'All'
+        all: 'All',
+        id: 'Permission ID',
+        idPlaceholder: 'Enter permission ID',
       },
       modal: {
         name: {
@@ -1283,6 +1321,10 @@ export const enUS: I18nRules = {
     mailTemplateTypeManager: {
       title: 'Mail Template Type Management',
       subtitle: 'Manage system mail template types',
+      filter: {
+        id: 'Type ID',
+        idPlaceholder: 'Enter type ID',
+      },
       modal: {
         name: {
           label: 'Name',
@@ -1316,7 +1358,9 @@ export const enUS: I18nRules = {
       enabledStatus: 'Enabled Status',
       filter: {
         templateType: 'Template Type',
-        placeholder: 'Select template type'
+        placeholder: 'Select template type',
+        id: 'Template ID',
+        idPlaceholder: 'Enter template ID',
       },
       modal: {
         name: {
@@ -1362,6 +1406,10 @@ export const enUS: I18nRules = {
     mailTemplateCategoryManager: {
       title: 'Mail Template Category Management',
       subtitle: 'Manage system mail template categories',
+      filter: {
+        id: 'Category ID',
+        idPlaceholder: 'Enter category ID',
+      },
       modal: {
         name: {
           label: 'Name',
@@ -1393,7 +1441,9 @@ export const enUS: I18nRules = {
         path: 'Path',
         pathPlaceholder: 'Enter path',
         remoteIp: 'IP Address',
-        remoteIpPlaceholder: 'Enter IP'
+        remoteIpPlaceholder: 'Enter IP',
+        id: 'Log ID',
+        idPlaceholder: 'Enter log ID',
       },
       actionType: {
         unknown: 'Unknown',
@@ -1416,7 +1466,9 @@ export const enUS: I18nRules = {
         success: 'Success',
         failed: 'Failed',
         userId: 'User ID',
-        userIdPlaceholder: 'Enter user ID'
+        userIdPlaceholder: 'Enter user ID',
+        id: 'Log ID',
+        idPlaceholder: 'Enter log ID',
       }
     },
     userLoginLogManager: {
@@ -1433,7 +1485,9 @@ export const enUS: I18nRules = {
         success: 'Success',
         failed: 'Failed',
         remoteIp: 'IP Address',
-        remoteIpPlaceholder: 'Enter IP address'
+        remoteIpPlaceholder: 'Enter IP address',
+        id: 'Log ID',
+        idPlaceholder: 'Enter log ID',
       },
       loginMethod: {
         password: 'Password Login',

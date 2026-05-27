@@ -19,14 +19,14 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function FileResourceManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { type: 'number' }
+        schema: { type: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const columns = useFileResourceTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.type]);
+    }, [filters.type, filters.id]);
 
     const handleDownloadFileEntity = async (record: FileResource) => {
         const url = (await getResourceFileDownloadUrlById(record.id)).data;
@@ -39,6 +39,7 @@ export default function FileResourceManagerPage() {
     };
 
     const filterableFields = [
+        { field: 'id', type: 'number' as const, label: t('pages.fileResourceManager.filter.id') },
         {
             field: 'type',
             type: 'number' as const,
@@ -71,6 +72,7 @@ export default function FileResourceManagerPage() {
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type', operator: 'eq', value: filters.type },
             ]}
             editModalFormChildren={
@@ -151,6 +153,17 @@ export default function FileResourceManagerPage() {
                 return (await FileResourceManagerController.create(props as ManagerCreateFileResourceDTO)).data!
             }}
             tableActions={[
+                {
+                    label: <span>{t('pages.fileResourceManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.fileResourceManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.fileResourceManager.filter.type')}</span>,
                     children: <Select
