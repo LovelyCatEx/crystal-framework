@@ -10,6 +10,10 @@
 **当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
 **当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
 
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
+
 正确的例子:
 
 ```text
