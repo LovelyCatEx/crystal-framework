@@ -7,15 +7,16 @@ import {
 } from "@/api/tenant/tenant-member.api.ts";
 import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useMyTenantMemberTableColumns} from "@/components/columns/MyTenantMemberEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterStatus, setFilterStatus] = useState<number>();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number' } });
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const {t} = useTranslation();
     const columns = useMyTenantMemberTableColumns();
@@ -24,7 +25,7 @@ export default function MyTenantMemberManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filterStatus]);
+    }, [filters.status]);
 
     const statusOptions = [
         { label: getTenantMemberStatus(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
@@ -95,23 +96,28 @@ export default function MyTenantMemberManagerPage() {
                             tenantId: currentTenantId
                         })).data!
                     }}
+                    filterableFields={[
+                        { field: 'status',        type: 'number' as const, label: t('pages.myTenantMemberManager.filter.status') },
+                        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+                        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+                    ]}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'status', operator: 'eq', value: filters.status },
+                    ]}
                     tableActions={[
                         {
                             label: <span>{t('pages.myTenantMemberManager.filter.status')}</span>,
                             children: <Select
-                                defaultValue="-1"
+                                defaultValue={filters.status !== undefined ? String(filters.status) : '-1'}
                                 style={{ width: 120 }}
                                 options={[
                                     { value: '-1', label: t('pages.myTenantMemberManager.filter.all') },
                                     ...statusOptions
                                 ]}
-                                onChange={(value) => setFilterStatus(value === '-1' ? undefined : Number.parseInt(value))}
+                                onChange={(value) => setFilter('status', value === '-1' ? undefined : Number.parseInt(value))}
                             />,
-                            queryParamsProvider() {
-                                return {
-                                    status: filterStatus
-                                };
-                            }
                         }
                     ]}
                     delete={async (props) => {

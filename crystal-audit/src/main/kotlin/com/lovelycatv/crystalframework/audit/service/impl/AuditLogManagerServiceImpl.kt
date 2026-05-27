@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -17,6 +18,7 @@ class AuditLogManagerServiceImpl(
     private val auditLogRepository: AuditLogRepository,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : AuditLogManagerService {
     override val cacheStore: ExpiringKVStore<String, AuditLogEntity>
         get() = redisService.asKVStore()
@@ -27,6 +29,8 @@ class AuditLogManagerServiceImpl(
     override fun getRepository(): AuditLogRepository {
         return this.auditLogRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateAuditLogDTO): AuditLogEntity {
         throw BusinessException("Audit logs cannot be created manually")

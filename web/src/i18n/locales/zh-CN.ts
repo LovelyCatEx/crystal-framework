@@ -532,6 +532,14 @@ export const zhCN: I18nRules = {
           label: '密码',
           required: '请输入密码'
         }
+      },
+      filter: {
+        username: '用户名',
+        usernamePlaceholder: '按用户名筛选',
+        email: '邮箱',
+        emailPlaceholder: '按邮箱筛选',
+        nickname: '昵称',
+        nicknamePlaceholder: '按昵称筛选',
       }
     },
     oauthAccountManager: {
@@ -1989,6 +1997,9 @@ export const zhCN: I18nRules = {
       search: '搜索',
       searchPlaceholder: '搜索{{entityName}}...',
       fetchError: '无法获取{{entityName}}列表',
+      combineLogic: '组合逻辑',
+      combineAnd: '且',
+      combineOr: '或',
       pagination: {
         total: '共 {{total}} 条记录',
       },
@@ -1997,6 +2008,35 @@ export const zhCN: I18nRules = {
         button: '列筛选',
         title: '显示列',
         selectAll: '全选',
+      }
+    },
+    filterBuilder: {
+      filters: '筛选',
+      addCondition: '添加条件',
+      fillRequired: '请填写所有条件值',
+      addGroup: '添加分组',
+      and: '且',
+      or: '或',
+      apply: '应用',
+      cancel: '取消',
+      reset: '重置',
+      rootLogic: '组内逻辑',
+      group: '分组',
+      noConditions: '暂无筛选条件，请添加条件或分组',
+      selectField: '选择字段',
+      selectOperator: '选择操作符',
+      selectValue: '选择值',
+      valuePlaceholder: '输入值',
+      operators: {
+        eq: '等于',
+        ne: '不等于',
+        contains: '包含',
+        like: '模糊匹配',
+        gt: '大于',
+        gte: '大于等于',
+        lt: '小于',
+        lte: '小于等于',
+        in: '包含于',
       }
     },
     jsonEditor: {

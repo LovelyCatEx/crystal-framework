@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -20,6 +21,7 @@ class StorageProviderManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : StorageProviderManagerService {
     override val cacheStore: ExpiringKVStore<String, StorageProviderEntity>
         get() = redisService.asKVStore()
@@ -30,6 +32,8 @@ class StorageProviderManagerServiceImpl(
     override fun getRepository(): StorageProviderRepository {
         return this.storageProviderRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateStorageProviderDTO): StorageProviderEntity {
         storageProviderRepository.findByName(dto.name).awaitFirstOrNull()?.let {

@@ -20,6 +20,7 @@ import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -32,6 +33,7 @@ class TenantDepartmentMemberManagerServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantDepartmentMemberManagerService {
     override val cacheStore: ExpiringKVStore<String, TenantDepartmentMemberRelationEntity>
         get() = redisService.asKVStore()
@@ -42,6 +44,8 @@ class TenantDepartmentMemberManagerServiceImpl(
     override fun getRepository(): TenantDepartmentMemberRelationRepository {
         return this.tenantDepartmentMemberRelationRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateTenantDepartmentMemberDTO): TenantDepartmentMemberRelationEntity {
         // Check if member exists

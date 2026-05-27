@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -23,10 +24,13 @@ class UserPermissionManagerServiceImpl(
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val userRolePermissionRelationService: UserRolePermissionRelationService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : UserPermissionManagerService {
     override fun getRepository(): UserPermissionRepository {
         return this.userPermissionRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreatePermissionDTO): UserPermissionEntity {
         return this.getRepository().save(

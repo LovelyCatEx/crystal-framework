@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.auth.service.manager.UserLoginLogManagerS
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -14,6 +15,7 @@ class UserLoginLogManagerServiceImpl(
     private val userLoginLogRepository: UserLoginLogRepository,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : UserLoginLogManagerService {
     override val cacheStore: ExpiringKVStore<String, UserLoginLogEntity>
         get() = redisService.asKVStore()
@@ -24,4 +26,6 @@ class UserLoginLogManagerServiceImpl(
     override fun getRepository(): UserLoginLogRepository {
         return this.userLoginLogRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 }

@@ -1,5 +1,15 @@
 # Change Logs
 
+## v1.5.0
+
+2026-05-27
+
++ **!refactor: Remove legacy advanced search and migrate to condition-based search.**
++ feat(backend): Support advanced composable condition-based search.
++ refactor: All Manager Query requests changed from GET to POST.
++ feat(web): Support visual advanced search condition editor.
++ feat(web): All manager pages now support URL query parameters.
+
 ## v1.4.0
 
 2026-05-26

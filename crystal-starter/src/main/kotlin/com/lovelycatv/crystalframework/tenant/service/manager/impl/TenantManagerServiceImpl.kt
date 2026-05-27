@@ -14,6 +14,7 @@ import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.reflect.KClass
@@ -26,6 +27,7 @@ class TenantManagerServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val tenantService: TenantService,
     private val tenantInitializeService: TenantInitializeService,
+    private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantManagerService {
     private val logger = logger()
 
@@ -38,6 +40,8 @@ class TenantManagerServiceImpl(
     override fun getRepository(): TenantRepository {
         return tenantRepository
     }
+
+    override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateTenantDTO): TenantEntity {

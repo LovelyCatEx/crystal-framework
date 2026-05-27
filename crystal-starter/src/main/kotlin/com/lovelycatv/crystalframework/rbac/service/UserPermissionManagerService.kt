@@ -6,11 +6,7 @@ import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.Ma
 import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerUpdatePermissionDTO
 import com.lovelycatv.crystalframework.rbac.entity.UserPermissionEntity
 import com.lovelycatv.crystalframework.rbac.repository.UserPermissionRepository
-import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
-import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 
 interface UserPermissionManagerService : CachedBaseManagerService<
         UserPermissionRepository,
@@ -19,42 +15,4 @@ interface UserPermissionManagerService : CachedBaseManagerService<
         ManagerReadPermissionDTO,
         ManagerUpdatePermissionDTO,
         ManagerDeletePermissionDTO
-> {
-    override suspend fun query(
-        dto: ManagerReadPermissionDTO,
-        isAdvanceQuery: suspend (dto: ManagerReadPermissionDTO) -> Boolean,
-        doAdvanceQuery: suspend (dto: ManagerReadPermissionDTO, limit: Int, offset: Int) -> PaginatedResponseData<UserPermissionEntity>
-    ): PaginatedResponseData<UserPermissionEntity> {
-        return super.query(
-            dto,
-            isAdvanceQuery = { dto ->
-                dto.searchKeyword != null || dto.type != null || dto.startTime != null || dto.endTime != null
-            },
-            doAdvanceQuery = { dto, limit, offset ->
-                val total = this.getRepository()
-                    .countAdvanceSearch(
-                        dto.searchKeyword,
-                        dto.type,
-                        dto.startTime,
-                        dto.endTime,
-                    )
-                    .awaitFirstOrNull()
-                    ?: 0
-
-                val records = this.getRepository().advanceSearch(
-                    dto.searchKeyword,
-                    dto.type,
-                    dto.startTime,
-                    dto.endTime,
-                    limit,
-                    offset
-                ).awaitListWithTimeout()
-
-                dto.toPaginatedResponseData(
-                    total = total,
-                    records = records
-                )
-            }
-        )
-    }
-}
+>

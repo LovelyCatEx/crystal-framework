@@ -1,24 +1,39 @@
 import {Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {AuditLogManagerController, type ManagerReadAuditLogDTO,} from "@/api/audit/audit-log.api.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useAuditLogTableColumns} from "@/components/columns/AuditLogEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function AuditLogManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [filterAction, setFilterAction] = useState<number>();
-    const [filterUserId, setFilterUserId] = useState<string>();
-    const [filterUsername, setFilterUsername] = useState<string>();
-    const [filterPath, setFilterPath] = useState<string>();
-    const [filterRemoteIp, setFilterRemoteIp] = useState<string>();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: {
+            action: 'number',
+            userId: 'string',
+            username: 'string',
+            path: 'string',
+            remoteIp: 'string',
+        }
+    });
     const {t} = useTranslation();
     const columns = useAuditLogTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filterAction, filterUserId, filterUsername, filterPath, filterRemoteIp]);
+    }, [filters.action, filters.userId, filters.username, filters.path, filters.remoteIp]);
+
+    const filterableFields = [
+        { field: 'user_id',       type: 'number' as const, label: t('pages.auditLogManager.filter.userId') },
+        { field: 'username',      type: 'text'   as const, label: t('pages.auditLogManager.filter.username') },
+        { field: 'action',        type: 'number' as const, label: t('pages.auditLogManager.filter.action') },
+        { field: 'path',          type: 'text'   as const, label: t('pages.auditLogManager.filter.path') },
+        { field: 'remote_ip',     type: 'text'   as const, label: t('pages.auditLogManager.filter.remoteIp') },
+        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
+        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+    ];
 
     return (
         <>
@@ -36,17 +51,28 @@ export default function AuditLogManagerPage() {
                 showRowActions={false}
                 columns={columns}
                 editModalFormChildren={<></>}
+                filterableFields={filterableFields}
+                queryParamsSync={syncToUrl}
+                initialQueryValues={initialQueryValues}
+                searchKeywords={['username', 'path', 'remote_ip']}
+                simpleFilters={[
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                    { field: 'username', operator: 'contains', value: filters.username },
+                    { field: 'action', operator: 'eq', value: filters.action },
+                    { field: 'path', operator: 'contains', value: filters.path },
+                    { field: 'remote_ip', urlKey: 'remoteIp', operator: 'contains', value: filters.remoteIp },
+                ]}
                 query={async (props: ManagerReadAuditLogDTO) => {
                     return (await AuditLogManagerController.query(props)).data!;
                 }}
                 delete={async () => { return null; }}
                 update={async () => { return null; }}
                 create={async () => { return null; }}
-                tableActions={[
+                tablePrefixActions={[
                     {
                         label: <span>{t('pages.auditLogManager.filter.action')}</span>,
                         children: <Select
-                            defaultValue="-1"
+                            defaultValue={filters.action !== undefined ? String(filters.action) : '-1'}
                             style={{ width: 120 }}
                             options={[
                                 { value: '-1', label: t('pages.auditLogManager.filter.all') },
@@ -55,81 +81,60 @@ export default function AuditLogManagerPage() {
                                 { value: '3', label: t('pages.auditLogManager.actionType.update') },
                                 { value: '4', label: t('pages.auditLogManager.actionType.delete') },
                             ]}
-                            onChange={(value) => setFilterAction(value === '-1' ? undefined : Number.parseInt(value))}
+                            onChange={(value) => setFilter('action', value === '-1' ? undefined : Number.parseInt(value))}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                action: filterAction
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.auditLogManager.filter.userId')}</span>,
                         children: <Input
                             style={{ width: 140 }}
                             placeholder={t('pages.auditLogManager.filter.userIdPlaceholder')}
+                            defaultValue={filters.userId}
                             allowClear
-                            onPressEnter={(e) => setFilterUserId((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('userId', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterUserId(undefined);
+                                if (e.target.value === '') setFilter('userId', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                userId: filterUserId
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.auditLogManager.filter.username')}</span>,
                         children: <Input
                             style={{ width: 140 }}
                             placeholder={t('pages.auditLogManager.filter.usernamePlaceholder')}
+                            defaultValue={filters.username}
                             allowClear
-                            onPressEnter={(e) => setFilterUsername((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('username', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterUsername(undefined);
+                                if (e.target.value === '') setFilter('username', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                username: filterUsername
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.auditLogManager.filter.path')}</span>,
                         children: <Input
                             style={{ width: 160 }}
                             placeholder={t('pages.auditLogManager.filter.pathPlaceholder')}
+                            defaultValue={filters.path}
                             allowClear
-                            onPressEnter={(e) => setFilterPath((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('path', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterPath(undefined);
+                                if (e.target.value === '') setFilter('path', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                path: filterPath
-                            };
-                        }
                     },
                     {
                         label: <span>{t('pages.auditLogManager.filter.remoteIp')}</span>,
                         children: <Input
                             style={{ width: 140 }}
                             placeholder={t('pages.auditLogManager.filter.remoteIpPlaceholder')}
+                            defaultValue={filters.remoteIp}
                             allowClear
-                            onPressEnter={(e) => setFilterRemoteIp((e.target as HTMLInputElement).value || undefined)}
+                            onPressEnter={(e) => setFilter('remoteIp', (e.target as HTMLInputElement).value || undefined)}
                             onChange={(e) => {
-                                if (e.target.value === '') setFilterRemoteIp(undefined);
+                                if (e.target.value === '') setFilter('remoteIp', undefined);
                             }}
                         />,
-                        queryParamsProvider() {
-                            return {
-                                remoteIp: filterRemoteIp
-                            };
-                        }
                     }
                 ]}
             >
