@@ -140,7 +140,24 @@ export default function MailTemplateManagerPage() {
             subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
             filterableFields={[
-                { field: 'type_id',       type: 'number' as const, label: t('pages.mailTemplateManager.filter.templateType') },
+                {
+                    field: 'type_id',
+                    type: 'number' as const,
+                    label: t('pages.mailTemplateManager.filter.templateType'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? String(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.mailTemplateManager.filter.placeholder')}
+                            options={templateTypes.map((type) => ({
+                                label: type.name,
+                                value: String(type.id),
+                            }))}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
                             ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

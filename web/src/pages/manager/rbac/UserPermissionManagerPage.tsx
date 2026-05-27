@@ -86,7 +86,25 @@ export default function UserPermissionManagerPage() {
                 return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
             filterableFields={[
-                { field: 'type',          type: 'number' as const, label: t('pages.userPermissionManager.filter.type') },
+                {
+                    field: 'type',
+                    type: 'number' as const,
+                    label: t('pages.userPermissionManager.filter.type'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? String(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.userPermissionManager.filter.all')}
+                            options={[
+                                { value: String(PermissionType.ACTION), label: getPermissionType(PermissionType.ACTION) },
+                                { value: String(PermissionType.MENU), label: getPermissionType(PermissionType.MENU) },
+                                { value: String(PermissionType.COMPONENT), label: getPermissionType(PermissionType.COMPONENT) },
+                            ]}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
                             ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

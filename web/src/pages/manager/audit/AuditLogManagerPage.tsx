@@ -28,7 +28,26 @@ export default function AuditLogManagerPage() {
     const filterableFields = [
         { field: 'user_id',       type: 'number' as const, label: t('pages.auditLogManager.filter.userId') },
         { field: 'username',      type: 'text'   as const, label: t('pages.auditLogManager.filter.username') },
-        { field: 'action',        type: 'number' as const, label: t('pages.auditLogManager.filter.action') },
+        {
+            field: 'action',
+            type: 'number' as const,
+            label: t('pages.auditLogManager.filter.action'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.auditLogManager.filter.all')}
+                    options={[
+                        { value: '1', label: t('pages.auditLogManager.actionType.create') },
+                        { value: '2', label: t('pages.auditLogManager.actionType.read') },
+                        { value: '3', label: t('pages.auditLogManager.actionType.update') },
+                        { value: '4', label: t('pages.auditLogManager.actionType.delete') },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
         { field: 'path',          type: 'text'   as const, label: t('pages.auditLogManager.filter.path') },
         { field: 'remote_ip',     type: 'text'   as const, label: t('pages.auditLogManager.filter.remoteIp') },
     ];

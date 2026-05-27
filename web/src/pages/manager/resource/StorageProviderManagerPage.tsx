@@ -48,7 +48,25 @@ export default function StorageProviderManagerPage() {
     });
 
     const filterableFields = [
-        { field: 'type',          type: 'number' as const, label: t('pages.storageProviderManager.filter.type') },
+        {
+            field: 'type',
+            type: 'number' as const,
+            label: t('pages.storageProviderManager.filter.type'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.storageProviderManager.filter.all')}
+                    options={[
+                        { value: String(StorageProviderType.LOCAL_FILE_SYSTEM), label: t('pages.storageProviderManager.modal.type.localFileSystem') },
+                        { value: String(StorageProviderType.ALIYUN_OSS), label: t('pages.storageProviderManager.modal.type.aliyunOss') },
+                        { value: String(StorageProviderType.TENCENT_COS), label: t('pages.storageProviderManager.modal.type.tencentCos') },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
     ];
 
     return (

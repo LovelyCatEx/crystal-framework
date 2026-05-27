@@ -97,7 +97,21 @@ export default function MyTenantMemberManagerPage() {
                         })).data!
                     }}
                     filterableFields={[
-                        { field: 'status',        type: 'number' as const, label: t('pages.myTenantMemberManager.filter.status') },
+                        {
+                            field: 'status',
+                            type: 'number' as const,
+                            label: t('pages.myTenantMemberManager.filter.status'),
+                            renderValue: ({ value, onChange }) => (
+                                <Select
+                                    className="flex-1"
+                                    value={value !== undefined ? String(value) : undefined}
+                                    allowClear
+                                    placeholder={t('pages.myTenantMemberManager.filter.all')}
+                                    options={statusOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                                />
+                            ),
+                        },
                                                     ]}
                     queryParamsSync={syncToUrl}
                     initialQueryValues={initialQueryValues}

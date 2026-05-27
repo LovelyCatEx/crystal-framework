@@ -39,7 +39,24 @@ export default function FileResourceManagerPage() {
     };
 
     const filterableFields = [
-        { field: 'type',          type: 'number' as const, label: t('pages.fileResourceManager.filter.type') },
+        {
+            field: 'type',
+            type: 'number' as const,
+            label: t('pages.fileResourceManager.filter.type'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.fileResourceManager.filter.all')}
+                    options={[
+                        { value: String(ResourceFileType.USER_AVATAR), label: getResourceFileType(ResourceFileType.USER_AVATAR) },
+                        { value: String(ResourceFileType.TENANT_ICON), label: getResourceFileType(ResourceFileType.TENANT_ICON) },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
     ];
 
     return (

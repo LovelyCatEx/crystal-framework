@@ -24,7 +24,25 @@ export default function OAuthAccountManagerPage() {
     }, [filters.platform]);
 
     const filterableFields = [
-        { field: 'platform',      type: 'number' as const, label: t('pages.oauthAccountManager.filter.platform') },
+        {
+            field: 'platform',
+            type: 'number' as const,
+            label: t('pages.oauthAccountManager.filter.platform'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.oauthAccountManager.filter.all')}
+                    options={[
+                        { value: '0', label: 'Github' },
+                        { value: '1', label: 'Google' },
+                        { value: '2', label: 'QQ' },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
     ];
 
     return (

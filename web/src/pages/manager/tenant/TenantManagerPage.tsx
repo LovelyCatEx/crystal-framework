@@ -216,7 +216,21 @@ export default function TenantManagerPage() {
                 return (await TenantManagerController.create(createProps)).data!
             }}
             filterableFields={[
-                { field: 'status',        type: 'number' as const, label: t('pages.tenantManager.filter.status') },
+                {
+                    field: 'status',
+                    type: 'number' as const,
+                    label: t('pages.tenantManager.filter.status'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? String(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.tenantManager.filter.all')}
+                            options={statusOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
             ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

@@ -31,7 +31,24 @@ export default function UserLoginLogManagerPage() {
     const filterableFields = [
         { field: 'user_id',       type: 'number' as const, label: t('pages.userLoginLogManager.filter.userId') },
         { field: 'username',      type: 'text'   as const, label: t('pages.userLoginLogManager.filter.username') },
-        { field: 'login_method',  type: 'number' as const, label: t('pages.userLoginLogManager.filter.loginMethod') },
+        {
+            field: 'login_method',
+            type: 'number' as const,
+            label: t('pages.userLoginLogManager.filter.loginMethod'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.userLoginLogManager.filter.all')}
+                    options={[
+                        { value: '0', label: t('pages.userLoginLogManager.loginMethod.password') },
+                        { value: '1', label: t('pages.userLoginLogManager.loginMethod.oauth2') },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
         { field: 'success',       type: 'text'   as const, label: t('pages.userLoginLogManager.filter.status') },
         { field: 'remote_ip',     type: 'text'   as const, label: t('pages.userLoginLogManager.filter.remoteIp') },
     ];

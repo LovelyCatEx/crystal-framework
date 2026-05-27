@@ -130,7 +130,21 @@ export default function TenantPermissionManagerPage() {
                     return (await controller.query(props)).data!
                 }}
                 filterableFields={[
-                    { field: 'type',          type: 'number' as const, label: t('pages.tenantPermissionManager.filter.type') },
+                    {
+                        field: 'type',
+                        type: 'number' as const,
+                        label: t('pages.tenantPermissionManager.filter.type'),
+                        renderValue: ({ value, onChange }) => (
+                            <Select
+                                className="flex-1"
+                                value={value !== undefined ? String(value) : undefined}
+                                allowClear
+                                placeholder={t('pages.tenantPermissionManager.filter.all')}
+                                options={typeOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                                onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                            />
+                        ),
+                    },
                                         ]}
                 queryParamsSync={syncToUrl}
                 initialQueryValues={initialQueryValues}
