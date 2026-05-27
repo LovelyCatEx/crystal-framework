@@ -134,6 +134,7 @@ export default function TenantRoleManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={columns}
+                    searchKeywords={['name', 'description']}
                     editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>

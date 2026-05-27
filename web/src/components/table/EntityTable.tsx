@@ -22,12 +22,13 @@ import {
     Space,
     Switch,
     Table,
+    Tooltip,
     type TableProps,
     type TimeRangePickerProps
 } from 'antd';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import {SearchOutlined, SettingOutlined} from "@ant-design/icons";
+import {InfoCircleOutlined, SearchOutlined, SettingOutlined} from "@ant-design/icons";
 import type {EntityTableColumn, EntityTableColumns} from "./entity-table.types.ts";
 import type {BaseManagerReadDTO, PaginatedResponseData} from "@/types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
@@ -574,7 +575,12 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 {/* Global search box — shown only when searchKeywords is configured */}
                 {props.searchKeywords && props.searchKeywords.length > 0 && (
                     <div className="flex flex-col space-y-2">
-                        <span>{t('components.entityTable.search')}</span>
+                        <span>
+                            {t('components.entityTable.search')}
+                            <Tooltip title={props.searchKeywords?.join(', ')}>
+                                <InfoCircleOutlined className="ml-1 text-gray-400 cursor-help" />
+                            </Tooltip>
+                        </span>
                         <Input
                             placeholder={t('components.entityTable.searchPlaceholder', { entityName: props.entityName })}
                             prefix={<SearchOutlined className="text-gray-400" />}

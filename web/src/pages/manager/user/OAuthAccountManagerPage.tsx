@@ -52,6 +52,7 @@ export default function OAuthAccountManagerPage() {
             title={t('pages.oauthAccountManager.title')}
             subtitle={t('pages.oauthAccountManager.subtitle')}
             columns={columns}
+            searchKeywords={['identifier', 'nickname', 'email']}
             filterableFields={filterableFields}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

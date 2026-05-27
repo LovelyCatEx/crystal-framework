@@ -75,6 +75,7 @@ export default function TenantInvitationManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={columns}
+                    searchKeywords={['invitation_code']}
                     tableRowActionsRender={(row) => (
                         <>
                             <Tooltip title={t('pages.tenantInvitationManager.copyInvitationLink')}>

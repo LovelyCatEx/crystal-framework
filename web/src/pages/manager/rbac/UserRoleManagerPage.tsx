@@ -89,6 +89,7 @@ export default function UserRoleManagerPage() {
                 title={t('pages.userRoleManager.title')}
                 subtitle={t('pages.userRoleManager.subtitle')}
                 columns={columns}
+                searchKeywords={['name', 'description']}
                 editModalFormChildren={
                     <>
                         <Row gutter={24}>

@@ -113,6 +113,7 @@ export default function TenantMemberManagerPage() {
                             tenantId: selectedTenantId
                         })).data!
                     }}
+                    searchKeywords={['member_user_id']}
                     filterableFields={[
                         {
                             field: 'status',

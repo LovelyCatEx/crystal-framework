@@ -66,6 +66,7 @@ export default function FileResourceManagerPage() {
             title={t('pages.fileResourceManager.title')}
             subtitle={t('pages.fileResourceManager.subtitle')}
             columns={columns}
+            searchKeywords={['file_name', 'md5', 'file_extension']}
             filterableFields={filterableFields}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

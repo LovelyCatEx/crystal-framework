@@ -215,6 +215,7 @@ export default function TenantManagerPage() {
                 };
                 return (await TenantManagerController.create(createProps)).data!
             }}
+            searchKeywords={['name', 'description', 'contact_name']}
             filterableFields={[
                 {
                     field: 'status',

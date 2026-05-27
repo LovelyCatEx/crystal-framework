@@ -76,6 +76,7 @@ export default function StorageProviderManagerPage() {
             title={t('pages.storageProviderManager.title')}
             subtitle={t('pages.storageProviderManager.subtitle')}
             columns={columnsWithActive}
+            searchKeywords={['name', 'base_url']}
             filterableFields={filterableFields}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}

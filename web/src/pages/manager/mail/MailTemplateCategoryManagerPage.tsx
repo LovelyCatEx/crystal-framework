@@ -23,6 +23,7 @@ export default function MailTemplateCategoryManagerPage() {
             title={t('pages.mailTemplateCategoryManager.title')}
             subtitle={t('pages.mailTemplateCategoryManager.subtitle')}
             columns={columns}
+            searchKeywords={['name', 'description']}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>

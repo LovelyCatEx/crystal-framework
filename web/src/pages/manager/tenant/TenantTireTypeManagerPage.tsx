@@ -21,6 +21,7 @@ export default function TenantTireTypeManagerPage() {
             title={t('pages.tenantTireTypeManager.title')}
             subtitle={t('pages.tenantTireTypeManager.subtitle')}
             columns={columns}
+            searchKeywords={['name', 'description']}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>

@@ -129,6 +129,7 @@ export default function TenantPermissionManagerPage() {
                 query={async (props) => {
                     return (await controller.query(props)).data!
                 }}
+                searchKeywords={['name', 'description', 'path']}
                 filterableFields={[
                     {
                         field: 'type',

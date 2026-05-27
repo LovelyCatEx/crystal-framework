@@ -85,6 +85,7 @@ export default function UserPermissionManagerPage() {
             create={async (props) => {
                 return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
+            searchKeywords={['name', 'description', 'path']}
             filterableFields={[
                 {
                     field: 'type',

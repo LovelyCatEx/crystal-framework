@@ -139,6 +139,7 @@ export default function MailTemplateManagerPage() {
             title={t('pages.mailTemplateManager.title')}
             subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
+            searchKeywords={['name', 'title']}
             filterableFields={[
                 {
                     field: 'type_id',
