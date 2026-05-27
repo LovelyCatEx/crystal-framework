@@ -27,8 +27,6 @@ export default function UserManagerPage() {
         { field: 'username',      type: 'text'   as const, label: t('pages.userManager.filter.username') },
         { field: 'email',         type: 'text'   as const, label: t('pages.userManager.filter.email') },
         { field: 'nickname',      type: 'text'   as const, label: t('pages.userManager.filter.nickname') },
-        { field: 'created_time',  type: 'number' as const, label: t('pages.userManager.filter.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('pages.userManager.filter.modifiedTime') },
     ];
 
     return (
@@ -46,7 +44,7 @@ export default function UserManagerPage() {
                 { field: 'username', value: filters.username },
                 { field: 'nickname', value: filters.nickname },
             ]}
-            tablePrefixActions={[
+            tableActions={[
                 {
                     label: t('pages.userManager.filter.username'),
                     children: (

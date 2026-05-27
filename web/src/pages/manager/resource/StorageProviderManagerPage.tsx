@@ -49,8 +49,6 @@ export default function StorageProviderManagerPage() {
 
     const filterableFields = [
         { field: 'type',          type: 'number' as const, label: t('pages.storageProviderManager.filter.type') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -120,7 +118,7 @@ export default function StorageProviderManagerPage() {
             create={async (props) => {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
-            tablePrefixActions={[
+            tableActions={[
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select

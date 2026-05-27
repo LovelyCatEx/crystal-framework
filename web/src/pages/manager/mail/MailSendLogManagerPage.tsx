@@ -28,8 +28,6 @@ export default function MailSendLogManagerPage() {
         { field: 'to_email',      type: 'text'   as const, label: t('pages.mailSendLogManager.filter.toEmail') },
         { field: 'success',       type: 'text'   as const, label: t('pages.mailSendLogManager.filter.status') },
         { field: 'user_id',       type: 'number' as const, label: t('pages.mailSendLogManager.filter.userId') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -63,7 +61,7 @@ export default function MailSendLogManagerPage() {
                 delete={async () => null}
                 update={async () => null}
                 create={async () => null}
-                tablePrefixActions={[
+                tableActions={[
                     {
                         label: <span>{t('pages.mailSendLogManager.filter.toEmail')}</span>,
                         children: <Input

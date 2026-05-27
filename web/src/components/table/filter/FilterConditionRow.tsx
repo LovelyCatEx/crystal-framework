@@ -34,69 +34,36 @@ export function FilterConditionRow({row, fields, onUpdate, onDelete}: FilterCond
     onUpdate({...row, value: v});
   }, [onUpdate, row]);
 
-  const renderValueInput = () => {
-    if (!row.field) return null;
+  const renderSingleValueInput = (value: unknown, onChange: (v: unknown) => void) => {
+    if (fieldDef?.renderValue) {
+      return fieldDef.renderValue({ value, onChange, operator: 'eq' });
+    }
 
     switch (fieldDef?.type) {
       case 'text':
-        if (row.operator === 'in') {
-          return (
-            <Select
-              className="flex-1"
-              mode="tags"
-              value={(row.value as unknown[]) ?? []}
-              onChange={(v) => handleValueChange(v)}
-              placeholder={t('components.filterBuilder.valuePlaceholder')}
-            />
-          );
-        }
         return (
           <Input
             className="flex-1"
-            value={(row.value as string) ?? ''}
-            onChange={(e) => handleValueChange(e.target.value)}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
             placeholder={t('components.filterBuilder.valuePlaceholder')}
             allowClear
           />
         );
       case 'number':
-        if (row.operator === 'in') {
-          return (
-            <Select
-              className="flex-1"
-              mode="tags"
-              value={(row.value as string[]) ?? []}
-              onChange={(v) => handleValueChange(v.map(Number).filter(n => !Number.isNaN(n)))}
-              placeholder={t('components.filterBuilder.valuePlaceholder')}
-            />
-          );
-        }
         return (
           <InputNumber
             className="flex-1"
-            value={(row.value as number | null) ?? null}
-            onChange={(v) => handleValueChange(v)}
+            value={(value as number | null) ?? null}
+            onChange={(v) => onChange(v)}
             placeholder={t('components.filterBuilder.valuePlaceholder')}
           />
         );
       case 'select':
-        if (row.operator === 'in') {
-          return (
-            <Select
-              className="flex-1"
-              mode="multiple"
-              value={(row.value as (string | number)[]) ?? []}
-              onChange={(v) => handleValueChange(v)}
-              placeholder={t('components.filterBuilder.selectValue')}
-              options={fieldDef.options ?? []}
-            />
-          );
-        }
         return (
-          <Select
-            className="flex-1"
-            value={(row.value as string | number | undefined) ?? undefined}
-            onChange={(v) => handleValueChange(v)}
+          <Select className="flex-1"
+            value={(value as string | number | undefined) ?? undefined}
+            onChange={(v) => onChange(v)}
             placeholder={t('components.filterBuilder.selectValue')}
             allowClear
             options={fieldDef.options ?? []}
@@ -106,8 +73,8 @@ export function FilterConditionRow({row, fields, onUpdate, onDelete}: FilterCond
         return (
           <DatePicker
             className="flex-1"
-            value={row.value ? dayjs(row.value as number) : null}
-            onChange={(d) => handleValueChange(d?.valueOf() ?? null)}
+            value={value ? dayjs(value as number) : null}
+            onChange={(d) => onChange(d?.valueOf() ?? null)}
           />
         );
       case 'dateTime':
@@ -115,21 +82,53 @@ export function FilterConditionRow({row, fields, onUpdate, onDelete}: FilterCond
           <DatePicker
             className="flex-1"
             showTime
-            value={row.value ? dayjs(row.value as number) : null}
-            onChange={(d) => handleValueChange(d?.valueOf() ?? null)}
+            value={value ? dayjs(value as number) : null}
+            onChange={(d) => onChange(d?.valueOf() ?? null)}
           />
         );
       default:
         return (
-          <Input
-            className="flex-1"
-            value={(row.value as string) ?? ''}
-            onChange={(e) => handleValueChange(e.target.value)}
+          <Input className="flex-1"
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
             placeholder={t('components.filterBuilder.valuePlaceholder')}
             allowClear
           />
         );
     }
+  };
+
+  const renderValueInput = () => {
+    if (!row.field) return null;
+
+    if (row.operator === 'in') {
+      const values = Array.isArray(row.value) ? (row.value as unknown[]) : [];
+      return (
+        <div className="flex flex-col gap-1 min-w-64">
+          {values.map((v, i) => (
+            <div key={i} className="flex items-center gap-1">
+              {renderSingleValueInput(v, (newVal) => {
+                const next = [...values];
+                next[i] = newVal;
+                handleValueChange(next);
+              })}
+              <Button type="text" size="small" danger icon={<CloseOutlined />}
+                onClick={() => handleValueChange(values.filter((_, j) => j !== i))} />
+            </div>
+          ))}
+          <Button type="dashed" size="small"
+            onClick={() => handleValueChange([...values, null])}>
+            {t('components.filterBuilder.addValue')}
+          </Button>
+        </div>
+      );
+    }
+
+    if (fieldDef?.renderValue) {
+      return fieldDef.renderValue({ value: row.value, onChange: handleValueChange, operator: row.operator });
+    }
+
+    return renderSingleValueInput(row.value, handleValueChange);
   };
 
   return (

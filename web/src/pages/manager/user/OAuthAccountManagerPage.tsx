@@ -25,8 +25,6 @@ export default function OAuthAccountManagerPage() {
 
     const filterableFields = [
         { field: 'platform',      type: 'number' as const, label: t('pages.oauthAccountManager.filter.platform') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -106,7 +104,7 @@ export default function OAuthAccountManagerPage() {
             create={async (props) => {
                 return (await OAuthAccountManagerController.create(props as ManagerCreateOAuthAccountDTO)).data!;
             }}
-            tablePrefixActions={[
+            tableActions={[
                 {
                     label: <span>{t('pages.oauthAccountManager.filter.platform')}</span>,
                     children: <Select

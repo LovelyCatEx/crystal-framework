@@ -131,9 +131,7 @@ export default function TenantPermissionManagerPage() {
                 }}
                 filterableFields={[
                     { field: 'type',          type: 'number' as const, label: t('pages.tenantPermissionManager.filter.type') },
-                    { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                    { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-                ]}
+                                        ]}
                 queryParamsSync={syncToUrl}
                 initialQueryValues={initialQueryValues}
                 simpleFilters={[

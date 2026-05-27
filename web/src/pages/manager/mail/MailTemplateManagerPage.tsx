@@ -141,9 +141,7 @@ export default function MailTemplateManagerPage() {
             columns={columnsWithActive}
             filterableFields={[
                 { field: 'type_id',       type: 'number' as const, label: t('pages.mailTemplateManager.filter.templateType') },
-                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-            ]}
+                            ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[

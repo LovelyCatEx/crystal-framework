@@ -34,8 +34,6 @@ export default function UserLoginLogManagerPage() {
         { field: 'login_method',  type: 'number' as const, label: t('pages.userLoginLogManager.filter.loginMethod') },
         { field: 'success',       type: 'text'   as const, label: t('pages.userLoginLogManager.filter.status') },
         { field: 'remote_ip',     type: 'text'   as const, label: t('pages.userLoginLogManager.filter.remoteIp') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -71,7 +69,7 @@ export default function UserLoginLogManagerPage() {
                 delete={async () => null}
                 update={async () => null}
                 create={async () => null}
-                tablePrefixActions={[
+                tableActions={[
                     {
                         label: <span>{t('pages.userLoginLogManager.filter.userId')}</span>,
                         children: <Input

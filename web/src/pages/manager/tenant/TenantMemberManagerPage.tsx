@@ -115,9 +115,7 @@ export default function TenantMemberManagerPage() {
                     }}
                     filterableFields={[
                         { field: 'status',        type: 'number' as const, label: t('pages.tenantMemberManager.filter.status') },
-                        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-                    ]}
+                                                    ]}
                     queryParamsSync={syncToUrl}
                     initialQueryValues={initialQueryValues}
                     simpleFilters={[

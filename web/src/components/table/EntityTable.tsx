@@ -11,8 +11,20 @@ import React, {
     useRef,
     useState
 } from "react";
-import type {TimeRangePickerProps} from 'antd';
-import {Button, Checkbox, DatePicker, Flex, Input, message, Popover, Space, Switch, Table, type TableProps} from "antd";
+import {
+    Button,
+    Checkbox,
+    DatePicker,
+    Flex,
+    Input,
+    message,
+    Popover,
+    Space,
+    Switch,
+    Table,
+    type TableProps,
+    type TimeRangePickerProps
+} from 'antd';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {SearchOutlined, SettingOutlined} from "@ant-design/icons";
@@ -32,12 +44,10 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     tablePrefixActions?: {
         label: React.ReactNode | JSX.Element,
         children: React.ReactNode | JSX.Element,
-        queryParamsProvider?: () => object
     }[];
     tableActions?: {
         label: React.ReactNode | JSX.Element,
         children: React.ReactNode | JSX.Element,
-        queryParamsProvider?: () => object
     }[];
     filterableFields?: FilterableField[];
     /**
@@ -45,6 +55,16 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
      * URL param: `searchKeyword=<value>`
      */
     searchKeywords?: string[];
+    /**
+     * External search control. When `onSearch` is provided,
+     * EntityTable enters external-search mode:
+     * - no internal search box is rendered
+     * - `searchKeyword` is used as the current keyword value
+     * - `onSearch` is called when the keyword changes
+     * Used by ManagerPageContainer to render a unified search box.
+     */
+    searchKeyword?: string;
+    onSearch?: (keyword: string) => void;
     /**
      * Developer-provided per-field filter values AND-ed into the simple group.
      * `urlKey` overrides the URL param name (defaults to `field`).
@@ -159,6 +179,22 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     const simpleFiltersRef = useRef(props.simpleFilters);
     simpleFiltersRef.current = props.simpleFilters;
 
+    // Built-in filterable fields (created_time, modified_time) with DatePicker.
+    const mergedFields: FilterableField[] = useMemo(() => {
+        const base = props.filterableFields ?? [];
+        const timeRender = ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+            <DatePicker className="flex-1" showTime
+                value={value ? dayjs(value as number) : null}
+                onChange={(d) => onChange(d?.valueOf() ?? null)}
+            />
+        );
+        return [
+            ...base,
+            { field: 'created_time',  type: 'number', label: t('components.entityTable.createdTime'),  renderValue: timeRender },
+            { field: 'modified_time', type: 'number', label: t('components.entityTable.modifiedTime'), renderValue: timeRender },
+        ];
+    }, [props.filterableFields, t]);
+
     // ── Query node builders ──────────────────────────────────────────────────
 
     /**
@@ -251,12 +287,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     ) => {
         setRefreshing(true);
 
-        const actionParams = Object.assign(
-            {},
-            ...[...(props.tableActions ?? []), ...(props.tablePrefixActions ?? [])]
-                .mapNotNull(action => action.queryParamsProvider?.())
-        ) as Record<string, unknown>;
-
         const tr = timeRangeRef.current;
         const startTime = tr ? tr[0] : undefined;
         const endTime   = tr ? (tr[1] ?? Date.now()) : undefined;
@@ -280,7 +310,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             ),
             ...(startTime ? { startTime } : {}),
             ...(endTime   ? { endTime }   : {}),
-            ...actionParams,
             ...(filterNodeRef.current && filterNodeRef.current.children.length > 0
                 ? { query: filterNodeRef.current }
                 : {}),
@@ -293,7 +322,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         const requestParams = {
             page,
             pageSize,
-            ...actionParams,
             ...(queryNode ? { query: queryNode } : {}),
         };
 
@@ -344,7 +372,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
         ...props.columns,
-        ...(!!!props.hideRecordTimeColumn ? [{
+        ...(!props.hideRecordTimeColumn ? [{
             title: t('components.entityTable.recordTime'),
             dataIndex: 'createdTime',
             key: 'createdTime',
@@ -394,6 +422,10 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     const showTimeRangeFilter = props.showTimeRangeFilter !== false;
 
+    const hasSimpleInputs = (props.searchKeywords && props.searchKeywords.length > 0)
+        || (props.simpleFilters && props.simpleFilters.length > 0);
+    const showCombineSwitch = hasSimpleInputs && !!props.filterableFields;
+
     const tableActions = useMemo(() => {
         const actions = [...(props.tableActions ?? [])];
 
@@ -422,11 +454,28 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         }
 
         if (props.filterableFields) {
+            if (showCombineSwitch) {
+                actions.push({
+                    label: <span>{t('components.entityTable.combineLogic')}</span>,
+                    children: (
+                        <Switch
+                            checked={combineWithAnd}
+                            checkedChildren={t('components.entityTable.combineAnd')}
+                            unCheckedChildren={t('components.entityTable.combineOr')}
+                            onChange={(checked) => {
+                                combineWithAndRef.current = checked;
+                                setCombineWithAnd(checked);
+                                setTimeout(() => refreshData({ resetPage: true }), 0);
+                            }}
+                        />
+                    ),
+                });
+            }
             actions.push({
                 label: <span>{t('components.filterBuilder.filters')}</span>,
                 children: (
                     <FilterBuilder
-                        fields={props.filterableFields}
+                        fields={mergedFields}
                         defaultValue={filterNodeRef.current}
                         onChange={(node) => {
                             filterNodeRef.current = node;
@@ -447,7 +496,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         });
 
         return actions;
-    }, [props.tableActions, props.filterableFields, showTimeRangeFilter, timeRange, rangePresets, t, refreshData]);
+    }, [props.tableActions, props.filterableFields, showTimeRangeFilter, showCombineSwitch, combineWithAnd, timeRange, rangePresets, t, refreshData]);
 
     // ── Render helpers ───────────────────────────────────────────────────────
 
@@ -520,12 +569,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         </div>
     );
 
-    // Whether the AND/OR switch should be shown:
-    // only when there's something in the simple group AND filterableFields is configured.
-    const hasSimpleInputs = (props.searchKeywords && props.searchKeywords.length > 0)
-        || (props.simpleFilters && props.simpleFilters.length > 0);
-    const showCombineSwitch = hasSimpleInputs && !!props.filterableFields;
-
     // ── JSX ──────────────────────────────────────────────────────────────────
 
     return (
@@ -564,23 +607,6 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                         {action.children}
                     </div>
                 ))}
-
-                {/* AND/OR switch between simple group and FilterBuilder group */}
-                {showCombineSwitch && (
-                    <div className="flex flex-col space-y-2">
-                        <span>{t('components.entityTable.combineLogic')}</span>
-                        <Switch
-                            checked={combineWithAnd}
-                            checkedChildren={t('components.entityTable.combineAnd')}
-                            unCheckedChildren={t('components.entityTable.combineOr')}
-                            onChange={(checked) => {
-                                combineWithAndRef.current = checked;
-                                setCombineWithAnd(checked);
-                                setTimeout(() => refreshData({ resetPage: true }), 0);
-                            }}
-                        />
-                    </div>
-                )}
 
                 <div className="flex flex-col space-y-2">
                     <span>{t('components.entityTable.columnFilter.label')}</span>

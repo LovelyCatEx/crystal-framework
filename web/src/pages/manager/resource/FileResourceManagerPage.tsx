@@ -40,8 +40,6 @@ export default function FileResourceManagerPage() {
 
     const filterableFields = [
         { field: 'type',          type: 'number' as const, label: t('pages.fileResourceManager.filter.type') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -134,7 +132,7 @@ export default function FileResourceManagerPage() {
             create={async (props) => {
                 return (await FileResourceManagerController.create(props as ManagerCreateFileResourceDTO)).data!
             }}
-            tablePrefixActions={[
+            tableActions={[
                 {
                     label: <span>{t('pages.fileResourceManager.filter.type')}</span>,
                     children: <Select

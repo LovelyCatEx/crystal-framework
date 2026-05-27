@@ -2027,6 +2027,7 @@ export const zhCN: I18nRules = {
       selectOperator: '选择操作符',
       selectValue: '选择值',
       valuePlaceholder: '输入值',
+      addValue: '添加值',
       operators: {
         eq: '等于',
         ne: '不等于',

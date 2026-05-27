@@ -31,8 +31,6 @@ export default function AuditLogManagerPage() {
         { field: 'action',        type: 'number' as const, label: t('pages.auditLogManager.filter.action') },
         { field: 'path',          type: 'text'   as const, label: t('pages.auditLogManager.filter.path') },
         { field: 'remote_ip',     type: 'text'   as const, label: t('pages.auditLogManager.filter.remoteIp') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -68,7 +66,7 @@ export default function AuditLogManagerPage() {
                 delete={async () => { return null; }}
                 update={async () => { return null; }}
                 create={async () => { return null; }}
-                tablePrefixActions={[
+                tableActions={[
                     {
                         label: <span>{t('pages.auditLogManager.filter.action')}</span>,
                         children: <Select

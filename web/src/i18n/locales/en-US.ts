@@ -2030,6 +2030,7 @@ export const enUS: I18nRules = {
       selectOperator: 'Select Operator',
       selectValue: 'Select Value',
       valuePlaceholder: 'Enter value',
+      addValue: 'Add Value',
       operators: {
         eq: 'Equals',
         ne: 'Not Equals',

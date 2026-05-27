@@ -97,10 +97,6 @@ export interface UseManagerQueryParamsReturn<S extends FilterSchema = FilterSche
     /**
      * Typed filter values derived from the schema.
      * Only available when `schema` is provided.
-     * Pass this directly to ManagerPageContainer/EntityTable as `extraQueryParams`.
-     *
-     * @example
-     * <ManagerPageContainer extraQueryParams={filters} ... />
      */
     filters: FiltersFromSchema<S>;
 
@@ -149,15 +145,12 @@ function parseValue(raw: string, type: FilterFieldType): string | number | boole
  * // Use filters directly in controls
  * <Input defaultValue={filters.userId} onChange={(e) => setFilter('userId', e.target.value || undefined)} />
  *
- * // Pass to ManagerPageContainer — no queryParamsProvider needed
+ * // Pass to ManagerPageContainer
  * <ManagerPageContainer
- *     extraQueryParams={filters}
  *     queryParamsSync={syncToUrl}
  *     initialQueryValues={initialQueryValues}
  * />
  * ```
- *
- * **Manual mode (legacy / advanced)** — manage your own state and use queryParamsProvider:
  * ```tsx
  * const { getInitialParam, syncToUrl, initialQueryValues } = useManagerQueryParams();
  * const [filterUserId, setFilterUserId] = useState(getInitialParam('userId'));
