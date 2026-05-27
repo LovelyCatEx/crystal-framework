@@ -56,16 +56,6 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
      */
     searchKeywords?: string[];
     /**
-     * External search control. When `onSearch` is provided,
-     * EntityTable enters external-search mode:
-     * - no internal search box is rendered
-     * - `searchKeyword` is used as the current keyword value
-     * - `onSearch` is called when the keyword changes
-     * Used by ManagerPageContainer to render a unified search box.
-     */
-    searchKeyword?: string;
-    onSearch?: (keyword: string) => void;
-    /**
      * Developer-provided per-field filter values AND-ed into the simple group.
      * `urlKey` overrides the URL param name (defaults to `field`).
      */

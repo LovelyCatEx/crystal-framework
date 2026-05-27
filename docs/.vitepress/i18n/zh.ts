@@ -23,6 +23,20 @@ export const zhThemeConfig: DefaultTheme.Config = {
                 { text: '非标准化 Manager', link: '/develop/frontend/manager/custom-manager' },
               ]
             },
+            {
+              text: '组件',
+              items: [
+                { text: '实体数据表格', link: '/develop/frontend/components/entity-table' },
+                { text: '页面标题栏', link: '/develop/frontend/components/action-bar' },
+                { text: '标准卡片', link: '/develop/frontend/components/standard-card' },
+                { text: '右键菜单', link: '/develop/frontend/components/context-menu' },
+                { text: '图片裁剪器', link: '/develop/frontend/components/image-cropper' },
+                { text: 'JSON 编辑器', link: '/develop/frontend/components/json-editor' },
+                { text: 'HTML 编辑器', link: '/develop/frontend/components/html-editor' },
+                { text: '头像资源', link: '/develop/frontend/components/avatar-resource' },
+                { text: '可复制气泡', link: '/develop/frontend/components/copyable-tooltip' },
+              ]
+            },
           ]
         },
         {
