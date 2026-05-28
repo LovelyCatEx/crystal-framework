@@ -1,6 +1,20 @@
 # Change Logs
 
+## v1.5.2
+
+2026-05-28
+
++ refactor(system & monitor): Migrate system statistics to the monitor module.
++ chore(shared): Unify backend common configuration classes.
++ feat(schedule): @CronTaskExecutor cron expressions now support Spring dynamic evaluation.
++ feat(monitor): Add scheduled task to clean system monitoring data older than 14 days.
++ feat(sdk): Add Registry pre-checks to prevent issues from duplicate registration.
++ feat(system): Add system announcement database table and related code.
++ feat(web): Restructure dashboard page layout and add announcement list.
+
 ## v1.5.1
+
+2026-05-28
 
 + feat(web): Advanced filter component now supports custom condition value renderers.
 + feat(web): All manager pages add a global search box and primary key ID search box.

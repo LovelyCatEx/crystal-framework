@@ -4,7 +4,13 @@
 
 2026-05-28
 
-
++ refactor(system & monitor): 将系统统计数据迁移到 monitor 模块。
++ chore(shared): 后端统一使用通用配置类。
++ feat(schedule): @CronTaskExecutor 的 cron 表达式支持通过 Spring 动态计算。
++ feat(monitor): 新增定时任务，每天清理 14 天前的系统监控数据。
++ feat(sdk): 新增 Registry 预检查，防止重复注册引发未知问题。
++ feat(system): 新增系统公告数据表以及相关代码。
++ feat(web): 重新布局仪表盘页面并添加公告列表。
 
 ## v1.5.1
 
