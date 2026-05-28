@@ -1,12 +1,12 @@
-import {Avatar, Button, Card, Col, Empty, Row, Spin, Tag, theme} from "antd";
+import {Avatar, Button, Card, Col, Empty, Modal, Row, Spin, Tag, theme} from "antd";
 import {useTranslation} from "react-i18next";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {PlusOutlined, RightOutlined, ShopOutlined, TeamOutlined,} from "@ant-design/icons";
 import {getTenantMemberStatus} from "@/i18n/enum-helpers.ts";
-import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {getTenantProfile} from "@/api/tenant/tenant-profile.api.ts";
 import type {TenantProfileVO, UserTenantVO} from "@/types/tenant/tenant.types.ts";
+import {TenantInvitationFlow} from "../tenant/TenantInvitationFlow.tsx";
 
 const { useToken } = theme;
 
@@ -24,8 +24,8 @@ export function MyJoinedTenants() {
     const { token } = useToken();
     const { t } = useTranslation();
     const { joinedTenants, isJoinedTenantsLoading, currentTenant } = useUserTenants();
-    const navigate = useNavigate();
     const [tenantsWithProfile, setTenantsWithProfile] = useState<TenantWithProfile[]>([]);
+    const [invitationModalOpen, setInvitationModalOpen] = useState(false);
     const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
 
     useEffect(() => {
@@ -53,7 +53,7 @@ export function MyJoinedTenants() {
     }, [joinedTenants]);
 
     const handleJoinByCode = () => {
-        navigate("/tenant/invitation");
+        setInvitationModalOpen(true);
     };
 
     if (isJoinedTenantsLoading || isLoadingProfiles) {
@@ -83,6 +83,7 @@ export function MyJoinedTenants() {
         });
 
     return (
+        <>
         <Card
                 title={
                     <div className="flex items-center justify-between w-full" style={{ color: token.colorTextHeading }}>
@@ -221,5 +222,18 @@ export function MyJoinedTenants() {
                     </Row>
                 )}
             </Card>
+
+            <Modal
+                title={t('pages.tenantInvitation.title')}
+                open={invitationModalOpen}
+                onCancel={() => setInvitationModalOpen(false)}
+                footer={null}
+                width={520}
+                destroyOnClose
+                centered
+            >
+                <TenantInvitationFlow onFinish={() => setInvitationModalOpen(false)} />
+            </Modal>
+    </>
     );
 }

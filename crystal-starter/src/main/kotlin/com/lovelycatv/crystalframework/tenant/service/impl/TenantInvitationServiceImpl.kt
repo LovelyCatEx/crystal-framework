@@ -79,23 +79,25 @@ class TenantInvitationServiceImpl(
         val tenant = tenantService.getByIdOrThrow(invitation.tenantId)
 
         // 1. Check whether the user is already in the target tenant
-        val memberEntity = tenantMemberService.getByTenantIdAndUserId(tenant.id, userId).also {
+        val existingMember = tenantMemberService.getByTenantIdAndUserId(tenant.id, userId)
+        if (existingMember != null) {
             // 1.1 User is already joined this tenant
             logger.info("User ${user.username} - ${user.id} is already in the tenant ${tenant.name} - ${tenant.id}")
+            throw BusinessException("user is already a member of this tenant")
         }
-            // 1.2 Not found
-            ?: tenantMemberManagerService.create(
-                ManagerCreateTenantMemberDTO(
-                    tenantId = tenant.id,
-                    memberUserId = userId,
-                    status = if (invitation.requiresReviewing)
-                        TenantMemberStatus.REVIEWING.typeId
-                    else
-                        TenantMemberStatus.ACTIVE.typeId
-                )
-            ).also {
-                logger.info("User ${user.username} - ${user.id} joined the tenant ${tenant.name} - ${tenant.id}")
-            }
+        // 1.2 Not found — create
+        val memberEntity = tenantMemberManagerService.create(
+            ManagerCreateTenantMemberDTO(
+                tenantId = tenant.id,
+                memberUserId = userId,
+                status = if (invitation.requiresReviewing)
+                    TenantMemberStatus.REVIEWING.typeId
+                else
+                    TenantMemberStatus.ACTIVE.typeId
+            )
+        ).also {
+            logger.info("User ${user.username} - ${user.id} joined the tenant ${tenant.name} - ${tenant.id}")
+        }
 
         // 2. Check whether the invitation includes department
         invitation.departmentId?.let { departmentId ->
