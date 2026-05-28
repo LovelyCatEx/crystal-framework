@@ -1,5 +1,13 @@
 # Change Logs
 
+## v1.5.1
+
++ feat(web): Advanced filter component now supports custom condition value renderers.
++ feat(web): All manager pages add a global search box and primary key ID search box.
++ feat(web): Add `EnhancedNumberInput` component with support for long integer input.
++ fix(web): Fix page reloading triggered by URL changes.
++ fix(web): Fix URL query params reading/overwriting non-schema parameters.
+
 ## v1.5.0
 
 2026-05-27
