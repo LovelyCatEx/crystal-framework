@@ -1,4 +1,4 @@
-import { Col, Form, Input, InputNumber, Row, Select, Tag } from 'antd';
+import {Col, Form, Input, InputNumber, Row, Select} from 'antd';
 import { ManagerPageContainer, type ManagerPageContainerRef } from '@/components/ManagerPageContainer.tsx';
 import {
     AnnouncementManagerController,
@@ -6,15 +6,22 @@ import {
     type ManagerReadAnnouncementDTO,
 } from '@/api/system/announcement.api.ts';
 import type { Announcement } from '@/types/system/announcement.types.ts';
-import { ANNOUNCEMENT_STATUS_COLORS, ANNOUNCEMENT_TARGET_COLORS } from '@/types/system/announcement.types.ts';
 import { useTranslation } from 'react-i18next';
-import { useRef } from 'react';
-import type { EntityTableColumns } from '@/components/table/entity-table.types.ts';
-import { formatTimestamp } from '@/utils/datetime.utils.ts';
+import { useEffect, useRef } from 'react';
+import {useAnnouncementTableColumns} from "@/components/columns/AnnouncementEntityColumns.tsx";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function AnnouncementManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { t } = useTranslation();
+
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+        schema: { id: 'string', status: 'number', target: 'number' } as const,
+    });
+
+    useEffect(() => {
+        pageRef.current?.refreshData({ resetPage: true });
+    }, [filters.id, filters.status, filters.target]);
 
     const statusOptions = [
         { value: 0, label: t('enums.announcementStatus.0') },
@@ -28,48 +35,42 @@ export default function AnnouncementManagerPage() {
         { value: 2, label: t('enums.announcementTarget.2') },
     ];
 
-    const columns: EntityTableColumns<Announcement> = [
+    const columns = useAnnouncementTableColumns({
+        onRefresh: () => pageRef.current?.refreshData(),
+    });
+
+    const filterableFields = [
+        { field: 'id', type: 'number' as const, label: t('pages.announcementManager.filter.id') },
+        { field: 'priority', type: 'number' as const, label: t('pages.announcementManager.filter.priority') },
         {
-            title: t('pages.announcementManager.columns.title'),
-            dataIndex: 'title',
-            key: 'title',
-            render: (val: unknown) => <span className="line-clamp-1">{val as string}</span>,
-        },
-        {
-            title: t('pages.announcementManager.columns.status'),
-            dataIndex: 'status',
-            key: 'status',
-            width: 100,
-            render: (val: unknown) => (
-                <Tag color={ANNOUNCEMENT_STATUS_COLORS[val as number]}>
-                    {t(`enums.announcementStatus.${val}`)}
-                </Tag>
+            field: 'status',
+            type: 'number' as const,
+            label: t('pages.announcementManager.filter.status'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.announcementManager.filter.all')}
+                    options={statusOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
             ),
         },
         {
-            title: t('pages.announcementManager.columns.target'),
-            dataIndex: 'target',
-            key: 'target',
-            width: 130,
-            render: (val: unknown) => (
-                <Tag color={ANNOUNCEMENT_TARGET_COLORS[val as number]}>
-                    {t(`enums.announcementTarget.${val}`)}
-                </Tag>
+            field: 'target',
+            type: 'number' as const,
+            label: t('pages.announcementManager.filter.target'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.announcementManager.filter.all')}
+                    options={targetOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
             ),
-        },
-        {
-            title: t('pages.announcementManager.columns.priority'),
-            dataIndex: 'priority',
-            key: 'priority',
-            width: 90,
-            render: (val: unknown) => <span>{val as number}</span>,
-        },
-        {
-            title: t('pages.announcementManager.columns.createdTime'),
-            dataIndex: 'createdTime',
-            key: 'createdTime',
-            width: 180,
-            render: (val: unknown) => formatTimestamp(val as string),
         },
     ];
 
@@ -80,6 +81,52 @@ export default function AnnouncementManagerPage() {
             title={t('pages.announcementManager.title')}
             subtitle={t('pages.announcementManager.subtitle')}
             columns={columns}
+            searchKeywords={['title', 'content']}
+            filterableFields={filterableFields}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
+                { field: 'status', operator: 'eq', value: filters.status },
+                { field: 'target', operator: 'eq', value: filters.target },
+            ]}
+            tableActions={[
+                {
+                    label: <span>{t('pages.announcementManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.announcementManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
+                {
+                    label: <span>{t('pages.announcementManager.filter.status')}</span>,
+                    children: <Select
+                        defaultValue={filters.status !== undefined ? String(filters.status) : '-1'}
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '-1', label: t('pages.announcementManager.filter.all') },
+                            ...statusOptions,
+                        ]}
+                        onChange={(value) => setFilter('status', value === '-1' ? undefined : Number.parseInt(value))}
+                    />,
+                },
+                {
+                    label: <span>{t('pages.announcementManager.filter.target')}</span>,
+                    children: <Select
+                        defaultValue={filters.target !== undefined ? String(filters.target) : '-1'}
+                        style={{ width: 120 }}
+                        options={[
+                            { value: '-1', label: t('pages.announcementManager.filter.all') },
+                            ...targetOptions,
+                        ]}
+                        onChange={(value) => setFilter('target', value === '-1' ? undefined : Number.parseInt(value))}
+                    />,
+                },
+            ]}
             editModalFormChildren={(editingItem) => {
                 const item = editingItem as Announcement | null;
                 return (

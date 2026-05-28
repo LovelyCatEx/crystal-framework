@@ -1559,10 +1559,19 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统公告信息',
       columns: {
         title: '标题',
+        content: '内容',
         status: '状态',
         target: '展示端',
         priority: '优先级',
         createdTime: '创建时间',
+      },
+      filter: {
+        id: '公告ID',
+        idPlaceholder: '请输入公告ID',
+        status: '状态',
+        target: '展示端',
+        priority: '优先级',
+        all: '全部',
       },
       modal: {
         title: {
@@ -1583,6 +1592,10 @@ export const zhCN: I18nRules = {
         priority: {
           label: '优先级',
         },
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败',
       },
     },
     managerContainer: {
@@ -1770,6 +1783,13 @@ export const zhCN: I18nRules = {
         joinByCode: '通过邀请码加入',
         joinByCodeDesc: '输入邀请码加入新组织',
         loadFailed: '加载组织列表失败'
+      },
+
+      // SystemAnnouncements
+      systemAnnouncements: {
+        title: '系统公告',
+        noAnnouncements: '暂无公告',
+        loadFailed: '加载公告失败'
       }
     },
 

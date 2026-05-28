@@ -1562,10 +1562,19 @@ export const enUS: I18nRules = {
       subtitle: 'Manage system announcements',
       columns: {
         title: 'Title',
+        content: 'Content',
         status: 'Status',
         target: 'Display Target',
         priority: 'Priority',
         createdTime: 'Created Time',
+      },
+      filter: {
+        id: 'Announcement ID',
+        idPlaceholder: 'Enter announcement ID',
+        status: 'Status',
+        target: 'Display Target',
+        priority: 'Priority',
+        all: 'All',
       },
       modal: {
         title: {
@@ -1586,6 +1595,10 @@ export const enUS: I18nRules = {
         priority: {
           label: 'Priority',
         },
+      },
+      messages: {
+        statusUpdateSuccess: 'Status updated successfully',
+        statusUpdateFailed: 'Status update failed',
       },
     },
     managerContainer: {
@@ -1773,6 +1786,13 @@ export const enUS: I18nRules = {
         joinByCode: 'Join by Invitation Code',
         joinByCodeDesc: 'Enter invitation code to join new organization',
         loadFailed: 'Failed to load organization list'
+      },
+
+      // SystemAnnouncements
+      systemAnnouncements: {
+        title: 'Announcements',
+        noAnnouncements: 'No announcements',
+        loadFailed: 'Failed to load announcements'
       }
     },
 

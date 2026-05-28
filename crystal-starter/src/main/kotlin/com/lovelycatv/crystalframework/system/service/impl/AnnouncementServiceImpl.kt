@@ -11,9 +11,6 @@ class AnnouncementServiceImpl(
     private val announcementRepository: AnnouncementRepository,
 ) : AnnouncementService {
 
-    override fun getPublishedForUser(): Flux<AnnouncementEntity> =
-        announcementRepository.findPublishedForUser()
-
-    override fun getPublishedForManager(): Flux<AnnouncementEntity> =
-        announcementRepository.findPublishedForManager()
+    override fun getPublished(): Flux<AnnouncementEntity> =
+        announcementRepository.findPublished()
 }

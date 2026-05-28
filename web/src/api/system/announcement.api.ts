@@ -31,10 +31,6 @@ export const AnnouncementManagerController = new BaseManagerController<
     ManagerUpdateAnnouncementDTO
 >('/manager/announcements');
 
-export async function getAnnouncementsForUser() {
-    return doGet<Announcement[]>('/api/announcements/user/list');
-}
-
-export async function getAnnouncementsForManager() {
-    return doGet<Announcement[]>('/api/announcements/manager/list');
+export async function getPublishedAnnouncements() {
+    return doGet<Announcement[]>('/api/announcements/list');
 }

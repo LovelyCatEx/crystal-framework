@@ -53,13 +53,15 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_ANNOUNCEMENT_CREATE,
             SystemPermission.ACTION_ANNOUNCEMENT_UPDATE,
             SystemPermission.ACTION_ANNOUNCEMENT_DELETE,
-            SystemPermission.ACTION_ANNOUNCEMENT_MANAGER_READ,
+            SystemPermission.ACTION_ANNOUNCEMENT_LIST,
+            SystemPermission.COMPONENT_DASHBOARD_ANNOUNCEMENTS,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard
             SystemPermission.COMPONENT_DASHBOARD_MY_TENANTS,
+            SystemPermission.COMPONENT_DASHBOARD_ANNOUNCEMENTS,
             // Announcement
-            SystemPermission.ACTION_ANNOUNCEMENT_USER_READ,
+            SystemPermission.ACTION_ANNOUNCEMENT_LIST,
         )
     )
 }

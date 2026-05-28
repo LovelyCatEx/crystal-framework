@@ -18,17 +18,10 @@ import org.springframework.web.bind.annotation.RestController
 class AnnouncementController(
     private val announcementService: AnnouncementService,
 ) {
-    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_ANNOUNCEMENT_USER_READ}')")
-    @GetMapping("/user/list")
-    suspend fun listForUser(): ApiResponse<List<AnnouncementEntity>> {
-        val list = announcementService.getPublishedForUser().collectList().awaitFirst()
-        return ApiResponse.success(list)
-    }
-
-    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_ANNOUNCEMENT_MANAGER_READ}')")
-    @GetMapping("/manager/list")
-    suspend fun listForManager(): ApiResponse<List<AnnouncementEntity>> {
-        val list = announcementService.getPublishedForManager().collectList().awaitFirst()
+    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_ANNOUNCEMENT_LIST}')")
+    @GetMapping("/list")
+    suspend fun list(): ApiResponse<List<AnnouncementEntity>> {
+        val list = announcementService.getPublished().collectList().awaitFirst()
         return ApiResponse.success(list)
     }
 }
