@@ -20,7 +20,7 @@ class MonitorMetricService(
         return repository.insert(type, value)
     }
 
-    @Scheduled(fixedRateString = "#{@monitorProperties.flushIntervalMs}")
+    @Scheduled(fixedRateString = "#{@crystalFrameworkConfiguration.monitor.flushIntervalMs}")
     fun flushBuffer() {
         val snapshot = metricBuffer.drain()
         if (snapshot.isEmpty()) return
