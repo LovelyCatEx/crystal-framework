@@ -16,10 +16,9 @@ class SystemRbacRegistry {
             return
         }
 
-        permissions.putIfAbsent(
-            permissionName,
-            permission.copy(name = permissionName)
-        )
+        if (permissions.putIfAbsent(permissionName, permission.copy(name = permissionName)) != null) {
+            throw IllegalStateException("SystemRbacRegistry: duplicate permission name '$permissionName'")
+        }
     }
 
     fun permissions(permissions: Iterable<SystemRbacPermissionDeclaration>) {
@@ -32,10 +31,9 @@ class SystemRbacRegistry {
             return
         }
 
-        roles.putIfAbsent(
-            roleName,
-            role.copy(name = roleName)
-        )
+        if (roles.putIfAbsent(roleName, role.copy(name = roleName)) != null) {
+            throw IllegalStateException("SystemRbacRegistry: duplicate role name '$roleName'")
+        }
     }
 
     fun roles(roles: Iterable<SystemRoleDeclaration>) {
