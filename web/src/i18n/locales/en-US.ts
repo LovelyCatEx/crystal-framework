@@ -1919,6 +1919,7 @@ export const enUS: I18nRules = {
 
     columns: {
       fileResource: {
+        preview: 'Preview',
         fileInfo: 'File Info',
         fileSize: 'Size',
         md5: 'MD5',

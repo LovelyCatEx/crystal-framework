@@ -34,6 +34,7 @@ export const zhThemeConfig: DefaultTheme.Config = {
                 { text: 'JSON 编辑器', link: '/develop/frontend/components/json-editor' },
                 { text: 'HTML 编辑器', link: '/develop/frontend/components/html-editor' },
                 { text: '头像资源', link: '/develop/frontend/components/avatar-resource' },
+                { text: '图片资源', link: '/develop/frontend/components/image-resource' },
                 { text: '可复制气泡', link: '/develop/frontend/components/copyable-tooltip' },
               ]
             },

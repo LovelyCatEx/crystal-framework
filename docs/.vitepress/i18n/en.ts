@@ -34,6 +34,7 @@ export const enThemeConfig: DefaultTheme.Config = {
                 { text: 'JSON Editor', link: '/en/develop/frontend/components/json-editor' },
                 { text: 'HTML Editor', link: '/en/develop/frontend/components/html-editor' },
                 { text: 'Avatar Resource', link: '/en/develop/frontend/components/avatar-resource' },
+                { text: 'Image Resource', link: '/en/develop/frontend/components/image-resource' },
                 { text: 'Copyable Tooltip', link: '/en/develop/frontend/components/copyable-tooltip' },
               ]
             },

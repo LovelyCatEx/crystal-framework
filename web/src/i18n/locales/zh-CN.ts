@@ -1916,6 +1916,7 @@ export const zhCN: I18nRules = {
 
     columns: {
       fileResource: {
+        preview: '预览',
         fileInfo: '文件信息',
         fileSize: '大小',
         md5: 'MD5',
