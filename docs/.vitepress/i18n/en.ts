@@ -37,6 +37,7 @@ export const enThemeConfig: DefaultTheme.Config = {
                 { text: 'Copyable Tooltip', link: '/en/develop/frontend/components/copyable-tooltip' },
               ]
             },
+            { text: 'i18n', link: '/en/develop/frontend/i18n' },
           ]
         },
         {

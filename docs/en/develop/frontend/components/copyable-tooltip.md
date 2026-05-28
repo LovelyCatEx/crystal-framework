@@ -24,3 +24,7 @@ import { CopyableToolTip } from '@/components/CopyableToolTip.tsx';
 |------|------|-------------|
 | `title` | `string \| ReactNode` | Tooltip text, also used as the copy content |
 | `children` | `ReactNode` | The trigger element wrapped by the tooltip |
+
+::: tip i18n
+Text labels in the examples should use i18n keys under the appropriate page or component namespace. See [i18n](../i18n).
+:::

@@ -61,3 +61,7 @@ interface ContextMenuDivider {
 - `ctrl` / `alt` / `shift` / `meta` — 对应各修饰键
 - 最后一段为按键名，匹配 `e.key` 或 `e.code`（如 `w`、`escape`、`delete`）
 - 输入框内不触发快捷键
+
+::: tip 国际化
+示例中菜单项的 `label` 文字应使用 i18n key。菜单相关 key 放在 `components.contextMenu` 下，详见[国际化](../i18n)。
+:::

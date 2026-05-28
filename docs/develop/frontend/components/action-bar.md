@@ -23,3 +23,7 @@ import { ActionBarComponent } from '@/components/ActionBarComponent.tsx';
 | `title` | `string` | 主标题 |
 | `subtitle` | `string` | 副标题，可选 |
 | `titleActions` | `ReactNode` | 标题右侧的操作区，放置按钮等控件 |
+
+::: tip 国际化
+示例中的页面标题和按钮文字应使用 i18n key。页面级 key 放在 `pages.{页面名}` 下（如 `pages.userManager.title`），详见[国际化](../i18n)。
+:::

@@ -61,3 +61,7 @@ interface ContextMenuDivider {
 - `ctrl` / `alt` / `shift` / `meta` — corresponding modifier keys
 - The last segment is the key name, matched against `e.key` or `e.code` (e.g. `w`, `escape`, `delete`)
 - Shortcuts are suppressed inside input fields
+
+::: tip i18n
+Menu item `label` text in the examples should use i18n keys under `components.contextMenu`. See [i18n](../i18n).
+:::

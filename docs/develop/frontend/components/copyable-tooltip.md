@@ -24,3 +24,7 @@ import { CopyableToolTip } from '@/components/CopyableToolTip.tsx';
 |------|------|------|
 | `title` | `string \| ReactNode` | 提示文字，也作为复制内容 |
 | `children` | `ReactNode` | 被包裹的触发元素 |
+
+::: tip 国际化
+示例中的文字标签应使用 i18n key，key 放在所属页面或组件的命名空间下，详见[国际化](../i18n)。
+:::

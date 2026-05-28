@@ -37,6 +37,7 @@ export const zhThemeConfig: DefaultTheme.Config = {
                 { text: '可复制气泡', link: '/develop/frontend/components/copyable-tooltip' },
               ]
             },
+            { text: '国际化', link: '/develop/frontend/i18n' },
           ]
         },
         {

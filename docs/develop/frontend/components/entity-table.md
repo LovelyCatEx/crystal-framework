@@ -323,3 +323,7 @@ tableRef.current?.clearSelection();
 | `queryParamsSync` | `(params: object) => void` | — | URL 同步回调 |
 | `initialQueryValues` | `object` | — | URL 初始值 |
 | `children` | `ReactNode` | — | 表格下方的内容 |
+
+::: tip 国际化 Key 命名
+列标题 key 统一使用 `components.columns.{实体名}.{字段}` 格式，如 `components.columns.user.nickname`。详见[国际化](../i18n)。
+:::
