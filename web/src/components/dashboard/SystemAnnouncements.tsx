@@ -55,11 +55,14 @@ export function SystemAnnouncements() {
                     className="py-8"
                 />
             ) : (
-                <div className="divide-y">
-                    {announcements.map((a) => (
+                <div>
+                    {announcements.map((a, index) => (
                         <div
                             key={a.id}
-                            className="py-4 px-6 cursor-pointer transition-colors hover:bg-gray-50"
+                            className="py-4 px-6 cursor-pointer transition-colors"
+                            style={index < announcements.length - 1 ? { borderBottom: `1px solid ${token.colorBorderSecondary}` } : undefined}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = token.controlItemBgHover; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; }}
                             onClick={() => {
                                 Modal.info({
                                     title: a.title,

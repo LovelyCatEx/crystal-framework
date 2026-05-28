@@ -105,8 +105,8 @@ export default function SystemMonitorPage() {
                 title={
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-2">
-                            <LineChartOutlined style={{fontSize: 18, color: token.colorTextHeading}} />
-                            <span style={{fontSize: 16, fontWeight: 600, color: token.colorTextHeading}}>
+                            <LineChartOutlined style={{ color: token.colorTextHeading }} />
+                            <span className="text-sm font-bold" style={{ color: token.colorTextHeading }}>
                                 {t('pages.systemMonitor.chartTitle')}
                             </span>
                             <Switch size="small" checked={syncEnabled} onChange={setSyncEnabled} />
@@ -143,8 +143,8 @@ export default function SystemMonitorPage() {
                 <Row gutter={[12, 12]}>
                     {METRICS.map(m => (
                         <Col {...(colSpan ? {xs: 24, sm: colSpan, md: colSpan, lg: colSpan, xxl: colSpan} : {xs: 24, sm: 24, lg: 12, xxl: 8})} key={m.type}>
-                            <div className="p-3 rounded-xl" style={{background: "#fafafa"}}>
-                                <div style={{fontSize: 13, fontWeight: 600, marginBottom: 4, color: token.colorTextSecondary}}>
+                            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-200/5">
+                                <div className="text-sm font-medium mb-4" style={{ color: token.colorTextSecondary }}>
                                     {t(m.labelKey)}
                                 </div>
                                 <MetricChart config={m} data={dataMap[m.type] ?? []} duration={duration} />

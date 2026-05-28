@@ -63,6 +63,22 @@ export function MetricChart({config, data, duration}: { config: MetricChartConfi
             .map(p => [Number(p.timestamp), Number(p.value)] as [number, number])
             .filter(([, v]) => !isNaN(v))
             .sort((a, b) => a[0] - b[0]);
+
+        if (source.length > 2) {
+            const interval = (source[source.length - 1][0] - source[0][0]) / source.length;
+            const threshold = Math.max(interval * 3, 10000);
+            const padded: [number, number | null][] = [[source[0][0], source[0][1]]];
+            for (let i = 1; i < source.length; i++) {
+                const gap = source[i][0] - source[i - 1][0];
+                if (gap > threshold) {
+                    padded.push([source[i - 1][0] + 1, null]);
+                }
+                padded.push([source[i][0], source[i][1]]);
+            }
+            chartRef.current.setOption({dataset: {source: padded}});
+            return;
+        }
+
         chartRef.current.setOption({dataset: {source}});
     }, [data]);
 
