@@ -3,6 +3,16 @@
 本文档为 Claude Code（claude.ai/code）在此仓库中工作时提供指导。
 
 **你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
+**你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
+**你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
+
+**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
+**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
+**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
+
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
+**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
 
 正确的例子:
 
@@ -303,12 +313,15 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 | `readonlyMode`          | `boolean`                                            | 只读模式（隐藏增删改按钮）                                    |
 | `showRowActions`        | `boolean`                                            | 是否显示行操作按钮（编辑/删除），默认 `true`，只读模式自动隐藏              |
 | `showActionBar`         | `boolean`                                            | 是否显示顶栏，默认 `true`                                 |
-| `tableActions`          | `array`                                              | 表格筛选条件（每个元素含 label、children、queryParamsProvider） |
+| `tableActions`          | `array`                                              | 表格过滤栏操作项（每项含 label、children） |
+| `searchKeywords`        | `string[]`                                           | 全局搜索框的搜索字段，不传则不显示搜索框                               |
+| `simpleFilters`         | `array`                                              | 行内过滤条件，配合 `useManagerQueryParams` 的 `filters` 使用       |
+| `filterableFields`      | `FilterableField[]`                                  | FilterBuilder 可用字段，不传则不显示高级筛选                        |
 | `editModalFormChildren` | `ReactNode \| ((ENTITY) => ReactNode)`               | 新增/编辑弹窗的表单项                                      |
 | `showTimeRangeFilter`   | `boolean`                                            | 是否显示时间范围筛选器，默认 `true`                            |
 | `hideRecordTimeColumn`  | `boolean`                                            | 是否隐藏表格末尾自动追加的"记录时间"列，默认 `false`                  |
 
-注意 `tableActions` 中的 `queryParamsProvider` 会在查询时调用，返回值会和 `query` 的 DTO 合并。筛选条件变化时需手动触发 `pageRef.current.refreshData({resetPage: true})`（见现有页面示例）。
+筛选条件变化时需手动触发 `pageRef.current.refreshData({resetPage: true})`（见现有页面示例）。
 
 #### 插件
 

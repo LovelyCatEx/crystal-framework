@@ -14,19 +14,36 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function OAuthAccountManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { platform: 'number' }
+        schema: { platform: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const columns = useOAuthAccountTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.platform]);
+    }, [filters.platform, filters.id]);
 
     const filterableFields = [
-        { field: 'platform',      type: 'number' as const, label: t('pages.oauthAccountManager.filter.platform') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+        { field: 'id', type: 'number' as const, label: t('pages.oauthAccountManager.filter.id') },
+        {
+            field: 'platform',
+            type: 'number' as const,
+            label: t('pages.oauthAccountManager.filter.platform'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.oauthAccountManager.filter.all')}
+                    options={[
+                        { value: '0', label: 'Github' },
+                        { value: '1', label: 'Google' },
+                        { value: '2', label: 'QQ' },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
     ];
 
     return (
@@ -36,10 +53,12 @@ export default function OAuthAccountManagerPage() {
             title={t('pages.oauthAccountManager.title')}
             subtitle={t('pages.oauthAccountManager.subtitle')}
             columns={columns}
+            searchKeywords={['identifier', 'nickname', 'email']}
             filterableFields={filterableFields}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'platform', operator: 'eq', value: filters.platform },
             ]}
             editModalFormChildren={
@@ -106,7 +125,18 @@ export default function OAuthAccountManagerPage() {
             create={async (props) => {
                 return (await OAuthAccountManagerController.create(props as ManagerCreateOAuthAccountDTO)).data!;
             }}
-            tablePrefixActions={[
+            tableActions={[
+                {
+                    label: <span>{t('pages.oauthAccountManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.oauthAccountManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.oauthAccountManager.filter.platform')}</span>,
                     children: <Select

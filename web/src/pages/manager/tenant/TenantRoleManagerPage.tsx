@@ -17,6 +17,7 @@ import {getTenantRolePermissions, setTenantRolePermissions} from "@/api/tenant/r
 import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
 import {type TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
 
 interface TransferItem {
@@ -32,6 +33,11 @@ export default function TenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     // Permission assignment modal states
     const [allPermissions, setAllPermissions] = useState<TenantPermission[]>([]);
@@ -134,6 +140,25 @@ export default function TenantRoleManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={columns}
+                    searchKeywords={['name', 'description']}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'id', operator: 'eq', value: filters.id },
+                    ]}
+                    tableActions={[
+                        {
+                            label: <span>{t('pages.tenantRoleManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.tenantRoleManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                    ]}
                     editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>

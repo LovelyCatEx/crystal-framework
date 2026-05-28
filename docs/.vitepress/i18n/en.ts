@@ -23,6 +23,20 @@ export const enThemeConfig: DefaultTheme.Config = {
                 { text: 'Custom Manager', link: '/en/develop/frontend/manager/custom-manager' },
               ]
             },
+            {
+              text: 'Components',
+              items: [
+                { text: 'Data Table', link: '/en/develop/frontend/components/entity-table' },
+                { text: 'Page Title Bar', link: '/en/develop/frontend/components/action-bar' },
+                { text: 'Standard Card', link: '/en/develop/frontend/components/standard-card' },
+                { text: 'Context Menu', link: '/en/develop/frontend/components/context-menu' },
+                { text: 'Image Cropper', link: '/en/develop/frontend/components/image-cropper' },
+                { text: 'JSON Editor', link: '/en/develop/frontend/components/json-editor' },
+                { text: 'HTML Editor', link: '/en/develop/frontend/components/html-editor' },
+                { text: 'Avatar Resource', link: '/en/develop/frontend/components/avatar-resource' },
+                { text: 'Copyable Tooltip', link: '/en/develop/frontend/components/copyable-tooltip' },
+              ]
+            },
           ]
         },
         {

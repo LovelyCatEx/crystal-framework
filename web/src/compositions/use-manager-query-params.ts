@@ -97,10 +97,6 @@ export interface UseManagerQueryParamsReturn<S extends FilterSchema = FilterSche
     /**
      * Typed filter values derived from the schema.
      * Only available when `schema` is provided.
-     * Pass this directly to ManagerPageContainer/EntityTable as `extraQueryParams`.
-     *
-     * @example
-     * <ManagerPageContainer extraQueryParams={filters} ... />
      */
     filters: FiltersFromSchema<S>;
 
@@ -149,15 +145,12 @@ function parseValue(raw: string, type: FilterFieldType): string | number | boole
  * // Use filters directly in controls
  * <Input defaultValue={filters.userId} onChange={(e) => setFilter('userId', e.target.value || undefined)} />
  *
- * // Pass to ManagerPageContainer — no queryParamsProvider needed
+ * // Pass to ManagerPageContainer
  * <ManagerPageContainer
- *     extraQueryParams={filters}
  *     queryParamsSync={syncToUrl}
  *     initialQueryValues={initialQueryValues}
  * />
  * ```
- *
- * **Manual mode (legacy / advanced)** — manage your own state and use queryParamsProvider:
  * ```tsx
  * const { getInitialParam, syncToUrl, initialQueryValues } = useManagerQueryParams();
  * const [filterUserId, setFilterUserId] = useState(getInitialParam('userId'));
@@ -179,10 +172,14 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
     if (initialParamsRef.current === null) {
         const params: Record<string, string> = {};
         const queryValues: typeof initialQueryValuesRef.current = {};
+        const schemaKeys = schema ? new Set(Object.keys(schema)) : null;
 
         searchParams.forEach((value, key) => {
+            // Only capture non-reserved keys if they are declared in the schema
             if (!RESERVED_KEYS.includes(key)) {
-                params[key] = value;
+                if (schemaKeys === null || schemaKeys.has(key)) {
+                    params[key] = value;
+                }
                 return;
             }
             if (key === 'page') {
@@ -254,9 +251,13 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
     const syncToUrl = useCallback((params: Record<string, unknown>) => {
         if (!enabled) return;
 
-        const newSearchParams = new URLSearchParams();
+        // Start from CURRENT URL so non-managed params (e.g. tenantId) are preserved
+        const newSearchParams = new URLSearchParams(window.location.search);
         for (const [key, value] of Object.entries(params)) {
-            if (value === undefined || value === null || value === '') continue;
+            if (value === undefined || value === null || value === '') {
+                newSearchParams.delete(key);
+                continue;
+            }
             if (typeof value === 'object') {
                 try {
                     newSearchParams.set(key, btoa(JSON.stringify(value)));
@@ -268,13 +269,23 @@ export function useManagerQueryParams<S extends FilterSchema = FilterSchema>(
             }
         }
 
+        // Clean up schema-declared keys that are absent from the current params
+        // This ensures cleared filters are removed from the URL
+        if (schema) {
+            for (const schemaKey of Object.keys(schema)) {
+                if (!(schemaKey in params)) {
+                    newSearchParams.delete(schemaKey);
+                }
+            }
+        }
+
         // Skip if nothing changed — prevents re-render loops
         const newStr = newSearchParams.toString();
         const currentStr = new URLSearchParams(window.location.search).toString();
         if (newStr === currentStr) return;
 
         setSearchParams(newSearchParams, { replace: true });
-    }, [enabled, setSearchParams]);
+    }, [enabled, setSearchParams, schema]);
 
     const initialQueryValues = useMemo(() => initialQueryValuesRef.current ?? {}, []);
 

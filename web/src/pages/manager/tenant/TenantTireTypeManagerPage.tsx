@@ -1,18 +1,24 @@
 import {Col, Form, Input, Row} from "antd";
+import {useEffect, useRef} from "react";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantTireTypeDTO,
     type ManagerReadTenantTireTypeDTO,
     TenantTireTypeManagerController
 } from "@/api/tenant/tenant-tire-type.api.ts";
-import {useRef} from "react";
 import {useTenantTireTypeTableColumns} from "@/components/columns/TenantTireTypeEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function TenantTireTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const {t} = useTranslation();
     const columns = useTenantTireTypeTableColumns();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     return (
         <ManagerPageContainer
@@ -21,6 +27,25 @@ export default function TenantTireTypeManagerPage() {
             title={t('pages.tenantTireTypeManager.title')}
             subtitle={t('pages.tenantTireTypeManager.subtitle')}
             columns={columns}
+            searchKeywords={['name', 'description']}
+            queryParamsSync={syncToUrl}
+            initialQueryValues={initialQueryValues}
+            simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
+            ]}
+            tableActions={[
+                {
+                    label: <span>{t('pages.tenantTireTypeManager.filter.id')}</span>,
+                    children: <Input
+                        className="rounded-xl"
+                        placeholder={t('pages.tenantTireTypeManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
+            ]}
             editModalFormChildren={
                 <>
                     <Row gutter={24}>

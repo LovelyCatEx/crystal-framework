@@ -1,3 +1,5 @@
+import type {ReactNode} from 'react';
+
 /**
  * Developer-facing: what fields the user can filter on.
  */
@@ -6,6 +8,11 @@ export interface FilterableField {
   label: string;
   type: 'text' | 'number' | 'select' | 'date' | 'dateTime';
   options?: { label: string; value: string | number }[];
+  /**
+   * Custom value input renderer.
+   * Overrides the default input for this field's type.
+   */
+  renderValue?: (ctx: { value: unknown; onChange: (v: unknown) => void; operator: string | null }) => ReactNode;
 }
 
 /** Operator metadata used to render the operator selector. */
@@ -173,7 +180,7 @@ export function toGroupNode(group: FilterGroupState): GroupNode {
         if (child.field && child.operator) {
           const cond: ConditionNode = { type: 'condition', field: child.field, operator: child.operator };
           if (child.operator === 'in' && Array.isArray(child.value)) {
-            cond.values = child.value;
+            cond.values = child.value.filter(v => v !== null && v !== undefined && v !== '');
           } else {
             cond.value = child.value;
           }
@@ -210,7 +217,10 @@ export function hasMissingValues(group: FilterGroupState): boolean {
       return hasMissingValues(child);
     }
     if (!child.field || !child.operator) return true;          // field or operator not set
-    if (child.operator === 'in') return !Array.isArray(child.value) || child.value.length === 0;
+    if (child.operator === 'in') {
+      if (!Array.isArray(child.value)) return true;
+      return child.value.filter(v => v !== null && v !== undefined && v !== '').length === 0;
+    }
     return child.value === null || child.value === undefined || child.value === '';  // value not filled
   });
 }

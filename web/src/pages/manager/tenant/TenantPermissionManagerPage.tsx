@@ -19,7 +19,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { type: 'number' }
+        schema: { type: 'number', id: 'string' }
     });
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
     const {t} = useTranslation();
@@ -27,7 +27,7 @@ export default function TenantPermissionManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.type]);
+    }, [filters.type, filters.id]);
 
     const typeOptions = [
         { label: getTenantPermissionType(TenantPermissionType.ACTION), value: TenantPermissionType.ACTION },
@@ -129,17 +129,43 @@ export default function TenantPermissionManagerPage() {
                 query={async (props) => {
                     return (await controller.query(props)).data!
                 }}
+                searchKeywords={['name', 'description', 'path']}
                 filterableFields={[
-                    { field: 'type',          type: 'number' as const, label: t('pages.tenantPermissionManager.filter.type') },
-                    { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                    { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-                ]}
+                    { field: 'id', type: 'number' as const, label: t('pages.tenantPermissionManager.filter.id') },
+                    {
+                        field: 'type',
+                        type: 'number' as const,
+                        label: t('pages.tenantPermissionManager.filter.type'),
+                        renderValue: ({ value, onChange }) => (
+                            <Select
+                                className="flex-1"
+                                value={value !== undefined ? String(value) : undefined}
+                                allowClear
+                                placeholder={t('pages.tenantPermissionManager.filter.all')}
+                                options={typeOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                                onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                            />
+                        ),
+                    },
+                                        ]}
                 queryParamsSync={syncToUrl}
                 initialQueryValues={initialQueryValues}
                 simpleFilters={[
+                    { field: 'id', operator: 'eq', value: filters.id },
                     { field: 'type', operator: 'eq', value: filters.type },
                 ]}
                 tableActions={[
+                    {
+                        label: <span>{t('pages.tenantPermissionManager.filter.id')}</span>,
+                        children: <Input
+                            style={{ width: 160 }}
+                            placeholder={t('pages.tenantPermissionManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                        />,
+                    },
                     {
                         label: <span>{t('pages.tenantPermissionManager.filter.type')}</span>,
                         children: <Select

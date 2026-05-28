@@ -16,6 +16,7 @@ export default function AuditLogManagerPage() {
             username: 'string',
             path: 'string',
             remoteIp: 'string',
+            id: 'string',
         }
     });
     const {t} = useTranslation();
@@ -23,16 +24,34 @@ export default function AuditLogManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.action, filters.userId, filters.username, filters.path, filters.remoteIp]);
+    }, [filters.action, filters.userId, filters.username, filters.path, filters.remoteIp, filters.id]);
 
     const filterableFields = [
+        { field: 'id',            type: 'number' as const, label: t('pages.auditLogManager.filter.id') },
         { field: 'user_id',       type: 'number' as const, label: t('pages.auditLogManager.filter.userId') },
         { field: 'username',      type: 'text'   as const, label: t('pages.auditLogManager.filter.username') },
-        { field: 'action',        type: 'number' as const, label: t('pages.auditLogManager.filter.action') },
+        {
+            field: 'action',
+            type: 'number' as const,
+            label: t('pages.auditLogManager.filter.action'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.auditLogManager.filter.all')}
+                    options={[
+                        { value: '1', label: t('pages.auditLogManager.actionType.create') },
+                        { value: '2', label: t('pages.auditLogManager.actionType.read') },
+                        { value: '3', label: t('pages.auditLogManager.actionType.update') },
+                        { value: '4', label: t('pages.auditLogManager.actionType.delete') },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
         { field: 'path',          type: 'text'   as const, label: t('pages.auditLogManager.filter.path') },
         { field: 'remote_ip',     type: 'text'   as const, label: t('pages.auditLogManager.filter.remoteIp') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
     ];
 
     return (
@@ -56,7 +75,8 @@ export default function AuditLogManagerPage() {
                 initialQueryValues={initialQueryValues}
                 searchKeywords={['username', 'path', 'remote_ip']}
                 simpleFilters={[
-                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId ? Number(filters.userId) : undefined },
+                    { field: 'id', operator: 'eq', value: filters.id },
+                    { field: 'user_id', urlKey: 'userId', operator: 'eq', value: filters.userId },
                     { field: 'username', operator: 'contains', value: filters.username },
                     { field: 'action', operator: 'eq', value: filters.action },
                     { field: 'path', operator: 'contains', value: filters.path },
@@ -68,7 +88,20 @@ export default function AuditLogManagerPage() {
                 delete={async () => { return null; }}
                 update={async () => { return null; }}
                 create={async () => { return null; }}
-                tablePrefixActions={[
+                tableActions={[
+                    {
+                        label: <span>{t('pages.auditLogManager.filter.id')}</span>,
+                        children: <Input
+                            style={{ width: 160 }}
+                            placeholder={t('pages.auditLogManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => {
+                                if (e.target.value === '') setFilter('id', undefined);
+                            }}
+                        />,
+                    },
                     {
                         label: <span>{t('pages.auditLogManager.filter.action')}</span>,
                         children: <Select

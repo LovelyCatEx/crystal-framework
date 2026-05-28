@@ -15,14 +15,14 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function StorageProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { type: 'number' }
+        schema: { type: 'number', id: 'string' }
     });
     const {t} = useTranslation();
     const baseColumns = useStorageProviderTableColumns();
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filters.type]);
+    }, [filters.type, filters.id]);
 
     const handleStorageProviderActiveChange = (active: boolean, row: StorageProvider) => {
         StorageProviderManagerController
@@ -48,9 +48,26 @@ export default function StorageProviderManagerPage() {
     });
 
     const filterableFields = [
-        { field: 'type',          type: 'number' as const, label: t('pages.storageProviderManager.filter.type') },
-        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
+        { field: 'id', type: 'number' as const, label: t('pages.storageProviderManager.filter.id') },
+        {
+            field: 'type',
+            type: 'number' as const,
+            label: t('pages.storageProviderManager.filter.type'),
+            renderValue: ({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) => (
+                <Select
+                    className="flex-1"
+                    value={value !== undefined ? String(value) : undefined}
+                    allowClear
+                    placeholder={t('pages.storageProviderManager.filter.all')}
+                    options={[
+                        { value: String(StorageProviderType.LOCAL_FILE_SYSTEM), label: t('pages.storageProviderManager.modal.type.localFileSystem') },
+                        { value: String(StorageProviderType.ALIYUN_OSS), label: t('pages.storageProviderManager.modal.type.aliyunOss') },
+                        { value: String(StorageProviderType.TENCENT_COS), label: t('pages.storageProviderManager.modal.type.tencentCos') },
+                    ]}
+                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                />
+            ),
+        },
     ];
 
     return (
@@ -60,10 +77,12 @@ export default function StorageProviderManagerPage() {
             title={t('pages.storageProviderManager.title')}
             subtitle={t('pages.storageProviderManager.subtitle')}
             columns={columnsWithActive}
+            searchKeywords={['name', 'base_url']}
             filterableFields={filterableFields}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type', operator: 'eq', value: filters.type },
             ]}
             editModalFormChildren={
@@ -120,7 +139,18 @@ export default function StorageProviderManagerPage() {
             create={async (props) => {
                 return (await StorageProviderManagerController.create(props as ManagerCreateStorageProviderDTO)).data!
             }}
-            tablePrefixActions={[
+            tableActions={[
+                {
+                    label: <span>{t('pages.storageProviderManager.filter.id')}</span>,
+                    children: <Input
+                        style={{ width: 160 }}
+                        placeholder={t('pages.storageProviderManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.storageProviderManager.filter.type')}</span>,
                     children: <Select

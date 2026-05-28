@@ -42,12 +42,115 @@ export default function MyEntityManagerPage() {
 }
 ```
 
-## Adding Filters
+::: tip Underlying Component
+The data table, filtering, and search features of `ManagerPageContainer` are all powered by the [Data Table](/en/develop/frontend/components/entity-table) component. To use the table independently of `ManagerPageContainer`, or to see the full props reference, check out that component's documentation.
+:::
 
-Use `useManagerQueryParams` with a `schema` to declare filter fields. Filter state is automatically synced to the URL, enabling shareable links and state restoration on refresh.
+## Global Search
+
+Pass `searchKeywords` to show a global search box in the filter bar. Enter a keyword and press Enter to search. All fields in `searchKeywords` are **OR**-combined — the record matches if any field contains the keyword.
 
 ```tsx
-import { useRef } from 'react';
+<ManagerPageContainer
+    searchKeywords={['username', 'email', 'nickname']}
+    // ...
+/>
+```
+
+**Effect**: The user types `alice` and presses Enter → the query matches records where `username`, `email`, or `nickname` contains `alice`, the table resets to page 1, and the URL syncs to `?searchKeyword=alice`.
+
+::: tip Combining with Advanced Filters
+When both `searchKeywords` and `filterableFields` are configured, an AND/OR toggle switch automatically appears in the filter bar, controlling how global search and advanced filter conditions combine.
+:::
+
+---
+
+## Adding Filters
+
+Management pages typically provide dropdowns, inputs, and other controls for users to filter data. The framework uses `useManagerQueryParams` to centrally manage filter state, automatically syncing it to the browser URL (`?status=active&userId=123`) so filters survive page refreshes and shared links.
+
+The workflow has four steps:
+
+1. **Declare a schema** — define what filters exist and their types
+2. **Read with `filters`** — use `filters.xxx` in control `defaultValue` / `value`
+3. **Write with `setFilter`** — call `setFilter('key', value)` in control `onChange` / `onPressEnter`
+4. **Sync to URL** — pass `syncToUrl` and `initialQueryValues` to `ManagerPageContainer`
+
+### Step 1: Declare the Schema
+
+```tsx
+import { useManagerQueryParams } from '@/compositions/use-manager-query-params.ts';
+
+const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
+    schema: {
+        status: 'string',   // status, text type
+        userId: 'string',   // user ID, text type
+        type: 'number',     // type, number type
+    }
+});
+```
+
+Each key in `schema` is a filter condition. `'string'` means text, `'number'` auto-converts from URL via `Number()`, `'boolean'` recognizes `'true'` / `'false'`.
+
+**Effect**: After declaration, `filters` gains `.status`, `.userId`, and `.type` fields, all initially `undefined` (meaning "no filter applied").
+
+### Step 2: Read Values with `filters`
+
+`filters` is a reactive object holding the current value of each filter condition. When the user interacts with a control → `setFilter` updates → `filters` changes immediately.
+
+```tsx
+// filters.status is currently 'active', 'disabled', or undefined (all)
+console.log(filters.status);  // => 'active'
+
+// filters.userId is the user's input text, or undefined (not entered)
+console.log(filters.userId);  // => '123'
+```
+
+### Step 3: Update Values with `setFilter`
+
+`setFilter(key, value)` updates a filter field. **Pass `undefined` as the value to clear it (no filtering).**
+
+```tsx
+// Set status to 'active'
+setFilter('status', 'active');
+
+// Clear the status condition (back to "all")
+setFilter('status', undefined);
+
+// Set userId from input value; treat empty string as clear
+setFilter('userId', e.target.value || undefined);
+```
+
+Typical patterns: Select "All" → pass `undefined`; Input cleared → pass `undefined`.
+
+### Step 4: Sync to URL and Trigger Refresh
+
+```tsx
+// 1. Pass syncToUrl / initialQueryValues to the container
+<ManagerPageContainer
+    queryParamsSync={syncToUrl}
+    initialQueryValues={initialQueryValues}
+    simpleFilters={[
+        // Map filters values to query conditions sent to the backend
+        { field: 'status',  value: filters.status },
+        { field: 'user_id', value: filters.userId ? Number(filters.userId) : undefined },
+        { field: 'type',    value: filters.type },
+    ]}
+    // ...
+/>
+
+// 2. Watch filters changes and trigger refresh
+useEffect(() => {
+    pageRef.current?.refreshData({ resetPage: true });
+}, [filters.status, filters.userId, filters.type]);
+```
+
+**Effect**: The URL updates to `?status=active&userId=123` automatically, and the table resets to page 1. Share the URL or refresh the page — filter state is preserved.
+
+### Complete Example
+
+```tsx
+import { useRef, useEffect } from 'react';
 import { Input, Select } from 'antd';
 import { ManagerPageContainer, type ManagerPageContainerRef } from '@/components/ManagerPageContainer.tsx';
 import { useManagerQueryParams } from '@/compositions/use-manager-query-params.ts';
@@ -59,24 +162,30 @@ export default function MyEntityManagerPage() {
         schema: {
             status: 'string',
             userId: 'string',
-            type: 'number',
         }
     });
 
-    // Reset to page 1 and refresh whenever any filter changes
     useEffect(() => {
         pageRef.current?.refreshData({ resetPage: true });
-    }, [filters.status, filters.userId, filters.type]);
+    }, [filters.status, filters.userId]);
 
     return (
         <>
-            <ActionBarComponent ... />
+            <ActionBarComponent title="Entity Management" subtitle="Manage all entities" />
             <ManagerPageContainer
                 ref={pageRef}
-                // ...other required props
+                entityName="Entity"
+                title=""
+                subtitle=""
+                showActionBar={false}
+                columns={columns}
+                editModalFormChildren={<MyForm />}
                 queryParamsSync={syncToUrl}
                 initialQueryValues={initialQueryValues}
-                extraQueryParams={filters}
+                simpleFilters={[
+                    { field: 'status',  value: filters.status },
+                    { field: 'user_id', value: filters.userId ? Number(filters.userId) : undefined },
+                ]}
                 tableActions={[
                     {
                         label: <span>Status</span>,
@@ -104,13 +213,19 @@ export default function MyEntityManagerPage() {
                         ),
                     },
                 ]}
+                query={async (props) => (await MyEntityController.query(props)).data!}
+                delete={async (props) => MyEntityController.delete(props)}
+                update={async (props) => MyEntityController.update(props)}
+                create={async (props) => MyEntityController.create(props)}
             />
         </>
     );
 }
 ```
 
-### useManagerQueryParams Schema Field Types
+### useManagerQueryParams API
+
+**Parameter** — `schema` field types:
 
 | Type value | TypeScript type | Notes |
 |------------|----------------|-------|
@@ -118,19 +233,96 @@ export default function MyEntityManagerPage() {
 | `'number'` | `number` | Automatically converted via `Number()` when read from URL |
 | `'boolean'` | `boolean` | Recognizes `'true'` / `'false'` strings from URL |
 
-### useManagerQueryParams Return Values
+**Return values**:
 
 | Return value | Type | Description |
 |--------------|------|-------------|
-| `filters` | `FiltersFromSchema<S>` | Current filter values object, all fields optional |
-| `setFilter(key, value)` | `function` | Update a single filter field; pass `undefined` to clear it |
-| `syncToUrl` | `function` | Pass to `queryParamsSync` — syncs query params to URL after each query |
-| `initialQueryValues` | `object` | Pass to `initialQueryValues` — restores pagination and search state from URL |
-| `getInitialParam(key)` | `function` | Manual mode: read the initial string value of a URL param |
+| `filters` | `{ [K in keyof S]: S[K] \| undefined }` | Current filter values. Field names match the schema. All fields default to `undefined` |
+| `setFilter(key, value)` | `(key: string, value: any \| undefined) => void` | Update a filter field. `key` must be a field declared in the schema. Pass `undefined` as `value` to clear the condition |
+| `syncToUrl` | `(params: object) => void` | Pass to `ManagerPageContainer`'s `queryParamsSync`. Syncs query params to URL after each query |
+| `initialQueryValues` | `object` | Pass to `ManagerPageContainer`'s `initialQueryValues`. Restores state from URL on page load |
+| `getInitialParam(key)` | `(key: string) => string` | Read the initial string value of a URL param (no type conversion) |
+
+---
+
+## Advanced Filtering
+
+The `ManagerPageContainer` has built-in `FilterBuilder` support for advanced conditional search. Pass `filterableFields` to enable a visual query builder in the filter bar, allowing users to freely compose AND/OR conditions across multiple fields with various operators.
+
+```tsx
+<ManagerPageContainer
+    filterableFields={[
+        { field: 'username',  type: 'text',   label: t('pages.userManager.filter.username') },
+        { field: 'email',     type: 'text',   label: t('pages.userManager.filter.email') },
+        { field: 'nickname',  type: 'text',   label: t('pages.userManager.filter.nickname') },
+    ]}
+    searchKeywords={['username', 'email', 'nickname']}
+    // ...
+/>
+```
+
+When both `searchKeywords` (global search) and `filterableFields` (advanced filter) are configured, an AND/OR toggle switch automatically appears in the filter bar to control how the two groups combine.
+
+### FilterableField Types & Operators
+
+| `type` | Available Operators |
+|--------|--------------------|
+| `text` | eq, ne, contains, like, not_contains, is_null, is_not_null |
+| `number` | eq, ne, gt, gte, lt, lte, is_null, is_not_null |
+| `select` | eq, ne, is_null, is_not_null |
+| `date` | eq, ne, gt, gte, lt, lte, is_null, is_not_null |
+| `dateTime` | eq, ne, gt, gte, lt, lte, is_null, is_not_null |
+
+### Operator Reference
+
+| Operator | Meaning | Description |
+|----------|---------|-------------|
+| `eq` | Equals | Exact match |
+| `ne` | Not Equals | Exclude match |
+| `gt` | Greater Than | Value greater than specified |
+| `gte` | Greater Than or Equal | Value greater than or equal to specified |
+| `lt` | Less Than | Value less than specified |
+| `lte` | Less Than or Equal | Value less than or equal to specified |
+| `contains` | Contains | String contains substring |
+| `not_contains` | Not Contains | String does not contain substring |
+| `like` | Like | SQL LIKE syntax, supports `%` wildcard |
+| `is_null` | Is Null | Field value is NULL |
+| `is_not_null` | Is Not Null | Field value is not NULL |
+
+`FilterableField` structure:
+
+```ts
+interface FilterableField {
+    field: string;                // Data field name
+    label: string;                // Human-readable field label
+    type: 'text' | 'number' | 'select' | 'date' | 'dateTime';
+    options?: { label: string; value: string | number }[];  // select-type only, dropdown options
+    renderValue?: (ctx: {        // Custom value input control
+        value: unknown;
+        onChange: (v: unknown) => void;
+        operator: string | null;
+    }) => ReactNode;
+}
+```
+
+::: tip
+Built-in `created_time` and `modified_time` fields are automatically appended and do not need to be manually added.
+:::
 
 ---
 
 ## Props Reference
+
+### Display Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `entityName` | `string` | — | Entity name used in modal titles and operation messages |
+| `title` | `string` | — | Title for the built-in ActionBar (only when `showActionBar` is `true`) |
+| `subtitle` | `string` | — | Subtitle for the built-in ActionBar |
+| `columns` | `EntityTableColumns<ENTITY>` | — | Table column definitions, typically returned by a `useXxxColumns()` hook |
+
+---
 
 ### Data Operation Props
 
@@ -153,17 +345,6 @@ create={async () => null}
 
 ---
 
-### Display Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `entityName` | `string` | — | Entity name used in modal titles and operation messages |
-| `title` | `string` | — | Title for the built-in ActionBar (only when `showActionBar` is `true`) |
-| `subtitle` | `string` | — | Subtitle for the built-in ActionBar |
-| `columns` | `EntityTableColumns<ENTITY>` | — | Table column definitions, typically returned by a `useXxxColumns()` hook |
-
----
-
 ### Visibility Control Props
 
 | Prop | Type | Default | Description |
@@ -171,7 +352,7 @@ create={async () => null}
 | `showActionBar` | `boolean` | `true` | Whether to show the built-in ActionBar (with the create button). Usually set to `false` when placing `ActionBarComponent` outside the container |
 | `readonlyMode` | `boolean` | `false` | Read-only mode: hides create button, row edit/delete buttons, and disables batch selection |
 | `showRowActions` | `boolean` | `true` | Whether to show per-row edit/delete action buttons |
-| `showTimeRangeFilter` | `boolean` | `true` | Whether to show the built-in time range picker in the filter bar |
+| `showTimeRangeFilter` | `boolean` | `true` | Whether to show the built-in time range picker. See [Filter Bar Props](#filter-bar-props) |
 | `hideRecordTimeColumn` | `boolean` | `false` | Whether to hide the "Record Time" column that is automatically appended to the table |
 
 ---
@@ -246,7 +427,6 @@ editModalFormChildren={(editingItem) => (
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `extraQueryParams` | `Record<string, unknown>` | Extra query params merged into every request. Use with `useManagerQueryParams({ schema }).filters` — no `queryParamsProvider` needed on each action |
 | `queryParamsSync` | `(params: Record<string, unknown>) => void` | Called after each query to sync params to the URL. Pass `syncToUrl` from `useManagerQueryParams()` |
 | `initialQueryValues` | `object` | Initial query values to restore pagination, search keyword, and time range from URL. Pass `initialQueryValues` from `useManagerQueryParams()` |
 
@@ -256,8 +436,12 @@ editModalFormChildren={(editingItem) => (
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `tableActions` | `TableAction[]` | Filter bar items on the right side. Each item has `label`, `children`, and an optional `queryParamsProvider` |
-| `tablePrefixActions` | `TableAction[]` | Filter bar items on the left side. Same structure as `tableActions`. The built-in batch operation selector is prepended here automatically |
+| `tableActions` | `TableAction[]` | Filter bar items rendered after the search box. Each item has `label` and `children`. In non-readonly mode, the built-in batch operation selector is prepended automatically |
+| `tablePrefixActions` | `TableAction[]` | Filter bar items rendered before the search box. Same structure as `tableActions` |
+| `searchKeywords` | `string[]` | Fields used by the global search box (OR-combined). Search box is hidden when omitted |
+| `simpleFilters` | `SimpleFilter[]` | Inline filter conditions AND-combined into every query. Use with `filters` from `useManagerQueryParams` |
+| `filterableFields` | `FilterableField[]` | Fields available in the FilterBuilder. FilterBuilder is hidden when omitted |
+| `showTimeRangeFilter` | `boolean` | Whether to show the built-in time range picker (createdTime range), default `true` |
 
 `TableAction` structure:
 
@@ -265,14 +449,27 @@ editModalFormChildren={(editingItem) => (
 {
     label: ReactNode;           // Label text above the control
     children: ReactNode;        // The actual control (Input, Select, etc.)
-    queryParamsProvider?: () => object;  // Optional: returns query params for this control
 }
 ```
 
-::: tip queryParamsProvider vs extraQueryParams
-- `extraQueryParams` (recommended): Use with `useManagerQueryParams({ schema })`. Filter state is managed centrally and synced to URL automatically — minimal boilerplate.
-- `queryParamsProvider`: Suitable when URL sync is not needed, or when a field requires special transformation. Both approaches can coexist; `queryParamsProvider` takes higher priority.
+`SimpleFilter` structure:
+
+```ts
+{
+    field: string;              // Query field name
+    operator?: string;          // Comparison operator, default "contains"
+    value: unknown;             // Filter value, ignored when undefined/null/''
+    urlKey?: string;            // URL param name, defaults to `field`
+}
+```
+
+::: tip SimpleFilter Notes
+- All `simpleFilters` are **AND**-combined — every condition must match.
+- `operator` defaults to `"contains"` (substring match). For numeric/enum fields, pass `"eq"` explicitly.
+- When `value` is `undefined`, `null`, or an empty string, that filter is silently skipped.
+- `urlKey` controls the URL param name. When omitted, the URL param name equals `field`. Use it when the field name and the desired URL key differ (e.g. `field: 'user_id'`, `urlKey: 'userId'`).
 :::
+```
 
 ---
 

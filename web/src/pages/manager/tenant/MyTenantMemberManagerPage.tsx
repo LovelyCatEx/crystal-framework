@@ -1,4 +1,4 @@
-import {Col, Form, Row, Select, Spin} from "antd";
+import {Col, Form, Input, Row, Select, Spin} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantMemberDTO,
@@ -16,7 +16,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 export default function MyTenantMemberManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number' } });
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { status: 'number', id: 'string', memberUserId: 'string' } });
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
     const {t} = useTranslation();
     const columns = useMyTenantMemberTableColumns();
@@ -25,7 +25,7 @@ export default function MyTenantMemberManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.status]);
+    }, [filters.status, filters.id, filters.memberUserId]);
 
     const statusOptions = [
         { label: getTenantMemberStatus(TenantMemberStatus.INACTIVE), value: TenantMemberStatus.INACTIVE },
@@ -97,16 +97,53 @@ export default function MyTenantMemberManagerPage() {
                         })).data!
                     }}
                     filterableFields={[
-                        { field: 'status',        type: 'number' as const, label: t('pages.myTenantMemberManager.filter.status') },
-                        { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                        { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-                    ]}
+                        { field: 'id', type: 'number' as const, label: t('pages.myTenantMemberManager.filter.id') },
+                        {
+                            field: 'status',
+                            type: 'number' as const,
+                            label: t('pages.myTenantMemberManager.filter.status'),
+                            renderValue: ({ value, onChange }) => (
+                                <Select
+                                    className="flex-1"
+                                    value={value !== undefined ? String(value) : undefined}
+                                    allowClear
+                                    placeholder={t('pages.myTenantMemberManager.filter.all')}
+                                    options={statusOptions.map(o => ({ label: o.label, value: String(o.value) }))}
+                                    onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                                />
+                            ),
+                        },
+                                                    ]}
                     queryParamsSync={syncToUrl}
                     initialQueryValues={initialQueryValues}
                     simpleFilters={[
                         { field: 'status', operator: 'eq', value: filters.status },
+                        { field: 'id', operator: 'eq', value: filters.id },
+                        { field: 'member_user_id', urlKey: 'memberUserId', operator: 'eq', value: filters.memberUserId },
                     ]}
                     tableActions={[
+                        {
+                            label: <span>{t('pages.myTenantMemberManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.myTenantMemberManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                        {
+                            label: <span>{t('pages.myTenantMemberManager.filter.memberUserId')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.myTenantMemberManager.filter.memberUserIdPlaceholder')}
+                                defaultValue={filters.memberUserId}
+                                allowClear
+                                onPressEnter={(e) => setFilter('memberUserId', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('memberUserId', undefined); }}
+                            />,
+                        },
                         {
                             label: <span>{t('pages.myTenantMemberManager.filter.status')}</span>,
                             children: <Select
