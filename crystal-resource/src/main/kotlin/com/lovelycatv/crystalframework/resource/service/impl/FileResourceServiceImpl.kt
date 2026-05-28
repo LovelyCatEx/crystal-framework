@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.resource.service.impl
 
-import com.lovelycatv.crystalframework.resource.config.ResourceModuleConfiguration
+import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
@@ -22,7 +22,7 @@ class FileResourceServiceImpl(
     private val fileResourceRepository: FileResourceRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val storageProviderService: StorageProviderService,
-    private val resourceModuleConfiguration: ResourceModuleConfiguration,
+    private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val systemModuleClient: SystemModuleClient,
@@ -35,21 +35,20 @@ class FileResourceServiceImpl(
         return snowIdGenerator.nextId(gene)
     }
 
-    override fun getResourceModuleConfiguration(): ResourceModuleConfiguration {
-        return this.resourceModuleConfiguration
+    override fun getCrystalFrameworkConfiguration(): CrystalFrameworkConfiguration {
+        return this.crystalFrameworkConfiguration
     }
 
     override fun checkFileContentType(
         fileType: ResourceFileType,
         contentType: String
     ): Boolean {
-        val config = this.getResourceModuleConfiguration()
-            .get(fileType)
-        return if (config != null) {
-            contentType in config.supportedContentTypes
-        } else {
-            false
+        val resourceConfig = this.getCrystalFrameworkConfiguration().resource
+        val config = when (fileType) {
+            ResourceFileType.USER_AVATAR -> resourceConfig.avatar
+            ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
         }
+        return contentType in config.supportedContentTypes
     }
 
     override suspend fun getByMD5(md5: String): FileResourceEntity? {

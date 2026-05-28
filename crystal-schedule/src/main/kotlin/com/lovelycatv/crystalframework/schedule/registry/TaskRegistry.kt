@@ -13,11 +13,13 @@ class TaskRegistry {
     private val tasks = mutableMapOf<String, ScheduleTaskDefinition>()
 
     /**
-     * Register a task.
+     * Register a task. Throws [IllegalStateException] if a task with the same name is already registered.
      */
     fun register(task: ScheduledTask) {
         val definition = ScheduleTaskDefinition.from(task)
-        tasks[definition.name] = definition
+        if (tasks.putIfAbsent(definition.name, definition) != null) {
+            throw IllegalStateException("TaskRegistry: duplicate task name '${definition.name}' (class: ${task::class.qualifiedName})")
+        }
     }
 
     /**

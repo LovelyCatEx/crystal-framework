@@ -1554,6 +1554,50 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    announcementManager: {
+      title: '公告管理',
+      subtitle: '管理系统公告信息',
+      columns: {
+        title: '标题',
+        content: '内容',
+        status: '状态',
+        target: '展示端',
+        priority: '优先级',
+        createdTime: '创建时间',
+      },
+      filter: {
+        id: '公告ID',
+        idPlaceholder: '请输入公告ID',
+        status: '状态',
+        target: '展示端',
+        priority: '优先级',
+        all: '全部',
+      },
+      modal: {
+        title: {
+          label: '标题',
+          required: '请输入标题',
+          maxLength: '标题长度不能超过256个字符',
+        },
+        content: {
+          label: '内容',
+          required: '请输入内容',
+        },
+        status: {
+          label: '状态',
+        },
+        target: {
+          label: '展示端',
+        },
+        priority: {
+          label: '优先级',
+        },
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败',
+      },
+    },
     managerContainer: {
       notOrganizationIdentity: '非组织身份',
       current: '当前',
@@ -1739,6 +1783,13 @@ export const zhCN: I18nRules = {
         joinByCode: '通过邀请码加入',
         joinByCodeDesc: '输入邀请码加入新组织',
         loadFailed: '加载组织列表失败'
+      },
+
+      // SystemAnnouncements
+      systemAnnouncements: {
+        title: '系统公告',
+        noAnnouncements: '暂无公告',
+        loadFailed: '加载公告失败'
       }
     },
 
@@ -2297,6 +2348,18 @@ export const zhCN: I18nRules = {
       0: 'GitHub',
       1: 'Google',
       2: 'QQ'
+    },
+
+    announcementStatus: {
+      0: '草稿',
+      1: '已发布',
+      2: '已下线'
+    },
+
+    announcementTarget: {
+      0: '仅用户端',
+      1: '仅管理端',
+      2: '两端都显示'
     }
   },
 
@@ -2322,7 +2385,8 @@ export const zhCN: I18nRules = {
     auditLog: '审计日志',
     mailSendLog: '邮件发送日志',
     userLoginLog: '用户登录日志',
-    sessionMonitor: '会话'
+    sessionMonitor: '会话',
+    announcement: '公告'
   },
 
   menu: {
@@ -2369,7 +2433,8 @@ export const zhCN: I18nRules = {
       userLoginLogs: '用户登录日志',
       settings: '系统设置',
       sessions: '在线会话',
-      systemMonitor: '系统监控'
+      systemMonitor: '系统监控',
+      announcements: '公告管理'
     },
 
     // 菜单分组

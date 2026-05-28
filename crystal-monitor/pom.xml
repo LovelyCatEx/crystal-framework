@@ -62,7 +62,15 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-shared-types</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-schedule</artifactId>
         </dependency>
     </dependencies>
 

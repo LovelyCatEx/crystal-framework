@@ -1,8 +1,8 @@
-package com.lovelycatv.crystalframework.system.service
+package com.lovelycatv.crystalframework.monitor.service
 
-import com.lovelycatv.crystalframework.system.controller.vo.BusinessStatsVO
-import com.lovelycatv.crystalframework.system.controller.vo.DashboardStatsVO
-import com.lovelycatv.crystalframework.system.controller.vo.SystemMetricsVO
+import com.lovelycatv.crystalframework.monitor.controller.vo.BusinessStatsVO
+import com.lovelycatv.crystalframework.monitor.controller.vo.DashboardStatsVO
+import com.lovelycatv.crystalframework.monitor.controller.vo.SystemMetricsVO
 
 /**
  * Dashboard Statistics Service

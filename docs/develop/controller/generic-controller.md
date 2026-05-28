@@ -71,3 +71,5 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 - `UserAuthentication` 作为方法参数由框架自动注入，可直接获取当前用户/租户信息
 - 不加 `@PreAuthorize` 的接口仍需合法 token 才能访问；如需完全公开（免登录），在方法上添加 `@Unauthorized` 注解
 - 返回值统一使用 `ApiResponse.success(...)` / `ApiResponse.error(...)`
+- **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
+- **普通 Controller 必须注入普通 Service（`service/` + `service/impl/`），禁止注入 Manager Service（`service/manager/`）**

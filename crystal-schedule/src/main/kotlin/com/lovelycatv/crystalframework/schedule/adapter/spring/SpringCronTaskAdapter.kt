@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.event.EventListener
+import org.springframework.core.env.Environment
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.support.CronTrigger
 import org.springframework.stereotype.Component
@@ -16,7 +17,8 @@ import java.util.*
 @Component
 class SpringCronTaskAdapter(
     @Qualifier("taskScheduler")
-    private val taskScheduler: TaskScheduler
+    private val taskScheduler: TaskScheduler,
+    private val environment: Environment,
 ) {
 
     private val logger = LoggerFactory.getLogger(SpringCronTaskAdapter::class.java)
@@ -36,6 +38,9 @@ class SpringCronTaskAdapter(
             logger.info("[SpringCron] Task ${definition.name} is disabled, skipping registration")
             return
         }
+
+        // Resolve placeholders like ${my.cron.expression} from application.yaml
+        val resolvedCron = environment.resolvePlaceholders(triggerAnnotation.cron)
 
         taskScheduler.schedule(
             {
@@ -63,11 +68,11 @@ class SpringCronTaskAdapter(
                     }
                 }
             },
-            CronTrigger(triggerAnnotation.cron)
+            CronTrigger(resolvedCron)
         )
 
         if (triggerAnnotation.enableLog) {
-            logger.info("[SpringCron] Registered task: ${definition.name} with cron: ${triggerAnnotation.cron}")
+            logger.info("[SpringCron] Registered task: ${definition.name} with cron: $resolvedCron")
         }
     }
 }

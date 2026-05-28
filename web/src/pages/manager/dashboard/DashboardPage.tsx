@@ -1,11 +1,11 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {Segmented, theme} from "antd";
+import {Col, Row, Segmented, theme} from "antd";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {BusinessStatistics} from "@/components/dashboard/BusinessStatistics.tsx";
-import {SystemMetrics} from "@/components/dashboard/SystemMetrics.tsx";
 import {MyJoinedTenants} from "@/components/dashboard/MyJoinedTenants.tsx";
+import {SystemAnnouncements} from "@/components/dashboard/SystemAnnouncements.tsx";
 import {ClockCircleOutlined} from "@ant-design/icons";
 
 const { useToken } = theme;
@@ -20,8 +20,8 @@ function getGreeting(t: ReturnType<typeof useTranslation>['t']): string {
 }
 
 const COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics";
-const COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics";
 const COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined";
+const COMPONENT_DASHBOARD_ANNOUNCEMENTS = "dashboard.announcements";
 
 function LiveClock() {
     const { token } = useToken();
@@ -40,17 +40,17 @@ function LiveClock() {
         };
     }, []);
 
-    const formattedTime = time.toLocaleTimeString(undefined, { 
-        hour: "2-digit", 
-        minute: "2-digit", 
+    const formattedTime = time.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
         second: "2-digit",
-        hour12: false 
+        hour12: false
     });
 
     return (
         <div className="flex items-center gap-2">
             <ClockCircleOutlined style={{ color: token.colorTextSecondary, fontSize: 20 }} />
-            <span 
+            <span
                 className="text-lg font-medium mr-2"
                 style={{ color: token.colorText }}
             >
@@ -86,12 +86,12 @@ export default function DashboardPage() {
         return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_BUSINESS_STATISTICS);
     }, [accessibleComponentPaths]);
 
-    const hasSystemMetricsPermission = useMemo(() => {
-        return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_SYSTEM_METRICS);
-    }, [accessibleComponentPaths]);
-
     const hasMyTenantsPermission = useMemo(() => {
         return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_MY_TENANTS);
+    }, [accessibleComponentPaths]);
+
+    const hasAnnouncementsPermission = useMemo(() => {
+        return accessibleComponentPaths?.includes(COMPONENT_DASHBOARD_ANNOUNCEMENTS);
     }, [accessibleComponentPaths]);
 
     return (
@@ -111,9 +111,18 @@ export default function DashboardPage() {
 
                 {hasBusinessStatsPermission && <BusinessStatistics timeRange={timeRange} />}
 
-                {hasSystemMetricsPermission && <SystemMetrics />}
-
-                {hasMyTenantsPermission && <MyJoinedTenants />}
+                <Row gutter={[16, 16]} align="top">
+                    {hasMyTenantsPermission && (
+                        <Col xs={24} lg={16}>
+                            <MyJoinedTenants />
+                        </Col>
+                    )}
+                    {hasAnnouncementsPermission && (
+                        <Col xs={24} lg={8}>
+                            <SystemAnnouncements />
+                        </Col>
+                    )}
+                </Row>
             </div>
         </>
     );

@@ -119,7 +119,7 @@ export function MyJoinedTenants() {
                             const description = formatDescription(tenant.profile?.description);
 
                             return (
-                                <Col xs={24} sm={12} lg={8} key={tenant.tenantId}>
+                                <Col xs={24} lg={12} xxl={8} key={tenant.tenantId}>
                                     <div
                                         className="p-4 rounded-xl transition-all duration-300 h-full cursor-pointer border"
                                         style={isCurrent ? {
@@ -174,10 +174,10 @@ export function MyJoinedTenants() {
                             );
                         })}
 
-                        <Col xs={24} sm={12} lg={8}>
+                        <Col xs={24} lg={12} xxl={8}>
                             <div
                                 onClick={handleJoinByCode}
-                                className="p-4 rounded-xl border-2 border-dashed h-full flex items-center gap-3 cursor-pointer transition-all duration-300"
+                                className="w-full p-4 rounded-xl border-2 border-dashed h-full flex items-center gap-3 cursor-pointer transition-all duration-300"
                                 style={{
                                     borderColor: token.colorBorderSecondary,
                                     backgroundColor: token.colorBgContainer
