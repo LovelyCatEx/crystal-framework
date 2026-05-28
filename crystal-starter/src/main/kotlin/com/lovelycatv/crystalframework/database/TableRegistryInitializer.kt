@@ -43,6 +43,7 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_USER_LOGIN_LOGS)
         registry.register(TableConstants.TABLE_FILE_RESOURCES)
         registry.register(TableConstants.TABLE_STORAGE_PROVIDERS)
+        registry.register(TableConstants.TABLE_SYSTEM_ANNOUNCEMENTS)
 
         configurers.forEach { it.configure(registry) }
 

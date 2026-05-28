@@ -1,17 +1,10 @@
-package com.lovelycatv.crystalframework.system.service.impl
+package com.lovelycatv.crystalframework.monitor.service.impl
 
-import com.lovelycatv.crystalframework.mail.repository.MailSendLogRepository
-import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
+import com.lovelycatv.crystalframework.monitor.controller.vo.*
+import com.lovelycatv.crystalframework.monitor.service.DashboardService
+import com.lovelycatv.crystalframework.monitor.service.DashboardStatsProvider
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.system.controller.vo.*
-import com.lovelycatv.crystalframework.system.service.DashboardService
-import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRecordRepository
-import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRepository
-import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
-import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
-import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
-import com.lovelycatv.crystalframework.user.repository.UserRepository
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,14 +24,7 @@ import kotlin.math.round
 
 @Service
 class DashboardServiceImpl(
-    private val userRepository: UserRepository,
-    private val tenantRepository: TenantRepository,
-    private val tenantMemberRepository: TenantMemberRepository,
-    private val fileResourceRepository: FileResourceRepository,
-    private val tenantInvitationRepository: TenantInvitationRepository,
-    private val tenantInvitationRecordRepository: TenantInvitationRecordRepository,
-    private val oAuthAccountRepository: OAuthAccountRepository,
-    private val mailSendLogRepository: MailSendLogRepository,
+    private val statsProvider: DashboardStatsProvider,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val databaseClient: DatabaseClient,
     private val meterRegistry: MeterRegistry,
@@ -58,63 +44,62 @@ class DashboardServiceImpl(
     }
 
     override suspend fun getBusinessStats(timeRange: String): BusinessStatsVO {
-
         val (currentStartTime, previousStartTime) = calculateTimeRange(timeRange)
         val now = System.currentTimeMillis()
 
         val totalUsers = coroutineScope.async {
             calculateStatItem(
-                currentCount = userRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = userRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countUsers(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countUsers(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalTenants = coroutineScope.async {
             calculateStatItem(
-                currentCount = tenantRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = tenantRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countTenants(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countTenants(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalTenantMembers = coroutineScope.async {
             calculateStatItem(
-                currentCount = tenantMemberRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = tenantMemberRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countTenantMembers(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countTenantMembers(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalFileResources = coroutineScope.async {
             calculateStatItem(
-                currentCount = fileResourceRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = fileResourceRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countFileResources(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countFileResources(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalInvitations = coroutineScope.async {
             calculateStatItem(
-                currentCount = tenantInvitationRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = tenantInvitationRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countTenantInvitations(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countTenantInvitations(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalInvitationRecords = coroutineScope.async {
             calculateStatItem(
-                currentCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = tenantInvitationRecordRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countTenantInvitationRecords(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countTenantInvitationRecords(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalOAuthAccounts = coroutineScope.async {
             calculateStatItem(
-                currentCount = oAuthAccountRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = oAuthAccountRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countOAuthAccounts(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countOAuthAccounts(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
         val totalMailSent = coroutineScope.async {
             calculateStatItem(
-                currentCount = mailSendLogRepository.countByCreatedTimeBetween(currentStartTime, now).awaitSingleOrNull() ?: 0,
-                previousCount = mailSendLogRepository.countByCreatedTimeBetween(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
+                currentCount = statsProvider.countMailSent(currentStartTime, now).awaitSingleOrNull() ?: 0,
+                previousCount = statsProvider.countMailSent(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0
             )
         }
 
@@ -188,7 +173,7 @@ class DashboardServiceImpl(
 
         return SystemMetricsVO(
             cpuUsage = MetricItem(
-                used =  cpuLoad * 100.0,
+                used = cpuLoad * 100.0,
                 total = osBean.availableProcessors,
                 usage = cpuLoad * 100.0,
             ),
@@ -342,7 +327,6 @@ class DashboardServiceImpl(
             unknownDatabaseStr
         }
     }
-
 
     suspend fun getRedisVersion(): String {
         return try {

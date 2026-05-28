@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.task
+package com.lovelycatv.crystalframework.monitor.task
 
 import com.lovelycatv.crystalframework.schedule.annotations.CronTaskExecutor
 import com.lovelycatv.crystalframework.schedule.annotations.ScheduledTaskMetadata

@@ -68,4 +68,13 @@ class MonitorMetricRepository(
             .all()
     }
 
+    fun deleteBeforeTime(type: MetricType, beforeTime: Long): Mono<Long> {
+        return databaseClient.sql(
+            "DELETE FROM ${type.tableName} WHERE created_time < :beforeTime"
+        )
+            .bind("beforeTime", beforeTime)
+            .fetch()
+            .rowsUpdated()
+    }
+
 }

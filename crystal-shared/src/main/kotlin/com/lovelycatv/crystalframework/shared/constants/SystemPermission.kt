@@ -160,10 +160,18 @@ object SystemPermission {
     const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
     const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
     const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"
+    const val COMPONENT_DASHBOARD_ANNOUNCEMENTS = "dashboard.announcements@dashboard.announcements"
 
     const val ACTION_DASHBOARD_BUSINESS_STATISTICS_READ = "dashboard.business.statistics.read"
     const val ACTION_DASHBOARD_SYSTEM_METRICS_READ = "dashboard.system.metrics.read"
 
     const val MENU_MONITOR_SESSIONS = "monitor.sessions:/manager/sessions"
     const val ACTION_MONITOR_SESSIONS_READ = "monitor.sessions.read"
+
+    const val MENU_ANNOUNCEMENT_MANAGER = "announcement:/manager/announcements"
+    const val ACTION_ANNOUNCEMENT_CREATE = "announcement.create"
+    const val ACTION_ANNOUNCEMENT_READ = "announcement.read"
+    const val ACTION_ANNOUNCEMENT_UPDATE = "announcement.update"
+    const val ACTION_ANNOUNCEMENT_DELETE = "announcement.delete"
+    const val ACTION_ANNOUNCEMENT_LIST = "announcement.list"
 }

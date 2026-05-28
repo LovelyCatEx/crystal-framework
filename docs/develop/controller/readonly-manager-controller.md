@@ -79,6 +79,8 @@ class ExtMyPluginLogController(
 - `read` / `readAll` / `create` / `update` / `delete` 全部设置相同权限，因为只读控制器本质上只有查询能力
 - service / repository / entity / 四种 DTO 的类型参数一个都不能少（基类约束）
 - Controller 本身不需要写任何方法——所有行为从父类继承
+- **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
+- **Manager Controller 只能注入 Manager Service（`service/manager/`），禁止注入普通 Service**
 
 ## 自动提供的端点
 

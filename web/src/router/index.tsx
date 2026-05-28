@@ -10,6 +10,7 @@ import {
     LineChartOutlined,
     MailOutlined,
     MonitorOutlined,
+    NotificationOutlined,
     SafetyOutlined,
     SettingOutlined,
     ShopOutlined,
@@ -54,6 +55,7 @@ const MyTenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/
 const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLoginLogManagerPage.tsx"));
 const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
 const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
+const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/AnnouncementManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -417,6 +419,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             label: t('menu.admin.userLoginLogs'),
             page: <UserLoginLogManagerPage />,
             group: 'logs'
+        },
+        {
+            key: '/manager/announcements',
+            path: '/manager/announcements',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.announcements'),
+            page: <AnnouncementManagerPage />,
         },
         {
             key: '/manager/settings',

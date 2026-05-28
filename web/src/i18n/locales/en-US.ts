@@ -1557,6 +1557,50 @@ export const enUS: I18nRules = {
         }
       }
     },
+    announcementManager: {
+      title: 'Announcement Management',
+      subtitle: 'Manage system announcements',
+      columns: {
+        title: 'Title',
+        content: 'Content',
+        status: 'Status',
+        target: 'Display Target',
+        priority: 'Priority',
+        createdTime: 'Created Time',
+      },
+      filter: {
+        id: 'Announcement ID',
+        idPlaceholder: 'Enter announcement ID',
+        status: 'Status',
+        target: 'Display Target',
+        priority: 'Priority',
+        all: 'All',
+      },
+      modal: {
+        title: {
+          label: 'Title',
+          required: 'Please enter a title',
+          maxLength: 'Title cannot exceed 256 characters',
+        },
+        content: {
+          label: 'Content',
+          required: 'Please enter content',
+        },
+        status: {
+          label: 'Status',
+        },
+        target: {
+          label: 'Display Target',
+        },
+        priority: {
+          label: 'Priority',
+        },
+      },
+      messages: {
+        statusUpdateSuccess: 'Status updated successfully',
+        statusUpdateFailed: 'Status update failed',
+      },
+    },
     managerContainer: {
       notOrganizationIdentity: 'Not Organization Identity',
       current: 'Current',
@@ -1742,6 +1786,13 @@ export const enUS: I18nRules = {
         joinByCode: 'Join by Invitation Code',
         joinByCodeDesc: 'Enter invitation code to join new organization',
         loadFailed: 'Failed to load organization list'
+      },
+
+      // SystemAnnouncements
+      systemAnnouncements: {
+        title: 'Announcements',
+        noAnnouncements: 'No announcements',
+        loadFailed: 'Failed to load announcements'
       }
     },
 
@@ -2300,6 +2351,18 @@ export const enUS: I18nRules = {
       0: 'GitHub',
       1: 'Google',
       2: 'QQ'
+    },
+
+    announcementStatus: {
+      0: 'Draft',
+      1: 'Published',
+      2: 'Offline'
+    },
+
+    announcementTarget: {
+      0: 'User Side Only',
+      1: 'Manager Side Only',
+      2: 'Both Sides'
     }
   },
 
@@ -2325,7 +2388,8 @@ export const enUS: I18nRules = {
     auditLog: 'Audit Log',
     mailSendLog: 'Mail Send Log',
     userLoginLog: 'User Login Log',
-    sessionMonitor: 'Session'
+    sessionMonitor: 'Session',
+    announcement: 'Announcement'
   },
 
   menu: {
@@ -2372,7 +2436,8 @@ export const enUS: I18nRules = {
       userLoginLogs: 'User Login Logs',
       settings: 'System Settings',
       sessions: 'Online Sessions',
-      systemMonitor: 'System Monitor'
+      systemMonitor: 'System Monitor',
+      announcements: 'Announcement Management'
     },
 
     // Menu groups

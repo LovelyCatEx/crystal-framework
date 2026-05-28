@@ -11,10 +11,9 @@ class SystemSettingsRegistry {
             return
         }
 
-        settings.putIfAbsent(
-            settingKey,
-            declaration.copy(key = settingKey)
-        )
+        if (settings.putIfAbsent(settingKey, declaration.copy(key = settingKey)) != null) {
+            throw IllegalStateException("SystemSettingsRegistry: duplicate setting key '$settingKey'")
+        }
     }
 
     fun settings(declarations: Iterable<SystemSettingsItemDeclaration>) {

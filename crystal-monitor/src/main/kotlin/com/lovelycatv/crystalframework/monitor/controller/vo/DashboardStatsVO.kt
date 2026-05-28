@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.controller.vo
+package com.lovelycatv.crystalframework.monitor.controller.vo
 
 /**
  * Dashboard statistics response VO
