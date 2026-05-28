@@ -166,6 +166,9 @@ class DashboardController
 
 本项目使用 SpringSecurity 进行权限校验，因此你可以使用任意该框架的权限校验注解，例如 `@PreAuthorize` 等。
 
+**Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
+**Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
+
 #### 实体类
 
 关于实体类请见项目根目录下的 `.agent` 文件夹中的 `AddBaseEntity.md`。

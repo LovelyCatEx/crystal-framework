@@ -166,4 +166,12 @@ object SystemPermission {
 
     const val MENU_MONITOR_SESSIONS = "monitor.sessions:/manager/sessions"
     const val ACTION_MONITOR_SESSIONS_READ = "monitor.sessions.read"
+
+    const val MENU_ANNOUNCEMENT_MANAGER = "announcement:/manager/announcements"
+    const val ACTION_ANNOUNCEMENT_CREATE = "announcement.create"
+    const val ACTION_ANNOUNCEMENT_READ = "announcement.read"
+    const val ACTION_ANNOUNCEMENT_UPDATE = "announcement.update"
+    const val ACTION_ANNOUNCEMENT_DELETE = "announcement.delete"
+    const val ACTION_ANNOUNCEMENT_USER_READ = "announcement.user.read"
+    const val ACTION_ANNOUNCEMENT_MANAGER_READ = "announcement.manager.read"
 }

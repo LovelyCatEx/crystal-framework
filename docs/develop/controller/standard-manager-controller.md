@@ -103,7 +103,9 @@ class ExtMyPluginItemController(
 ## 关键点
 
 - Controller 类不需要写任何方法体
-- Service 必须继承 `CachedBaseManagerService`（带缓存失效）
+- Service 必须继承 `CachedBaseManagerService`（带缓存失效），放在 `service/manager/` + `service/manager/impl/` 包下
+- **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
+- **Manager Controller 只能注入 Manager Service，禁止注入普通 Service**
 - BaseManagerReadDTO 继承 `PageQuery`，自带 `page`、`pageSize`、`searchKeyword`、`startTime`、`endTime`
 - BaseManagerUpdateDTO 携带 `id: Long`
 - BaseManagerDeleteDTO 携带 `ids: List<Long>`

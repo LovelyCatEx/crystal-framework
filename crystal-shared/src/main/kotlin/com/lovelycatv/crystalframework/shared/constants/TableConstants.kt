@@ -27,4 +27,5 @@ object TableConstants {
     const val TABLE_USER_LOGIN_LOGS = "user_login_logs"
     const val TABLE_FILE_RESOURCES = "file_resources"
     const val TABLE_STORAGE_PROVIDERS = "storage_providers"
+    const val TABLE_SYSTEM_ANNOUNCEMENTS = "system_announcements"
 }

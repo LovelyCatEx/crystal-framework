@@ -47,10 +47,19 @@ object SystemRolePermissionRelation {
             // Monitor
             SystemPermission.MENU_MONITOR_SESSIONS,
             SystemPermission.ACTION_MONITOR_SESSIONS_READ,
+            // Announcement
+            SystemPermission.MENU_ANNOUNCEMENT_MANAGER,
+            SystemPermission.ACTION_ANNOUNCEMENT_READ,
+            SystemPermission.ACTION_ANNOUNCEMENT_CREATE,
+            SystemPermission.ACTION_ANNOUNCEMENT_UPDATE,
+            SystemPermission.ACTION_ANNOUNCEMENT_DELETE,
+            SystemPermission.ACTION_ANNOUNCEMENT_MANAGER_READ,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard
             SystemPermission.COMPONENT_DASHBOARD_MY_TENANTS,
+            // Announcement
+            SystemPermission.ACTION_ANNOUNCEMENT_USER_READ,
         )
     )
 }
