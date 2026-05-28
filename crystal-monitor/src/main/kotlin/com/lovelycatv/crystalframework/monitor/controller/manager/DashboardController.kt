@@ -1,12 +1,12 @@
-package com.lovelycatv.crystalframework.system.controller.manager
+package com.lovelycatv.crystalframework.monitor.controller.manager
 
+import com.lovelycatv.crystalframework.monitor.controller.vo.BusinessStatsVO
+import com.lovelycatv.crystalframework.monitor.controller.vo.DashboardStatsVO
+import com.lovelycatv.crystalframework.monitor.controller.vo.SystemMetricsVO
+import com.lovelycatv.crystalframework.monitor.service.DashboardService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.system.controller.vo.BusinessStatsVO
-import com.lovelycatv.crystalframework.system.controller.vo.DashboardStatsVO
-import com.lovelycatv.crystalframework.system.controller.vo.SystemMetricsVO
-import com.lovelycatv.crystalframework.system.service.DashboardService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/dashboard")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/monitor/dashboard")
 class DashboardController(
     private val dashboardService: DashboardService
 ) {

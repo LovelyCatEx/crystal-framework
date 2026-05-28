@@ -7,12 +7,12 @@ import type {BusinessStatsVO, SystemMetricsVO} from "@/types/monitor/dashboard.t
  * @param timeRange 1d, 3d, 5d, 1w, 2w, 1m, 3m, 6m, 1y
  */
 export async function getBusinessStats(timeRange: string) {
-    return doGet<BusinessStatsVO>("/api/manager/dashboard/business-stats", {timeRange});
+    return doGet<BusinessStatsVO>("/api/manager/monitor/dashboard/business-stats", {timeRange});
 }
 
 /**
  * Get system metrics
  */
 export async function getSystemMetrics() {
-    return doGet<SystemMetricsVO>("/api/manager/dashboard/system-metrics");
+    return doGet<SystemMetricsVO>("/api/manager/monitor/dashboard/system-metrics");
 }
