@@ -14,7 +14,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 export default function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { type: 'number' }
+        schema: { type: 'number', id: 'string' }
     });
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
     const {t} = useTranslation();
@@ -22,7 +22,7 @@ export default function UserPermissionManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
-    }, [filters.type]);
+    }, [filters.type, filters.id]);
 
     return (
         <ManagerPageContainer
@@ -85,17 +85,47 @@ export default function UserPermissionManagerPage() {
             create={async (props) => {
                 return (await controller.create(props as ManagerCreatePermissionDTO)).data!
             }}
+            searchKeywords={['name', 'description', 'path']}
             filterableFields={[
-                { field: 'type',          type: 'number' as const, label: t('pages.userPermissionManager.filter.type') },
-                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-            ]}
+                { field: 'id', type: 'number' as const, label: t('pages.userPermissionManager.filter.id') },
+                {
+                    field: 'type',
+                    type: 'number' as const,
+                    label: t('pages.userPermissionManager.filter.type'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? String(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.userPermissionManager.filter.all')}
+                            options={[
+                                { value: String(PermissionType.ACTION), label: getPermissionType(PermissionType.ACTION) },
+                                { value: String(PermissionType.MENU), label: getPermissionType(PermissionType.MENU) },
+                                { value: String(PermissionType.COMPONENT), label: getPermissionType(PermissionType.COMPONENT) },
+                            ]}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
+                            ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type', operator: 'eq', value: filters.type },
             ]}
             tableActions={[
+                {
+                    label: <span>{t('pages.userPermissionManager.filter.id')}</span>,
+                    children: <Input
+                        placeholder={t('pages.userPermissionManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        className="rounded-xl"
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: <span>{t('pages.userPermissionManager.filter.type')}</span>,
                     children: <Select

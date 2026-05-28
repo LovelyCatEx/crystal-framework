@@ -16,19 +16,19 @@ export default function UserManagerPage() {
         schema: {
             username: 'string',
             nickname: 'string',
+            id: 'string',
         } as const,
     });
 
     useEffect(() => {
         pageRef.current?.refreshData({ resetPage: true });
-    }, [filters.username, filters.nickname]);
+    }, [filters.username, filters.nickname, filters.id]);
 
     const filterableFields = [
+        { field: 'id',            type: 'number' as const, label: t('pages.userManager.filter.id') },
         { field: 'username',      type: 'text'   as const, label: t('pages.userManager.filter.username') },
         { field: 'email',         type: 'text'   as const, label: t('pages.userManager.filter.email') },
         { field: 'nickname',      type: 'text'   as const, label: t('pages.userManager.filter.nickname') },
-        { field: 'created_time',  type: 'number' as const, label: t('pages.userManager.filter.createdTime') },
-        { field: 'modified_time', type: 'number' as const, label: t('pages.userManager.filter.modifiedTime') },
     ];
 
     return (
@@ -43,10 +43,22 @@ export default function UserManagerPage() {
             initialQueryValues={initialQueryValues}
             searchKeywords={['username', 'email', 'nickname']}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'username', value: filters.username },
                 { field: 'nickname', value: filters.nickname },
             ]}
-            tablePrefixActions={[
+            tableActions={[
+                {
+                    label: <span>{t('pages.userManager.filter.id')}</span>,
+                    children: <Input
+                        placeholder={t('pages.userManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        className="rounded-xl"
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: t('pages.userManager.filter.username'),
                     children: (

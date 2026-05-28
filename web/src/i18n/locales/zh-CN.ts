@@ -540,6 +540,8 @@ export const zhCN: I18nRules = {
         emailPlaceholder: '按邮箱筛选',
         nickname: '昵称',
         nicknamePlaceholder: '按昵称筛选',
+        id: '用户ID',
+        idPlaceholder: '输入用户 ID',
       }
     },
     oauthAccountManager: {
@@ -573,7 +575,9 @@ export const zhCN: I18nRules = {
       },
       filter: {
         platform: '平台',
-        all: '全部'
+        all: '全部',
+        id: '账号ID',
+        idPlaceholder: '输入账号 ID'
       }
     },
     tenantManager: {
@@ -581,7 +585,9 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统租户信息',
       filter: {
         status: '状态',
-        all: '全部'
+        all: '全部',
+        id: '租户ID',
+        idPlaceholder: '输入租户 ID'
       },
       modal: {
         name: {
@@ -650,6 +656,10 @@ export const zhCN: I18nRules = {
     tenantTireTypeManager: {
       title: '套餐类型管理',
       subtitle: '管理系统套餐类型',
+      filter: {
+        id: '套餐ID',
+        idPlaceholder: '输入套餐 ID'
+      },
       modal: {
         name: {
           label: '名称',
@@ -667,6 +677,10 @@ export const zhCN: I18nRules = {
     tenantRoleManager: {
       title: '租户角色管理',
       subtitle: '管理系统租户角色',
+      filter: {
+        id: '角色ID',
+        idPlaceholder: '输入角色 ID'
+      },
       action: {
         addNew: '新增租户角色',
         assignPermission: '分配权限',
@@ -707,7 +721,9 @@ export const zhCN: I18nRules = {
       },
       filter: {
         type: '权限类型',
-        all: '全部'
+        all: '全部',
+        id: '权限ID',
+        idPlaceholder: '输入权限 ID'
       },
       modal: {
         name: {
@@ -738,7 +754,11 @@ export const zhCN: I18nRules = {
       },
       filter: {
         status: '状态',
-        all: '全部'
+        all: '全部',
+        id: '成员 ID',
+        idPlaceholder: '输入成员 ID',
+        memberUserId: '用户 ID',
+        memberUserIdPlaceholder: '输入用户 ID'
       },
       modal: {
         memberUserId: {
@@ -755,6 +775,10 @@ export const zhCN: I18nRules = {
     tenantInvitationManager: {
       title: '邀请码管理',
       subtitle: '管理系统租户邀请码',
+      filter: {
+        id: '邀请码ID',
+        idPlaceholder: '输入邀请码 ID'
+      },
       addInvitationCode: '新增邀请码',
       copyInvitationLink: '复制邀请码链接',
       copySuccess: '已将邀请链接复制到剪切板',
@@ -925,6 +949,10 @@ export const zhCN: I18nRules = {
     myTenantRoleManager: {
       title: '我的角色管理',
       subtitle: '管理当前组织的角色',
+      filter: {
+        id: '角色ID',
+        idPlaceholder: '输入角色 ID'
+      },
       action: {
         addNew: '新增角色'
       },
@@ -948,7 +976,11 @@ export const zhCN: I18nRules = {
       subtitle: '管理当前组织成员信息',
       filter: {
         status: '状态',
-        all: '全部'
+        all: '全部',
+        id: '成员 ID',
+        idPlaceholder: '输入成员 ID',
+        memberUserId: '用户 ID',
+        memberUserIdPlaceholder: '输入用户 ID'
       },
       modal: {
         status: {
@@ -989,6 +1021,10 @@ export const zhCN: I18nRules = {
     myTenantInvitationManager: {
       title: '我的组织邀请码',
       subtitle: '管理当前组织的邀请码',
+      filter: {
+        id: '邀请码ID',
+        idPlaceholder: '输入邀请码 ID'
+      },
       action: {
         addNew: '新增邀请码',
         copyLink: '复制邀请码链接',
@@ -1084,7 +1120,9 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统存储提供商',
       filter: {
         type: '类型',
-        all: '全部'
+        all: '全部',
+        id: '存储ID',
+        idPlaceholder: '输入存储 ID'
       },
       columns: {
         active: '启用状态'
@@ -1131,7 +1169,9 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统文件资源',
       filter: {
         type: '类型',
-        all: '全部'
+        all: '全部',
+        id: '文件ID',
+        idPlaceholder: '输入文件 ID'
       },
       modal: {
         userId: {
@@ -1184,6 +1224,10 @@ export const zhCN: I18nRules = {
     userRoleManager: {
       title: '用户角色管理',
       subtitle: '管理系统用户角色',
+      filter: {
+        id: '角色ID',
+        idPlaceholder: '输入角色 ID'
+      },
       modal: {
         name: {
           label: '角色名称',
@@ -1245,7 +1289,9 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统用户权限',
       filter: {
         type: '类型',
-        all: '全部'
+        all: '全部',
+        id: '权限ID',
+        idPlaceholder: '输入权限 ID'
       },
       modal: {
         name: {
@@ -1272,6 +1318,10 @@ export const zhCN: I18nRules = {
     mailTemplateTypeManager: {
       title: '邮件模板类型管理',
       subtitle: '管理系统邮件模板类型',
+      filter: {
+        id: '类型ID',
+        idPlaceholder: '输入类型 ID'
+      },
       modal: {
         name: {
           label: '名称',
@@ -1305,7 +1355,9 @@ export const zhCN: I18nRules = {
       enabledStatus: '启用状态',
       filter: {
         templateType: '模板类型',
-        placeholder: '选择模板类型'
+        placeholder: '选择模板类型',
+        id: '模板ID',
+        idPlaceholder: '输入模板 ID'
       },
       modal: {
         name: {
@@ -1351,6 +1403,10 @@ export const zhCN: I18nRules = {
     mailTemplateCategoryManager: {
       title: '邮件模板分类管理',
       subtitle: '管理系统邮件模板分类',
+      filter: {
+        id: '分类ID',
+        idPlaceholder: '输入分类 ID'
+      },
       modal: {
         name: {
           label: '名称',
@@ -1382,7 +1438,9 @@ export const zhCN: I18nRules = {
         path: '操作路径',
         pathPlaceholder: '输入路径',
         remoteIp: 'IP地址',
-        remoteIpPlaceholder: '输入IP'
+        remoteIpPlaceholder: '输入IP',
+        id: '日志ID',
+        idPlaceholder: '输入日志 ID'
       },
       actionType: {
         unknown: '未知',
@@ -1405,7 +1463,9 @@ export const zhCN: I18nRules = {
         success: '成功',
         failed: '失败',
         userId: '用户ID',
-        userIdPlaceholder: '输入用户ID'
+        userIdPlaceholder: '输入用户ID',
+        id: '日志ID',
+        idPlaceholder: '输入日志 ID'
       }
     },
     userLoginLogManager: {
@@ -1422,7 +1482,9 @@ export const zhCN: I18nRules = {
         success: '成功',
         failed: '失败',
         remoteIp: 'IP地址',
-        remoteIpPlaceholder: '输入IP地址'
+        remoteIpPlaceholder: '输入IP地址',
+        id: '日志ID',
+        idPlaceholder: '输入日志 ID'
       },
       loginMethod: {
         password: '密码登录',
@@ -2027,6 +2089,7 @@ export const zhCN: I18nRules = {
       selectOperator: '选择操作符',
       selectValue: '选择值',
       valuePlaceholder: '输入值',
+      addValue: '添加值',
       operators: {
         eq: '等于',
         ne: '不等于',

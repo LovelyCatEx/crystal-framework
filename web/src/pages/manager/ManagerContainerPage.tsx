@@ -836,7 +836,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                                 key={menu.key.toString()}
                                                 path={menu.path.replace(parentPath, "")}
                                                 element={
-                                                    <div key={location.key} className={pageAnimationClass}>
+                                                    <div key={location.pathname} className={pageAnimationClass}>
                                                         {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
                                                     </div>
                                                 }
@@ -869,7 +869,7 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                                         key={menu.key.toString()}
                                         path={menu.path.replace(parentPath, "")}
                                         element={
-                                            <div key={location.key} className={pageAnimationClass}>
+                                            <div key={location.pathname} className={pageAnimationClass}>
                                                 {menu.page ? menu.page : <>NO IMPLEMENTATIONS</>}
                                             </div>
                                         }

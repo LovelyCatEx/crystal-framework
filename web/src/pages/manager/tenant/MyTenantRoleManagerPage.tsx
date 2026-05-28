@@ -5,7 +5,7 @@ import {
     type ManagerUpdateTenantRoleDTO,
     TenantRoleManagerController
 } from "@/api/tenant/rbac/tenant-role.api.ts";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {useTenantRoleTableColumns} from "@/components/columns/TenantRoleEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
@@ -13,10 +13,17 @@ import {TenantRoleIdSelector} from "@/components/selector/TenantRoleIdSelector.t
 import {PlusOutlined} from "@ant-design/icons";
 import type {TenantRole} from "@/types/tenant/rbac/tenant-role.types.ts";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function MyTenantRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { currentTenant, isJoinedTenantsLoading } = useUserTenants();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
+
     const currentTenantId = currentTenant?.tenantId ?? null;
     const {t} = useTranslation();
     const columns = useTenantRoleTableColumns();
@@ -64,6 +71,25 @@ export default function MyTenantRoleManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={columns}
+                    searchKeywords={['name', 'description']}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'id', operator: 'eq', value: filters.id },
+                    ]}
+                    tableActions={[
+                        {
+                            label: <span>{t('pages.myTenantRoleManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.myTenantRoleManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                    ]}
                     editModalFormChildren={(editingItem: TenantRole | null) => (
                         <>
                             <Row gutter={24}>

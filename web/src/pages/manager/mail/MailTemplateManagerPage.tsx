@@ -92,7 +92,7 @@ export default function MailTemplateManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [templateTypes, setTemplateTypes] = useState<MailTemplateType[]>([]);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({
-        schema: { typeId: 'number' }
+        schema: { typeId: 'number', id: 'string' }
     });
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function MailTemplateManagerPage() {
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
-    }, [filters.typeId]);
+    }, [filters.typeId, filters.id]);
 
     const handleActiveChange = (active: boolean, row: MailTemplate) => {
         MailTemplateManagerController
@@ -139,17 +139,46 @@ export default function MailTemplateManagerPage() {
             title={t('pages.mailTemplateManager.title')}
             subtitle={t('pages.mailTemplateManager.subtitle')}
             columns={columnsWithActive}
+            searchKeywords={['name', 'title']}
             filterableFields={[
-                { field: 'type_id',       type: 'number' as const, label: t('pages.mailTemplateManager.filter.templateType') },
-                { field: 'created_time',  type: 'number' as const, label: t('components.entityTable.createdTime') },
-                { field: 'modified_time', type: 'number' as const, label: t('components.entityTable.modifiedTime') },
-            ]}
+                { field: 'id', type: 'number' as const, label: t('pages.mailTemplateManager.filter.id') },
+                {
+                    field: 'type_id',
+                    type: 'number' as const,
+                    label: t('pages.mailTemplateManager.filter.templateType'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? String(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.mailTemplateManager.filter.placeholder')}
+                            options={templateTypes.map((type) => ({
+                                label: type.name,
+                                value: String(type.id),
+                            }))}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
+                            ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
+                { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'type_id', urlKey: 'typeId', operator: 'eq', value: filters.typeId },
             ]}
             tableActions={[
+                {
+                    label: <span>{t('pages.mailTemplateManager.filter.id')}</span>,
+                    children: <Input
+                        className="rounded-xl"
+                        placeholder={t('pages.mailTemplateManager.filter.idPlaceholder')}
+                        defaultValue={filters.id}
+                        allowClear
+                        onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                        onChange={(e) => { if (e.target.value === '') setFilter('id', undefined); }}
+                    />,
+                },
                 {
                     label: t('pages.mailTemplateManager.filter.templateType'),
                     children: (

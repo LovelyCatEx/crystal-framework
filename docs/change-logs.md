@@ -1,5 +1,13 @@
 # 更新日志
 
+## v1.5.1
+
++ feat(web): 高级筛选组件提供自定义条件值渲染器。
++ feat(web): 所有 Manager 页面增加全局搜索框与主键 ID 搜索框。
++ feat(web): 新增 EnhancedNumberInput 组件，支持输入长整数。
++ fix(web): 修复页面因 URL 变更而重新加载的问题。
++ fix(web): 修复 URL 查询参数读取/覆盖非 schema 参数。
+
 ## v1.5.0
 
 2026-05-27

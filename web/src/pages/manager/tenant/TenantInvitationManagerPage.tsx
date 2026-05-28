@@ -1,4 +1,4 @@
-import {Button, Col, DatePicker, Form, InputNumber, message, Row, Switch, Tooltip} from "antd";
+import {Button, Col, DatePicker, Form, Input, InputNumber, message, Row, Switch, Tooltip} from "antd";
 import dayjs from "dayjs";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
@@ -6,19 +6,25 @@ import {
     type ManagerCreateInvitationDTO,
     type ManagerUpdateInvitationDTO
 } from "@/api/tenant/tenant-invitation.api.ts";
-import {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useTenantInvitationTableColumns} from "@/components/columns/TenantInvitationEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {LinkOutlined, PlusOutlined} from "@ant-design/icons";
 import {TenantDepartmentIdSelector, TenantMemberIdSelector} from "@/components/selector";
 import {useTranslation} from "react-i18next";
+import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
 export default function TenantInvitationManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();
     const columns = useTenantInvitationTableColumns();
+    const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
+
+    useEffect(() => {
+        pageRef?.current?.refreshData?.({ resetPage: true });
+    }, [filters.id]);
 
     const handleTenantChange = (tenantId: string | null) => {
         setSelectedTenantId(tenantId);
@@ -75,6 +81,25 @@ export default function TenantInvitationManagerPage() {
                     subtitle=""
                     showActionBar={false}
                     columns={columns}
+                    searchKeywords={['invitation_code']}
+                    queryParamsSync={syncToUrl}
+                    initialQueryValues={initialQueryValues}
+                    simpleFilters={[
+                        { field: 'id', operator: 'eq', value: filters.id },
+                    ]}
+                    tableActions={[
+                        {
+                            label: <span>{t('pages.tenantInvitationManager.filter.id')}</span>,
+                            children: <Input
+                                style={{ width: 160 }}
+                                placeholder={t('pages.tenantInvitationManager.filter.idPlaceholder')}
+                                defaultValue={filters.id}
+                                allowClear
+                                onPressEnter={(e: React.KeyboardEvent<HTMLInputElement>) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.value === '') setFilter('id', undefined); }}
+                            />,
+                        },
+                    ]}
                     tableRowActionsRender={(row) => (
                         <>
                             <Tooltip title={t('pages.tenantInvitationManager.copyInvitationLink')}>
