@@ -8,6 +8,8 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerUpdateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRepository
+import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
+import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantInvitationManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -15,11 +17,15 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.reflect.KClass
 
 @Service
 class TenantInvitationManagerServiceImpl(
     private val tenantInvitationRepository: TenantInvitationRepository,
+    private val tenantBenefitService: TenantBenefitService,
+    private val tenantService: TenantService,
     private val redisService: RedisService,
     private val snowIdGenerator: SnowIdGenerator,
     override val eventPublisher: ApplicationEventPublisher,
@@ -39,6 +45,38 @@ class TenantInvitationManagerServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateInvitationDTO): TenantInvitationEntity {
+        val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
+        val now = System.currentTimeMillis()
+
+        // Check total invitation count limit
+        val totalLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_count")
+        val existingTotal = tenantInvitationRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0
+        if (existingTotal >= totalLimit) {
+            throw BusinessException("Total invitation codes limit reached ($totalLimit)")
+        }
+
+        // Check daily creation limit
+        val dailyLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_day_count")
+        val startOfToday = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val todayCount = tenantInvitationRepository
+            .countByTenantIdAndCreatedTimeGreaterThanEqual(dto.tenantId, startOfToday)
+            .awaitFirstOrNull() ?: 0
+        if (todayCount >= dailyLimit) {
+            throw BusinessException("Daily invitation creation limit reached ($dailyLimit)")
+        }
+
+        // Check per-code usage limit (cap the invitationCount field)
+        val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_code_usage_limit")
+        if (dto.invitationCount > perCodeLimit) {
+            throw BusinessException("Per-code usage limit is $perCodeLimit, configured value ${dto.invitationCount} exceeds it")
+        }
+
+        // Check max validity days
+        val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_validity_days")
+        if (dto.expiresTime != null && dto.expiresTime > now + maxValidityDays * 86400000L) {
+            throw BusinessException("Invitation validity period cannot exceed $maxValidityDays days")
+        }
+
         val entity = TenantInvitationEntity(
             id = snowIdGenerator.nextId(),
             tenantId = dto.tenantId,
@@ -58,6 +96,23 @@ class TenantInvitationManagerServiceImpl(
         dto: ManagerUpdateInvitationDTO,
         original: TenantInvitationEntity
     ): TenantInvitationEntity {
+        val tireTypeId = tenantService.getByIdOrThrow(original.tenantId).tireTypeId
+        val now = System.currentTimeMillis()
+
+        dto.invitationCount?.let { newCount ->
+            val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_code_usage_limit")
+            if (newCount > perCodeLimit) {
+                throw BusinessException("Per-code usage limit is $perCodeLimit, configured value $newCount exceeds it")
+            }
+        }
+
+        dto.expiresTime?.let { newExpiresTime ->
+            val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_validity_days")
+            if (newExpiresTime > now + maxValidityDays * 86400000L) {
+                throw BusinessException("Invitation validity period cannot exceed $maxValidityDays days")
+            }
+        }
+
         return original.apply {
             departmentId = dto.departmentId
             dto.invitationCount?.let { invitationCount = it }

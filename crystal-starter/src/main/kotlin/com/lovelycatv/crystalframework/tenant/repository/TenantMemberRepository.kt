@@ -15,6 +15,8 @@ interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
 
     fun findByTenantIdAndMemberUserId(tenantId: Long, memberUserId: Long): Mono<TenantMemberEntity>
 
+    fun countByTenantId(tenantId: Long): Mono<Long>
+
     @Query("SELECT COUNT(*) FROM tenant_members WHERE created_time >= :startTime AND created_time < :endTime")
     fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
 }
