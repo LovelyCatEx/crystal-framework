@@ -19,10 +19,8 @@ class TenantBenefitController(
 ) {
     @GetMapping
     suspend fun getMyBenefits(authentication: UserAuthentication): ApiResponse<Map<String, String>> {
-        authentication.assertTenantIdNotNull()
-        val tenantId = authentication.tenantId ?: return ApiResponse.success(emptyMap())
-        val tenant = tenantService.getByIdOrNull(tenantId)
-            ?: return ApiResponse.success(emptyMap())
+        val tenantId = authentication.assertTenantIdNotNull()
+        val tenant = tenantService.getByIdOrNull(tenantId) ?: return ApiResponse.badRequest("tenant not found")
         val benefits = tenantBenefitService.getAllBenefitsForTireType(tenant.tireTypeId)
         return ApiResponse.success(benefits)
     }

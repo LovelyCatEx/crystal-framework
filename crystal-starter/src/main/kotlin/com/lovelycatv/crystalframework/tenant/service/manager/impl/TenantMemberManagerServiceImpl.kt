@@ -16,6 +16,7 @@ import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRela
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.service.UserManagerService
@@ -72,7 +73,7 @@ class TenantMemberManagerServiceImpl(
 
         // Check member count limit
         val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
-        val memberLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "member.max_count")
+        val memberLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.MEMBER_MAX_COUNT.featureKey)
         val memberCount = tenantMemberRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0
         if (memberCount >= memberLimit) {
             throw BusinessException("Member limit reached ($memberLimit)")

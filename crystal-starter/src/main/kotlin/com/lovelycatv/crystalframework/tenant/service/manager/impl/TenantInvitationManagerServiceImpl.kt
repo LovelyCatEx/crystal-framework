@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantInvitationManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -49,14 +50,14 @@ class TenantInvitationManagerServiceImpl(
         val now = System.currentTimeMillis()
 
         // Check total invitation count limit
-        val totalLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_count")
+        val totalLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_MAX_COUNT.featureKey)
         val existingTotal = tenantInvitationRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0
         if (existingTotal >= totalLimit) {
             throw BusinessException("Total invitation codes limit reached ($totalLimit)")
         }
 
         // Check daily creation limit
-        val dailyLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_day_count")
+        val dailyLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey)
         val startOfToday = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val todayCount = tenantInvitationRepository
             .countByTenantIdAndCreatedTimeGreaterThanEqual(dto.tenantId, startOfToday)
@@ -66,13 +67,13 @@ class TenantInvitationManagerServiceImpl(
         }
 
         // Check per-code usage limit (cap the invitationCount field)
-        val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_code_usage_limit")
+        val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_PER_CODE_USAGE_LIMIT.featureKey)
         if (dto.invitationCount > perCodeLimit) {
             throw BusinessException("Per-code usage limit is $perCodeLimit, configured value ${dto.invitationCount} exceeds it")
         }
 
         // Check max validity days
-        val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_validity_days")
+        val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_MAX_VALIDITY_DAYS.featureKey)
         if (dto.expiresTime != null && dto.expiresTime > now + maxValidityDays * 86400000L) {
             throw BusinessException("Invitation validity period cannot exceed $maxValidityDays days")
         }
@@ -100,14 +101,14 @@ class TenantInvitationManagerServiceImpl(
         val now = System.currentTimeMillis()
 
         dto.invitationCount?.let { newCount ->
-            val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.per_code_usage_limit")
+            val perCodeLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_PER_CODE_USAGE_LIMIT.featureKey)
             if (newCount > perCodeLimit) {
                 throw BusinessException("Per-code usage limit is $perCodeLimit, configured value $newCount exceeds it")
             }
         }
 
         dto.expiresTime?.let { newExpiresTime ->
-            val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, "invitation.max_validity_days")
+            val maxValidityDays = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_MAX_VALIDITY_DAYS.featureKey)
             if (newExpiresTime > now + maxValidityDays * 86400000L) {
                 throw BusinessException("Invitation validity period cannot exceed $maxValidityDays days")
             }

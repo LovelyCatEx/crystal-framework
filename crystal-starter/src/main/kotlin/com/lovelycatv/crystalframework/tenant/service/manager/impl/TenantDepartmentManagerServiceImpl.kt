@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -42,7 +43,7 @@ class TenantDepartmentManagerServiceImpl(
 
     override suspend fun create(dto: ManagerCreateTenantDepartmentDTO): TenantDepartmentEntity {
         val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
-        val departmentLimit = tenantBenefitService.getBenefitLimit(tireTypeId, "department.max_count")
+        val departmentLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.DEPARTMENT_MAX_COUNT.featureKey)
         val departmentCount = tenantDepartmentRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0
         if (departmentCount >= departmentLimit) {
             throw BusinessException("Department limit reached ($departmentLimit)")
