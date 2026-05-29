@@ -681,6 +681,9 @@ export const enUS: I18nRules = {
       title: 'Tier Benefit Features',
       subtitle: 'Manage tier benefit feature definitions',
       filter: {
+        featureKey: 'Feature Key',
+        name: 'Name',
+        description: 'Description',
         featureType: 'Feature Type',
         featureTypePlaceholder: 'Select feature type'
       },

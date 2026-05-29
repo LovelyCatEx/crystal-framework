@@ -30,7 +30,31 @@ export default function TenantTireBenefitFeatureManagerPage() {
             title={t('pages.tenantTireBenefitFeatureManager.title')}
             subtitle={t('pages.tenantTireBenefitFeatureManager.subtitle')}
             columns={columns}
-            searchKeywords={['featureKey', 'name']}
+            searchKeywords={['featureKey', 'name', 'description']}
+            filterableFields={[
+                { field: 'featureKey', type: 'text' as const, label: t('pages.tenantTireBenefitFeatureManager.filter.featureKey') },
+                { field: 'name', type: 'text' as const, label: t('pages.tenantTireBenefitFeatureManager.filter.name') },
+                { field: 'description', type: 'text' as const, label: t('pages.tenantTireBenefitFeatureManager.filter.description') },
+                {
+                    field: 'featureType',
+                    type: 'number' as const,
+                    label: t('pages.tenantTireBenefitFeatureManager.filter.featureType'),
+                    renderValue: ({ value, onChange }) => (
+                        <Select
+                            className="flex-1"
+                            value={value !== undefined ? Number(value) : undefined}
+                            allowClear
+                            placeholder={t('pages.tenantTireBenefitFeatureManager.filter.featureTypePlaceholder')}
+                            options={[
+                                { value: TenantBenefitType.BOOLEAN, label: getTenantBenefitType(TenantBenefitType.BOOLEAN) },
+                                { value: TenantBenefitType.LIMIT, label: getTenantBenefitType(TenantBenefitType.LIMIT) },
+                                { value: TenantBenefitType.ENUM, label: getTenantBenefitType(TenantBenefitType.ENUM) },
+                            ]}
+                            onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
+                        />
+                    ),
+                },
+            ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[

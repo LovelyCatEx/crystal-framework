@@ -678,6 +678,9 @@ export const zhCN: I18nRules = {
       title: '套餐权益配置',
       subtitle: '管理系统套餐权益项',
       filter: {
+        featureKey: '权益标识',
+        name: '权益名称',
+        description: '描述',
         featureType: '权益类型',
         featureTypePlaceholder: '选择权益类型'
       },
