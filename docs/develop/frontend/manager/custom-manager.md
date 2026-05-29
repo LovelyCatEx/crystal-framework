@@ -46,5 +46,5 @@ export default function MyCustomPage() {
 `ActionBarComponent` 提供统一的页面标题栏，`StandardCard` 提供统一的卡片容器样式，两者都是可选的，但建议保留以维持视觉一致性。
 
 ::: tip 国际化
-自定义页面的标题、副标题等文字应使用 i18n key，放在 `pages.{页面名}` 下。详见[国际化](../frontend/components/i18n)。
+自定义页面的标题、副标题等文字应使用 i18n key，放在 `pages.{页面名}` 下。详见[国际化](../i18n)。
 :::

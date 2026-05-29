@@ -531,5 +531,5 @@ pageRef.current?.clearSelection();
 ```
 
 ::: tip i18n Key Naming
-Page titles use `pages.{pageName}.title` / `.subtitle`, entity names use `entityNames.{entityName}`, filter labels use `pages.{pageName}.filter.{field}`, and advanced filter field labels use `components.filterBuilder.{field}`. See [i18n](../frontend/components/i18n).
+Page titles use `pages.{pageName}.title` / `.subtitle`, entity names use `entityNames.{entityName}`, filter labels use `pages.{pageName}.filter.{field}`, and advanced filter field labels use `components.filterBuilder.{field}`. See [i18n](../i18n).
 :::

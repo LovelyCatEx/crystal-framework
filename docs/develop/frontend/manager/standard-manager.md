@@ -530,5 +530,5 @@ pageRef.current?.clearSelection();
 ```
 
 ::: tip 国际化 Key 命名
-页面标题使用 `pages.{页面名}.title` / `.subtitle`，实体名称使用 `entityNames.{实体名}`，过滤条件标签使用 `pages.{页面名}.filter.{字段}`，高级筛选字段标签使用 `components.filterBuilder.{字段}`。详见[国际化](../frontend/components/i18n)。
+页面标题使用 `pages.{页面名}.title` / `.subtitle`，实体名称使用 `entityNames.{实体名}`，过滤条件标签使用 `pages.{页面名}.filter.{字段}`，高级筛选字段标签使用 `components.filterBuilder.{字段}`。详见[国际化](../i18n)。
 :::
