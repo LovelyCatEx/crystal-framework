@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantTireBenefitFeatureEnt
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitValueRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitFeatureManagerService
+import com.lovelycatv.crystalframework.tenant.utils.TenantBenefitValidator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -47,6 +48,12 @@ class TenantTireBenefitFeatureManagerServiceImpl(
             throw BusinessException("feature $featureKey already exists")
         }
 
+        dto.defaultValue?.let { defaultVal ->
+            if (defaultVal.isNotBlank()) {
+                TenantBenefitValidator.validateByType(dto.featureType, defaultVal, "defaultValue")
+            }
+        }
+
         val entity = TenantTireBenefitFeatureEntity(
             id = snowIdGenerator.nextId(),
             featureKey = featureKey,
@@ -72,6 +79,12 @@ class TenantTireBenefitFeatureManagerServiceImpl(
                     }
                 }
                 original.featureKey = trimmed
+            }
+        }
+        val effectiveFeatureType = dto.featureType ?: original.featureType
+        dto.defaultValue?.let { defaultVal ->
+            if (defaultVal.isNotBlank()) {
+                TenantBenefitValidator.validateByType(effectiveFeatureType, defaultVal, "defaultValue")
             }
         }
         return original.apply {

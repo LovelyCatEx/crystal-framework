@@ -1,13 +1,16 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
+import com.lovelycatv.crystalframework.sdk.rbac.tenant.benefit.types.TenantBenefitType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerCreateTenantTireBenefitValueDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerUpdateTenantTireBenefitValueDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantTireBenefitValueEntity
+import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitValueRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitValueManagerService
+import com.lovelycatv.crystalframework.tenant.utils.TenantBenefitValidator
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -18,6 +21,7 @@ import kotlin.reflect.KClass
 @Service
 class TenantTireBenefitValueManagerServiceImpl(
     private val benefitValueRepository: TenantTireBenefitValueRepository,
+    private val benefitFeatureRepository: TenantTireBenefitFeatureRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val redisService: RedisService,
     override val eventPublisher: ApplicationEventPublisher,
@@ -39,6 +43,7 @@ class TenantTireBenefitValueManagerServiceImpl(
         if (dto.featureValue.isBlank()) {
             throw BusinessException("featureValue must not be blank")
         }
+        validateFeatureValue(dto.featureId, dto.featureValue)
 
         val entity = TenantTireBenefitValueEntity(
             id = snowIdGenerator.nextId(),
@@ -51,10 +56,23 @@ class TenantTireBenefitValueManagerServiceImpl(
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantTireBenefitValueDTO, original: TenantTireBenefitValueEntity): TenantTireBenefitValueEntity {
+        val effectiveFeatureId = dto.featureId ?: original.featureId
+        dto.featureValue?.let { validateFeatureValue(effectiveFeatureId, it) }
         return original.apply {
             dto.tireTypeId?.let { tireTypeId = it }
             dto.featureId?.let { featureId = it }
             dto.featureValue?.let { featureValue = it }
+        }
+    }
+
+    private suspend fun validateFeatureValue(featureId: Long, featureValue: String) {
+        val feature = benefitFeatureRepository.findById(featureId).awaitFirstOrNull()
+            ?: throw BusinessException("Benefit feature not found: $featureId")
+
+        TenantBenefitValidator.validateByType(feature.featureType, featureValue, "featureValue")
+
+        if (TenantBenefitType.entries.find { it.typeId == feature.featureType } == TenantBenefitType.ENUM) {
+            TenantBenefitValidator.validateEnumAllowedValue(feature, featureValue)
         }
     }
 }

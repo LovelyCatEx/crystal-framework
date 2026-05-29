@@ -704,7 +704,11 @@ export const enUS: I18nRules = {
         },
         defaultValue: {
           label: 'Default Value',
-          placeholder: 'Default value'
+          placeholder: 'Default value',
+          placeholderBoolean: 'Select default',
+          placeholderLimit: 'Enter default number',
+          placeholderEnum: 'Type option and press Enter',
+          requiredEnum: 'Please enter at least one option'
         },
         description: {
           label: 'Description',
@@ -736,7 +740,10 @@ export const enUS: I18nRules = {
         featureValue: {
           label: 'Feature Value',
           required: 'Please enter feature value',
-          placeholder: 'Value for this feature'
+          placeholder: 'Value for this feature',
+          placeholderEnum: 'Select enum value',
+          booleanTrue: 'Enabled',
+          booleanFalse: 'Disabled'
         }
       }
     },
@@ -2105,9 +2112,6 @@ export const enUS: I18nRules = {
         description: 'Description',
         featureType: 'Feature Type',
         defaultValue: 'Default Value',
-        typeBoolean: 'Boolean',
-        typeLimit: 'Limit',
-        typeEnum: 'Enum'
       },
       tenantTireBenefitValue: {
         id: 'ID',
@@ -2431,6 +2435,12 @@ export const enUS: I18nRules = {
       0: 'GitHub',
       1: 'Google',
       2: 'QQ'
+    },
+
+    tenantBenefitType: {
+      0: 'Boolean',
+      1: 'Limit',
+      2: 'Enum'
     },
 
     announcementStatus: {

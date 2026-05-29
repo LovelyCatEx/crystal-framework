@@ -62,6 +62,7 @@ const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/Announ
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
+import {TenantTireBenefitFeatureManagerController} from "@/api/tenant/tenant-benefit.api.ts";
 import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
 import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
 import type {TFunction} from "i18next";
@@ -338,7 +339,9 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             path: '/manager/tenant-tire-benefit-features',
             icon: <SafetyOutlined />,
             label: t('menu.admin.tenantTireBenefitFeatures'),
-            page: <TenantTireBenefitFeatureManagerPage />,
+            page: <ProtectedControllerWarningWrapper controller={TenantTireBenefitFeatureManagerController}>
+                <TenantTireBenefitFeatureManagerPage />
+            </ProtectedControllerWarningWrapper>,
             group: 'tenant'
         },
         {

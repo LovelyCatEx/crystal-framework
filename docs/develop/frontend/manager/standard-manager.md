@@ -532,3 +532,29 @@ pageRef.current?.clearSelection();
 ::: tip 国际化 Key 命名
 页面标题使用 `pages.{页面名}.title` / `.subtitle`，实体名称使用 `entityNames.{实体名}`，过滤条件标签使用 `pages.{页面名}.filter.{字段}`，高级筛选字段标签使用 `components.filterBuilder.{字段}`。详见[国际化](../i18n)。
 :::
+
+::: warning 枚举类型字段
+当过滤栏或表格列涉及后端枚举类型时，**严禁**使用分散的 `t('components.columns.xxx.typeXxx')` 键或硬编码数字。必须按[枚举翻译四步流程](../i18n#枚举翻译)：
+
+1. `src/types/` 中定义 TypeScript 枚举常量
+2. `locales/{locale}.ts` 的 `enums` 命名空间添加翻译
+3. `enum-helpers.ts` 注册 `getXxx()` 函数
+4. 组件中通过 `getXxxType(EnumType.VALUE)` 获取标签
+
+```tsx
+// ❌ 错误
+options={[
+    { value: 0, label: t('components.columns.xxx.typeBoolean') },
+    { value: 1, label: t('components.columns.xxx.typeLimit') },
+]}
+
+// ✅ 正确
+import { MyType } from "@/types/xxx.types.ts";
+import { getMyType } from "@/i18n/enum-helpers.ts";
+
+options={[
+    { value: MyType.BOOLEAN, label: getMyType(MyType.BOOLEAN) },
+    { value: MyType.LIMIT, label: getMyType(MyType.LIMIT) },
+]}
+```
+:::

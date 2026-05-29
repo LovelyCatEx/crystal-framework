@@ -3,6 +3,7 @@ import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {TenantTireBenefitFeature} from "@/types/tenant/tenant-benefit.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
+import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 
 export function useTenantTireBenefitFeatureTableColumns(): EntityTableColumns<TenantTireBenefitFeature> {
@@ -47,12 +48,7 @@ export function useTenantTireBenefitFeatureTableColumns(): EntityTableColumns<Te
             key: "featureType",
             width: 120,
             render: function (_: unknown, row: TenantTireBenefitFeature): React.ReactNode | JSX.Element {
-                const typeMap: Record<number, string> = {
-                    0: t('components.columns.tenantTireBenefitFeature.typeBoolean'),
-                    1: t('components.columns.tenantTireBenefitFeature.typeLimit'),
-                    2: t('components.columns.tenantTireBenefitFeature.typeEnum'),
-                };
-                return <Tag>{typeMap[row.featureType] ?? row.featureType}</Tag>
+                return <Tag>{getTenantBenefitType(row.featureType)}</Tag>
             }
         },
         {

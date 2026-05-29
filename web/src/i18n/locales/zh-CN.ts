@@ -701,7 +701,11 @@ export const zhCN: I18nRules = {
         },
         defaultValue: {
           label: '默认值',
-          placeholder: '权益默认值'
+          placeholder: '权益默认值',
+          placeholderBoolean: '选择默认值',
+          placeholderLimit: '输入默认数值',
+          placeholderEnum: '输入选项后回车',
+          requiredEnum: '请至少输入一个选项'
         },
         description: {
           label: '描述',
@@ -733,7 +737,10 @@ export const zhCN: I18nRules = {
         featureValue: {
           label: '权益值',
           required: '请输入权益值',
-          placeholder: '权益的取值'
+          placeholder: '权益的取值',
+          placeholderEnum: '选择枚举值',
+          booleanTrue: '开启',
+          booleanFalse: '关闭'
         }
       }
     },
@@ -2103,9 +2110,6 @@ export const zhCN: I18nRules = {
         description: '描述',
         featureType: '权益类型',
         defaultValue: '默认值',
-        typeBoolean: '开关',
-        typeLimit: '数量限制',
-        typeEnum: '枚举'
       },
       tenantTireBenefitValue: {
         id: 'ID',
@@ -2428,6 +2432,12 @@ export const zhCN: I18nRules = {
       0: 'GitHub',
       1: 'Google',
       2: 'QQ'
+    },
+
+    tenantBenefitType: {
+      0: '开关',
+      1: '数量限制',
+      2: '枚举'
     },
 
     announcementStatus: {
