@@ -44,6 +44,8 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_FILE_RESOURCES)
         registry.register(TableConstants.TABLE_STORAGE_PROVIDERS)
         registry.register(TableConstants.TABLE_SYSTEM_ANNOUNCEMENTS)
+        registry.register(TableConstants.TABLE_TENANT_TIRE_BENEFIT_FEATURES)
+        registry.register(TableConstants.TABLE_TENANT_TIRE_BENEFIT_VALUES)
 
         configurers.forEach { it.configure(registry) }
 

@@ -677,6 +677,69 @@ export const enUS: I18nRules = {
         }
       }
     },
+    tenantTireBenefitFeatureManager: {
+      title: 'Tier Benefit Features',
+      subtitle: 'Manage tier benefit feature definitions',
+      filter: {
+        featureType: 'Feature Type',
+        featureTypePlaceholder: 'Select feature type'
+      },
+      modal: {
+        featureKey: {
+          label: 'Feature Key',
+          required: 'Please enter feature key',
+          maxLength: 'Feature key cannot exceed 64 characters',
+          placeholder: 'e.g. invitation.max_count'
+        },
+        name: {
+          label: 'Name',
+          required: 'Please enter name',
+          maxLength: 'Name cannot exceed 128 characters',
+          placeholder: 'Feature name'
+        },
+        featureType: {
+          label: 'Feature Type',
+          required: 'Please select feature type',
+          placeholder: 'Select feature type'
+        },
+        defaultValue: {
+          label: 'Default Value',
+          placeholder: 'Default value'
+        },
+        description: {
+          label: 'Description',
+          maxLength: 'Description cannot exceed 512 characters',
+          placeholder: 'Feature description'
+        }
+      }
+    },
+    tenantTireBenefitValueManager: {
+      title: 'Tier Benefit Values',
+      subtitle: 'Configure benefit values for each tier',
+      filter: {
+        tireTypeId: 'Tier Type',
+        tireTypeIdPlaceholder: 'Select tier type',
+        featureId: 'Feature',
+        featureIdPlaceholder: 'Select feature'
+      },
+      modal: {
+        tireTypeId: {
+          label: 'Tier Type',
+          required: 'Please select tier type',
+          placeholder: 'Select tier type'
+        },
+        featureId: {
+          label: 'Feature',
+          required: 'Please select feature',
+          placeholder: 'Select feature'
+        },
+        featureValue: {
+          label: 'Feature Value',
+          required: 'Please enter feature value',
+          placeholder: 'Value for this feature'
+        }
+      }
+    },
     tenantRoleManager: {
       title: 'Tenant Role Management',
       subtitle: 'Manage system tenant roles',
@@ -2036,6 +2099,22 @@ export const enUS: I18nRules = {
         name: 'Name',
         description: 'Description'
       },
+      tenantTireBenefitFeature: {
+        featureKey: 'Feature Key',
+        name: 'Name',
+        description: 'Description',
+        featureType: 'Feature Type',
+        defaultValue: 'Default Value',
+        typeBoolean: 'Boolean',
+        typeLimit: 'Limit',
+        typeEnum: 'Enum'
+      },
+      tenantTireBenefitValue: {
+        id: 'ID',
+        tireTypeId: 'Tier Type ID',
+        featureId: 'Feature ID',
+        featureValue: 'Feature Value'
+      },
       oAuthAccount: {
         identifier: 'Identifier',
         platform: 'Platform',
@@ -2379,6 +2458,8 @@ export const enUS: I18nRules = {
     tenantDepartment: 'Tenant Department',
     tenantInvitation: 'Invitation Code',
     tenantTireType: 'Tire Type',
+    tenantTireBenefitFeature: 'Benefit Feature',
+    tenantTireBenefitValue: 'Tier Benefit Value',
     fileResource: 'File Resource',
     storageProvider: 'Storage Provider',
     mailTemplate: 'Mail Template',
@@ -2427,6 +2508,8 @@ export const enUS: I18nRules = {
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',
       tenantTireTypes: 'Tire Type Management',
+      tenantTireBenefitFeatures: 'Benefit Features',
+      tenantTireBenefitValues: 'Tier Benefit Values',
       fileResources: 'File Resource Management',
       storageProviders: 'Storage Provider Management',
       mailTemplates: 'Mail Template Management',

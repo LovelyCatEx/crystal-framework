@@ -36,6 +36,8 @@ const MailTemplateTypeManagerPage = lazy(() => import("../pages/manager/mail/Mai
 const MailTemplateManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateManagerPage.tsx"));
 const TenantManagerPage = lazy(() => import("../pages/manager/tenant/TenantManagerPage.tsx"));
 const TenantTireTypeManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireTypeManagerPage.tsx"));
+const TenantTireBenefitFeatureManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireBenefitFeatureManagerPage.tsx"));
+const TenantTireBenefitValueManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireBenefitValueManagerPage.tsx"));
 const TenantMemberManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberManagerPage.tsx"));
 const TenantPermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantPermissionManagerPage.tsx"));
 const TenantRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantRoleManagerPage.tsx"));
@@ -329,6 +331,22 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <ShopOutlined />,
             label: t('menu.admin.tenantTireTypes'),
             page: <TenantTireTypeManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-tire-benefit-features',
+            path: '/manager/tenant-tire-benefit-features',
+            icon: <SafetyOutlined />,
+            label: t('menu.admin.tenantTireBenefitFeatures'),
+            page: <TenantTireBenefitFeatureManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-tire-benefit-values',
+            path: '/manager/tenant-tire-benefit-values',
+            icon: <SafetyOutlined />,
+            label: t('menu.admin.tenantTireBenefitValues'),
+            page: <TenantTireBenefitValueManagerPage />,
             group: 'tenant'
         },
         {

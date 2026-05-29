@@ -674,6 +674,69 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    tenantTireBenefitFeatureManager: {
+      title: '套餐权益配置',
+      subtitle: '管理系统套餐权益项',
+      filter: {
+        featureType: '权益类型',
+        featureTypePlaceholder: '选择权益类型'
+      },
+      modal: {
+        featureKey: {
+          label: '权益标识',
+          required: '请输入权益标识',
+          maxLength: '权益标识长度不能超过64个字符',
+          placeholder: '例如 invitation.max_count'
+        },
+        name: {
+          label: '名称',
+          required: '请输入名称',
+          maxLength: '名称长度不能超过128个字符',
+          placeholder: '权益名称'
+        },
+        featureType: {
+          label: '权益类型',
+          required: '请选择权益类型',
+          placeholder: '选择权益类型'
+        },
+        defaultValue: {
+          label: '默认值',
+          placeholder: '权益默认值'
+        },
+        description: {
+          label: '描述',
+          maxLength: '描述长度不能超过512个字符',
+          placeholder: '权益描述'
+        }
+      }
+    },
+    tenantTireBenefitValueManager: {
+      title: '套餐权益取值',
+      subtitle: '为各套餐配置权益的具体取值',
+      filter: {
+        tireTypeId: '套餐类型',
+        tireTypeIdPlaceholder: '选择套餐类型',
+        featureId: '权益项',
+        featureIdPlaceholder: '选择权益项'
+      },
+      modal: {
+        tireTypeId: {
+          label: '套餐类型',
+          required: '请选择套餐类型',
+          placeholder: '选择套餐类型'
+        },
+        featureId: {
+          label: '权益项',
+          required: '请选择权益项',
+          placeholder: '选择权益项'
+        },
+        featureValue: {
+          label: '权益值',
+          required: '请输入权益值',
+          placeholder: '权益的取值'
+        }
+      }
+    },
     tenantRoleManager: {
       title: '租户角色管理',
       subtitle: '管理系统租户角色',
@@ -2034,6 +2097,22 @@ export const zhCN: I18nRules = {
         name: '名称',
         description: '描述'
       },
+      tenantTireBenefitFeature: {
+        featureKey: '权益标识',
+        name: '名称',
+        description: '描述',
+        featureType: '权益类型',
+        defaultValue: '默认值',
+        typeBoolean: '开关',
+        typeLimit: '数量限制',
+        typeEnum: '枚举'
+      },
+      tenantTireBenefitValue: {
+        id: 'ID',
+        tireTypeId: '套餐类型 ID',
+        featureId: '权益 ID',
+        featureValue: '权益值'
+      },
       oAuthAccount: {
         identifier: '标识',
         platform: '平台',
@@ -2376,6 +2455,8 @@ export const zhCN: I18nRules = {
     tenantDepartment: '租户部门',
     tenantInvitation: '邀请码',
     tenantTireType: '套餐类型',
+    tenantTireBenefitFeature: '权益项',
+    tenantTireBenefitValue: '套餐权益取值',
     fileResource: '文件资源',
     storageProvider: '存储提供商',
     mailTemplate: '邮件模板',
@@ -2424,6 +2505,8 @@ export const zhCN: I18nRules = {
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
       tenantTireTypes: '套餐类型管理',
+      tenantTireBenefitFeatures: '套餐权益项管理',
+      tenantTireBenefitValues: '套餐权益取值',
       fileResources: '文件资源管理',
       storageProviders: '存储提供商管理',
       mailTemplates: '邮件模板管理',
