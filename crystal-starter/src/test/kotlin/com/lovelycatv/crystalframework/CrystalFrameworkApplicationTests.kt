@@ -29,7 +29,9 @@ abstract class CrystalFrameworkApplicationTests {
         val constructor = T::class.constructors.minBy { it.parameters.size }
         return constructor.call(
             *constructor.parameters.map {
-                applicationContext.getBean(it.type.javaType as Class<*>)
+                val requiredType = it.type.javaType as Class<*>
+                if ((ApplicationContext::class as Any).javaClass.isAssignableFrom(requiredType))
+                applicationContext.getBean(requiredType)
             }.toTypedArray()
         )
     }

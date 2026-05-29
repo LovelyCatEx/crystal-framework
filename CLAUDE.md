@@ -131,6 +131,13 @@ main.tsx → BrowserRouter
 **!!!严令禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
 **!!!严令禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
 
+**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
+**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
+**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
+**此规则同样适用于测试代码中的 feature key、permission name、table name、setting key 等所有可枚举的字符串值。**
+
+**工具方法优先使用 Kotlin 扩展函数。编写前先在项目内搜索是否有现成的扩展函数可用（路径如 `shared/utils/`、`shared/extensions/` 或模块内的 `utils/` 包）禁止不搜索直接写。**
+
 **所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
 **所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
 **所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**

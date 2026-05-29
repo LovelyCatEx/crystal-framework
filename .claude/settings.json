@@ -1,5 +1,25 @@
 {
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(pnpm build *)",
+      "Bash(mkdir *)",
+      "Bash(git log *)",
+      "Bash(npx tsc *)",
+      "Bash(mvn install *)",
+      "Bash(mvn compile *)",
+      "Bash(git show *)",
+      "Bash(git diff *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(pwd)",
+      "Bash(which *)"
+    ]
   }
 }
