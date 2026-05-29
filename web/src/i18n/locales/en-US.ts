@@ -2114,9 +2114,9 @@ export const enUS: I18nRules = {
         defaultValue: 'Default Value',
       },
       tenantTireBenefitValue: {
-        id: 'ID',
-        tireTypeId: 'Tier Type ID',
-        featureId: 'Feature ID',
+        recordInfo: 'Record Info',
+        tireType: 'Tier Type',
+        feature: 'Feature',
         featureValue: 'Feature Value'
       },
       oAuthAccount: {

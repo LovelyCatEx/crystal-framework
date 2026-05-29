@@ -2112,9 +2112,9 @@ export const zhCN: I18nRules = {
         defaultValue: '默认值',
       },
       tenantTireBenefitValue: {
-        id: 'ID',
-        tireTypeId: '套餐类型 ID',
-        featureId: '权益 ID',
+        recordInfo: '记录信息',
+        tireType: '套餐类型',
+        feature: '权益项',
         featureValue: '权益值'
       },
       oAuthAccount: {
