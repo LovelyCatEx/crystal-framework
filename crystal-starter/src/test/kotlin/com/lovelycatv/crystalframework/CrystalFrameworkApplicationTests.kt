@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework
 import com.lovelycatv.crystalframework.config.ReactiveTestConfig
 import com.lovelycatv.crystalframework.config.TestMockConfig
 import com.lovelycatv.crystalframework.config.TestMockInitializer
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.utils.testWithTransactionalRollback
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,8 +31,15 @@ abstract class CrystalFrameworkApplicationTests {
         return constructor.call(
             *constructor.parameters.map {
                 val requiredType = it.type.javaType as Class<*>
-                if ((ApplicationContext::class as Any).javaClass.isAssignableFrom(requiredType))
-                applicationContext.getBean(requiredType)
+                try {
+                    if (ApplicationContext::class.java.isAssignableFrom(requiredType)) {
+                        applicationContext
+                    } else {
+                        applicationContext.getBean(requiredType)
+                    }
+                } catch (e: Exception) {
+                    throw BusinessException("Could not resolve required bean ${requiredType.canonicalName}", e)
+                }
             }.toTypedArray()
         )
     }
