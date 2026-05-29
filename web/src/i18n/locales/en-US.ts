@@ -662,6 +662,8 @@ export const enUS: I18nRules = {
       filter: {
         id: 'Tier ID',
         idPlaceholder: 'Enter tier ID',
+        name: 'Name',
+        description: 'Description'
       },
       modal: {
         name: {

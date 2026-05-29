@@ -658,7 +658,9 @@ export const zhCN: I18nRules = {
       subtitle: '管理系统套餐类型',
       filter: {
         id: '套餐ID',
-        idPlaceholder: '输入套餐 ID'
+        idPlaceholder: '输入套餐 ID',
+        name: '名称',
+        description: '描述'
       },
       modal: {
         name: {
