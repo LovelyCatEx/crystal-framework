@@ -1,5 +1,10 @@
 # Generic Controller
 
+::: warning Return Type
+
+**All controller methods must explicitly return `ApiResponse<*>`** using `ApiResponse.success(data)` or `ApiResponse.failed(message)`. Never return raw entities, List, Map, or other primitive types — the framework does not provide a uniform wrapping layer, and the frontend `doGet` / `doPost` rely on the `ApiResponse` structure.
+:::
+
 ## Design Rationale
 
 The framework does not force all controllers to extend a base class. When business logic cannot be expressed as CRUD templates (authentication, file uploads, multi-step operations), use a standard Spring `@RestController`.

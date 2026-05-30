@@ -19,3 +19,16 @@ export interface TenantTireBenefitValue extends BaseEntity {
     featureId: string;
     featureValue: string;
 }
+
+// Overview — backend returns this to frontend, so it's a VO
+export interface TenantTireBenefitOverviewItemVO {
+    featureId: string;
+    featureKey: string;
+    name: string;
+    description: string | null;
+    featureType: number;
+    defaultValue: string | null;
+    value: string | null;
+    valueId: string | null;
+    isCustomized: boolean;
+}

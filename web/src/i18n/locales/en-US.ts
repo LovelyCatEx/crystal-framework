@@ -725,6 +725,24 @@ export const enUS: I18nRules = {
     tenantTireBenefitValueManager: {
       title: 'Tier Benefit Values',
       subtitle: 'Configure benefit values for each tier',
+      switch: {
+        overview: 'Benefit Overview',
+        management: 'Detailed Management',
+      },
+      overview: {
+        title: 'Tier Benefit Overview',
+        subtitle: 'View all benefit values configured for each tier type',
+        selectTireType: 'Select Tier Type',
+        selectTireTypePlaceholder: 'Please select a tier type',
+        name: 'Name',
+        featureKey: 'Feature Key',
+        featureType: 'Feature Type',
+        defaultValue: 'Default Value',
+        currentValue: 'Current Value',
+        default: 'Default',
+        save: 'Save',
+        cancel: 'Cancel',
+      },
       filter: {
         tireTypeId: 'Tier Type',
         tireTypeIdPlaceholder: 'Select tier type',
@@ -2524,7 +2542,7 @@ export const enUS: I18nRules = {
       tenantInvitations: 'Invitation Code Management',
       tenantTireTypes: 'Tire Type Management',
       tenantTireBenefitFeatures: 'Benefit Features',
-      tenantTireBenefitValues: 'Tier Benefit Values',
+      tenantTireBenefitValues: 'Tier Benefit Management',
       fileResources: 'File Resource Management',
       storageProviders: 'Storage Provider Management',
       mailTemplates: 'Mail Template Management',

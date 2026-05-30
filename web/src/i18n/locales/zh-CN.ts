@@ -722,6 +722,24 @@ export const zhCN: I18nRules = {
     tenantTireBenefitValueManager: {
       title: '套餐权益取值',
       subtitle: '为各套餐配置权益的具体取值',
+      switch: {
+        overview: '权益概览',
+        management: '详细管理',
+      },
+      overview: {
+        title: '套餐权益概览',
+        subtitle: '查看所有权益项在各套餐下的当前取值',
+        selectTireType: '选择套餐类型',
+        selectTireTypePlaceholder: '请选择套餐类型',
+        name: '权益名称',
+        featureKey: '权益标识',
+        featureType: '权益类型',
+        defaultValue: '默认值',
+        currentValue: '当前值',
+        default: '默认',
+        save: '保存',
+        cancel: '取消',
+      },
       filter: {
         tireTypeId: '套餐类型',
         tireTypeIdPlaceholder: '选择套餐类型',
@@ -2521,7 +2539,7 @@ export const zhCN: I18nRules = {
       tenantInvitations: '邀请码管理',
       tenantTireTypes: '套餐类型管理',
       tenantTireBenefitFeatures: '套餐权益项管理',
-      tenantTireBenefitValues: '套餐权益取值',
+      tenantTireBenefitValues: '套餐权益管理',
       fileResources: '文件资源管理',
       storageProviders: '存储提供商管理',
       mailTemplates: '邮件模板管理',

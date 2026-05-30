@@ -14,6 +14,8 @@
 **当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
 **当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
 
+**!important!当用户指出某个现象或问题时，禁止基于常规推测质疑用户。必须首先去验证是否真实，以代码和日志为准。**
+
 **在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
 **在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
 **在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
@@ -148,6 +150,10 @@ main.tsx → BrowserRouter
 **所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
 **所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
 
+**文档修改必须跨语言同步：修改 `docs/` 下某语言版本的文档时，必须同步更新其他语言版本（如 `docs/en/`）的对应文档。条目数量必须一一对应，禁止在翻译中额外添加原文没有的细节。**
+
+**后端枚举字段 Entity 规则：当实体字段对应枚举类型时，数据库存储枚举的 `typeId`（`Int`），Entity 中提供 `getRealXxx()` 方法转换为强类型枚举。详见 `docs/contribute/add-entity.md` 的「枚举字段」章节。**
+
 #### Controller
 
 一个 Controller 必须包含下面的所有注解：
@@ -159,13 +165,21 @@ main.tsx → BrowserRouter
 class DashboardController
 ```
 
+**所有 Controller 的方法必须显式返回 `ApiResponse<>` 类型（使用 `ApiResponse.success()` / `ApiResponse.failed()` 包装），禁止返回裸实体或 List。前端 `doGet` / `doPost` 依赖 `ApiResponse` 结构解析。**
+
 普通 Controller 只需要放入 `controller` 包即可，对于 Manager 页面用到的 Controller 必须放入 `controller/manager` 中，并且类的命名与相关 DTO 文件必须以 `Manager` 开头。
 
 `controller` 包中一般情况只允许有普通 Controller 文件、`dto`、`vo`、`manager` 包，而 `manager` 包的结构同理。
 
-**请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。**
-**请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。**
-**请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。**
+**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
+**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
+**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
+**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
+**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
+
+**Long 类型序列化规则：** 所有落在 `Long` 范围的字段（主键 `id`、外键 `xxxId`、时间戳 `xxxTime` 等）必须在 DTO / VO 中以 **字符串（`String`）** 传递，禁止在后端直接暴露 `Long` 类型的字段给前端。后端序列化时通过 `ToStringSerializer` 将 `Long` → `String`，前端对应类型为 `string`。
+
+**Jackson 版本：** 本项目使用 **Jackson 3（`tools.jackson` 包）** 进行 HTTP JSON 序列化/反序列化（全局配置注入 WebFlux codec）。所有 `@JsonSerialize`、`@JsonDeserialize` 等注解必须使用 `tools.jackson.databind.*` 下的版本，禁止使用 Jackson 2（`com.fasterxml.jackson.databind.*`）。可空 `Long?` 字段不受全局 `addSerializer(Long::class.java)` 覆盖（Kotlin module 的类型包装不匹配），必须手动加 `@get:JsonSerialize(using = ToStringSerializer::class)` 注解。参考 `BaseEntity` 中的写法。 
 
 **标准化 ManagerController**
 
@@ -181,6 +195,20 @@ class DashboardController
 
 **Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
 **Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
+
+**请求参数绑定规则：**
+
+Controller 方法接收前端参数时只允许以下三种方式，前端据此选择对应的 Content-Type：
+
+| 后端注解           | 适用场景                 | 前端调用方式                          |
+|----------------|----------------------|-----------------------------------|
+| `@RequestBody` | JSON 请求体（POST/PUT）    | `doPost(url, body, {'Content-Type': 'application/json'})` |
+| `@ModelAttribute` | form-urlencoded / 查询参数绑定到 DTO | `doPost(url, body)` 默认行为                |
+| `@RequestParam` | 单个查询参数（GET 为主）      | `doGet(url, { param: value })`     |
+
+- `@RequestBody` 用于 `@PostMapping`，接收 JSON 格式的请求体
+- `@ModelAttribute` 用于 `@PostMapping`，接收 `application/x-www-form-urlencoded` 格式
+- `@RequestParam` 用于 `@GetMapping`，绑定 URL 查询参数
 
 #### 实体类
 
@@ -243,6 +271,22 @@ export interface BaseEntity {
 
 对于组件中用到的类型/枚举，必须在 tsx 文件内的顶部（import 下方）使用 export 导出，对于组件内部的类型/枚举等不需要 export 导出。
 
+#### 页面文件命名
+
+**页面文件即使放在子文件夹中，也必须保留完整的模块前缀。** 例如 `pages/manager/tenant/benefit/` 中的文件必须命名为 `TenantTireBenefitValueContainer.tsx`、`TenantTireBenefitValueOverviewPage.tsx`，不能省略为 `Container.tsx`。
+
+#### Columns 具象化展示
+
+**禁止在表格列中只显示裸 ID。** 凡是关联了其他实体的外键字段（如 `tireTypeId`、`featureId` 等），必须通过异步请求获取关联实体的名称并展示。
+
+参考 `TenantInvitationEntityColumns.tsx` 的 `MemberInfoDisplay` / `DepartmentInfoDisplay` 模式：
+- 在 columns 文件中定义 `XxxDisplay` React 组件（带 loading → 名称 tag + ID tag 兜底）
+- 加载中显示 `<Spin size="small" />`
+- 加载失败显示红色 "Unknown" tag
+- 加载完成后显示实体名称 + ID tag（小字号）
+
+**禁止**使用 `render: (_, row) => <span>{row.tireTypeId}</span>` 这种方式。
+
 #### Context
 
 所有需要创建并提供上下文的组件，必须放入 `context` 文件夹而非 `compositions` 中。
@@ -252,6 +296,8 @@ export interface BaseEntity {
 所有 Api 文件必须放入 `api` 中的对应文件夹，必须按后端对应的模块/包进行分类，但 `request` / `system-request` 等特殊类型的 api 文件无需分类。
 
 所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹。
+
+**Long 类型接收规则：** 所有后端 `Long` 类型的字段（`id`、`xxxId`、`xxxTime` 等），前端 **只能用 `string` 类型来接**，禁止使用 `number`。后端序列化时用 `ToStringSerializer` 将 `Long` → `String` 再传给前端。详见后端 Controller 节的 Long 序列化规则。
 
 对于后端继承 BaseEntity 的实体类，前端对应也必须继承该类。
 
@@ -271,16 +317,23 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 | `U`      | Update DTO（默认 BaseManagerUpdateDTO，含 id）                                                 |
 | `D`      | Delete DTO（默认 BaseManagerDeleteDTO，含 ids: string[]）                                      |
 
-| 方法              | 请求方式     | URL 模式                 | 说明                            |
-|-----------------|----------|------------------------|-------------------------------|
-| `create(dto)`   | POST     | `/api{baseUrl}/create` | 新增                            |
-| `query(dto)`    | GET      | `/api{baseUrl}/query`  | 分页查询，返回 PaginatedResponseData |
-| `update(dto)`   | POST     | `/api{baseUrl}/update` | 更新                            |
-| `delete(dto)`   | POST     | `/api{baseUrl}/delete` | 删除                            |
-| `list(params?)` | GET      | `/api{baseUrl}/list`   | 全量列表                          |
-| `getById(id)`   | 复用 query | —                      | 按 ID 查单条                      |
+| 方法              | 请求方式     | URL 模式                      | 后端注解              | 前端 Content-Type                    | 说明                            |
+|-----------------|----------|-----------------------------|-------------------|-------------------------------------|-------------------------------|
+| `create(dto)`   | POST     | `/api{baseUrl}/create`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 新增                            |
+| `query(dto)`    | POST     | `/api{baseUrl}/query`       | `@RequestBody`    | `application/json`                  | 分页查询，返回 PaginatedResponseData |
+| `update(dto)`   | POST     | `/api{baseUrl}/update`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 更新                            |
+| `delete(dto)`   | POST     | `/api{baseUrl}/delete`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 删除                            |
+| `list(params?)` | GET      | `/api{baseUrl}/list?xxx=yyy` | `@GetMapping`     | query params                        | 全量列表                          |
+| `getById(id)`   | 复用 query | —                           | —                 | —                                   | 按 ID 查单条                      |
 
-**请求路径拼接规则**：`/api` + `baseUrl`（即构造时传入的路径，如 `/manager/mail-send-logs`）+ 方法路径。开发环境下 Vite 代理 `/api` → 后端 dev server。
+**请求路径拼接规则**：`/api` + `baseUrl`（即构造时传入的路径，如 `/manager/mail-send-logs`）+ 方法路径。开发环境下 Vite 代理将 `/api` 路径重写为 `/api/v1` 转发到后端。
+
+**请求 Content-Type 规则（前端）：**
+- **`@RequestBody` 后端** → 前端必须传 `{'Content-Type': 'application/json'}` 给 `doPost` / `doPut` / `doPatch`
+- **`@ModelAttribute` 后端** → 前端使用 `doPost` / `doPut` / `doDelete` 的默认行为（`application/x-www-form-urlencoded`）
+- **`@GetMapping` / `@RequestParam` 后端** → 前端使用 `doGet(url, queryParams)` 传查询参数
+- 禁止在 api 文件中直接使用 `axios` 实例、`URLSearchParams`、`qs` 等底层 API 手动构造请求体
+- `system-request.ts` 中的 `preProcessHeaders` 已默认对 POST/PUT/PATCH 设置 `application/x-www-form-urlencoded`，调用方只需在 `@RequestBody` 场景显式覆写
 
 调用 api 时，先判断该 api 是否有缓存的价值，本项目提供预设的 SWR-Composition 可用，位于 `compositions` 文件夹。内置多种方式，请按需使用。
 

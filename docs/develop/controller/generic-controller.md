@@ -66,6 +66,11 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 }
 ```
 
+::: warning 返回值类型
+
+**所有 Controller 方法必须显式返回 `ApiResponse<*>` 类型**，使用 `ApiResponse.success(data)` 或 `ApiResponse.failed(message)` 包装。禁止返回裸实体、List、Map 等原始类型——框架不提供统一包装层，前端 `doGet` / `doPost` 依赖 `ApiResponse` 结构（`code`、`message`、`data`）解析。
+:::
+
 ## 关键点
 
 - `UserAuthentication` 作为方法参数由框架自动注入，可直接获取当前用户/租户信息
