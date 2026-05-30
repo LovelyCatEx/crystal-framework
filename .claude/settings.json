@@ -16,10 +16,13 @@
       "Bash(grep *)",
       "Bash(find *)",
       "Bash(ls *)",
+      "Bash(lsof *)",
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(pwd)",
-      "Bash(which *)"
+      "Bash(which *)",
+      "Bash(sed *)",
+      "Bash(cat *)"
     ]
   }
 }

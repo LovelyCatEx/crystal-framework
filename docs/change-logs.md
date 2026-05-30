@@ -1,5 +1,25 @@
 # 更新日志
 
+## v1.6.0
+
+2026-05-30
+
+### 新功能
++ feat(tenant): 新增套餐权益模块，支持细粒度控制租户权益。
++ feat(web): 权益项管理/权益取值 Modal 表单根据权益类型动态切换输入控件。
++ feat(web): 套餐权益配置页面添加只读保护模式。
++ feat(web): 套餐权益配置、套餐类型管理页面支持高级组合条件搜索。
++ feat(web): 新组件 TenantInvitationFlow 邀请加入组织。
+
+### Bug 修复
++ fix(test): mock 用户重复导致 `User testuser already exists` 错误。
++ fix(test): 修复测试类通过 getTestClassInstance() 获取 ApplicationContext 失败。
+
+### 其他
++ docs: 新增 CLAUDE.md 三级优先级规则。
+
+---
+
 ## v1.5.2
 
 2026-05-28
