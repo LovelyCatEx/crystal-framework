@@ -89,6 +89,21 @@ object SystemPermission {
     const val ACTION_TENANT_TIRE_TYPE_UPDATE = "tenant.tire.type.update"
     const val ACTION_TENANT_TIRE_TYPE_DELETE = "tenant.tire.type.delete"
 
+    // Tenant Tire Benefit
+    const val MENU_TENANT_TIRE_BENEFIT_FEATURE_MANAGER = "tenant.tire.benefit.feature:/manager/tenant-tire-benefit-features"
+
+    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_CREATE = "tenant.tire.benefit.feature.create"
+    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ = "tenant.tire.benefit.feature.read"
+    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_UPDATE = "tenant.tire.benefit.feature.update"
+    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_DELETE = "tenant.tire.benefit.feature.delete"
+
+    const val MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER = "tenant.tire.benefit.value:/manager/tenant-tire-benefit-values"
+
+    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_CREATE = "tenant.tire.benefit.value.create"
+    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_READ = "tenant.tire.benefit.value.read"
+    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_UPDATE = "tenant.tire.benefit.value.update"
+    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_DELETE = "tenant.tire.benefit.value.delete"
+
     const val MENU_TENANT_DEPARTMENT_MANAGER = "tenant.department:/manager/tenant-departments"
 
     const val ACTION_TENANT_DEPARTMENT_CREATE = "tenant.department.create"

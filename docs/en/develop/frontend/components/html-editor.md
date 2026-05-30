@@ -23,3 +23,7 @@ import { HtmlEditor } from '@/components/HtmlEditor.tsx';
 | `onChange` | `(value: string) => void` | — | Change callback |
 | `placeholder` | `string` | — | Placeholder text in code mode |
 | `height` | `number` | `400` | Editor/preview area height in px |
+
+::: tip i18n
+The `placeholder` text in the example should use an i18n key under `components.htmlEditor`. See [i18n](../i18n).
+:::

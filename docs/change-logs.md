@@ -1,10 +1,36 @@
 # 更新日志
 
+## v1.6.0
+
+2026-05-30
+
+### 新功能
++ feat(tenant): 新增套餐权益模块，支持细粒度控制租户权益。
++ feat(web): 权益项管理/权益取值 Modal 表单根据权益类型动态切换输入控件。
++ feat(web): 套餐权益配置页面添加只读保护模式。
++ feat(web): 套餐权益配置、套餐类型管理页面支持高级组合条件搜索。
++ feat(web): 新组件 TenantInvitationFlow 邀请加入组织。
+
+### Bug 修复
++ fix(test): mock 用户重复导致 `User testuser already exists` 错误。
++ fix(test): 修复测试类通过 getTestClassInstance() 获取 ApplicationContext 失败。
+
+### 其他
++ docs: 新增 CLAUDE.md 三级优先级规则。
+
+---
+
 ## v1.5.2
 
 2026-05-28
 
-
++ refactor(system & monitor): 将系统统计数据迁移到 monitor 模块。
++ chore(shared): 后端统一使用通用配置类。
++ feat(schedule): @CronTaskExecutor 的 cron 表达式支持通过 Spring 动态计算。
++ feat(monitor): 新增定时任务，每天清理 14 天前的系统监控数据。
++ feat(sdk): 新增 Registry 预检查，防止重复注册引发未知问题。
++ feat(system): 新增系统公告数据表以及相关代码。
++ feat(web): 重新布局仪表盘页面并添加公告列表。
 
 ## v1.5.1
 

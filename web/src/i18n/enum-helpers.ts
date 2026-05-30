@@ -49,6 +49,10 @@ export function getStorageProviderType(type: number): string {
     return translateEnum('storageProviderType', type);
 }
 
+export function getTenantBenefitType(type: number): string {
+    return translateEnum('tenantBenefitType', type);
+}
+
 export function getOAuthPlatform(platform: number): string {
     return translateEnum('oAuthPlatform', platform);
 }

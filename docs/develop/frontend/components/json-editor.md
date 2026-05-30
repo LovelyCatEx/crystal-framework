@@ -28,3 +28,7 @@ import { JsonEditor } from '@/components/JsonEditor.tsx';
 - **源码模式**：直接编辑 JSON 文本，实时校验语法
 - 支持 6 种值类型：`string`、`number`、`boolean`、`object`、`array`、`null`
 - 底部状态栏实时显示 JSON 是否合法
+
+::: tip 国际化
+示例中的 `placeholder` 文字应使用 i18n key，放在 `components.jsonEditor` 下，详见[国际化](../i18n)。
+:::

@@ -23,3 +23,7 @@ import { HtmlEditor } from '@/components/HtmlEditor.tsx';
 | `onChange` | `(value: string) => void` | — | 代码变化回调 |
 | `placeholder` | `string` | — | 编辑模式下的占位文字 |
 | `height` | `number` | `400` | 编辑/预览区域高度（px） |
+
+::: tip 国际化
+示例中的 `placeholder` 文字应使用 i18n key，放在 `components.htmlEditor` 下，详见[国际化](../i18n)。
+:::

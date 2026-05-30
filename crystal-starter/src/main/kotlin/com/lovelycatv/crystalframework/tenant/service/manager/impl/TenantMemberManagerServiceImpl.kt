@@ -11,10 +11,12 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.Mana
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.vo.TenantMemberVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
+import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
+import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.service.UserManagerService
@@ -31,6 +33,7 @@ import kotlin.reflect.KClass
 class TenantMemberManagerServiceImpl(
     private val tenantMemberRepository: TenantMemberRepository,
     private val userManagerService: UserManagerService,
+    private val tenantBenefitService: TenantBenefitService,
     private val redisService: RedisService,
     private val snowIdGenerator: SnowIdGenerator,
     override val eventPublisher: ApplicationEventPublisher,
@@ -66,6 +69,14 @@ class TenantMemberManagerServiceImpl(
 
         if (existingMember != null) {
             throw BusinessException("Member already exists in this tenant")
+        }
+
+        // Check member count limit
+        val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
+        val memberLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.MEMBER_MAX_COUNT.featureKey)
+        val memberCount = tenantMemberRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0
+        if (memberCount >= memberLimit) {
+            throw BusinessException("Member limit reached ($memberLimit)")
         }
 
         val entity = TenantMemberEntity(

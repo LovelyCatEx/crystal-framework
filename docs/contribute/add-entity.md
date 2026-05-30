@@ -54,6 +54,40 @@ class OperationLogs(
 - `id`、`createdTime`、`modifiedTime`、`deletedTime` 透传给 `BaseEntity`
 - `id` 在 Service 层通过 `SnowIdGenerator.nextId()` 赋值
 
+### 枚举字段
+
+当实体字段对应枚举类型时，数据库存储枚举的 `ordinal`（`Int`），Entity 中提供 `getRealXxx()` 方法转换为强类型枚举，便于 Service 层安全使用：
+
+```kotlin
+@Table("tenant_tire_benefit_features")
+class TenantTireBenefitFeatureEntity(
+    id: Long = 0,
+    @Column("feature_type") var featureType: Int = 0,
+    // ...
+    createdTime: Long = System.currentTimeMillis(),
+    modifiedTime: Long = System.currentTimeMillis(),
+    deletedTime: Long? = null,
+) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
+
+    @JsonIgnore
+    fun getRealFeatureType(): TenantBenefitType {
+        return TenantBenefitType.entries.getOrNull(this.featureType)
+            ?: throw BusinessException("invalid featureType id $featureType")
+    }
+}
+```
+
+**规则：**
+
+| 规则 | 说明 |
+|------|------|
+| 存储 `ordinal` | 实体属性为 `var xxxType: Int`，存枚举的 `typeId` / `ordinal` |
+| `getRealXxx()` | 返回强类型枚举值，`@JsonIgnore` 不序列化到前端 |
+| 异常处理 | `entries.getOrNull()` 对非法值抛 `BusinessException` |
+| 使用时调用 | Service 中通过 `entity.getRealXxx()` 判断，`when` 分支覆盖所有枚举值 |
+
+现有参考：`TenantEntity.getRealStatus()`、`TenantMemberEntity.getRealStatus()`、`TenantPermissionEntity.getRealPermissionType()`。
+
 ### 非 BaseEntity
 
 ```kotlin

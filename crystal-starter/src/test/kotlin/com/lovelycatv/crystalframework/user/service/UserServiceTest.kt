@@ -20,9 +20,10 @@ class UserServiceTest(
     }
 
     suspend fun mockRegisteredUser(): UserEntity {
-        val username = "testuser"
+        val suffix = java.util.UUID.randomUUID().toString().substring(0, 8)
+        val username = "testuser-$suffix"
         val password = "testpassword"
-        val email = "test@crystalframework.com"
+        val email = "test-$suffix@crystalframework.com"
         val emailCode = "123456"
 
         userService.requestRegisterEmailConfirmationCode(email)

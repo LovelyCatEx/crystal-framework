@@ -44,3 +44,7 @@ export default function MyCustomPage() {
 ```
 
 `ActionBarComponent` provides a consistent page title bar, and `StandardCard` provides a consistent card container style. Both are optional but recommended for visual consistency.
+
+::: tip i18n
+Custom page titles, subtitles, and other text should use i18n keys under `pages.{pageName}`. See [i18n](../i18n).
+:::
