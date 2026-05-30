@@ -76,3 +76,7 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 - `UserAuthentication` is auto-injected as a method parameter by the framework
 - Endpoints without `@PreAuthorize` still require a valid token. For fully public access (no login), add `@Unauthorized` to the method
 - Always use `ApiResponse.success(...)` / `ApiResponse.error(...)` for return values
+
+::: tip DTO Usage
+Custom controller request DTOs **should not extend** `BaseManagerReadDTO`, `BaseManagerCreateDTO`, `BaseManagerUpdateDTO`, or `BaseManagerDeleteDTO`. These four CRUD DTOs are designed exclusively for the `StandardManagerController` hierarchy. Use lighter base classes like `PageQuery` for custom endpoints.
+:::

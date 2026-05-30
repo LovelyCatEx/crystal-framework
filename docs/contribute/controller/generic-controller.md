@@ -77,3 +77,7 @@ suspend fun getProfile(
 - 业务 API：`/api/{version}/ext/{plugin-name}/...`（插件扩展）
 - 管理端非 CRUD：`/api/{version}/manager/...`（系统内置）
 - 使用 `GlobalConstants.REQUEST_MAPPING_PREFIX` 引用 `/api/{version}` 前缀
+
+::: tip DTO 使用提醒
+自定义 Controller 的请求参数 DTO **不应继承** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO。这些 DTO 专为 `StandardManagerController` 体系设计，自定义端点应使用更轻量的基类如 `PageQuery`。
+:::

@@ -187,6 +187,8 @@ class DashboardController
 
 示例请参考 `ManagerOAuthAccountController` 类。
 
+**DTO 使用规则：** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO **仅限标准化 Controller（即 `StandardManagerController` 的子类）使用**。自定义 Controller（非标准化 Controller、普通 Controller、自定义端点）禁止混用这些 DTO，应使用更轻量的基类如 `PageQuery`。
+
 **非标准化 Controller**
 
 默认情况下，所有接口都要求访问时携带合法 Token，但允许使用 `@Unauthorized` 注解表示无需任何授权即可访问的接口。

@@ -77,3 +77,7 @@ suspend fun getProfile(
 - Business API: `/api/{version}/ext/{plugin-name}/...` (plugin extensions)
 - Admin non-CRUD: `/api/{version}/manager/...` (built-in)
 - Reference the prefix via `GlobalConstants.REQUEST_MAPPING_PREFIX`
+
+::: tip DTO Usage
+Custom controller request DTOs **should not extend** `BaseManagerReadDTO`, `BaseManagerCreateDTO`, `BaseManagerUpdateDTO`, or `BaseManagerDeleteDTO`. These four CRUD DTOs are designed exclusively for the `StandardManagerController` hierarchy. Use lighter base classes like `PageQuery` for custom endpoints.
+:::

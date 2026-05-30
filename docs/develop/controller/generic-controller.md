@@ -78,3 +78,7 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 - 返回值统一使用 `ApiResponse.success(...)` / `ApiResponse.error(...)`
 - **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
 - **普通 Controller 必须注入普通 Service（`service/` + `service/impl/`），禁止注入 Manager Service（`service/manager/`）**
+
+::: tip DTO 使用提醒
+自定义 Controller 的请求参数 DTO **不应继承** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO。这些 DTO 专为 `StandardManagerController` 体系设计，自定义端点应使用更轻量的基类如 `PageQuery`。
+:::

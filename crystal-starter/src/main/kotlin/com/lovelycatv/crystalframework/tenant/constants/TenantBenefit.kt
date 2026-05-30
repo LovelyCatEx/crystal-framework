@@ -5,6 +5,14 @@ import com.lovelycatv.crystalframework.sdk.rbac.tenant.benefit.types.TenantBenef
 import com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils
 
 object TenantBenefit {
+    val INVITATION_ENABLED = TenantBenefitDeclaration(
+        featureKey = "invitation.enabled",
+        name = "Create Invitation Code",
+        description = "Whether the tenant can create invitation codes",
+        featureType = TenantBenefitType.BOOLEAN,
+        defaultValue = "true",
+    )
+
     val INVITATION_MAX_COUNT = TenantBenefitDeclaration(
         featureKey = "invitation.max_count",
         name = "Invitation Code Create Limit",
@@ -42,7 +50,7 @@ object TenantBenefit {
         name = "Member Limit",
         description = "Maximum number of members a tenant can have",
         featureType = TenantBenefitType.LIMIT,
-        defaultValue = "20",
+        defaultValue = "100",
     )
 
     val DEPARTMENT_MAX_COUNT = TenantBenefitDeclaration(
@@ -50,31 +58,7 @@ object TenantBenefit {
         name = "Department Limit",
         description = "Maximum number of departments a tenant can create",
         featureType = TenantBenefitType.LIMIT,
-        defaultValue = "5",
-    )
-
-    val EXPORT_DATA_ENABLED = TenantBenefitDeclaration(
-        featureKey = "feature.export_data",
-        name = "Data Export",
-        description = "Enable data export functionality",
-        featureType = TenantBenefitType.BOOLEAN,
-        defaultValue = "false",
-    )
-
-    val ADVANCED_ANALYTICS_ENABLED = TenantBenefitDeclaration(
-        featureKey = "feature.advanced_analytics",
-        name = "Advanced Analytics",
-        description = "Enable advanced data analytics functionality",
-        featureType = TenantBenefitType.BOOLEAN,
-        defaultValue = "false",
-    )
-
-    val API_ACCESS_ENABLED = TenantBenefitDeclaration(
-        featureKey = "feature.api_access",
-        name = "API Access",
-        description = "Enable API access functionality",
-        featureType = TenantBenefitType.BOOLEAN,
-        defaultValue = "false",
+        defaultValue = "30",
     )
 
     fun allBenefits(): List<TenantBenefitDeclaration> {

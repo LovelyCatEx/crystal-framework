@@ -1,10 +1,10 @@
-import {Input, InputNumber, message, Select, Space, Table, Tag, Typography} from "antd";
+import {Button, Input, InputNumber, message, Select, Space, Table, Tag, Typography} from "antd";
 import {useEffect, useState} from "react";
 import {useSearchParams} from "react-router-dom";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {StandardCard} from "@/components/card/StandardCard.tsx";
 import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
-import {getBenefitOverview, TenantTireBenefitValueManagerController} from "@/api/tenant/tenant-benefit.api.ts";
+import {queryBenefitOverview, TenantTireBenefitValueManagerController} from "@/api/tenant/tenant-benefit.api.ts";
 import type {TenantTireBenefitOverviewItemVO} from "@/types/tenant/tenant-benefit.types.ts";
 import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
@@ -19,6 +19,9 @@ export default function BenefitOverviewPage() {
     const [loading, setLoading] = useState(false);
     const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<string>('');
+    const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
+    const [pageSize, setPageSize] = useState(Number(searchParams.get('pageSize')) || 20);
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         TenantTireTypeManagerController.list().then((res) => {
@@ -29,12 +32,13 @@ export default function BenefitOverviewPage() {
     useEffect(() => {
         if (!selectedTireId) return;
         setLoading(true);
-        getBenefitOverview(selectedTireId)
+        queryBenefitOverview({ page, pageSize, tireTypeId: selectedTireId })
             .then((res) => {
-                setItems(res.data || []);
+                setItems(res.data?.records || []);
+                setTotal(res.data?.total ?? 0);
             })
             .finally(() => setLoading(false));
-    }, [selectedTireId]);
+    }, [selectedTireId, page, pageSize]);
 
     const saveValue = async (row: TenantTireBenefitOverviewItemVO) => {
         if (!selectedTireId) return;
@@ -53,7 +57,11 @@ export default function BenefitOverviewPage() {
             }
             message.success(t('components.managerPageContainer.updateSuccess', { entityName: t('entityNames.tenantTireBenefitValue') }));
             setEditingFeatureId(null);
-            getBenefitOverview(selectedTireId).then((res) => setItems(res.data || []));
+            queryBenefitOverview({ page, pageSize, tireTypeId: selectedTireId })
+                .then((res) => {
+                    setItems(res.data?.records || []);
+                    setTotal(res.data?.total ?? 0);
+                });
         } catch {
             message.error(t('components.managerPageContainer.updateFailed', { entityName: t('entityNames.tenantTireBenefitValue') }));
         }
@@ -89,8 +97,8 @@ export default function BenefitOverviewPage() {
                             { value: 'false', label: t('pages.tenantTireBenefitValueManager.modal.featureValue.booleanFalse') },
                         ]}
                     />
-                    <Tag color="blue" className="cursor-pointer" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Tag>
-                    <Tag color="default" className="cursor-pointer" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Tag>
+                    <Button type="primary" size="small" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Button>
+                    <Button size="small" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Button>
                 </Space>
             );
         }
@@ -98,8 +106,8 @@ export default function BenefitOverviewPage() {
             return (
                 <Space>
                     <InputNumber className="w-32" min={0} value={Number(editValue)} onChange={(v) => setEditValue(String(v ?? '0'))} />
-                    <Tag color="blue" className="cursor-pointer" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Tag>
-                    <Tag color="default" className="cursor-pointer" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Tag>
+                    <Button type="primary" size="small" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Button>
+                    <Button size="small" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Button>
                 </Space>
             );
         }
@@ -108,16 +116,16 @@ export default function BenefitOverviewPage() {
             return (
                 <Space>
                     <Select className="w-32" value={editValue} onChange={setEditValue} options={enumOptions} />
-                    <Tag color="blue" className="cursor-pointer" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Tag>
-                    <Tag color="default" className="cursor-pointer" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Tag>
+                    <Button type="primary" size="small" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Button>
+                    <Button size="small" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Button>
                 </Space>
             );
         }
         return (
             <Space>
                 <Input className="w-32" value={editValue} onChange={(e) => setEditValue(e.target.value)} />
-                <Tag color="blue" className="cursor-pointer" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Tag>
-                <Tag color="default" className="cursor-pointer" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Tag>
+                <Button type="primary" size="small" onClick={() => saveValue(row)}>{t('pages.tenantTireBenefitValueManager.overview.save')}</Button>
+                <Button size="small" onClick={() => setEditingFeatureId(null)}>{t('pages.tenantTireBenefitValueManager.overview.cancel')}</Button>
             </Space>
         );
     };
@@ -128,7 +136,16 @@ export default function BenefitOverviewPage() {
             dataIndex: 'name',
             key: 'name',
             render: (_: unknown, row: TenantTireBenefitOverviewItemVO) => (
-                <span>{row.name}</span>
+                <div>
+                    <div>{row.name}</div>
+                    {row.description && (
+                        <div className="text-gray-400 text-xs leading-tight mt-0.5">
+                            {row.description.length > 128
+                                ? `${row.description.slice(0, 128)}...`
+                                : row.description}
+                        </div>
+                    )}
+                </div>
             ),
         },
         {
@@ -182,7 +199,11 @@ export default function BenefitOverviewPage() {
                             value={selectedTireId}
                             onChange={(value) => {
                                 setSelectedTireId(value || null);
-                                setSearchParams(value ? { tireId: value } : {}, { replace: true });
+                                setPage(1);
+                                const params = new URLSearchParams();
+                                if (value) params.set('tireId', value);
+                                params.set('page', '1');
+                                setSearchParams(params, { replace: true });
                             }}
                             options={(tireTypes ?? []).map((t) => ({ value: t.id, label: t.name }))}
                         />
@@ -193,7 +214,21 @@ export default function BenefitOverviewPage() {
                     loading={loading}
                     dataSource={items}
                     columns={columns}
-                    pagination={false}
+                    pagination={{
+                        showSizeChanger: true,
+                        current: page,
+                        pageSize,
+                        total,
+                        pageSizeOptions: [5, 10, 15, 20],
+                        onChange: (p, ps) => {
+                            setPage(p);
+                            setPageSize(ps);
+                            const params = new URLSearchParams(searchParams.toString());
+                            params.set('page', String(p));
+                            params.set('pageSize', String(ps));
+                            setSearchParams(params, { replace: true });
+                        },
+                    }}
                 />
             </StandardCard>
         </>
