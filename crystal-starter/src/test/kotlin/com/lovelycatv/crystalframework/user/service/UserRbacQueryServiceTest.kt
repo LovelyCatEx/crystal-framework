@@ -18,7 +18,7 @@ class UserRbacQueryServiceTest(
 
     @Test
     fun getUserRbacAccessInfo() {
-        withTransactionalRollback("s") {
+        withTransactionalRollback("getUserRbacAccessInfo") {
             val user = userServiceTest.mockRegisteredUser()
 
             val result = userRbacQueryService.getUserRbacAccessInfo(user.id)

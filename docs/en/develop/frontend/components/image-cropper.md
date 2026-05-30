@@ -48,3 +48,7 @@ function MyComponent() {
 | `minZoom` | `number` | `0.5` | Minimum zoom level |
 | `maxZoom` | `number` | `3` | Maximum zoom level |
 | `quality` | `number` | `0.9` | JPEG output quality (0-1) |
+
+::: tip i18n
+The `title`, `confirmText`, and `cancelText` props in the example should use i18n keys under `components.imageCropper`. See [i18n](../i18n).
+:::

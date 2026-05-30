@@ -323,3 +323,7 @@ Clear all selected rows.
 | `queryParamsSync` | `(params: object) => void` | — | URL sync callback |
 | `initialQueryValues` | `object` | — | Initial values from URL |
 | `children` | `ReactNode` | — | Content below the table |
+
+::: tip i18n Key Naming
+Column header keys use the `components.columns.{entityName}.{field}` format, e.g., `components.columns.user.nickname`. See [i18n](../i18n).
+:::

@@ -23,3 +23,7 @@ import { ActionBarComponent } from '@/components/ActionBarComponent.tsx';
 | `title` | `string` | Main title |
 | `subtitle` | `string` | Subtitle, optional |
 | `titleActions` | `ReactNode` | Action area on the right side, e.g. buttons |
+
+::: tip i18n
+The title, subtitle, and button text in the examples should use i18n keys. Page-level keys go under `pages.{pageName}` (e.g., `pages.userManager.title`). See [i18n](../i18n) for details.
+:::

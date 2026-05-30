@@ -55,6 +55,11 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_ANNOUNCEMENT_DELETE,
             SystemPermission.ACTION_ANNOUNCEMENT_LIST,
             SystemPermission.COMPONENT_DASHBOARD_ANNOUNCEMENTS,
+            // Tenant Tire Benefit
+            SystemPermission.MENU_TENANT_TIRE_BENEFIT_FEATURE_MANAGER,
+            SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ,
+            SystemPermission.MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER,
+            SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard

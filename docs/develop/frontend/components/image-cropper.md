@@ -48,3 +48,7 @@ function MyComponent() {
 | `minZoom` | `number` | `0.5` | 最小缩放比例 |
 | `maxZoom` | `number` | `3` | 最大缩放比例 |
 | `quality` | `number` | `0.9` | JPEG 输出质量（0-1） |
+
+::: tip 国际化
+示例中的 `title`、`confirmText`、`cancelText` 等文字应使用 i18n key，放在 `components.imageCropper` 下，详见[国际化](../i18n)。
+:::

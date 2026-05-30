@@ -662,6 +662,8 @@ export const enUS: I18nRules = {
       filter: {
         id: 'Tier ID',
         idPlaceholder: 'Enter tier ID',
+        name: 'Name',
+        description: 'Description'
       },
       modal: {
         name: {
@@ -674,6 +676,79 @@ export const enUS: I18nRules = {
           label: 'Description',
           maxLength: 'Description cannot exceed 512 characters',
           placeholder: 'Tier type description'
+        }
+      }
+    },
+    tenantTireBenefitFeatureManager: {
+      title: 'Tier Benefit Features',
+      subtitle: 'Manage tier benefit feature definitions',
+      filter: {
+        featureKey: 'Feature Key',
+        name: 'Name',
+        description: 'Description',
+        featureType: 'Feature Type',
+        featureTypePlaceholder: 'Select feature type'
+      },
+      modal: {
+        featureKey: {
+          label: 'Feature Key',
+          required: 'Please enter feature key',
+          maxLength: 'Feature key cannot exceed 64 characters',
+          placeholder: 'e.g. invitation.max_count'
+        },
+        name: {
+          label: 'Name',
+          required: 'Please enter name',
+          maxLength: 'Name cannot exceed 128 characters',
+          placeholder: 'Feature name'
+        },
+        featureType: {
+          label: 'Feature Type',
+          required: 'Please select feature type',
+          placeholder: 'Select feature type'
+        },
+        defaultValue: {
+          label: 'Default Value',
+          placeholder: 'Default value',
+          placeholderBoolean: 'Select default',
+          placeholderLimit: 'Enter default number',
+          placeholderEnum: 'Type option and press Enter',
+          requiredEnum: 'Please enter at least one option'
+        },
+        description: {
+          label: 'Description',
+          maxLength: 'Description cannot exceed 512 characters',
+          placeholder: 'Feature description'
+        }
+      }
+    },
+    tenantTireBenefitValueManager: {
+      title: 'Tier Benefit Values',
+      subtitle: 'Configure benefit values for each tier',
+      filter: {
+        tireTypeId: 'Tier Type',
+        tireTypeIdPlaceholder: 'Select tier type',
+        featureId: 'Feature',
+        featureIdPlaceholder: 'Select feature'
+      },
+      modal: {
+        tireTypeId: {
+          label: 'Tier Type',
+          required: 'Please select tier type',
+          placeholder: 'Select tier type'
+        },
+        featureId: {
+          label: 'Feature',
+          required: 'Please select feature',
+          placeholder: 'Select feature'
+        },
+        featureValue: {
+          label: 'Feature Value',
+          required: 'Please enter feature value',
+          placeholder: 'Value for this feature',
+          placeholderEnum: 'Select enum value',
+          booleanTrue: 'Enabled',
+          booleanFalse: 'Disabled'
         }
       }
     },
@@ -1919,6 +1994,7 @@ export const enUS: I18nRules = {
 
     columns: {
       fileResource: {
+        preview: 'Preview',
         fileInfo: 'File Info',
         fileSize: 'Size',
         md5: 'MD5',
@@ -2034,6 +2110,19 @@ export const enUS: I18nRules = {
       tenantTireType: {
         name: 'Name',
         description: 'Description'
+      },
+      tenantTireBenefitFeature: {
+        featureKey: 'Feature Key',
+        name: 'Name',
+        description: 'Description',
+        featureType: 'Feature Type',
+        defaultValue: 'Default Value',
+      },
+      tenantTireBenefitValue: {
+        recordInfo: 'Record Info',
+        tireType: 'Tier Type',
+        feature: 'Feature',
+        featureValue: 'Feature Value'
       },
       oAuthAccount: {
         identifier: 'Identifier',
@@ -2353,6 +2442,12 @@ export const enUS: I18nRules = {
       2: 'QQ'
     },
 
+    tenantBenefitType: {
+      0: 'Boolean',
+      1: 'Limit',
+      2: 'Enum'
+    },
+
     announcementStatus: {
       0: 'Draft',
       1: 'Published',
@@ -2378,6 +2473,8 @@ export const enUS: I18nRules = {
     tenantDepartment: 'Tenant Department',
     tenantInvitation: 'Invitation Code',
     tenantTireType: 'Tire Type',
+    tenantTireBenefitFeature: 'Benefit Feature',
+    tenantTireBenefitValue: 'Tier Benefit Value',
     fileResource: 'File Resource',
     storageProvider: 'Storage Provider',
     mailTemplate: 'Mail Template',
@@ -2426,6 +2523,8 @@ export const enUS: I18nRules = {
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',
       tenantTireTypes: 'Tire Type Management',
+      tenantTireBenefitFeatures: 'Benefit Features',
+      tenantTireBenefitValues: 'Tier Benefit Values',
       fileResources: 'File Resource Management',
       storageProviders: 'Storage Provider Management',
       mailTemplates: 'Mail Template Management',

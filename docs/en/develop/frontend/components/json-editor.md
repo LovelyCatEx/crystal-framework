@@ -28,3 +28,7 @@ import { JsonEditor } from '@/components/JsonEditor.tsx';
 - **Source mode**: Edit raw JSON text with real-time syntax validation
 - 6 value types: `string`, `number`, `boolean`, `object`, `array`, `null`
 - Status bar at the bottom shows whether the JSON is valid
+
+::: tip i18n
+The `placeholder` text in the example should use an i18n key under `components.jsonEditor`. See [i18n](../i18n).
+:::

@@ -11,7 +11,10 @@ import {type StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import type {User} from "@/types/user/user.types.ts";
 import {StorageProviderCard, UserCard} from "../card/pop";
 import {AvatarResource} from "../AvatarResource.tsx";
+import {ImageResource} from "../ImageResource.tsx";
 import {useTranslation} from "react-i18next";
+
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'avif'];
 
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
@@ -87,8 +90,18 @@ function UserCell({ userId }: { userId: string }) {
 
 export function useFileResourceTableColumns(): EntityTableColumns<FileResource> {
     const { t } = useTranslation();
-    
+
     return [
+        {
+            title: t('components.columns.fileResource.preview'),
+            dataIndex: 'id',
+            key: 'preview',
+            width: 80,
+            render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
+                const isImage = IMAGE_EXTENSIONS.includes(row.fileExtension?.toLowerCase());
+                return isImage ? <ImageResource fileEntityId={row.id} width={70} /> : null;
+            }
+        },
         {
             title: t('components.columns.fileResource.fileInfo'),
             dataIndex: "fileName",

@@ -36,6 +36,8 @@ const MailTemplateTypeManagerPage = lazy(() => import("../pages/manager/mail/Mai
 const MailTemplateManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateManagerPage.tsx"));
 const TenantManagerPage = lazy(() => import("../pages/manager/tenant/TenantManagerPage.tsx"));
 const TenantTireTypeManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireTypeManagerPage.tsx"));
+const TenantTireBenefitFeatureManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireBenefitFeatureManagerPage.tsx"));
+const TenantTireBenefitValueManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireBenefitValueManagerPage.tsx"));
 const TenantMemberManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberManagerPage.tsx"));
 const TenantPermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantPermissionManagerPage.tsx"));
 const TenantRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantRoleManagerPage.tsx"));
@@ -60,6 +62,7 @@ const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/Announ
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
 import {TenantPermissionManagerController} from "@/api/tenant/rbac/tenant-permission.api.ts";
+import {TenantTireBenefitFeatureManagerController} from "@/api/tenant/tenant-benefit.api.ts";
 import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
 import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
 import type {TFunction} from "i18next";
@@ -329,6 +332,24 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <ShopOutlined />,
             label: t('menu.admin.tenantTireTypes'),
             page: <TenantTireTypeManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-tire-benefit-features',
+            path: '/manager/tenant-tire-benefit-features',
+            icon: <SafetyOutlined />,
+            label: t('menu.admin.tenantTireBenefitFeatures'),
+            page: <ProtectedControllerWarningWrapper controller={TenantTireBenefitFeatureManagerController}>
+                <TenantTireBenefitFeatureManagerPage />
+            </ProtectedControllerWarningWrapper>,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-tire-benefit-values',
+            path: '/manager/tenant-tire-benefit-values',
+            icon: <SafetyOutlined />,
+            label: t('menu.admin.tenantTireBenefitValues'),
+            page: <TenantTireBenefitValueManagerPage />,
             group: 'tenant'
         },
         {

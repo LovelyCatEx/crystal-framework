@@ -58,7 +58,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.5.2</revision>
+        <revision>1.6.0</revision>
     </properties>
 
     <dependencyManagement>

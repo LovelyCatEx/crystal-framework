@@ -28,6 +28,11 @@ export default function TenantTireTypeManagerPage() {
             subtitle={t('pages.tenantTireTypeManager.subtitle')}
             columns={columns}
             searchKeywords={['name', 'description']}
+            filterableFields={[
+                { field: 'id', type: 'number' as const, label: t('pages.tenantTireTypeManager.filter.id') },
+                { field: 'name', type: 'text' as const, label: t('pages.tenantTireTypeManager.filter.name') },
+                { field: 'description', type: 'text' as const, label: t('pages.tenantTireTypeManager.filter.description') },
+            ]}
             queryParamsSync={syncToUrl}
             initialQueryValues={initialQueryValues}
             simpleFilters={[
