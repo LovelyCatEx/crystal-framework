@@ -49,6 +49,11 @@ class TenantInvitationManagerServiceImpl(
         val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
         val now = System.currentTimeMillis()
 
+        // Check invitation feature is enabled for this tenant's tire type
+        if (!tenantBenefitService.hasBenefit(tireTypeId, TenantBenefit.INVITATION_ENABLED.featureKey)) {
+            throw BusinessException("Invitations are not enabled for your plan")
+        }
+
         // Check total invitation count limit
         val totalLimit = tenantBenefitService.getBenefitLimit(tireTypeId, TenantBenefit.INVITATION_MAX_COUNT.featureKey)
         val existingTotal = tenantInvitationRepository.countByTenantId(dto.tenantId).awaitFirstOrNull() ?: 0

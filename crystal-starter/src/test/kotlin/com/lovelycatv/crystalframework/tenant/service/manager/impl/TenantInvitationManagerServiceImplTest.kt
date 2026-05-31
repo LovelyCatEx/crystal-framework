@@ -204,4 +204,59 @@ class TenantInvitationManagerServiceImplTest(
             assertTrue((ex as BusinessException).message!!.contains("validity"))
         }
     }
+
+    @Test
+    fun createInvitationFailsWhenInvitationDisabled() {
+        withTransactionalRollback("invitation-enabled-false") {
+            benefitServiceTest.ensureBenefitFeaturesExist()
+            val tireType = tireTypeServiceTest.mockTireType()
+            val owner = tenantServiceTest.mockUser()
+            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_ENABLED.featureKey, "false")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "10")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_CODE_USAGE_LIMIT.featureKey, "5")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_VALIDITY_DAYS.featureKey, "30")
+
+            val result = runCatching {
+                invitationManagerService.create(
+                    ManagerCreateInvitationDTO(
+                        tenantId = tenant.id,
+                        creatorMemberId = member.id,
+                        invitationCount = 1,
+                    )
+                )
+            }
+            val ex = result.exceptionOrNull()
+            assertNotNull(ex)
+            assertTrue(ex is BusinessException)
+        }
+    }
+
+    @Test
+    fun createInvitationSucceedsWhenInvitationEnabledByDefault() {
+        withTransactionalRollback("invitation-enabled-default") {
+            benefitServiceTest.ensureBenefitFeaturesExist()
+            val tireType = tireTypeServiceTest.mockTireType()
+            val owner = tenantServiceTest.mockUser()
+            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "10")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_CODE_USAGE_LIMIT.featureKey, "5")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_VALIDITY_DAYS.featureKey, "30")
+
+            val invitation = invitationManagerService.create(
+                ManagerCreateInvitationDTO(
+                    tenantId = tenant.id,
+                    creatorMemberId = member.id,
+                    invitationCount = 1,
+                )
+            )
+            assertNotNull(invitation)
+        }
+    }
 }
