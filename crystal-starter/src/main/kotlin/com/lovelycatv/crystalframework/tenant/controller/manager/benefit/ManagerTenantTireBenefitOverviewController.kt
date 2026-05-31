@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerReadTenantTireBenefitFeatureDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerReadTenantTireBenefitOverviewDTO
+import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.ManagerReadTenantTireBenefitOverviewGroupVO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.ManagerReadTenantTireBenefitOverviewItemVO
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitValueRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitFeatureManagerService
@@ -44,24 +45,35 @@ class ManagerTenantTireBenefitOverviewController(
             )
         )
 
-        // 2. Fetch all bound values for this tire type
-        val values = benefitValueRepository.findByTireTypeId(dto.tireTypeId)
+        // 2. Fetch bound values for ALL requested tire types
+        val allValues = benefitValueRepository.findByTireTypeIdIn(dto.tireTypeIds)
             .collectList().awaitFirstOrNull() ?: emptyList()
-        val valueMap = values.associateBy { it.featureId }
 
-        // 3. Merge features with their values into overview VOs
-        val records = featurePage.records.map { feature ->
-            val existingValue = valueMap[feature.id]
-            ManagerReadTenantTireBenefitOverviewItemVO(
-                featureId = feature.id,
-                featureKey = feature.featureKey,
-                name = feature.name,
-                description = feature.description,
-                featureType = feature.featureType,
-                defaultValue = feature.defaultValue,
-                value = existingValue?.featureValue,
-                valueId = existingValue?.id,
-                isCustomized = existingValue != null,
+        // 3. Build: tireTypeId -> (featureId -> entity) lookup map
+        val valueMapByTire = allValues
+            .groupBy { it.tireTypeId }
+            .mapValues { (_, values) -> values.associateBy { it.featureId } }
+
+        // 4. For each tire type, merge features with their values
+        val records = dto.tireTypeIds.map { tireId ->
+            val tireValueMap = valueMapByTire[tireId] ?: emptyMap()
+            val items = featurePage.records.map { feature ->
+                val existingValue = tireValueMap[feature.id]
+                ManagerReadTenantTireBenefitOverviewItemVO(
+                    featureId = feature.id,
+                    featureKey = feature.featureKey,
+                    name = feature.name,
+                    description = feature.description,
+                    featureType = feature.featureType,
+                    defaultValue = feature.defaultValue,
+                    value = existingValue?.featureValue,
+                    valueId = existingValue?.id,
+                    isCustomized = existingValue != null,
+                )
+            }
+            ManagerReadTenantTireBenefitOverviewGroupVO(
+                tireTypeId = tireId,
+                items = items,
             )
         }
 

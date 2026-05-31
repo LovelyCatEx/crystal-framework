@@ -16,6 +16,4 @@ interface TenantTireBenefitValueManagerService : CachedBaseManagerService<
         ManagerReadTenantTireBenefitValueDTO,
         ManagerUpdateTenantTireBenefitValueDTO,
         ManagerDeleteTenantTireBenefitValueDTO
-> {
-    suspend fun getOverview(tireTypeId: Long): List<ManagerReadTenantTireBenefitOverviewItemVO>
-}
+>

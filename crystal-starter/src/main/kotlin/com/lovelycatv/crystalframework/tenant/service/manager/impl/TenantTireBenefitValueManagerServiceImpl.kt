@@ -76,25 +76,4 @@ class TenantTireBenefitValueManagerServiceImpl(
             TenantBenefitValidator.validateEnumAllowedValue(feature, featureValue)
         }
     }
-
-    override suspend fun getOverview(tireTypeId: Long): List<ManagerReadTenantTireBenefitOverviewItemVO> {
-        val features = benefitFeatureRepository.findAll().collectList().awaitFirstOrNull() ?: emptyList()
-        val values = benefitValueRepository.findByTireTypeId(tireTypeId).collectList().awaitFirstOrNull() ?: emptyList()
-        val valueMap = values.associateBy { it.featureId }
-
-        return features.map { feature ->
-            val existingValue = valueMap[feature.id]
-            ManagerReadTenantTireBenefitOverviewItemVO(
-                featureId = feature.id,
-                featureKey = feature.featureKey,
-                name = feature.name,
-                description = feature.description,
-                featureType = feature.featureType,
-                defaultValue = feature.defaultValue,
-                value = existingValue?.featureValue,
-                valueId = existingValue?.id,
-                isCustomized = existingValue != null,
-            )
-        }
-    }
 }

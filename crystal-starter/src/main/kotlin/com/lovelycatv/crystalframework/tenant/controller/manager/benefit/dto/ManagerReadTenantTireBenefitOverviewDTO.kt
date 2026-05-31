@@ -5,5 +5,5 @@ import com.lovelycatv.crystalframework.shared.request.PageQuery
 data class ManagerReadTenantTireBenefitOverviewDTO(
     override val page: Int,
     override val pageSize: Int = 20,
-    val tireTypeId: Long,
+    val tireTypeIds: List<Long>,
 ) : PageQuery(page, pageSize)

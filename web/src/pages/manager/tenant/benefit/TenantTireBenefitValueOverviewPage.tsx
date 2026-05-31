@@ -32,9 +32,9 @@ export default function BenefitOverviewPage() {
     useEffect(() => {
         if (!selectedTireId) return;
         setLoading(true);
-        queryBenefitOverview({ page, pageSize, tireTypeId: selectedTireId })
+        queryBenefitOverview({ page, pageSize, tireTypeIds: [selectedTireId] })
             .then((res) => {
-                setItems(res.data?.records || []);
+                setItems(res.data?.records[0]?.items || []);
                 setTotal(res.data?.total ?? 0);
             })
             .finally(() => setLoading(false));
@@ -57,9 +57,9 @@ export default function BenefitOverviewPage() {
             }
             message.success(t('components.managerPageContainer.updateSuccess', { entityName: t('entityNames.tenantTireBenefitValue') }));
             setEditingFeatureId(null);
-            queryBenefitOverview({ page, pageSize, tireTypeId: selectedTireId })
+            queryBenefitOverview({ page, pageSize, tireTypeIds: [selectedTireId] })
                 .then((res) => {
-                    setItems(res.data?.records || []);
+                    setItems(res.data?.records[0]?.items || []);
                     setTotal(res.data?.total ?? 0);
                 });
         } catch {
