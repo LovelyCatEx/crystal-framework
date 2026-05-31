@@ -723,7 +723,8 @@ export const zhCN: I18nRules = {
       title: '套餐权益取值',
       subtitle: '为各套餐配置权益的具体取值',
       switch: {
-        overview: '权益概览',
+        planBenefits: '套餐权益',
+        crossOverview: '权益概览',
         management: '详细管理',
       },
       overview: {
@@ -739,6 +740,17 @@ export const zhCN: I18nRules = {
         default: '默认',
         save: '保存',
         cancel: '取消',
+      },
+      crossOverview: {
+        title: '权益概览',
+        subtitle: '查看所有套餐在各权益下的当前取值对比',
+        name: '权益名称',
+        description: '说明',
+        featureKey: '标识',
+        featureType: '类型',
+        readOnly: '只读',
+        edit: '编辑',
+        showDefaultValue: '显示默认值',
       },
       filter: {
         tireTypeId: '套餐类型',

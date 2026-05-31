@@ -726,7 +726,8 @@ export const enUS: I18nRules = {
       title: 'Tier Benefit Values',
       subtitle: 'Configure benefit values for each tier',
       switch: {
-        overview: 'Benefit Overview',
+        planBenefits: 'Plan Benefits',
+        crossOverview: 'Benefit Overview',
         management: 'Detailed Management',
       },
       overview: {
@@ -742,6 +743,17 @@ export const enUS: I18nRules = {
         default: 'Default',
         save: 'Save',
         cancel: 'Cancel',
+      },
+      crossOverview: {
+        title: 'Benefit Overview',
+        subtitle: 'Compare benefit values across all plan types',
+        name: 'Benefit Name',
+        description: 'Description',
+        featureKey: 'Key',
+        featureType: 'Type',
+        readOnly: 'Read Only',
+        edit: 'Edit',
+        showDefaultValue: 'Show Default',
       },
       filter: {
         tireTypeId: 'Tier Type',
