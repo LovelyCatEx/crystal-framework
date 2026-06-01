@@ -39,9 +39,9 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['mail.smtp.port', t('pages.systemSettingsManager.keys.mail.smtp.port')],
         ['mail.smtp.ssl', t('pages.systemSettingsManager.keys.mail.smtp.ssl')],
         ['mail.smtp.fromEmail', t('pages.systemSettingsManager.keys.mail.smtp.fromEmail')],
-        ['lark.app.appId', t('pages.systemSettingsManager.keys.lark.app.appId')],
-        ['lark.app.appSecret', t('pages.systemSettingsManager.keys.lark.app.appSecret')],
-        ['lark.app.baseUrl', t('pages.systemSettingsManager.keys.lark.app.baseUrl')],
+        ['messageChannel.lark.appId', t('pages.systemSettingsManager.keys.messageChannel.lark.appId')],
+        ['messageChannel.lark.appSecret', t('pages.systemSettingsManager.keys.messageChannel.lark.appSecret')],
+        ['messageChannel.lark.baseUrl', t('pages.systemSettingsManager.keys.messageChannel.lark.baseUrl')],
         ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
         ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
         ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
@@ -65,7 +65,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['basic.waterMark', { label: t('pages.systemSettingsManager.groups.basic.waterMark'), icon: <CopyrightCircleOutlined /> }],
         ['bootstrap', { label: t('pages.systemSettingsManager.groups.bootstrap'), icon: <SettingOutlined /> }],
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
-        ['lark.app', { label: t('pages.systemSettingsManager.groups.lark.app'), icon: <RobotOutlined /> }],
+        ['messageChannel.lark', { label: t('pages.systemSettingsManager.groups.messageChannel.lark'), icon: <RobotOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
     ]);
 
@@ -86,7 +86,7 @@ export function useSettingsTabToTranslationMap(): Map<string, string> {
         ['basic', t('pages.systemSettingsManager.tabs.basic')],
         ['bootstrap', t('pages.systemSettingsManager.tabs.bootstrap')],
         ['mail', t('pages.systemSettingsManager.tabs.mail')],
-        ['lark', t('pages.systemSettingsManager.tabs.lark')],
+        ['messageChannel', t('pages.systemSettingsManager.tabs.messageChannel')],
         ['security', t('pages.systemSettingsManager.tabs.security')],
     ]);
 

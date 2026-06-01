@@ -63,7 +63,7 @@ class LarkChannelProvider(
                 errorMessage = "LarkRecipient must carry at least one of openId/userId/unionId/email/chatId",
             )
 
-        val larkConfig = systemModuleClient.getSystemSettings()?.lark?.app
+        val larkConfig = systemModuleClient.getSystemSettings()?.messageChannel?.lark
             ?: return SendResult.failed(
                 channelType = channelType,
                 errorCode = ERR_SETTINGS_UNAVAILABLE,
@@ -73,7 +73,7 @@ class LarkChannelProvider(
             return SendResult.failed(
                 channelType = channelType,
                 errorCode = ERR_NOT_CONFIGURED,
-                errorMessage = "Lark app credentials are not configured (lark.app.appId / appSecret)",
+                errorMessage = "Lark app credentials are not configured (messageChannel.lark.appId / appSecret)",
             )
         }
 
@@ -115,7 +115,7 @@ class LarkChannelProvider(
 
     private suspend fun renderContent(
         message: ChainMessage,
-        @Suppress("UNUSED_PARAMETER") larkConfig: SystemSettings.Lark.App,
+        @Suppress("UNUSED_PARAMETER") larkConfig: SystemSettings.MessageChannel.Lark,
     ): Pair<String, String> {
         val needsPost = !message.title.isNullOrBlank() || chainHasImage(message.chain)
         return if (needsPost) {

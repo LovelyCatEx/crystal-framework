@@ -94,7 +94,7 @@ class SystemSettingsServiceImpl(
             basic = getSystemBasicSettings(),
             bootstrap = getSystemBootstrapSettings(),
             mail = getSystemMailSettings(),
-            lark = getSystemLarkSettings(),
+            messageChannel = getSystemMessageChannelSettings(),
             security = getSystemSecuritySettings(),
         ).also {
             this.cachedSystemSettings = it
@@ -134,12 +134,12 @@ class SystemSettingsServiceImpl(
         )
     }
 
-    override suspend fun getSystemLarkSettings(): SystemSettings.Lark {
-        return SystemSettings.Lark(
-            app = SystemSettings.Lark.App(
-                appId = getSettings(SystemSettingsConstants.Lark.App.APP_ID)!!,
-                appSecret = getSettings(SystemSettingsConstants.Lark.App.APP_SECRET)!!,
-                baseUrl = getSettings(SystemSettingsConstants.Lark.App.BASE_URL)!!,
+    override suspend fun getSystemMessageChannelSettings(): SystemSettings.MessageChannel {
+        return SystemSettings.MessageChannel(
+            lark = SystemSettings.MessageChannel.Lark(
+                appId = getSettings(SystemSettingsConstants.MessageChannel.Lark.APP_ID)!!,
+                appSecret = getSettings(SystemSettingsConstants.MessageChannel.Lark.APP_SECRET)!!,
+                baseUrl = getSettings(SystemSettingsConstants.MessageChannel.Lark.BASE_URL)!!,
             )
         )
     }
@@ -174,9 +174,9 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
 
-        setSettings(SystemSettingsConstants.Lark.App.APP_ID, settings.lark.app.appId)
-        setSettings(SystemSettingsConstants.Lark.App.APP_SECRET, settings.lark.app.appSecret)
-        setSettings(SystemSettingsConstants.Lark.App.BASE_URL, settings.lark.app.baseUrl)
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.APP_ID, settings.messageChannel.lark.appId)
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.APP_SECRET, settings.messageChannel.lark.appSecret)
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.BASE_URL, settings.messageChannel.lark.baseUrl)
 
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)

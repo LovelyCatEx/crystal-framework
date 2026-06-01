@@ -6,7 +6,7 @@ data class SystemSettings(
     val basic: Basic,
     val bootstrap: Bootstrap,
     val mail: Mail,
-    val lark: Lark,
+    val messageChannel: MessageChannel,
     val security: Security,
 ) {
     data class Basic(
@@ -48,10 +48,10 @@ data class SystemSettings(
         )
     }
 
-    data class Lark(
-        val app: App,
+    data class MessageChannel(
+        val lark: Lark,
     ) {
-        data class App(
+        data class Lark(
             val appId: String,
             val appSecret: String,
             val baseUrl: String,
