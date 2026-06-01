@@ -1,5 +1,10 @@
 # Generic Controller
 
+::: warning Return Type
+
+**All controller methods must explicitly return `ApiResponse<*>`** using `ApiResponse.success(data)` or `ApiResponse.failed(message)`. Never return raw entities, List, Map, or other primitive types — the framework does not provide a uniform wrapping layer, and the frontend `doGet` / `doPost` rely on the `ApiResponse` structure.
+:::
+
 ## Design Rationale
 
 The framework does not force all controllers to extend a base class. When business logic cannot be expressed as CRUD templates (authentication, file uploads, multi-step operations), use a standard Spring `@RestController`.
@@ -72,3 +77,7 @@ suspend fun getProfile(
 - Business API: `/api/{version}/ext/{plugin-name}/...` (plugin extensions)
 - Admin non-CRUD: `/api/{version}/manager/...` (built-in)
 - Reference the prefix via `GlobalConstants.REQUEST_MAPPING_PREFIX`
+
+::: tip DTO Usage
+Custom controller request DTOs **should not extend** `BaseManagerReadDTO`, `BaseManagerCreateDTO`, `BaseManagerUpdateDTO`, or `BaseManagerDeleteDTO`. These four CRUD DTOs are designed exclusively for the `StandardManagerController` hierarchy. Use lighter base classes like `PageQuery` for custom endpoints.
+:::

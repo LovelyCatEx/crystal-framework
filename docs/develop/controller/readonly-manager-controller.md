@@ -82,6 +82,10 @@ class ExtMyPluginLogController(
 - **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
 - **Manager Controller 只能注入 Manager Service（`service/manager/`），禁止注入普通 Service**
 
+::: warning 返回值类型
+继承 `ReadonlyManagerController` 的类不需要自己写方法体，基类已经统一返回 `ApiResponse<*>`。如果添加自定义端点，必须显式返回 `ApiResponse<*>`。
+:::
+
 ## 自动提供的端点
 
 | 方法 | 路径 | 说明 |

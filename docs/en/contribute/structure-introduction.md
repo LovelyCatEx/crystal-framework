@@ -1,6 +1,6 @@
 # Project Structure
 
-## .agent
+## .claude
 
 Stores project development guidelines for AI to quickly and standardly complete development tasks
 

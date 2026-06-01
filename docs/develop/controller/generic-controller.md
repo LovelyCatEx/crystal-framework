@@ -66,6 +66,11 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 }
 ```
 
+::: warning 返回值类型
+
+**所有 Controller 方法必须显式返回 `ApiResponse<*>` 类型**，使用 `ApiResponse.success(data)` 或 `ApiResponse.failed(message)` 包装。禁止返回裸实体、List、Map 等原始类型——框架不提供统一包装层，前端 `doGet` / `doPost` 依赖 `ApiResponse` 结构（`code`、`message`、`data`）解析。
+:::
+
 ## 关键点
 
 - `UserAuthentication` 作为方法参数由框架自动注入，可直接获取当前用户/租户信息
@@ -73,3 +78,7 @@ class MyPermissionConfigurer : SystemRbacConfigurer {
 - 返回值统一使用 `ApiResponse.success(...)` / `ApiResponse.error(...)`
 - **禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行**
 - **普通 Controller 必须注入普通 Service（`service/` + `service/impl/`），禁止注入 Manager Service（`service/manager/`）**
+
+::: tip DTO 使用提醒
+自定义 Controller 的请求参数 DTO **不应继承** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO。这些 DTO 专为 `StandardManagerController` 体系设计，自定义端点应使用更轻量的基类如 `PageQuery`。
+:::
