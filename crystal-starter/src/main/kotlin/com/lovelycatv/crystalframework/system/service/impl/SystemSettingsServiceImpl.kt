@@ -94,6 +94,7 @@ class SystemSettingsServiceImpl(
             basic = getSystemBasicSettings(),
             bootstrap = getSystemBootstrapSettings(),
             mail = getSystemMailSettings(),
+            lark = getSystemLarkSettings(),
             security = getSystemSecuritySettings(),
         ).also {
             this.cachedSystemSettings = it
@@ -133,6 +134,16 @@ class SystemSettingsServiceImpl(
         )
     }
 
+    override suspend fun getSystemLarkSettings(): SystemSettings.Lark {
+        return SystemSettings.Lark(
+            app = SystemSettings.Lark.App(
+                appId = getSettings(SystemSettingsConstants.Lark.App.APP_ID)!!,
+                appSecret = getSettings(SystemSettingsConstants.Lark.App.APP_SECRET)!!,
+                baseUrl = getSettings(SystemSettingsConstants.Lark.App.BASE_URL)!!,
+            )
+        )
+    }
+
     override suspend fun getSystemSecuritySettings(): SystemSettings.Security {
         return SystemSettings.Security(
             api = SystemSettings.Security.Api(
@@ -162,6 +173,10 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
         setSettings(SystemSettingsConstants.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+
+        setSettings(SystemSettingsConstants.Lark.App.APP_ID, settings.lark.app.appId)
+        setSettings(SystemSettingsConstants.Lark.App.APP_SECRET, settings.lark.app.appSecret)
+        setSettings(SystemSettingsConstants.Lark.App.BASE_URL, settings.lark.app.baseUrl)
 
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)

@@ -19,6 +19,8 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
 
     suspend fun getSystemMailSettings(): SystemSettings.Mail
 
+    suspend fun getSystemLarkSettings(): SystemSettings.Lark
+
     suspend fun getSystemSecuritySettings(): SystemSettings.Security
 
     suspend fun updateSystemSettings(settings: SystemSettings)

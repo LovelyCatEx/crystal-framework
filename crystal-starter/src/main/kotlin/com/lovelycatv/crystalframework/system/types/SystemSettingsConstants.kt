@@ -97,6 +97,31 @@ object SystemSettingsConstants {
         }
     }
 
+    object Lark {
+        object App {
+            val APP_ID = SystemSettingsItemDeclaration(
+                key = "lark.app.appId",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 1
+            )
+
+            val APP_SECRET = SystemSettingsItemDeclaration(
+                key = "lark.app.appSecret",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 2
+            )
+
+            val BASE_URL = SystemSettingsItemDeclaration(
+                key = "lark.app.baseUrl",
+                valueType = SystemSettingsItemValueType.STRING,
+                defaultValue = "https://open.feishu.cn",
+                sort = 3
+            )
+        }
+    }
+
     object Security {
         object Api {
             object Encrypt {
