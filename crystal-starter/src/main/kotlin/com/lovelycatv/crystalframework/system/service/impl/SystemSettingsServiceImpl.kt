@@ -94,6 +94,7 @@ class SystemSettingsServiceImpl(
             basic = getSystemBasicSettings(),
             bootstrap = getSystemBootstrapSettings(),
             mail = getSystemMailSettings(),
+            messageChannel = getSystemMessageChannelSettings(),
             security = getSystemSecuritySettings(),
         ).also {
             this.cachedSystemSettings = it
@@ -133,6 +134,16 @@ class SystemSettingsServiceImpl(
         )
     }
 
+    override suspend fun getSystemMessageChannelSettings(): SystemSettings.MessageChannel {
+        return SystemSettings.MessageChannel(
+            lark = SystemSettings.MessageChannel.Lark(
+                appId = getSettings(SystemSettingsConstants.MessageChannel.Lark.APP_ID)!!,
+                appSecret = getSettings(SystemSettingsConstants.MessageChannel.Lark.APP_SECRET)!!,
+                baseUrl = getSettings(SystemSettingsConstants.MessageChannel.Lark.BASE_URL)!!,
+            )
+        )
+    }
+
     override suspend fun getSystemSecuritySettings(): SystemSettings.Security {
         return SystemSettings.Security(
             api = SystemSettings.Security.Api(
@@ -162,6 +173,10 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
         setSettings(SystemSettingsConstants.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettingsConstants.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.APP_ID, settings.messageChannel.lark.appId)
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.APP_SECRET, settings.messageChannel.lark.appSecret)
+        setSettings(SystemSettingsConstants.MessageChannel.Lark.BASE_URL, settings.messageChannel.lark.baseUrl)
 
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)

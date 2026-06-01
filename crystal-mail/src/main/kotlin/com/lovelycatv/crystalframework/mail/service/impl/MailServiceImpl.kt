@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.mail.service.impl
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity
 import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.mail.service.MailTemplateService
+import com.lovelycatv.crystalframework.mail.utils.resolveMailTemplatePlaceholders
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
@@ -109,18 +110,10 @@ class MailServiceImpl(
 
         logger.info("Sending mail to $to by using template: ${template.name}")
 
-        val title = resolvePlaceholders(template.title, placeholders)
-        val content = resolvePlaceholders(template.content, placeholders)
+        val title = template.title.resolveMailTemplatePlaceholders(placeholders)
+        val content = template.content.resolveMailTemplatePlaceholders(placeholders)
 
         self.sendMail(to, title, content)
-    }
-
-    private fun resolvePlaceholders(originalContent: String, placeholders: Map<String, String?>): String {
-        var r = originalContent
-        placeholders.forEach { (k, v) ->
-            r = r.replace("{{$k}}", v ?: "null")
-        }
-        return r
     }
 
     fun createMailSender(mailSettings: SystemSettings.Mail): JavaMailSender {

@@ -6,6 +6,7 @@ data class SystemSettings(
     val basic: Basic,
     val bootstrap: Bootstrap,
     val mail: Mail,
+    val messageChannel: MessageChannel,
     val security: Security,
 ) {
     data class Basic(
@@ -44,6 +45,16 @@ data class SystemSettings(
             val password: String,
             val ssl: Boolean,
             val fromEmail: String,
+        )
+    }
+
+    data class MessageChannel(
+        val lark: Lark,
+    ) {
+        data class Lark(
+            val appId: String,
+            val appSecret: String,
+            val baseUrl: String,
         )
     }
 

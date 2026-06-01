@@ -36,6 +36,7 @@ import {
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
+import {settingsGroupExtraRenderers, settingsItemRenderers} from "@/pages/manager/settings/settings-renderers.tsx";
 
 const { useToken } = theme;
 
@@ -48,6 +49,8 @@ function SettingsGroup(props: {
     const { token } = useToken();
     const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
     const translatedGroup = settingsGroupToTranslationMap.get(props.group);
+    const form = Form.useFormInstance();
+    const extraRenderer = settingsGroupExtraRenderers.get(props.group);
 
     return (
         <div className={props.isFirst ? "" : "mt-8"}>
@@ -65,14 +68,20 @@ function SettingsGroup(props: {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {props.items.map(([key, value]) => (
                     <div key={key} className="bg-slate-50/50 dark:bg-slate-200/5 rounded-xl p-4 hover:bg-slate-50 dark:hover:bg-slate-200/10 transition-colors">
-                        <SettingsItem 
-                            settingsKey={key} 
+                        <SettingsItem
+                            settingsKey={key}
                             schema={value}
                             loading={props.loading}
                         />
                     </div>
                 ))}
             </div>
+
+            {extraRenderer && (
+                <div className="mt-6">
+                    {extraRenderer({ group: props.group, form })}
+                </div>
+            )}
         </div>
     );
 }
@@ -294,8 +303,12 @@ export default function SystemSettingsManagerPage() {
 function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema, loading?: boolean }) {
     const { token } = useToken();
     const { t } = useTranslation();
-    const [formItemProps, setFormItemProps] = useState<Record<string, unknown>>();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
+    const customRenderer = settingsItemRenderers.get(props.settingsKey);
+    const formItemProps: Record<string, unknown> | undefined =
+        props.schema.valueType === SystemSettingsItemValueType.BOOLEAN
+            ? { getValueProps: (value: string | boolean) => ({ checked: value === 'true' || value === true }) }
+            : undefined;
 
     return (
         <Form.Item
@@ -309,7 +322,9 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
             className="mb-0"
             {...formItemProps}
         >
-            {props.schema.valueType == SystemSettingsItemValueType.STRING ? (
+            {customRenderer ? (
+                customRenderer({ settingsKey: props.settingsKey, schema: props.schema, loading: props.loading })
+            ) : props.schema.valueType == SystemSettingsItemValueType.STRING ? (
                 <Input 
                     className="rounded-lg h-10" 
                     placeholder={props.schema.defaultValue ?? ''} 
@@ -328,17 +343,7 @@ function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema
                     disabled={props.loading}
                 />
             ) : props.schema.valueType == SystemSettingsItemValueType.BOOLEAN ? (
-                <>
-                    {(() => {
-                        setFormItemProps({
-                            getValueProps: (value: string | boolean) => ({
-                                checked: value === 'true' || value === true
-                            })
-                        })
-                        return <></>
-                    })()}
-                    <Switch disabled={props.loading} />
-                </>
+                <Switch disabled={props.loading} />
             ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_SINGLE ? (
                 <Radio.Group
                     className="flex flex-col space-y-2"
