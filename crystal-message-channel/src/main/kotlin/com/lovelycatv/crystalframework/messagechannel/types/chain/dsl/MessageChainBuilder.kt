@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.chain.LinkSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageChain
 import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.NewlineSegment
+import com.lovelycatv.crystalframework.messagechannel.types.chain.RawHtmlSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.ResourceImageSource
 import com.lovelycatv.crystalframework.messagechannel.types.chain.TextSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.UrlImageSource
@@ -48,6 +49,10 @@ class MessageChainBuilder {
 
     fun newline() {
         segments += NewlineSegment
+    }
+
+    fun rawHtml(html: String) {
+        if (html.isNotEmpty()) segments += RawHtmlSegment(html)
     }
 
     fun build(): MessageChain = MessageChain(segments.toList())

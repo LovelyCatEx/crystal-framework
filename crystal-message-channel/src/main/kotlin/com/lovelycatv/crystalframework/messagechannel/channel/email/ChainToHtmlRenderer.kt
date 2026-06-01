@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.chain.ImageSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.LinkSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageChain
 import com.lovelycatv.crystalframework.messagechannel.types.chain.NewlineSegment
+import com.lovelycatv.crystalframework.messagechannel.types.chain.RawHtmlSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.ResourceImageSource
 import com.lovelycatv.crystalframework.messagechannel.types.chain.TextSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.UrlImageSource
@@ -24,6 +25,7 @@ class ChainToHtmlRenderer {
                 is AtSegment -> sb.append(renderAt(segment, atResolver))
                 is ImageSegment -> sb.append(renderImage(segment))
                 is LinkSegment -> sb.append(renderLink(segment))
+                is RawHtmlSegment -> sb.append(segment.html)
                 NewlineSegment -> sb.append("<br/>")
             }
         }

@@ -186,6 +186,33 @@ class MessageChainTest {
     }
 
     @Test
+    fun rawHtmlSegmentBuiltViaDslPreservesContent() {
+        val html = """<table><tr><td style="color:#28a745">{{user}} hi &amp; bye</td></tr></table>"""
+        val chain = messageChain { rawHtml(html) }
+
+        printlnSection("rawHtmlSegmentBuiltViaDslPreservesContent")
+        println("  segments -> ${chain.segments}")
+
+        assertEquals(listOf(RawHtmlSegment(html)), chain.segments)
+    }
+
+    @Test
+    fun rawHtmlSegmentRejectsXmlSerialization() {
+        val chain = messageChain { rawHtml("<b>x</b>") }
+        var caught: Throwable? = null
+        try {
+            chain.toXml()
+        } catch (e: IllegalArgumentException) {
+            caught = e
+        }
+
+        printlnSection("rawHtmlSegmentRejectsXmlSerialization")
+        println("  caught -> ${caught?.message}")
+
+        assertEquals(true, caught is IllegalArgumentException)
+    }
+
+    @Test
     fun chainPlusOperatorAppendsSegment() {
         val base = messageChain { text("a") }
         val combined = base + TextSegment("b")

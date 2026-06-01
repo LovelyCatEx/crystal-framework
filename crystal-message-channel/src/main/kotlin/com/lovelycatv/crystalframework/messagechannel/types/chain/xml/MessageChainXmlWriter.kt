@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.chain.ImageSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.LinkSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageChain
 import com.lovelycatv.crystalframework.messagechannel.types.chain.NewlineSegment
+import com.lovelycatv.crystalframework.messagechannel.types.chain.RawHtmlSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.ResourceImageSource
 import com.lovelycatv.crystalframework.messagechannel.types.chain.TextSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.UrlImageSource
@@ -21,6 +22,8 @@ object MessageChainXmlWriter {
                 is AtSegment -> writeAt(sb, segment)
                 is ImageSegment -> writeImage(sb, segment)
                 is LinkSegment -> writeLink(sb, segment)
+                is RawHtmlSegment ->
+                    throw IllegalArgumentException("RawHtmlSegment has no XML form; channels should consume it directly")
                 NewlineSegment -> sb.append("<${MessageChainXmlTags.TAG_BR}/>")
             }
         }

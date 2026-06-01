@@ -1,6 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
-import com.lovelycatv.crystalframework.mail.service.MailService
+import com.lovelycatv.crystalframework.mail.service.MailTemplateService
+import com.lovelycatv.crystalframework.mail.utils.resolveMailTemplatePlaceholders
+import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
+import com.lovelycatv.crystalframework.messagechannel.types.chain.dsl.messageChain
+import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
+import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
@@ -35,7 +40,8 @@ class TenantInvitationServiceImpl(
     private val tenantDepartmentService: TenantDepartmentService,
     private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService,
     private val tenantInvitationRecordService: TenantInvitationRecordService,
-    private val mailService: MailService,
+    private val mailTemplateService: MailTemplateService,
+    private val messageChannelService: MessageChannelService,
 ) : TenantInvitationService {
     private val logger = logger()
 
@@ -140,19 +146,34 @@ class TenantInvitationServiceImpl(
                 throw BusinessException("your request is denied as there are no one could handle your request")
             }
 
+            val template = mailTemplateService.getAvailableTemplateByTypeName(
+                TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name
+            )
+            val placeholders = mapOf(
+                TenantMailDeclaration.VARIABLE_USERNAME to user.username,
+                TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
+                TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
+                TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber,
+            )
+            val reviewMessage = ChainMessage(
+                title = template.title.resolveMailTemplatePlaceholders(placeholders),
+                chain = messageChain {
+                    rawHtml(template.content.resolveMailTemplatePlaceholders(placeholders))
+                },
+            )
+
             tenantMembersToReceiveEmail.forEach {
-                logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user!!.nickname}@${it.user.username}")
-                mailService.sendMailByType(
-                    to = it.user.email
-                        ?: throw BusinessException("request could not be processed as your email is absent"),
-                    templateTypeName = TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name,
-                    placeholders = mapOf(
-                        TenantMailDeclaration.VARIABLE_USERNAME to user.username,
-                        TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
-                        TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
-                        TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber
+                val email = it.user!!.email
+                    ?: throw BusinessException("request could not be processed as your email is absent")
+                logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user.nickname}@${it.user.username}")
+                val result = messageChannelService.send(EmailRecipient(email = email), reviewMessage)
+                if (!result.success) {
+                    logger.error(
+                        "Failed to send tenant member join review email to {} via {}: [{}] {}",
+                        email, result.channelType, result.errorCode, result.errorMessage,
                     )
-                )
+                    throw BusinessException("Send email to $email failed")
+                }
             }
         }
     }
