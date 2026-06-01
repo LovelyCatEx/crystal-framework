@@ -120,7 +120,7 @@ class LarkChannelProvider(
         val needsPost = !message.title.isNullOrBlank() || chainHasImage(message.chain)
         return if (needsPost) {
             val post = postRenderer.render(message.title, message.chain, larkAtResolver)
-            MSG_TYPE_POST to objectMapper.writeValueAsString(mapOf("post" to post))
+            MSG_TYPE_POST to objectMapper.writeValueAsString(post)
         } else {
             val text = textRenderer.render(message.chain, larkAtResolver)
             MSG_TYPE_TEXT to objectMapper.writeValueAsString(mapOf("text" to text))
