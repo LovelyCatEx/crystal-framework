@@ -1,5 +1,18 @@
 # Change Logs
 
+## v1.6.2
+
+2026-06-02
+
+### Features
++ feat(msg-channel): Added message channel module with mail and Lark message support.
++ feat(web): System settings support custom renderers.
+
+### Other
++ docs: Updated project structure documentation.
+
+---
+
 ## v1.6.1
 
 2026-06-01
