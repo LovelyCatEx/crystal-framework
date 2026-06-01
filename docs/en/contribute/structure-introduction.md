@@ -52,6 +52,10 @@ Encryption module, provides API response data encryption functionality
 
 Mail module, provides mail sending, template management, and mail log functionalities
 
+## crystal-message-channel
+
+Message channel module, provides a unified abstraction and routing for multi-channel message delivery (mail, Lark, etc.)
+
 ## crystal-sdk
 
 SDK module, enables developers to quickly integrate this framework with zero code intrusion
