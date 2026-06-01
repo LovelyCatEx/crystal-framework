@@ -109,3 +109,7 @@ class ExtMyPluginItemController(
 - BaseManagerReadDTO 继承 `PageQuery`，自带 `page`、`pageSize`、`searchKeyword`、`startTime`、`endTime`
 - BaseManagerUpdateDTO 携带 `id: Long`
 - BaseManagerDeleteDTO 携带 `ids: List<Long>`
+
+::: warning 返回值类型
+继承 `StandardManagerController` 的类不需要自己写方法体，基类已经统一返回 `ApiResponse<*>`。但如果需要自定义端点（如新增非 CRUD 接口），**必须显式返回 `ApiResponse<*>`**，禁止返回裸类型。
+:::

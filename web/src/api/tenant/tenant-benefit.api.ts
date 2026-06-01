@@ -1,7 +1,7 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
-import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
-import type {TenantTireBenefitFeature, TenantTireBenefitValue} from "@/types/tenant/tenant-benefit.types.ts";
-import {doGet} from "../system-request.ts";
+import type {BaseManagerReadDTO, BaseManagerUpdateDTO, PageQuery, PaginatedResponseData} from "@/types/api.types.ts";
+import type {TenantTireBenefitFeature, TenantTireBenefitValue, TenantTireBenefitOverviewGroupVO} from "@/types/tenant/tenant-benefit.types.ts";
+import {doGet, doPost} from "../system-request.ts";
 
 // Feature Catalog
 export const TenantTireBenefitFeatureManagerController = new BaseManagerController<
@@ -57,3 +57,17 @@ export interface ManagerUpdateTenantTireBenefitValueDTO extends BaseManagerUpdat
 export function getMyTenantBenefits() {
     return doGet<Record<string, string>>('/api/tenant/benefits');
 }
+
+// Overview — paginated query
+export interface ManagerReadTenantTireBenefitOverviewDTO extends PageQuery {
+    tireTypeIds: string[];
+}
+
+export function queryBenefitOverview(dto: ManagerReadTenantTireBenefitOverviewDTO) {
+    return doPost<PaginatedResponseData<TenantTireBenefitOverviewGroupVO>>(
+        '/api/manager/tenant/tire/benefit/overview/query',
+        dto,
+        {'Content-Type': 'application/json'}
+    );
+}
+

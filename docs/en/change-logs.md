@@ -1,5 +1,21 @@
 # Change Logs
 
+## v1.6.1
+
+2026-06-01
+
+### Features
++ feat(web): Added editable tenant benefit overview page.
++ feat(web): Added editable tenant benefit summary page.
+
+### Bug Fixes
++ fix(tenant): Fixed tenant invitation code creation not being restricted by INVITATION_ENABLED benefit.
+
+### Other
++ docs: Updated Controller-related documentation.
+
+---
+
 ## v1.6.0
 
 2026-05-30

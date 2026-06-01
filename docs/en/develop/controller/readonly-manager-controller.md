@@ -79,6 +79,10 @@ Key points:
 - All type parameters (service, repository, entity, 4 DTOs) are required by the base class constraint
 - No methods needed in the controller body — everything is inherited
 
+::: warning Return Type
+When extending `ReadonlyManagerController`, no method body is needed — the base class already returns `ApiResponse<*>`. If you add custom endpoints, all methods must explicitly return `ApiResponse<*>`.
+:::
+
 ## Auto-Provided Endpoints
 
 | Method | Path | Description |

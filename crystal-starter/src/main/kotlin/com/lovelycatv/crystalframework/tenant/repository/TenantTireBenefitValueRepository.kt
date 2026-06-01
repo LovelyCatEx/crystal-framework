@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono
 interface TenantTireBenefitValueRepository : BaseRepository<TenantTireBenefitValueEntity> {
     fun findByTireTypeId(tireTypeId: Long): Flux<TenantTireBenefitValueEntity>
 
+    fun findByTireTypeIdIn(tireTypeIds: Collection<Long>): Flux<TenantTireBenefitValueEntity>
+
     fun findByTireTypeIdAndFeatureId(tireTypeId: Long, featureId: Long): Mono<TenantTireBenefitValueEntity>
 
     fun deleteByFeatureIdIn(featureIds: Collection<Long>): Mono<Void>

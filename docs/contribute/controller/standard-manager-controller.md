@@ -1,5 +1,10 @@
 # 标准化控制器
 
+::: warning 返回值类型
+
+继承 `StandardManagerController` / `ReadonlyManagerController` 的类不需要自己写方法体，基类已经统一返回 `ApiResponse<*>`。但如果需要自定义端点（如新增非 CRUD 接口），**所有自定义方法必须显式返回 `ApiResponse<*>`**，禁止返回裸类型。
+:::
+
 ## 设计意图
 
 `StandardManagerController` 是框架管理端 CRUD 的核心抽象。它约束了 Controller → Service → Repository 的分层协作模式，配合 AOP 实现权限校验和审计日志的自动化。

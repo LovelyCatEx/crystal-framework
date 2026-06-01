@@ -104,6 +104,12 @@ Class-level annotation specifying permissions per action:
 
 - No method body needed in the controller class
 - Service must extend `CachedBaseManagerService` (includes cache eviction)
+- **Never inject Repository directly — all DB operations must go through Service layer**
+- **Manager Controller must only inject Manager Service, never a regular Service**
 - `BaseManagerReadDTO` extends `PageQuery` with `page`, `pageSize`, `searchKeyword`, `startTime`, `endTime`
 - `BaseManagerUpdateDTO` carries `id: Long`
 - `BaseManagerDeleteDTO` carries `ids: List<Long>`
+
+::: warning Return Type
+When extending `StandardManagerController`, no method body is needed — the base class already returns `ApiResponse<*>`. However, if you add custom endpoints, **all methods must explicitly return `ApiResponse<*>`**. Never return raw types.
+:::

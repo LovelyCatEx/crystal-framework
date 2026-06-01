@@ -1,5 +1,10 @@
 # StandardManagerController
 
+::: warning Return Type
+
+When extending `StandardManagerController` / `ReadonlyManagerController`, the base class already returns `ApiResponse<*>`. If you add custom endpoints, **all custom methods must explicitly return `ApiResponse<*>`**. Never return raw types.
+:::
+
 ## Design Rationale
 
 `StandardManagerController` is the core abstraction for admin CRUD operations. It enforces a layered Controller → Service → Repository pattern and leverages AOP for automated permission checks and audit logging.

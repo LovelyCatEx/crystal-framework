@@ -73,7 +73,7 @@ class TenantBenefitServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
 
-            assertFalse(tenantBenefitService.hasBenefit(tireType.id, TenantBenefit.EXPORT_DATA_ENABLED.featureKey))
+            assertEquals(TenantBenefit.INVITATION_ENABLED.defaultValue, tenantBenefitService.hasBenefit(tireType.id, TenantBenefit.INVITATION_ENABLED.featureKey).toString())
         }
     }
 
@@ -83,9 +83,9 @@ class TenantBenefitServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
 
-            setBenefitValue(tireType.id, TenantBenefit.EXPORT_DATA_ENABLED.featureKey, "true")
+            setBenefitValue(tireType.id, TenantBenefit.INVITATION_ENABLED.featureKey, "true")
 
-            assertTrue(tenantBenefitService.hasBenefit(tireType.id, TenantBenefit.EXPORT_DATA_ENABLED.featureKey))
+            assertTrue(tenantBenefitService.hasBenefit(tireType.id, TenantBenefit.INVITATION_ENABLED.featureKey))
         }
     }
 

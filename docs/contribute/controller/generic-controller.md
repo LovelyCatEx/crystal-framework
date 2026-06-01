@@ -1,5 +1,10 @@
 # 普通控制器
 
+::: warning 返回值类型
+
+**所有 Controller 方法必须显式返回 `ApiResponse<*>` 类型**，使用 `ApiResponse.success(data)` 或 `ApiResponse.failed(message)` 包装。禁止返回裸实体、List、Map 等原始类型——框架不提供统一包装层，前端 `doGet` / `doPost` 依赖 `ApiResponse` 结构解析。
+:::
+
 ## 设计意图
 
 框架不强制所有 Controller 继承基类。当业务逻辑无法被 CRUD 模板覆盖时（如认证、文件上传、多步骤操作），使用标准 Spring `@RestController`。
@@ -72,3 +77,7 @@ suspend fun getProfile(
 - 业务 API：`/api/{version}/ext/{plugin-name}/...`（插件扩展）
 - 管理端非 CRUD：`/api/{version}/manager/...`（系统内置）
 - 使用 `GlobalConstants.REQUEST_MAPPING_PREFIX` 引用 `/api/{version}` 前缀
+
+::: tip DTO 使用提醒
+自定义 Controller 的请求参数 DTO **不应继承** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO。这些 DTO 专为 `StandardManagerController` 体系设计，自定义端点应使用更轻量的基类如 `PageQuery`。
+:::
