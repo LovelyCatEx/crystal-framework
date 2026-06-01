@@ -4,11 +4,9 @@ import './index.css'
 import {bootstrapI18n} from './i18n'
 import App from "./App.tsx";
 import {BrowserRouter} from "react-router-dom";
-import {registerAllKotlinModules} from "kotlin-ts";
 import {ProtectedApp} from "@/ProtectedApp.tsx";
 import {loadPlugins} from "@/plugin/loader.ts";
 
-registerAllKotlinModules()
 loadPlugins()
 
 bootstrapI18n().then(() => {

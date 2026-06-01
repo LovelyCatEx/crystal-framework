@@ -87,7 +87,7 @@ function TenantSwitcher() {
         return null;
     }
 
-    const isNonTenantAuthentication = tenants.all((it) => !it.authenticated)
+    const isNonTenantAuthentication = tenants.every((it) => !it.authenticated)
 
     const allOptions: UserTenantVO[] = [
         {
