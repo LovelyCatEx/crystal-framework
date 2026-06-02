@@ -9,7 +9,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.settings.entity.TenantSettingsEntity
 import com.lovelycatv.crystalframework.tenant.settings.repository.TenantSettingsRepository
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
-import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsConstants
+import com.lovelycatv.crystalframework.tenant.settings.constants.TenantSettingsConstants
 import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsView
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger

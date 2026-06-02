@@ -19,7 +19,6 @@ import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
-import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsConstants
 import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.entity.UserEntity

@@ -1071,7 +1071,8 @@ export const zhCN: I18nRules = {
         idPlaceholder: '输入角色 ID'
       },
       action: {
-        addNew: '新增角色'
+        addNew: '新增角色',
+        assignPermission: '分配权限',
       },
       modal: {
         name: {
@@ -1086,6 +1087,19 @@ export const zhCN: I18nRules = {
           label: '描述',
           placeholder: '输入描述（可选）'
         }
+      },
+      permissionModal: {
+        title: '为角色 "{{name}}" 分配权限',
+        titles: {
+          available: '可用权限',
+          assigned: '已分配权限'
+        }
+      },
+      messages: {
+        fetchPermissionsFailed: '无法获取权限列表',
+        fetchRolePermissionsFailed: '无法获取角色权限',
+        assignSuccess: '权限分配成功',
+        assignFailed: '权限分配失败'
       }
     },
     myTenantMemberManager: {

@@ -1074,7 +1074,8 @@ export const enUS: I18nRules = {
         idPlaceholder: 'Enter role ID',
       },
       action: {
-        addNew: 'Add New Role'
+        addNew: 'Add New Role',
+        assignPermission: 'Assign Permission',
       },
       modal: {
         name: {
@@ -1089,6 +1090,19 @@ export const enUS: I18nRules = {
           label: 'Description',
           placeholder: 'Enter description (optional)'
         }
+      },
+      permissionModal: {
+        title: 'Assign permissions to role "{{name}}"',
+        titles: {
+          available: 'Available Permissions',
+          assigned: 'Assigned Permissions'
+        }
+      },
+      messages: {
+        fetchPermissionsFailed: 'Failed to fetch permission list',
+        fetchRolePermissionsFailed: 'Failed to fetch role permissions',
+        assignSuccess: 'Permissions assigned successfully',
+        assignFailed: 'Failed to assign permissions'
       }
     },
     myTenantMemberManager: {

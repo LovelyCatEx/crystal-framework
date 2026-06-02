@@ -31,7 +31,7 @@ class TenantSettingsController(
             it.key to mapOf(
                 "sort" to it.sort,
                 "valueType" to it.valueType.name,
-                "value" to tenantSettingsService.getSettings(tenantId, it.key)?.configValue,
+                "value" to (tenantSettingsService.getSettings(tenantId, it.key)?.configValue ?: it.defaultValue),
                 "defaultValue" to it.defaultValue,
                 "enumValues" to it.enumValues,
                 "tab" to if (it.key.contains(".")) {

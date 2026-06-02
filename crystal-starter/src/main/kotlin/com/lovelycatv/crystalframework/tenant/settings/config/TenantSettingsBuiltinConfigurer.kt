@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.tenant.settings.config
 
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.sdk.tenant.settings.config.TenantSettingsConfigurer
-import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsConstants
+import com.lovelycatv.crystalframework.tenant.settings.constants.TenantSettingsConstants
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

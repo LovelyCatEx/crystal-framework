@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.tenant.settings.types
+package com.lovelycatv.crystalframework.tenant.settings.constants
 
 import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
 import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
