@@ -1616,6 +1616,18 @@ export const zhCN: I18nRules = {
       maintenanceConfirmDisableContent: '关闭维护模式后，所有用户将恢复正常访问。确定要继续吗？',
       maintenanceConfirmOk: '确认',
       maintenanceConfirmCancel: '取消',
+      testSendEmail: {
+        button: '发送测试邮件',
+        modalTitle: '发送测试邮件',
+        emailLabel: '收件邮箱',
+        emailPlaceholder: '请输入收件邮箱',
+        emailRequired: '请输入收件邮箱',
+        emailInvalid: '邮箱格式不正确',
+        confirm: '发送',
+        cancel: '取消',
+        sendSuccess: '测试邮件发送成功',
+        sendFailed: '测试邮件发送失败',
+      },
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'basic.waterMark.enabled': '是否显示水印',

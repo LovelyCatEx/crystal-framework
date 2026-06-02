@@ -2,6 +2,7 @@ import type {ReactNode} from "react";
 import type {FormInstance} from "antd";
 import type {SystemSettingsSchema} from "@/types/system/system-settings.types.ts";
 import {ColorPickerInput} from "@/components/ColorPickerInput.tsx";
+import {TestSendEmailButton} from "@/components/TestSendEmailButton.tsx";
 
 export interface SettingsItemRenderContext {
     settingsKey: string;
@@ -23,4 +24,9 @@ export const settingsItemRenderers = new Map<string, SettingsItemRenderer>([
 ]);
 
 export const settingsGroupExtraRenderers = new Map<string, SettingsGroupExtraRenderer>([
+    ['mail.smtp', () => (
+        <div className="flex justify-end">
+            <TestSendEmailButton/>
+        </div>
+    )],
 ]);

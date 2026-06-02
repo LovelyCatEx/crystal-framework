@@ -105,6 +105,10 @@ crystalframework:
       data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
       worker-id: ${SNOWFLAKE_WORKER_ID:0}
       actual-gene-length: 0
+  test:
+    smtp:
+      subject: Crystal Framework SMTP Test
+      content: This is a test email from Crystal Framework. If you received this message, your SMTP settings are working.
 
 logging:
   level:

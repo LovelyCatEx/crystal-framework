@@ -1619,6 +1619,18 @@ export const enUS: I18nRules = {
       maintenanceConfirmDisableContent: 'Disabling maintenance mode will restore access for all users. Are you sure you want to continue?',
       maintenanceConfirmOk: 'Confirm',
       maintenanceConfirmCancel: 'Cancel',
+      testSendEmail: {
+        button: 'Send Test Email',
+        modalTitle: 'Send Test Email',
+        emailLabel: 'Recipient Email',
+        emailPlaceholder: 'Enter recipient email',
+        emailRequired: 'Recipient email is required',
+        emailInvalid: 'Invalid email format',
+        confirm: 'Send',
+        cancel: 'Cancel',
+        sendSuccess: 'Test email sent successfully',
+        sendFailed: 'Failed to send test email',
+      },
       keys: {
         'basic.baseUrl': 'API Base URL',
         'basic.waterMark.enabled': 'Show Watermark',
