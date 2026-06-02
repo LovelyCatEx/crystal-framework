@@ -509,6 +509,18 @@ export const enUS: I18nRules = {
         uploadFailed: 'Failed to upload avatar',
         invalidType: 'Please upload JPG, PNG or WebP format',
         maxSize: 'Image size cannot exceed 5MB'
+      },
+      segments: {
+        profile: 'Profile',
+        settings: 'Settings'
+      },
+      tenantSettings: {
+        sectionTitle: 'Organization Settings',
+        sectionSubtitle: 'Tune preferences and toggles for the current organization',
+        save: 'Save Settings',
+        saveSuccess: 'Organization settings saved',
+        saveFailed: 'Failed to save organization settings',
+        fetchFailed: 'Failed to load organization settings'
       }
     },
 
@@ -1700,6 +1712,18 @@ export const enUS: I18nRules = {
           'CUSTOM': 'Custom',
         }
       }
+    },
+    tenantSettingsManager: {
+      keys: {
+        'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
+      },
+      groups: {
+        'notification': 'Notification',
+      },
+      tabs: {
+        'notification': 'Notification',
+      },
+      enums: {}
     },
     announcementManager: {
       title: 'Announcement Management',
