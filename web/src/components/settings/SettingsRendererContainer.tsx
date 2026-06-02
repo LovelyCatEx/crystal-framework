@@ -6,7 +6,7 @@ import {SettingsGroup} from "./SettingsGroup.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "./types.ts";
 
 export interface SettingsRendererContainerProps {
-    data: GetSystemSettingsSchemaData | undefined;
+    data?: GetSystemSettingsSchemaData | null;
     loading: boolean;
     tabTranslationMap: Map<string, string>;
     groupTranslationMap: Map<string, { label: string; icon?: ReactNode }>;
