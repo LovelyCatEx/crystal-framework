@@ -7,6 +7,7 @@ export function useTenantSettingsKeyToTranslationMap(): Map<string, string> {
 
     return new Map<string, string>([
         ['notification.memberJoinNotifyEmail', t('pages.tenantSettingsManager.keys.notification.memberJoinNotifyEmail')],
+        ['notification.memberJoinReviewNotifyEmail', t('pages.tenantSettingsManager.keys.notification.memberJoinReviewNotifyEmail')],
     ]);
 }
 

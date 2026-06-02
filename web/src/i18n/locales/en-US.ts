@@ -1716,6 +1716,7 @@ export const enUS: I18nRules = {
     tenantSettingsManager: {
       keys: {
         'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
+        'notification.memberJoinReviewNotifyEmail': 'Member Join Review Email Notification',
       },
       groups: {
         'notification': 'Notification',

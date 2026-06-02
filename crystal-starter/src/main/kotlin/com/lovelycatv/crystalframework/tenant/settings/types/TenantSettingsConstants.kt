@@ -11,5 +11,12 @@ object TenantSettingsConstants {
             defaultValue = true.toString(),
             sort = 1,
         )
+
+        val MEMBER_JOIN_REVIEW_NOTIFY_EMAIL = SystemSettingsItemDeclaration(
+            key = "notification.memberJoinReviewNotifyEmail",
+            valueType = SystemSettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 2,
+        )
     }
 }

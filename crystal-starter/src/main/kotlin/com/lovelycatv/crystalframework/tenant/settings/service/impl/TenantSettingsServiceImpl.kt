@@ -94,6 +94,7 @@ class TenantSettingsServiceImpl(
         return cachedTenantSettings[tenantId] ?: TenantSettingsView(
             notification = TenantSettingsView.Notification(
                 memberJoinNotifyEmail = getSettings(tenantId, TenantSettingsConstants.Notification.MEMBER_JOIN_NOTIFY_EMAIL)!!,
+                memberJoinReviewNotifyEmail = getSettings(tenantId, TenantSettingsConstants.Notification.MEMBER_JOIN_REVIEW_NOTIFY_EMAIL)!!,
             ),
         ).also {
             this.cachedTenantSettings[tenantId] = it

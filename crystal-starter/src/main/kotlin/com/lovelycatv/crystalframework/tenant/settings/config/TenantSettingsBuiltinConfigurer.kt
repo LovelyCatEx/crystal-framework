@@ -14,6 +14,7 @@ class TenantSettingsBuiltinConfigurer : TenantSettingsConfigurer {
         registry.settings(
             listOf(
                 TenantSettingsConstants.Notification.MEMBER_JOIN_NOTIFY_EMAIL,
+                TenantSettingsConstants.Notification.MEMBER_JOIN_REVIEW_NOTIFY_EMAIL,
             )
         )
     }

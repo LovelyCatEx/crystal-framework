@@ -5,5 +5,6 @@ data class TenantSettingsView(
 ) {
     data class Notification(
         val memberJoinNotifyEmail: Boolean,
+        val memberJoinReviewNotifyEmail: Boolean,
     )
 }

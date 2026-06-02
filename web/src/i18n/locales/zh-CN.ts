@@ -1713,6 +1713,7 @@ export const zhCN: I18nRules = {
     tenantSettingsManager: {
       keys: {
         'notification.memberJoinNotifyEmail': '成员加入邮件通知',
+        'notification.memberJoinReviewNotifyEmail': '成员加入审核邮件通知',
       },
       groups: {
         'notification': '通知设置',

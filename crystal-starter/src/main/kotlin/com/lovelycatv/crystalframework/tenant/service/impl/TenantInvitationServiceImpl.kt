@@ -12,13 +12,17 @@ import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
+import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRepository
 import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
+import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
+import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsConstants
 import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
+import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import com.lovelycatv.vertex.log.logger
@@ -42,6 +46,7 @@ class TenantInvitationServiceImpl(
     private val tenantInvitationRecordService: TenantInvitationRecordService,
     private val mailTemplateService: MailTemplateService,
     private val messageChannelService: MessageChannelService,
+    private val tenantSettingsService: TenantSettingsService,
 ) : TenantInvitationService {
     private val logger = logger()
 
@@ -128,53 +133,105 @@ class TenantInvitationServiceImpl(
         // 3. Record invitation code usage
         tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
 
-        // 4. Send email to all members authorized to receive review notifications
+        // 4. Notify by email according to tenant settings
+        val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
         if (invitation.requiresReviewing) {
-            val tenantMembersToReceiveEmail = tenantService
-                .getMembersHasAnyPermission(
-                    tenant.id,
-                    TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM
-                )
-                .mapNotNull {
-                    tenantMemberService.getByIdOrNull(it.id)?.let {
-                        tenantMemberService.transformTenantMemberVO(it)
-                    }
-                }
-                .filter { it.user != null }
+            sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, tenantSettings.notification.memberJoinReviewNotifyEmail)
+        }
 
-            if (tenantMembersToReceiveEmail.isEmpty()) {
-                throw BusinessException("your request is denied as there are no one could handle your request")
-            }
+        if (tenantSettings.notification.memberJoinNotifyEmail) {
+            sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber)
+        }
+    }
 
-            val template = mailTemplateService.getAvailableTemplateByTypeName(
-                TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name
+    private suspend fun sendMemberJoinReviewEmail(
+        tenant: TenantEntity,
+        user: UserEntity,
+        realName: String,
+        phoneNumber: String,
+        switchOn: Boolean,
+    ) {
+        val tenantMembersToReceiveEmail = tenantService
+            .getMembersHasAnyPermission(
+                tenant.id,
+                TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM
             )
-            val placeholders = mapOf(
-                TenantMailDeclaration.VARIABLE_USERNAME to user.username,
-                TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
-                TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
-                TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber,
-            )
-            val reviewMessage = ChainMessage(
-                title = template.title.resolveMailTemplatePlaceholders(placeholders),
-                chain = messageChain {
-                    rawHtml(template.content.resolveMailTemplatePlaceholders(placeholders))
-                },
-            )
-
-            tenantMembersToReceiveEmail.forEach {
-                val email = it.user!!.email
-                    ?: throw BusinessException("request could not be processed as your email is absent")
-                logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user.nickname}@${it.user.username}")
-                val result = messageChannelService.send(EmailRecipient(email = email), reviewMessage)
-                if (!result.success) {
-                    logger.error(
-                        "Failed to send tenant member join review email to {} via {}: [{}] {}",
-                        email, result.channelType, result.errorCode, result.errorMessage,
-                    )
-                    throw BusinessException("Send email to $email failed")
+            .mapNotNull {
+                tenantMemberService.getByIdOrNull(it.id)?.let { member ->
+                    tenantMemberService.transformTenantMemberVO(member)
                 }
             }
+            .filter { it.user != null }
+
+        if (tenantMembersToReceiveEmail.isEmpty()) {
+            throw BusinessException("your request is denied as there are no one could handle your request")
+        }
+
+        if (!switchOn) {
+            logger.info("memberJoinReviewNotifyEmail is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+            return
+        }
+
+        val placeholders = mapOf(
+            TenantMailDeclaration.VARIABLE_USERNAME to user.username,
+            TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
+            TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
+            TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber,
+        )
+        val message = buildMailMessage(TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name, placeholders)
+
+        tenantMembersToReceiveEmail.forEach {
+            val email = it.user!!.email
+                ?: throw BusinessException("request could not be processed as your email is absent")
+            logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user.nickname}@${it.user.username}")
+            sendEmailOrThrow(email, message, "tenant member join review email")
+        }
+    }
+
+    private suspend fun sendMemberJoinNotifyEmail(
+        tenant: TenantEntity,
+        user: UserEntity,
+        realName: String,
+        phoneNumber: String,
+    ) {
+        val owner = userService.getByIdOrNull(tenant.ownerUserId)
+        val ownerEmail = owner?.email
+        if (ownerEmail.isNullOrBlank()) {
+            logger.info("Skip sending member join notify email: owner of tenant ${tenant.name} - ${tenant.id} has no email")
+            return
+        }
+
+        val placeholders = mapOf(
+            TenantMailDeclaration.VARIABLE_USERNAME to user.username,
+            TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
+            TenantMailDeclaration.VARIABLE_REAL_NAME to realName,
+            TenantMailDeclaration.VARIABLE_PHONE_NUMBER to phoneNumber,
+            TenantMailDeclaration.VARIABLE_TENANT_NAME to tenant.name,
+        )
+        val message = buildMailMessage(TenantMailDeclaration.tenantMemberJoinNotifyTemplateType.name, placeholders)
+
+        logger.info("sending tenant member join notify email of tenant ${tenant.name} to owner ${owner.nickname}@${owner.username}")
+        sendEmailOrThrow(ownerEmail, message, "tenant member join notify email")
+    }
+
+    private suspend fun buildMailMessage(templateTypeName: String, placeholders: Map<String, String>): ChainMessage {
+        val template = mailTemplateService.getAvailableTemplateByTypeName(templateTypeName)
+        return ChainMessage(
+            title = template.title.resolveMailTemplatePlaceholders(placeholders),
+            chain = messageChain {
+                rawHtml(template.content.resolveMailTemplatePlaceholders(placeholders))
+            },
+        )
+    }
+
+    private suspend fun sendEmailOrThrow(email: String, message: ChainMessage, label: String) {
+        val result = messageChannelService.send(EmailRecipient(email = email), message)
+        if (!result.success) {
+            logger.error(
+                "Failed to send {} to {} via {}: [{}] {}",
+                label, email, result.channelType, result.errorCode, result.errorMessage,
+            )
+            throw BusinessException("Send email to $email failed")
         }
     }
 }
