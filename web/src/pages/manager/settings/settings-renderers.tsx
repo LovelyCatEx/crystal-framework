@@ -3,6 +3,7 @@ import type {FormInstance} from "antd";
 import type {SystemSettingsSchema} from "@/types/system/system-settings.types.ts";
 import {ColorPickerInput} from "@/components/ColorPickerInput.tsx";
 import {TestSendEmailButton} from "@/components/TestSendEmailButton.tsx";
+import {TestSendLarkButton} from "@/components/TestSendLarkButton.tsx";
 
 export interface SettingsItemRenderContext {
     settingsKey: string;
@@ -27,6 +28,11 @@ export const settingsGroupExtraRenderers = new Map<string, SettingsGroupExtraRen
     ['mail.smtp', () => (
         <div className="flex justify-end">
             <TestSendEmailButton/>
+        </div>
+    )],
+    ['messageChannel.lark', () => (
+        <div className="flex justify-end">
+            <TestSendLarkButton/>
         </div>
     )],
 ]);
