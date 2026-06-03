@@ -42,11 +42,11 @@ class LarkApiClient(
             ?: throw IllegalStateException("Lark tenant_access_token endpoint returned empty body")
 
         val code = (response["code"] as? Number)?.toInt() ?: -1
-        if (code != 0) {
-            throw IllegalStateException(
-                "Lark tenant_access_token failed: code=$code, msg=${response["msg"]}"
-            )
+
+        check(code == 0) {
+            "Lark tenant_access_token failed: code=$code, msg=${response["msg"]}"
         }
+
         val token = response["tenant_access_token"] as? String
             ?: throw IllegalStateException("Lark response missing tenant_access_token")
         val expireSeconds = (response["expire"] as? Number)?.toLong() ?: DEFAULT_TOKEN_TTL_SECONDS

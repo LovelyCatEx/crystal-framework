@@ -17,8 +17,9 @@ class TaskRegistry {
      */
     fun register(task: ScheduledTask) {
         val definition = ScheduleTaskDefinition.from(task)
-        if (tasks.putIfAbsent(definition.name, definition) != null) {
-            throw IllegalStateException("TaskRegistry: duplicate task name '${definition.name}' (class: ${task::class.qualifiedName})")
+       
+        check(tasks.putIfAbsent(definition.name, definition) == null) {
+            "TaskRegistry: duplicate task name '${definition.name}' (class: ${task::class.qualifiedName})"
         }
     }
 

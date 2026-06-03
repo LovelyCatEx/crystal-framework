@@ -17,8 +17,8 @@ class TenantRbacRegistry {
             return
         }
 
-        if (permissions.putIfAbsent(permissionName, permission.copy(name = permissionName)) != null) {
-            throw IllegalStateException("TenantRbacRegistry: duplicate permission name '$permissionName'")
+        check(permissions.putIfAbsent(permissionName, permission.copy(name = permissionName)) == null) {
+            "TenantRbacRegistry: duplicate permission name '$permissionName'"
         }
     }
 
@@ -32,16 +32,15 @@ class TenantRbacRegistry {
             return
         }
 
-        if (roles.putIfAbsent(
+        check(
+            roles.putIfAbsent(
                 roleName,
                 role.copy(
                     name = roleName,
                     parentRoleName = role.parentRoleName?.trim()?.takeIf { it.isNotBlank() }
                 )
-            ) != null
-        ) {
-            throw IllegalStateException("TenantRbacRegistry: duplicate role name '$roleName'")
-        }
+            ) == null
+        ) { "TenantRbacRegistry: duplicate role name '$roleName'" }
     }
 
     fun roles(roles: Iterable<TenantRoleDeclaration>) {

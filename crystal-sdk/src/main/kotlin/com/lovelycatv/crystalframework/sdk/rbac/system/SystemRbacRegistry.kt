@@ -16,8 +16,8 @@ class SystemRbacRegistry {
             return
         }
 
-        if (permissions.putIfAbsent(permissionName, permission.copy(name = permissionName)) != null) {
-            throw IllegalStateException("SystemRbacRegistry: duplicate permission name '$permissionName'")
+        check(permissions.putIfAbsent(permissionName, permission.copy(name = permissionName)) == null) {
+            "SystemRbacRegistry: duplicate permission name '$permissionName'"
         }
     }
 
@@ -31,8 +31,8 @@ class SystemRbacRegistry {
             return
         }
 
-        if (roles.putIfAbsent(roleName, role.copy(name = roleName)) != null) {
-            throw IllegalStateException("SystemRbacRegistry: duplicate role name '$roleName'")
+        check(roles.putIfAbsent(roleName, role.copy(name = roleName)) == null) {
+            "SystemRbacRegistry: duplicate role name '$roleName'"
         }
     }
 
