@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.settings.controller
 
+import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -25,38 +26,10 @@ class TenantSettingsController(
     @GetMapping("/schema")
     suspend fun getTenantSettings(userAuthentication: UserAuthentication): ApiResponse<*> {
         val tenantId = userAuthentication.assertTenantIdNotNull()
-        val declarations = tenantSettingsRegistry.settingDeclarations()
-
-        val mapping = declarations.associate {
-            it.key to mapOf(
-                "sort" to it.sort,
-                "valueType" to it.valueType.name,
-                "value" to (tenantSettingsService.getSettings(tenantId, it.key)?.configValue ?: it.defaultValue),
-                "defaultValue" to it.defaultValue,
-                "enumValues" to it.enumValues,
-                "tab" to if (it.key.contains(".")) {
-                    it.key.split(".")[0]
-                } else {
-                    null
-                },
-                "group" to if (it.key.contains(".")) {
-                    it.key.split(".")
-                        .dropLast(1)
-                        .joinToString(".")
-                } else {
-                    null
-                }
-            )
+        val data = buildSettingsSchemaResponse(tenantSettingsRegistry.settingDeclarations()) { key ->
+            tenantSettingsService.getSettings(tenantId, key)?.configValue
         }
-
-        return ApiResponse.success(
-            mapOf(
-                "groups" to mapping.values
-                    .mapNotNull { it["group"] }
-                    .distinct(),
-                "items" to mapping,
-            )
-        )
+        return ApiResponse.success(data)
     }
 
     @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_SETTINGS_UPDATE_PEM}')")
