@@ -40,6 +40,10 @@ registry.settings(
 | `BOOLEAN` | Switch | Toggle |
 | `ENUM_SINGLE` | Radio.Group | Single selection |
 | `ENUM_MULTIPLE` | Checkbox.Group | Multiple selection |
+| `STRING_ARRAY` | Select (tags) | String array (transported as a JSON string array) |
+| `NUMBER_ARRAY` | Select (tags) | Integer array (transported as a JSON string array) |
+| `DECIMAL_ARRAY` | Select (tags) | Decimal array (transported as a JSON string array) |
+| `BOOLEAN_ARRAY` | Select (tags) | Boolean array (transported as a JSON string array) |
 
 ## Key Naming Convention
 

@@ -13,6 +13,7 @@ import {
     useSettingsKeyToTranslationMap,
     useSettingsTabToTranslationMap
 } from "@/i18n/system-settings.tsx";
+import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
 import {
     ApiOutlined,
     ExclamationCircleFilled,
@@ -54,10 +55,7 @@ export default function SystemSettingsManagerPage() {
             return;
         }
 
-        const kv = Object.fromEntries(
-            Object.entries(data.items)
-                .map(([key, schema]) => [key, schema.value])
-        );
+        const kv = deserializeSettingsValues(data.items)
 
         form.setFieldsValue(kv)
     }, [data]);
@@ -66,7 +64,8 @@ export default function SystemSettingsManagerPage() {
         setRefreshing(isLoading);
     }, [isLoading]);
 
-    const updateSettings = (props: Record<string, string | null>) => {
+    const updateSettings = (values: Record<string, unknown>) => {
+        const props = serializeSettingsValues(data?.items ?? {}, values)
         updateSystemSettings(props)
             .then(() => {
                 void message.success(t('pages.systemSettingsManager.saveSuccess'))

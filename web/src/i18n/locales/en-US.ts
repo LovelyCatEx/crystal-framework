@@ -2538,7 +2538,11 @@ export const enUS: I18nRules = {
       STRING: 'String',
       NUMBER: 'Number',
       DECIMAL: 'Decimal',
-      BOOLEAN: 'Boolean'
+      BOOLEAN: 'Boolean',
+      STRING_ARRAY: 'String Array',
+      NUMBER_ARRAY: 'Number Array',
+      DECIMAL_ARRAY: 'Decimal Array',
+      BOOLEAN_ARRAY: 'Boolean Array'
     },
 
     storageProviderType: {

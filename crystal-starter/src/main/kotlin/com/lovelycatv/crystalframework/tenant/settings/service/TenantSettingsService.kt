@@ -1,9 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.settings.service
 
+import com.lovelycatv.crystalframework.sdk.common.settings.convertValue
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
-import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.tenant.settings.entity.TenantSettingsEntity
 import com.lovelycatv.crystalframework.tenant.settings.repository.TenantSettingsRepository
 import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsView
@@ -31,14 +30,7 @@ interface TenantSettingsService : CachedBaseService<TenantSettingsRepository, Te
         val settingsValue = getSettings(tenantId, declaration.key) { declaration.defaultValue }
             ?: return null
 
-        return when (declaration.valueType) {
-            SettingsItemValueType.STRING -> settingsValue
-            SettingsItemValueType.NUMBER -> settingsValue.toLongOrNull()
-            SettingsItemValueType.DECIMAL -> settingsValue.toDoubleOrNull()
-            SettingsItemValueType.BOOLEAN -> settingsValue.toBooleanStrictOrNull()
-            SettingsItemValueType.ENUM_SINGLE -> settingsValue
-            SettingsItemValueType.ENUM_MULTIPLE -> settingsValue.parseObject<List<String>>()
-        } as? R?
+        return declaration.valueType.convertValue(settingsValue) as? R?
     }
 
     suspend fun setSettings(tenantId: Long, key: String, value: String?)

@@ -13,6 +13,7 @@ import {
     useTenantSettingsTabToTranslationMap,
 } from "@/i18n/tenant-settings.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
+import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
 
 export const tenantSettingsItemRenderers = new Map<string, SettingsItemRenderer>();
 
@@ -39,15 +40,13 @@ export function TenantSettingsSection() {
         if (!data) {
             return;
         }
-        const kv = Object.fromEntries(
-            Object.entries(data.items).map(([key, schema]) => [key, schema.value])
-        );
+        const kv = deserializeSettingsValues(data.items);
         form.setFieldsValue(kv);
     }, [data]);
 
-    const onSave = (values: Record<string, string | null>) => {
+    const onSave = (values: Record<string, unknown>) => {
         setSaving(true);
-        updateTenantSettings(values)
+        updateTenantSettings(serializeSettingsValues(data?.items ?? {}, values))
             .then(() => {
                 void message.success(t('pages.tenantSettingsManager.saveSuccess'));
             })

@@ -1,10 +1,9 @@
 package com.lovelycatv.crystalframework.system.service
 
+import com.lovelycatv.crystalframework.sdk.common.settings.convertValue
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
-import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 
@@ -38,14 +37,7 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
         val settingsValue = getSettings(declaration.key) { declaration.defaultValue }
             ?: return null
 
-        return when (declaration.valueType) {
-            SettingsItemValueType.STRING -> settingsValue
-            SettingsItemValueType.NUMBER -> settingsValue.toLongOrNull()
-            SettingsItemValueType.DECIMAL -> settingsValue.toDoubleOrNull()
-            SettingsItemValueType.BOOLEAN -> settingsValue.toBooleanStrictOrNull()
-            SettingsItemValueType.ENUM_SINGLE -> settingsValue
-            SettingsItemValueType.ENUM_MULTIPLE -> settingsValue.parseObject<List<String>>()
-        } as? R?
+        return declaration.valueType.convertValue(settingsValue) as? R?
     }
 
     suspend fun setSettings(key: String, value: String?)

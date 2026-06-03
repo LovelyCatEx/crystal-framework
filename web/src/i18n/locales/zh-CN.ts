@@ -2535,7 +2535,11 @@ export const zhCN: I18nRules = {
       STRING: '字符串',
       NUMBER: '整数',
       DECIMAL: '小数',
-      BOOLEAN: '布尔值'
+      BOOLEAN: '布尔值',
+      STRING_ARRAY: '字符串数组',
+      NUMBER_ARRAY: '整数数组',
+      DECIMAL_ARRAY: '小数数组',
+      BOOLEAN_ARRAY: '布尔值数组'
     },
 
     storageProviderType: {

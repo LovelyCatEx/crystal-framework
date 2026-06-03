@@ -58,6 +58,10 @@ class MyPluginSettingsConfigurer : SystemSettingsConfigurer {
 | `BOOLEAN` | Switch | 开关 |
 | `ENUM_SINGLE` | Radio.Group | 单选枚举 |
 | `ENUM_MULTIPLE` | Checkbox.Group | 多选枚举 |
+| `STRING_ARRAY` | Select (tags) | 字符串数组（JSON 字符串数组传输） |
+| `NUMBER_ARRAY` | Select (tags) | 整数数组（JSON 字符串数组传输） |
+| `DECIMAL_ARRAY` | Select (tags) | 小数数组（JSON 字符串数组传输） |
+| `BOOLEAN_ARRAY` | Select (tags) | 布尔值数组（JSON 字符串数组传输） |
 
 ## Key 命名规则
 

@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.settings.service.impl
 
-import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -192,15 +192,6 @@ class TenantSettingsServiceImpl(
         )
 
         logger.info("Tenant($tenantId) settings synchronized to cache")
-    }
-
-    private fun SettingsItemValueType.matches(raw: String): Boolean = when (this) {
-        SettingsItemValueType.STRING -> true
-        SettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
-        SettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
-        SettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
-        SettingsItemValueType.ENUM_SINGLE -> true
-        SettingsItemValueType.ENUM_MULTIPLE -> true
     }
 
     companion object {
