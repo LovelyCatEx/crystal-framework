@@ -18,9 +18,6 @@ object TenantRolePermissionRelation {
             TenantPermission.MENU_TENANT_MEMBER_ROLE_MANAGER,
             TenantPermission.ACTION_TENANT_MEMBER_ROLE_READ,
             TenantPermission.ACTION_TENANT_MEMBER_ROLE_UPDATE,
-            // Tenant Settings
-            TenantPermission.ACTION_TENANT_SETTINGS_READ,
-            TenantPermission.ACTION_TENANT_SETTINGS_UPDATE,
         ),
         TenantRole.ADMIN to listOf(
             // Profile

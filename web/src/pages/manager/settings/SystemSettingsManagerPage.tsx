@@ -1,12 +1,24 @@
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
-import {
-    getSystemSettingsSchema,
-    updateSystemMaintenanceMode,
-    updateSystemSettings
-} from "@/api/system/system-settings.api.ts";
+import {getSystemSettingsSchema, updateSystemMaintenanceMode, updateSystemSettings} from "@/api/system/system-settings.api.ts";
 import type {MenuProps} from "antd";
-import {Button, Card, Dropdown, Form, message, Modal} from "antd";
+import {
+    Button,
+    Card,
+    Checkbox,
+    Dropdown,
+    Form,
+    Input,
+    InputNumber,
+    message,
+    Modal,
+    Radio,
+    Switch,
+    Tabs,
+    theme
+} from "antd";
+import type {GetSystemSettingsSchemaData, SystemSettingsSchema} from "@/types/system/system-settings.types.ts";
+import {SystemSettingsItemValueType} from "@/types/system/system-settings.types.ts";
 import {useEffect, useState} from "react";
 import {
     useSettingsGroupToTranslationMap,
@@ -25,16 +37,106 @@ import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 import {settingsGroupExtraRenderers, settingsItemRenderers} from "@/pages/manager/settings/settings-renderers.tsx";
-import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+
+const { useToken } = theme;
+
+function SettingsGroup(props: {
+    group: string;
+    items: [string, SystemSettingsSchema][];
+    loading: boolean;
+    isFirst: boolean;
+}) {
+    const { token } = useToken();
+    const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
+    const translatedGroup = settingsGroupToTranslationMap.get(props.group);
+    const form = Form.useFormInstance();
+    const extraRenderer = settingsGroupExtraRenderers.get(props.group);
+
+    return (
+        <div className={props.isFirst ? "" : "mt-8"}>
+            <div className="flex items-center mb-6 pb-3" style={{ borderBottom: `1px solid ${token.colorBorder}` }}>
+                {translatedGroup?.icon && (
+                    <span className="text-xl mr-3" style={{ color: token.colorPrimary }}>
+                        {translatedGroup.icon}
+                    </span>
+                )}
+                <h3 className="text-lg font-semibold" style={{ color: token.colorTextHeading }}>
+                    {translatedGroup?.label ?? props.group}
+                </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {props.items.map(([key, value]) => (
+                    <div key={key} className="bg-slate-50/50 dark:bg-slate-200/5 rounded-xl p-4 hover:bg-slate-50 dark:hover:bg-slate-200/10 transition-colors">
+                        <SettingsItem
+                            settingsKey={key}
+                            schema={value}
+                            loading={props.loading}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {extraRenderer && (
+                <div className="mt-6">
+                    {extraRenderer({ group: props.group, form })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function buildTabItems(
+    data: GetSystemSettingsSchemaData,
+    settingsTabToTranslationMap: Map<string, string>,
+    isLoading: boolean,
+    refreshing: boolean
+) {
+    const tabs = Array.from(
+        new Set(
+            Object.values(data.items)
+                .map(item => item.tab)
+                .filter(tab => tab !== null)
+        )
+    ).sort();
+
+    return tabs.map(tab => {
+        const groupsInTab = data.groups.filter(group => 
+            Object.values(data.items).some(item => 
+                item.tab === tab && item.group === group
+            )
+        );
+
+        const groupElements = groupsInTab.map((group, index) => {
+            const items = Object.entries(data.items)
+                .filter(([_, value]) => value.group === group)
+                .sort(([, a], [, b]) => a.sort - b.sort);
+
+            return (
+                <SettingsGroup
+                    key={group}
+                    group={group}
+                    items={items}
+                    loading={isLoading || refreshing}
+                    isFirst={index === 0}
+                />
+            );
+        });
+
+        return {
+            key: tab,
+            label: settingsTabToTranslationMap.get(tab) ?? tab,
+            children: <div className="py-4">{groupElements}</div>
+        };
+    });
+}
 
 export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
     const {t} = useTranslation();
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();
-    const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
-    const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
 
-    const {data, isLoading, mutate} = useSWRComposition(
+    const { data, isLoading, mutate } = useSWRComposition(
         'settings-schema',
         () => getSystemSettingsSchema().then((res) => res.data),
         () => void message.error(t('pages.systemSettingsManager.fetchFailed'))
@@ -103,7 +205,7 @@ export default function SystemSettingsManagerPage() {
             title: isInMaintenance
                 ? t('pages.systemSettingsManager.maintenanceConfirmDisableTitle')
                 : t('pages.systemSettingsManager.maintenanceConfirmEnableTitle'),
-            icon: <ExclamationCircleFilled/>,
+            icon: <ExclamationCircleFilled />,
             content: isInMaintenance
                 ? t('pages.systemSettingsManager.maintenanceConfirmDisableContent')
                 : t('pages.systemSettingsManager.maintenanceConfirmEnableContent'),
@@ -136,20 +238,22 @@ export default function SystemSettingsManagerPage() {
                                     {
                                         key: 'import',
                                         label: t('pages.systemSettingsManager.importConfig'),
-                                        icon: <ImportOutlined/>,
+                                        icon: <ImportOutlined />,
                                         onClick: importSettings
                                     },
                                     {
                                         key: 'export',
                                         label: t('pages.systemSettingsManager.exportConfig'),
-                                        icon: <ExportOutlined/>,
+                                        icon: <ExportOutlined />,
                                         onClick: exportSettings
                                     },
-                                    {type: 'divider'},
+                                    {
+                                        type: 'divider'
+                                    },
                                     {
                                         key: 'maintenance',
                                         label: t('pages.systemSettingsManager.maintenanceMode'),
-                                        icon: isInMaintenance ? <ApiOutlined/> : <ToolOutlined/>,
+                                        icon: isInMaintenance ? <ApiOutlined /> : <ToolOutlined />,
                                         onClick: switchMaintenanceMode,
                                         danger: isInMaintenance
                                     }
@@ -158,7 +262,7 @@ export default function SystemSettingsManagerPage() {
                             placement="bottomRight"
                         >
                             <Button
-                                icon={<ToolOutlined/>}
+                                icon={<ToolOutlined />}
                                 size="large"
                                 className="rounded-xl h-12 px-6"
                             >
@@ -167,7 +271,7 @@ export default function SystemSettingsManagerPage() {
                         </Dropdown>
                         <Button
                             type="primary"
-                            icon={<SaveOutlined/>}
+                            icon={<SaveOutlined />}
                             size="large"
                             className="rounded-xl h-12 px-8 shadow-lg"
                             onClick={() => {
@@ -181,24 +285,90 @@ export default function SystemSettingsManagerPage() {
             />
 
             <div className="animate-in slide-in-from-bottom-4 duration-500">
-                <Card className="rounded-2xl shadow-sm border-none overflow-hidden mb-6"
-                      styles={{body: {paddingTop: 8}}}>
+                <Card className="rounded-2xl shadow-sm border-none overflow-hidden mb-6" styles={{ body: { paddingTop: 8 } }}>
                     <Form form={form} layout="vertical" onFinish={updateSettings}>
-                        <SettingsRendererContainer
-                            data={data}
-                            loading={isLoading || refreshing}
-                            tabTranslationMap={settingsTabToTranslationMap}
-                            groupTranslationMap={settingsGroupToTranslationMap}
-                            keyTranslationMap={settingsKeyToTranslationMap}
-                            enumTranslator={(key, value) =>
-                                t(`pages.systemSettingsManager.enums.${key}.${value}`)
-                            }
-                            itemRenderers={settingsItemRenderers}
-                            groupExtraRenderers={settingsGroupExtraRenderers}
-                        />
+                        {data && (
+                            <Tabs 
+                                items={buildTabItems(data, settingsTabToTranslationMap, isLoading, refreshing)} 
+                                className="settings-tabs" 
+                            />
+                        )}
                     </Form>
                 </Card>
             </div>
         </>
+    )
+}
+
+function SettingsItem(props: { settingsKey: string, schema: SystemSettingsSchema, loading?: boolean }) {
+    const { token } = useToken();
+    const { t } = useTranslation();
+    const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
+    const customRenderer = settingsItemRenderers.get(props.settingsKey);
+    const formItemProps: Record<string, unknown> | undefined =
+        props.schema.valueType === SystemSettingsItemValueType.BOOLEAN
+            ? { getValueProps: (value: string | boolean) => ({ checked: value === 'true' || value === true }) }
+            : undefined;
+
+    return (
+        <Form.Item
+            key={props.settingsKey}
+            name={props.settingsKey}
+            label={
+                <span className="text-sm font-medium" style={{ color: token.colorTextSecondary }}>
+                    {settingsKeyToTranslationMap.get(props.settingsKey) ?? props.settingsKey}
+                </span>
+            }
+            className="mb-0"
+            {...formItemProps}
+        >
+            {customRenderer ? (
+                customRenderer({ settingsKey: props.settingsKey, schema: props.schema, loading: props.loading })
+            ) : props.schema.valueType == SystemSettingsItemValueType.STRING ? (
+                <Input 
+                    className="rounded-lg h-10" 
+                    placeholder={props.schema.defaultValue ?? ''} 
+                    disabled={props.loading}
+                />
+            ) : props.schema.valueType == SystemSettingsItemValueType.NUMBER ? (
+                <InputNumber
+                    className="w-full rounded-lg h-10"
+                    defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
+                    disabled={props.loading}
+                />
+            ) : props.schema.valueType == SystemSettingsItemValueType.DECIMAL ? (
+                <InputNumber
+                    className="w-full rounded-lg h-10"
+                    defaultValue={Number.parseFloat(props.schema.defaultValue ?? '0')}
+                    disabled={props.loading}
+                />
+            ) : props.schema.valueType == SystemSettingsItemValueType.BOOLEAN ? (
+                <Switch disabled={props.loading} />
+            ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_SINGLE ? (
+                <Radio.Group
+                    className="flex flex-col space-y-2"
+                    disabled={props.loading}
+                    options={(props.schema.enumValues ?? []).map((item) => {
+                        return {
+                            value: item,
+                            label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                        }
+                    })}
+                />
+            ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_MULTIPLE ? (
+                <Checkbox.Group
+                    className="flex flex-col space-y-2"
+                    disabled={props.loading}
+                    options={(props.schema.enumValues ?? []).map((item) => {
+                        return {
+                            value: item,
+                            label: t(`pages.systemSettingsManager.enums.${props.settingsKey}.${item}`),
+                        }
+                    })}
+                />
+            ) : (
+                <span className="text-red-500 text-sm">NO RENDER FOUND FOR THIS SETTINGS ITEM</span>
+            )}
+        </Form.Item>
     )
 }

@@ -7,7 +7,6 @@ import {
     Input,
     message,
     Row,
-    Segmented,
     Spin,
     theme,
     Typography,
@@ -35,15 +34,11 @@ import {
 import type {TenantProfileVO} from "@/types/tenant/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
-import {TenantSettingsSection} from "@/components/tenant/TenantSettingsSection.tsx";
-import {AddressInput} from "@/components/map/AddressInput.tsx";
 
 const { useToken } = theme;
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
-
-type RightSegment = 'profile' | 'settings';
 
 export default function MyTenantProfilePage() {
     const { t } = useTranslation();
@@ -53,7 +48,6 @@ export default function MyTenantProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [tenant, setTenant] = useState<TenantProfileVO | null>(null);
-    const [activeSegment, setActiveSegment] = useState<RightSegment>('profile');
 
     const [isIconUploading, setIsIconUploading] = useState(false);
     const [cropperOpen, setCropperOpen] = useState(false);
@@ -250,29 +244,17 @@ export default function MyTenantProfilePage() {
 
                 <div className="lg:col-span-8">
                     <Card className="rounded-2xl shadow-sm border-none min-h-[500px]">
-                        <Segmented
-                            block
-                            value={activeSegment}
-                            onChange={(v) => setActiveSegment(v as RightSegment)}
-                            options={[
-                                {label: t('pages.myTenantSettings.segments.profile'), value: 'profile'},
-                                {label: t('pages.myTenantSettings.segments.settings'), value: 'settings'},
-                            ]}
-                        />
+                        <div className="mb-6">
+                            <Title level={4} className="!mb-1">{t('pages.myTenantSettings.basicInfo')}</Title>
+                            <Text type="secondary">{t('pages.myTenantSettings.basicInfoDesc')}</Text>
+                        </div>
 
-                        {activeSegment === 'profile' ? (
-                            <div className="mt-6">
-                                <div className="mb-6">
-                                    <Title level={4} className="!mb-1">{t('pages.myTenantSettings.basicInfo')}</Title>
-                                    <Text type="secondary">{t('pages.myTenantSettings.basicInfoDesc')}</Text>
-                                </div>
-
-                                <Form
-                                    form={form}
-                                    layout="vertical"
-                                    onFinish={handleSave}
-                                    className="mt-6"
-                                >
+                        <Form
+                            form={form}
+                            layout="vertical"
+                            onFinish={handleSave}
+                            className="mt-6"
+                        >
                             <Row gutter={24}>
                                 <Col span={12}>
                                     <Form.Item
@@ -352,23 +334,22 @@ export default function MyTenantProfilePage() {
                                 </Col>
                             </Row>
 
-                            <AddressInput
-                                formItemProps={{
-                                    name: 'address',
-                                    label: t('pages.myTenantSettings.form.address'),
-                                    rules: [
-                                        { required: true, message: t('pages.myTenantSettings.validation.addressRequired') },
-                                        { max: 256, message: t('pages.myTenantSettings.validation.addressMax') }
-                                    ],
-                                }}
-                                inputProps={{
-                                    prefix: <HomeOutlined className="text-gray-400 mr-2" />,
-                                    className: "rounded-lg h-10",
-                                    placeholder: t('pages.myTenantSettings.placeholders.address'),
-                                    maxLength: 256,
-                                    showCount: true,
-                                }}
-                            />
+                            <Form.Item
+                                name="address"
+                                label={t('pages.myTenantSettings.form.address')}
+                                rules={[
+                                    { required: true, message: t('pages.myTenantSettings.validation.addressRequired') },
+                                    { max: 256, message: t('pages.myTenantSettings.validation.addressMax') }
+                                ]}
+                            >
+                                <Input
+                                    prefix={<HomeOutlined className="text-gray-400 mr-2" />}
+                                    className="rounded-lg h-10"
+                                    placeholder={t('pages.myTenantSettings.placeholders.address')}
+                                    maxLength={256}
+                                    showCount
+                                />
+                            </Form.Item>
 
                             <Form.Item
                                 name="description"
@@ -417,12 +398,6 @@ export default function MyTenantProfilePage() {
                                 </Button>
                             </Form.Item>
                         </Form>
-                            </div>
-                        ) : (
-                            <div className="mt-6">
-                                <TenantSettingsSection/>
-                            </div>
-                        )}
                     </Card>
                 </div>
             </div>
