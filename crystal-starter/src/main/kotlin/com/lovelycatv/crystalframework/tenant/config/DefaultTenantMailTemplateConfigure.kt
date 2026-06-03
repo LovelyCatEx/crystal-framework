@@ -8,4 +8,8 @@ class DefaultTenantMailTemplateConfigure : TenantMailTemplateConfigure {
     override fun configureUserJoinReview(): MailTemplateDeclaration {
         return TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate
     }
+
+    override fun configureMemberJoinNotify(): MailTemplateDeclaration {
+        return TenantMailDeclaration.defaultTenantMemberJoinNotifyTemplate
+    }
 }

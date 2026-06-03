@@ -509,6 +509,18 @@ export const enUS: I18nRules = {
         uploadFailed: 'Failed to upload avatar',
         invalidType: 'Please upload JPG, PNG or WebP format',
         maxSize: 'Image size cannot exceed 5MB'
+      },
+      segments: {
+        profile: 'Profile',
+        settings: 'Settings'
+      },
+      tenantSettings: {
+        sectionTitle: 'Organization Settings',
+        sectionSubtitle: 'Tune preferences and toggles for the current organization',
+        save: 'Save Settings',
+        saveSuccess: 'Organization settings saved',
+        saveFailed: 'Failed to save organization settings',
+        fetchFailed: 'Failed to load organization settings'
       }
     },
 
@@ -643,6 +655,7 @@ export const enUS: I18nRules = {
         address: {
           label: 'Address',
           required: 'Please enter address',
+          maxLength: 'Address cannot exceed 256 characters',
           placeholder: 'Address'
         },
         config: {
@@ -1062,7 +1075,8 @@ export const enUS: I18nRules = {
         idPlaceholder: 'Enter role ID',
       },
       action: {
-        addNew: 'Add New Role'
+        addNew: 'Add New Role',
+        assignPermission: 'Assign Permission',
       },
       modal: {
         name: {
@@ -1077,6 +1091,19 @@ export const enUS: I18nRules = {
           label: 'Description',
           placeholder: 'Enter description (optional)'
         }
+      },
+      permissionModal: {
+        title: 'Assign permissions to role "{{name}}"',
+        titles: {
+          available: 'Available Permissions',
+          assigned: 'Assigned Permissions'
+        }
+      },
+      messages: {
+        fetchPermissionsFailed: 'Failed to fetch permission list',
+        fetchRolePermissionsFailed: 'Failed to fetch role permissions',
+        assignSuccess: 'Permissions assigned successfully',
+        assignFailed: 'Failed to assign permissions'
       }
     },
     myTenantMemberManager: {
@@ -1619,6 +1646,40 @@ export const enUS: I18nRules = {
       maintenanceConfirmDisableContent: 'Disabling maintenance mode will restore access for all users. Are you sure you want to continue?',
       maintenanceConfirmOk: 'Confirm',
       maintenanceConfirmCancel: 'Cancel',
+      testSendEmail: {
+        button: 'Send Test Email',
+        modalTitle: 'Send Test Email',
+        emailLabel: 'Recipient Email',
+        emailPlaceholder: 'Enter recipient email',
+        emailRequired: 'Recipient email is required',
+        emailInvalid: 'Invalid email format',
+        confirm: 'Send',
+        cancel: 'Cancel',
+        sendSuccess: 'Test email sent successfully',
+        sendFailed: 'Failed to send test email',
+      },
+      testSendLark: {
+        button: 'Send Lark Test Message',
+        modalTitle: 'Send Lark Test Message',
+        idTypeLabel: 'ID Type',
+        idTypes: {
+          openId: 'Open ID',
+          userId: 'User ID',
+          unionId: 'Union ID',
+          email: 'Email',
+          chatId: 'Chat ID',
+        },
+        idValueLabel: 'Recipient ID',
+        idValuePlaceholder: 'Enter the ID value for the selected type',
+        idValueRequired: 'Recipient ID is required',
+        contentLabel: 'Message Content (XML)',
+        contentPlaceholder: 'Enter XML message content',
+        contentHint: 'Supports MessageChain XML; falls back to the default in application.yaml when empty',
+        confirm: 'Send',
+        cancel: 'Cancel',
+        sendSuccess: 'Lark test message sent successfully',
+        sendFailed: 'Failed to send Lark test message',
+      },
       keys: {
         'basic.baseUrl': 'API Base URL',
         'basic.waterMark.enabled': 'Show Watermark',
@@ -1666,6 +1727,19 @@ export const enUS: I18nRules = {
           'CUSTOM': 'Custom',
         }
       }
+    },
+    tenantSettingsManager: {
+      keys: {
+        'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
+        'notification.memberJoinReviewNotifyEmail': 'Member Join Review Email Notification',
+      },
+      groups: {
+        'notification': 'Notification',
+      },
+      tabs: {
+        'notification': 'Notification',
+      },
+      enums: {}
     },
     announcementManager: {
       title: 'Announcement Management',
@@ -1817,6 +1891,12 @@ export const enUS: I18nRules = {
   },
 
   components: {
+    addressPicker: {
+      triggerTooltip: 'Pick address on map',
+      akMissing: 'Baidu map AK is not configured, address picker is unavailable',
+      emptyNearby: 'No nearby addresses found',
+      loading: 'Searching nearby addresses...'
+    },
     dashboard: {
       // DashboardPage
       greeting: {
