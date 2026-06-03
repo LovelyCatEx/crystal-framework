@@ -11,15 +11,15 @@ import {useTranslation} from "react-i18next";
 import {pluginRegistry} from "@/plugin/registry.ts";
 
 function usePluginSystemSettingsKeys(): string[] {
-    return pluginRegistry.systemSettingsKeys;
+    return pluginRegistry.getSettingsKeys('system');
 }
 
 function usePluginSystemSettingsGroups(): string[] {
-    return pluginRegistry.systemSettingsGroups;
+    return pluginRegistry.getSettingsGroups('system');
 }
 
 function usePluginSystemSettingsTabs(): string[] {
-    return pluginRegistry.systemSettingsTabs;
+    return pluginRegistry.getSettingsTabs('system');
 }
 
 export function useSettingsKeyToTranslationMap(): Map<string, string> {

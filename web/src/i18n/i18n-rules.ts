@@ -1,5 +1,14 @@
+export interface SettingsManagerI18nNode {
+    keys: { [key: string]: string };
+    groups: { [key: string]: string };
+    tabs: { [key: string]: string };
+    enums: { [key: string]: { [value: string]: string } };
+}
+
 export interface I18nRules {
     pages: {
+        systemSettingsManager: SettingsManagerI18nNode & { [key: string]: unknown };
+        tenantSettingsManager: SettingsManagerI18nNode & { [key: string]: unknown };
         [key: string]: object;
     },
     components: {

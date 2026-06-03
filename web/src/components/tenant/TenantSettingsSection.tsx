@@ -5,6 +5,8 @@ import {useTranslation} from "react-i18next";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {getTenantSettingsSchema, updateTenantSettings} from "@/api/tenant/tenant-settings.api.ts";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
+import {pluginRegistry} from "@/plugin/registry.ts";
 import {
     useTenantSettingsGroupToTranslationMap,
     useTenantSettingsKeyToTranslationMap,
@@ -24,11 +26,13 @@ export function TenantSettingsSection() {
     const tenantSettingsTabToTranslationMap = useTenantSettingsTabToTranslationMap();
     const tenantSettingsGroupToTranslationMap = useTenantSettingsGroupToTranslationMap();
     const tenantSettingsKeyToTranslationMap = useTenantSettingsKeyToTranslationMap();
+    const itemRenderers = mergeRenderers(tenantSettingsItemRenderers, pluginRegistry.getSettingsItemRenderers('tenant'));
+    const groupExtraRenderers = mergeRenderers(tenantSettingsGroupExtraRenderers, pluginRegistry.getSettingsGroupExtraRenderers('tenant'));
 
     const {data, isLoading, mutate} = useSWRComposition(
         'tenant-settings-schema',
         () => getTenantSettingsSchema().then((res) => res.data),
-        () => void message.error(t('pages.myTenantSettings.tenantSettings.fetchFailed'))
+        () => void message.error(t('pages.tenantSettingsManager.fetchFailed'))
     );
 
     useEffect(() => {
@@ -45,10 +49,10 @@ export function TenantSettingsSection() {
         setSaving(true);
         updateTenantSettings(values)
             .then(() => {
-                void message.success(t('pages.myTenantSettings.tenantSettings.saveSuccess'));
+                void message.success(t('pages.tenantSettingsManager.saveSuccess'));
             })
             .catch(() => {
-                void message.error(t('pages.myTenantSettings.tenantSettings.saveFailed'));
+                void message.error(t('pages.tenantSettingsManager.saveFailed'));
             })
             .finally(() => {
                 setRefreshing(true);
@@ -70,8 +74,8 @@ export function TenantSettingsSection() {
                 enumTranslator={(key, value) =>
                     t(`pages.tenantSettingsManager.enums.${key}.${value}`)
                 }
-                itemRenderers={tenantSettingsItemRenderers}
-                groupExtraRenderers={tenantSettingsGroupExtraRenderers}
+                itemRenderers={itemRenderers}
+                groupExtraRenderers={groupExtraRenderers}
                 showTabs={false}
             />
 
@@ -83,7 +87,7 @@ export function TenantSettingsSection() {
                     loading={saving}
                     className="rounded-xl px-8 h-auto py-2"
                 >
-                    {t('pages.myTenantSettings.tenantSettings.save')}
+                    {t('pages.tenantSettingsManager.saveSettings')}
                 </Button>
             </div>
         </Form>

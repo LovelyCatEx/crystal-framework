@@ -513,14 +513,6 @@ export const enUS: I18nRules = {
       segments: {
         profile: 'Profile',
         settings: 'Settings'
-      },
-      tenantSettings: {
-        sectionTitle: 'Organization Settings',
-        sectionSubtitle: 'Tune preferences and toggles for the current organization',
-        save: 'Save Settings',
-        saveSuccess: 'Organization settings saved',
-        saveFailed: 'Failed to save organization settings',
-        fetchFailed: 'Failed to load organization settings'
       }
     },
 
@@ -1729,6 +1721,10 @@ export const enUS: I18nRules = {
       }
     },
     tenantSettingsManager: {
+      fetchFailed: 'Failed to load organization settings',
+      saveSuccess: 'Organization settings saved',
+      saveFailed: 'Failed to save organization settings',
+      saveSettings: 'Save Settings',
       keys: {
         'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
         'notification.memberJoinReviewNotifyEmail': 'Member Join Review Email Notification',

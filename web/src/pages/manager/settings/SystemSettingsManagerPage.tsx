@@ -26,6 +26,8 @@ import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 import {settingsGroupExtraRenderers, settingsItemRenderers} from "@/pages/manager/settings/settings-renderers.tsx";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
+import {pluginRegistry} from "@/plugin/registry.ts";
 
 export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -33,6 +35,8 @@ export default function SystemSettingsManagerPage() {
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();
     const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
+    const itemRenderers = mergeRenderers(settingsItemRenderers, pluginRegistry.getSettingsItemRenderers('system'));
+    const groupExtraRenderers = mergeRenderers(settingsGroupExtraRenderers, pluginRegistry.getSettingsGroupExtraRenderers('system'));
 
     const {data, isLoading, mutate} = useSWRComposition(
         'settings-schema',
@@ -193,8 +197,8 @@ export default function SystemSettingsManagerPage() {
                             enumTranslator={(key, value) =>
                                 t(`pages.systemSettingsManager.enums.${key}.${value}`)
                             }
-                            itemRenderers={settingsItemRenderers}
-                            groupExtraRenderers={settingsGroupExtraRenderers}
+                            itemRenderers={itemRenderers}
+                            groupExtraRenderers={groupExtraRenderers}
                         />
                     </Form>
                 </Card>
