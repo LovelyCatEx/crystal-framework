@@ -652,6 +652,7 @@ export const zhCN: I18nRules = {
         address: {
           label: '联系地址',
           required: '请输入联系地址',
+          maxLength: '联系地址不能超过256个字符',
           placeholder: '联系地址'
         },
         config: {
@@ -1887,6 +1888,12 @@ export const zhCN: I18nRules = {
   },
 
   components: {
+    addressPicker: {
+      triggerTooltip: '在地图上选择地址',
+      akMissing: '未配置百度地图 AK，无法使用地图选址',
+      emptyNearby: '附近暂无可选地址',
+      loading: '正在搜索附近地址...'
+    },
     dashboard: {
       // DashboardPage
       greeting: {

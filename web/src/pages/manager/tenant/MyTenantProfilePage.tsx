@@ -36,6 +36,7 @@ import type {TenantProfileVO} from "@/types/tenant/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ImageCropper} from "@/components/ImageCropper.tsx";
 import {TenantSettingsSection} from "@/components/tenant/TenantSettingsSection.tsx";
+import {AddressInput} from "@/components/map/AddressInput.tsx";
 
 const { useToken } = theme;
 
@@ -351,22 +352,23 @@ export default function MyTenantProfilePage() {
                                 </Col>
                             </Row>
 
-                            <Form.Item
-                                name="address"
-                                label={t('pages.myTenantSettings.form.address')}
-                                rules={[
-                                    { required: true, message: t('pages.myTenantSettings.validation.addressRequired') },
-                                    { max: 256, message: t('pages.myTenantSettings.validation.addressMax') }
-                                ]}
-                            >
-                                <Input
-                                    prefix={<HomeOutlined className="text-gray-400 mr-2" />}
-                                    className="rounded-lg h-10"
-                                    placeholder={t('pages.myTenantSettings.placeholders.address')}
-                                    maxLength={256}
-                                    showCount
-                                />
-                            </Form.Item>
+                            <AddressInput
+                                formItemProps={{
+                                    name: 'address',
+                                    label: t('pages.myTenantSettings.form.address'),
+                                    rules: [
+                                        { required: true, message: t('pages.myTenantSettings.validation.addressRequired') },
+                                        { max: 256, message: t('pages.myTenantSettings.validation.addressMax') }
+                                    ],
+                                }}
+                                inputProps={{
+                                    prefix: <HomeOutlined className="text-gray-400 mr-2" />,
+                                    className: "rounded-lg h-10",
+                                    placeholder: t('pages.myTenantSettings.placeholders.address'),
+                                    maxLength: 256,
+                                    showCount: true,
+                                }}
+                            />
 
                             <Form.Item
                                 name="description"

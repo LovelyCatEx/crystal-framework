@@ -28,22 +28,36 @@ export interface GenericMapEvent {
     latLng: GenericLatLngPoint;
 }
 
+export interface GenericMapMoveEvent {
+    center: GenericLatLngPoint;
+    heading: number;
+    pitch: number;
+    range: number;
+}
+
 export interface GenericMapEvents {
     onClick?: (e: GenericMapEvent) => void;
+    onDoubleClick?: (e: GenericMapEvent) => void;
+    onMouseMove?: (e: GenericMapEvent) => void;
     onMouseEnter?: (e: GenericMapEvent) => void;
     onMouseLeave?: (e: GenericMapEvent) => void;
     onMouseDown?: (e: GenericMapEvent) => void;
     onMouseUp?: (e: GenericMapEvent) => void;
+    onRightClick?: (e: GenericMapEvent) => void;
+    onRightDoubleClick?: (e: GenericMapEvent) => void;
+    onMoveStart?: (e: GenericMapMoveEvent) => void;
+    onMove?: (e: GenericMapMoveEvent) => void;
+    onMoveEnd?: (e: GenericMapMoveEvent) => void;
 }
 
-export type GenericMapCommonProps = {
+export type GenericMapCommonProps = HTMLProps<HTMLDivElement> & {
     initialProps?: GenericMapInitialProps;
     components?: GenericMapComponents;
     events?: GenericMapEvents;
 };
 
 
-export type GenericMapProps = HTMLProps<HTMLDivElement> & ({
+export type GenericMapProps = ({
     mapType: GenericMapType.BAIDU;
     mapSettings: BaiduMapConfig;
 } | {
@@ -52,6 +66,19 @@ export type GenericMapProps = HTMLProps<HTMLDivElement> & ({
 }) & GenericMapCommonProps;
 
 export type GenericLatLngPoint = [number, number];
+
+export interface GenericAddressPoi {
+    title: string;
+    address: string;
+    point: GenericLatLngPoint;
+    uid?: string;
+}
+
+export interface GenericAddressLookupResult {
+    point: GenericLatLngPoint;
+    address: string;
+    surroundingPois: GenericAddressPoi[];
+}
 
 export interface GenericMapRef {
     moveCameraTo: (
@@ -67,5 +94,6 @@ export interface GenericMapRef {
     tools: {
         addressToLatLngPoint: (address: string) => Promise<GenericLatLngPoint | null>;
         latLngPointToAddress: (point: GenericLatLngPoint) => Promise<string | null>;
+        searchAddressByPoint: (point: GenericLatLngPoint) => Promise<GenericAddressLookupResult | null>;
     }
 }

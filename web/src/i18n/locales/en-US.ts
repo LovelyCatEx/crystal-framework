@@ -655,6 +655,7 @@ export const enUS: I18nRules = {
         address: {
           label: 'Address',
           required: 'Please enter address',
+          maxLength: 'Address cannot exceed 256 characters',
           placeholder: 'Address'
         },
         config: {
@@ -1890,6 +1891,12 @@ export const enUS: I18nRules = {
   },
 
   components: {
+    addressPicker: {
+      triggerTooltip: 'Pick address on map',
+      akMissing: 'Baidu map AK is not configured, address picker is unavailable',
+      emptyNearby: 'No nearby addresses found',
+      loading: 'Searching nearby addresses...'
+    },
     dashboard: {
       // DashboardPage
       greeting: {
