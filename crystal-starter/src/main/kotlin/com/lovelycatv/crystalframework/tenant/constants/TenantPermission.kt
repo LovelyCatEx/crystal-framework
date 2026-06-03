@@ -220,19 +220,6 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
-    // Tenant Settings (embedded as a Segmented section in Tenant Profile page)
-    const val ACTION_TENANT_SETTINGS_READ_PEM = "i.tenant.settings.read"
-    val ACTION_TENANT_SETTINGS_READ = TenantPermissionDeclaration(
-        name = ACTION_TENANT_SETTINGS_READ_PEM,
-        type = TenantPermissionType.ACTION,
-    )
-
-    const val ACTION_TENANT_SETTINGS_UPDATE_PEM = "i.tenant.settings.update"
-    val ACTION_TENANT_SETTINGS_UPDATE = TenantPermissionDeclaration(
-        name = ACTION_TENANT_SETTINGS_UPDATE_PEM,
-        type = TenantPermissionType.ACTION,
-    )
-
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

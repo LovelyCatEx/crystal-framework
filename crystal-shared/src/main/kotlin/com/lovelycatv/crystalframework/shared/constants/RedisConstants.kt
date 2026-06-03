@@ -9,13 +9,9 @@ object RedisConstants {
 
     const val SYSTEM_SETTINGS_REFRESH_TOPIC = "crystalframework:system-settings:refresh"
 
-    const val TENANT_SETTINGS_REFRESH_TOPIC = "crystalframework:tenant-settings:refresh"
-
     const val SYSTEM_MAINTENANCE_TOPIC = "crystalframework:system-maintenance:refresh"
 
     const val SYSTEM_SETTINGS = "system-settings"
-
-    fun getTenantSettingsCacheKey(tenantId: Long) = "tenant-settings:$tenantId"
 
     object SpringSession {
         const val EXPIRATIONS = "spring:session:sessions:expirations"

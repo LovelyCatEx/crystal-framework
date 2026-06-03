@@ -1,18 +1,5 @@
 # Change Logs
 
-## v1.7.0
-
-2026-06-03
-
-### Features
-+ feat(tenant): Added tenant settings module.
-+ feat(tenant): Added mail template and notification for new member join.
-+ feat(web): Added send-test-email/message buttons in system settings.
-+ feat(web): Added Baidu Map SDK support and visual address picker for tenant address.
-+ feat(web): Allow tenants to edit their own role permissions.
-
----
-
 ## v1.6.2
 
 2026-06-02

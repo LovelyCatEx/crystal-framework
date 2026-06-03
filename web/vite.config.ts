@@ -2,7 +2,6 @@ import {defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import {fileURLToPath} from 'url'
-import copy from 'rollup-plugin-copy'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -24,13 +23,6 @@ export default defineConfig(({ mode }) => {
         babel: {
           plugins: [['babel-plugin-react-compiler']],
         },
-      }),
-      copy({
-        targets: [
-          {src: 'node_modules/@baidumap/mapv-three/dist/assets', dest: 'public/mapvthree'},
-        ],
-        verbose: true,
-        hook: 'buildStart',
       }),
     ],
     resolve: {

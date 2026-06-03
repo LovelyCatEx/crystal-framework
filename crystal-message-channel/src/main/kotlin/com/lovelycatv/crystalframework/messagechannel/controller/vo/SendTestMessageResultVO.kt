@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.controller.manager.vo
+package com.lovelycatv.crystalframework.messagechannel.controller.vo
 
 import com.lovelycatv.crystalframework.messagechannel.types.result.SendResult
 
@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.result.SendResult
  *
  * @param channelType resolved channel, value of [com.lovelycatv.crystalframework.messagechannel.constants.ChannelType.typeId].
  */
-data class ManagerTestSendMessageResultVO(
+data class SendTestMessageResultVO(
     val channelType: Int,
     val success: Boolean,
     val errorCode: String? = null,
@@ -15,7 +15,7 @@ data class ManagerTestSendMessageResultVO(
     val providerMessageId: String? = null,
 ) {
     companion object {
-        fun from(result: SendResult): ManagerTestSendMessageResultVO = ManagerTestSendMessageResultVO(
+        fun from(result: SendResult): SendTestMessageResultVO = SendTestMessageResultVO(
             channelType = result.channelType.typeId,
             success = result.success,
             errorCode = result.errorCode,

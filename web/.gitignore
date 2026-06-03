@@ -24,7 +24,5 @@ dist-ssr
 *.sw?
 
 .env.production
-.env.development
 
 /extensions
-/public/mapvthree
