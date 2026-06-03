@@ -21,6 +21,7 @@ class TenantMailModuleConfigure(
         templateTypes: MutableList<MailTemplateTypeDeclaration>
     ) {
         templateTypes.add(TenantMailDeclaration.tenantMemberJoinReviewTemplateType)
+        templateTypes.add(TenantMailDeclaration.tenantMemberJoinNotifyTemplateType)
     }
 
     override fun configureTemplate(
@@ -44,6 +45,14 @@ class TenantMailModuleConfigure(
                 tenantMailTemplateConfigure.configureUserJoinReview(),
                 TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.name,
                 TenantMailDeclaration.defaultTenantMemberJoinReviewTemplate.type
+            )
+        )
+
+        templates.add(
+            preProcessMailTemplateDeclaration.invoke(
+                tenantMailTemplateConfigure.configureMemberJoinNotify(),
+                TenantMailDeclaration.defaultTenantMemberJoinNotifyTemplate.name,
+                TenantMailDeclaration.defaultTenantMemberJoinNotifyTemplate.type
             )
         )
     }

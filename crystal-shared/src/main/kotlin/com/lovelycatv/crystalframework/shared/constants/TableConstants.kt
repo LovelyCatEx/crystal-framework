@@ -30,4 +30,5 @@ object TableConstants {
     const val TABLE_SYSTEM_ANNOUNCEMENTS = "system_announcements"
     const val TABLE_TENANT_TIRE_BENEFIT_FEATURES = "tenant_tire_benefit_features"
     const val TABLE_TENANT_TIRE_BENEFIT_VALUES = "tenant_tire_benefit_values"
+    const val TABLE_TENANT_SETTINGS = "tenant_settings"
 }
