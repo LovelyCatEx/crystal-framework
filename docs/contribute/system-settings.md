@@ -7,9 +7,9 @@
 打开 `crystal-starter/src/main/kotlin/com/lovelycatv/crystalframework/system/types/SystemSettingsConstants.kt`，在对应分类的 nested object 中添加声明：
 
 ```kotlin
-val CUSTOM_LOGO = SystemSettingsItemDeclaration(
+val CUSTOM_LOGO = SettingsItemDeclaration(
     key = "basic.customLogo.url",
-    valueType = SystemSettingsItemValueType.STRING,
+    valueType = SettingsItemValueType.STRING,
     defaultValue = "",
     sort = 10
 )

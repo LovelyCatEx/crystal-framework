@@ -7,9 +7,9 @@ When contributing to the framework source code, you need to modify two files.
 Open `crystal-starter/src/main/kotlin/com/lovelycatv/crystalframework/system/types/SystemSettingsConstants.kt` and add the declaration in the appropriate nested object:
 
 ```kotlin
-val CUSTOM_LOGO = SystemSettingsItemDeclaration(
+val CUSTOM_LOGO = SettingsItemDeclaration(
     key = "basic.customLogo.url",
-    valueType = SystemSettingsItemValueType.STRING,
+    valueType = SettingsItemValueType.STRING,
     defaultValue = "",
     sort = 10
 )
