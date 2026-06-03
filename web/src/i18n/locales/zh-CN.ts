@@ -506,6 +506,18 @@ export const zhCN: I18nRules = {
         uploadFailed: '头像上传失败',
         invalidType: '请上传 JPG、PNG 或 WebP 格式的图片',
         maxSize: '图片大小不能超过 5MB'
+      },
+      segments: {
+        profile: '基本信息',
+        settings: '设置'
+      },
+      tenantSettings: {
+        sectionTitle: '组织设置',
+        sectionSubtitle: '调整当前组织内的偏好与开关',
+        save: '保存设置',
+        saveSuccess: '组织设置已保存',
+        saveFailed: '组织设置保存失败',
+        fetchFailed: '无法获取组织设置'
       }
     },
 
@@ -640,6 +652,7 @@ export const zhCN: I18nRules = {
         address: {
           label: '联系地址',
           required: '请输入联系地址',
+          maxLength: '联系地址不能超过256个字符',
           placeholder: '联系地址'
         },
         config: {
@@ -1059,7 +1072,8 @@ export const zhCN: I18nRules = {
         idPlaceholder: '输入角色 ID'
       },
       action: {
-        addNew: '新增角色'
+        addNew: '新增角色',
+        assignPermission: '分配权限',
       },
       modal: {
         name: {
@@ -1074,6 +1088,19 @@ export const zhCN: I18nRules = {
           label: '描述',
           placeholder: '输入描述（可选）'
         }
+      },
+      permissionModal: {
+        title: '为角色 "{{name}}" 分配权限',
+        titles: {
+          available: '可用权限',
+          assigned: '已分配权限'
+        }
+      },
+      messages: {
+        fetchPermissionsFailed: '无法获取权限列表',
+        fetchRolePermissionsFailed: '无法获取角色权限',
+        assignSuccess: '权限分配成功',
+        assignFailed: '权限分配失败'
       }
     },
     myTenantMemberManager: {
@@ -1616,6 +1643,40 @@ export const zhCN: I18nRules = {
       maintenanceConfirmDisableContent: '关闭维护模式后，所有用户将恢复正常访问。确定要继续吗？',
       maintenanceConfirmOk: '确认',
       maintenanceConfirmCancel: '取消',
+      testSendEmail: {
+        button: '发送测试邮件',
+        modalTitle: '发送测试邮件',
+        emailLabel: '收件邮箱',
+        emailPlaceholder: '请输入收件邮箱',
+        emailRequired: '请输入收件邮箱',
+        emailInvalid: '邮箱格式不正确',
+        confirm: '发送',
+        cancel: '取消',
+        sendSuccess: '测试邮件发送成功',
+        sendFailed: '测试邮件发送失败',
+      },
+      testSendLark: {
+        button: '发送飞书测试消息',
+        modalTitle: '发送飞书测试消息',
+        idTypeLabel: 'ID 类型',
+        idTypes: {
+          openId: 'Open ID',
+          userId: 'User ID',
+          unionId: 'Union ID',
+          email: '邮箱',
+          chatId: 'Chat ID',
+        },
+        idValueLabel: '收件人 ID',
+        idValuePlaceholder: '请输入对应类型的 ID 值',
+        idValueRequired: '请输入收件人 ID',
+        contentLabel: '消息内容（XML）',
+        contentPlaceholder: '请输入 XML 格式的消息内容',
+        contentHint: '支持 MessageChain XML 语法；为空时使用 application.yaml 中的默认值',
+        confirm: '发送',
+        cancel: '取消',
+        sendSuccess: '飞书测试消息发送成功',
+        sendFailed: '飞书测试消息发送失败',
+      },
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'basic.waterMark.enabled': '是否显示水印',
@@ -1663,6 +1724,19 @@ export const zhCN: I18nRules = {
           'CUSTOM': '自定义',
         }
       }
+    },
+    tenantSettingsManager: {
+      keys: {
+        'notification.memberJoinNotifyEmail': '成员加入邮件通知',
+        'notification.memberJoinReviewNotifyEmail': '成员加入审核邮件通知',
+      },
+      groups: {
+        'notification': '通知设置',
+      },
+      tabs: {
+        'notification': '通知',
+      },
+      enums: {}
     },
     announcementManager: {
       title: '公告管理',
@@ -1814,6 +1888,12 @@ export const zhCN: I18nRules = {
   },
 
   components: {
+    addressPicker: {
+      triggerTooltip: '在地图上选择地址',
+      akMissing: '未配置百度地图 AK，无法使用地图选址',
+      emptyNearby: '附近暂无可选地址',
+      loading: '正在搜索附近地址...'
+    },
     dashboard: {
       // DashboardPage
       greeting: {

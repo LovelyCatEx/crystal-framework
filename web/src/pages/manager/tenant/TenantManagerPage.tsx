@@ -18,6 +18,7 @@ import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 import {useState} from "react";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {AddressInput} from "@/components/map/AddressInput.tsx";
 
 export default function TenantManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -172,12 +173,24 @@ export default function TenantManagerPage() {
                                 <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.contactPhone.placeholder')} maxLength={32} showCount />
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
-                            <Form.Item name="address" label={t('pages.tenantManager.modal.address.label')} rules={[{ required: true, message: t('pages.tenantManager.modal.address.required') }]}>
-                                <Input className="w-full rounded-lg h-10 flex items-center" placeholder={t('pages.tenantManager.modal.address.placeholder')} />
-                            </Form.Item>
-                        </Col>
                     </Row>
+                    <AddressInput
+                        formItemProps={{
+                            name: 'address',
+                            label: t('pages.tenantManager.modal.address.label'),
+                            rules: [
+                                { required: true, message: t('pages.tenantManager.modal.address.required') },
+                                { max: 256, message: t('pages.tenantManager.modal.address.maxLength') }
+                            ],
+                        }}
+                        inputProps={{
+                            className: "w-full rounded-lg h-10 flex items-center",
+                            placeholder: t('pages.tenantManager.modal.address.placeholder'),
+                            maxLength: 256,
+                            showCount: true,
+                        }}
+                        panelHeight={360}
+                    />
                     <Form.Item name="description" label={t('pages.tenantManager.modal.description.label')} rules={[{ max: 512, message: t('pages.tenantManager.modal.description.maxLength') }]}>
                         <Input.TextArea
                             className="w-full rounded-lg"

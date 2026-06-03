@@ -17,6 +17,7 @@ public class CrystalFrameworkConfiguration {
     private Resource resource = new Resource();
     private Monitor monitor = new Monitor();
     private Sharding sharding = new Sharding();
+    private Test test = new Test();
 
     public Auth getAuth() { return auth; }
     public void setAuth(Auth auth) { this.auth = auth; }
@@ -29,6 +30,9 @@ public class CrystalFrameworkConfiguration {
 
     public Sharding getSharding() { return sharding; }
     public void setSharding(Sharding sharding) { this.sharding = sharding; }
+
+    public Test getTest() { return test; }
+    public void setTest(Test test) { this.test = test; }
 
     // -------------------------------------------------------------------------
     // crystalframework.auth
@@ -127,6 +131,45 @@ public class CrystalFrameworkConfiguration {
 
             public int getActualGeneLength() { return actualGeneLength; }
             public void setActualGeneLength(int actualGeneLength) { this.actualGeneLength = actualGeneLength; }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // crystalframework.test
+    // -------------------------------------------------------------------------
+    public static class Test {
+        private SMTP smtp = new SMTP();
+        private MessageChannel messageChannel = new MessageChannel();
+
+        public SMTP getSmtp() { return smtp; }
+        public void setSmtp(SMTP smtp) { this.smtp = smtp; }
+
+        public MessageChannel getMessageChannel() { return messageChannel; }
+        public void setMessageChannel(MessageChannel messageChannel) { this.messageChannel = messageChannel; }
+
+        public static class SMTP {
+            private String subject = "Crystal Framework SMTP Test";
+            private String content = "This is a test email from Crystal Framework. If you received this message, your SMTP settings are working.";
+
+            public String getSubject() { return subject; }
+            public void setSubject(String subject) { this.subject = subject; }
+
+            public String getContent() { return content; }
+            public void setContent(String content) { this.content = content; }
+        }
+
+        public static class MessageChannel {
+            private Lark lark = new Lark();
+
+            public Lark getLark() { return lark; }
+            public void setLark(Lark lark) { this.lark = lark; }
+
+            public static class Lark {
+                private String defaultMessage = "hello, world! <link href=\"https://github.com/LovelyCatEx/crystal-framework\" title=\"Crystal Framework\" />";
+
+                public String getDefaultMessage() { return defaultMessage; }
+                public void setDefaultMessage(String defaultMessage) { this.defaultMessage = defaultMessage; }
+            }
         }
     }
 }

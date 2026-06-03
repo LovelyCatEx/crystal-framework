@@ -9,6 +9,7 @@ object TenantMailDeclaration {
     const val VARIABLE_NICKNAME = "nickname"
     const val VARIABLE_REAL_NAME = "real_name"
     const val VARIABLE_PHONE_NUMBER = "phone_number"
+    const val VARIABLE_TENANT_NAME = "tenant_name"
 
     val tenantCategory = MailTemplateCategoryDeclaration(
         name = "tenant",
@@ -23,6 +24,20 @@ object TenantMailDeclaration {
             VARIABLE_NICKNAME,
             VARIABLE_REAL_NAME,
             VARIABLE_PHONE_NUMBER
+        ),
+        categoryDeclaration = tenantCategory,
+        allowMultiple = false
+    )
+
+    val tenantMemberJoinNotifyTemplateType = MailTemplateTypeDeclaration(
+        name = "tenant_member_join_notify",
+        description = "Notification to tenant owner that a new member has joined",
+        variables = arrayOf(
+            VARIABLE_USERNAME,
+            VARIABLE_NICKNAME,
+            VARIABLE_REAL_NAME,
+            VARIABLE_PHONE_NUMBER,
+            VARIABLE_TENANT_NAME
         ),
         categoryDeclaration = tenantCategory,
         allowMultiple = false
@@ -115,5 +130,94 @@ object TenantMailDeclaration {
     """.trimIndent(),
         active = true,
         type = tenantMemberJoinReviewTemplateType
+    )
+
+    val defaultTenantMemberJoinNotifyTemplate = MailTemplateDeclaration(
+        name = "default_tenant_member_join_notify",
+        description = "Notification to tenant owner that a new member has joined",
+        title = "New Member Joined Your Tenant",
+        content = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Member Joined</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f9; color: #333333;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+            <tr>
+                <td align="center" style="padding: 40px 0;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+
+                        <tr>
+                            <td style="background-color: #1677ff; height: 6px;"></td>
+                        </tr>
+
+                        <tr>
+                            <td style="padding: 40px 30px;">
+                                <h2 style="margin: 0 0 20px; color: #1677ff; font-size: 24px; font-weight: 600;">A New Member Joined {{tenant_name}}</h2>
+
+                                <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.6; color: #555555;">
+                                    Hello,
+                                </p>
+
+                                <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #555555;">
+                                    A new member has joined your tenant <strong>{{tenant_name}}</strong>. Member details:
+                                </p>
+
+                                <div style="background-color: #f8f9fa; border-left: 4px solid #1677ff; border-radius: 4px; padding: 20px; margin-bottom: 30px;">
+                                    <table style="width: 100%; font-size: 15px; line-height: 1.8; color: #555555;">
+                                        <tr>
+                                            <td style="padding: 5px 0; width: 120px; color: #777777;">Username:</td>
+                                            <td style="padding: 5px 0; font-weight: 500; color: #333333;">{{username}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 5px 0; color: #777777;">Nickname:</td>
+                                            <td style="padding: 5px 0; font-weight: 500; color: #333333;">{{nickname}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 5px 0; color: #777777;">Real Name:</td>
+                                            <td style="padding: 5px 0; font-weight: 500; color: #333333;">{{real_name}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 5px 0; color: #777777;">Phone Number:</td>
+                                            <td style="padding: 5px 0; font-weight: 500; color: #333333;">{{phone_number}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <p style="margin: 0 0 25px; font-size: 16px; line-height: 1.6; color: #555555;">
+                                    No action is required. You can manage your tenant members from the admin console.
+                                </p>
+
+                                <p style="margin: 0 0 15px; font-size: 14px; line-height: 1.6; color: #888888;">
+                                    If you do not recognise this activity, please review your tenant access settings.
+                                </p>
+
+                                <div style="border-top: 1px solid #eeeeee; padding-top: 25px; margin-top: 30px;">
+                                    <p style="margin: 5px 0 0; font-size: 12px; color: #999999;">
+                                        This email is automatically sent by the system. Please do not reply directly.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center;">
+                                <p style="margin: 0; font-size: 12px; color: #aaaaaa;">
+                                    &copy; 2026 CrystalFramework (LovelyCat). All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        </body>
+        </html>
+    """.trimIndent(),
+        active = true,
+        type = tenantMemberJoinNotifyTemplateType
     )
 }
