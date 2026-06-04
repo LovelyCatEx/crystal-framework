@@ -26,7 +26,7 @@ COPY . .
 
 RUN chmod +x mvnw && ./mvnw package -DskipTests
 
-FROM --platform=linux/amd64 eclipse-temurin:17-jdk-alpine
+FROM --platform=linux/amd64 eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
@@ -34,4 +34,4 @@ COPY --from=build /app/crystal-starter/target/*.jar app.jar
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar \"$@\"", "--"]
