@@ -1,5 +1,25 @@
 # 更新日志
 
+## v1.7.1 (breaking)
+
+2026-06-05
+
+### 新功能
++ feat(tenant): 新增租户消息渠道管理功能。
++ feat(web): 新增租户消息渠道管理页面。
++ feat(settings): 设置项添加四种（字符串、整数、小数、布尔值）数组数据类型。
++ refactor(sdk): 统一系统设置与租户设置的数据类型。
++ refactor(web): 统一系统设置与租户设置的相关插件注册函数。
+
+### Bug 修复
++ fix(backend): 修复后端 Dockerfile 构建脚本。
+
+### 其他
++ docs: 更新系统设置与租户设置相关文档。
++ chore(web): 由 esbuild 改为使用 terser 构建。
+
+---
+
 ## v1.7.0
 
 2026-06-03

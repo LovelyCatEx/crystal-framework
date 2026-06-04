@@ -233,6 +233,37 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Message Channel
+    val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.message.channel",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/message-channels"
+    )
+
+    const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE_PEM = "i.tenant.message.channel.create"
+    val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MESSAGE_CHANNEL_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_MESSAGE_CHANNEL_READ_PEM = "i.tenant.message.channel.read"
+    val ACTION_TENANT_MESSAGE_CHANNEL_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MESSAGE_CHANNEL_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE_PEM = "i.tenant.message.channel.update"
+    val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MESSAGE_CHANNEL_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE_PEM = "i.tenant.message.channel.delete"
+    val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_MESSAGE_CHANNEL_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

@@ -40,7 +40,7 @@ class MailServiceImpl(
             val settings = systemModuleClient.getSystemSettings()
                 ?: throw IllegalStateException("System settings not initialized")
             logger.info("MailSender is creating, settings: ${settings.mail}")
-            this.mailSender = createMailSender(settings.mail)
+            this.mailSender = createMailSender(settings.mail.smtp)
         }
 
         return this.mailSender!!
@@ -53,20 +53,37 @@ class MailServiceImpl(
             val from = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail
                 ?: throw IllegalStateException("System settings not initialized")
 
-            val message: MimeMessage = instance.createMimeMessage()
-
-            MimeMessageHelper(message, true, "UTF-8").apply {
-                setFrom(from)
-                setTo(to)
-                setSubject(subject)
-                setText(content, true)
-            }
-
-            instance.send(message)
+            sendMailInternal(instance, from, to, subject, content)
 
             logger.info("Mail sent successfully, to: $to, subject: $subject, content: ${content.length} bytes")
         } catch (e: Exception) {
             logger.error("Send email to $to failed, subject: $subject, content: $content", e)
+            throw BusinessException("Send email to $to failed")
+        }
+    }
+
+    override suspend fun sendMail(
+        smtpOverride: SystemSettings.Mail.SMTP?,
+        to: String,
+        subject: String,
+        content: String,
+    ) {
+        if (smtpOverride == null) {
+            self.sendMail(to, subject, content)
+            return
+        }
+
+        try {
+            val instance = createMailSender(smtpOverride)
+            sendMailInternal(instance, smtpOverride.fromEmail, to, subject, content)
+            logger.info(
+                "Mail sent successfully (override SMTP), to: $to, subject: $subject, content: ${content.length} bytes"
+            )
+        } catch (e: Exception) {
+            logger.error(
+                "Send email to {} via override SMTP {} failed, subject: {}",
+                to, smtpOverride.host, subject, e
+            )
             throw BusinessException("Send email to $to failed")
         }
     }
@@ -116,18 +133,37 @@ class MailServiceImpl(
         self.sendMail(to, title, content)
     }
 
-    fun createMailSender(mailSettings: SystemSettings.Mail): JavaMailSender {
+    private fun sendMailInternal(
+        sender: JavaMailSender,
+        from: String,
+        to: String,
+        subject: String,
+        content: String,
+    ) {
+        val message: MimeMessage = sender.createMimeMessage()
+
+        MimeMessageHelper(message, true, "UTF-8").apply {
+            setFrom(from)
+            setTo(to)
+            setSubject(subject)
+            setText(content, true)
+        }
+
+        sender.send(message)
+    }
+
+    fun createMailSender(smtp: SystemSettings.Mail.SMTP): JavaMailSender {
         return JavaMailSenderImpl().apply {
-            host = mailSettings.smtp.host
-            port = mailSettings.smtp.port
-            username = mailSettings.smtp.username
-            password = mailSettings.smtp.password
+            host = smtp.host
+            port = smtp.port
+            username = smtp.username
+            password = smtp.password
             defaultEncoding = "UTF-8"
             javaMailProperties = Properties().apply {
                 val timeout = 5000
                 this["mail.transport.protocol"] = "smtp"
                 this["mail.smtp.auth"] = "true"
-                if (mailSettings.smtp.ssl) {
+                if (smtp.ssl) {
                     // SMTPS (typically port 465)
                     this["mail.smtp.ssl.enable"] = "true"
                     this["mail.smtp.starttls.enable"] = "false"
@@ -137,7 +173,7 @@ class MailServiceImpl(
                     this["mail.smtp.starttls.enable"] = "true"
                     this["mail.smtp.starttls.required"] = "true"
                 }
-                this["mail.smtp.ssl.trust"] = mailSettings.smtp.host
+                this["mail.smtp.ssl.trust"] = smtp.host
                 this["mail.smtp.connectiontimeout"] = "$timeout"
                 this["mail.smtp.timeout"] = "$timeout"
                 this["mail.smtp.writetimeout"] = "$timeout"

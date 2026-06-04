@@ -8,6 +8,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
+import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
@@ -33,6 +34,7 @@ class ManagerSystemSettingsController(
     private val systemSettingsRegistry: SystemSettingsRegistry,
     private val mailService: MailService,
     private val messageChannelService: MessageChannelService,
+    private val systemChannelConfigProvider: SystemChannelConfigProvider,
     private val jsonMapper: JsonMapper,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
 ) {
@@ -91,7 +93,8 @@ class ManagerSystemSettingsController(
             chain = MessageChain.parse(rawContent),
         )
 
-        val result = messageChannelService.send(recipient, message)
+        val config = systemChannelConfigProvider.resolve(channelType)
+        val result = messageChannelService.send(config, recipient, message)
         val vo = ManagerTestSendMessageResultVO.from(result)
         return if (result.success) {
             ApiResponse.success(vo)

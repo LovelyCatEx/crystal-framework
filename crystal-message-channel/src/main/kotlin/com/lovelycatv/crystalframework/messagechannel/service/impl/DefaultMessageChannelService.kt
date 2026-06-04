@@ -2,7 +2,9 @@ package com.lovelycatv.crystalframework.messagechannel.service.impl
 
 import com.lovelycatv.crystalframework.messagechannel.channel.MessageChannelProvider
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
+import com.lovelycatv.crystalframework.messagechannel.constants.MessageChannelErrorCodes
 import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
+import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.options.SendOptions
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
@@ -27,36 +29,41 @@ class DefaultMessageChannelService(
             }
 
     override suspend fun send(
+        config: ChannelConfig,
         recipient: MessageRecipient,
         message: ChainMessage,
         options: SendOptions,
     ): SendResult {
+        if (config.channelType != recipient.channelType) {
+            return SendResult.failed(
+                channelType = recipient.channelType,
+                errorCode = MessageChannelErrorCodes.INCOMPATIBLE_CHANNEL,
+                errorMessage = "ChannelConfig(${config.channelType}) does not match recipient(${recipient.channelType})",
+            )
+        }
+
         val provider = providersByType[recipient.channelType]
             ?: return SendResult.failed(
                 channelType = recipient.channelType,
-                errorCode = ERR_NO_PROVIDER,
+                errorCode = MessageChannelErrorCodes.NO_PROVIDER,
                 errorMessage = "No provider registered for channel ${recipient.channelType}",
             )
 
         if (!provider.supports(recipient)) {
             return SendResult.failed(
                 channelType = recipient.channelType,
-                errorCode = ERR_UNSUPPORTED_RECIPIENT,
+                errorCode = MessageChannelErrorCodes.UNSUPPORTED_RECIPIENT,
                 errorMessage = "Provider ${provider::class.simpleName} does not support recipient $recipient",
             )
         }
 
-        return provider.send(recipient, message, options)
+        return provider.send(config, recipient, message, options)
     }
 
     override suspend fun broadcast(
+        config: ChannelConfig,
         recipients: List<MessageRecipient>,
         message: ChainMessage,
         options: SendOptions,
-    ): List<SendResult> = recipients.map { send(it, message, options) }
-
-    private companion object {
-        const val ERR_NO_PROVIDER = "NO_PROVIDER"
-        const val ERR_UNSUPPORTED_RECIPIENT = "UNSUPPORTED_RECIPIENT"
-    }
+    ): List<SendResult> = recipients.map { send(config, it, message, options) }
 }

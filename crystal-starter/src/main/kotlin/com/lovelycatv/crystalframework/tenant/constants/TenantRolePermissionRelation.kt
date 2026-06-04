@@ -51,7 +51,13 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE,
             TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE,
             // Mail
-            TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL
+            TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL,
+            // Message Channels
+            TenantPermission.MENU_TENANT_MESSAGE_CHANNEL_MANAGER,
+            TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE,
+            TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
+            TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE,
+            TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE,
         ),
         TenantRole.MEMBER to listOf(
             // Dashboard

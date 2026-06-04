@@ -159,6 +159,13 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
+    const val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = "tenant.message.channel:/manager/tenant-message-channels"
+
+    const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = "tenant.message.channel.create"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_READ = "tenant.message.channel.read"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = "tenant.message.channel.update"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = "tenant.message.channel.delete"
+
     const val MENU_AUDIT_LOG_MANAGER = "audit.log:/manager/audit-logs"
 
     const val ACTION_AUDIT_LOG_CREATE = "audit.log.create"
