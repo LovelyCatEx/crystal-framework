@@ -14,8 +14,10 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.node.ObjectNode
 import java.util.Base64
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.javaField
 
 /**
  * Serializes/deserializes [ChannelConfig] subclasses to/from the JSON string used to persist a
@@ -96,8 +98,18 @@ class ChannelConfigCodec(
 
     private fun sensitiveFieldNames(clazz: KClass<out ChannelConfig>): List<String> =
         clazz.declaredMemberProperties
-            .filter { it.findAnnotation<SensitiveField>() != null }
+            .filter { it.isSensitive() }
             .map { it.name }
+
+    /**
+     * The config classes annotate their secrets with `@field:SensitiveField`, so the annotation
+     * lives on the Java backing field rather than the Kotlin property. Checking only the property
+     * (via [findAnnotation]) silently misses every field. We look on both the property and its
+     * backing field so either use-site target is honoured.
+     */
+    private fun KProperty1<out ChannelConfig, *>.isSensitive(): Boolean =
+        findAnnotation<SensitiveField>() != null ||
+            javaField?.isAnnotationPresent(SensitiveField::class.java) == true
 
     companion object {
         const val ENC_PREFIX = "ENC:"
