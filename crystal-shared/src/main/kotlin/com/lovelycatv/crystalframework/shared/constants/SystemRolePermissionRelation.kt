@@ -62,6 +62,9 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ,
             SystemPermission.MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER,
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ,
+            // Tenant Message Channel
+            SystemPermission.MENU_TENANT_MESSAGE_CHANNEL_MANAGER,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard

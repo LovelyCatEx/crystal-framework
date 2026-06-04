@@ -18,6 +18,7 @@ public class CrystalFrameworkConfiguration {
     private Monitor monitor = new Monitor();
     private Sharding sharding = new Sharding();
     private Test test = new Test();
+    private MessageChannel messageChannel = new MessageChannel();
 
     public Auth getAuth() { return auth; }
     public void setAuth(Auth auth) { this.auth = auth; }
@@ -33,6 +34,9 @@ public class CrystalFrameworkConfiguration {
 
     public Test getTest() { return test; }
     public void setTest(Test test) { this.test = test; }
+
+    public MessageChannel getMessageChannel() { return messageChannel; }
+    public void setMessageChannel(MessageChannel messageChannel) { this.messageChannel = messageChannel; }
 
     // -------------------------------------------------------------------------
     // crystalframework.auth
@@ -171,5 +175,20 @@ public class CrystalFrameworkConfiguration {
                 public void setDefaultMessage(String defaultMessage) { this.defaultMessage = defaultMessage; }
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // crystalframework.message-channel
+    // -------------------------------------------------------------------------
+    public static class MessageChannel {
+        /**
+         * Base64-encoded AES key used to encrypt sensitive fields (e.g. password / appSecret)
+         * inside the {@code config} blob of the {@code tenant_message_channels} table.
+         * Must be set; the application fails to start when blank.
+         */
+        private String encryptionKey = "";
+
+        public String getEncryptionKey() { return encryptionKey; }
+        public void setEncryptionKey(String encryptionKey) { this.encryptionKey = encryptionKey; }
     }
 }
