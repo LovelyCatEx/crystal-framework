@@ -56,3 +56,7 @@ export function getTenantBenefitType(type: number): string {
 export function getOAuthPlatform(platform: number): string {
     return translateEnum('oAuthPlatform', platform);
 }
+
+export function getChannelType(type: number): string {
+    return translateEnum('channelType', type);
+}

@@ -924,6 +924,43 @@ export const zhCN: I18nRules = {
         copyFailed: '复制失败，请手动复制'
       }
     },
+    tenantMessageChannelManager: {
+      title: '消息渠道管理',
+      subtitle: '管理系统租户的消息渠道',
+      addChannel: '新增渠道',
+      filter: {
+        id: '渠道ID',
+        idPlaceholder: '输入渠道 ID',
+        type: '渠道类型',
+        all: '全部'
+      },
+      modal: {
+        channelType: {
+          label: '渠道类型',
+          required: '请选择渠道类型',
+          placeholder: '选择渠道类型'
+        },
+        name: {
+          label: '渠道名称',
+          required: '请输入渠道名称',
+          maxLength: '渠道名称不能超过 64 个字符',
+          placeholder: '输入渠道名称'
+        },
+        enabled: {
+          label: '是否启用'
+        },
+        config: {
+          label: '渠道配置',
+          required: '请填写渠道配置',
+          placeholder: '填写渠道配置（JSON）',
+          encryptedHint: '出于安全考虑，敏感字段（如密码、密钥）不会回显，编辑时请重新填写'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败'
+      }
+    },
     tenantDepartmentManager: {
       title: '部门管理',
       subtitle: '管理系统租户部门',
@@ -1175,6 +1212,43 @@ export const zhCN: I18nRules = {
       messages: {
         copySuccess: '已将邀请链接复制到剪切板',
         copyFailed: '复制失败，请手动复制'
+      }
+    },
+    myTenantMessageChannelManager: {
+      title: '我的消息渠道',
+      subtitle: '管理当前组织的消息渠道',
+      addChannel: '新增渠道',
+      filter: {
+        id: '渠道ID',
+        idPlaceholder: '输入渠道 ID',
+        type: '渠道类型',
+        all: '全部'
+      },
+      modal: {
+        channelType: {
+          label: '渠道类型',
+          required: '请选择渠道类型',
+          placeholder: '选择渠道类型'
+        },
+        name: {
+          label: '渠道名称',
+          required: '请输入渠道名称',
+          maxLength: '渠道名称不能超过 64 个字符',
+          placeholder: '输入渠道名称'
+        },
+        enabled: {
+          label: '是否启用'
+        },
+        config: {
+          label: '渠道配置',
+          required: '请填写渠道配置',
+          placeholder: '填写渠道配置（JSON）',
+          encryptedHint: '出于安全考虑，敏感字段（如密码、密钥）不会回显，编辑时请重新填写'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败'
       }
     },
     myTenantDepartmentManager: {
@@ -2100,6 +2174,14 @@ export const zhCN: I18nRules = {
       applyTemplateTooltip: '应用模板'
     },
 
+    messageChannelConfig: {
+      email: '邮件渠道',
+      lark: '飞书渠道',
+      selectTemplate: '选择配置模板',
+      applyTemplate: '应用模板',
+      applyTemplateTooltip: '应用所选渠道类型的配置模板'
+    },
+
     columns: {
       fileResource: {
         preview: '预览',
@@ -2215,6 +2297,16 @@ export const zhCN: I18nRules = {
         status: '状态',
         usedCount: '已使用次数',
         createdTime: '创建时间'
+      },
+      tenantMessageChannel: {
+        recordInfo: '记录信息',
+        tenantId: '租户 ID',
+        name: '渠道名称',
+        channelType: '渠道类型',
+        enabled: '启用状态',
+        statusEnabled: '已启用',
+        statusDisabled: '已禁用',
+        config: '配置'
       },
       tenantTireType: {
         name: '名称',
@@ -2554,6 +2646,11 @@ export const zhCN: I18nRules = {
       2: 'QQ'
     },
 
+    channelType: {
+      1: '邮件',
+      2: '飞书'
+    },
+
     tenantBenefitType: {
       0: '开关',
       1: '数量限制',
@@ -2584,6 +2681,7 @@ export const zhCN: I18nRules = {
     tenantPermission: '租户权限',
     tenantDepartment: '租户部门',
     tenantInvitation: '邀请码',
+    tenantMessageChannel: '消息渠道',
     tenantTireType: '套餐类型',
     tenantTireBenefitFeature: '权益项',
     tenantTireBenefitValue: '套餐权益取值',
@@ -2616,7 +2714,8 @@ export const zhCN: I18nRules = {
       roles: '角色管理',
       memberRoles: '成员角色管理',
       departments: '部门管理',
-      profile: '组织设置'
+      profile: '组织设置',
+      messageChannels: '消息渠道管理'
     },
 
     // 管理员菜单
@@ -2634,6 +2733,7 @@ export const zhCN: I18nRules = {
       tenantMemberRoles: '成员角色管理',
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
+      tenantMessageChannels: '消息渠道管理',
       tenantTireTypes: '套餐类型管理',
       tenantTireBenefitFeatures: '套餐权益项管理',
       tenantTireBenefitValues: '套餐权益管理',
