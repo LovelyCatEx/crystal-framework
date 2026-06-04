@@ -103,5 +103,10 @@ i18nResources: {
 | `addTenantMenu(...)` | 添加租户菜单项 |
 | `addTopLevelRoute(...)` | 添加顶层路由（脱离 `/manager/*` 布局） |
 | `addMenuGroup(...)` | 添加自定义菜单分组 |
+| `addSettingsKey(scope, key)` | 注册系统/租户设置项的 key（`scope` 取 `'system'` 或 `'tenant'`） |
+| `addSettingsGroup(scope, group)` | 注册系统/租户设置项的分组 |
+| `addSettingsTab(scope, tab)` | 注册系统/租户设置项的标签页 |
+| `addSettingsItemRenderer(scope, key, renderer)` | 为指定 key 提供自定义输入控件 |
+| `addSettingsGroupExtraRenderer(scope, group, renderer)` | 为指定分组追加额外区域（如按钮） |
 
-具体用法见[添加页面](./add-page)和[API 对接](./api-integration)。
+具体用法见[添加页面](./add-page)、[API 对接](./api-integration)，以及 [系统设置项](../sdk/system-settings) 和 [租户设置项](../sdk/tenant-settings)。

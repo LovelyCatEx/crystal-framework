@@ -510,14 +510,6 @@ export const zhCN: I18nRules = {
       segments: {
         profile: '基本信息',
         settings: '设置'
-      },
-      tenantSettings: {
-        sectionTitle: '组织设置',
-        sectionSubtitle: '调整当前组织内的偏好与开关',
-        save: '保存设置',
-        saveSuccess: '组织设置已保存',
-        saveFailed: '组织设置保存失败',
-        fetchFailed: '无法获取组织设置'
       }
     },
 
@@ -1726,6 +1718,10 @@ export const zhCN: I18nRules = {
       }
     },
     tenantSettingsManager: {
+      fetchFailed: '无法获取组织设置',
+      saveSuccess: '组织设置已保存',
+      saveFailed: '组织设置保存失败',
+      saveSettings: '保存设置',
       keys: {
         'notification.memberJoinNotifyEmail': '成员加入邮件通知',
         'notification.memberJoinReviewNotifyEmail': '成员加入审核邮件通知',
@@ -2539,7 +2535,11 @@ export const zhCN: I18nRules = {
       STRING: '字符串',
       NUMBER: '整数',
       DECIMAL: '小数',
-      BOOLEAN: '布尔值'
+      BOOLEAN: '布尔值',
+      STRING_ARRAY: '字符串数组',
+      NUMBER_ARRAY: '整数数组',
+      DECIMAL_ARRAY: '小数数组',
+      BOOLEAN_ARRAY: '布尔值数组'
     },
 
     storageProviderType: {

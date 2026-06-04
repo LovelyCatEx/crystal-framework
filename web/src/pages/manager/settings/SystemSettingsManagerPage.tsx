@@ -13,6 +13,7 @@ import {
     useSettingsKeyToTranslationMap,
     useSettingsTabToTranslationMap
 } from "@/i18n/system-settings.tsx";
+import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
 import {
     ApiOutlined,
     ExclamationCircleFilled,
@@ -26,6 +27,8 @@ import {useTranslation} from "react-i18next";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 import {settingsGroupExtraRenderers, settingsItemRenderers} from "@/pages/manager/settings/settings-renderers.tsx";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
+import {pluginRegistry} from "@/plugin/registry.ts";
 
 export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -33,6 +36,8 @@ export default function SystemSettingsManagerPage() {
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();
     const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
+    const itemRenderers = mergeRenderers(settingsItemRenderers, pluginRegistry.getSettingsItemRenderers('system'));
+    const groupExtraRenderers = mergeRenderers(settingsGroupExtraRenderers, pluginRegistry.getSettingsGroupExtraRenderers('system'));
 
     const {data, isLoading, mutate} = useSWRComposition(
         'settings-schema',
@@ -50,10 +55,7 @@ export default function SystemSettingsManagerPage() {
             return;
         }
 
-        const kv = Object.fromEntries(
-            Object.entries(data.items)
-                .map(([key, schema]) => [key, schema.value])
-        );
+        const kv = deserializeSettingsValues(data.items)
 
         form.setFieldsValue(kv)
     }, [data]);
@@ -62,7 +64,8 @@ export default function SystemSettingsManagerPage() {
         setRefreshing(isLoading);
     }, [isLoading]);
 
-    const updateSettings = (props: Record<string, string | null>) => {
+    const updateSettings = (values: Record<string, unknown>) => {
+        const props = serializeSettingsValues(data?.items ?? {}, values)
         updateSystemSettings(props)
             .then(() => {
                 void message.success(t('pages.systemSettingsManager.saveSuccess'))
@@ -193,8 +196,8 @@ export default function SystemSettingsManagerPage() {
                             enumTranslator={(key, value) =>
                                 t(`pages.systemSettingsManager.enums.${key}.${value}`)
                             }
-                            itemRenderers={settingsItemRenderers}
-                            groupExtraRenderers={settingsGroupExtraRenderers}
+                            itemRenderers={itemRenderers}
+                            groupExtraRenderers={groupExtraRenderers}
                         />
                     </Form>
                 </Card>

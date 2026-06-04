@@ -1,7 +1,8 @@
-import {Checkbox, Form, Input, InputNumber, Radio, Switch, theme} from "antd";
+import {Checkbox, Form, Input, InputNumber, Radio, Select, Switch, theme} from "antd";
 import {useTranslation} from "react-i18next";
 import type {SystemSettingsSchema} from "@/types/system/system-settings.types.ts";
 import {SystemSettingsItemValueType} from "@/types/system/system-settings.types.ts";
+import {isArrayValueType} from "@/utils/settings-value.ts";
 import type {SettingsItemRenderer} from "./types.ts";
 
 const {useToken} = theme;
@@ -78,6 +79,27 @@ export function SettingsItem(props: SettingsItemProps) {
                         value: item,
                         label: props.enumTranslator(props.settingsKey, item),
                     }))}
+                />
+            ) : props.schema.valueType == SystemSettingsItemValueType.BOOLEAN_ARRAY ? (
+                <Select
+                    mode="tags"
+                    className="w-full"
+                    disabled={props.loading}
+                    tokenSeparators={[',']}
+                    options={[
+                        {value: 'true', label: 'true'},
+                        {value: 'false', label: 'false'},
+                    ]}
+                />
+            ) : isArrayValueType(props.schema.valueType) ? (
+                <Select
+                    mode="tags"
+                    className="w-full"
+                    disabled={props.loading}
+                    tokenSeparators={[',']}
+                    open={false}
+                    suffixIcon={null}
+                    placeholder={props.schema.defaultValue ?? ''}
                 />
             ) : (
                 <span className="text-red-500 text-sm">NO RENDER FOUND FOR THIS SETTINGS ITEM</span>

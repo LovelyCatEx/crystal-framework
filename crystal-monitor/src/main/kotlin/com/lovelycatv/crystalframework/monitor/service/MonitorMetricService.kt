@@ -16,7 +16,7 @@ class MonitorMetricService(
     private val metricBuffer: MetricBuffer,
 ) {
 
-    fun record(type: MetricType, value: Double): Mono<Void> {
+    fun record(type: MetricType, value: Double): Mono<*> {
         return repository.insert(type, value)
     }
 

@@ -8,6 +8,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
+import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
@@ -38,38 +39,10 @@ class ManagerSystemSettingsController(
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_READ}')")
     @GetMapping("/schema")
     suspend fun getSystemSettings(): ApiResponse<*> {
-        val declarations = systemSettingsRegistry.settingDeclarations()
-
-        val mapping = declarations.associate {
-            it.key to mapOf(
-                "sort" to it.sort,
-                "valueType" to it.valueType.name,
-                "value" to systemSettingsService.getSettings(it.key)?.configValue,
-                "defaultValue" to it.defaultValue,
-                "enumValues" to it.enumValues,
-                "tab" to if (it.key.contains(".")) {
-                    it.key.split(".")[0]
-                } else {
-                    null
-                },
-                "group" to if (it.key.contains(".")) {
-                    it.key.split(".")
-                        .dropLast(1)
-                        .joinToString(".")
-                } else {
-                    null
-                }
-            )
+        val data = buildSettingsSchemaResponse(systemSettingsRegistry.settingDeclarations()) { key ->
+            systemSettingsService.getSettings(key)?.configValue
         }
-
-        return ApiResponse.success(
-            mapOf(
-                "groups" to mapping.values
-                    .mapNotNull { it["group"] }
-                    .distinct(),
-                "items" to mapping,
-            )
-        )
+        return ApiResponse.success(data)
     }
 
     @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_UPDATE}')")

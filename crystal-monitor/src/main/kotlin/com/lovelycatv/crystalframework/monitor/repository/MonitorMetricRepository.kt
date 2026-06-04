@@ -12,7 +12,7 @@ class MonitorMetricRepository(
     private val databaseClient: DatabaseClient,
 ) {
 
-    fun insert(type: MetricType, value: Double): Mono<Void> {
+    fun insert(type: MetricType, value: Double): Mono<*> {
         val now = System.currentTimeMillis()
         return databaseClient.sql(
             """
@@ -25,8 +25,8 @@ class MonitorMetricRepository(
             .then()
     }
 
-    fun batchInsert(type: MetricType, points: List<MetricPoint>): Mono<Void> {
-        if (points.isEmpty()) return Mono.empty()
+    fun batchInsert(type: MetricType, points: List<MetricPoint>): Mono<*> {
+        if (points.isEmpty()) return Mono.empty<Unit>()
 
         val values = points.indices.joinToString(", ") {
             "(:value_${it}, :created_time_${it})"

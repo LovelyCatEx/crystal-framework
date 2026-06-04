@@ -22,6 +22,10 @@ export enum SystemSettingsItemValueType {
     BOOLEAN = 'BOOLEAN',
     ENUM_SINGLE = 'ENUM_SINGLE',
     ENUM_MULTIPLE = 'ENUM_MULTIPLE',
+    STRING_ARRAY = 'STRING_ARRAY',
+    NUMBER_ARRAY = 'NUMBER_ARRAY',
+    DECIMAL_ARRAY = 'DECIMAL_ARRAY',
+    BOOLEAN_ARRAY = 'BOOLEAN_ARRAY',
 }
 
 export interface SystemMaintenanceStatusVO {

@@ -1,4 +1,29 @@
-import type {IMenuRegistry, PluginMenuGroup, PluginRouteItem, PluginTopLevelRoute} from "./types.ts";
+import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
+import type {
+    IMenuRegistry,
+    PluginMenuGroup,
+    PluginRouteItem,
+    PluginTopLevelRoute,
+    SettingsScope,
+} from "./types.ts";
+
+interface SettingsScopeBucket {
+    keys: string[];
+    groups: string[];
+    tabs: string[];
+    itemRenderers: Map<string, SettingsItemRenderer>;
+    groupExtraRenderers: Map<string, SettingsGroupExtraRenderer>;
+}
+
+function createScopeBucket(): SettingsScopeBucket {
+    return {
+        keys: [],
+        groups: [],
+        tabs: [],
+        itemRenderers: new Map(),
+        groupExtraRenderers: new Map(),
+    };
+}
 
 class MenuRegistryImpl implements IMenuRegistry {
     private _menuGroups: PluginMenuGroup[] = [];
@@ -6,9 +31,10 @@ class MenuRegistryImpl implements IMenuRegistry {
     private _tenantMenus: PluginRouteItem[] = [];
     private _publicMenus: PluginRouteItem[] = [];
     private _topLevelRoutes: PluginTopLevelRoute[] = [];
-    private _systemSettingsKeys: string[] = [];
-    private _systemSettingsGroups: string[] = [];
-    private _systemSettingsTabs: string[] = [];
+    private _settings: Record<SettingsScope, SettingsScopeBucket> = {
+        system: createScopeBucket(),
+        tenant: createScopeBucket(),
+    };
 
     addMenuGroup(group: PluginMenuGroup): void {
         this._menuGroups.push(group);
@@ -30,22 +56,41 @@ class MenuRegistryImpl implements IMenuRegistry {
         this._topLevelRoutes.push(route);
     }
 
-    addSystemSettingsKey(key: string): void {
-        if (!this._systemSettingsKeys.includes(key)) {
-            this._systemSettingsKeys.push(key);
+    addSettingsKey(scope: SettingsScope, key: string): void {
+        const bucket = this._settings[scope];
+        if (!bucket.keys.includes(key)) {
+            bucket.keys.push(key);
         }
     }
 
-    addSystemSettingsGroup(group: string): void {
-        if (!this._systemSettingsGroups.includes(group)) {
-            this._systemSettingsGroups.push(group);
+    addSettingsGroup(scope: SettingsScope, group: string): void {
+        const bucket = this._settings[scope];
+        if (!bucket.groups.includes(group)) {
+            bucket.groups.push(group);
         }
     }
 
-    addSystemSettingsTab(tab: string): void {
-        if (!this._systemSettingsTabs.includes(tab)) {
-            this._systemSettingsTabs.push(tab);
+    addSettingsTab(scope: SettingsScope, tab: string): void {
+        const bucket = this._settings[scope];
+        if (!bucket.tabs.includes(tab)) {
+            bucket.tabs.push(tab);
         }
+    }
+
+    addSettingsItemRenderer(scope: SettingsScope, key: string, renderer: SettingsItemRenderer): void {
+        const bucket = this._settings[scope];
+        if (bucket.itemRenderers.has(key)) {
+            console.warn(`[plugin] settings item renderer for '${scope}:${key}' is being overridden`);
+        }
+        bucket.itemRenderers.set(key, renderer);
+    }
+
+    addSettingsGroupExtraRenderer(scope: SettingsScope, group: string, renderer: SettingsGroupExtraRenderer): void {
+        const bucket = this._settings[scope];
+        if (bucket.groupExtraRenderers.has(group)) {
+            console.warn(`[plugin] settings group extra renderer for '${scope}:${group}' is being overridden`);
+        }
+        bucket.groupExtraRenderers.set(group, renderer);
     }
 
     get menuGroups(): PluginMenuGroup[] {
@@ -68,16 +113,24 @@ class MenuRegistryImpl implements IMenuRegistry {
         return this._topLevelRoutes;
     }
 
-    get systemSettingsKeys(): string[] {
-        return this._systemSettingsKeys;
+    getSettingsKeys(scope: SettingsScope): string[] {
+        return this._settings[scope].keys;
     }
 
-    get systemSettingsGroups(): string[] {
-        return this._systemSettingsGroups;
+    getSettingsGroups(scope: SettingsScope): string[] {
+        return this._settings[scope].groups;
     }
 
-    get systemSettingsTabs(): string[] {
-        return this._systemSettingsTabs;
+    getSettingsTabs(scope: SettingsScope): string[] {
+        return this._settings[scope].tabs;
+    }
+
+    getSettingsItemRenderers(scope: SettingsScope): Map<string, SettingsItemRenderer> {
+        return this._settings[scope].itemRenderers;
+    }
+
+    getSettingsGroupExtraRenderers(scope: SettingsScope): Map<string, SettingsGroupExtraRenderer> {
+        return this._settings[scope].groupExtraRenderers;
     }
 }
 

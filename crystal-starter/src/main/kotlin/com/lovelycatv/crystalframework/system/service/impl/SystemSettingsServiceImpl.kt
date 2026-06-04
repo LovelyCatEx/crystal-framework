@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
@@ -282,14 +282,5 @@ class SystemSettingsServiceImpl(
         )
 
         logger.info("System settings synchronized to cache")
-    }
-
-    private fun SystemSettingsItemValueType.matches(raw: String): Boolean = when (this) {
-        SystemSettingsItemValueType.STRING -> true
-        SystemSettingsItemValueType.NUMBER -> raw.toLongOrNull() != null
-        SystemSettingsItemValueType.DECIMAL -> raw.toDoubleOrNull() != null
-        SystemSettingsItemValueType.BOOLEAN -> raw.toBooleanStrictOrNull() != null
-        SystemSettingsItemValueType.ENUM_SINGLE -> true
-        SystemSettingsItemValueType.ENUM_MULTIPLE -> true
     }
 }

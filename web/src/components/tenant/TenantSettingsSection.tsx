@@ -5,12 +5,15 @@ import {useTranslation} from "react-i18next";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {getTenantSettingsSchema, updateTenantSettings} from "@/api/tenant/tenant-settings.api.ts";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
+import {pluginRegistry} from "@/plugin/registry.ts";
 import {
     useTenantSettingsGroupToTranslationMap,
     useTenantSettingsKeyToTranslationMap,
     useTenantSettingsTabToTranslationMap,
 } from "@/i18n/tenant-settings.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
+import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
 
 export const tenantSettingsItemRenderers = new Map<string, SettingsItemRenderer>();
 
@@ -24,31 +27,31 @@ export function TenantSettingsSection() {
     const tenantSettingsTabToTranslationMap = useTenantSettingsTabToTranslationMap();
     const tenantSettingsGroupToTranslationMap = useTenantSettingsGroupToTranslationMap();
     const tenantSettingsKeyToTranslationMap = useTenantSettingsKeyToTranslationMap();
+    const itemRenderers = mergeRenderers(tenantSettingsItemRenderers, pluginRegistry.getSettingsItemRenderers('tenant'));
+    const groupExtraRenderers = mergeRenderers(tenantSettingsGroupExtraRenderers, pluginRegistry.getSettingsGroupExtraRenderers('tenant'));
 
     const {data, isLoading, mutate} = useSWRComposition(
         'tenant-settings-schema',
         () => getTenantSettingsSchema().then((res) => res.data),
-        () => void message.error(t('pages.myTenantSettings.tenantSettings.fetchFailed'))
+        () => void message.error(t('pages.tenantSettingsManager.fetchFailed'))
     );
 
     useEffect(() => {
         if (!data) {
             return;
         }
-        const kv = Object.fromEntries(
-            Object.entries(data.items).map(([key, schema]) => [key, schema.value])
-        );
+        const kv = deserializeSettingsValues(data.items);
         form.setFieldsValue(kv);
     }, [data]);
 
-    const onSave = (values: Record<string, string | null>) => {
+    const onSave = (values: Record<string, unknown>) => {
         setSaving(true);
-        updateTenantSettings(values)
+        updateTenantSettings(serializeSettingsValues(data?.items ?? {}, values))
             .then(() => {
-                void message.success(t('pages.myTenantSettings.tenantSettings.saveSuccess'));
+                void message.success(t('pages.tenantSettingsManager.saveSuccess'));
             })
             .catch(() => {
-                void message.error(t('pages.myTenantSettings.tenantSettings.saveFailed'));
+                void message.error(t('pages.tenantSettingsManager.saveFailed'));
             })
             .finally(() => {
                 setRefreshing(true);
@@ -70,8 +73,8 @@ export function TenantSettingsSection() {
                 enumTranslator={(key, value) =>
                     t(`pages.tenantSettingsManager.enums.${key}.${value}`)
                 }
-                itemRenderers={tenantSettingsItemRenderers}
-                groupExtraRenderers={tenantSettingsGroupExtraRenderers}
+                itemRenderers={itemRenderers}
+                groupExtraRenderers={groupExtraRenderers}
                 showTabs={false}
             />
 
@@ -83,7 +86,7 @@ export function TenantSettingsSection() {
                     loading={saving}
                     className="rounded-xl px-8 h-auto py-2"
                 >
-                    {t('pages.myTenantSettings.tenantSettings.save')}
+                    {t('pages.tenantSettingsManager.saveSettings')}
                 </Button>
             </div>
         </Form>
