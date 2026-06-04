@@ -13,8 +13,6 @@ RUN git clone https://github.com/LovelyCatEx/VertexLib.git /tmp/VertexLib && \
     cd /tmp/VertexLib && \
     /dependencies/mvnw install -DskipTests
 
-RUN ./mvnw dependency:go-offline -B
-
 FROM --platform=linux/amd64 eclipse-temurin:17-jdk-alpine AS build
 
 WORKDIR /app
