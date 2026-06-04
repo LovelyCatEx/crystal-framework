@@ -103,5 +103,10 @@ i18nResources: {
 | `addTenantMenu(...)` | Add tenant menu items |
 | `addTopLevelRoute(...)` | Add a top-level route (outside `/manager/*` layout) |
 | `addMenuGroup(...)` | Add a custom menu group |
+| `addSettingsKey(scope, key)` | Register a system/tenant settings key (`scope` is `'system'` or `'tenant'`) |
+| `addSettingsGroup(scope, group)` | Register a system/tenant settings group |
+| `addSettingsTab(scope, tab)` | Register a system/tenant settings tab |
+| `addSettingsItemRenderer(scope, key, renderer)` | Provide a custom input control for a specific key |
+| `addSettingsGroupExtraRenderer(scope, group, renderer)` | Append an extra area (such as a button) under a specific group |
 
-See [Adding a Page](./add-page) and [API Integration](./api-integration) for details.
+See [Adding a Page](./add-page), [API Integration](./api-integration), [System Settings](../sdk/system-settings), and [Tenant Settings](../sdk/tenant-settings) for details.

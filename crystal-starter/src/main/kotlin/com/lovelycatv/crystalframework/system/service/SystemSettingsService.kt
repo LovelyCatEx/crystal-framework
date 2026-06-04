@@ -1,10 +1,9 @@
 package com.lovelycatv.crystalframework.system.service
 
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.convertValue
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
-import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 
@@ -33,24 +32,17 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
 
     @Suppress("UNCHECKED_CAST")
     suspend fun <R> getSettings(
-        declaration: SystemSettingsItemDeclaration
+        declaration: SettingsItemDeclaration
     ): R? {
         val settingsValue = getSettings(declaration.key) { declaration.defaultValue }
             ?: return null
 
-        return when (declaration.valueType) {
-            SystemSettingsItemValueType.STRING -> settingsValue
-            SystemSettingsItemValueType.NUMBER -> settingsValue.toLongOrNull()
-            SystemSettingsItemValueType.DECIMAL -> settingsValue.toDoubleOrNull()
-            SystemSettingsItemValueType.BOOLEAN -> settingsValue.toBooleanStrictOrNull()
-            SystemSettingsItemValueType.ENUM_SINGLE -> settingsValue
-            SystemSettingsItemValueType.ENUM_MULTIPLE -> settingsValue.parseObject<List<String>>()
-        } as? R?
+        return declaration.valueType.convertValue(settingsValue) as? R?
     }
 
     suspend fun setSettings(key: String, value: String?)
 
-    suspend fun setSettings(declaration: SystemSettingsItemDeclaration, value: String?) {
+    suspend fun setSettings(declaration: SettingsItemDeclaration, value: String?) {
         this.setSettings(declaration.key, value)
     }
 }

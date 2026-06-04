@@ -7,9 +7,9 @@ When contributing to the framework source code, you need to modify two files.
 Open `crystal-starter/src/main/kotlin/com/lovelycatv/crystalframework/system/types/SystemSettingsConstants.kt` and add the declaration in the appropriate nested object:
 
 ```kotlin
-val CUSTOM_LOGO = SystemSettingsItemDeclaration(
+val CUSTOM_LOGO = SettingsItemDeclaration(
     key = "basic.customLogo.url",
-    valueType = SystemSettingsItemValueType.STRING,
+    valueType = SettingsItemValueType.STRING,
     defaultValue = "",
     sort = 10
 )
@@ -40,6 +40,10 @@ registry.settings(
 | `BOOLEAN` | Switch | Toggle |
 | `ENUM_SINGLE` | Radio.Group | Single selection |
 | `ENUM_MULTIPLE` | Checkbox.Group | Multiple selection |
+| `STRING_ARRAY` | Select (tags) | String array (transported as a JSON string array) |
+| `NUMBER_ARRAY` | Select (tags) | Integer array (transported as a JSON string array) |
+| `DECIMAL_ARRAY` | Select (tags) | Decimal array (transported as a JSON string array) |
+| `BOOLEAN_ARRAY` | Select (tags) | Boolean array (transported as a JSON string array) |
 
 ## Key Naming Convention
 

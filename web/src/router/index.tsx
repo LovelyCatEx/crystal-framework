@@ -45,12 +45,14 @@ const TenantRolePermissionManagerPage = lazy(() => import("../pages/manager/tena
 const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberRoleManagerPage.tsx"));
 const TenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/TenantDepartmentManagerPage.tsx"));
 const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/TenantInvitationManagerPage.tsx"));
+const TenantMessageChannelManagerPage = lazy(() => import("@/pages/manager/tenant/TenantMessageChannelManagerPage.tsx"));
 const AuditLogManagerPage = lazy(() => import("@/pages/manager/audit/AuditLogManagerPage.tsx"));
 const MyTenantProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantProfilePage.tsx"));
 const MyTenantDashboard = lazy(() => import("@/pages/manager/tenant/MyTenantDashboard.tsx"));
 const MailSendLogManagerPage = lazy(() => import("@/pages/manager/mail/MailSendLogManagerPage.tsx"));
 const MyTenantMemberManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMemberManagerPage.tsx"));
 const MyTenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantInvitationManagerPage.tsx"));
+const MyTenantMessageChannelManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMessageChannelManagerPage.tsx"));
 const MyTenantRoleManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantRoleManagerPage.tsx"));
 const MyTenantMemberRoleManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMemberRoleManagerPage.tsx"));
 const MyTenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantDepartmentManagerPage.tsx"));
@@ -203,6 +205,14 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             group: 'i_tenant',
         },
         {
+            key: '/manager/tenant/message-channels',
+            path: '/manager/tenant/message-channels',
+            icon: <NotificationOutlined />,
+            label: t('menu.myTenant.messageChannels'),
+            page: <MyTenantMessageChannelManagerPage />,
+            group: 'i_tenant',
+        },
+        {
             key: '/manager/tenant/profile',
             path: '/manager/tenant/profile',
             icon: <SettingOutlined />,
@@ -324,6 +334,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <TagsOutlined />,
             label: t('menu.admin.tenantInvitations'),
             page: <TenantInvitationManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-message-channels',
+            path: '/manager/tenant-message-channels',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.tenantMessageChannels'),
+            page: <TenantMessageChannelManagerPage />,
             group: 'tenant'
         },
         {

@@ -1,9 +1,9 @@
 package com.lovelycatv.crystalframework
 
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.validateConfigValue
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.tenant.settings.entity.TenantSettingsEntity
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
 import com.lovelycatv.vertex.log.logger
@@ -54,32 +54,9 @@ class TenantSettingsTableDataCheckRunner(
                             logger.info("?  tenant=$tenantId ${row.configKey} (declaration not found, skipped)")
                             return@mapNotNull null
                         }
+                    val validation = declaration.validateConfigValue(copiedConfigValue)
 
-                    var testErrorMessage: String? = null
-                    val testResult = try {
-                        when (declaration.valueType) {
-                            SystemSettingsItemValueType.STRING -> copiedConfigValue
-                            SystemSettingsItemValueType.NUMBER -> copiedConfigValue.toLongOrNull()
-                            SystemSettingsItemValueType.DECIMAL -> copiedConfigValue.toDoubleOrNull()
-                            SystemSettingsItemValueType.BOOLEAN -> copiedConfigValue.toBooleanStrictOrNull()
-                            SystemSettingsItemValueType.ENUM_SINGLE -> {
-                                val enumValues = declaration.enumValues
-                                    ?: throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
-                                copiedConfigValue in enumValues
-                            }
-                            SystemSettingsItemValueType.ENUM_MULTIPLE -> {
-                                val enumValues = declaration.enumValues
-                                    ?: throw IllegalArgumentException("Declaration ${declaration.key} does not have enum values")
-                                val parsed = copiedConfigValue.parseObject<List<String>>()
-                                parsed.all { it in enumValues }
-                            }
-                        } != null
-                    } catch (e: Exception) {
-                        testErrorMessage = e.localizedMessage ?: e.message ?: "${row.configKey} = ${row.configValue}"
-                        false
-                    }
-
-                    if (testResult) {
+                    if (validation.pass) {
                         logger.info("  √ tenant=$tenantId ${row.configKey} = $copiedConfigValue")
                         null
                     } else {
@@ -87,7 +64,7 @@ class TenantSettingsTableDataCheckRunner(
                             "  × tenant=$tenantId ${row.configKey} = $copiedConfigValue " +
                                 "(expectedType: ${declaration.valueType}, " +
                                 "enums: ${declaration.enumValues?.joinToString(" | ")}, " +
-                                "message: $testErrorMessage)"
+                                "message: ${validation.errorMessage})"
                         )
                         row
                     }
@@ -100,7 +77,7 @@ class TenantSettingsTableDataCheckRunner(
 
         check(failedItems.isEmpty()) {
             "There were ${failedItems.size} failed tenant settings item(s). " +
-                "tips: ${SystemSettingsItemValueType.BOOLEAN} only supports \"true\" or \"false\""
+                "tips: ${SettingsItemValueType.BOOLEAN} only supports \"true\" or \"false\""
         }
 
         logger.info("=".repeat(64))

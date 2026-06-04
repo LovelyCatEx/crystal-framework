@@ -59,6 +59,7 @@ export const enThemeConfig: DefaultTheme.Config = {
           ]
         },
         { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
+        { text: 'Tenant Settings', link: '/en/develop/sdk/tenant-settings' },
         { text: 'System Permission', link: '/en/develop/sdk/system-permission' },
         { text: 'Tenant Permission', link: '/en/develop/sdk/tenant-permission' },
         { text: 'Mail Template', link: '/en/develop/sdk/mail-template' },
@@ -93,6 +94,7 @@ export const enThemeConfig: DefaultTheme.Config = {
           ]
         },
         { text: 'System Settings', link: '/en/contribute/system-settings' },
+        { text: 'Tenant Settings', link: '/en/contribute/tenant-settings' },
         { text: 'System Permission', link: '/en/contribute/system-permission' },
         { text: 'Tenant Permission', link: '/en/contribute/tenant-permission' },
         { text: 'Mail Template', link: '/en/contribute/mail-template' },

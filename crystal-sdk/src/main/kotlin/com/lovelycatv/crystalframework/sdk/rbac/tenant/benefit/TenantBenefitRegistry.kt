@@ -11,8 +11,8 @@ class TenantBenefitRegistry {
             return
         }
 
-        if (benefits.putIfAbsent(featureKey, declaration.copy(featureKey = featureKey)) != null) {
-            throw IllegalStateException("TenantBenefitRegistry: duplicate featureKey '$featureKey'")
+        check(benefits.putIfAbsent(featureKey, declaration.copy(featureKey = featureKey)) == null) {
+            "TenantBenefitRegistry: duplicate featureKey '$featureKey'"
         }
     }
 

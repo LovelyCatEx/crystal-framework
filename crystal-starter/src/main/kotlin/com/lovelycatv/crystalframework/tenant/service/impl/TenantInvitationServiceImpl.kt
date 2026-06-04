@@ -2,10 +2,12 @@ package com.lovelycatv.crystalframework.tenant.service.impl
 
 import com.lovelycatv.crystalframework.mail.service.MailTemplateService
 import com.lovelycatv.crystalframework.mail.utils.resolveMailTemplatePlaceholders
+import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
 import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
 import com.lovelycatv.crystalframework.messagechannel.types.chain.dsl.messageChain
 import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
+import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
@@ -45,6 +47,7 @@ class TenantInvitationServiceImpl(
     private val tenantInvitationRecordService: TenantInvitationRecordService,
     private val mailTemplateService: MailTemplateService,
     private val messageChannelService: MessageChannelService,
+    private val systemChannelConfigProvider: SystemChannelConfigProvider,
     private val tenantSettingsService: TenantSettingsService,
 ) : TenantInvitationService {
     private val logger = logger()
@@ -224,7 +227,8 @@ class TenantInvitationServiceImpl(
     }
 
     private suspend fun sendEmailOrThrow(email: String, message: ChainMessage, label: String) {
-        val result = messageChannelService.send(EmailRecipient(email = email), message)
+        val config = systemChannelConfigProvider.resolve(ChannelType.EMAIL)
+        val result = messageChannelService.send(config, EmailRecipient(email = email), message)
         if (!result.success) {
             logger.error(
                 "Failed to send {} to {} via {}: [{}] {}",

@@ -1,5 +1,25 @@
 # Change Logs
 
+## v1.7.1 (breaking)
+
+2026-06-05
+
+### Features
++ feat(tenant): Added tenant message channel management.
++ feat(web): Added tenant message channel management pages.
++ feat(settings): Added four array data types (string, integer, decimal, boolean) for setting items.
++ refactor(sdk): Unified data types of system settings and tenant settings.
++ refactor(web): Unified plugin registration functions for system settings and tenant settings.
+
+### Bug Fixes
++ fix(backend): Fixed backend Dockerfile build script.
+
+### Other
++ docs: Updated documentation for system settings and tenant settings.
++ chore(web): Switched build from esbuild to terser.
+
+---
+
 ## v1.7.0
 
 2026-06-03

@@ -2,15 +2,16 @@ package com.lovelycatv.crystalframework.messagechannel.channel.lark
 
 import com.lovelycatv.crystalframework.messagechannel.channel.MessageChannelProvider
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
+import com.lovelycatv.crystalframework.messagechannel.constants.MessageChannelErrorCodes
 import com.lovelycatv.crystalframework.messagechannel.types.chain.ImageSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageChain
+import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
+import com.lovelycatv.crystalframework.messagechannel.types.config.LarkChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.options.SendOptions
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.result.SendResult
-import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
-import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.vertex.log.logger
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -18,9 +19,8 @@ import tools.jackson.databind.ObjectMapper
 /**
  * Sends messages to Lark recipients via Lark's IM v1 endpoint.
  *
- * App credentials are read from system settings on every call (cached internally by
- * [LarkApiClient] until expiry). When app credentials are blank, send returns a clear
- * `NOT_CONFIGURED` error so callers can surface it.
+ * App credentials are supplied per-call via [LarkChannelConfig]. Token cache inside
+ * [LarkApiClient] is keyed by `(baseUrl, appId)` so multiple Lark apps can coexist.
  *
  * Renderer selection (mirrors what users would expect from a single send entry-point):
  *   - chain contains an [ImageSegment] OR message has a non-blank title → `post` msg_type
@@ -31,7 +31,6 @@ class LarkChannelProvider(
     private val apiClient: LarkApiClient,
     private val textRenderer: ChainToLarkTextRenderer,
     private val postRenderer: ChainToLarkPostRenderer,
-    private val systemModuleClient: SystemModuleClient,
     private val objectMapper: ObjectMapper,
     larkAtResolvers: List<LarkAtResolver>,
 ) : MessageChannelProvider {
@@ -44,6 +43,7 @@ class LarkChannelProvider(
     override fun supports(recipient: MessageRecipient): Boolean = recipient is LarkRecipient
 
     override suspend fun send(
+        config: ChannelConfig,
         recipient: MessageRecipient,
         message: ChainMessage,
         options: SendOptions,
@@ -51,43 +51,44 @@ class LarkChannelProvider(
         if (recipient !is LarkRecipient) {
             return SendResult.failed(
                 channelType = channelType,
-                errorCode = ERR_BAD_RECIPIENT,
+                errorCode = MessageChannelErrorCodes.BAD_RECIPIENT,
                 errorMessage = "LarkChannelProvider requires LarkRecipient but got ${recipient::class.simpleName}",
+            )
+        }
+        if (config !is LarkChannelConfig) {
+            return SendResult.failed(
+                channelType = channelType,
+                errorCode = MessageChannelErrorCodes.INCOMPATIBLE_CHANNEL,
+                errorMessage = "LarkChannelProvider requires LarkChannelConfig but got ${config::class.simpleName}",
             )
         }
 
         val resolvedReceive = resolveReceiveId(recipient)
             ?: return SendResult.failed(
                 channelType = channelType,
-                errorCode = ERR_BAD_RECIPIENT,
+                errorCode = MessageChannelErrorCodes.BAD_RECIPIENT,
                 errorMessage = "LarkRecipient must carry at least one of openId/userId/unionId/email/chatId",
             )
 
-        val larkConfig = systemModuleClient.getSystemSettings()?.messageChannel?.lark
-            ?: return SendResult.failed(
-                channelType = channelType,
-                errorCode = ERR_SETTINGS_UNAVAILABLE,
-                errorMessage = "System settings not initialized; cannot read Lark configuration",
-            )
-        if (larkConfig.appId.isBlank() || larkConfig.appSecret.isBlank()) {
+        if (config.appId.isBlank() || config.appSecret.isBlank()) {
             return SendResult.failed(
                 channelType = channelType,
-                errorCode = ERR_NOT_CONFIGURED,
-                errorMessage = "Lark app credentials are not configured (messageChannel.lark.appId / appSecret)",
+                errorCode = MessageChannelErrorCodes.NOT_CONFIGURED,
+                errorMessage = "Lark app credentials are not configured (appId / appSecret blank)",
             )
         }
 
         return try {
             val token = apiClient.fetchTenantAccessToken(
-                appId = larkConfig.appId,
-                appSecret = larkConfig.appSecret,
-                baseUrl = larkConfig.baseUrl,
+                appId = config.appId,
+                appSecret = config.appSecret,
+                baseUrl = config.baseUrl,
             )
-            val (msgType, content) = renderContent(message, larkConfig)
+            val (msgType, content) = renderContent(message)
 
             val result = apiClient.sendMessage(
                 accessToken = token,
-                baseUrl = larkConfig.baseUrl,
+                baseUrl = config.baseUrl,
                 receiveIdType = resolvedReceive.idType,
                 receiveId = resolvedReceive.id,
                 msgType = msgType,
@@ -113,10 +114,7 @@ class LarkChannelProvider(
         }
     }
 
-    private suspend fun renderContent(
-        message: ChainMessage,
-        @Suppress("UNUSED_PARAMETER") larkConfig: SystemSettings.MessageChannel.Lark,
-    ): Pair<String, String> {
+    private suspend fun renderContent(message: ChainMessage): Pair<String, String> {
         val needsPost = !message.title.isNullOrBlank() || chainHasImage(message.chain)
         return if (needsPost) {
             val post = postRenderer.render(message.title, message.chain, larkAtResolver)
@@ -150,9 +148,6 @@ class LarkChannelProvider(
         const val RECEIVE_ID_EMAIL = "email"
         const val RECEIVE_ID_CHAT_ID = "chat_id"
 
-        const val ERR_BAD_RECIPIENT = "BAD_RECIPIENT"
-        const val ERR_SETTINGS_UNAVAILABLE = "SETTINGS_UNAVAILABLE"
-        const val ERR_NOT_CONFIGURED = "NOT_CONFIGURED"
         const val ERR_LARK_API = "LARK_API_ERROR"
     }
 }

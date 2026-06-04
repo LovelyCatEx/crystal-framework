@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       rollupOptions: {
+        maxParallelFileOps: 10,
         output: {
           manualChunks(id: string) {
             console.log(`Chucking: ${id}`);
@@ -64,7 +65,9 @@ export default defineConfig(({ mode }) => {
             }
           }
         }
-      }
+      },
+      sourcemap: false,
+      minify: 'terser',
     },
     server: {
       proxy: {

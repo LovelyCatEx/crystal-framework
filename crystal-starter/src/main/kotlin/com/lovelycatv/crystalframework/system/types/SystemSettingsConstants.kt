@@ -1,42 +1,42 @@
 package com.lovelycatv.crystalframework.system.types
 
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
 
 object SystemSettingsConstants {
     object Basic {
-        val BASE_URL = SystemSettingsItemDeclaration(
+        val BASE_URL = SettingsItemDeclaration(
             key = "basic.baseUrl",
-            valueType = SystemSettingsItemValueType.STRING,
+            valueType = SettingsItemValueType.STRING,
             defaultValue = "http://localhost:8080/api/v1",
         )
 
         object WaterMark {
-            val ENABLED = SystemSettingsItemDeclaration(
+            val ENABLED = SettingsItemDeclaration(
                 key = "basic.waterMark.enabled",
-                valueType = SystemSettingsItemValueType.BOOLEAN,
+                valueType = SettingsItemValueType.BOOLEAN,
                 defaultValue = false.toString(),
                 sort = 1
             )
 
-            val TYPE = SystemSettingsItemDeclaration(
+            val TYPE = SettingsItemDeclaration(
                 key = "basic.waterMark.type",
-                valueType = SystemSettingsItemValueType.ENUM_SINGLE,
+                valueType = SettingsItemValueType.ENUM_SINGLE,
                 defaultValue = "SYSTEM_NAME",
                 sort = 2,
                 enumValues = listOf("SYSTEM_NAME", "USER_NAME", "CUSTOM")
             )
 
-            val CUSTOM_VALUE = SystemSettingsItemDeclaration(
+            val CUSTOM_VALUE = SettingsItemDeclaration(
                 key = "basic.waterMark.customValue",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
                 sort = 3
             )
 
-            val FONT_COLOR = SystemSettingsItemDeclaration(
+            val FONT_COLOR = SettingsItemDeclaration(
                 key = "basic.waterMark.fontColor",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "#00000018",
                 sort = 4
             )
@@ -44,53 +44,53 @@ object SystemSettingsConstants {
     }
 
     object Bootstrap {
-        val AUTO_CHECK_RBAC_TABLE_DATA = SystemSettingsItemDeclaration(
+        val AUTO_CHECK_RBAC_TABLE_DATA = SettingsItemDeclaration(
             key = "bootstrap.autoCheckRbacTableData",
-            valueType = SystemSettingsItemValueType.BOOLEAN,
+            valueType = SettingsItemValueType.BOOLEAN,
             defaultValue = true.toString()
         )
     }
 
     object Mail {
         object SMTP {
-            val HOST = SystemSettingsItemDeclaration(
+            val HOST = SettingsItemDeclaration(
                 key = "mail.smtp.host",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "127.0.0.1",
                 sort = 1
             )
 
-            val PORT = SystemSettingsItemDeclaration(
+            val PORT = SettingsItemDeclaration(
                 key = "mail.smtp.port",
-                valueType = SystemSettingsItemValueType.NUMBER,
+                valueType = SettingsItemValueType.NUMBER,
                 defaultValue = 465.toString(),
                 sort = 2
             )
 
-            val USERNAME = SystemSettingsItemDeclaration(
+            val USERNAME = SettingsItemDeclaration(
                 key = "mail.smtp.username",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "username",
                 sort = 3
             )
 
-            val PASSWORD = SystemSettingsItemDeclaration(
+            val PASSWORD = SettingsItemDeclaration(
                 key = "mail.smtp.password",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "password",
                 sort = 4
             )
 
-            val FROM_EMAIL = SystemSettingsItemDeclaration(
+            val FROM_EMAIL = SettingsItemDeclaration(
                 key = "mail.smtp.fromEmail",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "user@example.com",
                 sort = 5
             )
 
-            val SSL = SystemSettingsItemDeclaration(
+            val SSL = SettingsItemDeclaration(
                 key = "mail.smtp.ssl",
-                valueType = SystemSettingsItemValueType.BOOLEAN,
+                valueType = SettingsItemValueType.BOOLEAN,
                 defaultValue = true.toString(),
                 sort = 6
             )
@@ -99,23 +99,23 @@ object SystemSettingsConstants {
 
     object MessageChannel {
         object Lark {
-            val APP_ID = SystemSettingsItemDeclaration(
+            val APP_ID = SettingsItemDeclaration(
                 key = "messageChannel.lark.appId",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
                 sort = 1
             )
 
-            val APP_SECRET = SystemSettingsItemDeclaration(
+            val APP_SECRET = SettingsItemDeclaration(
                 key = "messageChannel.lark.appSecret",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
                 sort = 2
             )
 
-            val BASE_URL = SystemSettingsItemDeclaration(
+            val BASE_URL = SettingsItemDeclaration(
                 key = "messageChannel.lark.baseUrl",
-                valueType = SystemSettingsItemValueType.STRING,
+                valueType = SettingsItemValueType.STRING,
                 defaultValue = "https://open.feishu.cn",
                 sort = 3
             )
@@ -125,24 +125,24 @@ object SystemSettingsConstants {
     object Security {
         object Api {
             object Encrypt {
-                val ENABLE = SystemSettingsItemDeclaration(
+                val ENABLE = SettingsItemDeclaration(
                     key = "security.api.encrypt.enabled",
-                    valueType =  SystemSettingsItemValueType.BOOLEAN,
+                    valueType =  SettingsItemValueType.BOOLEAN,
                     defaultValue = true.toString(),
                     sort = 1
                 )
 
-                val SCOPE = SystemSettingsItemDeclaration(
+                val SCOPE = SettingsItemDeclaration(
                     key = "security.api.encrypt.scope",
-                    valueType =  SystemSettingsItemValueType.ENUM_SINGLE,
+                    valueType =  SettingsItemValueType.ENUM_SINGLE,
                     defaultValue = "ALL",
                     sort = 2,
                     enumValues = listOf("ALL", "ALL_ANNOTATED", "BY_ANNOTATED_LEVEL")
                 )
 
-                val SECURITY_LEVEL = SystemSettingsItemDeclaration(
+                val SECURITY_LEVEL = SettingsItemDeclaration(
                     key = "security.api.encrypt.securityLevel",
-                    valueType = SystemSettingsItemValueType.NUMBER,
+                    valueType = SettingsItemValueType.NUMBER,
                     defaultValue = 1.toString(),
                     sort = 3
                 )

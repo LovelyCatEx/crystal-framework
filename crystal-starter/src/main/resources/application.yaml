@@ -112,6 +112,8 @@ crystalframework:
     message-channel:
       lark:
         default-message: 'hello, world! <link href="https://github.com/LovelyCatEx/crystal-framework" title="Crystal Framework" />'
+  message-channel:
+    encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
 
 logging:
   level:

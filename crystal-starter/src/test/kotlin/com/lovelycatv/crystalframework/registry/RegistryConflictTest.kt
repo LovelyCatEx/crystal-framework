@@ -13,8 +13,8 @@ import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionDec
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionType
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -83,9 +83,9 @@ class RegistryConflictTest {
     @Test
     fun systemSettingsRegistryDuplicateKey() {
         val registry = SystemSettingsRegistry()
-        val declaration = SystemSettingsItemDeclaration(
+        val declaration = SettingsItemDeclaration(
             key = "mail.smtp.host",
-            valueType = SystemSettingsItemValueType.STRING,
+            valueType = SettingsItemValueType.STRING,
             defaultValue = "127.0.0.1"
         )
         registry.setting(declaration)

@@ -1,5 +1,6 @@
 import type {ReactNode} from "react";
 import type {I18nRules} from "@/i18n/i18n-rules.ts";
+import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
 
 export interface PluginMenuGroup {
     name: string;
@@ -27,6 +28,8 @@ type DeepPartial<T> = T extends object ? {
 
 export type PluginI18nResources = Record<string, DeepPartial<I18nRules>>;
 
+export type SettingsScope = 'system' | 'tenant';
+
 export interface CrystalWebPlugin {
     configure(registry: IMenuRegistry): void;
     i18nResources?: PluginI18nResources;
@@ -43,9 +46,13 @@ export interface IMenuRegistry {
 
     addTopLevelRoute(route: PluginTopLevelRoute): void;
 
-    addSystemSettingsKey(key: string): void;
+    addSettingsKey(scope: SettingsScope, key: string): void;
 
-    addSystemSettingsGroup(group: string): void;
+    addSettingsGroup(scope: SettingsScope, group: string): void;
 
-    addSystemSettingsTab(tab: string): void;
+    addSettingsTab(scope: SettingsScope, tab: string): void;
+
+    addSettingsItemRenderer(scope: SettingsScope, key: string, renderer: SettingsItemRenderer): void;
+
+    addSettingsGroupExtraRenderer(scope: SettingsScope, group: string, renderer: SettingsGroupExtraRenderer): void;
 }

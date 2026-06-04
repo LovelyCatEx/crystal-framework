@@ -1,9 +1,8 @@
 package com.lovelycatv.crystalframework.tenant.settings.service
 
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemDeclaration
-import com.lovelycatv.crystalframework.sdk.system.settings.types.SystemSettingsItemValueType
+import com.lovelycatv.crystalframework.sdk.common.settings.convertValue
+import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
-import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.tenant.settings.entity.TenantSettingsEntity
 import com.lovelycatv.crystalframework.tenant.settings.repository.TenantSettingsRepository
 import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsView
@@ -26,26 +25,19 @@ interface TenantSettingsService : CachedBaseService<TenantSettingsRepository, Te
     @Suppress("UNCHECKED_CAST")
     suspend fun <R> getSettings(
         tenantId: Long,
-        declaration: SystemSettingsItemDeclaration,
+        declaration: SettingsItemDeclaration,
     ): R? {
         val settingsValue = getSettings(tenantId, declaration.key) { declaration.defaultValue }
             ?: return null
 
-        return when (declaration.valueType) {
-            SystemSettingsItemValueType.STRING -> settingsValue
-            SystemSettingsItemValueType.NUMBER -> settingsValue.toLongOrNull()
-            SystemSettingsItemValueType.DECIMAL -> settingsValue.toDoubleOrNull()
-            SystemSettingsItemValueType.BOOLEAN -> settingsValue.toBooleanStrictOrNull()
-            SystemSettingsItemValueType.ENUM_SINGLE -> settingsValue
-            SystemSettingsItemValueType.ENUM_MULTIPLE -> settingsValue.parseObject<List<String>>()
-        } as? R?
+        return declaration.valueType.convertValue(settingsValue) as? R?
     }
 
     suspend fun setSettings(tenantId: Long, key: String, value: String?)
 
     suspend fun setSettings(
         tenantId: Long,
-        declaration: SystemSettingsItemDeclaration,
+        declaration: SettingsItemDeclaration,
         value: String?,
     ) {
         this.setSettings(tenantId, declaration.key, value)

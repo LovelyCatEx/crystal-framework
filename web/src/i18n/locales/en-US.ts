@@ -513,14 +513,6 @@ export const enUS: I18nRules = {
       segments: {
         profile: 'Profile',
         settings: 'Settings'
-      },
-      tenantSettings: {
-        sectionTitle: 'Organization Settings',
-        sectionSubtitle: 'Tune preferences and toggles for the current organization',
-        save: 'Save Settings',
-        saveSuccess: 'Organization settings saved',
-        saveFailed: 'Failed to save organization settings',
-        fetchFailed: 'Failed to load organization settings'
       }
     },
 
@@ -935,6 +927,43 @@ export const enUS: I18nRules = {
         copyFailed: 'Copy failed, please copy manually'
       }
     },
+    tenantMessageChannelManager: {
+      title: 'Message Channel Management',
+      subtitle: 'Manage message channels for system tenants',
+      addChannel: 'Add Channel',
+      filter: {
+        id: 'Channel ID',
+        idPlaceholder: 'Enter channel ID',
+        type: 'Channel Type',
+        all: 'All'
+      },
+      modal: {
+        channelType: {
+          label: 'Channel Type',
+          required: 'Please select a channel type',
+          placeholder: 'Select channel type'
+        },
+        name: {
+          label: 'Channel Name',
+          required: 'Please enter a channel name',
+          maxLength: 'Channel name cannot exceed 64 characters',
+          placeholder: 'Enter channel name'
+        },
+        enabled: {
+          label: 'Enabled'
+        },
+        config: {
+          label: 'Channel Config',
+          required: 'Please fill in the channel config',
+          placeholder: 'Fill in the channel config (JSON)',
+          encryptedHint: 'For security, sensitive fields (e.g. password, secret) are not echoed back; please re-enter them when editing'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: 'Status updated successfully',
+        statusUpdateFailed: 'Failed to update status'
+      }
+    },
     tenantDepartmentManager: {
       title: 'Department Management',
       subtitle: 'Manage system tenant departments',
@@ -1186,6 +1215,43 @@ export const enUS: I18nRules = {
       messages: {
         copySuccess: 'Invitation link copied to clipboard',
         copyFailed: 'Copy failed, please copy manually'
+      }
+    },
+    myTenantMessageChannelManager: {
+      title: 'My Message Channels',
+      subtitle: 'Manage message channels for current organization',
+      addChannel: 'Add Channel',
+      filter: {
+        id: 'Channel ID',
+        idPlaceholder: 'Enter channel ID',
+        type: 'Channel Type',
+        all: 'All'
+      },
+      modal: {
+        channelType: {
+          label: 'Channel Type',
+          required: 'Please select a channel type',
+          placeholder: 'Select channel type'
+        },
+        name: {
+          label: 'Channel Name',
+          required: 'Please enter a channel name',
+          maxLength: 'Channel name cannot exceed 64 characters',
+          placeholder: 'Enter channel name'
+        },
+        enabled: {
+          label: 'Enabled'
+        },
+        config: {
+          label: 'Channel Config',
+          required: 'Please fill in the channel config',
+          placeholder: 'Fill in the channel config (JSON)',
+          encryptedHint: 'For security, sensitive fields (e.g. password, secret) are not echoed back; please re-enter them when editing'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: 'Status updated successfully',
+        statusUpdateFailed: 'Failed to update status'
       }
     },
     myTenantDepartmentManager: {
@@ -1729,6 +1795,10 @@ export const enUS: I18nRules = {
       }
     },
     tenantSettingsManager: {
+      fetchFailed: 'Failed to load organization settings',
+      saveSuccess: 'Organization settings saved',
+      saveFailed: 'Failed to save organization settings',
+      saveSettings: 'Save Settings',
       keys: {
         'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
         'notification.memberJoinReviewNotifyEmail': 'Member Join Review Email Notification',
@@ -2107,6 +2177,14 @@ export const enUS: I18nRules = {
       applyTemplateTooltip: 'Apply Template'
     },
 
+    messageChannelConfig: {
+      email: 'Email Channel',
+      lark: 'Lark Channel',
+      selectTemplate: 'Select Config Template',
+      applyTemplate: 'Apply Template',
+      applyTemplateTooltip: 'Apply the config template for the selected channel type'
+    },
+
     columns: {
       fileResource: {
         preview: 'Preview',
@@ -2221,6 +2299,16 @@ export const enUS: I18nRules = {
         status: 'Status',
         usedCount: 'Used Count',
         createdTime: 'Created Time'
+      },
+      tenantMessageChannel: {
+        recordInfo: 'Record Info',
+        tenantId: 'Tenant ID',
+        name: 'Channel Name',
+        channelType: 'Channel Type',
+        enabled: 'Status',
+        statusEnabled: 'Enabled',
+        statusDisabled: 'Disabled',
+        config: 'Config'
       },
       tenantTireType: {
         name: 'Name',
@@ -2542,7 +2630,11 @@ export const enUS: I18nRules = {
       STRING: 'String',
       NUMBER: 'Number',
       DECIMAL: 'Decimal',
-      BOOLEAN: 'Boolean'
+      BOOLEAN: 'Boolean',
+      STRING_ARRAY: 'String Array',
+      NUMBER_ARRAY: 'Number Array',
+      DECIMAL_ARRAY: 'Decimal Array',
+      BOOLEAN_ARRAY: 'Boolean Array'
     },
 
     storageProviderType: {
@@ -2555,6 +2647,11 @@ export const enUS: I18nRules = {
       0: 'GitHub',
       1: 'Google',
       2: 'QQ'
+    },
+
+    channelType: {
+      1: 'Email',
+      2: 'Lark'
     },
 
     tenantBenefitType: {
@@ -2587,6 +2684,7 @@ export const enUS: I18nRules = {
     tenantPermission: 'Tenant Permission',
     tenantDepartment: 'Tenant Department',
     tenantInvitation: 'Invitation Code',
+    tenantMessageChannel: 'Message Channel',
     tenantTireType: 'Tire Type',
     tenantTireBenefitFeature: 'Benefit Feature',
     tenantTireBenefitValue: 'Tier Benefit Value',
@@ -2619,7 +2717,8 @@ export const enUS: I18nRules = {
       roles: 'Role Management',
       memberRoles: 'Member Role Management',
       departments: 'Department Management',
-      profile: 'Organization Settings'
+      profile: 'Organization Settings',
+      messageChannels: 'Message Channel Management'
     },
 
     // Admin menus
@@ -2637,6 +2736,7 @@ export const enUS: I18nRules = {
       tenantMemberRoles: 'Member Role Management',
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',
+      tenantMessageChannels: 'Message Channel Management',
       tenantTireTypes: 'Tire Type Management',
       tenantTireBenefitFeatures: 'Benefit Features',
       tenantTireBenefitValues: 'Tier Benefit Management',
