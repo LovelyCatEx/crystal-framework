@@ -1,5 +1,20 @@
 # 更新日志
 
+## v1.7.2
+
+2026-06-05
+
+### 新功能
++ feat(web): 新增消息渠道配置预设模板。
++ feat(web): 租户设置页面渲染 Tabs 标题栏。
+
+### 其他
++ chore(backend): 启动后在控制台打印 CrystalFramework 横幅。
++ chore(web): 消息渠道编辑弹窗关联渠道类型与配置文件。
++ chore(docker): 将 Dockerfile 改为仅复制构建产物，提高构建速度。
+
+---
+
 ## v1.7.1 (breaking)
 
 2026-06-05

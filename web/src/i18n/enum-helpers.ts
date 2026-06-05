@@ -60,3 +60,7 @@ export function getOAuthPlatform(platform: number): string {
 export function getChannelType(type: number): string {
     return translateEnum('channelType', type);
 }
+
+export function getMessageChannelPreset(channelType: number, presetKey: string): string {
+    return translateEnum('messageChannelPreset', `${channelType}_${presetKey}`);
+}

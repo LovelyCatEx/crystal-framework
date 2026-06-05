@@ -1,58 +1,57 @@
-import {Button, Select, Space, Tooltip} from "antd";
+import {Button, Modal, Select, Space, Tooltip} from "antd";
 import {JsonEditor} from "./JsonEditor.tsx";
-import {useState} from "react";
-import {MailOutlined, MessageOutlined} from "@ant-design/icons";
+import {useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {ChannelType} from "@/types/tenant/tenant-message-channel.types.ts";
+import {
+    isEmptyConfig,
+    MESSAGE_CHANNEL_PRESETS,
+    serializePreset
+} from "@/utils/message-channel.utils.ts";
+import {getMessageChannelPreset} from "@/i18n/enum-helpers.ts";
 
-interface MessageChannelConfigEditorProps {
+export interface MessageChannelConfigEditorProps {
     value?: string;
     onChange?: (value: string) => void;
     placeholder?: string;
+    channelType?: ChannelType;
 }
 
-interface ChannelConfigTemplate {
-    label: string;
-    key: ChannelType;
-    icon: React.ReactNode;
-    config: Record<string, unknown>;
-}
-
-export function MessageChannelConfigEditor({value, onChange, placeholder}: MessageChannelConfigEditorProps) {
+export function MessageChannelConfigEditor({
+                                               value,
+                                               onChange,
+                                               placeholder,
+                                               channelType
+                                           }: MessageChannelConfigEditorProps) {
     const {t} = useTranslation();
-    const [selectedTemplate, setSelectedTemplate] = useState<ChannelType>();
+    const [selectedPresetKey, setSelectedPresetKey] = useState<string>();
+    const [lastChannelType, setLastChannelType] = useState<ChannelType | undefined>(channelType);
 
-    const templates: ChannelConfigTemplate[] = [
-        {
-            label: t('components.messageChannelConfig.email'),
-            key: ChannelType.EMAIL,
-            icon: <MailOutlined/>,
-            config: {
-                host: "",
-                port: 465,
-                username: "",
-                password: "",
-                ssl: true,
-                fromEmail: ""
-            }
-        },
-        {
-            label: t('components.messageChannelConfig.lark'),
-            key: ChannelType.LARK,
-            icon: <MessageOutlined/>,
-            config: {
-                appId: "",
-                appSecret: "",
-                baseUrl: "https://open.feishu.cn"
-            }
-        }
-    ];
+    if (channelType !== lastChannelType) {
+        setLastChannelType(channelType);
+        setSelectedPresetKey(undefined);
+    }
 
-    const handleApplyTemplate = () => {
-        const template = templates.find(it => it.key === selectedTemplate);
-        if (template) {
-            onChange?.(JSON.stringify(template.config, null, 2));
+    const presets = useMemo(
+        () => (channelType !== undefined ? MESSAGE_CHANNEL_PRESETS[channelType] ?? [] : []),
+        [channelType]
+    );
+
+    const disabled = channelType === undefined;
+
+    const applyPreset = () => {
+        const preset = presets.find(it => it.key === selectedPresetKey);
+        if (!preset) return;
+        const writePreset = () => onChange?.(serializePreset(preset));
+        if (!isEmptyConfig(value)) {
+            Modal.confirm({
+                title: t('components.messageChannelConfig.applyOverwriteTitle'),
+                content: t('components.messageChannelConfig.applyOverwriteContent'),
+                onOk: writePreset
+            });
+            return;
         }
+        writePreset();
     };
 
     return (
@@ -60,24 +59,26 @@ export function MessageChannelConfigEditor({value, onChange, placeholder}: Messa
             <Space className="w-full">
                 <Select
                     placeholder={t('components.messageChannelConfig.selectTemplate')}
-                    value={selectedTemplate}
-                    onChange={setSelectedTemplate}
-                    options={templates.map(it => ({
-                        label: (
-                            <Space>
-                                {it.icon}
-                                {it.label}
-                            </Space>
-                        ),
+                    value={selectedPresetKey}
+                    onChange={setSelectedPresetKey}
+                    disabled={disabled}
+                    options={presets.map(it => ({
+                        label: channelType !== undefined ? getMessageChannelPreset(channelType, it.key) : it.key,
                         value: it.key
                     }))}
                     className="min-w-48"
                 />
-                <Tooltip title={t('components.messageChannelConfig.applyTemplateTooltip')}>
+                <Tooltip
+                    title={
+                        disabled
+                            ? t('components.messageChannelConfig.disabledHint')
+                            : t('components.messageChannelConfig.applyTemplateTooltip')
+                    }
+                >
                     <Button
                         type="primary"
-                        onClick={handleApplyTemplate}
-                        disabled={selectedTemplate === undefined}
+                        onClick={applyPreset}
+                        disabled={disabled || selectedPresetKey === undefined}
                     >
                         {t('components.messageChannelConfig.applyTemplate')}
                     </Button>
