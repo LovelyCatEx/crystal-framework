@@ -5,18 +5,22 @@ import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemVal
 
 object TenantSettingsConstants {
     object Notification {
-        val MEMBER_JOIN_NOTIFY_EMAIL = SettingsItemDeclaration(
-            key = "notification.memberJoinNotifyEmail",
-            valueType = SettingsItemValueType.BOOLEAN,
-            defaultValue = true.toString(),
-            sort = 1,
-        )
+        object MemberJoin {
+            val EMAIL = SettingsItemDeclaration(
+                key = "notification.memberJoin.email",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1,
+            )
+        }
 
-        val MEMBER_JOIN_REVIEW_NOTIFY_EMAIL = SettingsItemDeclaration(
-            key = "notification.memberJoinReviewNotifyEmail",
-            valueType = SettingsItemValueType.BOOLEAN,
-            defaultValue = true.toString(),
-            sort = 2,
-        )
+        object MemberJoinReview {
+            val EMAIL = SettingsItemDeclaration(
+                key = "notification.memberJoinReview.email",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1,
+            )
+        }
     }
 }

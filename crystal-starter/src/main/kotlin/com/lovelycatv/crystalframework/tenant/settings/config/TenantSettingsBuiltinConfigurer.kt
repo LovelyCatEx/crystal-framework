@@ -13,8 +13,8 @@ class TenantSettingsBuiltinConfigurer : TenantSettingsConfigurer {
     override fun configure(registry: TenantSettingsRegistry) {
         registry.settings(
             listOf(
-                TenantSettingsConstants.Notification.MEMBER_JOIN_NOTIFY_EMAIL,
-                TenantSettingsConstants.Notification.MEMBER_JOIN_REVIEW_NOTIFY_EMAIL,
+                TenantSettingsConstants.Notification.MemberJoin.EMAIL,
+                TenantSettingsConstants.Notification.MemberJoinReview.EMAIL,
             )
         )
     }

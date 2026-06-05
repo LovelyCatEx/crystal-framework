@@ -138,10 +138,10 @@ class TenantInvitationServiceImpl(
         // 4. Notify by email according to tenant settings
         val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
         if (invitation.requiresReviewing) {
-            sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, tenantSettings.notification.memberJoinReviewNotifyEmail)
+            sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, tenantSettings.notification.memberJoinReview.email)
         }
 
-        if (tenantSettings.notification.memberJoinNotifyEmail) {
+        if (tenantSettings.notification.memberJoin.email) {
             sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber)
         }
     }
@@ -170,7 +170,7 @@ class TenantInvitationServiceImpl(
         }
 
         if (!switchOn) {
-            logger.info("memberJoinReviewNotifyEmail is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+            logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
             return
         }
 

@@ -1801,11 +1801,12 @@ export const zhCN: I18nRules = {
       saveFailed: '组织设置保存失败',
       saveSettings: '保存设置',
       keys: {
-        'notification.memberJoinNotifyEmail': '成员加入邮件通知',
-        'notification.memberJoinReviewNotifyEmail': '成员加入审核邮件通知',
+        'notification.memberJoin.email': '邮件通知',
+        'notification.memberJoinReview.email': '邮件通知',
       },
       groups: {
-        'notification': '通知设置',
+        'notification.memberJoin': '成员加入通知',
+        'notification.memberJoinReview': '成员加入审核通知',
       },
       tabs: {
         'notification': '通知',

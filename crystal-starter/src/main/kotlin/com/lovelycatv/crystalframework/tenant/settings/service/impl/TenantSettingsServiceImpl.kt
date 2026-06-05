@@ -93,8 +93,12 @@ class TenantSettingsServiceImpl(
     override suspend fun getTenantSettings(tenantId: Long): TenantSettingsView {
         return cachedTenantSettings[tenantId] ?: TenantSettingsView(
             notification = TenantSettingsView.Notification(
-                memberJoinNotifyEmail = getSettings(tenantId, TenantSettingsConstants.Notification.MEMBER_JOIN_NOTIFY_EMAIL)!!,
-                memberJoinReviewNotifyEmail = getSettings(tenantId, TenantSettingsConstants.Notification.MEMBER_JOIN_REVIEW_NOTIFY_EMAIL)!!,
+                memberJoin = TenantSettingsView.Notification.MemberJoin(
+                    email = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoin.EMAIL)!!,
+                ),
+                memberJoinReview = TenantSettingsView.Notification.MemberJoinReview(
+                    email = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoinReview.EMAIL)!!,
+                ),
             ),
         ).also {
             this.cachedTenantSettings[tenantId] = it
