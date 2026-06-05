@@ -75,7 +75,6 @@ export function TenantSettingsSection() {
                 }
                 itemRenderers={itemRenderers}
                 groupExtraRenderers={groupExtraRenderers}
-                showTabs={false}
             />
 
             <div className="mt-8 flex justify-end">

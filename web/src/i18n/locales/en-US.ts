@@ -941,7 +941,9 @@ export const enUS: I18nRules = {
         channelType: {
           label: 'Channel Type',
           required: 'Please select a channel type',
-          placeholder: 'Select channel type'
+          placeholder: 'Select channel type',
+          switchConfirmTitle: 'Switch Channel Type',
+          switchConfirmContent: 'Switching the channel type will reset the current config. Continue?'
         },
         name: {
           label: 'Channel Name',
@@ -1231,7 +1233,9 @@ export const enUS: I18nRules = {
         channelType: {
           label: 'Channel Type',
           required: 'Please select a channel type',
-          placeholder: 'Select channel type'
+          placeholder: 'Select channel type',
+          switchConfirmTitle: 'Switch Channel Type',
+          switchConfirmContent: 'Switching the channel type will reset the current config. Continue?'
         },
         name: {
           label: 'Channel Name',
@@ -2182,7 +2186,10 @@ export const enUS: I18nRules = {
       lark: 'Lark Channel',
       selectTemplate: 'Select Config Template',
       applyTemplate: 'Apply Template',
-      applyTemplateTooltip: 'Apply the config template for the selected channel type'
+      applyTemplateTooltip: 'Apply the config template for the selected channel type',
+      disabledHint: 'Please select a channel type first',
+      applyOverwriteTitle: 'Apply Template',
+      applyOverwriteContent: 'Applying this template will overwrite the current config. Continue?'
     },
 
     columns: {
@@ -2652,6 +2659,12 @@ export const enUS: I18nRules = {
     channelType: {
       1: 'Email',
       2: 'Lark'
+    },
+
+    messageChannelPreset: {
+      '1_empty': 'Empty Template',
+      '1_mail163': '163 Mail',
+      '2_empty': 'Empty Template'
     },
 
     tenantBenefitType: {
