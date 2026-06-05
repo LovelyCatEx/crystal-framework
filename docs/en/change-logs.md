@@ -1,5 +1,20 @@
 # Change Logs
 
+## v1.7.2
+
+2026-06-05
+
+### Features
++ feat(web): Added preset templates for message channel config.
++ feat(web): Tenant settings page now renders Tabs header.
+
+### Other
++ chore(backend): Print CrystalFramework banner in the console after startup.
++ chore(web): Message channel edit modal now links channel type with config presets.
++ chore(docker): Switch Dockerfiles to copy build artifacts only for faster builds.
+
+---
+
 ## v1.7.1 (breaking)
 
 2026-06-05
