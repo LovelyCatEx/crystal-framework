@@ -20,7 +20,7 @@ import kotlin.math.log
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableAsync
 @EnableSnailJob
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class SpringbootTemplateApplication(
     private val config: CrystalFrameworkConfiguration
 ) : CommandLineRunner {
