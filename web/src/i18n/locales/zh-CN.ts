@@ -938,7 +938,9 @@ export const zhCN: I18nRules = {
         channelType: {
           label: '渠道类型',
           required: '请选择渠道类型',
-          placeholder: '选择渠道类型'
+          placeholder: '选择渠道类型',
+          switchConfirmTitle: '切换渠道类型',
+          switchConfirmContent: '切换类型会重置当前配置，确认继续？'
         },
         name: {
           label: '渠道名称',
@@ -1228,7 +1230,9 @@ export const zhCN: I18nRules = {
         channelType: {
           label: '渠道类型',
           required: '请选择渠道类型',
-          placeholder: '选择渠道类型'
+          placeholder: '选择渠道类型',
+          switchConfirmTitle: '切换渠道类型',
+          switchConfirmContent: '切换类型会重置当前配置，确认继续？'
         },
         name: {
           label: '渠道名称',
@@ -2179,7 +2183,10 @@ export const zhCN: I18nRules = {
       lark: '飞书渠道',
       selectTemplate: '选择配置模板',
       applyTemplate: '应用模板',
-      applyTemplateTooltip: '应用所选渠道类型的配置模板'
+      applyTemplateTooltip: '应用所选渠道类型的配置模板',
+      disabledHint: '请先选择渠道类型',
+      applyOverwriteTitle: '应用模板',
+      applyOverwriteContent: '应用模板会覆盖当前已编辑的配置，确认继续？'
     },
 
     columns: {
@@ -2649,6 +2656,12 @@ export const zhCN: I18nRules = {
     channelType: {
       1: '邮件',
       2: '飞书'
+    },
+
+    messageChannelPreset: {
+      '1_empty': '空模板',
+      '1_mail163': '163 邮箱',
+      '2_empty': '空模板'
     },
 
     tenantBenefitType: {
