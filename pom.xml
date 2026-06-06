@@ -50,6 +50,7 @@
         <module>crystal-rbac</module>
         <module>crystal-system</module>
         <module>crystal-tenant</module>
+        <module>crystal-auth</module>
     </modules>
 
     <scm>
@@ -136,6 +137,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-tenant</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-auth</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>
