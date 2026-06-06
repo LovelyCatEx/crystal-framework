@@ -48,6 +48,8 @@
         <module>crystal-message-channel</module>
         <module>crystal-user</module>
         <module>crystal-rbac</module>
+        <module>crystal-system</module>
+        <module>crystal-tenant</module>
     </modules>
 
     <scm>
@@ -124,6 +126,16 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-rbac</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-system</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-tenant</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

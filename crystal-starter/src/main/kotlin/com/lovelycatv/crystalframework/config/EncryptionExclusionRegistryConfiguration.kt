@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.encrypt.config
+package com.lovelycatv.crystalframework.config
 
 import com.lovelycatv.crystalframework.sdk.encrypt.EncryptionExclusionRegistry
 import com.lovelycatv.crystalframework.sdk.encrypt.config.EncryptionExclusionConfigurer
