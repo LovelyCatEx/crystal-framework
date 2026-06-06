@@ -11,7 +11,7 @@ import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigP
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
-import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
@@ -21,8 +21,8 @@ import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
-import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
-import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.DepartmentMemberRoleType
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore

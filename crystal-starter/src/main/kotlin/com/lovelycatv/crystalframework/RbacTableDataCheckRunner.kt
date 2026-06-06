@@ -1,11 +1,11 @@
 package com.lovelycatv.crystalframework
 
-import com.lovelycatv.crystalframework.rbac.controller.manager.permission.dto.ManagerCreatePermissionDTO
-import com.lovelycatv.crystalframework.rbac.controller.manager.role.dto.ManagerCreateRoleDTO
-import com.lovelycatv.crystalframework.rbac.entity.UserRolePermissionRelationEntity
-import com.lovelycatv.crystalframework.rbac.service.UserPermissionManagerService
-import com.lovelycatv.crystalframework.rbac.service.UserRoleManagerService
-import com.lovelycatv.crystalframework.rbac.service.UserRolePermissionRelationService
+import com.lovelycatv.crystalframework.rbac.user.controller.manager.permission.dto.ManagerCreatePermissionDTO
+import com.lovelycatv.crystalframework.rbac.user.controller.manager.role.dto.ManagerCreateRoleDTO
+import com.lovelycatv.crystalframework.rbac.user.entity.UserRolePermissionRelationEntity
+import com.lovelycatv.crystalframework.rbac.user.service.UserPermissionManagerService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRoleManagerService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService

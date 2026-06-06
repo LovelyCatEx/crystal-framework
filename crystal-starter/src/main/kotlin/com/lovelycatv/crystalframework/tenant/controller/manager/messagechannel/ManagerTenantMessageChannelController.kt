@@ -2,8 +2,8 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel
 
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.tenant.constants.TenantPermission
-import com.lovelycatv.crystalframework.tenant.controller.manager.StandardTenantManagerController
+import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
 import com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto.ManagerCreateTenantMessageChannelDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto.ManagerDeleteTenantMessageChannelDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto.ManagerReadTenantMessageChannelDTO

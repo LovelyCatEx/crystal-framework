@@ -15,7 +15,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberR
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
-import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
+import com.lovelycatv.crystalframework.shared.types.tenant.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull

@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.settings.entity
 
-import com.lovelycatv.crystalframework.tenant.entity.BaseTenantEntity
+import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 

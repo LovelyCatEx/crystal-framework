@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.auth.config
 
-import com.lovelycatv.crystalframework.auth.converters.types.ClientRegistrationIdOAuthPlatformConverter
+import com.lovelycatv.crystalframework.user.converters.types.ClientRegistrationIdOAuthPlatformConverter
 import com.lovelycatv.crystalframework.auth.event.LoginMethod
 import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
@@ -8,9 +8,8 @@ import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
-import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.ApplicationEventPublisher
@@ -47,9 +46,9 @@ class SecurityConfig(
     @Bean
     fun securityWebFilterChain(
         http: ServerHttpSecurity,
-        redisService: RedisService,
         userAuthorizationService: UserAuthorizationService,
-        jwtSignKeyStore: JWTSignKeyStore, userRbacQueryService: UserRbacQueryService
+        jwtSignKeyStore: JWTSignKeyStore,
+        userRbacQueryService: UserRbacQueryService
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -226,8 +225,8 @@ class SecurityConfig(
         http.addFilterAfter(
             CustomAuthFilter(
                 unauthorizedPathPatterns = unauthorizedPathPatterns,
-                getUserAuthorities = { userId, tenantId ->
-                    userRbacQueryService.getUserAuthorities(userId, tenantId)
+                getUserAuthorities = { userId, tenantId, tenantMemberId ->
+                    userRbacQueryService.getUserAuthorities(userId, tenantId, tenantMemberId,false)
                 },
                 getJWTSignKey = {
                     jwtSignKeyStore.getSignKey()

@@ -1,0 +1,114 @@
+package com.lovelycatv.crystalframework.user.service.impl
+
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
+import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.user.converters.OAuth2AuthenticationTokenAccountConverterManager
+import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
+import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
+import com.lovelycatv.crystalframework.user.service.OAuthAccountService
+import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
+
+@Service
+class OAuthAccountServiceImpl(
+    private val oauthAccountRepository: OAuthAccountRepository,
+    private val oAuth2AuthenticationTokenAccountConverterManager: OAuth2AuthenticationTokenAccountConverterManager,
+    private val snowIdGenerator: SnowIdGenerator,
+    private val redisService: RedisService,
+    override val eventPublisher: ApplicationEventPublisher,
+) : OAuthAccountService {
+    private val logger = logger()
+
+    override fun getRepository(): OAuthAccountRepository {
+        return this.oauthAccountRepository
+    }
+
+    override val cacheStore: ExpiringKVStore<String, OAuthAccountEntity>
+        get() = redisService.asKVStore()
+    override val listCacheStore: ExpiringKVStore<String, List<OAuthAccountEntity>>
+        get() = redisService.asKVStore()
+    override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
+
+    override suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity? {
+        return this.getRepository()
+            .findByPlatformAndIdentifier(platform.typeId, identifier)
+            .awaitFirstOrNull()
+    }
+
+    override suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity {
+        val template = oAuth2AuthenticationTokenAccountConverterManager.convert(token)
+
+        val existing = this.getAccountByPlatformAndIdentifier(template.getRealPlatform(), template.identifier)
+
+        return existing?.run {
+            withInvalidateEntityCacheContext(existing) {
+                this.nickname = template.nickname
+
+                this
+            }
+        } ?: (this.getRepository()
+                .save(
+                    template.apply {
+                        id = snowIdGenerator.nextId()
+                    } newEntity true
+                )
+                .awaitFirstOrNull()
+                ?: throw BusinessException("Could not save OAuth2 account into database"))
+    }
+
+    override suspend fun bindUser(accountId: Long, userId: Long) {
+        withUpdateEntityContext(accountId) {
+            val result = withUpdateById(accountId) {
+                if (this.userId != null) {
+                    throw BusinessException("This account is already linked to a user")
+                }
+
+                // Check whether the user already has an account of this platform
+                val duplicatedPlatformAccount = this@OAuthAccountServiceImpl.getRepository()
+                    .findByPlatformAndUserId(this.platform, userId)
+                    .awaitFirstOrNull()
+
+                if (duplicatedPlatformAccount != null) {
+                    throw BusinessException("An another account in this platform is already linked to a user")
+                }
+
+                this.userId = userId
+            }
+
+            logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been bound to user $userId")
+
+            result
+        }
+    }
+
+    override suspend fun unbindUser(accountId: Long, userId: Long) {
+        withUpdateEntityContext(accountId) {
+            val result = withUpdateById(accountId) {
+                if (this.userId != userId) {
+                    throw ForbiddenException("You are not allowed to unbind this account")
+                }
+
+                this.userId = null
+            }
+
+            logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been unbound by user $userId")
+
+            result
+        }
+    }
+
+    override suspend fun getUserOAuthAccounts(userId: Long): List<OAuthAccountEntity> {
+        return this.getRepository()
+            .findAllByUserId(userId)
+            .awaitListWithTimeout()
+    }
+}

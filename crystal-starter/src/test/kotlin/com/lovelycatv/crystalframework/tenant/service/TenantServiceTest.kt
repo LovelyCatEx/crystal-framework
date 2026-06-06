@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.impl.TenantMemberManagerServiceImplTest
-import com.lovelycatv.crystalframework.tenant.types.TenantStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantStatus
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.UserServiceTest
 import kotlinx.coroutines.reactive.awaitFirstOrNull

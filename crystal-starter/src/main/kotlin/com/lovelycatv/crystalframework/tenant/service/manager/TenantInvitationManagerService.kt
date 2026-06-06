@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
+import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerDeleteInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerReadInvitationDTO
@@ -14,4 +15,4 @@ interface TenantInvitationManagerService : BaseTenantResourceManagerService<
         ManagerReadInvitationDTO,
         ManagerUpdateInvitationDTO,
         ManagerDeleteInvitationDTO
->
+        >

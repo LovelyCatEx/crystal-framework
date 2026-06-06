@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.shared.repository
 
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.data.relational.core.mapping.Table
 import java.lang.reflect.ParameterizedType

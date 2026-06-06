@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto
 
-import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerCreateTenantResourceDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTenantResourceDTO
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull

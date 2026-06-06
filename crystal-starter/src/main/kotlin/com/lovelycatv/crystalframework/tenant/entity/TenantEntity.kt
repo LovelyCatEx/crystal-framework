@@ -1,11 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.tenant.types.TenantSettings
-import com.lovelycatv.crystalframework.tenant.types.TenantStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantStatus
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize

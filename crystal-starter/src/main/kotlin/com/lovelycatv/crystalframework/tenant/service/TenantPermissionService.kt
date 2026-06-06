@@ -1,7 +1,0 @@
-package com.lovelycatv.crystalframework.tenant.service
-
-import com.lovelycatv.crystalframework.shared.service.CachedBaseService
-import com.lovelycatv.crystalframework.tenant.entity.TenantPermissionEntity
-import com.lovelycatv.crystalframework.tenant.repository.TenantPermissionRepository
-
-interface TenantPermissionService : CachedBaseService<TenantPermissionRepository, TenantPermissionEntity>

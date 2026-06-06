@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto
 
 import com.lovelycatv.crystalframework.shared.database.QueryNode
-import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerReadTenantResourceDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadTenantResourceDTO
 
 data class ManagerReadInvitationDTO(
     override val page: Int,

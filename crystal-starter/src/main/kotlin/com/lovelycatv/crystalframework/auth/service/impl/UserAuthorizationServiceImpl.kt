@@ -9,7 +9,7 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
-import com.lovelycatv.crystalframework.user.service.UserRbacQueryService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.UserService
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.Authentication
@@ -43,8 +43,9 @@ class UserAuthorizationServiceImpl(
                 expiration = expiration
             ) {
                 this.claim("userId", userEntity.id.toString())
-                userEntity.getAuthenticatedTenant()?.id?.let {
-                    this.claim("tenantId", it.toString())
+                userEntity.getAuthenticatedTenant()?.let {
+                    this.claim("tenantId", it.id.toString())
+                    this.claim("tenantMemberId", it.tenantMmberId.toString())
                 }
             }
 

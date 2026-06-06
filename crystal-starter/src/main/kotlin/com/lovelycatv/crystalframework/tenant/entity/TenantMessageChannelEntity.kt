@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
+import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 

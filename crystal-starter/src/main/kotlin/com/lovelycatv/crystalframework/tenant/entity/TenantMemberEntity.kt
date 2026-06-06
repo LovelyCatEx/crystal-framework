@@ -2,7 +2,8 @@ package com.lovelycatv.crystalframework.tenant.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize

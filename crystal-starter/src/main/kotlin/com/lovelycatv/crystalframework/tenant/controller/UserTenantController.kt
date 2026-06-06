@@ -8,7 +8,7 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.controller.vo.UserTenantVO
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantService
-import com.lovelycatv.crystalframework.tenant.types.TenantStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantStatus
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

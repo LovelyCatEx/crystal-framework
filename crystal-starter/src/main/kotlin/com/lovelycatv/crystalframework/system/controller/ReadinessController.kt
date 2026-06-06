@@ -48,8 +48,7 @@ class ReadinessController(
         redisMessageListenerContainer
             .receive(maintenanceTopic)
             .subscribe { message ->
-                val status = message.message.replace("\"", "")
-                when (status) {
+                when (val status = message.message.replace("\"", "")) {
                     maintenanceTopicMessageTrue -> {
                         setRefusing()
                     }

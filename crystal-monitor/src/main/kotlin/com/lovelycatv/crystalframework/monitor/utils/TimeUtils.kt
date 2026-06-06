@@ -5,8 +5,7 @@ object TimeUtils {
         if (duration.isBlank()) return 3600_000L // default 1h
         val value = duration.dropLast(1).toLongOrNull()
             ?: throw IllegalArgumentException("Invalid duration format: $duration")
-        val unit = duration.last()
-        return when (unit) {
+        return when (val unit = duration.last()) {
             'm' -> value * 60_000L
             'h' -> value * 3600_000L
             'd' -> value * 86400_000L

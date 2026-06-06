@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
+import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerCreateTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerDeleteTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerReadTenantDepartmentDTO
@@ -14,4 +15,4 @@ interface TenantDepartmentManagerService : BaseTenantResourceManagerService<
         ManagerReadTenantDepartmentDTO,
         ManagerUpdateTenantDepartmentDTO,
         ManagerDeleteTenantDepartmentDTO
->
+        >

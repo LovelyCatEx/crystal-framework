@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.service.manager
 
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
+import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerDeleteTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerReadTenantDepartmentMemberDTO
@@ -16,6 +17,6 @@ interface TenantDepartmentMemberManagerService : BaseTenantResourceManagerServic
         ManagerReadTenantDepartmentMemberDTO,
         ManagerUpdateTenantDepartmentMemberDTO,
         ManagerDeleteTenantDepartmentMemberDTO
-> {
+        > {
     suspend fun queryVO(dto: ManagerReadTenantDepartmentMemberDTO): PaginatedResponseData<TenantDepartmentMemberVO>
 }

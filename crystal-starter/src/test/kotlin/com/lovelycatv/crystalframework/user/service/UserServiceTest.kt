@@ -30,7 +30,7 @@ class UserServiceTest(
 
         userService.register(username, password, email, emailCode)
 
-        val user = userService.findByUsername(username).awaitSingleOrNull() as UserEntity
+        val user = userService.getRepository().findByUsername(username).awaitSingleOrNull()
         assertNotNull(user)
         assertEquals(username, user.username)
         assertEquals(email, user.email)

@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto
 
-import com.lovelycatv.crystalframework.tenant.controller.manager.BaseManagerCreateTenantResourceDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTenantResourceDTO
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive

@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
-import com.lovelycatv.crystalframework.rbac.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator

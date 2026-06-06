@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.monitor.service
 
 import com.lovelycatv.crystalframework.monitor.repository.MonitorMetricRepository
-import com.lovelycatv.crystalframework.monitor.types.MetricPoint
 import com.lovelycatv.crystalframework.monitor.types.MetricQueryResponse
 import com.lovelycatv.crystalframework.monitor.types.MetricType
 import com.lovelycatv.crystalframework.monitor.utils.TimeUtils

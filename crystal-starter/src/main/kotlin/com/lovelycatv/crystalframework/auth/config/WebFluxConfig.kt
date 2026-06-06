@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.auth.config
 
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
+import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.vertex.log.logger
@@ -77,11 +78,22 @@ class WebFluxConfig(
                     null
                 }
 
+                val tenantMemberId = try {
+                    claims["tenantMemberId", String::class.java].toLong()
+                } catch (_: Exception) {
+                    null
+                }
+
+                if ((tenantId != null && tenantMemberId == null) || (tenantId == null && tenantMemberId != null)) {
+                    throw UnauthorizedException("Could not resolve tenant authentication from token")
+                }
+
                 return if (userId != null) {
                     UserAuthentication(
                         userId = userId,
                         username = claims.subject,
-                        tenantId = tenantId
+                        tenantId = tenantId,
+                        tenantMemberId = tenantMemberId,
                     ).toMono()
                 } else {
                     Mono.empty()

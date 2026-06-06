@@ -13,12 +13,12 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
-import com.lovelycatv.crystalframework.tenant.service.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
-import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.service.UserManagerService
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull

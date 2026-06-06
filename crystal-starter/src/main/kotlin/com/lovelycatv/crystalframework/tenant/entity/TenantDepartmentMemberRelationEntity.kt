@@ -1,10 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
-import com.lovelycatv.crystalframework.shared.entity.ScopedEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.ScopedEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.tenant.types.DepartmentMemberRoleType
+import com.lovelycatv.crystalframework.shared.types.tenant.DepartmentMemberRoleType
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import tools.jackson.databind.annotation.JsonSerialize

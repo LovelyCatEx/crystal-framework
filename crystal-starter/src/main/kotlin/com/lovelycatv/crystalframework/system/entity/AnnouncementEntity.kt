@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.system.entity
 
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.system.types.AnnouncementStatus
 import com.lovelycatv.crystalframework.system.types.AnnouncementTarget

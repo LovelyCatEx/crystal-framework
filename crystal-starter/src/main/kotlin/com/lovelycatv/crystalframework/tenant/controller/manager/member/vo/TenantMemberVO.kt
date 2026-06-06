@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.member.vo
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
-import com.lovelycatv.crystalframework.tenant.types.TenantMemberStatus
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import tools.jackson.databind.annotation.JsonSerialize
 import tools.jackson.databind.ser.std.ToStringSerializer

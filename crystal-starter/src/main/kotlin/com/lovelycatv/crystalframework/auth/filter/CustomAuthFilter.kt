@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
-    val getUserAuthorities: suspend (userId: Long, tenantId: Long?) -> Collection<GrantedAuthority>,
+    val getUserAuthorities: suspend (userId: Long, tenantId: Long?, tenantMemberId: Long?) -> Collection<GrantedAuthority>,
     val getJWTSignKey: () -> String,
 ) : WebFilter {
     private val logger = logger()
@@ -79,11 +79,20 @@ class CustomAuthFilter(
                     ?.toString()
                     ?.toLong()
 
+                val tenantMemberId = claims["tenantMemberId"]
+                    ?.toString()
+                    ?.toLong()
+
+                if ((tenantId != null && tenantMemberId == null) || (tenantId == null && tenantMemberId != null)) {
+                    throw UnauthorizedException("Could not resolve tenant authentication from token")
+                }
+
                 session.attributes[SessionConstants.AUDIT_USER_ID] = userId
                 session.attributes[SessionConstants.AUDIT_TENANT_ID] = tenantId ?: 0L
+                session.attributes[SessionConstants.AUDIT_TENANT_MEMBER_ID] = tenantMemberId ?: 0L
 
                 mono {
-                    getUserAuthorities.invoke(userId, tenantId)
+                    getUserAuthorities.invoke(userId, tenantId, tenantMemberId)
                 }.flatMap {
                     val token = UsernamePasswordAuthenticationToken(
                         claims.subject,
