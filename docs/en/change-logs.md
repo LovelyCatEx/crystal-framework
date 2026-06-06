@@ -1,5 +1,19 @@
 # Change Logs
 
+## v1.8.0
+
+2026-06-06
+
+### Features
++ refactor(backend): Added user, tenant, system, auth, and rbac modules.
++ feat(tenant): Split the organization join request and notification settings into two groups.
++ feat(encrypt): Allow registering directly-passable endpoints via the Registry.
+
+### Other
++ docs: Updated the project structure introduction document.
+
+---
+
 ## v1.7.2
 
 2026-06-05
