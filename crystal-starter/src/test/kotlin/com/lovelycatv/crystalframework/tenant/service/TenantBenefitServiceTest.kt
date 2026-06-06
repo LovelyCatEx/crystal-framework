@@ -2,7 +2,6 @@ package com.lovelycatv.crystalframework.tenant.service
 
 import com.lovelycatv.crystalframework.CrystalFrameworkApplicationTests
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.benefit.TenantBenefitRegistry
-import com.lovelycatv.crystalframework.shared.utils.toPrettierJSONString
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.junit.jupiter.api.Test

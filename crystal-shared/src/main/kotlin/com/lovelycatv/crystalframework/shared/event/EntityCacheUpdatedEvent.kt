@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.shared.event
 
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.types.EntityCacheEventType
 import kotlin.reflect.KClass
 

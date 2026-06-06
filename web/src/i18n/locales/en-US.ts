@@ -1804,11 +1804,12 @@ export const enUS: I18nRules = {
       saveFailed: 'Failed to save organization settings',
       saveSettings: 'Save Settings',
       keys: {
-        'notification.memberJoinNotifyEmail': 'Member Join Email Notification',
-        'notification.memberJoinReviewNotifyEmail': 'Member Join Review Email Notification',
+        'notification.memberJoin.email': 'Email Notification',
+        'notification.memberJoinReview.email': 'Email Notification',
       },
       groups: {
-        'notification': 'Notification',
+        'notification.memberJoin': 'Member Join Notification',
+        'notification.memberJoinReview': 'Member Join Review Notification',
       },
       tabs: {
         'notification': 'Notification',

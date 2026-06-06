@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.service
 
 import com.lovelycatv.crystalframework.CrystalFrameworkApplicationTests
+import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.utils.toPrettierJSONString
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.mail.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table

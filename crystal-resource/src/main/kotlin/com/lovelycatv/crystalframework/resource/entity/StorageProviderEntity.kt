@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.resource.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import org.springframework.data.relational.core.mapping.Column

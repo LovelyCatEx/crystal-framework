@@ -1,12 +1,11 @@
 package com.lovelycatv.crystalframework.shared.service
 
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.event.*
 import com.lovelycatv.vertex.cache.store.ExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.repository.R2dbcRepository
-import kotlin.reflect.KClass
 
 interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEntity> :
     BaseService<REPOSITORY, ENTITY> {

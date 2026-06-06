@@ -44,7 +44,7 @@ class ChainToLarkTextRenderer {
     private suspend fun renderAt(at: AtSegment, resolver: LarkAtResolver?): String {
         val mention = resolver?.resolve(at)
         return if (mention != null) {
-            val nameAttr = mention.displayName?.let { it } ?: ""
+            val nameAttr = mention.displayName ?: ""
             "<at user_id=\"${escapeAttr(mention.userId)}\">${nameAttr}</at>"
         } else {
             "@${at.displayName ?: FALLBACK_AT_NAME}"

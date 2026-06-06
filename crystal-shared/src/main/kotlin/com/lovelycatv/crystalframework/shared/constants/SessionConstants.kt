@@ -8,4 +8,5 @@ object SessionConstants {
     const val AUDIT_USER_AGENT = "user_agent"
     const val AUDIT_USER_ID = "user_id"
     const val AUDIT_TENANT_ID = "tenant_id"
+    const val AUDIT_TENANT_MEMBER_ID = "tenant_member_id"
 }
