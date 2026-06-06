@@ -3,8 +3,8 @@ package com.lovelycatv.crystalframework
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.TenantRbacRegistry
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.crystalframework.tenant.controller.manager.permission.dto.ManagerCreateTenantPermissionDTO
-import com.lovelycatv.crystalframework.tenant.service.manager.TenantPermissionManagerService
+import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission.dto.ManagerCreateTenantPermissionDTO
+import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantPermissionManagerService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull

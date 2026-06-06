@@ -57,7 +57,7 @@ class ReactiveRedisServiceImpl(
 
     override fun <K: Any, V: Any> opsForHash(): ReactiveHashOperations<String, K, V> {
         @Suppress("UNCHECKED_CAST")
-        return reactiveRedisTemplate.opsForHash<K, V>()
+        return reactiveRedisTemplate.opsForHash()
     }
 
     override fun <T: Any> opsForList(): ReactiveListOperations<String, T> {

@@ -14,6 +14,7 @@ data class UserAuthentication(
     val userId: Long,
     val username: String,
     val tenantId: Long?,
+    val tenantMemberId: Long?,
 ) {
     fun assertTenantIdNotNull(): Long {
         return tenantId ?: throw BusinessException("invalid tenant authentication")

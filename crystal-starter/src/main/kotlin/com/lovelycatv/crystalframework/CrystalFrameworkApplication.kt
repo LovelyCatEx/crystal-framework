@@ -13,14 +13,13 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.scheduling.annotation.EnableAsync
 import reactor.core.publisher.Hooks
-import kotlin.math.log
 
 @EnableConfigurationProperties
 @SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableAsync
 @EnableSnailJob
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class SpringbootTemplateApplication(
     private val config: CrystalFrameworkConfiguration
 ) : CommandLineRunner {

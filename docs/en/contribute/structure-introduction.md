@@ -20,9 +20,13 @@ IDEA Configurations folder
 
 Docker related files, provides one-click deployment scripts based on source code compilation
 
-## crystal-starter
+## docs
 
-Backend startup module, integrates all functional modules and provides application entry point
+Project documentation site (VitePress), containing contribution guides, development docs, and deployment instructions
+
+## readme
+
+Image assets such as screenshots referenced by the README
 
 ## crystal-shared
 
@@ -31,6 +35,10 @@ Shared core module, provides core functionalities such as base repository, authe
 ## crystal-shared-types
 
 Shared type definition module, provides common type definitions such as system settings and API encryption scopes
+
+## crystal-sdk
+
+SDK module, enables developers to quickly integrate this framework with zero code intrusion
 
 ## crystal-audit
 
@@ -56,13 +64,33 @@ Mail module, provides mail sending, template management, and mail log functional
 
 Message channel module, provides a unified abstraction and routing for multi-channel message delivery (mail, Lark, etc.)
 
-## crystal-sdk
+## crystal-monitor
 
-SDK module, enables developers to quickly integrate this framework with zero code intrusion
+Monitoring module, provides system runtime status collection and dashboard statistics functionalities
 
-## ext-playground
+## crystal-user
 
-Example developed based on this project framework, you can directly develop within this module
+User module, provides user account, profile, and third-party OAuth account management functionalities
+
+## crystal-rbac
+
+Authorization module, provides management of system-level and tenant-level roles, permissions, and their relations
+
+## crystal-auth
+
+Authentication module, provides password login, OAuth2 login, JWT issuance, and security filtering functionalities
+
+## crystal-tenant
+
+Tenant module, provides multi-tenant core, members, departments, invitations, benefit tiers, and tenant settings functionalities
+
+## crystal-system
+
+System module, provides system initialization, announcements, system settings, and dashboard aggregation functionalities
+
+## crystal-starter
+
+Backend startup module, integrates all functional modules and provides application entry point
 
 ## web
 

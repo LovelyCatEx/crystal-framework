@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDT
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
-import com.lovelycatv.crystalframework.shared.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData

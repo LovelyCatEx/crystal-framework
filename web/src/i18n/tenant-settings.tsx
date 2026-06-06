@@ -20,8 +20,8 @@ export function useTenantSettingsKeyToTranslationMap(): Map<string, string> {
     const pluginKeys = usePluginTenantSettingsKeys();
 
     const map = new Map<string, string>([
-        ['notification.memberJoinNotifyEmail', t('pages.tenantSettingsManager.keys.notification.memberJoinNotifyEmail')],
-        ['notification.memberJoinReviewNotifyEmail', t('pages.tenantSettingsManager.keys.notification.memberJoinReviewNotifyEmail')],
+        ['notification.memberJoin.email', t('pages.tenantSettingsManager.keys.notification.memberJoin.email')],
+        ['notification.memberJoinReview.email', t('pages.tenantSettingsManager.keys.notification.memberJoinReview.email')],
     ]);
 
     for (const key of pluginKeys) {
@@ -38,7 +38,8 @@ export function useTenantSettingsGroupToTranslationMap(): Map<string, { label: s
     const pluginGroups = usePluginTenantSettingsGroups();
 
     const map = new Map<string, { label: string; icon?: ReactNode }>([
-        ['notification', {label: t('pages.tenantSettingsManager.groups.notification'), icon: <NotificationOutlined/>}],
+        ['notification.memberJoin', {label: t('pages.tenantSettingsManager.groups.notification.memberJoin'), icon: <NotificationOutlined/>}],
+        ['notification.memberJoinReview', {label: t('pages.tenantSettingsManager.groups.notification.memberJoinReview'), icon: <NotificationOutlined/>}],
     ]);
 
     for (const group of pluginGroups) {

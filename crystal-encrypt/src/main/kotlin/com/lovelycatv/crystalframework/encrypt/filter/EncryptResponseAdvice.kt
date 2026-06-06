@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.encrypt.filter
 
 import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
+import com.lovelycatv.crystalframework.sdk.encrypt.EncryptionExclusionRegistry
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
@@ -39,7 +40,8 @@ class EncryptResponseAdvice(
     private val codecConfigurer: ServerCodecConfigurer,
     private val resolver: RequestedContentTypeResolver,
     private val objectMapper: ObjectMapper,
-    private val systemModuleClient: SystemModuleClient
+    private val systemModuleClient: SystemModuleClient,
+    private val encryptionExclusionRegistry: EncryptionExclusionRegistry,
 ) : HandlerResultHandler {
     private val logger = logger()
 
@@ -99,6 +101,11 @@ class EncryptResponseAdvice(
         exchange: ServerWebExchange,
         result: HandlerResult
     ): Mono<Void> {
+        val path = exchange.request.path.value()
+        if (encryptionExclusionRegistry.matches(path)) {
+            return delegate.handleResult(exchange, result)
+        }
+
         @Suppress("UNCHECKED_CAST")
         val originalBody = result.returnValue
         if (originalBody == null) {
