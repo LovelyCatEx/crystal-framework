@@ -1795,6 +1795,24 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    tenantPersonalProfile: {
+      title: '个人资料',
+      subtitle: '管理你在当前组织内的个人资料',
+      tabs: {
+        oauth: '第三方账号'
+      },
+      oauth: {
+        availablePlatforms: '可绑定的平台',
+        unbind: '解绑',
+        unbindTitle: '解绑第三方账号',
+        unbindConfirm: '确定要解绑 {{nickname}} 吗？',
+        unbindSuccess: '解绑成功',
+        unbindFailed: '解绑失败',
+        bindSuccess: '绑定成功',
+        bindFailed: '绑定失败',
+        alreadyBoundToUser: '该第三方账号已绑定到某个系统用户，无法在组织内重复绑定'
+      }
+    },
     tenantSettingsManager: {
       fetchFailed: '无法获取组织设置',
       saveSuccess: '组织设置已保存',
@@ -2659,6 +2677,11 @@ export const zhCN: I18nRules = {
       2: 'QQ'
     },
 
+    oAuthBindingScope: {
+      0: '系统',
+      1: '租户'
+    },
+
     channelType: {
       1: '邮件',
       2: '飞书'
@@ -2734,7 +2757,8 @@ export const zhCN: I18nRules = {
       memberRoles: '成员角色管理',
       departments: '部门管理',
       profile: '组织设置',
-      messageChannels: '消息渠道管理'
+      messageChannels: '消息渠道管理',
+      personalProfile: '个人资料'
     },
 
     // 管理员菜单

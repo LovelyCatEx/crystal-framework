@@ -2,7 +2,9 @@ package com.lovelycatv.crystalframework.user.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerCreateOAuthAccountDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerUpdateOAuthAccountDTO
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
@@ -36,12 +38,19 @@ class OAuthAccountManagerServiceImpl(
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateOAuthAccountDTO): OAuthAccountEntity {
-        oAuthAccountRepository.findByPlatformAndIdentifier(dto.platform, dto.identifier).awaitFirstOrNull()?.let {
+        // Admin-created bindings are system-scoped. One row per (platform, identifier) at SYSTEM scope.
+        val existingRows = oAuthAccountRepository
+            .findAllByPlatformAndIdentifier(dto.platform, dto.identifier)
+            .awaitListWithTimeout()
+
+        existingRows.firstOrNull { it.scope == OAuthBindingScope.SYSTEM.typeId }?.let {
             throw BusinessException("OAuth account '${dto.identifier}' is already linked on platform ${dto.platform}")
         }
+
+        // Cross-row invariant: a third-party identity may only belong to one user.
         if (dto.userId != null) {
-            oAuthAccountRepository.findByPlatformAndUserId(dto.platform, dto.userId).awaitFirstOrNull()?.let {
-                throw BusinessException("user ${dto.userId} already has an account on platform ${dto.platform}")
+            existingRows.firstOrNull { it.userId != null && it.userId != dto.userId }?.let {
+                throw BusinessException("OAuth account '${dto.identifier}' already belongs to another user")
             }
         }
 
@@ -52,7 +61,9 @@ class OAuthAccountManagerServiceImpl(
                 platform = dto.platform,
                 identifier = dto.identifier,
                 nickname = dto.nickname,
-                avatar = dto.avatar
+                avatar = dto.avatar,
+                scope = OAuthBindingScope.SYSTEM.typeId,
+                tenantId = null,
             ) newEntity true
         ).awaitFirstOrNull() ?: throw BusinessException("Could not create OAuth account")
     }

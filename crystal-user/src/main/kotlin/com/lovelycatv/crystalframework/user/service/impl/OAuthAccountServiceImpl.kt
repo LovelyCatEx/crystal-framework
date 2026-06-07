@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
@@ -39,9 +40,11 @@ class OAuthAccountServiceImpl(
     override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
 
     override suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity? {
-        return this.getRepository()
-            .findByPlatformAndIdentifier(platform.typeId, identifier)
-            .awaitFirstOrNull()
+        // The SYSTEM-scope row is the login identity anchor for this third-party identity.
+        return getRepository()
+            .findAllByPlatformAndIdentifier(platform.typeId, identifier)
+            .awaitListWithTimeout()
+            .firstOrNull { it.scope == OAuthBindingScope.SYSTEM.typeId }
     }
 
     override suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity {
@@ -59,6 +62,8 @@ class OAuthAccountServiceImpl(
                 .save(
                     template.apply {
                         id = snowIdGenerator.nextId()
+                        scope = OAuthBindingScope.SYSTEM.typeId
+                        tenantId = null
                     } newEntity true
                 )
                 .awaitFirstOrNull()
@@ -72,13 +77,14 @@ class OAuthAccountServiceImpl(
                     throw BusinessException("This account is already linked to a user")
                 }
 
-                // Check whether the user already has an account of this platform
-                val duplicatedPlatformAccount = this@OAuthAccountServiceImpl.getRepository()
-                    .findByPlatformAndUserId(this.platform, userId)
-                    .awaitFirstOrNull()
+                // The third-party identity must not already belong to another user (cross-row invariant).
+                val conflictingOwner = this@OAuthAccountServiceImpl.getRepository()
+                    .findAllByPlatformAndIdentifier(this.platform, this.identifier)
+                    .awaitListWithTimeout()
+                    .firstOrNull { it.userId != null && it.userId != userId }
 
-                if (duplicatedPlatformAccount != null) {
-                    throw BusinessException("An another account in this platform is already linked to a user")
+                if (conflictingOwner != null) {
+                    throw BusinessException("This account already belongs to another user")
                 }
 
                 this.userId = userId
@@ -110,5 +116,62 @@ class OAuthAccountServiceImpl(
         return this.getRepository()
             .findAllByUserId(userId)
             .awaitListWithTimeout()
+    }
+
+    override suspend fun bindTenant(accountId: Long, userId: Long, tenantId: Long): OAuthAccountEntity {
+        val source = getByIdOrThrow(accountId, BusinessException("OAuth account $accountId not found"))
+
+        val rows = getRepository()
+            .findAllByPlatformAndIdentifier(source.platform, source.identifier)
+            .awaitListWithTimeout()
+
+        // Cross-row invariant: the third-party identity may only belong to one user.
+        rows.firstOrNull { it.userId != null && it.userId != userId }?.let {
+            throw BusinessException("This account already belongs to another user")
+        }
+
+        // Idempotency: a tenant may hold at most one binding for this identity.
+        rows.firstOrNull {
+            it.scope == OAuthBindingScope.TENANT.typeId && it.tenantId == tenantId
+        }?.let {
+            throw BusinessException("This account is already bound in the current tenant")
+        }
+
+        return getRepository().save(
+            OAuthAccountEntity(
+                id = snowIdGenerator.nextId(),
+                userId = userId,
+                platform = source.platform,
+                identifier = source.identifier,
+                nickname = source.nickname,
+                avatar = source.avatar,
+                email = source.email,
+                scope = OAuthBindingScope.TENANT.typeId,
+                tenantId = tenantId,
+            ) newEntity true
+        ).awaitFirstOrNull() ?: throw BusinessException("Could not bind OAuth account in tenant")
+    }
+
+    override suspend fun getUserTenantOAuthAccounts(userId: Long, tenantId: Long): List<OAuthAccountEntity> {
+        return getRepository()
+            .findAllByUserIdAndScopeAndTenantId(userId, OAuthBindingScope.TENANT.typeId, tenantId)
+            .awaitListWithTimeout()
+    }
+
+    override suspend fun unbindTenant(accountId: Long, userId: Long, tenantId: Long) {
+        withDeleteEntityContext(accountId) {
+            val entity = getByIdOrThrow(accountId, BusinessException("OAuth account $accountId not found"))
+
+            if (entity.scope != OAuthBindingScope.TENANT.typeId ||
+                entity.tenantId != tenantId ||
+                entity.userId != userId
+            ) {
+                throw ForbiddenException("You are not allowed to unbind this account")
+            }
+
+            getRepository().delete(entity).awaitFirstOrNull()
+
+            logger.info("Tenant OAuth account ${entity.nickname} of platform ${entity.getRealPlatform()} unbound by user $userId in tenant $tenantId")
+        }
     }
 }

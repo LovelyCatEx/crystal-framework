@@ -1798,6 +1798,24 @@ export const enUS: I18nRules = {
         }
       }
     },
+    tenantPersonalProfile: {
+      title: 'Personal Profile',
+      subtitle: 'Manage your personal profile within the current organization',
+      tabs: {
+        oauth: 'Third-party Accounts'
+      },
+      oauth: {
+        availablePlatforms: 'Available Platforms',
+        unbind: 'Unbind',
+        unbindTitle: 'Unbind Third-party Account',
+        unbindConfirm: 'Are you sure you want to unbind {{nickname}}?',
+        unbindSuccess: 'Unbound successfully',
+        unbindFailed: 'Failed to unbind',
+        bindSuccess: 'Bound successfully',
+        bindFailed: 'Failed to bind',
+        alreadyBoundToUser: 'This third-party account is already bound to a system user and cannot be bound again within the organization'
+      }
+    },
     tenantSettingsManager: {
       fetchFailed: 'Failed to load organization settings',
       saveSuccess: 'Organization settings saved',
@@ -2662,6 +2680,11 @@ export const enUS: I18nRules = {
       2: 'QQ'
     },
 
+    oAuthBindingScope: {
+      0: 'System',
+      1: 'Tenant'
+    },
+
     channelType: {
       1: 'Email',
       2: 'Lark'
@@ -2737,7 +2760,8 @@ export const enUS: I18nRules = {
       memberRoles: 'Member Role Management',
       departments: 'Department Management',
       profile: 'Organization Settings',
-      messageChannels: 'Message Channel Management'
+      messageChannels: 'Message Channel Management',
+      personalProfile: 'Personal Profile'
     },
 
     // Admin menus
