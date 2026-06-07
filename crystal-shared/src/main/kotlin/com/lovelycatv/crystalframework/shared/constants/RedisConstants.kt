@@ -13,6 +13,8 @@ object RedisConstants {
 
     const val SYSTEM_MAINTENANCE_TOPIC = "crystalframework:system-maintenance:refresh"
 
+    const val JWT_SIGN_KEY_REFRESH_TOPIC = "crystalframework:jwt-sign-key:refresh"
+
     const val SYSTEM_SETTINGS = "system-settings"
 
     fun getTenantSettingsCacheKey(tenantId: Long) = "tenant-settings:$tenantId"

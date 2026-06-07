@@ -6,12 +6,16 @@ import {Avatar, Button, Card, Form, Input, message, Space, Tabs} from "antd";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {bindOAuthAccount, loginByOAuth2Code, registerFromOAuthAccount} from "@/api/auth/auth.api.ts";
+import {bindTenantOAuthAccount} from "@/api/tenant/tenant-oauth.api.ts";
+import {TENANT_OAUTH_BIND_INTENT_KEY} from "@/pages/manager/tenant/MyTenantPersonalProfilePage.tsx";
 import {setUserAuthentication} from "@/utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth/auth.types.ts";
 import {GithubOutlined, LockOutlined, UserOutlined} from "@ant-design/icons";
 import PlatformIcon from "../../components/PlatformIcon.tsx";
 import {getOAuthPlatformByName} from "@/types/user/oauth-account.types.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+
+const TENANT_PERSONAL_PROFILE_PATH = '/manager/tenant/personal-profile';
 
 function isLoginResponse(res: OAuth2LoginResponse): res is LoginResponse {
     return (res as LoginResponse).token !== undefined;
@@ -321,18 +325,50 @@ export function OAuth2CodePage() {
 
         setProcessing(true);
 
+        // A tenant-scoped bind intent (set on the personal-profile page before redirect) takes
+        // precedence: bind the resolved third-party identity to the current tenant instead of logging in.
+        const tenantBindIntent = sessionStorage.getItem(TENANT_OAUTH_BIND_INTENT_KEY) === '1';
+
         loginByOAuth2Code(code, state)
             .then((res) => {
-                if (res.data) {
-                    if (isLoginResponse(res.data)) {
-                        void message.success(t('pages.auth.oauth2.messages.success'));
-                        setUserAuthentication(res.data.token, res.data.expiresIn);
-                        navigate(menuPathDashboard);
-                    } else {
-                        setUserInfo(res.data as OAuth2UserInfo);
-                    }
-                } else {
+                if (!res.data) {
                     void message.error(t('pages.auth.oauth2.messages.unknownError'));
+                    return;
+                }
+
+                if (tenantBindIntent) {
+                    sessionStorage.removeItem(TENANT_OAUTH_BIND_INTENT_KEY);
+
+                    // Tenant binding requires an unbound identity (one that resolves to an oauthAccountId).
+                    if (isLoginResponse(res.data)) {
+                        void message.error(t('pages.tenantPersonalProfile.oauth.alreadyBoundToUser'));
+                        navigate(TENANT_PERSONAL_PROFILE_PATH);
+                        return;
+                    }
+
+                    const info = res.data as OAuth2UserInfo;
+                    bindTenantOAuthAccount({ oauthAccountId: info.oauthAccountId })
+                        .then((bindRes) => {
+                            if (bindRes.data) {
+                                void message.success(t('pages.tenantPersonalProfile.oauth.bindSuccess'));
+                            } else {
+                                void message.error(bindRes.message || t('pages.tenantPersonalProfile.oauth.bindFailed'));
+                            }
+                            navigate(TENANT_PERSONAL_PROFILE_PATH);
+                        })
+                        .catch(() => {
+                            void message.error(t('pages.tenantPersonalProfile.oauth.bindFailed'));
+                            navigate(TENANT_PERSONAL_PROFILE_PATH);
+                        });
+                    return;
+                }
+
+                if (isLoginResponse(res.data)) {
+                    void message.success(t('pages.auth.oauth2.messages.success'));
+                    setUserAuthentication(res.data.token, res.data.expiresIn);
+                    navigate(menuPathDashboard);
+                } else {
+                    setUserInfo(res.data as OAuth2UserInfo);
                 }
             })
             .catch(() => {

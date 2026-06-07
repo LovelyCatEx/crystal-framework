@@ -57,6 +57,10 @@ export function getOAuthPlatform(platform: number): string {
     return translateEnum('oAuthPlatform', platform);
 }
 
+export function getOAuthBindingScope(scope: number): string {
+    return translateEnum('oAuthBindingScope', scope);
+}
+
 export function getChannelType(type: number): string {
     return translateEnum('channelType', type);
 }

@@ -38,6 +38,31 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // My Personal Profile (tenant-scoped, for the current member)
+    val MENU_TENANT_PERSONAL_PROFILE_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.personal.profile",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/personal-profile"
+    )
+
+    const val ACTION_TENANT_OAUTH_READ_PEM = "i.tenant.personal.profile.oauth.read"
+    val ACTION_TENANT_OAUTH_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_OAUTH_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_OAUTH_BIND_PEM = "i.tenant.personal.profile.oauth.bind"
+    val ACTION_TENANT_OAUTH_BIND = TenantPermissionDeclaration(
+        name = ACTION_TENANT_OAUTH_BIND_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_OAUTH_UNBIND_PEM = "i.tenant.personal.profile.oauth.unbind"
+    val ACTION_TENANT_OAUTH_UNBIND = TenantPermissionDeclaration(
+        name = ACTION_TENANT_OAUTH_UNBIND_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     // My Tenant Members
     val MENU_TENANT_MEMBER_MANAGER = TenantPermissionDeclaration(
         name = "i.tenant.member",

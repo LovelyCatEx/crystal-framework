@@ -34,7 +34,7 @@ class SpringbootTemplateApplication(
  | |___| |  | |_| \__ \ || (_| | |  _|| | | (_| | | | | | |  __/\ V  V / (_) | |  |   < 
   \____|_|   \__, |___/\__\__,_|_|_|  |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\
              |___/                                                                      
- :: Crystal Framework ::                                                       (${GlobalConstants.APP_VERSION})                                                                
+ :: Crystal Framework ::                                                       (v${GlobalConstants.APP_VERSION})                                                                
     
     DATACENTER: ${config.sharding.snowflake.dataCenterId}
     WORKER: ${config.sharding.snowflake.workerId}

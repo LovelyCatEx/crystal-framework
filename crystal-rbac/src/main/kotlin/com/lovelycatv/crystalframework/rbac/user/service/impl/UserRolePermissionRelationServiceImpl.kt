@@ -5,11 +5,11 @@ import com.lovelycatv.crystalframework.rbac.user.entity.UserRolePermissionRelati
 import com.lovelycatv.crystalframework.rbac.user.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.types.rbac.SystemRoleAuthoritiesInvalidationEvent
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -21,17 +21,17 @@ class UserRolePermissionRelationServiceImpl(
     private val userRolePermissionRelationRepository: UserRolePermissionRelationRepository,
     private val userPermissionRepository: UserPermissionRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
 ) : UserRolePermissionRelationService {
     override fun getRepository(): UserRolePermissionRelationRepository {
         return userRolePermissionRelationRepository
     }
 
-    override val cacheStore: ExpiringKVStore<String, UserRolePermissionRelationEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<UserRolePermissionRelationEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, UserRolePermissionRelationEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<UserRolePermissionRelationEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<UserRolePermissionRelationEntity> = UserRolePermissionRelationEntity::class
 
     override suspend fun getRolePermissions(roleId: Long): List<UserPermissionEntity> {

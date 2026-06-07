@@ -12,6 +12,20 @@ object TenantSettingsConstants {
                 defaultValue = true.toString(),
                 sort = 1,
             )
+
+            val CHANNELS = SettingsItemDeclaration(
+                key = "notification.memberJoin.channels",
+                valueType = SettingsItemValueType.NUMBER_ARRAY,
+                defaultValue = "[]",
+                sort = 2,
+            )
+
+            val CONTENT = SettingsItemDeclaration(
+                key = "notification.memberJoin.content",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 3,
+            )
         }
 
         object MemberJoinReview {
@@ -20,6 +34,20 @@ object TenantSettingsConstants {
                 valueType = SettingsItemValueType.BOOLEAN,
                 defaultValue = true.toString(),
                 sort = 1,
+            )
+
+            val CHANNELS = SettingsItemDeclaration(
+                key = "notification.memberJoinReview.channels",
+                valueType = SettingsItemValueType.NUMBER_ARRAY,
+                defaultValue = "[]",
+                sort = 2,
+            )
+
+            val CONTENT = SettingsItemDeclaration(
+                key = "notification.memberJoinReview.content",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 3,
             )
         }
     }

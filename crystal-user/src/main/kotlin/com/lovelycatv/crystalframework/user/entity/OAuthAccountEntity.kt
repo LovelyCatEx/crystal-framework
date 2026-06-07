@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.user.entity
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -25,6 +26,11 @@ class OAuthAccountEntity(
     var avatar: String? = null,
     @Column(value = "email")
     var email: String? = null,
+    @Column(value = "scope")
+    var scope: Int = OAuthBindingScope.SYSTEM.typeId,
+    @Column(value = "tenant_id")
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    var tenantId: Long? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
@@ -33,5 +39,11 @@ class OAuthAccountEntity(
     fun getRealPlatform(): OAuthPlatform {
         return OAuthPlatform.getByTypeId(this.platform)
             ?: throw BusinessException("could not get oauth_platform ${this.platform}")
+    }
+
+    @JsonIgnore
+    fun getRealScope(): OAuthBindingScope {
+        return OAuthBindingScope.getByTypeId(this.scope)
+            ?: throw BusinessException("could not get oauth_binding_scope ${this.scope}")
     }
 }

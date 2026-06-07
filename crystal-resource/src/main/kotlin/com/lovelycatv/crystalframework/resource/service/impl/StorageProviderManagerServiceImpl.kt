@@ -6,9 +6,9 @@ import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
 import com.lovelycatv.crystalframework.resource.service.StorageProviderManagerService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -19,14 +19,14 @@ import kotlin.reflect.KClass
 class StorageProviderManagerServiceImpl(
     private val storageProviderRepository: StorageProviderRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : StorageProviderManagerService {
-    override val cacheStore: ExpiringKVStore<String, StorageProviderEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<StorageProviderEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, StorageProviderEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<StorageProviderEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<StorageProviderEntity> = StorageProviderEntity::class
 
     override fun getRepository(): StorageProviderRepository {

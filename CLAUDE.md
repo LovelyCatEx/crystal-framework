@@ -275,6 +275,28 @@ export interface BaseEntity {
 
 对于组件中用到的类型/枚举，必须在 tsx 文件内的顶部（import 下方）使用 export 导出，对于组件内部的类型/枚举等不需要 export 导出。
 
+对于 Entity 选择（选择用户、租户、消息渠道等）必须参考 EntitySelector 实现组件/子组件，严禁 Query PageSize = 100 甚至 9999 条，单页最大只允许20条数据。
+
+#### 超高频通用组件速查（写页面/组件前必看，优先复用）
+
+下列组件几乎贯穿所有 Manager 页面，写新页面/组件前必须先确认能否复用，禁止重复造轮子。
+
+- **ManagerPageContainer**（`components/ManagerPageContainer.tsx`）：标准化 Manager 页面的顶层容器，组合了顶栏 + 表格 + 增删改弹窗的全套能力（props 见上文 ManagerPageContainer 核心 Props 表）。凡是「列表 + 增删改查」的标准后台页面一律用它，通过 `pageRef.current.refreshData()` 刷新数据。
+
+- **EntityTable**（`components/table/EntityTable.tsx`）：分页数据表格底座，被 ManagerPageContainer 内部使用。需要表格但不走标准 Manager 套路（如只读展示、嵌入式表格）时单独使用，提供 `query` 分页查询、列定义、行选择（`tableSelection`，`radio` 单选 / `checkbox` 多选）。
+
+- **EntitySelector / EntitySelectorModal**（`components/selector/`）：以表格弹窗形式选择实体。`EntityIdSelector` 为单选（`value: string`），多选直接用 `EntitySelectorModal type="checkbox"`。选用户/租户/角色/渠道等已有专用封装（`UserIdSelector`、`TenantRoleIdSelector` 等）直接复用，新实体照搬其写法，用 `additionalQueryParams` 注入额外查询条件。
+
+- **Columns**（`components/columns/XxxEntityColumns.tsx`）：每个实体一份表格列定义 Hook（`useXxxTableColumns`）。外键字段必须用 `XxxDisplay` 子组件异步展示关联实体名称（见 Columns 具象化展示节），禁止裸 ID。新实体表格必须新建对应 columns 文件。
+
+- **PopCard**（`components/card/pop/`）：鼠标悬浮/点击展示实体摘要信息的卡片（如 `UserCard`、`TenantDepartmentPopCard`），内部按 id 异步拉取 profile。在列表/详情中需要快速预览关联实体时复用，新实体照搬现有卡片写法。
+
+- **ActionBarComponent**（`components/ActionBarComponent.tsx`）：页面标题栏，提供 `title` / `subtitle` / `titleActions`（右侧操作区）。非标准化页面至少要有它作为页头；ManagerPageContainer 已内置。
+
+- **CopyableToolTip**（`components/CopyableToolTip.tsx`）：带一键复制的文本 Tooltip。展示 ID、长字符串、配置等需要复制的内容时统一用它包裹，columns 中尤其高频。
+
+- **StandardCard**（`components/card/StandardCard.tsx`）：统一圆角/边框/内边距风格的卡片容器。需要分块承载内容时用它替代裸 `div`/`Card`，保证视觉一致。
+
 #### 页面文件命名
 
 **页面文件即使放在子文件夹中，也必须保留完整的模块前缀。** 例如 `pages/manager/tenant/benefit/` 中的文件必须命名为 `TenantTireBenefitValueContainer.tsx`、`TenantTireBenefitValueOverviewPage.tsx`，不能省略为 `Container.tsx`。
@@ -344,6 +366,10 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
+
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
 
 #### Compositions
 

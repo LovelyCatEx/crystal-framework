@@ -6,6 +6,11 @@ export enum OAuthPlatform {
     OICQ = 2
 }
 
+export enum OAuthBindingScope {
+    SYSTEM = 0,
+    TENANT = 1
+}
+
 export function getOAuthPlatformByName(platformName: string) {
     const name = platformName.toLowerCase();
     if (name === "github") {

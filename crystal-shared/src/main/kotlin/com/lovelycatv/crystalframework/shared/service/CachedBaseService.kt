@@ -3,15 +3,15 @@ package com.lovelycatv.crystalframework.shared.service
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.event.*
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 
 interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: BaseEntity> :
     BaseService<REPOSITORY, ENTITY> {
-    val cacheStore: ExpiringKVStore<String, ENTITY>
+    val cacheStore: ReactiveExpiringKVStore<String, ENTITY>
 
-    val listCacheStore: ExpiringKVStore<String, List<ENTITY>>
+    val listCacheStore: ReactiveExpiringKVStore<String, List<ENTITY>>
 
     val eventPublisher: ApplicationEventPublisher
 
@@ -23,7 +23,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         return this.buildCacheKey(entity.id)
     }
 
-    fun updateCache(entityId: Long, entity: ENTITY, expirationInMs: Long = randomHourExpirationInMs(8, 12)) {
+    suspend fun updateCache(entityId: Long, entity: ENTITY, expirationInMs: Long = randomHourExpirationInMs(8, 12)) {
         val cacheKey = buildCacheKey(entityId)
 
         this.cacheStore.set(cacheKey, entity, expirationInMs)
@@ -37,11 +37,11 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         )
     }
 
-    fun updateCache(entity: ENTITY, expirationInMs: Long = randomHourExpirationInMs(8, 12)) {
+    suspend fun updateCache(entity: ENTITY, expirationInMs: Long = randomHourExpirationInMs(8, 12)) {
         this.updateCache(entity.id, entity, expirationInMs)
     }
 
-    fun removeCache(entityId: Long) {
+    suspend fun removeCache(entityId: Long) {
         val cacheKey = buildCacheKey(entityId)
 
         this.cacheStore.remove(cacheKey)
@@ -55,7 +55,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         )
     }
 
-    fun removeCache(entity: ENTITY) {
+    suspend fun removeCache(entity: ENTITY) {
         val cacheKey = buildCacheKey(entity.id)
 
         this.cacheStore.remove(cacheKey)
@@ -73,11 +73,11 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         return "${RedisConstants.ENTITY_CACHE_BY_LIST}$identifier"
     }
 
-    fun getListCache(identifier: String): List<ENTITY>? {
-        return this.listCacheStore[buildListCacheKey(identifier)]
+    suspend fun getListCache(identifier: String): List<ENTITY>? {
+        return this.listCacheStore.get(buildListCacheKey(identifier))
     }
 
-    fun updateListCache(
+    suspend fun updateListCache(
         identifier: String,
         entities: List<ENTITY>,
         expirationInMs: Long = randomHourExpirationInMs(8, 12)
@@ -103,7 +103,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         )
     }
 
-    fun removeListCache(identifier: String) {
+    suspend fun removeListCache(identifier: String) {
         val cacheKey = buildListCacheKey(identifier)
 
         this.listCacheStore.remove(cacheKey)
@@ -129,7 +129,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
 
         val cacheKey = buildCacheKey(id)
 
-        return this.cacheStore[cacheKey]
+        return this.cacheStore.get(cacheKey)
             ?: super.getByIdOrNull(id).also { entity ->
                 entity?.let {
                     this.cacheStore.set(

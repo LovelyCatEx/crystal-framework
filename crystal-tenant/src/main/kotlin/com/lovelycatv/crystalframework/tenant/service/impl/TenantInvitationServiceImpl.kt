@@ -5,11 +5,14 @@ import com.lovelycatv.crystalframework.mail.utils.resolveMailTemplatePlaceholder
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
 import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
 import com.lovelycatv.crystalframework.messagechannel.types.chain.dsl.messageChain
+import com.lovelycatv.crystalframework.messagechannel.types.chain.MessageChain
 import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
+import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
+import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
 import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
@@ -20,12 +23,13 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationReposit
 import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantMessageChannelManagerService
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
 import com.lovelycatv.crystalframework.shared.types.tenant.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.UserService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -36,7 +40,7 @@ import kotlin.reflect.KClass
 @Service
 class TenantInvitationServiceImpl(
     private val tenantInvitationRepository: TenantInvitationRepository,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val userService: UserService,
     private val tenantService: TenantService,
@@ -48,14 +52,15 @@ class TenantInvitationServiceImpl(
     private val mailTemplateService: MailTemplateService,
     private val messageChannelService: MessageChannelService,
     private val systemChannelConfigProvider: SystemChannelConfigProvider,
+    private val tenantMessageChannelManagerService: TenantMessageChannelManagerService,
     private val tenantSettingsService: TenantSettingsService,
 ) : TenantInvitationService {
     private val logger = logger()
 
-    override val cacheStore: ExpiringKVStore<String, TenantInvitationEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantInvitationEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantInvitationEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantInvitationEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantInvitationEntity> = TenantInvitationEntity::class
 
     override fun getRepository(): TenantInvitationRepository {
@@ -135,25 +140,47 @@ class TenantInvitationServiceImpl(
         // 3. Record invitation code usage
         tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
 
-        // 4. Notify by email according to tenant settings
+        // 4. Notify members according to tenant settings
         val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
+        val notification = tenantSettings.notification
+
         if (invitation.requiresReviewing) {
-            sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, tenantSettings.notification.memberJoinReview.email)
+            // Resolving reviewers also guards the join request: reviewing is required but
+            // nobody can handle it -> deny.
+            val reviewerEmails = resolveReviewerEmails(tenant)
+            if (notification.memberJoinReview.email) {
+                sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, reviewerEmails)
+            } else {
+                logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+            }
+            notifyViaChannels(
+                tenantId = tenant.id,
+                channelIds = notification.memberJoinReview.channels,
+                content = notification.memberJoinReview.content,
+                recipientEmails = reviewerEmails,
+                label = "tenant member join review",
+            )
         }
 
-        if (tenantSettings.notification.memberJoin.email) {
-            sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber)
+        val ownerEmail = resolveOwnerEmail(tenant)
+        if (notification.memberJoin.email) {
+            sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber, ownerEmail)
         }
+        notifyViaChannels(
+            tenantId = tenant.id,
+            channelIds = notification.memberJoin.channels,
+            content = notification.memberJoin.content,
+            recipientEmails = listOfNotNull(ownerEmail),
+            label = "tenant member join notify",
+        )
     }
 
-    private suspend fun sendMemberJoinReviewEmail(
-        tenant: TenantEntity,
-        user: UserEntity,
-        realName: String,
-        phoneNumber: String,
-        switchOn: Boolean,
-    ) {
-        val tenantMembersToReceiveEmail = tenantService
+    /**
+     * Members allowed to review join requests, addressed by email. Throws when reviewing is
+     * required but no member can handle it, so the join request is denied early.
+     */
+    private suspend fun resolveReviewerEmails(tenant: TenantEntity): List<String> {
+        val reviewers = tenantService
             .getMembersHasAnyPermission(
                 tenant.id,
                 TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM
@@ -165,15 +192,29 @@ class TenantInvitationServiceImpl(
             }
             .filter { it.user != null }
 
-        if (tenantMembersToReceiveEmail.isEmpty()) {
+        if (reviewers.isEmpty()) {
             throw BusinessException("your request is denied as there are no one could handle your request")
         }
 
-        if (!switchOn) {
-            logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
-            return
-        }
+        return reviewers.mapNotNull { it.user?.email }
+    }
 
+    private suspend fun resolveOwnerEmail(tenant: TenantEntity): String? {
+        val ownerEmail = userService.getByIdOrNull(tenant.ownerUserId)?.email
+        if (ownerEmail.isNullOrBlank()) {
+            logger.info("Owner of tenant ${tenant.name} - ${tenant.id} has no email")
+            return null
+        }
+        return ownerEmail
+    }
+
+    private suspend fun sendMemberJoinReviewEmail(
+        tenant: TenantEntity,
+        user: UserEntity,
+        realName: String,
+        phoneNumber: String,
+        reviewerEmails: List<String>,
+    ) {
         val placeholders = mapOf(
             TenantMailDeclaration.VARIABLE_USERNAME to user.username,
             TenantMailDeclaration.VARIABLE_NICKNAME to user.nickname,
@@ -182,10 +223,8 @@ class TenantInvitationServiceImpl(
         )
         val message = buildMailMessage(TenantMailDeclaration.tenantMemberJoinReviewTemplateType.name, placeholders)
 
-        tenantMembersToReceiveEmail.forEach {
-            val email = it.user!!.email
-                ?: throw BusinessException("request could not be processed as your email is absent")
-            logger.info("sending tenant member join review email of tenant ${tenant.name} to user ${it.user.nickname}@${it.user.username}")
+        reviewerEmails.forEach { email ->
+            logger.info("sending tenant member join review email of tenant ${tenant.name} to $email")
             sendEmailOrThrow(email, message, "tenant member join review email")
         }
     }
@@ -195,9 +234,8 @@ class TenantInvitationServiceImpl(
         user: UserEntity,
         realName: String,
         phoneNumber: String,
+        ownerEmail: String?,
     ) {
-        val owner = userService.getByIdOrNull(tenant.ownerUserId)
-        val ownerEmail = owner?.email
         if (ownerEmail.isNullOrBlank()) {
             logger.info("Skip sending member join notify email: owner of tenant ${tenant.name} - ${tenant.id} has no email")
             return
@@ -212,8 +250,51 @@ class TenantInvitationServiceImpl(
         )
         val message = buildMailMessage(TenantMailDeclaration.tenantMemberJoinNotifyTemplateType.name, placeholders)
 
-        logger.info("sending tenant member join notify email of tenant ${tenant.name} to owner ${owner.nickname}@${owner.username}")
+        logger.info("sending tenant member join notify email of tenant ${tenant.name} to owner $ownerEmail")
         sendEmailOrThrow(ownerEmail, message, "tenant member join notify email")
+    }
+
+    /**
+     * Sends [content] (a [MessageChain] XML body) to every recipient over each selected tenant
+     * message channel. Best-effort: failures are logged and never abort the join flow.
+     */
+    private suspend fun notifyViaChannels(
+        tenantId: Long,
+        channelIds: List<Long>,
+        content: String,
+        recipientEmails: List<String>,
+        label: String,
+    ) {
+        if (channelIds.isEmpty() || content.isBlank() || recipientEmails.isEmpty()) {
+            return
+        }
+
+        val message = ChainMessage(chain = MessageChain.parse(content))
+
+        channelIds.forEach { channelId ->
+            val config = try {
+                tenantMessageChannelManagerService.resolveConfig(channelId)
+            } catch (e: Exception) {
+                logger.warn("Skip channel $channelId for $label of tenant $tenantId: ${e.message}")
+                return@forEach
+            }
+
+            recipientEmails.forEach { email ->
+                val recipient = buildRecipient(config.channelType, email)
+                val result = messageChannelService.send(config, recipient, message)
+                if (!result.success) {
+                    logger.error(
+                        "Failed to send {} to {} via channel {} ({}): [{}] {}",
+                        label, email, channelId, result.channelType, result.errorCode, result.errorMessage,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun buildRecipient(channelType: ChannelType, email: String): MessageRecipient = when (channelType) {
+        ChannelType.EMAIL -> EmailRecipient(email = email)
+        ChannelType.LARK -> LarkRecipient(email = email)
     }
 
     private suspend fun buildMailMessage(templateTypeName: String, placeholders: Map<String, String>): ChainMessage {

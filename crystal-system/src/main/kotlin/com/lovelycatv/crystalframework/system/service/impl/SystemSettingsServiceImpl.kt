@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistr
 import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -12,7 +12,7 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +31,7 @@ import kotlin.reflect.KClass
 class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
     private val systemSettingsRegistry: SystemSettingsRegistry,
@@ -72,10 +72,10 @@ class SystemSettingsServiceImpl(
         return this.systemSettingsRepository
     }
 
-    override val cacheStore: ExpiringKVStore<String, SystemSettingsEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<SystemSettingsEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, SystemSettingsEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<SystemSettingsEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<SystemSettingsEntity> = SystemSettingsEntity::class
 
     override fun refreshSystemSettings() {
@@ -276,10 +276,10 @@ class SystemSettingsServiceImpl(
     private suspend fun syncToCache() {
         val settings = getSystemSettings()
 
-        redisService.set(
+        reactiveRedisService.set(
             RedisConstants.SYSTEM_SETTINGS,
             settings
-        )
+        ).awaitFirstOrNull()
 
         logger.info("System settings synchronized to cache")
     }

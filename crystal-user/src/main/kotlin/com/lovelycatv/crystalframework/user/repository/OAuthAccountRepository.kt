@@ -9,11 +9,16 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
-    fun findByPlatformAndIdentifier(platform: Int, identifier: String): Mono<OAuthAccountEntity>
+    /**
+     * All non-deleted binding rows for a third-party identity (one per scope/tenant). Callers
+     * filter by scope/tenantId in code — Spring Data derived queries bind a null tenant_id as
+     * `= NULL`, which never matches SYSTEM-scope rows, so we avoid them here.
+     */
+    fun findAllByPlatformAndIdentifier(platform: Int, identifier: String): Flux<OAuthAccountEntity>
 
     fun findAllByUserId(userId: Long): Flux<OAuthAccountEntity>
 
-    fun findByPlatformAndUserId(platform: Int, userId: Long): Mono<OAuthAccountEntity>
+    fun findAllByUserIdAndScopeAndTenantId(userId: Long, scope: Int, tenantId: Long): Flux<OAuthAccountEntity>
 
     @Query("SELECT COUNT(*) FROM oauth_accounts WHERE created_time >= :startTime AND created_time < :endTime")
     fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
