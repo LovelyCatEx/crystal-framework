@@ -4,14 +4,14 @@ import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.settings.entity.TenantSettingsEntity
 import com.lovelycatv.crystalframework.tenant.settings.repository.TenantSettingsRepository
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
 import com.lovelycatv.crystalframework.tenant.settings.constants.TenantSettingsConstants
 import com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsView
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +31,7 @@ import kotlin.reflect.KClass
 class TenantSettingsServiceImpl(
     private val tenantSettingsRepository: TenantSettingsRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
     private val tenantSettingsRegistry: TenantSettingsRegistry,
@@ -71,10 +71,10 @@ class TenantSettingsServiceImpl(
         return this.tenantSettingsRepository
     }
 
-    override val cacheStore: ExpiringKVStore<String, TenantSettingsEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantSettingsEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantSettingsEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantSettingsEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantSettingsEntity> = TenantSettingsEntity::class
 
     override fun refreshTenantSettings(tenantId: Long) {
@@ -194,10 +194,10 @@ class TenantSettingsServiceImpl(
     private suspend fun syncToCache(tenantId: Long) {
         val settings = getTenantSettings(tenantId)
 
-        redisService.set(
+        reactiveRedisService.set(
             RedisConstants.getTenantSettingsCacheKey(tenantId),
             settings,
-        )
+        ).awaitFirstOrNull()
 
         logger.info("Tenant($tenantId) settings synchronized to cache")
     }

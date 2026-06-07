@@ -1,9 +1,7 @@
 package com.lovelycatv.crystalframework.shared.service.redis
 
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
-import kotlinx.coroutines.Dispatchers
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.*
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -37,57 +35,38 @@ interface ReactiveRedisService {
 
     fun <T: Any> opsForHyperLogLog(): ReactiveHyperLogLogOperations<String, T>
 
-    fun <T: Any> asKVStore(): ExpiringKVStore<String, T> {
-        return object : ExpiringKVStore<String, T> {
-            override fun set(key: String, value: T, expiration: Long) {
-                runBlocking(Dispatchers.IO) {
-                    opsForValue<T>()
-                        .set(key, value, Duration.ofMillis(expiration))
-                        .awaitFirstOrNull()
-                }
+    fun <T: Any> asReactiveKVStore(): ReactiveExpiringKVStore<String, T> {
+        return object : ReactiveExpiringKVStore<String, T> {
+            override suspend fun set(key: String, value: T, expirationInMs: Long) {
+                opsForValue<T>()
+                    .set(key, value, Duration.ofMillis(expirationInMs))
+                    .awaitFirstOrNull()
             }
 
-            override fun set(key: String, value: T) {
-                runBlocking(Dispatchers.IO) {
-                    opsForValue<T>()
-                        .set(key, value)
-                        .awaitFirstOrNull()
-                }
+            override suspend fun set(key: String, value: T) {
+                opsForValue<T>()
+                    .set(key, value)
+                    .awaitFirstOrNull()
             }
 
-            override fun containsKey(key: String): Boolean {
-                return runBlocking(Dispatchers.IO) {
-                    hasKey(key).awaitFirstOrNull() == true
-                }
+            override suspend fun containsKey(key: String): Boolean {
+                return hasKey(key).awaitFirstOrNull() == true
             }
 
-            override fun get(key: String): T? {
-                return runBlocking(Dispatchers.IO) {
-                    this@ReactiveRedisService
-                        .get<T>(key)
-                        .awaitFirstOrNull()
-                }
+            override suspend fun get(key: String): T? {
+                return this@ReactiveRedisService
+                    .get<T>(key)
+                    .awaitFirstOrNull()
             }
 
-            override fun remove(key: String): T? {
-                return runBlocking(Dispatchers.IO) {
-                    val v = get(key)
+            override suspend fun remove(key: String): T? {
+                val v = get(key)
 
-                    if (v != null) {
-                        this@ReactiveRedisService.removeKey(key).awaitFirstOrNull()
-                    }
-
-                    v
+                if (v != null) {
+                    this@ReactiveRedisService.removeKey(key).awaitFirstOrNull()
                 }
-            }
 
-            override val keys: Set<String>
-                get() = emptySet()
-            override val size: Int
-                get() = keys.size
-
-            override fun clear() {
-                throw UnsupportedOperationException("Redis cannot be cleared")
+                return v
             }
         }
     }

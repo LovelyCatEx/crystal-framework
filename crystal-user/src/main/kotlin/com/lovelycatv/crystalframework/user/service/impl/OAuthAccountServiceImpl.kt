@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.user.converters.OAuth2AuthenticationToken
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -23,7 +23,7 @@ class OAuthAccountServiceImpl(
     private val oauthAccountRepository: OAuthAccountRepository,
     private val oAuth2AuthenticationTokenAccountConverterManager: OAuth2AuthenticationTokenAccountConverterManager,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
 ) : OAuthAccountService {
     private val logger = logger()
@@ -32,10 +32,10 @@ class OAuthAccountServiceImpl(
         return this.oauthAccountRepository
     }
 
-    override val cacheStore: ExpiringKVStore<String, OAuthAccountEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<OAuthAccountEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, OAuthAccountEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<OAuthAccountEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
 
     override suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity? {

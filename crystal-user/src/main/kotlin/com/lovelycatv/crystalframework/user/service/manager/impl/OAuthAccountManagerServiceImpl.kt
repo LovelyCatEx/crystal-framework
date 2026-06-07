@@ -1,14 +1,14 @@
 package com.lovelycatv.crystalframework.user.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerCreateOAuthAccountDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerUpdateOAuthAccountDTO
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
 import com.lovelycatv.crystalframework.user.service.manager.OAuthAccountManagerService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -19,14 +19,14 @@ import kotlin.reflect.KClass
 class OAuthAccountManagerServiceImpl(
     private val oAuthAccountRepository: OAuthAccountRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : OAuthAccountManagerService {
-    override val cacheStore: ExpiringKVStore<String, OAuthAccountEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<OAuthAccountEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, OAuthAccountEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<OAuthAccountEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
 
     override fun getRepository(): OAuthAccountRepository {

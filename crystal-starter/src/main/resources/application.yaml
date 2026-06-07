@@ -25,10 +25,10 @@ spring:
       password: ${REDIS_PASSWORD}
       lettuce:
         pool:
-          min-idle: 8
-          max-idle: 16
-          max-active: 40
-          max-wait: 2s
+          min-idle: 12
+          max-idle: 20
+          max-active: 60
+          max-wait: 3s
         shutdown-timeout: 100ms
       timeout: 5s
       connect-timeout: 3s

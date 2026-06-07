@@ -5,8 +5,9 @@ import com.lovelycatv.crystalframework.audit.types.SessionDescription
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Range
 import org.springframework.session.data.redis.ReactiveRedisIndexedSessionRepository
@@ -15,13 +16,14 @@ import kotlin.math.ceil
 
 @Service
 class SessionMonitorServiceImpl(
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val indexedSessionRepository: ReactiveRedisIndexedSessionRepository
 ) : SessionMonitorService {
     override suspend fun getSessionsCount(): Long {
-        return redisService
+        return reactiveRedisService
             .opsForZSet<Any>()
-            .zCard(RedisConstants.SpringSession.EXPIRATIONS)
+            .size(RedisConstants.SpringSession.EXPIRATIONS)
+            .awaitFirstOrNull()
             ?: 0L
     }
 

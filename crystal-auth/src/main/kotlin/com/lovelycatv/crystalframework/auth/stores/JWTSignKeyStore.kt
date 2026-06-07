@@ -1,19 +1,23 @@
 package com.lovelycatv.crystalframework.auth.stores
 
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
+import kotlinx.coroutines.runBlocking
 
 class JWTSignKeyStore(
-    val store: ExpiringKVStore<String, String>,
+    val store: ReactiveExpiringKVStore<String, String>,
     val keyGenerator: () -> String,
 ) {
-    fun getSignKey(): String {
-        return store[RedisConstants.JWT_SIGN_KEY]
-            ?: keyGenerator.invoke()
-                .also { setSignKey(it) }
+    /**
+     * Called from non-suspend Spring Security / WebFlux SPIs, so the reactive cache read is
+     * bridged with [runBlocking].
+     */
+    fun getSignKey(): String = runBlocking {
+        store.get(RedisConstants.JWT_SIGN_KEY)
+            ?: keyGenerator.invoke().also { setSignKey(it) }
     }
 
-    fun setSignKey(signKey: String) {
-        store[RedisConstants.JWT_SIGN_KEY] = signKey
+    fun setSignKey(signKey: String): Unit = runBlocking {
+        store.set(RedisConstants.JWT_SIGN_KEY, signKey)
     }
 }

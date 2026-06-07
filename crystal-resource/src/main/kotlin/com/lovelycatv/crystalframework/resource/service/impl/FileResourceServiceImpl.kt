@@ -9,9 +9,9 @@ import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ class FileResourceServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val storageProviderService: StorageProviderService,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val systemModuleClient: SystemModuleClient,
 ) : FileResourceService {
@@ -88,9 +88,9 @@ class FileResourceServiceImpl(
         return baseUrl + key
     }
 
-    override val cacheStore: ExpiringKVStore<String, FileResourceEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<FileResourceEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, FileResourceEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<FileResourceEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<FileResourceEntity> = FileResourceEntity::class
 }

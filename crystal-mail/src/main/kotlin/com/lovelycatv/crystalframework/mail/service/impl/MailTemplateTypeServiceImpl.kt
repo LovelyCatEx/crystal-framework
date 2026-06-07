@@ -3,8 +3,8 @@ package com.lovelycatv.crystalframework.mail.service.impl
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
 import com.lovelycatv.crystalframework.mail.service.MailTemplateTypeService
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
@@ -12,13 +12,13 @@ import kotlin.reflect.KClass
 @Service
 class MailTemplateTypeServiceImpl(
     private val mailTemplateTypeRepository: MailTemplateTypeRepository,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
 ) : MailTemplateTypeService {
-    override val cacheStore: ExpiringKVStore<String, MailTemplateTypeEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<MailTemplateTypeEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, MailTemplateTypeEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<MailTemplateTypeEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<MailTemplateTypeEntity> = MailTemplateTypeEntity::class
 
     override fun getRepository(): MailTemplateTypeRepository {

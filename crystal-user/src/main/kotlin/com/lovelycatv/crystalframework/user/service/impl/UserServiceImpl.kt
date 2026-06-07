@@ -8,7 +8,7 @@ import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
@@ -18,7 +18,7 @@ import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.service.UserService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -36,7 +36,7 @@ class UserServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val passwordEncoder: PasswordEncoder,
     private val userRoleRelationService: UserRoleRelationService,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
     override val eventPublisher: ApplicationEventPublisher,
@@ -319,9 +319,9 @@ class UserServiceImpl(
             ?: throw BusinessException("Could not create user entity due to missing encoded password, encoding failed")
     }
 
-    override val cacheStore: ExpiringKVStore<String, UserEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<UserEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, UserEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<UserEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<UserEntity> = UserEntity::class
 }
