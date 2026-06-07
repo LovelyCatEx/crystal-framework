@@ -1803,9 +1803,14 @@ export const enUS: I18nRules = {
       saveSuccess: 'Organization settings saved',
       saveFailed: 'Failed to save organization settings',
       saveSettings: 'Save Settings',
+      channelSelectPlaceholder: 'Select message channels',
       keys: {
         'notification.memberJoin.email': 'Email Notification',
+        'notification.memberJoin.channels': 'Message Channels',
+        'notification.memberJoin.content': 'Notification Content',
         'notification.memberJoinReview.email': 'Email Notification',
+        'notification.memberJoinReview.channels': 'Message Channels',
+        'notification.memberJoinReview.content': 'Notification Content',
       },
       groups: {
         'notification.memberJoin': 'Member Join Notification',

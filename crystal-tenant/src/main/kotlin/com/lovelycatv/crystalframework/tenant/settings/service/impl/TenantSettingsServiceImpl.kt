@@ -95,9 +95,13 @@ class TenantSettingsServiceImpl(
             notification = TenantSettingsView.Notification(
                 memberJoin = TenantSettingsView.Notification.MemberJoin(
                     email = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoin.EMAIL)!!,
+                    channels = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoin.CHANNELS)!!,
+                    content = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoin.CONTENT)!!,
                 ),
                 memberJoinReview = TenantSettingsView.Notification.MemberJoinReview(
                     email = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoinReview.EMAIL)!!,
+                    channels = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoinReview.CHANNELS)!!,
+                    content = getSettings(tenantId, TenantSettingsConstants.Notification.MemberJoinReview.CONTENT)!!,
                 ),
             ),
         ).also {

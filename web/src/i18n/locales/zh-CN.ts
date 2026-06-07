@@ -1800,9 +1800,14 @@ export const zhCN: I18nRules = {
       saveSuccess: '组织设置已保存',
       saveFailed: '组织设置保存失败',
       saveSettings: '保存设置',
+      channelSelectPlaceholder: '请选择消息渠道',
       keys: {
         'notification.memberJoin.email': '邮件通知',
+        'notification.memberJoin.channels': '消息渠道',
+        'notification.memberJoin.content': '消息通知内容',
         'notification.memberJoinReview.email': '邮件通知',
+        'notification.memberJoinReview.channels': '消息渠道',
+        'notification.memberJoinReview.content': '消息通知内容',
       },
       groups: {
         'notification.memberJoin': '成员加入通知',

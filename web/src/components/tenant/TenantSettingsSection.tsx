@@ -1,8 +1,9 @@
-import {Button, Form, message} from "antd";
+import {Button, Form, Input, message} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
+import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {getTenantSettingsSchema, updateTenantSettings} from "@/api/tenant/tenant-settings.api.ts";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
 import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
@@ -14,20 +15,49 @@ import {
 } from "@/i18n/tenant-settings.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
 import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
+import {TenantMessageChannelIdsSelector} from "@/components/selector/TenantMessageChannelIdsSelector.tsx";
 
-export const tenantSettingsItemRenderers = new Map<string, SettingsItemRenderer>();
+const xmlContentRenderer: SettingsItemRenderer = (ctx) => (
+    <Input.TextArea autoSize={{minRows: 3, maxRows: 10}} disabled={ctx.loading}/>
+);
+
+export const tenantSettingsItemRenderers = new Map<string, SettingsItemRenderer>([
+    ['notification.memberJoin.content', xmlContentRenderer],
+    ['notification.memberJoinReview.content', xmlContentRenderer],
+]);
 
 export const tenantSettingsGroupExtraRenderers = new Map<string, SettingsGroupExtraRenderer>();
 
 export function TenantSettingsSection() {
     const {t} = useTranslation();
+    const {currentTenant} = useUserTenants();
+    const tenantId = currentTenant?.tenantId ?? null;
     const [refreshing, setRefreshing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form] = Form.useForm();
     const tenantSettingsTabToTranslationMap = useTenantSettingsTabToTranslationMap();
     const tenantSettingsGroupToTranslationMap = useTenantSettingsGroupToTranslationMap();
     const tenantSettingsKeyToTranslationMap = useTenantSettingsKeyToTranslationMap();
-    const itemRenderers = mergeRenderers(tenantSettingsItemRenderers, pluginRegistry.getSettingsItemRenderers('tenant'));
+
+    // Channel selectors are bound to the current tenant, so they are built here rather than
+    // at module scope; merged on top of the static (content) and plugin renderers.
+    const channelRenderers = useMemo<Map<string, SettingsItemRenderer>>(() => {
+        if (!tenantId) {
+            return new Map();
+        }
+        const renderChannelSelect: SettingsItemRenderer = () => (
+            <TenantMessageChannelIdsSelector tenantId={tenantId}/>
+        );
+        return new Map<string, SettingsItemRenderer>([
+            ['notification.memberJoin.channels', renderChannelSelect],
+            ['notification.memberJoinReview.channels', renderChannelSelect],
+        ]);
+    }, [tenantId]);
+
+    const itemRenderers = mergeRenderers(
+        mergeRenderers(tenantSettingsItemRenderers, channelRenderers),
+        pluginRegistry.getSettingsItemRenderers('tenant'),
+    );
     const groupExtraRenderers = mergeRenderers(tenantSettingsGroupExtraRenderers, pluginRegistry.getSettingsGroupExtraRenderers('tenant'));
 
     const {data, isLoading, mutate} = useSWRComposition(
