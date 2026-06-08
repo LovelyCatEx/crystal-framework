@@ -114,7 +114,7 @@ class OAuthAccountServiceImpl(
 
     override suspend fun getUserOAuthAccounts(userId: Long): List<OAuthAccountEntity> {
         return this.getRepository()
-            .findAllByUserId(userId)
+            .findAllByUserIdAndScope(userId, OAuthBindingScope.SYSTEM.typeId)
             .awaitListWithTimeout()
     }
 
