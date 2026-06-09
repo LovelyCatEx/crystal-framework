@@ -49,6 +49,7 @@ class TenantInvitationServiceImpl(
     private val tenantDepartmentService: TenantDepartmentService,
     private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService,
     private val tenantInvitationRecordService: TenantInvitationRecordService,
+    private val tenantMemberProfileService: TenantMemberProfileService,
     private val mailTemplateService: MailTemplateService,
     private val messageChannelService: MessageChannelService,
     private val systemChannelConfigProvider: SystemChannelConfigProvider,
@@ -116,6 +117,16 @@ class TenantInvitationServiceImpl(
         ).also {
             logger.info("User ${user.username} - ${user.id} joined the tenant ${tenant.name} - ${tenant.id}")
         }
+
+        // 1.3 Persist tenant-scoped profile in the same transaction so member and profile stay consistent.
+        // Empty / fallback fields stay NULL — UI falls back to system-level users.* on display.
+        tenantMemberProfileService.upsertProfile(
+            tenantId = tenant.id,
+            tenantMemberId = memberEntity.id,
+            memberUserId = userId,
+            name = realName,
+            phone = phoneNumber,
+        )
 
         // 2. Check whether the invitation includes department
         invitation.departmentId?.let { departmentId ->

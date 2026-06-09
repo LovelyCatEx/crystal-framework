@@ -1797,20 +1797,46 @@ export const zhCN: I18nRules = {
     },
     tenantPersonalProfile: {
       title: '个人资料',
-      subtitle: '管理你在当前组织内的个人资料',
+      subtitle: '维护您在当前组织内的个人资料信息',
       tabs: {
+        info: '基础资料',
         oauth: '第三方账号'
+      },
+      info: {
+        name: '真实姓名',
+        nameHint: '不可修改',
+        phone: '联系电话',
+        nickname: '昵称',
+        nicknameHint: '留空则使用账户昵称',
+        email: '邮箱',
+        emailHint: '留空则使用账户邮箱',
+        bio: '个人简介',
+        gender: '性别',
+        birthday: '生日',
+        timezone: '时区',
+        locale: '语言',
+        save: '保存',
+        saveSuccess: '已保存个人资料',
+        saveFailed: '保存个人资料失败',
+        loadFailed: '加载个人资料失败',
+        phoneRequired: '请填写联系电话',
+        invalidEmail: '邮箱格式不正确'
+      },
+      card: {
+        unboundEmail: '尚未填写邮箱',
+        unboundPhone: '尚未填写联系电话',
+        joinedAt: '加入时间：{{time}}'
       },
       oauth: {
         availablePlatforms: '可绑定的平台',
         unbind: '解绑',
         unbindTitle: '解绑第三方账号',
-        unbindConfirm: '确定要解绑 {{nickname}} 吗？',
-        unbindSuccess: '解绑成功',
+        unbindConfirm: '确认解绑账号 {{nickname}} 吗？',
+        unbindSuccess: '已解绑',
         unbindFailed: '解绑失败',
-        bindSuccess: '绑定成功',
+        bindSuccess: '已绑定',
         bindFailed: '绑定失败',
-        alreadyBoundToUser: '该第三方账号已绑定到某个系统用户，无法在组织内重复绑定'
+        alreadyBoundToUser: '该第三方账号已绑定至其他系统账户，无法在当前组织内重复绑定'
       }
     },
     tenantSettingsManager: {
@@ -2709,6 +2735,13 @@ export const zhCN: I18nRules = {
       0: '仅用户端',
       1: '仅管理端',
       2: '两端都显示'
+    },
+
+    gender: {
+      0: '未指定',
+      1: '男',
+      2: '女',
+      3: '其他'
     }
   },
 

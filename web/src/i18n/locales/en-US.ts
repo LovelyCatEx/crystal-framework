@@ -1802,7 +1802,33 @@ export const enUS: I18nRules = {
       title: 'Personal Profile',
       subtitle: 'Manage your personal profile within the current organization',
       tabs: {
+        info: 'Profile',
         oauth: 'Third-party Accounts'
+      },
+      info: {
+        name: 'Real Name',
+        nameHint: 'Read-only',
+        phone: 'Phone',
+        nickname: 'Nickname',
+        nicknameHint: 'Leave blank to use your system nickname',
+        email: 'Email',
+        emailHint: 'Leave blank to use your system email',
+        bio: 'Bio',
+        gender: 'Gender',
+        birthday: 'Birthday',
+        timezone: 'Timezone',
+        locale: 'Locale',
+        save: 'Save',
+        saveSuccess: 'Profile saved',
+        saveFailed: 'Failed to save profile',
+        loadFailed: 'Failed to load profile',
+        phoneRequired: 'Phone is required',
+        invalidEmail: 'Invalid email address'
+      },
+      card: {
+        unboundEmail: 'No email',
+        unboundPhone: 'No phone',
+        joinedAt: 'Joined {{time}}'
       },
       oauth: {
         availablePlatforms: 'Available Platforms',
@@ -2712,6 +2738,13 @@ export const enUS: I18nRules = {
       0: 'User Side Only',
       1: 'Manager Side Only',
       2: 'Both Sides'
+    },
+
+    gender: {
+      0: 'Unspecified',
+      1: 'Male',
+      2: 'Female',
+      3: 'Other'
     }
   },
 
