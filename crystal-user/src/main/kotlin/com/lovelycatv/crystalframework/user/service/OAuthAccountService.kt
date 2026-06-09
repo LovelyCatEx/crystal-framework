@@ -7,7 +7,7 @@ import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 
 interface OAuthAccountService : CachedBaseService<OAuthAccountRepository, OAuthAccountEntity> {
-    suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity?
+    suspend fun getAccountsByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): List<OAuthAccountEntity>
 
     suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity
 
@@ -33,4 +33,6 @@ interface OAuthAccountService : CachedBaseService<OAuthAccountRepository, OAuthA
      * Unbinds a tenant-scoped binding. The row must belong to [userId] and [tenantId].
      */
     suspend fun unbindTenant(accountId: Long, userId: Long, tenantId: Long)
+
+    suspend fun isAlreadyBindToUser(oauthAccountId: Long): Boolean
 }

@@ -293,6 +293,11 @@ class UserServiceImpl(
             throw BusinessException("User $username already exists")
         }
 
+        // Conflict check
+        if (oAuthAccountService.isAlreadyBindToUser(oauthAccountId)) {
+            throw BusinessException("This OAuth account has already been bind to another user")
+        }
+
         val user = this.getRepository().save(
             UserEntity(
                 id = snowIdGenerator.nextId(),

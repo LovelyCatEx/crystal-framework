@@ -39,26 +39,27 @@ class OAuthAccountServiceImpl(
         get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<OAuthAccountEntity> = OAuthAccountEntity::class
 
-    override suspend fun getAccountByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): OAuthAccountEntity? {
-        // The SYSTEM-scope row is the login identity anchor for this third-party identity.
+    override suspend fun getAccountsByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): List<OAuthAccountEntity> {
         return getRepository()
             .findAllByPlatformAndIdentifier(platform.typeId, identifier)
             .awaitListWithTimeout()
-            .firstOrNull { it.scope == OAuthBindingScope.SYSTEM.typeId }
     }
 
     override suspend fun getAccountFromOAuth2AuthenticationToken(token: OAuth2AuthenticationToken): OAuthAccountEntity {
         val template = oAuth2AuthenticationTokenAccountConverterManager.convert(token)
 
-        val existing = this.getAccountByPlatformAndIdentifier(template.getRealPlatform(), template.identifier)
+        val existing = this
+            .getAccountsByPlatformAndIdentifier(template.getRealPlatform(), template.identifier)
+            .firstOrNull { it.getRealScope() == OAuthBindingScope.SYSTEM }
 
-        return existing?.run {
-            withInvalidateEntityCacheContext(existing) {
-                this.nickname = template.nickname
-
-                this
+        return if (existing != null) {
+            withUpdateEntityContext(existing) {
+                withUpdateById(existing.id) {
+                    existing.nickname = template.nickname
+                }
             }
-        } ?: (this.getRepository()
+        } else {
+            this.getRepository()
                 .save(
                     template.apply {
                         id = snowIdGenerator.nextId()
@@ -67,7 +68,8 @@ class OAuthAccountServiceImpl(
                     } newEntity true
                 )
                 .awaitFirstOrNull()
-                ?: throw BusinessException("Could not save OAuth2 account into database"))
+                ?: throw BusinessException("Could not save OAuth2 account into database")
+        }
     }
 
     override suspend fun bindUser(accountId: Long, userId: Long) {
@@ -173,5 +175,15 @@ class OAuthAccountServiceImpl(
 
             logger.info("Tenant OAuth account ${entity.nickname} of platform ${entity.getRealPlatform()} unbound by user $userId in tenant $tenantId")
         }
+    }
+
+    override suspend fun isAlreadyBindToUser(oauthAccountId: Long): Boolean {
+        val account = this.getByIdOrNull(oauthAccountId)
+            ?: throw BusinessException("OAuth account not found")
+
+        // Find out other oauth accounts with same plateform and id
+        val all = this.getAccountsByPlatformAndIdentifier(account.getRealPlatform(), account.identifier)
+
+        return all.any { it.userId != null }
     }
 }
