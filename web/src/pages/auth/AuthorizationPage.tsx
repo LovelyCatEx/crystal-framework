@@ -5,8 +5,9 @@ import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {GithubOutlined} from '@ant-design/icons';
 import {ProjectDisplayName} from "@/global/global-settings.ts";
-import {menuPathLogin, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router/paths.ts";
+import {menuPathLogin, menuPathOAuthBind, menuPathOAuthCode, menuPathRegister, menuPathResetPassword} from "@/router/paths.ts";
 import {OAuth2CodePage} from "./OAuth2CodePage.tsx";
+import {OAuth2BindPage} from "./OAuth2BindPage.tsx";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 
 export function AuthorizationPage({ parentPath }: { parentPath: string }) {
@@ -45,6 +46,7 @@ export function AuthorizationPage({ parentPath }: { parentPath: string }) {
           <Route path={menuPathRegister.replace(parentPath, "")} element={<RegisterPage />} />
           <Route path={menuPathResetPassword.replace(parentPath, "")} element={<ForgotPasswordPage />} />
           <Route path={menuPathOAuthCode.replace(parentPath, "")} element={<OAuth2CodePage />} />
+          <Route path={menuPathOAuthBind.replace(parentPath, "")} element={<OAuth2BindPage />} />
         </Routes>
       </div>
   );

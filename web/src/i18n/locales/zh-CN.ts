@@ -319,6 +319,19 @@ export const zhCN: I18nRules = {
           }
         }
       },
+
+      // OAuth2BindPage
+      oauth2Bind: {
+        title: '绑定账号',
+        subtitle: '正在绑定您的第三方账号',
+        processing: '绑定中...',
+        success: '账号绑定成功',
+        failed: '绑定失败',
+        successTitle: '绑定成功',
+        failedTitle: '绑定失败',
+        invalidParams: '绑定参数无效',
+        return: '返回'
+      },
     },
 
     userProfile: {

@@ -319,6 +319,19 @@ export const enUS: I18nRules = {
           }
         }
       },
+
+      // OAuth2BindPage
+      oauth2Bind: {
+        title: 'Bind Account',
+        subtitle: 'Binding your third-party account',
+        processing: 'Binding in progress...',
+        success: 'Account bound successfully',
+        failed: 'Binding failed',
+        successTitle: 'Bound Successfully',
+        failedTitle: 'Binding Failed',
+        invalidParams: 'Invalid binding parameters',
+        return: 'Return'
+      },
     },
 
     // User Profile

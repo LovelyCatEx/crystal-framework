@@ -25,17 +25,12 @@ import {
     type UpsertMyTenantUserProfileDTO
 } from "@/api/tenant/tenant-user-profile.api.ts";
 import type {TenantOAuthAccount} from "@/types/tenant/tenant-oauth.types.ts";
-import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
+import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types.ts";
 import {Gender} from "@/types/common/gender.types.ts";
 import {getGender} from "@/i18n/enum-helpers.ts";
 import {PlatformIcon} from "@/components/PlatformIcon.tsx";
-import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
-import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
+import {redirectToOAuthBind} from "@/utils/oauth2.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-
-// Key under which a tenant-scoped OAuth bind intent is stashed across the OAuth redirect.
-// Read back by OAuth2CodePage after the provider callback.
-export const TENANT_OAUTH_BIND_INTENT_KEY = 'tenant-oauth-bind-intent';
 
 const TAB_KEYS = {
     INFO: 'info',
@@ -229,9 +224,7 @@ const TenantOAuthBindings = () => {
     const allPlatforms = useMemo(() => [OAuthPlatform.GITHUB, OAuthPlatform.GOOGLE, OAuthPlatform.OICQ], []);
 
     const handleBind = (platform: OAuthPlatform) => {
-        // Persist the intent so OAuth2CodePage performs a tenant bind instead of a login after callback.
-        sessionStorage.setItem(TENANT_OAUTH_BIND_INTENT_KEY, '1');
-        window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);
+        redirectToOAuthBind(platform, OAuthBindingScope.TENANT);
     };
 
     const handleUnbind = (account: TenantOAuthAccount) => {

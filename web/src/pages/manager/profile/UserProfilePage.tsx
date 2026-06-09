@@ -45,9 +45,8 @@ import {useSWRState} from "@/compositions/use-swr.ts";
 import {getUserOAuthAccounts} from "@/api/user/user-oauth.api.ts";
 import PlatformIcon from "../../../components/PlatformIcon.tsx";
 import type {UserOAuthAccountVO} from "@/types/user/user-oauth.types.ts";
-import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
-import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
-import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
+import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types.ts";
+import {redirectToOAuthBind} from "@/utils/oauth2.ts";
 
 const { useToken } = theme;
 
@@ -497,7 +496,7 @@ const OAuthAccountSettings = () => {
     }
 
     const handleBind = (platform: OAuthPlatform) => {
-        window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);
+        redirectToOAuthBind(platform, OAuthBindingScope.SYSTEM);
     }
 
     const allPlatforms = useMemo(() =>

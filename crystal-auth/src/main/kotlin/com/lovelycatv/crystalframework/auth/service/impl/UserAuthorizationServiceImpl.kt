@@ -72,12 +72,19 @@ class UserAuthorizationServiceImpl(
                     }
 
                     userEntity?.map { userEntity ->
+                        val loginResponse = buildLoginSuccessResponse(userEntity)
                         ProcessOAuth2AuthenticationSuccessResult(
                             user = userEntity,
                             oauth2Account = it,
-                            response = ApiResponse.success(
-                                buildLoginSuccessResponse(userEntity)
-                            ) as ApiResponse<*>
+                            response = ApiResponse.success(mapOf(
+                                "token" to loginResponse.token,
+                                "expiresIn" to loginResponse.expiresIn,
+                                "oauthAccountId" to it.id.toString(),
+                                "platform" to it.getRealPlatform().name,
+                                "identifier" to it.identifier,
+                                "nickname" to it.nickname,
+                                "avatar" to it.avatar
+                            ))
                         )
                     } ?: ProcessOAuth2AuthenticationSuccessResult(
                         user = null,
