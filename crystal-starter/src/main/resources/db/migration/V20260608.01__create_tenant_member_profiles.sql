@@ -22,12 +22,12 @@ CREATE TABLE IF NOT EXISTS public.tenant_member_profiles
     deleted_time     BIGINT                DEFAULT NULL
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS tenant_user_profiles_member_unique_index
-    ON public.tenant_user_profiles USING btree (tenant_member_id)
+CREATE UNIQUE INDEX IF NOT EXISTS tenant_member_profiles_member_unique_index
+    ON public.tenant_member_profiles USING btree (tenant_member_id)
     WHERE deleted_time IS NULL;
 
 CREATE INDEX IF NOT EXISTS tenant_user_profiles_tenant_id_index
-    ON public.tenant_user_profiles USING btree (tenant_id);
+    ON public.tenant_member_profiles USING btree (tenant_id);
 
 CREATE INDEX IF NOT EXISTS tenant_user_profiles_tenant_member_user_index
-    ON public.tenant_user_profiles USING btree (tenant_id, member_user_id);
+    ON public.tenant_member_profiles USING btree (tenant_id, member_user_id);
