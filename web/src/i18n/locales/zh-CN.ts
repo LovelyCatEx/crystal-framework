@@ -385,8 +385,12 @@ export const zhCN: I18nRules = {
         unbindConfirm: '是否要解绑第三方账号 {{nickname}}',
         unbindSuccess: '账号解绑成功',
         unbindFailed: '账号解绑失败',
+        unbind: '解绑',
         bind: '绑定',
-        availablePlatforms: '可绑定的平台'
+        availablePlatforms: '可绑定的平台',
+        bindSuccess: '已绑定',
+        bindFailed: '绑定失败',
+        alreadyBoundToUser: '该第三方账号已被绑定至某账户'
       },
       card: {
         unbound: '未绑定',

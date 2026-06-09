@@ -386,8 +386,12 @@ export const enUS: I18nRules = {
         unbindConfirm: 'Are you sure you want to unbind {{nickname}}',
         unbindSuccess: 'Account unbound successfully',
         unbindFailed: 'Failed to unbind account',
+        unbind: 'Unbind',
         bind: 'Bind',
-        availablePlatforms: 'Available Platforms'
+        availablePlatforms: 'Available Platforms',
+        bindSuccess: 'Bound successfully',
+        bindFailed: 'Failed to bind',
+        alreadyBoundToUser: 'This third-party account is already bound to a user'
       },
       card: {
         unbound: 'Not bound',

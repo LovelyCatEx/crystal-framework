@@ -536,7 +536,7 @@ const OAuthAccountSettings = () => {
                         </Space>
 
                         <Button type="link" className="font-medium text-red-500" onClick={() => { handleUnbind(account); }}>
-                            {t('pages.userProfile.oauth.bind')}
+                            {t('pages.userProfile.oauth.unbind')}
                         </Button>
                     </div>
                 ))}
