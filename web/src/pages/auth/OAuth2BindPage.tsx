@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Button, message, Result, Spin} from "antd";
@@ -25,8 +25,12 @@ export function OAuth2BindPage() {
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const executedRef = useRef(false);
 
     useEffect(() => {
+        if (executedRef.current) return;
+        executedRef.current = true;
+
         if (!locationState?.code || !locationState?.state || locationState?.scope == null) {
             setStatus('error');
             setErrorMessage(t('pages.auth.oauth2Bind.invalidParams'));
