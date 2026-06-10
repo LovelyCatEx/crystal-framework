@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.system.controller
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.system.controller.vo.SystemIntegratedInfoVO
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import org.springframework.validation.annotation.Validated
@@ -21,6 +22,12 @@ class SystemIntegratedInfoController(
     @GetMapping("/integratedInfo")
     suspend fun getSystemIntegratedInfo(): ApiResponse<*> {
         val systemSettings = systemSettingsService.getSystemSettings()
+        val oauthSettings = systemSettings.oauth
+        val enabledPlatforms = buildList {
+            if (oauthSettings.github.enabled) add(OAuthPlatform.GITHUB.typeId)
+            if (oauthSettings.google.enabled) add(OAuthPlatform.GOOGLE.typeId)
+            if (oauthSettings.oicq.enabled) add(OAuthPlatform.OICQ.typeId)
+        }
         return ApiResponse.success(
             SystemIntegratedInfoVO(
                 maintenance = readinessController.getSystemMaintenance().data!!,
@@ -29,7 +36,8 @@ class SystemIntegratedInfoController(
                     type = systemSettings.basic.waterMark.type,
                     customValue = systemSettings.basic.waterMark.customValue,
                     fontColor = systemSettings.basic.waterMark.fontColor
-                )
+                ),
+                enabledOAuthPlatforms = enabledPlatforms
             )
         )
     }
