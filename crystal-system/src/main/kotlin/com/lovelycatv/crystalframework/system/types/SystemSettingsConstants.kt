@@ -11,6 +11,13 @@ object SystemSettingsConstants {
             defaultValue = "http://localhost:8080/api/v1",
         )
 
+        val FRONTEND_BASE_URL = SettingsItemDeclaration(
+            key = "basic.frontendBaseUrl",
+            valueType = SettingsItemValueType.STRING,
+            defaultValue = "http://localhost:5173",
+            sort = 1
+        )
+
         object WaterMark {
             val ENABLED = SettingsItemDeclaration(
                 key = "basic.waterMark.enabled",
@@ -118,6 +125,196 @@ object SystemSettingsConstants {
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "https://open.feishu.cn",
                 sort = 3
+            )
+        }
+    }
+
+    object OAuth {
+        object Github {
+            val ENABLED = SettingsItemDeclaration(
+                key = "oauth.github.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = false.toString(),
+                sort = 1
+            )
+
+            val USE_DEFAULT = SettingsItemDeclaration(
+                key = "oauth.github.useDefault",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 2
+            )
+
+            val AUTHORIZATION_URI = SettingsItemDeclaration(
+                key = "oauth.github.authorizationUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://github.com/login/oauth/authorize",
+                sort = 3
+            )
+
+            val TOKEN_URI = SettingsItemDeclaration(
+                key = "oauth.github.tokenUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://github.com/login/oauth/access_token",
+                sort = 4
+            )
+
+            val USER_INFO_URI = SettingsItemDeclaration(
+                key = "oauth.github.userInfoUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://api.github.com/user",
+                sort = 5
+            )
+
+            val USER_NAME_ATTRIBUTE = SettingsItemDeclaration(
+                key = "oauth.github.userNameAttribute",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "id",
+                sort = 6
+            )
+
+            val CLIENT_ID = SettingsItemDeclaration(
+                key = "oauth.github.clientId",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 7
+            )
+
+            val CLIENT_SECRET = SettingsItemDeclaration(
+                key = "oauth.github.clientSecret",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 8
+            )
+
+            val SCOPE = SettingsItemDeclaration(
+                key = "oauth.github.scope",
+                valueType = SettingsItemValueType.STRING_ARRAY,
+                defaultValue = """["read:user"]""",
+                sort = 9
+            )
+        }
+
+        object Google {
+            val ENABLED = SettingsItemDeclaration(
+                key = "oauth.google.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = false.toString(),
+                sort = 1
+            )
+
+            val USE_DEFAULT = SettingsItemDeclaration(
+                key = "oauth.google.useDefault",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 2
+            )
+
+            val AUTHORIZATION_URI = SettingsItemDeclaration(
+                key = "oauth.google.authorizationUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://accounts.google.com/o/oauth2/v2/auth",
+                sort = 3
+            )
+
+            val TOKEN_URI = SettingsItemDeclaration(
+                key = "oauth.google.tokenUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://www.googleapis.com/oauth2/v4/token",
+                sort = 4
+            )
+
+            val USER_INFO_URI = SettingsItemDeclaration(
+                key = "oauth.google.userInfoUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://www.googleapis.com/oauth2/v3/userinfo",
+                sort = 5
+            )
+
+            val USER_NAME_ATTRIBUTE = SettingsItemDeclaration(
+                key = "oauth.google.userNameAttribute",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "sub",
+                sort = 6
+            )
+
+            val CLIENT_ID = SettingsItemDeclaration(
+                key = "oauth.google.clientId",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 7
+            )
+
+            val CLIENT_SECRET = SettingsItemDeclaration(
+                key = "oauth.google.clientSecret",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 8
+            )
+
+            val SCOPE = SettingsItemDeclaration(
+                key = "oauth.google.scope",
+                valueType = SettingsItemValueType.STRING_ARRAY,
+                defaultValue = """["openid","profile","email"]""",
+                sort = 9
+            )
+        }
+
+        object Oicq {
+            val ENABLED = SettingsItemDeclaration(
+                key = "oauth.oicq.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = false.toString(),
+                sort = 1
+            )
+
+            val AUTHORIZATION_URI = SettingsItemDeclaration(
+                key = "oauth.oicq.authorizationUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://graph.qq.com/oauth2.0/authorize",
+                sort = 2
+            )
+
+            val TOKEN_URI = SettingsItemDeclaration(
+                key = "oauth.oicq.tokenUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://graph.qq.com/oauth2.0/token",
+                sort = 3
+            )
+
+            val USER_INFO_URI = SettingsItemDeclaration(
+                key = "oauth.oicq.userInfoUri",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "https://graph.qq.com/user/get_user_info",
+                sort = 4
+            )
+
+            val USER_NAME_ATTRIBUTE = SettingsItemDeclaration(
+                key = "oauth.oicq.userNameAttribute",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "openid",
+                sort = 5
+            )
+
+            val CLIENT_ID = SettingsItemDeclaration(
+                key = "oauth.oicq.clientId",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 6
+            )
+
+            val CLIENT_SECRET = SettingsItemDeclaration(
+                key = "oauth.oicq.clientSecret",
+                valueType = SettingsItemValueType.STRING,
+                defaultValue = "",
+                sort = 7
+            )
+
+            val SCOPE = SettingsItemDeclaration(
+                key = "oauth.oicq.scope",
+                valueType = SettingsItemValueType.STRING_ARRAY,
+                defaultValue = """["get_user_info"]""",
+                sort = 8
             )
         }
     }
