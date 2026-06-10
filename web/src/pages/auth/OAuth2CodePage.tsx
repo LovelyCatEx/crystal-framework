@@ -307,7 +307,7 @@ export function OAuth2CodePage() {
     const [userInfo, setUserInfo] = useState<OAuth2UserInfo | null>(null);
     const [activeTab, setActiveTab] = useState<string>('current');
     const [dispatched, setDispatched] = useState(false);
-    const isLoggedIn = loggedUser?.hasAuthToken === true;
+    const isLoggedIn = loggedUser.hasAuthToken;
 
     // Dispatch to OAuth2BindPage immediately if a bind intent exists.
     useEffect(() => {
