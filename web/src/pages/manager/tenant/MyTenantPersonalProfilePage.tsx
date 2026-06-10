@@ -31,6 +31,7 @@ import {getGender} from "@/i18n/enum-helpers.ts";
 import {PlatformIcon} from "@/components/PlatformIcon.tsx";
 import {redirectToOAuthBind} from "@/utils/oauth2.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 
 const TAB_KEYS = {
     INFO: 'info',
@@ -221,7 +222,10 @@ const TenantOAuthBindings = () => {
 
     const [accounts, , , reloadAccounts] = useSWRState('/getTenantOAuthAccounts', getTenantOAuthAccounts);
 
-    const allPlatforms = useMemo(() => [OAuthPlatform.GITHUB, OAuthPlatform.GOOGLE, OAuthPlatform.OICQ], []);
+    const { integratedInfo } = useSystemIntegrated();
+    const enabledOAuthPlatforms = integratedInfo?.enabledOAuthPlatforms ?? [];
+
+    const allPlatforms = useMemo(() => enabledOAuthPlatforms as OAuthPlatform[], [enabledOAuthPlatforms]);
 
     const handleBind = (platform: OAuthPlatform) => {
         redirectToOAuthBind(platform, OAuthBindingScope.TENANT);

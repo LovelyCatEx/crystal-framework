@@ -47,6 +47,7 @@ import PlatformIcon from "../../../components/PlatformIcon.tsx";
 import type {UserOAuthAccountVO} from "@/types/user/user-oauth.types.ts";
 import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types.ts";
 import {redirectToOAuthBind} from "@/utils/oauth2.ts";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 
 const { useToken } = theme;
 
@@ -499,9 +500,12 @@ const OAuthAccountSettings = () => {
         redirectToOAuthBind(platform, OAuthBindingScope.SYSTEM);
     }
 
+    const { integratedInfo } = useSystemIntegrated();
+    const enabledOAuthPlatforms = integratedInfo?.enabledOAuthPlatforms ?? [];
+
     const allPlatforms = useMemo(() =>
-        [OAuthPlatform.GITHUB, OAuthPlatform.GOOGLE, OAuthPlatform.OICQ]
-    , []);
+        enabledOAuthPlatforms as OAuthPlatform[]
+    , [enabledOAuthPlatforms]);
 
     const boundPlatformIds = useMemo(() => new Set(accounts?.map(a => a.platformId) ?? []), [accounts]);
 
