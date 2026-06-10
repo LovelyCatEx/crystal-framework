@@ -1,5 +1,29 @@
 # Change Logs
 
+## v1.9.0
+
+2026-06-10
+
+### Features
++ refactor(oauth): Decouple OAuth binding flow from login flow.
++ feat(tenant): Allow sending messages via message channels when a member joins the tenant.
++ feat(tenant): Allow tenant members to bind third-party accounts.
++ feat(oauth): Migrate OAuth configuration to system settings.
++ feat(web): Dynamically display enabled third-party login buttons.
++ feat(sdk): Support accessing message channel module Gateway functions via SDK.
+
+### Bug Fixes
++ fix(backend): Enforce usage of ReactiveRedisService and remove legacy implementation.
++ fix(backend): Cache frequently-read JwtKey to avoid thread deadlock.
++ fix(oauth): Check for conflicting bindings when registering via OAuth account.
++ fix(web): Fix i18n of OAuth login agreement warning text.
++ fix(web): Correct i18n key for OAuth unbind button in user profile page.
+
+### Other
+- docs: Update CLAUDE.md and related skills documentation.
+
+---
+
 ## v1.8.0
 
 2026-06-06

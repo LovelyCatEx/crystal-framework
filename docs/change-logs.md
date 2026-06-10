@@ -1,5 +1,29 @@
 # 更新日志
 
+## v1.9.0
+
+2026-06-10
+
+### 新功能
++ refactor(oauth): 将绑定第三方账号与登录逻辑分离。
++ feat(tenant): 成员加入租户时允许通过消息渠道发送消息。
++ feat(tenant): 允许租户成员绑定第三方账号。
++ feat(oauth): 将 OAuth 相关配置迁移到系统设置中。
++ feat(web): 可动态展示已启用的第三方登录按钮。
++ feat(sdk): 支持通过 SDK 访问消息渠道模块提供的 Gateway 函数。
+
+### Bug 修复
++ fix(backend): 强制使用 ReactiveRedisService 并移除旧实现。
++ fix(backend): 缓存高频读取的 JwtKey 避免线程死锁。
++ fix(oauth): 通过第三方账号注册平台账号时检查是否已绑定到其他用户。
++ fix(web): 修复在未同意用户条款时点击第三方登录按钮的提示文本。
++ fix(web): 修正用户个人资料页内第三方账号解绑按钮文本。
+
+### 其他
+- docs: 更新 CLAUDE.md 与部分 skills 文档。
+
+---
+
 ## v1.8.0
 
 2026-06-06
