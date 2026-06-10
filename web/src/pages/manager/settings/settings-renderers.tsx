@@ -20,6 +20,9 @@ export const settingsItemRenderers = new Map<string, SettingsItemRenderer>([
     ['basic.waterMark.fontColor', ({loading}) => <ColorPickerInput disabled={loading} />],
     ['mail.smtp.password', passwordRenderer],
     ['messageChannel.lark.appSecret', passwordRenderer],
+    ['oauth.github.clientSecret', passwordRenderer],
+    ['oauth.google.clientSecret', passwordRenderer],
+    ['oauth.oicq.clientSecret', passwordRenderer],
 ]);
 
 export const settingsGroupExtraRenderers = new Map<string, SettingsGroupExtraRenderer>([
