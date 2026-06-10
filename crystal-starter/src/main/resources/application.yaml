@@ -25,46 +25,14 @@ spring:
       password: ${REDIS_PASSWORD}
       lettuce:
         pool:
-          min-idle: 8
-          max-idle: 16
-          max-active: 40
-          max-wait: 2s
+          min-idle: 12
+          max-idle: 20
+          max-active: 60
+          max-wait: 3s
         shutdown-timeout: 100ms
       timeout: 5s
       connect-timeout: 3s
-  security:
-    oauth2:
-      client:
-        provider:
-          github:
-            user-name-attribute: login
-          google:
-            user-name-attribute: name
-          oicq:
-            authorization-uri: https://graph.qq.com/oauth2.0/authorize
-            token-uri: https://graph.qq.com/oauth2.0/token
-            user-info-uri: https://graph.qq.com/user/get_user_info
-        registration:
-          github:
-            provider: github
-            client-id: ${OAUTH_GITHUB_CLIENT_ID}
-            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
-            scope: read:user
-            redirect-uri: ${OAUTH_GITHUB_REDIRECT_URL}
-            authorization-grant-type: authorization_code
-          oicq:
-            provider: oicq
-            client-id: ${OAUTH_OICQ_CLIENT_ID}
-            client-secret: ${OAUTH_OICQ_CLIENT_SECRET}
-            scope: get_user_info
-            redirect-uri: ${OAUTH_OICQ_REDIRECT_URL}
-            authorization-grant-type: authorization_code
-          google:
-            provider: google
-            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
-            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URL}
-            authorization-grant-type: authorization_code
+  security: {}
 
   http:
     codecs:

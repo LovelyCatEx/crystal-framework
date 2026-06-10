@@ -1,13 +1,13 @@
 package com.lovelycatv.crystalframework.system.service.manager.impl
 
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.controller.manager.announcement.dto.ManagerCreateAnnouncementDTO
 import com.lovelycatv.crystalframework.system.controller.manager.announcement.dto.ManagerUpdateAnnouncementDTO
 import com.lovelycatv.crystalframework.system.entity.AnnouncementEntity
 import com.lovelycatv.crystalframework.system.repository.AnnouncementRepository
 import com.lovelycatv.crystalframework.system.service.manager.AnnouncementManagerService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -18,15 +18,15 @@ import kotlin.reflect.KClass
 class AnnouncementManagerServiceImpl(
     private val announcementRepository: AnnouncementRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : AnnouncementManagerService {
 
-    override val cacheStore: ExpiringKVStore<String, AnnouncementEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<AnnouncementEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, AnnouncementEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<AnnouncementEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<AnnouncementEntity> = AnnouncementEntity::class
 
     override fun getRepository(): AnnouncementRepository = announcementRepository

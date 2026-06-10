@@ -87,6 +87,15 @@ export async function registerFromOAuthAccount(dto: RegisterFromOAuthAccountDTO)
     return doPost<LoginResponse>('/api/user/oauth/registerFromOAuthAccount', { ...dto });
 }
 
+export interface BindOAuthByAccountIdDTO {
+    oauthAccountId: string;
+    scope: number;
+}
+
+export async function bindOAuthByAccountId(dto: BindOAuthByAccountIdDTO) {
+    return doPost<unknown>('/api/user/oauth/bindByAccountId', { ...dto });
+}
+
 export interface SwitchTenantDTO {
     tenantId: string;
 }

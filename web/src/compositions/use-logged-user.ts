@@ -10,7 +10,7 @@ export const useLoggedUser = () => {
     const auth = getUserAuthentication();
     const hasAuthToken = !!auth && !auth.expired;
 
-    const { userProfile, refreshUserProfile } = useCurrentUserProfile();
+    const { userProfile, refreshUserProfile } = useCurrentUserProfile(hasAuthToken);
 
     const { data: accessibleResourcesResponse, isLoading: isAccessibleMenusLoading } = useSWRComposition<ApiResponse<UserAccessibleResourceVO>>(
         hasAuthToken ? 'getUserAccessibleMenus' : undefined,

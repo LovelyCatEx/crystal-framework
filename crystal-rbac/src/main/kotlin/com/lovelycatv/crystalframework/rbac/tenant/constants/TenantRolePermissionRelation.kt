@@ -62,7 +62,12 @@ object TenantRolePermissionRelation {
         TenantRole.MEMBER to listOf(
             // Dashboard
             TenantPermission.MENU_MY_TENANT_DASHBOARD,
-            TenantPermission.ACTION_TENANT_PROFILE_READ_BASIC
+            TenantPermission.ACTION_TENANT_PROFILE_READ_BASIC,
+            // Personal Profile (own tenant-scoped OAuth bindings)
+            TenantPermission.MENU_TENANT_PERSONAL_PROFILE_MANAGER,
+            TenantPermission.ACTION_TENANT_OAUTH_READ,
+            TenantPermission.ACTION_TENANT_OAUTH_BIND,
+            TenantPermission.ACTION_TENANT_OAUTH_UNBIND,
         ),
     )
 }

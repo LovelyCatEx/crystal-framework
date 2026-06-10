@@ -22,6 +22,8 @@ interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, Sy
 
     suspend fun getSystemSecuritySettings(): SystemSettings.Security
 
+    suspend fun getSystemOAuthSettings(): SystemSettings.OAuth
+
     suspend fun updateSystemSettings(settings: SystemSettings)
 
     suspend fun updateSystemSettings(settings: Map<String, String?>)

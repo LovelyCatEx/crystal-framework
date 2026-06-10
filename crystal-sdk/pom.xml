@@ -68,6 +68,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-schedule</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-message-channel-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -1,11 +1,13 @@
 import {AuthCardLayout} from "./AuthorizationPage.tsx";
 import {useNavigate} from "react-router-dom";
 import {getQueryString} from "@/utils/url.utils.ts";
-import {menuPathDashboard, menuPathLogin} from "@/router/paths.ts";
+import {menuPathDashboard, menuPathLogin, menuPathOAuthBind} from "@/router/paths.ts";
 import {Avatar, Button, Card, Form, Input, message, Space, Tabs} from "antd";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {bindOAuthAccount, loginByOAuth2Code, registerFromOAuthAccount} from "@/api/auth/auth.api.ts";
+import {OAUTH_BIND_META_KEY} from "@/utils/oauth2.ts";
+import type {OAuthBindMeta} from "@/utils/oauth2.ts";
 import {setUserAuthentication} from "@/utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth/auth.types.ts";
 import {GithubOutlined, LockOutlined, UserOutlined} from "@ant-design/icons";
@@ -304,17 +306,38 @@ export function OAuth2CodePage() {
     const [isProcessed, setProcessed] = useState(false);
     const [userInfo, setUserInfo] = useState<OAuth2UserInfo | null>(null);
     const [activeTab, setActiveTab] = useState<string>('current');
+    const [dispatched, setDispatched] = useState(false);
     const isLoggedIn = loggedUser.hasAuthToken;
+
+    // Dispatch to OAuth2BindPage immediately if a bind intent exists.
+    useEffect(() => {
+        if (!code || !state) return;
+
+        const bindMetaRaw = sessionStorage.getItem(OAUTH_BIND_META_KEY);
+        if (bindMetaRaw) {
+            sessionStorage.removeItem(OAUTH_BIND_META_KEY);
+            const bindMeta: OAuthBindMeta = JSON.parse(bindMetaRaw);
+            setDispatched(true);
+            navigate(menuPathOAuthBind, {
+                state: { code, state, registrationId: bindMeta.registrationId, scope: bindMeta.scope },
+                replace: true
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        setActiveTab(isLoggedIn ? 'current' : 'register');
+    }, [isLoggedIn]);
+
+    if (dispatched) {
+        return null;
+    }
 
     if (!code || !state) {
         void message.error(t('pages.auth.oauth2.messages.invalidLoginInfo'));
         navigate(menuPathLogin);
         return null;
     }
-
-    useEffect(() => {
-        setActiveTab(isLoggedIn ? 'current' : 'register');
-    }, [isLoggedIn]);
 
     const handleLogin = () => {
         if (isProcessing || isProcessed) return;
@@ -323,16 +346,17 @@ export function OAuth2CodePage() {
 
         loginByOAuth2Code(code, state)
             .then((res) => {
-                if (res.data) {
-                    if (isLoginResponse(res.data)) {
-                        void message.success(t('pages.auth.oauth2.messages.success'));
-                        setUserAuthentication(res.data.token, res.data.expiresIn);
-                        navigate(menuPathDashboard);
-                    } else {
-                        setUserInfo(res.data as OAuth2UserInfo);
-                    }
-                } else {
+                if (!res.data) {
                     void message.error(t('pages.auth.oauth2.messages.unknownError'));
+                    return;
+                }
+
+                if (isLoginResponse(res.data)) {
+                    void message.success(t('pages.auth.oauth2.messages.success'));
+                    setUserAuthentication(res.data.token, res.data.expiresIn);
+                    navigate(menuPathDashboard);
+                } else {
+                    setUserInfo(res.data as OAuth2UserInfo);
                 }
             })
             .catch(() => {

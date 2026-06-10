@@ -9,10 +9,14 @@ data class TenantSettingsView(
     ) {
         data class MemberJoin(
             val email: Boolean,
+            val channels: List<Long>,
+            val content: String,
         )
 
         data class MemberJoinReview(
             val email: Boolean,
+            val channels: List<Long>,
+            val content: String,
         )
     }
 }

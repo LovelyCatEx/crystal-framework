@@ -319,6 +319,19 @@ export const enUS: I18nRules = {
           }
         }
       },
+
+      // OAuth2BindPage
+      oauth2Bind: {
+        title: 'Bind Account',
+        subtitle: 'Binding your third-party account',
+        processing: 'Binding in progress...',
+        success: 'Account bound successfully',
+        failed: 'Binding failed',
+        successTitle: 'Bound Successfully',
+        failedTitle: 'Binding Failed',
+        invalidParams: 'Invalid binding parameters',
+        return: 'Return'
+      },
     },
 
     // User Profile
@@ -386,8 +399,12 @@ export const enUS: I18nRules = {
         unbindConfirm: 'Are you sure you want to unbind {{nickname}}',
         unbindSuccess: 'Account unbound successfully',
         unbindFailed: 'Failed to unbind account',
+        unbind: 'Unbind',
         bind: 'Bind',
-        availablePlatforms: 'Available Platforms'
+        availablePlatforms: 'Available Platforms',
+        bindSuccess: 'Bound successfully',
+        bindFailed: 'Failed to bind',
+        alreadyBoundToUser: 'This third-party account is already bound to a user'
       },
       card: {
         unbound: 'Not bound',
@@ -1752,6 +1769,7 @@ export const enUS: I18nRules = {
       },
       keys: {
         'basic.baseUrl': 'API Base URL',
+        'basic.frontendBaseUrl': 'Frontend Base URL',
         'basic.waterMark.enabled': 'Show Watermark',
         'basic.waterMark.type': 'Watermark Type',
         'basic.waterMark.customValue': 'Custom Watermark Content',
@@ -1769,6 +1787,32 @@ export const enUS: I18nRules = {
         'security.api.encrypt.enabled': 'Enabled',
         'security.api.encrypt.scope': 'Scope',
         'security.api.encrypt.securityLevel': 'Security Level',
+        'oauth.github.enabled': 'Enabled',
+        'oauth.github.useDefault': 'Use System Default',
+        'oauth.github.authorizationUri': 'Authorization URI',
+        'oauth.github.tokenUri': 'Token URI',
+        'oauth.github.userInfoUri': 'User Info URI',
+        'oauth.github.userNameAttribute': 'Username Attribute',
+        'oauth.github.clientId': 'Client ID',
+        'oauth.github.clientSecret': 'Client Secret',
+        'oauth.github.scope': 'Scope',
+        'oauth.google.enabled': 'Enabled',
+        'oauth.google.useDefault': 'Use System Default',
+        'oauth.google.authorizationUri': 'Authorization URI',
+        'oauth.google.tokenUri': 'Token URI',
+        'oauth.google.userInfoUri': 'User Info URI',
+        'oauth.google.userNameAttribute': 'Username Attribute',
+        'oauth.google.clientId': 'Client ID',
+        'oauth.google.clientSecret': 'Client Secret',
+        'oauth.google.scope': 'Scope',
+        'oauth.oicq.enabled': 'Enabled',
+        'oauth.oicq.authorizationUri': 'Authorization URI',
+        'oauth.oicq.tokenUri': 'Token URI',
+        'oauth.oicq.userInfoUri': 'User Info URI',
+        'oauth.oicq.userNameAttribute': 'Username Attribute',
+        'oauth.oicq.clientId': 'Client ID',
+        'oauth.oicq.clientSecret': 'Client Secret',
+        'oauth.oicq.scope': 'Scope',
       },
       groups: {
         'basic': 'Basic Settings',
@@ -1777,6 +1821,9 @@ export const enUS: I18nRules = {
         'mail.smtp': 'SMTP Mail Service',
         'messageChannel.lark': 'Lark',
         'security.api.encrypt': 'Api Security',
+        'oauth.github': 'GitHub',
+        'oauth.google': 'Google',
+        'oauth.oicq': 'QQ',
       },
       tabs: {
         'basic': 'Basic',
@@ -1784,6 +1831,7 @@ export const enUS: I18nRules = {
         'mail': 'Mail',
         'messageChannel': 'Message Channel',
         'security': 'Security',
+        'oauth': 'OAuth',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -1798,14 +1846,63 @@ export const enUS: I18nRules = {
         }
       }
     },
+    tenantPersonalProfile: {
+      title: 'Personal Profile',
+      subtitle: 'Manage your personal profile within the current organization',
+      tabs: {
+        info: 'Profile',
+        oauth: 'Third-party Accounts'
+      },
+      info: {
+        name: 'Real Name',
+        nameHint: 'Read-only',
+        phone: 'Phone',
+        nickname: 'Nickname',
+        nicknameHint: 'Leave blank to use your system nickname',
+        email: 'Email',
+        emailHint: 'Leave blank to use your system email',
+        bio: 'Bio',
+        gender: 'Gender',
+        birthday: 'Birthday',
+        timezone: 'Timezone',
+        locale: 'Locale',
+        save: 'Save',
+        saveSuccess: 'Profile saved',
+        saveFailed: 'Failed to save profile',
+        loadFailed: 'Failed to load profile',
+        phoneRequired: 'Phone is required',
+        invalidEmail: 'Invalid email address'
+      },
+      card: {
+        unboundEmail: 'No email',
+        unboundPhone: 'No phone',
+        joinedAt: 'Joined {{time}}'
+      },
+      oauth: {
+        availablePlatforms: 'Available Platforms',
+        unbind: 'Unbind',
+        unbindTitle: 'Unbind Third-party Account',
+        unbindConfirm: 'Are you sure you want to unbind {{nickname}}?',
+        unbindSuccess: 'Unbound successfully',
+        unbindFailed: 'Failed to unbind',
+        bindSuccess: 'Bound successfully',
+        bindFailed: 'Failed to bind',
+        alreadyBoundToUser: 'This third-party account is already bound to a system user and cannot be bound again within the organization'
+      }
+    },
     tenantSettingsManager: {
       fetchFailed: 'Failed to load organization settings',
       saveSuccess: 'Organization settings saved',
       saveFailed: 'Failed to save organization settings',
       saveSettings: 'Save Settings',
+      channelSelectPlaceholder: 'Select message channels',
       keys: {
         'notification.memberJoin.email': 'Email Notification',
+        'notification.memberJoin.channels': 'Message Channels',
+        'notification.memberJoin.content': 'Notification Content',
         'notification.memberJoinReview.email': 'Email Notification',
+        'notification.memberJoinReview.channels': 'Message Channels',
+        'notification.memberJoinReview.content': 'Notification Content',
       },
       groups: {
         'notification.memberJoin': 'Member Join Notification',
@@ -2657,6 +2754,11 @@ export const enUS: I18nRules = {
       2: 'QQ'
     },
 
+    oAuthBindingScope: {
+      0: 'System',
+      1: 'Tenant'
+    },
+
     channelType: {
       1: 'Email',
       2: 'Lark'
@@ -2684,6 +2786,13 @@ export const enUS: I18nRules = {
       0: 'User Side Only',
       1: 'Manager Side Only',
       2: 'Both Sides'
+    },
+
+    gender: {
+      0: 'Unspecified',
+      1: 'Male',
+      2: 'Female',
+      3: 'Other'
     }
   },
 
@@ -2732,7 +2841,8 @@ export const enUS: I18nRules = {
       memberRoles: 'Member Role Management',
       departments: 'Department Management',
       profile: 'Organization Settings',
-      messageChannels: 'Message Channel Management'
+      messageChannels: 'Message Channel Management',
+      personalProfile: 'Personal Profile'
     },
 
     // Admin menus

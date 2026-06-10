@@ -9,10 +9,10 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberR
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -24,16 +24,16 @@ import kotlin.reflect.KClass
 class TenantRoleManagerServiceImpl(
     private val tenantRoleRepository: TenantRoleRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val tenantRolePermissionRelationService: TenantRolePermissionRelationService,
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantRoleManagerService {
-    override val cacheStore: ExpiringKVStore<String, TenantRoleEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantRoleEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantRoleEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantRoleEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantRoleEntity> = TenantRoleEntity::class
 
     override fun getRepository(): TenantRoleRepository {

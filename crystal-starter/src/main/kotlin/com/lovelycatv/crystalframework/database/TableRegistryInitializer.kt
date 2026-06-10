@@ -48,6 +48,7 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_TENANT_TIRE_BENEFIT_VALUES)
         registry.register(TableConstants.TABLE_TENANT_SETTINGS)
         registry.register(TableConstants.TABLE_TENANT_MESSAGE_CHANNELS)
+        registry.register(TableConstants.TABLE_TENANT_USER_PROFILES)
 
         configurers.forEach { it.configure(registry) }
 

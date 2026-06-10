@@ -48,6 +48,7 @@ const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/Te
 const TenantMessageChannelManagerPage = lazy(() => import("@/pages/manager/tenant/TenantMessageChannelManagerPage.tsx"));
 const AuditLogManagerPage = lazy(() => import("@/pages/manager/audit/AuditLogManagerPage.tsx"));
 const MyTenantProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantProfilePage.tsx"));
+const MyTenantPersonalProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantPersonalProfilePage.tsx"));
 const MyTenantDashboard = lazy(() => import("@/pages/manager/tenant/MyTenantDashboard.tsx"));
 const MailSendLogManagerPage = lazy(() => import("@/pages/manager/mail/MailSendLogManagerPage.tsx"));
 const MyTenantMemberManagerPage = lazy(() => import("@/pages/manager/tenant/MyTenantMemberManagerPage.tsx"));
@@ -162,6 +163,14 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             icon: <ShopOutlined />,
             label: t('menu.myTenant.dashboard'),
             page: <MyTenantDashboard />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/personal-profile',
+            path: '/manager/tenant/personal-profile',
+            icon: <UserOutlined />,
+            label: t('menu.myTenant.personalProfile'),
+            page: <MyTenantPersonalProfilePage />,
             group: 'i_tenant',
         },
         {

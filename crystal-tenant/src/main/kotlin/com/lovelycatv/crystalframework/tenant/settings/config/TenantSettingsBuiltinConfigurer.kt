@@ -14,7 +14,11 @@ class TenantSettingsBuiltinConfigurer : TenantSettingsConfigurer {
         registry.settings(
             listOf(
                 TenantSettingsConstants.Notification.MemberJoin.EMAIL,
+                TenantSettingsConstants.Notification.MemberJoin.CHANNELS,
+                TenantSettingsConstants.Notification.MemberJoin.CONTENT,
                 TenantSettingsConstants.Notification.MemberJoinReview.EMAIL,
+                TenantSettingsConstants.Notification.MemberJoinReview.CHANNELS,
+                TenantSettingsConstants.Notification.MemberJoinReview.CONTENT,
             )
         )
     }

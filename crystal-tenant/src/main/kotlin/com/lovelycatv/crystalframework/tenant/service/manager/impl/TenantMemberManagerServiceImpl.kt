@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
@@ -20,7 +20,7 @@ import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.user.service.UserManagerService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
@@ -34,7 +34,7 @@ class TenantMemberManagerServiceImpl(
     private val tenantMemberRepository: TenantMemberRepository,
     private val userManagerService: UserManagerService,
     private val tenantBenefitService: TenantBenefitService,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val snowIdGenerator: SnowIdGenerator,
     override val eventPublisher: ApplicationEventPublisher,
     @Lazy
@@ -45,10 +45,10 @@ class TenantMemberManagerServiceImpl(
     private val tenantMemberService: TenantMemberService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantMemberManagerService {
-    override val cacheStore: ExpiringKVStore<String, TenantMemberEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantMemberEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantMemberEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantMemberEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantMemberEntity> = TenantMemberEntity::class
 
     override fun getRepository(): TenantMemberRepository {

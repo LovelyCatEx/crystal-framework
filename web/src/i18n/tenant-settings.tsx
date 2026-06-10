@@ -21,7 +21,11 @@ export function useTenantSettingsKeyToTranslationMap(): Map<string, string> {
 
     const map = new Map<string, string>([
         ['notification.memberJoin.email', t('pages.tenantSettingsManager.keys.notification.memberJoin.email')],
+        ['notification.memberJoin.channels', t('pages.tenantSettingsManager.keys.notification.memberJoin.channels')],
+        ['notification.memberJoin.content', t('pages.tenantSettingsManager.keys.notification.memberJoin.content')],
         ['notification.memberJoinReview.email', t('pages.tenantSettingsManager.keys.notification.memberJoinReview.email')],
+        ['notification.memberJoinReview.channels', t('pages.tenantSettingsManager.keys.notification.memberJoinReview.channels')],
+        ['notification.memberJoinReview.content', t('pages.tenantSettingsManager.keys.notification.memberJoinReview.content')],
     ]);
 
     for (const key of pluginKeys) {

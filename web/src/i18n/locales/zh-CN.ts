@@ -319,6 +319,19 @@ export const zhCN: I18nRules = {
           }
         }
       },
+
+      // OAuth2BindPage
+      oauth2Bind: {
+        title: '绑定账号',
+        subtitle: '正在绑定您的第三方账号',
+        processing: '绑定中...',
+        success: '账号绑定成功',
+        failed: '绑定失败',
+        successTitle: '绑定成功',
+        failedTitle: '绑定失败',
+        invalidParams: '绑定参数无效',
+        return: '返回'
+      },
     },
 
     userProfile: {
@@ -385,8 +398,12 @@ export const zhCN: I18nRules = {
         unbindConfirm: '是否要解绑第三方账号 {{nickname}}',
         unbindSuccess: '账号解绑成功',
         unbindFailed: '账号解绑失败',
+        unbind: '解绑',
         bind: '绑定',
-        availablePlatforms: '可绑定的平台'
+        availablePlatforms: '可绑定的平台',
+        bindSuccess: '已绑定',
+        bindFailed: '绑定失败',
+        alreadyBoundToUser: '该第三方账号已被绑定至某账户'
       },
       card: {
         unbound: '未绑定',
@@ -1749,6 +1766,7 @@ export const zhCN: I18nRules = {
       },
       keys: {
         'basic.baseUrl': 'API 基本地址',
+        'basic.frontendBaseUrl': '前端基本地址',
         'basic.waterMark.enabled': '是否显示水印',
         'basic.waterMark.type': '水印类型',
         'basic.waterMark.customValue': '自定义水印内容',
@@ -1766,6 +1784,32 @@ export const zhCN: I18nRules = {
         'security.api.encrypt.enabled': '是否启用',
         'security.api.encrypt.scope': '作用域',
         'security.api.encrypt.securityLevel': '安全等级',
+        'oauth.github.enabled': '启用',
+        'oauth.github.useDefault': '使用系统默认配置',
+        'oauth.github.authorizationUri': '授权端点',
+        'oauth.github.tokenUri': 'Token 端点',
+        'oauth.github.userInfoUri': '用户信息端点',
+        'oauth.github.userNameAttribute': '用户名属性',
+        'oauth.github.clientId': 'Client ID',
+        'oauth.github.clientSecret': 'Client Secret',
+        'oauth.github.scope': '授权范围',
+        'oauth.google.enabled': '启用',
+        'oauth.google.useDefault': '使用系统默认配置',
+        'oauth.google.authorizationUri': '授权端点',
+        'oauth.google.tokenUri': 'Token 端点',
+        'oauth.google.userInfoUri': '用户信息端点',
+        'oauth.google.userNameAttribute': '用户名属性',
+        'oauth.google.clientId': 'Client ID',
+        'oauth.google.clientSecret': 'Client Secret',
+        'oauth.google.scope': '授权范围',
+        'oauth.oicq.enabled': '启用',
+        'oauth.oicq.authorizationUri': '授权端点',
+        'oauth.oicq.tokenUri': 'Token 端点',
+        'oauth.oicq.userInfoUri': '用户信息端点',
+        'oauth.oicq.userNameAttribute': '用户名属性',
+        'oauth.oicq.clientId': 'Client ID',
+        'oauth.oicq.clientSecret': 'Client Secret',
+        'oauth.oicq.scope': '授权范围',
       },
       groups: {
         'basic': '基本设置',
@@ -1774,6 +1818,9 @@ export const zhCN: I18nRules = {
         'mail.smtp': 'SMTP 邮件服务',
         'messageChannel.lark': '飞书',
         'security.api.encrypt': 'Api 安全设置',
+        'oauth.github': 'GitHub',
+        'oauth.google': 'Google',
+        'oauth.oicq': 'QQ',
       },
       tabs: {
         'basic': '基本',
@@ -1781,6 +1828,7 @@ export const zhCN: I18nRules = {
         'mail': '邮件',
         'messageChannel': '消息渠道',
         'security': '安全',
+        'oauth': 'OAuth',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -1795,14 +1843,63 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    tenantPersonalProfile: {
+      title: '个人资料',
+      subtitle: '维护您在当前组织内的个人资料信息',
+      tabs: {
+        info: '基础资料',
+        oauth: '第三方账号'
+      },
+      info: {
+        name: '真实姓名',
+        nameHint: '不可修改',
+        phone: '联系电话',
+        nickname: '昵称',
+        nicknameHint: '留空则使用账户昵称',
+        email: '邮箱',
+        emailHint: '留空则使用账户邮箱',
+        bio: '个人简介',
+        gender: '性别',
+        birthday: '生日',
+        timezone: '时区',
+        locale: '语言',
+        save: '保存',
+        saveSuccess: '已保存个人资料',
+        saveFailed: '保存个人资料失败',
+        loadFailed: '加载个人资料失败',
+        phoneRequired: '请填写联系电话',
+        invalidEmail: '邮箱格式不正确'
+      },
+      card: {
+        unboundEmail: '尚未填写邮箱',
+        unboundPhone: '尚未填写联系电话',
+        joinedAt: '加入时间：{{time}}'
+      },
+      oauth: {
+        availablePlatforms: '可绑定的平台',
+        unbind: '解绑',
+        unbindTitle: '解绑第三方账号',
+        unbindConfirm: '确认解绑账号 {{nickname}} 吗？',
+        unbindSuccess: '已解绑',
+        unbindFailed: '解绑失败',
+        bindSuccess: '已绑定',
+        bindFailed: '绑定失败',
+        alreadyBoundToUser: '该第三方账号已绑定至其他系统账户，无法在当前组织内重复绑定'
+      }
+    },
     tenantSettingsManager: {
       fetchFailed: '无法获取组织设置',
       saveSuccess: '组织设置已保存',
       saveFailed: '组织设置保存失败',
       saveSettings: '保存设置',
+      channelSelectPlaceholder: '请选择消息渠道',
       keys: {
         'notification.memberJoin.email': '邮件通知',
+        'notification.memberJoin.channels': '消息渠道',
+        'notification.memberJoin.content': '消息通知内容',
         'notification.memberJoinReview.email': '邮件通知',
+        'notification.memberJoinReview.channels': '消息渠道',
+        'notification.memberJoinReview.content': '消息通知内容',
       },
       groups: {
         'notification.memberJoin': '成员加入通知',
@@ -2654,6 +2751,11 @@ export const zhCN: I18nRules = {
       2: 'QQ'
     },
 
+    oAuthBindingScope: {
+      0: '系统',
+      1: '租户'
+    },
+
     channelType: {
       1: '邮件',
       2: '飞书'
@@ -2681,6 +2783,13 @@ export const zhCN: I18nRules = {
       0: '仅用户端',
       1: '仅管理端',
       2: '两端都显示'
+    },
+
+    gender: {
+      0: '未指定',
+      1: '男',
+      2: '女',
+      3: '其他'
     }
   },
 
@@ -2729,7 +2838,8 @@ export const zhCN: I18nRules = {
       memberRoles: '成员角色管理',
       departments: '部门管理',
       profile: '组织设置',
-      messageChannels: '消息渠道管理'
+      messageChannels: '消息渠道管理',
+      personalProfile: '个人资料'
     },
 
     // 管理员菜单

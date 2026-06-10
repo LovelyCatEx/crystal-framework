@@ -1,13 +1,13 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationRecordEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationRecordRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantInvitationRecordService
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -16,14 +16,14 @@ import kotlin.reflect.KClass
 @Service
 class TenantInvitationRecordServiceImpl(
     private val tenantInvitationRecordRepository: TenantInvitationRecordRepository,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val snowIdGenerator: SnowIdGenerator,
 ) : TenantInvitationRecordService {
-    override val cacheStore: ExpiringKVStore<String, TenantInvitationRecordEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantInvitationRecordEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantInvitationRecordEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantInvitationRecordEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantInvitationRecordEntity> = TenantInvitationRecordEntity::class
 
     override fun getRepository(): TenantInvitationRecordRepository {

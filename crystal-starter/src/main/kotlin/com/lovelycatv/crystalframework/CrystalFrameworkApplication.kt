@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
+import org.springframework.boot.security.oauth2.client.autoconfigure.reactive.ReactiveOAuth2ClientAutoConfiguration
+import org.springframework.boot.security.oauth2.client.autoconfigure.reactive.ReactiveOAuth2ClientWebSecurityAutoConfiguration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -15,7 +17,10 @@ import org.springframework.scheduling.annotation.EnableAsync
 import reactor.core.publisher.Hooks
 
 @EnableConfigurationProperties
-@SpringBootApplication
+@SpringBootApplication(exclude = [
+    ReactiveOAuth2ClientAutoConfiguration::class,
+    ReactiveOAuth2ClientWebSecurityAutoConfiguration::class
+])
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 @EnableAsync
 @EnableSnailJob
@@ -34,7 +39,7 @@ class SpringbootTemplateApplication(
  | |___| |  | |_| \__ \ || (_| | |  _|| | | (_| | | | | | |  __/\ V  V / (_) | |  |   < 
   \____|_|   \__, |___/\__\__,_|_|_|  |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\
              |___/                                                                      
- :: Crystal Framework ::                                                       (${GlobalConstants.APP_VERSION})                                                                
+ :: Crystal Framework ::                                                       (v${GlobalConstants.APP_VERSION})                                                                
     
     DATACENTER: ${config.sharding.snowflake.dataCenterId}
     WORKER: ${config.sharding.snowflake.workerId}

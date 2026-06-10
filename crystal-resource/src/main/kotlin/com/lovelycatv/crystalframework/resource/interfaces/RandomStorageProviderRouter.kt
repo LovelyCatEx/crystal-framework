@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import kotlinx.coroutines.runBlocking
 
 class RandomStorageProviderRouter(
     private val storageProviderService: StorageProviderService
@@ -25,12 +26,16 @@ class RandomStorageProviderRouter(
             ?: throw BusinessException("no storage provider found in database")
     }
 
-    override fun invalidateCache() {
+    /**
+     * Invoked from a non-suspend, @Async event listener, so the reactive cache removal is
+     * bridged with [runBlocking] (runs off the reactor event-loop).
+     */
+    override fun invalidateCache() = runBlocking {
         storageProviderService.removeListCache(CACHE_KEY_IDENTIFIER)
     }
 
     suspend fun refreshCache(): List<StorageProviderEntity> {
-        this.invalidateCache()
+        storageProviderService.removeListCache(CACHE_KEY_IDENTIFIER)
 
         return storageProviderService
             .getRepository()

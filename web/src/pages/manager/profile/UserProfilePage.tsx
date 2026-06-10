@@ -45,9 +45,9 @@ import {useSWRState} from "@/compositions/use-swr.ts";
 import {getUserOAuthAccounts} from "@/api/user/user-oauth.api.ts";
 import PlatformIcon from "../../../components/PlatformIcon.tsx";
 import type {UserOAuthAccountVO} from "@/types/user/user-oauth.types.ts";
-import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
-import {getOAuth2LoginUrl} from "@/utils/oauth2.ts";
-import {PLATFORM_REGISTRATION_ID_MAP} from "@/global/constants.ts";
+import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types.ts";
+import {redirectToOAuthBind} from "@/utils/oauth2.ts";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 
 const { useToken } = theme;
 
@@ -497,12 +497,15 @@ const OAuthAccountSettings = () => {
     }
 
     const handleBind = (platform: OAuthPlatform) => {
-        window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);
+        redirectToOAuthBind(platform, OAuthBindingScope.SYSTEM);
     }
 
+    const { integratedInfo } = useSystemIntegrated();
+    const enabledOAuthPlatforms = integratedInfo?.enabledOAuthPlatforms ?? [];
+
     const allPlatforms = useMemo(() =>
-        [OAuthPlatform.GITHUB, OAuthPlatform.GOOGLE, OAuthPlatform.OICQ]
-    , []);
+        enabledOAuthPlatforms as OAuthPlatform[]
+    , [enabledOAuthPlatforms]);
 
     const boundPlatformIds = useMemo(() => new Set(accounts?.map(a => a.platformId) ?? []), [accounts]);
 
@@ -536,7 +539,7 @@ const OAuthAccountSettings = () => {
                         </Space>
 
                         <Button type="link" className="font-medium text-red-500" onClick={() => { handleUnbind(account); }}>
-                            {t('pages.userProfile.oauth.bind')}
+                            {t('pages.userProfile.oauth.unbind')}
                         </Button>
                     </div>
                 ))}

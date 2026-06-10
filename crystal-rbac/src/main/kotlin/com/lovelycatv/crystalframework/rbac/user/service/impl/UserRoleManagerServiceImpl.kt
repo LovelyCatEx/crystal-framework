@@ -7,9 +7,9 @@ import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleManagerService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 class UserRoleManagerServiceImpl(
     private val userRoleRepository: UserRoleRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val userRoleRelationService: UserRoleRelationService,
     private val userRolePermissionRelationService: UserRolePermissionRelationService,
@@ -59,9 +59,9 @@ class UserRoleManagerServiceImpl(
         userRolePermissionRelationService.deleteByRoleIdIn(ids)
     }
 
-    override val cacheStore: ExpiringKVStore<String, UserRoleEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<UserRoleEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, UserRoleEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<UserRoleEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<UserRoleEntity> = UserRoleEntity::class
 }

@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerCreateTenantTireBenefitFeatureDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerUpdateTenantTireBenefitFeatureDTO
@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatur
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitValueRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitFeatureManagerService
 import com.lovelycatv.crystalframework.tenant.utils.TenantBenefitValidator
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -23,14 +23,14 @@ class TenantTireBenefitFeatureManagerServiceImpl(
     private val benefitFeatureRepository: TenantTireBenefitFeatureRepository,
     private val benefitValueRepository: TenantTireBenefitValueRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantTireBenefitFeatureManagerService {
-    override val cacheStore: ExpiringKVStore<String, TenantTireBenefitFeatureEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<TenantTireBenefitFeatureEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, TenantTireBenefitFeatureEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantTireBenefitFeatureEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<TenantTireBenefitFeatureEntity> = TenantTireBenefitFeatureEntity::class
 
     override fun getRepository(): TenantTireBenefitFeatureRepository {

@@ -13,9 +13,9 @@ export const useUserProfile = (userId?: string | null) => {
     return { userProfile, isUserProfileLoading, refreshUserProfile };
 }
 
-export const useCurrentUserProfile = () => {
+export const useCurrentUserProfile = (enabled: boolean = true) => {
     const [userProfile, , isUserProfileLoading, refreshUserProfile] = useSWRState<UserProfileVO>(
-        'getUserProfile',
+        enabled ? 'getUserProfile' : undefined,
         getUserProfile,
         () => void message.error("无法获取用户资料")
     );

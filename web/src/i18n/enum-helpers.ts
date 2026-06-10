@@ -57,10 +57,18 @@ export function getOAuthPlatform(platform: number): string {
     return translateEnum('oAuthPlatform', platform);
 }
 
+export function getOAuthBindingScope(scope: number): string {
+    return translateEnum('oAuthBindingScope', scope);
+}
+
 export function getChannelType(type: number): string {
     return translateEnum('channelType', type);
 }
 
 export function getMessageChannelPreset(channelType: number, presetKey: string): string {
     return translateEnum('messageChannelPreset', `${channelType}_${presetKey}`);
+}
+
+export function getGender(gender: number): string {
+    return translateEnum('gender', gender);
 }

@@ -4,15 +4,16 @@ import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistr
 import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.service.redis.RedisService
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
-import com.lovelycatv.vertex.cache.store.ExpiringKVStore
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +32,7 @@ import kotlin.reflect.KClass
 class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
     private val snowIdGenerator: SnowIdGenerator,
-    private val redisService: RedisService,
+    private val reactiveRedisService: ReactiveRedisService,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
     private val systemSettingsRegistry: SystemSettingsRegistry,
@@ -72,10 +73,10 @@ class SystemSettingsServiceImpl(
         return this.systemSettingsRepository
     }
 
-    override val cacheStore: ExpiringKVStore<String, SystemSettingsEntity>
-        get() = redisService.asKVStore()
-    override val listCacheStore: ExpiringKVStore<String, List<SystemSettingsEntity>>
-        get() = redisService.asKVStore()
+    override val cacheStore: ReactiveExpiringKVStore<String, SystemSettingsEntity>
+        get() = reactiveRedisService.asReactiveKVStore()
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<SystemSettingsEntity>>
+        get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<SystemSettingsEntity> = SystemSettingsEntity::class
 
     override fun refreshSystemSettings() {
@@ -96,6 +97,7 @@ class SystemSettingsServiceImpl(
             mail = getSystemMailSettings(),
             messageChannel = getSystemMessageChannelSettings(),
             security = getSystemSecuritySettings(),
+            oauth = getSystemOAuthSettings(),
         ).also {
             this.cachedSystemSettings = it
             this.syncToCacheAsync()
@@ -106,6 +108,7 @@ class SystemSettingsServiceImpl(
     override suspend fun getSystemBasicSettings(): SystemSettings.Basic {
         return SystemSettings.Basic(
             baseUrl = getSettings(SystemSettingsConstants.Basic.BASE_URL)!!,
+            frontendBaseUrl = getSettings(SystemSettingsConstants.Basic.FRONTEND_BASE_URL)!!,
             waterMark = SystemSettings.Basic.WaterMark(
                 enabled = getSettings(SystemSettingsConstants.Basic.WaterMark.ENABLED)!!,
                 type = getSettings(SystemSettingsConstants.Basic.WaterMark.TYPE)!!,
@@ -158,8 +161,47 @@ class SystemSettingsServiceImpl(
         )
     }
 
+    override suspend fun getSystemOAuthSettings(): SystemSettings.OAuth {
+        return SystemSettings.OAuth(
+            github = SystemSettings.OAuth.OAuthPlatformSettings(
+                enabled = getSettings(SystemSettingsConstants.OAuth.Github.ENABLED)!!,
+                useDefault = getSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT),
+                authorizationUri = getSettings(SystemSettingsConstants.OAuth.Github.AUTHORIZATION_URI)!!,
+                tokenUri = getSettings(SystemSettingsConstants.OAuth.Github.TOKEN_URI)!!,
+                userInfoUri = getSettings(SystemSettingsConstants.OAuth.Github.USER_INFO_URI)!!,
+                userNameAttribute = getSettings(SystemSettingsConstants.OAuth.Github.USER_NAME_ATTRIBUTE)!!,
+                clientId = getSettings(SystemSettingsConstants.OAuth.Github.CLIENT_ID)!!,
+                clientSecret = getSettings(SystemSettingsConstants.OAuth.Github.CLIENT_SECRET)!!,
+                scope = getSettings(SystemSettingsConstants.OAuth.Github.SCOPE)!!,
+            ),
+            google = SystemSettings.OAuth.OAuthPlatformSettings(
+                enabled = getSettings(SystemSettingsConstants.OAuth.Google.ENABLED)!!,
+                useDefault = getSettings(SystemSettingsConstants.OAuth.Google.USE_DEFAULT),
+                authorizationUri = getSettings(SystemSettingsConstants.OAuth.Google.AUTHORIZATION_URI)!!,
+                tokenUri = getSettings(SystemSettingsConstants.OAuth.Google.TOKEN_URI)!!,
+                userInfoUri = getSettings(SystemSettingsConstants.OAuth.Google.USER_INFO_URI)!!,
+                userNameAttribute = getSettings(SystemSettingsConstants.OAuth.Google.USER_NAME_ATTRIBUTE)!!,
+                clientId = getSettings(SystemSettingsConstants.OAuth.Google.CLIENT_ID)!!,
+                clientSecret = getSettings(SystemSettingsConstants.OAuth.Google.CLIENT_SECRET)!!,
+                scope = getSettings(SystemSettingsConstants.OAuth.Google.SCOPE)!!,
+            ),
+            oicq = SystemSettings.OAuth.OAuthPlatformSettings(
+                enabled = getSettings(SystemSettingsConstants.OAuth.Oicq.ENABLED)!!,
+                useDefault = null,
+                authorizationUri = getSettings(SystemSettingsConstants.OAuth.Oicq.AUTHORIZATION_URI)!!,
+                tokenUri = getSettings(SystemSettingsConstants.OAuth.Oicq.TOKEN_URI)!!,
+                userInfoUri = getSettings(SystemSettingsConstants.OAuth.Oicq.USER_INFO_URI)!!,
+                userNameAttribute = getSettings(SystemSettingsConstants.OAuth.Oicq.USER_NAME_ATTRIBUTE)!!,
+                clientId = getSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_ID)!!,
+                clientSecret = getSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_SECRET)!!,
+                scope = getSettings(SystemSettingsConstants.OAuth.Oicq.SCOPE)!!,
+            ),
+        )
+    }
+
     override suspend fun updateSystemSettings(settings: SystemSettings) {
         setSettings(SystemSettingsConstants.Basic.BASE_URL, settings.basic.baseUrl)
+        setSettings(SystemSettingsConstants.Basic.FRONTEND_BASE_URL, settings.basic.frontendBaseUrl)
         setSettings(SystemSettingsConstants.Basic.WaterMark.ENABLED, settings.basic.waterMark.enabled.toString())
         setSettings(SystemSettingsConstants.Basic.WaterMark.TYPE, settings.basic.waterMark.type)
         setSettings(SystemSettingsConstants.Basic.WaterMark.CUSTOM_VALUE, settings.basic.waterMark.customValue)
@@ -181,6 +223,35 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())
+
+        setSettings(SystemSettingsConstants.OAuth.Github.ENABLED, settings.oauth.github.enabled.toString())
+        setSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT, settings.oauth.github.useDefault?.toString())
+        setSettings(SystemSettingsConstants.OAuth.Github.AUTHORIZATION_URI, settings.oauth.github.authorizationUri)
+        setSettings(SystemSettingsConstants.OAuth.Github.TOKEN_URI, settings.oauth.github.tokenUri)
+        setSettings(SystemSettingsConstants.OAuth.Github.USER_INFO_URI, settings.oauth.github.userInfoUri)
+        setSettings(SystemSettingsConstants.OAuth.Github.USER_NAME_ATTRIBUTE, settings.oauth.github.userNameAttribute)
+        setSettings(SystemSettingsConstants.OAuth.Github.CLIENT_ID, settings.oauth.github.clientId)
+        setSettings(SystemSettingsConstants.OAuth.Github.CLIENT_SECRET, settings.oauth.github.clientSecret)
+        setSettings(SystemSettingsConstants.OAuth.Github.SCOPE, settings.oauth.github.scope.toJSONString())
+
+        setSettings(SystemSettingsConstants.OAuth.Google.ENABLED, settings.oauth.google.enabled.toString())
+        setSettings(SystemSettingsConstants.OAuth.Google.USE_DEFAULT, settings.oauth.google.useDefault?.toString())
+        setSettings(SystemSettingsConstants.OAuth.Google.AUTHORIZATION_URI, settings.oauth.google.authorizationUri)
+        setSettings(SystemSettingsConstants.OAuth.Google.TOKEN_URI, settings.oauth.google.tokenUri)
+        setSettings(SystemSettingsConstants.OAuth.Google.USER_INFO_URI, settings.oauth.google.userInfoUri)
+        setSettings(SystemSettingsConstants.OAuth.Google.USER_NAME_ATTRIBUTE, settings.oauth.google.userNameAttribute)
+        setSettings(SystemSettingsConstants.OAuth.Google.CLIENT_ID, settings.oauth.google.clientId)
+        setSettings(SystemSettingsConstants.OAuth.Google.CLIENT_SECRET, settings.oauth.google.clientSecret)
+        setSettings(SystemSettingsConstants.OAuth.Google.SCOPE, settings.oauth.google.scope.toJSONString())
+
+        setSettings(SystemSettingsConstants.OAuth.Oicq.ENABLED, settings.oauth.oicq.enabled.toString())
+        setSettings(SystemSettingsConstants.OAuth.Oicq.AUTHORIZATION_URI, settings.oauth.oicq.authorizationUri)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.TOKEN_URI, settings.oauth.oicq.tokenUri)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.USER_INFO_URI, settings.oauth.oicq.userInfoUri)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.USER_NAME_ATTRIBUTE, settings.oauth.oicq.userNameAttribute)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_ID, settings.oauth.oicq.clientId)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_SECRET, settings.oauth.oicq.clientSecret)
+        setSettings(SystemSettingsConstants.OAuth.Oicq.SCOPE, settings.oauth.oicq.scope.toJSONString())
 
         this.refreshSystemSettings()
     }
@@ -276,10 +347,10 @@ class SystemSettingsServiceImpl(
     private suspend fun syncToCache() {
         val settings = getSystemSettings()
 
-        redisService.set(
+        reactiveRedisService.set(
             RedisConstants.SYSTEM_SETTINGS,
             settings
-        )
+        ).awaitFirstOrNull()
 
         logger.info("System settings synchronized to cache")
     }

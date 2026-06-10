@@ -22,21 +22,40 @@
 
 **禁止以任何理由使用面向过程的冗余传递代码，必须以最少的代码、最高的可读性、最强的可维护性完成任务。重复逻辑必须提取为公共模块，禁止在多个位置维护同一份逻辑。**
 
-正确的例子:
+**以上规则以 checklist 形式嵌入在下方「编码规范」「后端编码规范」「前端编码规范」章节开头，确保在执行时刻被强制检查，而非仅在阅读文档时看到。**
+
+正确的例子 1（执行编码任务）:
 
 ```text
-用户：请你帮我写一个 Controller...
-Assistant：根据规则，普通 Controller 必须...并且使用 DTO 接受前端参数，最后用 VO 返回数据...
+用户：帮我写一个 Controller
+Assistant：检查强制确认清单：
+  - 用户不是在提问，是执行指令 ✓
+  - 匹配 Skill：.claude/skills/add-controller ✓
+  - 依据规则：Controller 必须 @Validated + @RestController + @RequestMapping，必须返回 ApiResponse<>，DTO 接收/VO 返回...
+  根据 add-controller Skill 和编码规范 Controller 节的要求，我将...
 Assistant: 编写代码
-Assistant: 已经按照后端编码规范中的...规则，完成了...
+Assistant: 已完成。逐条合规检查：单文件单定义 ✓、无魔法值 ✓、DTO/VO 分包 ✓...
 ```
 
-错误的例子：
+正确的例子 2（用户提问）:
 
 ```text
-用户：请你帮我写一个 Controller...
-Assistant: 编写代码（错误地创建了 Request/Response 文件，Controller 完全不按本文要求编写）
-Assistant: 已经按照后端编码规范中的...规则，完成了...（捏造事实且做事不按要求汇报，属于严重的违规操作）
+用户：ConcurrentHashMap 有序吗？
+Assistant：不有序，ConcurrentHashMap 不保证插入顺序。（不做任何文件操作）
+```
+
+错误的例子 1（提问时操作）:
+
+```text
+用户：ConcurrentHashMap 有序吗？
+Assistant: 不有序，我帮你改成 LinkedHashMap。（违规：用户在提问，禁止操作）
+```
+
+错误的例子 2（跳过流程直接编码）:
+
+```text
+用户：帮我在 SDK 新增一个 Registry
+Assistant: 编写代码（违规：未检查 .claude/skills/add-registry Skill，未说明依据的规则，完成后未逐条检查合规）
 ```
 
 ## 构建与开发命令
@@ -109,10 +128,24 @@ main.tsx → BrowserRouter
 
 ## 编码规范
 
+### ⛔ 编码前强制确认（每次操作前必须逐项通过，任何一项未通过则禁止动手）
+
+| # | 检查项 | 未通过时的动作 |
+|---|--------|-------------|
+| 1 | 当前是否为用户提问/设计/确认场景？ | → 只回答，禁止任何文件操作 |
+| 2 | 是否有匹配的 Skill（`.claude/skills/`）？ | → 严格遵守 Skill 全部规则 |
+| 3 | 是否有 `docs/` 下的相关文档？ | → 遵守文档指导 |
+| 4 | 本次修改对应 CLAUDE.md 哪条规则？ | → 无对应规则：停下来问用户确认 |
+| 5 | 已向用户说明本次修改依据的规则了吗？ | → 没有：先说明再动手 |
+| 6 | 完成后是否会逐条对照本文档检查合规？ | → 承诺检查，否则不动手 |
+
 **!!!Attention: 在进行任何文件创建、代码编写/修改之前，应当阅读下面的内容，严格遵守规则，若用户意图与以下任意一条规则冲突，必须告知用户并得到二次确认才可以继续，否则视为违规操作。!!!**
 **!!!Attention: 在遇到该文档中未能详细描述或缺失的问题，请前往项目根目录 `.claude` 目录中寻找相关说明，若无则以最小的代价且符合所有下述规则的前提下进行修改。!!!**
+**!!!Attention: 所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。!!!**
 
 ### 后端编码规范
+
+> **⛔ 节点提醒：** 写后端代码前再确认一次 — ① 是否用户在提问（是→只回答）② 本次操作依据哪条规则（说不出来→停下来问用户）③ 完成后必须逐条合规检查
 
 后端采用模块化开发，现有结构请见上方的 Project Architecture 部分。
 
@@ -144,13 +177,13 @@ main.tsx → BrowserRouter
 **禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
 **此规则同样适用于测试代码中的 feature key、permission name、table name、setting key 等所有可枚举的字符串值。**
 
+**系统/租户设置读取规则：禁止在业务代码中逐条调用 `getSettings(declaration)` / `getSettings(tenantId, declaration)` 读取多个设置项。必须通过 Service 层提供的聚合方法（如 `getSystemXxxSettings()` / `getTenantSettings(tenantId)`）一次性获取已缓存的设置对象，再从中取值。逐条 `getSettings()` 仅允许在 Service 实现类内部的聚合方法中使用。**
+
+**调用项目内部 Service/工具方法时，必须先阅读对应接口或类的方法签名，确认方法名、参数和返回值后再调用。禁止想当然编造不存在的方法名（如用 `delete` 代替实际的 `removeKey`）。**
+
 **前端枚举规则（后端 enum 必须前端对应）：所有后端定义的枚举类型必须在前端有对应 TypeScript 枚举定义，并按四步流程实现翻译：① `src/types/` 定义枚举常量 ② `locales/{locale}.ts` 的 `enums` 命名空间添加翻译键 ③ `enum-helpers.ts` 注册 `getXxx()` 函数 ④ 所有组件中通过 `getXxx(EnumType.VALUE)` 获取标签文本。禁止在组件中使用原始数字直接比较或分散的 `t('components.columns.xxx')` 键代替枚举翻译函数。详见 `docs/develop/frontend/i18n.md` 的枚举翻译章节。**
 
 **工具方法优先使用 Kotlin 扩展函数。编写前先在项目内搜索是否有现成的扩展函数可用（路径如 `shared/utils/`、`shared/extensions/` 或模块内的 `utils/` 包）禁止不搜索直接写。**
-
-**所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
-**所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
-**所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。**
 
 **文档修改必须跨语言同步：修改 `docs/` 下某语言版本的文档时，必须同步更新其他语言版本（如 `docs/en/`）的对应文档。条目数量必须一一对应，禁止在翻译中额外添加原文没有的细节。**
 
@@ -263,6 +296,8 @@ export interface BaseEntity {
 
 ### 前端编码规范
 
+> **⛔ 节点提醒：** 写前端代码前再确认一次 — ① 是否用户在提问（是→只回答）② 本次操作依据哪条规则（说不出来→停下来问用户）③ 完成后必须逐条合规检查
+
 以下规则均以 `web/` 作为工作目录，不再重复。
 
 #### 组件
@@ -274,6 +309,28 @@ export interface BaseEntity {
 **写组件之前先检查是否有类似的文件夹存放你要写的组件，若有必须放入对应位置，若没有请遵守上述规则。**
 
 对于组件中用到的类型/枚举，必须在 tsx 文件内的顶部（import 下方）使用 export 导出，对于组件内部的类型/枚举等不需要 export 导出。
+
+对于 Entity 选择（选择用户、租户、消息渠道等）必须参考 EntitySelector 实现组件/子组件，严禁 Query PageSize = 100 甚至 9999 条，单页最大只允许20条数据。
+
+#### 超高频通用组件速查（写页面/组件前必看，优先复用）
+
+下列组件几乎贯穿所有 Manager 页面，写新页面/组件前必须先确认能否复用，禁止重复造轮子。
+
+- **ManagerPageContainer**（`components/ManagerPageContainer.tsx`）：标准化 Manager 页面的顶层容器，组合了顶栏 + 表格 + 增删改弹窗的全套能力（props 见上文 ManagerPageContainer 核心 Props 表）。凡是「列表 + 增删改查」的标准后台页面一律用它，通过 `pageRef.current.refreshData()` 刷新数据。
+
+- **EntityTable**（`components/table/EntityTable.tsx`）：分页数据表格底座，被 ManagerPageContainer 内部使用。需要表格但不走标准 Manager 套路（如只读展示、嵌入式表格）时单独使用，提供 `query` 分页查询、列定义、行选择（`tableSelection`，`radio` 单选 / `checkbox` 多选）。
+
+- **EntitySelector / EntitySelectorModal**（`components/selector/`）：以表格弹窗形式选择实体。`EntityIdSelector` 为单选（`value: string`），多选直接用 `EntitySelectorModal type="checkbox"`。选用户/租户/角色/渠道等已有专用封装（`UserIdSelector`、`TenantRoleIdSelector` 等）直接复用，新实体照搬其写法，用 `additionalQueryParams` 注入额外查询条件。
+
+- **Columns**（`components/columns/XxxEntityColumns.tsx`）：每个实体一份表格列定义 Hook（`useXxxTableColumns`）。外键字段必须用 `XxxDisplay` 子组件异步展示关联实体名称（见 Columns 具象化展示节），禁止裸 ID。新实体表格必须新建对应 columns 文件。
+
+- **PopCard**（`components/card/pop/`）：鼠标悬浮/点击展示实体摘要信息的卡片（如 `UserCard`、`TenantDepartmentPopCard`），内部按 id 异步拉取 profile。在列表/详情中需要快速预览关联实体时复用，新实体照搬现有卡片写法。
+
+- **ActionBarComponent**（`components/ActionBarComponent.tsx`）：页面标题栏，提供 `title` / `subtitle` / `titleActions`（右侧操作区）。非标准化页面至少要有它作为页头；ManagerPageContainer 已内置。
+
+- **CopyableToolTip**（`components/CopyableToolTip.tsx`）：带一键复制的文本 Tooltip。展示 ID、长字符串、配置等需要复制的内容时统一用它包裹，columns 中尤其高频。
+
+- **StandardCard**（`components/card/StandardCard.tsx`）：统一圆角/边框/内边距风格的卡片容器。需要分块承载内容时用它替代裸 `div`/`Card`，保证视觉一致。
 
 #### 页面文件命名
 
@@ -344,6 +401,10 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
 **禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
+
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
+**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
 
 #### Compositions
 
