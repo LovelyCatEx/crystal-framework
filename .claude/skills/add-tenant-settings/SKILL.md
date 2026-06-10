@@ -73,6 +73,15 @@ i18n 翻译位于 `web/src/i18n/locales/zh-CN.ts` 和 `en-US.ts`，节点为 `pa
 1. 阅读 `TenantSettingsConstants.kt`，判断新增 key 是否重复。如果重复则立即停止并通知用户。
 2. 如果新增 key 属于已有分类，在对应 nested object 内添加 `val` 声明。如果需要新的 group/tab 分类，按嵌套 object 规则创建。
 3. 阅读 `TenantSettingsBuiltinConfigurer.kt`，将上一步的声明添加到 `registry.settings()` 列表中。
+4. 更新 `TenantSettingsView` 数据类（`crystal-tenant` 模块的 `com.lovelycatv.crystalframework.tenant.settings.types.TenantSettingsView`）：
+   - 如果属于已有分类，在对应嵌套 data class 中添加新字段。
+   - 如果需要新的分类，新增对应嵌套 data class 并在上级构造参数中引用。
+   - **禁止给新增字段添加默认值（如 `= ""`, `= false`）。** 数据类必须严格反映实际结构，反序列化兼容性问题由缓存失效机制处理，不允许用默认值掩盖 schema 不一致。
+5. 更新 `TenantSettingsServiceImpl`（`crystal-tenant` 模块）：
+   - 在 `getTenantSettings()` 方法中添加新字段的读取。
+   - 在 `updateTenantSettings()` 方法中添加新字段的写入（若存在逐字段写入逻辑）。
+
+**禁止在业务代码中逐条调用 `getSettings(tenantId, declaration)` 读取多个设置项。必须通过 `getTenantSettings(tenantId)` 一次性获取已缓存的 `TenantSettingsView` 对象，再从中取值。**
 
 ### 前端
 1. 在 `zh-CN.ts` 和 `en-US.ts` 的 `pages.tenantSettingsManager.keys` 下添加 key 翻译。

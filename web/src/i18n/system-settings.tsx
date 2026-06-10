@@ -5,7 +5,8 @@ import {
     LockOutlined,
     MailOutlined,
     RobotOutlined,
-    SettingOutlined
+    SettingOutlined,
+    ApiOutlined
 } from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {pluginRegistry} from "@/plugin/registry.ts";
@@ -28,6 +29,7 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
 
     const map = new Map<string, string>([
         ['basic.baseUrl', t('pages.systemSettingsManager.keys.basic.baseUrl')],
+        ['basic.frontendBaseUrl', t('pages.systemSettingsManager.keys.basic.frontendBaseUrl')],
         ['basic.waterMark.enabled', t('pages.systemSettingsManager.keys.basic.waterMark.enabled')],
         ['basic.waterMark.type', t('pages.systemSettingsManager.keys.basic.waterMark.type')],
         ['basic.waterMark.customValue', t('pages.systemSettingsManager.keys.basic.waterMark.customValue')],
@@ -45,6 +47,32 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
         ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
         ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
+        ['oauth.github.enabled', t('pages.systemSettingsManager.keys.oauth.github.enabled')],
+        ['oauth.github.useDefault', t('pages.systemSettingsManager.keys.oauth.github.useDefault')],
+        ['oauth.github.authorizationUri', t('pages.systemSettingsManager.keys.oauth.github.authorizationUri')],
+        ['oauth.github.tokenUri', t('pages.systemSettingsManager.keys.oauth.github.tokenUri')],
+        ['oauth.github.userInfoUri', t('pages.systemSettingsManager.keys.oauth.github.userInfoUri')],
+        ['oauth.github.userNameAttribute', t('pages.systemSettingsManager.keys.oauth.github.userNameAttribute')],
+        ['oauth.github.clientId', t('pages.systemSettingsManager.keys.oauth.github.clientId')],
+        ['oauth.github.clientSecret', t('pages.systemSettingsManager.keys.oauth.github.clientSecret')],
+        ['oauth.github.scope', t('pages.systemSettingsManager.keys.oauth.github.scope')],
+        ['oauth.google.enabled', t('pages.systemSettingsManager.keys.oauth.google.enabled')],
+        ['oauth.google.useDefault', t('pages.systemSettingsManager.keys.oauth.google.useDefault')],
+        ['oauth.google.authorizationUri', t('pages.systemSettingsManager.keys.oauth.google.authorizationUri')],
+        ['oauth.google.tokenUri', t('pages.systemSettingsManager.keys.oauth.google.tokenUri')],
+        ['oauth.google.userInfoUri', t('pages.systemSettingsManager.keys.oauth.google.userInfoUri')],
+        ['oauth.google.userNameAttribute', t('pages.systemSettingsManager.keys.oauth.google.userNameAttribute')],
+        ['oauth.google.clientId', t('pages.systemSettingsManager.keys.oauth.google.clientId')],
+        ['oauth.google.clientSecret', t('pages.systemSettingsManager.keys.oauth.google.clientSecret')],
+        ['oauth.google.scope', t('pages.systemSettingsManager.keys.oauth.google.scope')],
+        ['oauth.oicq.enabled', t('pages.systemSettingsManager.keys.oauth.oicq.enabled')],
+        ['oauth.oicq.authorizationUri', t('pages.systemSettingsManager.keys.oauth.oicq.authorizationUri')],
+        ['oauth.oicq.tokenUri', t('pages.systemSettingsManager.keys.oauth.oicq.tokenUri')],
+        ['oauth.oicq.userInfoUri', t('pages.systemSettingsManager.keys.oauth.oicq.userInfoUri')],
+        ['oauth.oicq.userNameAttribute', t('pages.systemSettingsManager.keys.oauth.oicq.userNameAttribute')],
+        ['oauth.oicq.clientId', t('pages.systemSettingsManager.keys.oauth.oicq.clientId')],
+        ['oauth.oicq.clientSecret', t('pages.systemSettingsManager.keys.oauth.oicq.clientSecret')],
+        ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
     ]);
 
     for (const key of pluginKeys) {
@@ -67,6 +95,9 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['messageChannel.lark', { label: t('pages.systemSettingsManager.groups.messageChannel.lark'), icon: <RobotOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
+        ['oauth.github', { label: t('pages.systemSettingsManager.groups.oauth.github'), icon: <ApiOutlined /> }],
+        ['oauth.google', { label: t('pages.systemSettingsManager.groups.oauth.google'), icon: <ApiOutlined /> }],
+        ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
     ]);
 
     for (const group of pluginGroups) {
@@ -88,6 +119,7 @@ export function useSettingsTabToTranslationMap(): Map<string, string> {
         ['mail', t('pages.systemSettingsManager.tabs.mail')],
         ['messageChannel', t('pages.systemSettingsManager.tabs.messageChannel')],
         ['security', t('pages.systemSettingsManager.tabs.security')],
+        ['oauth', t('pages.systemSettingsManager.tabs.oauth')],
     ]);
 
     for (const tab of pluginTabs) {

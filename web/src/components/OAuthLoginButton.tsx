@@ -37,7 +37,7 @@ export const OAuthLoginButton: React.FC<OAuthLoginButtonProps> = ({
 
     const handleClick = () => {
         if (!agreedToTerms) {
-            void message.warning(t('pages.login.form.agreement.required'));
+            void message.warning(t('pages.auth.login.form.agreement.required'));
             return;
         }
         window.location.href = getOAuth2LoginUrl(PLATFORM_REGISTRATION_ID_MAP[platform]);

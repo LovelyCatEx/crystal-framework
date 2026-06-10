@@ -35,8 +35,15 @@ class SystemModuleClient(
 
     @PostConstruct
     fun init() {
-        // Boot thread: blocking warm-up is safe here (not a reactor event-loop).
-        runBlocking { reload() }
+        runBlocking {
+            try {
+                reload()
+            } catch (e: Exception) {
+                logger.warn("Failed to deserialize cached system settings, invalidating stale cache", e)
+                reactiveRedisService.removeKey(RedisConstants.SYSTEM_SETTINGS).awaitFirstOrNull()
+                cachedSystemSettings = null
+            }
+        }
 
         reactiveRedisMessageListenerContainer
             .receive(refreshTopic)
@@ -63,9 +70,16 @@ class SystemModuleClient(
     }
 
     private suspend fun reload(): SystemSettings? {
-        return reactiveRedisService
-            .get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
-            .awaitFirstOrNull()
-            .also { cachedSystemSettings = it }
+        return try {
+            reactiveRedisService
+                .get<SystemSettings>(RedisConstants.SYSTEM_SETTINGS)
+                .awaitFirstOrNull()
+                .also { cachedSystemSettings = it }
+        } catch (e: Exception) {
+            logger.warn("Failed to deserialize system settings from cache, treating as cache miss", e)
+            reactiveRedisService.removeKey(RedisConstants.SYSTEM_SETTINGS).awaitFirstOrNull()
+            cachedSystemSettings = null
+            null
+        }
     }
 }

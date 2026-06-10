@@ -22,4 +22,6 @@ interface OAuthAccountRepository : BaseRepository<OAuthAccountEntity> {
 
     @Query("SELECT COUNT(*) FROM oauth_accounts WHERE created_time >= :startTime AND created_time < :endTime")
     fun countByCreatedTimeBetween(startTime: Long, endTime: Long): Mono<Long>
+
+    fun findAllByUserIdAndScope(userId: Long, scope: Int): Flux<OAuthAccountEntity>
 }

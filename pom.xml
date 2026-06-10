@@ -64,7 +64,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.8.0</revision>
+        <revision>1.9.0</revision>
     </properties>
 
     <dependencyManagement>
@@ -116,7 +116,12 @@
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
-                <artifactId>crystal-message-channel</artifactId>
+                <artifactId>crystal-message-channel-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-message-channel-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

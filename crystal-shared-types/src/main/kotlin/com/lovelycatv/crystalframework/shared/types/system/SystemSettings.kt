@@ -8,9 +8,11 @@ data class SystemSettings(
     val mail: Mail,
     val messageChannel: MessageChannel,
     val security: Security,
+    val oauth: OAuth,
 ) {
     data class Basic(
         val baseUrl: String,
+        val frontendBaseUrl: String,
         val waterMark: WaterMark,
     ) {
         data class WaterMark(
@@ -70,5 +72,23 @@ data class SystemSettings(
                 val securityLevel: Int,
             )
         }
+    }
+
+    data class OAuth(
+        val github: OAuthPlatformSettings,
+        val google: OAuthPlatformSettings,
+        val oicq: OAuthPlatformSettings,
+    ) {
+        data class OAuthPlatformSettings(
+            val enabled: Boolean,
+            val useDefault: Boolean?,
+            val authorizationUri: String,
+            val tokenUri: String,
+            val userInfoUri: String,
+            val userNameAttribute: String,
+            val clientId: String,
+            val clientSecret: String,
+            val scope: List<String>,
+        )
     }
 }

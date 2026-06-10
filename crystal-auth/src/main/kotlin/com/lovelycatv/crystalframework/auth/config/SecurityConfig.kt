@@ -9,9 +9,9 @@ import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.vertex.log.logger
-import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -36,7 +36,6 @@ import reactor.kotlin.core.publisher.toMono
 class SecurityConfig(
     private val unauthorizedPathScanner: UnauthorizedPathScanner,
     private val reactiveAuthenticationManager: ReactiveAuthenticationManager,
-    private val oauth2ClientProperties: OAuth2ClientProperties,
     private val eventPublisher: ApplicationEventPublisher,
     private val clientRegistrationIdOAuthPlatformConverter: ClientRegistrationIdOAuthPlatformConverter,
 ) {
@@ -182,10 +181,11 @@ class SecurityConfig(
 
         // Build path patterns for matching
         val unauthorizedPathPatterns = unauthorizedPathScanner.getUnauthorizedPathPatterns() +
-                oauth2ClientProperties.registration.keys.flatMap {
+                OAuthPlatform.entries.flatMap { platform ->
+                    val registrationId = platform.name.lowercase()
                     listOf(
-                        pathPatternParser.parse("/login/oauth2/code/${it}"),
-                        pathPatternParser.parse("/oauth2/authorization/${it}")
+                        pathPatternParser.parse("/login/oauth2/code/${registrationId}"),
+                        pathPatternParser.parse("/oauth2/authorization/${registrationId}")
                     )
                 } +
                 listOf(

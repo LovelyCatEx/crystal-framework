@@ -68,3 +68,7 @@ export function getChannelType(type: number): string {
 export function getMessageChannelPreset(channelType: number, presetKey: string): string {
     return translateEnum('messageChannelPreset', `${channelType}_${presetKey}`);
 }
+
+export function getGender(gender: number): string {
+    return translateEnum('gender', gender);
+}

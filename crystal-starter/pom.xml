@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-message-channel</artifactId>
+            <artifactId>crystal-message-channel-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>

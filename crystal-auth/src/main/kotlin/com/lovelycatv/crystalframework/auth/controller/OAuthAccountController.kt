@@ -6,10 +6,13 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.auth.controller.dto.BindOAuthAccountDTO
+import com.lovelycatv.crystalframework.auth.controller.dto.BindOAuthByAccountIdDTO
 import com.lovelycatv.crystalframework.user.controller.dto.RegisterFromOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.dto.UnbindOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.vo.UserOAuthAccountVO
+import com.lovelycatv.crystalframework.auth.controller.vo.TenantOAuthAccountVO
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.service.UserService
 import jakarta.validation.Valid
@@ -109,5 +112,61 @@ class OAuthAccountController(
                     )
                 }
         )
+    }
+
+    /**
+     * Unified OAuth binding endpoint. Binds the specified OAuth identity to the current user
+     * at the given scope (SYSTEM or TENANT). The OAuth account must already exist (created by
+     * the login/code-exchange flow via loginByOAuth2Code).
+     */
+    @PostMapping("/bindByAccountId")
+    suspend fun bindOAuthByAccountId(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: BindOAuthByAccountIdDTO
+    ): ApiResponse<*> {
+        val account = oAuthAccountService.getByIdOrNull(dto.oauthAccountId)
+            ?: throw BusinessException("OAuth account not found")
+
+        // The identity must either be unbound or belong to the current user
+        if (account.userId != null && account.userId != userAuthentication.userId) {
+            throw BusinessException("This OAuth identity belongs to another user")
+        }
+
+        // Ensure system-level binding exists (required for both scopes)
+        if (account.userId == null) {
+            oAuthAccountService.bindUser(account.id, userAuthentication.userId)
+        }
+
+        val scope = OAuthBindingScope.getByTypeId(dto.scope)
+            ?: throw BusinessException("Invalid binding scope: ${dto.scope}")
+
+        return when (scope) {
+            OAuthBindingScope.SYSTEM -> {
+                ApiResponse.success(
+                    UserOAuthAccountVO(
+                        id = account.id,
+                        platformId = account.platform,
+                        nickname = account.nickname,
+                        avatar = account.avatar,
+                    )
+                )
+            }
+            OAuthBindingScope.TENANT -> {
+                val tenantId = userAuthentication.assertTenantIdNotNull()
+                val bound = oAuthAccountService.bindTenant(account.id, userAuthentication.userId, tenantId)
+                ApiResponse.success(
+                    TenantOAuthAccountVO(
+                        id = bound.id,
+                        platformId = bound.platform,
+                        scope = bound.scope,
+                        tenantId = bound.tenantId,
+                        nickname = bound.nickname,
+                        avatar = bound.avatar,
+                    )
+                )
+            }
+        }
     }
 }

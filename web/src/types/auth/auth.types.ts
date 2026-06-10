@@ -1,6 +1,7 @@
 export interface LoginResponse {
     token: string;
     expiresIn: number;
+    oauthAccountId?: string;
 }
 
 export interface OAuth2UserInfo {

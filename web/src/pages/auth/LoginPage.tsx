@@ -10,10 +10,10 @@ import {getQueryString} from "@/utils/url.utils.ts";
 import {buildDocumentTitle} from "@/global/global-settings.ts";
 import {menuPathDashboard, menuPathRegister, menuPathResetPassword} from "@/router/paths.ts";
 import {OAuthLoginButton} from "../../components/OAuthLoginButton.tsx";
-import {OAuthPlatform} from "@/types/user/oauth-account.types.ts";
 import {getJoinedTenants} from "@/api/tenant/tenant.api.ts";
 import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 
 interface LoginFormData {
     username: string,
@@ -140,6 +140,8 @@ export function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const navigate = useNavigate();
+    const { integratedInfo } = useSystemIntegrated();
+    const enabledOAuthPlatforms = integratedInfo?.enabledOAuthPlatforms ?? [];
 
     const [joinedTenants, setJoinedTenants] = useState<UserTenantVO[]>([]);
     const [loggedUsername, setLoggedUsername] = useState<string>("");
@@ -290,30 +292,25 @@ export function LoginPage() {
                     </Form>
 
                     {/* Third Party Login */}
-                    <div className="mt-8">
-                        <Divider
-                            plain
-                            className="text-gray-400 text-[10px] uppercase tracking-widest"
-                        >
-                            {t('pages.auth.login.divider')}
-                        </Divider>
-                        <div className="flex gap-4 mt-6">
-                            <OAuthLoginButton
-                                platform={OAuthPlatform.GITHUB}
-                                agreedToTerms={agreedToTerms}
-                            />
-
-                            <OAuthLoginButton
-                                platform={OAuthPlatform.GOOGLE}
-                                agreedToTerms={agreedToTerms}
-                            />
-
-                            <OAuthLoginButton
-                                platform={OAuthPlatform.OICQ}
-                                agreedToTerms={agreedToTerms}
-                            />
+                    {enabledOAuthPlatforms.length > 0 && (
+                        <div className="mt-8">
+                            <Divider
+                                plain
+                                className="text-gray-400 text-[10px] uppercase tracking-widest"
+                            >
+                                {t('pages.auth.login.divider')}
+                            </Divider>
+                            <div className="flex gap-4 mt-6">
+                                {enabledOAuthPlatforms.map(platformId => (
+                                    <OAuthLoginButton
+                                        key={platformId}
+                                        platform={platformId}
+                                        agreedToTerms={agreedToTerms}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </>
             )}
 
