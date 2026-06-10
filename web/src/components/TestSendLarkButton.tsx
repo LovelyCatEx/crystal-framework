@@ -3,6 +3,7 @@ import {SendOutlined} from "@ant-design/icons";
 import {useState} from "react";
 import {useTranslation} from "react-i18next";
 import {ChannelType, testSendMessage} from "@/api/system/system-settings.api.ts";
+import {MessageChainEditor} from "@/components/message-chain-editor";
 
 export type LarkRecipientIdType = 'openId' | 'userId' | 'unionId' | 'email' | 'chatId';
 
@@ -99,10 +100,10 @@ export function TestSendLarkButton() {
                         name="content"
                         extra={t('pages.systemSettingsManager.testSendLark.contentHint')}
                     >
-                        <Input.TextArea
-                            rows={5}
+                        <MessageChainEditor
+                            minRows={4}
+                            maxRows={8}
                             placeholder={t('pages.systemSettingsManager.testSendLark.contentPlaceholder')}
-                            autoComplete="off"
                         />
                     </Form.Item>
                 </Form>

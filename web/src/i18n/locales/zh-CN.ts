@@ -2574,6 +2574,29 @@ export const zhCN: I18nRules = {
       preview: '预览',
       placeholder: '输入 HTML 代码...'
     },
+    messageChainEditor: {
+      visualMode: '可视化',
+      sourceMode: '源码',
+      placeholder: '输入消息内容...',
+      modalTitle: '编辑消息内容',
+      modalOk: '确定',
+      insert: {
+        at: '提及',
+        link: '链接',
+        image: '图片',
+        br: '换行'
+      },
+      fields: {
+        userId: '用户 ID',
+        tenantId: '租户 ID',
+        displayName: '显示名称',
+        href: '链接地址',
+        title: '标题',
+        src: '图片地址'
+      },
+      confirm: '插入',
+      cancel: '取消'
+    },
     imageCropper: {
       loading: '加载中...',
       rotateLeft: '向左旋转',

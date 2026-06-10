@@ -41,7 +41,7 @@ object MessageChainXmlWriter {
     private fun writeImage(sb: StringBuilder, segment: ImageSegment) {
         val src = when (val source = segment.source) {
             is UrlImageSource -> source.url
-            is ResourceImageSource -> "resource:${source.resourceId}"
+            is ResourceImageSource -> "resource://${source.resourceId}"
             is BytesImageSource ->
                 throw IllegalArgumentException("BytesImageSource cannot be serialized to XML")
         }

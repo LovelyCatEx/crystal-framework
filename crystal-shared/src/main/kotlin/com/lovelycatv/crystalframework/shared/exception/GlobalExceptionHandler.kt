@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
 import org.springframework.web.server.MissingRequestValueException
+import org.springframework.web.server.ServerWebInputException
 
 @Component
 @RestControllerAdvice
@@ -95,6 +96,13 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         logger.debug("An authorization denied exception occurred", e)
 
         return ApiResponse.forbidden<Nothing>("you are not allowed to access this resource")
+    }
+
+    @ExceptionHandler(ServerWebInputException::class)
+    fun handleServerWebInputException(e: ServerWebInputException): ApiResponse<*> {
+        logger.debug("An parameter input exception occurred, message: ${e.localizedMessage ?: e.message}", e)
+
+        return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message)
     }
 
     @ExceptionHandler(Exception::class)

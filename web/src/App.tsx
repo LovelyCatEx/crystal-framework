@@ -99,7 +99,7 @@ function App() {
   };
 
   return (
-      <ConfigProvider theme={themeConfig}>
+      <ConfigProvider theme={themeConfig} modal={{mask: {closable: false}}}>
           <SystemIntegratedProvider>
               <AppContent />
           </SystemIntegratedProvider>
