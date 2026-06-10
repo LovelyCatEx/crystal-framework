@@ -49,6 +49,8 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_TENANT_SETTINGS)
         registry.register(TableConstants.TABLE_TENANT_MESSAGE_CHANNELS)
         registry.register(TableConstants.TABLE_TENANT_USER_PROFILES)
+        registry.register(TableConstants.TABLE_TENANT_DICT_TYPES)
+        registry.register(TableConstants.TABLE_TENANT_DICT_ITEMS)
 
         configurers.forEach { it.configure(registry) }
 

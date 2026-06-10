@@ -289,6 +289,62 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Dictionary Type
+    val MENU_TENANT_DICT_TYPE_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.dict.type",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/dict-types"
+    )
+
+    const val ACTION_TENANT_DICT_TYPE_CREATE_PEM = "i.tenant.dict.type.create"
+    val ACTION_TENANT_DICT_TYPE_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_TYPE_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_TYPE_READ_PEM = "i.tenant.dict.type.read"
+    val ACTION_TENANT_DICT_TYPE_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_TYPE_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_TYPE_UPDATE_PEM = "i.tenant.dict.type.update"
+    val ACTION_TENANT_DICT_TYPE_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_TYPE_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_TYPE_DELETE_PEM = "i.tenant.dict.type.delete"
+    val ACTION_TENANT_DICT_TYPE_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_TYPE_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    // Tenant Dictionary Item
+    const val ACTION_TENANT_DICT_ITEM_CREATE_PEM = "i.tenant.dict.item.create"
+    val ACTION_TENANT_DICT_ITEM_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_ITEM_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_ITEM_READ_PEM = "i.tenant.dict.item.read"
+    val ACTION_TENANT_DICT_ITEM_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_ITEM_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_ITEM_UPDATE_PEM = "i.tenant.dict.item.update"
+    val ACTION_TENANT_DICT_ITEM_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_ITEM_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_DICT_ITEM_DELETE_PEM = "i.tenant.dict.item.delete"
+    val ACTION_TENANT_DICT_ITEM_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_DICT_ITEM_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

@@ -33,4 +33,6 @@ object TableConstants {
     const val TABLE_TENANT_SETTINGS = "tenant_settings"
     const val TABLE_TENANT_MESSAGE_CHANNELS = "tenant_message_channels"
     const val TABLE_TENANT_USER_PROFILES = "tenant_user_profiles"
+    const val TABLE_TENANT_DICT_TYPES = "tenant_dict_type"
+    const val TABLE_TENANT_DICT_ITEMS = "tenant_dict_item"
 }

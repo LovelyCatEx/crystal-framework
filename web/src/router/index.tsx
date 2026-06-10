@@ -1,6 +1,7 @@
 import {
     ApartmentOutlined,
     AuditOutlined,
+    BookOutlined,
     CloudOutlined,
     DashboardOutlined,
     DatabaseOutlined,
@@ -61,6 +62,10 @@ const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLogi
 const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
 const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
 const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/AnnouncementManagerPage.tsx"));
+const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictTypeManagerPage.tsx"));
+const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
+const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
+const MyTenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictItemManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -219,6 +224,22 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             icon: <NotificationOutlined />,
             label: t('menu.myTenant.messageChannels'),
             page: <MyTenantMessageChannelManagerPage />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/dict-types',
+            path: '/manager/tenant/dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.myTenant.dictTypes'),
+            page: <MyTenantDictTypeManagerPage />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/dict-items',
+            path: '/manager/tenant/dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.myTenant.dictTypes'),
+            page: <MyTenantDictItemManagerPage />,
             group: 'i_tenant',
         },
         {
@@ -474,6 +495,22 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <NotificationOutlined />,
             label: t('menu.admin.announcements'),
             page: <AnnouncementManagerPage />,
+        },
+        {
+            key: '/manager/tenant-dict-types',
+            path: '/manager/tenant-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictTypes'),
+            page: <TenantDictTypeManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-dict-items',
+            path: '/manager/tenant-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictItems'),
+            page: <TenantDictItemManagerPage />,
+            group: 'tenant'
         },
         {
             key: '/manager/settings',
