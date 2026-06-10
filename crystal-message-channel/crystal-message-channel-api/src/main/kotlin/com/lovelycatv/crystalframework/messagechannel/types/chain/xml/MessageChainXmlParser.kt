@@ -11,6 +11,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.chain.NewlineSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.ResourceImageSource
 import com.lovelycatv.crystalframework.messagechannel.types.chain.TextSegment
 import com.lovelycatv.crystalframework.messagechannel.types.chain.UrlImageSource
+import java.net.URI
 
 /**
  * Hand-written tokenizer for [MessageChain] XML form.
@@ -101,9 +102,13 @@ object MessageChainXmlParser {
         else -> null
     }
 
-    private fun parseImageSource(src: String): ImageSource =
-        if (src.startsWith("resource:")) ResourceImageSource(src.removePrefix("resource:"))
-        else UrlImageSource(src)
+    private fun parseImageSource(src: String): ImageSource {
+        val uri = URI.create(src)
+        return when (uri.scheme) {
+            "resource" -> ResourceImageSource(uri.schemeSpecificPart.removePrefix("//"))
+            else -> UrlImageSource(src)
+        }
+    }
 
     private fun parseAttrs(raw: String): Map<String, String> {
         val trimmed = raw.trim().removeSuffix("/").trim()

@@ -26,6 +26,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useEffect, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
     getTenantProfile,
     updateTenantProfile,
@@ -53,7 +54,9 @@ export default function MyTenantProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [tenant, setTenant] = useState<TenantProfileVO | null>(null);
-    const [activeSegment, setActiveSegment] = useState<RightSegment>('profile');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeSegment = (searchParams.get('segment') as RightSegment) || 'profile';
+    const setActiveSegment = (v: RightSegment) => setSearchParams({segment: v});
 
     const [isIconUploading, setIsIconUploading] = useState(false);
     const [cropperOpen, setCropperOpen] = useState(false);

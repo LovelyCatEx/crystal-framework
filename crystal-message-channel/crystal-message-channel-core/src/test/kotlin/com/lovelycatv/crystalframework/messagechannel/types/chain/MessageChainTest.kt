@@ -68,7 +68,7 @@ class MessageChainTest {
         assertEquals(
             """Hello <at user="123" tenant="456" name="张三"/>!""" +
                 """<br/><image src="https://example.com/a.png"/>""" +
-                """<image src="resource:file-001"/>""" +
+                """<image src="resource://file-001"/>""" +
                 """<link href="https://example.com" title="home"/>""",
             xml,
         )
@@ -120,7 +120,7 @@ class MessageChainTest {
 
     @Test
     fun parsesResourceImageSourceFromXml() {
-        val xml = """<image src="resource:abc-123"/>"""
+        val xml = """<image src="resource://abc-123"/>"""
         val chain = MessageChain.parse(xml)
 
         printlnSection("parsesResourceImageSourceFromXml")

@@ -2577,6 +2577,29 @@ export const enUS: I18nRules = {
       preview: 'Preview',
       placeholder: 'Enter HTML code...'
     },
+    messageChainEditor: {
+      visualMode: 'Visual',
+      sourceMode: 'Source',
+      placeholder: 'Enter message content...',
+      modalTitle: 'Edit Message Content',
+      modalOk: 'OK',
+      insert: {
+        at: 'Mention',
+        link: 'Link',
+        image: 'Image',
+        br: 'Newline'
+      },
+      fields: {
+        userId: 'User ID',
+        tenantId: 'Tenant ID',
+        displayName: 'Display Name',
+        href: 'URL',
+        title: 'Title',
+        src: 'Image URL'
+      },
+      confirm: 'Insert',
+      cancel: 'Cancel'
+    },
     imageCropper: {
       loading: 'Loading...',
       rotateLeft: 'Rotate Left',

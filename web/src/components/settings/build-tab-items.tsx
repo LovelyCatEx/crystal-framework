@@ -12,6 +12,7 @@ export interface BuildTabItemsOptions {
     enumTranslator: (settingsKey: string, enumValue: string) => string;
     itemRenderers?: Map<string, SettingsItemRenderer>;
     groupExtraRenderers?: Map<string, SettingsGroupExtraRenderer>;
+    maxColumns?: 1 | 2 | 3;
 }
 
 export function buildTabItems(options: BuildTabItemsOptions) {
@@ -49,6 +50,7 @@ export function buildTabItems(options: BuildTabItemsOptions) {
                     enumTranslator={options.enumTranslator}
                     itemRenderers={options.itemRenderers}
                     groupExtraRenderers={options.groupExtraRenderers}
+                    maxColumns={options.maxColumns}
                 />
             );
         });
