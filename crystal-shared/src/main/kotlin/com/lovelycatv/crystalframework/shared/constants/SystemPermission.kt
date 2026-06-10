@@ -213,6 +213,7 @@ object SystemPermission {
 
     // Tenant-level Dictionary (tenantId > 0, system admin access)
     const val MENU_TENANT_DICT_TYPE_MANAGER = "tenant.dict.type:/manager/tenant-dict-types"
+    const val MENU_TENANT_DICT_ITEM_MANAGER = "tenant.dict.item:/manager/tenant-dict-items"
     const val ACTION_TENANT_DICT_TYPE_CREATE = "tenant.dict.type.create"
     const val ACTION_TENANT_DICT_TYPE_READ = "tenant.dict.type.read"
     const val ACTION_TENANT_DICT_TYPE_UPDATE = "tenant.dict.type.update"

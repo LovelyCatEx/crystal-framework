@@ -296,6 +296,12 @@ object TenantPermission {
         path = "/manager/tenant/dict-types"
     )
 
+    val MENU_TENANT_DICT_ITEM_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.dict.item",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/dict-items"
+    )
+
     const val ACTION_TENANT_DICT_TYPE_CREATE_PEM = "i.tenant.dict.type.create"
     val ACTION_TENANT_DICT_TYPE_CREATE = TenantPermissionDeclaration(
         name = ACTION_TENANT_DICT_TYPE_CREATE_PEM,
