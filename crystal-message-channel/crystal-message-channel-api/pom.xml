@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.lovelycatv.crystalframework</groupId>
-        <artifactId>core</artifactId>
+        <artifactId>crystal-message-channel</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>crystal-sdk</artifactId>
+    <artifactId>crystal-message-channel-api</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,8 +17,6 @@
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -37,19 +35,6 @@
                             </sourceDirs>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>/src/test/kotlin</sourceDir>
-                                <sourceDir>target/generated-test-sources/test-annotations</sourceDir>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>
@@ -58,19 +43,7 @@
     <dependencies>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-shared-types</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-schedule</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-message-channel-api</artifactId>
         </dependency>
     </dependencies>
 
