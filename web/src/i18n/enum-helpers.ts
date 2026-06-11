@@ -72,3 +72,11 @@ export function getMessageChannelPreset(channelType: number, presetKey: string):
 export function getGender(gender: number): string {
     return translateEnum('gender', gender);
 }
+
+export function getDictTypeStatus(status: number): string {
+    return translateEnum('dictTypeStatus', status);
+}
+
+export function getDictItemStatus(status: number): string {
+    return translateEnum('dictItemStatus', status);
+}

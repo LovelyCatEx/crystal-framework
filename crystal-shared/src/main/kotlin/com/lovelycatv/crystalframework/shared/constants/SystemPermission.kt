@@ -198,4 +198,29 @@ object SystemPermission {
     const val ACTION_ANNOUNCEMENT_UPDATE = "announcement.update"
     const val ACTION_ANNOUNCEMENT_DELETE = "announcement.delete"
     const val ACTION_ANNOUNCEMENT_LIST = "announcement.list"
+
+    // System-level Dictionary (tenantId = 0)
+    const val MENU_SYSTEM_DICT_TYPE_MANAGER = "system.dict.type:/manager/system-dict-types"
+    const val ACTION_SYSTEM_DICT_TYPE_CREATE = "system.dict.type.create"
+    const val ACTION_SYSTEM_DICT_TYPE_READ = "system.dict.type.read"
+    const val ACTION_SYSTEM_DICT_TYPE_UPDATE = "system.dict.type.update"
+    const val ACTION_SYSTEM_DICT_TYPE_DELETE = "system.dict.type.delete"
+
+    const val ACTION_SYSTEM_DICT_ITEM_CREATE = "system.dict.item.create"
+    const val ACTION_SYSTEM_DICT_ITEM_READ = "system.dict.item.read"
+    const val ACTION_SYSTEM_DICT_ITEM_UPDATE = "system.dict.item.update"
+    const val ACTION_SYSTEM_DICT_ITEM_DELETE = "system.dict.item.delete"
+
+    // Tenant-level Dictionary (tenantId > 0, system admin access)
+    const val MENU_TENANT_DICT_TYPE_MANAGER = "tenant.dict.type:/manager/tenant-dict-types"
+    const val MENU_TENANT_DICT_ITEM_MANAGER = "tenant.dict.item:/manager/tenant-dict-items"
+    const val ACTION_TENANT_DICT_TYPE_CREATE = "tenant.dict.type.create"
+    const val ACTION_TENANT_DICT_TYPE_READ = "tenant.dict.type.read"
+    const val ACTION_TENANT_DICT_TYPE_UPDATE = "tenant.dict.type.update"
+    const val ACTION_TENANT_DICT_TYPE_DELETE = "tenant.dict.type.delete"
+
+    const val ACTION_TENANT_DICT_ITEM_CREATE = "tenant.dict.item.create"
+    const val ACTION_TENANT_DICT_ITEM_READ = "tenant.dict.item.read"
+    const val ACTION_TENANT_DICT_ITEM_UPDATE = "tenant.dict.item.update"
+    const val ACTION_TENANT_DICT_ITEM_DELETE = "tenant.dict.item.delete"
 }

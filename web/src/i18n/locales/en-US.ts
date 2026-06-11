@@ -2060,11 +2060,62 @@ export const enUS: I18nRules = {
         gcTime: 'GC Time',
       },
     },
+    tenantDictTypeManager: {
+      title: 'Dictionary Type Management',
+      subtitle: 'Manage system and tenant dictionary types',
+      scope: {
+        system: 'System Dictionary',
+        tenant: 'Tenant Dictionary',
+      },
+      action: {
+        addNew: 'Add Dictionary Type',
+        manageItems: 'Manage Items',
+      },
+      modal: {
+        code: { label: 'Code', placeholder: 'Enter dictionary type code', required: 'Code is required' },
+        name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
+        remark: { label: 'Remark', placeholder: 'Enter remark' },
+        status: { label: 'Status' },
+      },
+    },
+    tenantDictItemManager: {
+      title: 'Dictionary Item Management',
+      subtitle: 'Manage dictionary items under the current type',
+      noTypeSelected: 'Please navigate from the dictionary type list',
+      action: {
+        addNew: 'Add Dictionary Item',
+        back: 'Back',
+      },
+      modal: {
+        itemCode: { label: 'Code', placeholder: 'Enter item code', required: 'Code is required' },
+        itemValue: { label: 'Display Value', placeholder: 'Enter display value', required: 'Display value is required' },
+        sortOrder: { label: 'Sort Order' },
+        status: { label: 'Status' },
+        isDefault: { label: 'Default' },
+      },
+    },
+    myTenantDictTypeManager: {
+      title: 'Dictionary Management',
+      subtitle: 'Manage organization dictionaries and view system dictionaries',
+      scope: {
+        myTenant: 'Organization',
+        system: 'System',
+      },
+      action: {
+        addNew: 'Add Dictionary Type',
+        manageItems: 'Manage Items',
+      },
+      modal: {
+        code: { label: 'Code', placeholder: 'Enter dictionary type code', required: 'Code is required' },
+        name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
+        remark: { label: 'Remark', placeholder: 'Enter remark' },
+        status: { label: 'Status' },
+      },
+    },
   },
 
   components: {
     addressPicker: {
-      triggerTooltip: 'Pick address on map',
       akMissing: 'Baidu map AK is not configured, address picker is unavailable',
       emptyNearby: 'No nearby addresses found',
       loading: 'Searching nearby addresses...'
@@ -2500,6 +2551,21 @@ export const enUS: I18nRules = {
         tenant: 'Tenant',
         remoteIp: 'IP Address',
         userAgent: 'User Agent'
+      },
+      tenantDictType: {
+        code: 'Code',
+        name: 'Name',
+        remark: 'Remark',
+        status: 'Status'
+      },
+      tenantDictItem: {
+        itemCode: 'Code',
+        itemValue: 'Display Value',
+        sortOrder: 'Sort Order',
+        isDefault: 'Default',
+        status: 'Status',
+        yes: 'Yes',
+        no: 'No'
       }
     },
     entityTable: {
@@ -2576,6 +2642,29 @@ export const enUS: I18nRules = {
       code: 'Code',
       preview: 'Preview',
       placeholder: 'Enter HTML code...'
+    },
+    messageChainEditor: {
+      visualMode: 'Visual',
+      sourceMode: 'Source',
+      placeholder: 'Enter message content...',
+      modalTitle: 'Edit Message Content',
+      modalOk: 'OK',
+      insert: {
+        at: 'Mention',
+        link: 'Link',
+        image: 'Image',
+        br: 'Newline'
+      },
+      fields: {
+        userId: 'User ID',
+        tenantId: 'Tenant ID',
+        displayName: 'Display Name',
+        href: 'URL',
+        title: 'Title',
+        src: 'Image URL'
+      },
+      confirm: 'Insert',
+      cancel: 'Cancel'
     },
     imageCropper: {
       loading: 'Loading...',
@@ -2793,6 +2882,14 @@ export const enUS: I18nRules = {
       1: 'Male',
       2: 'Female',
       3: 'Other'
+    },
+    dictTypeStatus: {
+      0: 'Disabled',
+      1: 'Enabled'
+    },
+    dictItemStatus: {
+      0: 'Disabled',
+      1: 'Enabled'
     }
   },
 
@@ -2822,7 +2919,9 @@ export const enUS: I18nRules = {
     mailSendLog: 'Mail Send Log',
     userLoginLog: 'User Login Log',
     sessionMonitor: 'Session',
-    announcement: 'Announcement'
+    announcement: 'Announcement',
+    tenantDictType: 'Dictionary Type',
+    tenantDictItem: 'Dictionary Item'
   },
 
   menu: {
@@ -2842,7 +2941,8 @@ export const enUS: I18nRules = {
       departments: 'Department Management',
       profile: 'Organization Settings',
       messageChannels: 'Message Channel Management',
-      personalProfile: 'Personal Profile'
+      personalProfile: 'Personal Profile',
+      dictTypes: 'Dictionary Management'
     },
 
     // Admin menus
@@ -2875,7 +2975,9 @@ export const enUS: I18nRules = {
       settings: 'System Settings',
       sessions: 'Online Sessions',
       systemMonitor: 'System Monitor',
-      announcements: 'Announcement Management'
+      announcements: 'Announcement Management',
+      tenantDictTypes: 'Dictionary Type Management',
+      tenantDictItems: 'Dictionary Item Management'
     },
 
     // Menu groups

@@ -15,6 +15,12 @@ export interface SettingsRendererContainerProps {
     itemRenderers?: Map<string, SettingsItemRenderer>;
     groupExtraRenderers?: Map<string, SettingsGroupExtraRenderer>;
     showTabs?: boolean;
+    /** Maximum number of columns per group. Defaults to 3. */
+    maxColumns?: 1 | 2 | 3;
+    /** Active tab key (controlled). When provided, tab state is managed externally. */
+    activeTab?: string;
+    /** Callback when tab changes. Use with activeTab for URL persistence. */
+    onTabChange?: (key: string) => void;
 }
 
 export function SettingsRendererContainer(props: SettingsRendererContainerProps) {
@@ -27,6 +33,8 @@ export function SettingsRendererContainer(props: SettingsRendererContainerProps)
     if (showTabs) {
         return (
             <Tabs
+                activeKey={props.activeTab}
+                onChange={props.onTabChange}
                 items={buildTabItems({
                     data: props.data,
                     loading: props.loading,
@@ -36,6 +44,7 @@ export function SettingsRendererContainer(props: SettingsRendererContainerProps)
                     enumTranslator: props.enumTranslator,
                     itemRenderers: props.itemRenderers,
                     groupExtraRenderers: props.groupExtraRenderers,
+                    maxColumns: props.maxColumns,
                 })}
                 className="settings-tabs"
             />
@@ -65,6 +74,7 @@ export function SettingsRendererContainer(props: SettingsRendererContainerProps)
                         enumTranslator={props.enumTranslator}
                         itemRenderers={props.itemRenderers}
                         groupExtraRenderers={props.groupExtraRenderers}
+                        maxColumns={props.maxColumns}
                     />
                 );
             })}

@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "CrystalFramework Docs"
   text: ""
-  tagline: v1.9.0
+  tagline: v1.10.0
   actions:
     - theme: brand
       text: Plugin Dev

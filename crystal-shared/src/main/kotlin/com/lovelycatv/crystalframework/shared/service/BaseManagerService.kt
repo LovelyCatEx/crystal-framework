@@ -44,26 +44,20 @@ interface BaseManagerService<
         val offset = (dto.page - 1) * dto.pageSize
         val template = getEntityTemplate()
 
-        // Build criteria
-        val criteria: Criteria = when {
-            dto.id != null -> {
-                // Exact id match — use cached getByIdOrNull
-                val e = this.getByIdOrNull(dto.id!!)
-                return PaginatedResponseData(
-                    page = dto.page,
-                    pageSize = dto.pageSize,
-                    total = if (e != null) 1 else 0,
-                    totalPages = if (e != null) 1 else 0,
-                    records = if (e != null) listOf(e) else emptyList()
-                )
-            }
-            dto.query != null -> {
-                criteriaFromQueryNode(dto.query!!)
-            }
-            else -> {
-                Criteria.empty()
-            }
+        if (dto.id != null) {
+            // Exact id match — use cached getByIdOrNull
+            val e = this.getByIdOrNull(dto.id!!)
+            return PaginatedResponseData(
+                page = dto.page,
+                pageSize = dto.pageSize,
+                total = if (e != null) 1 else 0,
+                totalPages = if (e != null) 1 else 0,
+                records = if (e != null) listOf(e) else emptyList()
+            )
         }
+
+        // Build criteria
+        val criteria: Criteria = buildQueryCriteria(dto)
 
         val baseQuery = Query.query(criteria)
             .sort(Sort.by(Sort.Direction.DESC, "created_time"))
@@ -81,6 +75,17 @@ interface BaseManagerService<
             total = total,
             records = records
         )
+    }
+
+    suspend fun buildQueryCriteria(dto: READ_DTO): Criteria {
+        return when {
+            dto.query != null -> {
+                criteriaFromQueryNode(dto.query!!)
+            }
+            else -> {
+                Criteria.empty()
+            }
+        }
     }
 
     suspend fun create(dto: CREATE_DTO): ENTITY

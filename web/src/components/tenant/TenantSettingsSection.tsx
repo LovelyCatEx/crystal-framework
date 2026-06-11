@@ -1,7 +1,8 @@
-import {Button, Form, Input, message} from "antd";
+import {Button, Form, message} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
+import {useSearchParams} from "react-router-dom";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {getTenantSettingsSchema, updateTenantSettings} from "@/api/tenant/tenant-settings.api.ts";
@@ -16,9 +17,10 @@ import {
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
 import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
 import {TenantMessageChannelIdsSelector} from "@/components/selector/TenantMessageChannelIdsSelector.tsx";
+import {MessageChainEditor} from "@/components/message-chain-editor";
 
 const xmlContentRenderer: SettingsItemRenderer = (ctx) => (
-    <Input.TextArea autoSize={{minRows: 3, maxRows: 10}} disabled={ctx.loading}/>
+    <MessageChainEditor disabled={ctx.loading} minRows={3} maxRows={10} />
 );
 
 export const tenantSettingsItemRenderers = new Map<string, SettingsItemRenderer>([
@@ -35,9 +37,15 @@ export function TenantSettingsSection() {
     const [refreshing, setRefreshing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form] = Form.useForm();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || undefined;
     const tenantSettingsTabToTranslationMap = useTenantSettingsTabToTranslationMap();
     const tenantSettingsGroupToTranslationMap = useTenantSettingsGroupToTranslationMap();
     const tenantSettingsKeyToTranslationMap = useTenantSettingsKeyToTranslationMap();
+
+    const handleTabChange = (key: string) => {
+        setSearchParams({tab: key});
+    };
 
     // Channel selectors are bound to the current tenant, so they are built here rather than
     // at module scope; merged on top of the static (content) and plugin renderers.
@@ -105,6 +113,9 @@ export function TenantSettingsSection() {
                 }
                 itemRenderers={itemRenderers}
                 groupExtraRenderers={groupExtraRenderers}
+                maxColumns={2}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
             />
 
             <div className="mt-8 flex justify-end">
