@@ -51,6 +51,12 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_TENANT_USER_PROFILES)
         registry.register(TableConstants.TABLE_TENANT_DICT_TYPES)
         registry.register(TableConstants.TABLE_TENANT_DICT_ITEMS)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_DEFINITION)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_NODE)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_EDGE)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_INSTANCE)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_TASK)
+        registry.register(TableConstants.TABLE_APPROVAL_FLOW_RECORD)
 
         configurers.forEach { it.configure(registry) }
 
