@@ -2,9 +2,11 @@
 
 本文档为 Claude Code（claude.ai/code）在此仓库中工作时提供指导。
 
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 有匹配的 Skill → 严格遵守 Skill 的全部规则 ② 无 Skill → 查找 `docs/` 目录下是否有相关文档 ③ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 有匹配的 Skill → 严格遵守 Skill 的全部规则 ② 无 Skill → 查找 `docs/` 目录下是否有相关文档 ③ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 有匹配的 Skill → 严格遵守 Skill 的全部规则 ② 无 Skill → 查找 `docs/` 目录下是否有相关文档 ③ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
+## 重要规则
+
+**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
+**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
+**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
 
 **你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
 **你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
@@ -130,14 +132,16 @@ main.tsx → BrowserRouter
 
 ### ⛔ 编码前强制确认（每次操作前必须逐项通过，任何一项未通过则禁止动手）
 
-| # | 检查项 | 未通过时的动作 |
-|---|--------|-------------|
-| 1 | 当前是否为用户提问/设计/确认场景？ | → 只回答，禁止任何文件操作 |
+| # | 检查项                              | 未通过时的动作           |
+|---|----------------------------------|-------------------|
+| 1 | 当前是否为用户提问/设计/确认场景？               | → 只回答，禁止任何文件操作    |
 | 2 | 是否有匹配的 Skill（`.claude/skills/`）？ | → 严格遵守 Skill 全部规则 |
-| 3 | 是否有 `docs/` 下的相关文档？ | → 遵守文档指导 |
-| 4 | 本次修改对应 CLAUDE.md 哪条规则？ | → 无对应规则：停下来问用户确认 |
-| 5 | 已向用户说明本次修改依据的规则了吗？ | → 没有：先说明再动手 |
-| 6 | 完成后是否会逐条对照本文档检查合规？ | → 承诺检查，否则不动手 |
+| 3 | 是否有 `docs/` 下的相关文档？              | → 遵守文档指导          |
+| 4 | 本次修改对应 CLAUDE.md 哪条规则？           | → 无对应规则：停下来问用户确认  |
+| 5 | 已向用户说明本次修改依据的规则了吗？               | → 没有：先说明再动手       |
+| 6 | 完成后是否会逐条对照本文档检查合规？               | → 承诺检查，否则不动手      |
+
+**合规检查必须具体而全面，禁止使用简单的文字概括**
 
 **!!!Attention: 在进行任何文件创建、代码编写/修改之前，应当阅读下面的内容，严格遵守规则，若用户意图与以下任意一条规则冲突，必须告知用户并得到二次确认才可以继续，否则视为违规操作。!!!**
 **!!!Attention: 在遇到该文档中未能详细描述或缺失的问题，请前往项目根目录 `.claude` 目录中寻找相关说明，若无则以最小的代价且符合所有下述规则的前提下进行修改。!!!**
@@ -168,14 +172,20 @@ main.tsx → BrowserRouter
 
 例如 mail 模块的包名为 `com.lovelycatv.crystalframework.mail`。
 
-**!!!严令禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
-**!!!严令禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
-**!!!严令禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
+#### 禁止单个文件多个定义
+
+**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
+**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
+**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
+
+#### 禁止魔法值
 
 **禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
 **禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
 **禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
 **此规则同样适用于测试代码中的 feature key、permission name、table name、setting key 等所有可枚举的字符串值。**
+
+#### 其他规则
 
 **系统/租户设置读取规则：禁止在业务代码中逐条调用 `getSettings(declaration)` / `getSettings(tenantId, declaration)` 读取多个设置项。必须通过 Service 层提供的聚合方法（如 `getSystemXxxSettings()` / `getTenantSettings(tenantId)`）一次性获取已缓存的设置对象，再从中取值。逐条 `getSettings()` 仅允许在 Service 实现类内部的聚合方法中使用。**
 
@@ -237,11 +247,11 @@ class DashboardController
 
 Controller 方法接收前端参数时只允许以下三种方式，前端据此选择对应的 Content-Type：
 
-| 后端注解           | 适用场景                 | 前端调用方式                          |
-|----------------|----------------------|-----------------------------------|
-| `@RequestBody` | JSON 请求体（POST/PUT）    | `doPost(url, body, {'Content-Type': 'application/json'})` |
-| `@ModelAttribute` | form-urlencoded / 查询参数绑定到 DTO | `doPost(url, body)` 默认行为                |
-| `@RequestParam` | 单个查询参数（GET 为主）      | `doGet(url, { param: value })`     |
+| 后端注解              | 适用场景                          | 前端调用方式                                                    |
+|-------------------|-------------------------------|-----------------------------------------------------------|
+| `@RequestBody`    | JSON 请求体（POST/PUT）            | `doPost(url, body, {'Content-Type': 'application/json'})` |
+| `@ModelAttribute` | form-urlencoded / 查询参数绑定到 DTO | `doPost(url, body)` 默认行为                                  |
+| `@RequestParam`   | 单个查询参数（GET 为主）                | `doGet(url, { param: value })`                            |
 
 - `@RequestBody` 用于 `@PostMapping`，接收 JSON 格式的请求体
 - `@ModelAttribute` 用于 `@PostMapping`，接收 `application/x-www-form-urlencoded` 格式
@@ -378,14 +388,14 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 | `U`      | Update DTO（默认 BaseManagerUpdateDTO，含 id）                                                 |
 | `D`      | Delete DTO（默认 BaseManagerDeleteDTO，含 ids: string[]）                                      |
 
-| 方法              | 请求方式     | URL 模式                      | 后端注解              | 前端 Content-Type                    | 说明                            |
-|-----------------|----------|-----------------------------|-------------------|-------------------------------------|-------------------------------|
-| `create(dto)`   | POST     | `/api{baseUrl}/create`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 新增                            |
-| `query(dto)`    | POST     | `/api{baseUrl}/query`       | `@RequestBody`    | `application/json`                  | 分页查询，返回 PaginatedResponseData |
-| `update(dto)`   | POST     | `/api{baseUrl}/update`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 更新                            |
-| `delete(dto)`   | POST     | `/api{baseUrl}/delete`      | `@ModelAttribute` | `application/x-www-form-urlencoded` | 删除                            |
+| 方法              | 请求方式     | URL 模式                       | 后端注解              | 前端 Content-Type                     | 说明                            |
+|-----------------|----------|------------------------------|-------------------|-------------------------------------|-------------------------------|
+| `create(dto)`   | POST     | `/api{baseUrl}/create`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 新增                            |
+| `query(dto)`    | POST     | `/api{baseUrl}/query`        | `@RequestBody`    | `application/json`                  | 分页查询，返回 PaginatedResponseData |
+| `update(dto)`   | POST     | `/api{baseUrl}/update`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 更新                            |
+| `delete(dto)`   | POST     | `/api{baseUrl}/delete`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 删除                            |
 | `list(params?)` | GET      | `/api{baseUrl}/list?xxx=yyy` | `@GetMapping`     | query params                        | 全量列表                          |
-| `getById(id)`   | 复用 query | —                           | —                 | —                                   | 按 ID 查单条                      |
+| `getById(id)`   | 复用 query | —                            | —                 | —                                   | 按 ID 查单条                      |
 
 **请求路径拼接规则**：`/api` + `baseUrl`（即构造时传入的路径，如 `/manager/mail-send-logs`）+ 方法路径。开发环境下 Vite 代理将 `/api` 路径重写为 `/api/v1` 转发到后端。
 
@@ -447,10 +457,10 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 | `readonlyMode`          | `boolean`                                            | 只读模式（隐藏增删改按钮）                                    |
 | `showRowActions`        | `boolean`                                            | 是否显示行操作按钮（编辑/删除），默认 `true`，只读模式自动隐藏              |
 | `showActionBar`         | `boolean`                                            | 是否显示顶栏，默认 `true`                                 |
-| `tableActions`          | `array`                                              | 表格过滤栏操作项（每项含 label、children） |
-| `searchKeywords`        | `string[]`                                           | 全局搜索框的搜索字段，不传则不显示搜索框                               |
-| `simpleFilters`         | `array`                                              | 行内过滤条件，配合 `useManagerQueryParams` 的 `filters` 使用       |
-| `filterableFields`      | `FilterableField[]`                                  | FilterBuilder 可用字段，不传则不显示高级筛选                        |
+| `tableActions`          | `array`                                              | 表格过滤栏操作项（每项含 label、children）                     |
+| `searchKeywords`        | `string[]`                                           | 全局搜索框的搜索字段，不传则不显示搜索框                             |
+| `simpleFilters`         | `array`                                              | 行内过滤条件，配合 `useManagerQueryParams` 的 `filters` 使用 |
+| `filterableFields`      | `FilterableField[]`                                  | FilterBuilder 可用字段，不传则不显示高级筛选                    |
 | `editModalFormChildren` | `ReactNode \| ((ENTITY) => ReactNode)`               | 新增/编辑弹窗的表单项                                      |
 | `showTimeRangeFilter`   | `boolean`                                            | 是否显示时间范围筛选器，默认 `true`                            |
 | `hideRecordTimeColumn`  | `boolean`                                            | 是否隐藏表格末尾自动追加的"记录时间"列，默认 `false`                  |
