@@ -41,7 +41,7 @@ class TenantDepartmentManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val (tenant) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.DEPARTMENT_MAX_COUNT.featureKey, "10")
 
@@ -61,7 +61,7 @@ class TenantDepartmentManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val (tenant) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.DEPARTMENT_MAX_COUNT.featureKey, "0")
 
@@ -86,7 +86,7 @@ class TenantDepartmentManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val (tenant) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.DEPARTMENT_MAX_COUNT.featureKey, "2")
 

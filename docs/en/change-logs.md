@@ -1,5 +1,24 @@
 # Change Logs
 
+## Announcement
+
+::: danger
+1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
+:::
+
+## v1.10.0
+
+2026-06-11
+
+### Features
++ feat(tenant): Add system/tenant-level global dictionary editing.
++ feat(web): Introduce Slate.js for visual message channel editor.
+
+### Bug Fixes
++ fix(tenant): Fix standardized query controller not scoping by tenant.
+
+---
+
 ## v1.9.0
 
 2026-06-10

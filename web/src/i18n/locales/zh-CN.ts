@@ -2057,6 +2057,58 @@ export const zhCN: I18nRules = {
         gcTime: 'GC 时间 (ms)',
       },
     },
+    tenantDictTypeManager: {
+      title: '字典类型管理',
+      subtitle: '管理系统和租户的字典类型',
+      scope: {
+        system: '系统字典',
+        tenant: '租户字典',
+      },
+      action: {
+        addNew: '新增字典类型',
+        manageItems: '管理字典项',
+      },
+      modal: {
+        code: { label: '编码', placeholder: '请输入字典类型编码', required: '编码不能为空' },
+        name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
+        remark: { label: '备注', placeholder: '请输入备注' },
+        status: { label: '状态' },
+      },
+    },
+    tenantDictItemManager: {
+      title: '字典项管理',
+      subtitle: '管理当前字典类型下的字典项',
+      noTypeSelected: '请从字典类型列表进入',
+      action: {
+        addNew: '新增字典项',
+        back: '返回',
+      },
+      modal: {
+        itemCode: { label: '编码', placeholder: '请输入字典项编码', required: '编码不能为空' },
+        itemValue: { label: '显示值', placeholder: '请输入字典项显示值', required: '显示值不能为空' },
+        sortOrder: { label: '排序' },
+        status: { label: '状态' },
+        isDefault: { label: '默认选中' },
+      },
+    },
+    myTenantDictTypeManager: {
+      title: '字典管理',
+      subtitle: '管理组织字典和查看系统字典',
+      scope: {
+        myTenant: '组织字典',
+        system: '系统字典',
+      },
+      action: {
+        addNew: '新增字典类型',
+        manageItems: '管理字典项',
+      },
+      modal: {
+        code: { label: '编码', placeholder: '请输入字典类型编码', required: '编码不能为空' },
+        name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
+        remark: { label: '备注', placeholder: '请输入备注' },
+        status: { label: '状态' },
+      },
+    },
   },
 
   components: {
@@ -2497,6 +2549,21 @@ export const zhCN: I18nRules = {
         tenant: '租户',
         remoteIp: 'IP地址',
         userAgent: 'User Agent'
+      },
+      tenantDictType: {
+        code: '编码',
+        name: '名称',
+        remark: '备注',
+        status: '状态'
+      },
+      tenantDictItem: {
+        itemCode: '编码',
+        itemValue: '显示值',
+        sortOrder: '排序',
+        isDefault: '默认',
+        status: '状态',
+        yes: '是',
+        no: '否'
       }
     },
     entityTable: {
@@ -2573,6 +2640,29 @@ export const zhCN: I18nRules = {
       code: '代码',
       preview: '预览',
       placeholder: '输入 HTML 代码...'
+    },
+    messageChainEditor: {
+      visualMode: '可视化',
+      sourceMode: '源码',
+      placeholder: '输入消息内容...',
+      modalTitle: '编辑消息内容',
+      modalOk: '确定',
+      insert: {
+        at: '提及',
+        link: '链接',
+        image: '图片',
+        br: '换行'
+      },
+      fields: {
+        userId: '用户 ID',
+        tenantId: '租户 ID',
+        displayName: '显示名称',
+        href: '链接地址',
+        title: '标题',
+        src: '图片地址'
+      },
+      confirm: '插入',
+      cancel: '取消'
     },
     imageCropper: {
       loading: '加载中...',
@@ -2790,6 +2880,14 @@ export const zhCN: I18nRules = {
       1: '男',
       2: '女',
       3: '其他'
+    },
+    dictTypeStatus: {
+      0: '禁用',
+      1: '启用'
+    },
+    dictItemStatus: {
+      0: '禁用',
+      1: '启用'
     }
   },
 
@@ -2819,7 +2917,9 @@ export const zhCN: I18nRules = {
     mailSendLog: '邮件发送日志',
     userLoginLog: '用户登录日志',
     sessionMonitor: '会话',
-    announcement: '公告'
+    announcement: '公告',
+    tenantDictType: '字典类型',
+    tenantDictItem: '字典项'
   },
 
   menu: {
@@ -2839,7 +2939,8 @@ export const zhCN: I18nRules = {
       departments: '部门管理',
       profile: '组织设置',
       messageChannels: '消息渠道管理',
-      personalProfile: '个人资料'
+      personalProfile: '个人资料',
+      dictTypes: '字典管理'
     },
 
     // 管理员菜单
@@ -2872,7 +2973,9 @@ export const zhCN: I18nRules = {
       settings: '系统设置',
       sessions: '在线会话',
       systemMonitor: '系统监控',
-      announcements: '公告管理'
+      announcements: '公告管理',
+      tenantDictTypes: '字典类型管理',
+      tenantDictItems: '字典项管理'
     },
 
     // 菜单分组

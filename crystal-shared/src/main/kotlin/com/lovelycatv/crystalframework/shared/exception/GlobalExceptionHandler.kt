@@ -3,12 +3,14 @@ package com.lovelycatv.crystalframework.shared.exception
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.vertex.log.logger
 import org.springframework.boot.actuate.audit.AuditEventRepository
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
 import org.springframework.web.server.MissingRequestValueException
+import org.springframework.web.server.ServerWebInputException
 
 @Component
 @RestControllerAdvice
@@ -95,6 +97,20 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         logger.debug("An authorization denied exception occurred", e)
 
         return ApiResponse.forbidden<Nothing>("you are not allowed to access this resource")
+    }
+
+    @ExceptionHandler(ServerWebInputException::class)
+    fun handleServerWebInputException(e: ServerWebInputException): ApiResponse<*> {
+        logger.debug("An parameter input exception occurred, message: ${e.localizedMessage ?: e.message}", e)
+
+        return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message)
+    }
+
+    @ExceptionHandler(DuplicateKeyException::class)
+    fun handleDuplicateKeyException(e: DuplicateKeyException): ApiResponse<*> {
+        logger.debug("An duplicated key exception occurred, message: ${e.localizedMessage ?: e.message}", e)
+
+        return ApiResponse.badRequest<Nothing>("duplicate resource id")
     }
 
     @ExceptionHandler(Exception::class)

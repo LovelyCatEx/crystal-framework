@@ -48,7 +48,7 @@ abstract class StandardTenantManagerController<
         REPOSITORY : BaseRepository<ENTITY>,
         ENTITY,
         CREATE_DTO: Any,
-        READ_DTO: BaseManagerReadDTO,
+        READ_DTO: BaseManagerReadTenantResourceDTO,
         UPDATE_DTO: BaseManagerUpdateDTO,
         DELETE_DTO: BaseManagerDeleteDTO
 >(

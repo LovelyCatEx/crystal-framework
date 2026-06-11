@@ -6,10 +6,12 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.Man
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
+import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitServiceTest
 import com.lovelycatv.crystalframework.tenant.service.TenantServiceTest
 import com.lovelycatv.crystalframework.tenant.service.TenantTireTypeServiceTest
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantInvitationManagerService
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitValueManagerService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.junit.jupiter.api.Test
@@ -19,6 +21,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TenantInvitationManagerServiceImplTest(
+    @Autowired private val tenantMemberManagerService: TenantMemberManagerService,
     @Autowired private val invitationManagerService: TenantInvitationManagerService,
     @Autowired private val benefitFeatureRepository: TenantTireBenefitFeatureRepository,
     @Autowired private val benefitValueManagerService: TenantTireBenefitValueManagerService,
@@ -42,8 +45,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "10")
@@ -67,8 +69,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "0")
 
@@ -94,8 +95,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "0")
 
@@ -121,8 +121,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "2")
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
@@ -154,8 +153,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_CODE_USAGE_LIMIT.featureKey, "1")
 
@@ -181,8 +179,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_VALIDITY_DAYS.featureKey, "1")
 
@@ -211,8 +208,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_ENABLED.featureKey, "false")
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
@@ -241,8 +237,7 @@ class TenantInvitationManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
-            val member = memberServiceTest.mockMember(tenant.id, owner.id)
+            val (tenant, member) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_MAX_COUNT.featureKey, "10")
             setBenefitValue(tireType.id, TenantBenefit.INVITATION_PER_DAY_COUNT.featureKey, "10")

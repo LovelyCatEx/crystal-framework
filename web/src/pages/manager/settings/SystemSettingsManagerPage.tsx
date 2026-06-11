@@ -8,6 +8,7 @@ import {
 import type {MenuProps} from "antd";
 import {Button, Card, Dropdown, Form, message, Modal} from "antd";
 import {useEffect, useState} from "react";
+import {useSearchParams} from "react-router-dom";
 import {
     useSettingsGroupToTranslationMap,
     useSettingsKeyToTranslationMap,
@@ -33,6 +34,9 @@ import {pluginRegistry} from "@/plugin/registry.ts";
 export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
     const {t} = useTranslation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || undefined;
+    const handleTabChange = (key: string) => setSearchParams({tab: key});
     const settingsTabToTranslationMap = useSettingsTabToTranslationMap();
     const settingsGroupToTranslationMap = useSettingsGroupToTranslationMap();
     const settingsKeyToTranslationMap = useSettingsKeyToTranslationMap();
@@ -198,6 +202,8 @@ export default function SystemSettingsManagerPage() {
                             }
                             itemRenderers={itemRenderers}
                             groupExtraRenderers={groupExtraRenderers}
+                            activeTab={activeTab}
+                            onTabChange={handleTabChange}
                         />
                     </Form>
                 </Card>

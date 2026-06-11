@@ -16,6 +16,8 @@ export interface SettingsGroupProps {
     enumTranslator: (settingsKey: string, enumValue: string) => string;
     itemRenderers?: Map<string, SettingsItemRenderer>;
     groupExtraRenderers?: Map<string, SettingsGroupExtraRenderer>;
+    /** Maximum number of columns at large breakpoint. Defaults to 3. */
+    maxColumns?: 1 | 2 | 3;
 }
 
 export function SettingsGroup(props: SettingsGroupProps) {
@@ -23,6 +25,13 @@ export function SettingsGroup(props: SettingsGroupProps) {
     const translatedGroup = props.groupTranslationMap.get(props.group);
     const form = Form.useFormInstance();
     const extraRenderer = props.groupExtraRenderers?.get(props.group);
+    const maxColumns = props.maxColumns ?? 3;
+
+    const gridClass = maxColumns === 1
+        ? 'grid grid-cols-1 gap-6'
+        : maxColumns === 2
+            ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
+            : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
     return (
         <div className={props.isFirst ? "" : "mt-8"}>
@@ -40,7 +49,7 @@ export function SettingsGroup(props: SettingsGroupProps) {
                 </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={gridClass}>
                 {props.items.map(([key, value]) => (
                     <div
                         key={key}

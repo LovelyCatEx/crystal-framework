@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadTenantResourceDTO
 import com.lovelycatv.crystalframework.shared.database.QueryNode
 import jakarta.validation.constraints.NotNull
 
@@ -15,4 +16,4 @@ data class ManagerReadTenantDepartmentMemberDTO(
 
     val memberId: Long? = null,
     val roleType: Int? = null
-) : BaseManagerReadDTO(page, pageSize)
+) : BaseManagerReadTenantResourceDTO(page, pageSize, null)

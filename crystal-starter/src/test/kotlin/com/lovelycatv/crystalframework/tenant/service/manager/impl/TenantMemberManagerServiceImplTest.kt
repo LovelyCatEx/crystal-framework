@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.Man
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
+import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitServiceTest
 import com.lovelycatv.crystalframework.tenant.service.TenantServiceTest
 import com.lovelycatv.crystalframework.tenant.service.TenantTireTypeServiceTest
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
+import org.bouncycastle.asn1.x500.style.RFC4519Style.owner
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -61,7 +64,7 @@ class TenantMemberManagerServiceImplTest(
 
             val member = memberManagerService.create(
                 ManagerCreateTenantMemberDTO(
-                    tenantId = tenant.id,
+                    tenantId = tenant.first.id,
                     memberUserId = newUser.id,
                 )
             )
@@ -75,7 +78,7 @@ class TenantMemberManagerServiceImplTest(
             benefitServiceTest.ensureBenefitFeaturesExist()
             val tireType = tireTypeServiceTest.mockTireType()
             val owner = tenantServiceTest.mockUser()
-            val tenant = tenantServiceTest.mockTenant(owner.id, tireType.id)
+            val (tenant) = tenantServiceTest.mockTenant(owner.id, tireType.id)
 
             setBenefitValue(tireType.id, TenantBenefit.MEMBER_MAX_COUNT.featureKey, "0")
 
@@ -83,14 +86,14 @@ class TenantMemberManagerServiceImplTest(
                 memberManagerService.create(
                     ManagerCreateTenantMemberDTO(
                         tenantId = tenant.id,
-                        memberUserId = owner.id,
+                        memberUserId = tenantServiceTest.mockUser().id,
                     )
                 )
             }
             val ex = result.exceptionOrNull()
             assertNotNull(ex)
             assertTrue(ex is BusinessException)
-            assertTrue((ex as BusinessException).message!!.contains("limit", ignoreCase = true))
+            assertTrue(ex.message!!.contains("limit", ignoreCase = true))
         }
     }
 
@@ -106,25 +109,42 @@ class TenantMemberManagerServiceImplTest(
 
             val user1 = tenantServiceTest.mockUser()
             val member1 = memberManagerService.create(
-                ManagerCreateTenantMemberDTO(tenantId = tenant.id, memberUserId = user1.id)
+                ManagerCreateTenantMemberDTO(tenantId = tenant.first.id, memberUserId = user1.id)
             )
             assertNotNull(member1)
 
             val user2 = tenantServiceTest.mockUser()
-            val member2 = memberManagerService.create(
-                ManagerCreateTenantMemberDTO(tenantId = tenant.id, memberUserId = user2.id)
-            )
-            assertNotNull(member2)
-
-            val user3 = tenantServiceTest.mockUser()
             val result = runCatching {
                 memberManagerService.create(
-                    ManagerCreateTenantMemberDTO(tenantId = tenant.id, memberUserId = user3.id)
+                    ManagerCreateTenantMemberDTO(tenantId = tenant.first.id, memberUserId = user2.id)
                 )
             }
+
             val ex = result.exceptionOrNull()
             assertNotNull(ex, "Expected BusinessException when exceeding member limit")
             assertTrue(ex is BusinessException)
+        }
+    }
+
+    @Test
+    fun queryMemberInScope() {
+        withTransactionalRollback("query-member-in-scope") {
+            val tireType = tireTypeServiceTest.mockTireType("testTireType")
+
+            val tenantOwner1 = tenantServiceTest.mockUser()
+            val tenant1 = tenantServiceTest.mockTenant(tenantOwner1.id, tireType.id)
+
+            val tenantOwner2 = tenantServiceTest.mockUser()
+            val tenant2 = tenantServiceTest.mockTenant(tenantOwner2.id, tireType.id)
+
+            val result1 = memberManagerService.queryVO(ManagerReadTenantMemberDTO(1, 20, tenant1.first.id))
+            val result2 = memberManagerService.queryVO(ManagerReadTenantMemberDTO(1, 20, tenant2.first.id))
+
+            assertEquals(1, result1.records.size)
+            assertEquals(1, result2.records.size)
+
+            assertEquals(tenantOwner1.id, result1.records[0].memberUserId)
+            assertEquals(tenantOwner2.id, result2.records[0].memberUserId)
         }
     }
 }

@@ -27,6 +27,9 @@
     "react-i18next": "^16.5.8",
     "react-router-dom": "^7.13.0",
     "rollup-plugin-copy": "^3.5.0",
+    "slate": "^0.124.1",
+    "slate-history": "^0.113.1",
+    "slate-react": "^0.124.2",
     "swr": "^2.4.0",
     "three": "^0.184.0"
   },
