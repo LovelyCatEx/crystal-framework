@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.shared.exception
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.vertex.log.logger
 import org.springframework.boot.actuate.audit.AuditEventRepository
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -103,6 +104,13 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         logger.debug("An parameter input exception occurred, message: ${e.localizedMessage ?: e.message}", e)
 
         return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message)
+    }
+
+    @ExceptionHandler(DuplicateKeyException::class)
+    fun handleDuplicateKeyException(e: DuplicateKeyException): ApiResponse<*> {
+        logger.debug("An duplicated key exception occurred, message: ${e.localizedMessage ?: e.message}", e)
+
+        return ApiResponse.badRequest<Nothing>("duplicate resource id")
     }
 
     @ExceptionHandler(Exception::class)
