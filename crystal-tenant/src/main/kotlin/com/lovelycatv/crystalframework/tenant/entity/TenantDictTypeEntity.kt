@@ -1,14 +1,16 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
 import com.lovelycatv.crystalframework.shared.types.tenant.DictTypeStatus
-import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("tenant_dict_type")
 class TenantDictTypeEntity(
     id: Long = 0,
-    tenantId: Long = 0,
+    scope: Int = ResourceScope.TENANT.typeId,
+    scopeId: Long = 0,
     @Column(value = "code")
     var code: String = "",
     @Column(value = "name")
@@ -20,7 +22,7 @@ class TenantDictTypeEntity(
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
-) : BaseTenantEntity(id, tenantId, createdTime, modifiedTime, deletedTime) {
+) : BaseScopedEntity(id, scope, scopeId, createdTime, modifiedTime, deletedTime) {
 
     fun getRealStatus(): DictTypeStatus? = DictTypeStatus.getById(status)
 }

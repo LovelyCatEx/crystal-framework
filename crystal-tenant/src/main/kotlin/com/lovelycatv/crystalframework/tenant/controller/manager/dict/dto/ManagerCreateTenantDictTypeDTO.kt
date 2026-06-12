@@ -1,11 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto
 
-import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTenantResourceDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateScopedDTO
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
 data class ManagerCreateTenantDictTypeDTO(
-    override val tenantId: Long,
+    override val scope: Int = 0,
+    override val scopeId: Long = 0,
 
     @field:NotBlank(message = "Code is required")
     @field:Size(max = 64, message = "Code length cannot exceed 64 characters")
@@ -19,4 +20,4 @@ data class ManagerCreateTenantDictTypeDTO(
     val remark: String? = null,
 
     val status: Int = 1
-) : BaseManagerCreateTenantResourceDTO(tenantId)
+) : BaseManagerCreateScopedDTO(scope, scopeId)

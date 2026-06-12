@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, Row, Segmented, Select, Spin} from "antd";
+import {Button, Col, Form, Input, Row, Select, Spin} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantDictTypeDTO,
@@ -6,8 +6,9 @@ import {
     TenantDictTypeManagerController
 } from "@/api/tenant/tenant-dict-type.api.ts";
 import {DictTypeStatus} from "@/types/tenant/tenant-dict-type.types.ts";
+import {ResourceScope} from "@/types/approval/approval-flow-definition.types.ts";
 import {getDictTypeStatus} from "@/i18n/enum-helpers.ts";
-import {useEffect, useRef, useState} from "react";
+import {useRef} from "react";
 import {useTenantDictTypeTableColumns} from "@/components/columns/TenantDictTypeEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {BookOutlined, PlusOutlined} from "@ant-design/icons";
@@ -16,25 +17,14 @@ import {useNavigate} from "react-router-dom";
 import type {TenantDictType} from "@/types/tenant/tenant-dict-type.types.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 
-type DictScope = 'myTenant' | 'system';
-
 export default function MyTenantDictTypeManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const [scope, setScope] = useState<DictScope>('myTenant');
     const {currentTenant, isJoinedTenantsLoading} = useUserTenants();
     const {t} = useTranslation();
     const navigate = useNavigate();
     const columns = useTenantDictTypeTableColumns();
 
     const currentTenantId = currentTenant?.tenantId ?? null;
-    const queryTenantId = scope === 'system' ? '0' : (currentTenantId || '');
-    const isReadonly = scope === 'system';
-
-    useEffect(() => {
-        if (queryTenantId) {
-            pageRef.current?.refreshData({resetPage: true});
-        }
-    }, [queryTenantId]);
 
     const statusOptions = [
         {label: getDictTypeStatus(DictTypeStatus.ENABLED), value: DictTypeStatus.ENABLED},
@@ -66,7 +56,7 @@ export default function MyTenantDictTypeManagerPage() {
                 title={t('pages.myTenantDictTypeManager.title')}
                 subtitle={t('pages.myTenantDictTypeManager.subtitle')}
                 titleActions={
-                    !isReadonly && currentTenantId ? (
+                    currentTenantId ? (
                         <Button
                             type="primary"
                             icon={<PlusOutlined/>}
@@ -79,23 +69,13 @@ export default function MyTenantDictTypeManagerPage() {
                     ) : null
                 }
             />
-            <Segmented
-                className="mb-4"
-                value={scope}
-                onChange={(val) => setScope(val as DictScope)}
-                options={[
-                    {label: t('pages.myTenantDictTypeManager.scope.myTenant'), value: 'myTenant'},
-                    {label: t('pages.myTenantDictTypeManager.scope.system'), value: 'system'},
-                ]}
-            />
-            {queryTenantId && (
+            {currentTenantId && (
                 <ManagerPageContainer
                     ref={pageRef}
                     entityName={t('entityNames.tenantDictType')}
                     title=""
                     subtitle=""
                     showActionBar={false}
-                    readonlyMode={isReadonly}
                     columns={columns}
                     searchKeywords={['code', 'name']}
                     tableRowActionsRender={(row: TenantDictType) => (
@@ -109,9 +89,6 @@ export default function MyTenantDictTypeManagerPage() {
                     )}
                     editModalFormChildren={
                         <>
-                            <Form.Item name="tenantId" hidden initialValue={currentTenantId}>
-                                <Input/>
-                            </Form.Item>
                             <Row gutter={24}>
                                 <Col span={12}>
                                     <Form.Item
@@ -156,13 +133,15 @@ export default function MyTenantDictTypeManagerPage() {
                     query={async (props) => {
                         return (await TenantDictTypeManagerController.query({
                             ...props,
-                            tenantId: queryTenantId
+                            scope: ResourceScope.TENANT,
+                            scopeId: currentTenantId,
                         })).data!;
                     }}
                     create={async (props) => {
                         await TenantDictTypeManagerController.create({
                             ...props,
-                            tenantId: currentTenantId!
+                            scope: ResourceScope.TENANT,
+                            scopeId: currentTenantId!,
                         } as unknown as ManagerCreateTenantDictTypeDTO);
                     }}
                     update={async (props) => {

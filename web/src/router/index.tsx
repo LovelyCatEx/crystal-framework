@@ -66,6 +66,8 @@ const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
 const MyTenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictItemManagerPage.tsx"));
+const SystemDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/SystemDictTypeManagerPage.tsx"));
+const SystemDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/SystemDictItemManagerPage.tsx"));
 const ApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowDefinitionManagerPage.tsx"));
 const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowDefinitionManagerPage.tsx"));
 const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
@@ -542,6 +544,22 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <ApartmentOutlined />,
             label: t('menu.admin.approvalFlowDefinitions'),
             page: <ApprovalFlowDefinitionManagerPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/system-dict-types',
+            path: '/manager/system-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictTypes'),
+            page: <SystemDictTypeManagerPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/system-dict-items',
+            path: '/manager/system-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictItems'),
+            page: <SystemDictItemManagerPage />,
             group: 'approval'
         },
         {

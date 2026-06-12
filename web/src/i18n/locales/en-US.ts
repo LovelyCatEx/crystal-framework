@@ -2061,12 +2061,8 @@ export const enUS: I18nRules = {
       },
     },
     tenantDictTypeManager: {
-      title: 'Dictionary Type Management',
-      subtitle: 'Manage system and tenant dictionary types',
-      scope: {
-        system: 'System Dictionary',
-        tenant: 'Tenant Dictionary',
-      },
+      title: 'Tenant Dictionary Type Management',
+      subtitle: 'Manage tenant dictionary types',
       action: {
         addNew: 'Add Dictionary Type',
         manageItems: 'Manage Items',
@@ -2076,6 +2072,28 @@ export const enUS: I18nRules = {
         name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
         remark: { label: 'Remark', placeholder: 'Enter remark' },
         status: { label: 'Status' },
+      },
+    },
+    systemDictTypeManager: {
+      title: 'System Dictionary Type Management',
+      subtitle: 'Manage system-level dictionary types',
+      action: {
+        addNew: 'Add Dictionary Type',
+        manageItems: 'Manage Items',
+      },
+      modal: {
+        code: { label: 'Code', placeholder: 'Enter dictionary type code', required: 'Code is required' },
+        name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
+        remark: { label: 'Remark', placeholder: 'Enter remark' },
+        status: { label: 'Status' },
+      },
+    },
+    systemDictItemManager: {
+      title: 'System Dictionary Item Management',
+      subtitle: 'Manage system-level dictionary items',
+      action: {
+        addNew: 'Add Dictionary Item',
+        back: 'Back',
       },
     },
     tenantDictItemManager: {
@@ -2096,11 +2114,7 @@ export const enUS: I18nRules = {
     },
     myTenantDictTypeManager: {
       title: 'Dictionary Management',
-      subtitle: 'Manage organization dictionaries and view system dictionaries',
-      scope: {
-        myTenant: 'Organization',
-        system: 'System',
-      },
+      subtitle: 'Manage organization dictionaries',
       action: {
         addNew: 'Add Dictionary Type',
         manageItems: 'Manage Items',
@@ -3028,7 +3042,9 @@ export const enUS: I18nRules = {
       tenantDictTypes: 'Dictionary Type Management',
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',
-      tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management'
+      tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
+      systemDictTypes: 'System Dictionary Types',
+      systemDictItems: 'System Dictionary Items'
     },
 
     // Menu groups

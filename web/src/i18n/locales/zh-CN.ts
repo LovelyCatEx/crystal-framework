@@ -2058,12 +2058,8 @@ export const zhCN: I18nRules = {
       },
     },
     tenantDictTypeManager: {
-      title: '字典类型管理',
-      subtitle: '管理系统和租户的字典类型',
-      scope: {
-        system: '系统字典',
-        tenant: '租户字典',
-      },
+      title: '租户字典类型管理',
+      subtitle: '管理租户的字典类型',
       action: {
         addNew: '新增字典类型',
         manageItems: '管理字典项',
@@ -2073,6 +2069,28 @@ export const zhCN: I18nRules = {
         name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
         remark: { label: '备注', placeholder: '请输入备注' },
         status: { label: '状态' },
+      },
+    },
+    systemDictTypeManager: {
+      title: '系统字典类型管理',
+      subtitle: '管理系统级字典类型',
+      action: {
+        addNew: '新增字典类型',
+        manageItems: '管理字典项',
+      },
+      modal: {
+        code: { label: '编码', placeholder: '请输入字典类型编码', required: '编码不能为空' },
+        name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
+        remark: { label: '备注', placeholder: '请输入备注' },
+        status: { label: '状态' },
+      },
+    },
+    systemDictItemManager: {
+      title: '系统字典项管理',
+      subtitle: '管理系统级字典项',
+      action: {
+        addNew: '新增字典项',
+        back: '返回',
       },
     },
     tenantDictItemManager: {
@@ -2093,11 +2111,7 @@ export const zhCN: I18nRules = {
     },
     myTenantDictTypeManager: {
       title: '字典管理',
-      subtitle: '管理组织字典和查看系统字典',
-      scope: {
-        myTenant: '组织字典',
-        system: '系统字典',
-      },
+      subtitle: '管理组织字典',
       action: {
         addNew: '新增字典类型',
         manageItems: '管理字典项',
@@ -3026,7 +3040,9 @@ export const zhCN: I18nRules = {
       tenantDictTypes: '字典类型管理',
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',
-      tenantApprovalFlowDefinitions: '租户流程定义管理'
+      tenantApprovalFlowDefinitions: '租户流程定义管理',
+      systemDictTypes: '系统字典类型',
+      systemDictItems: '系统字典项'
     },
 
     // 菜单分组

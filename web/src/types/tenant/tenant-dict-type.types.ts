@@ -1,7 +1,8 @@
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 
 export interface TenantDictType extends BaseEntity {
-    tenantId: string;
+    scope: number;
+    scopeId: string;
     code: string;
     name: string;
     remark: string | null;

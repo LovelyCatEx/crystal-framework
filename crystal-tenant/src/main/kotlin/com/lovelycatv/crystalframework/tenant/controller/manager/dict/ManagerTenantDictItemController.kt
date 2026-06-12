@@ -4,15 +4,11 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
-import com.lovelycatv.crystalframework.shared.database.ConditionNode
-import com.lovelycatv.crystalframework.shared.database.GroupNode
-import com.lovelycatv.crystalframework.shared.database.QueryLogic
-import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
-import com.lovelycatv.crystalframework.tenant.constants.TenantDictConstants
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerReadTenantDictItemDTO
@@ -78,18 +74,18 @@ class ManagerTenantDictItemController(
 
     // endregion
 
-    // region System-scope routing: typeId → type.tenantId == 0 requires system dict permissions
+    // region System-scope routing: typeId → type.scope == SYSTEM requires system dict permissions
 
-    private suspend fun getTypeTenantId(typeId: Long): Long {
-        val type = tenantDictTypeManagerService.getByIdOrNull(typeId) ?: return -1
-        return type.tenantId
+    private suspend fun isSystemDictType(typeId: Long): Boolean {
+        val type = tenantDictTypeManagerService.getByIdOrNull(typeId) ?: return false
+        return type.scope == ResourceScope.SYSTEM.typeId
     }
 
     override suspend fun customCreate(
         userAuthentication: UserAuthentication,
         dto: ManagerCreateTenantDictItemDTO
     ): ApiResponse<*>? {
-        if (getTypeTenantId(dto.typeId) != TenantDictConstants.SYSTEM_TENANT_ID) return null
+        if (!isSystemDictType(dto.typeId)) return null
         if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE)) {
             throw ForbiddenException()
         }
@@ -97,15 +93,11 @@ class ManagerTenantDictItemController(
         return ApiResponse.success(null)
     }
 
-    /**
-     * System dict item query: any authenticated user can read.
-     */
     override suspend fun customQuery(
         userAuthentication: UserAuthentication,
         dto: ManagerReadTenantDictItemDTO
     ): ApiResponse<*>? {
-        if (getTypeTenantId(dto.typeId) != TenantDictConstants.SYSTEM_TENANT_ID) return null
-        // Read is open to all authenticated users for system dicts
+        if (!isSystemDictType(dto.typeId)) return null
         return ApiResponse.success(managerService.query(dto))
     }
 
@@ -114,7 +106,7 @@ class ManagerTenantDictItemController(
         dto: ManagerUpdateTenantDictItemDTO
     ): ApiResponse<*>? {
         val item = managerService.getByIdOrNull(dto.id) ?: return null
-        if (getTypeTenantId(item.typeId) != TenantDictConstants.SYSTEM_TENANT_ID) return null
+        if (!isSystemDictType(item.typeId)) return null
         if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE)) {
             throw ForbiddenException()
         }
@@ -128,7 +120,7 @@ class ManagerTenantDictItemController(
     ): ApiResponse<*>? {
         val items = dto.ids.map { managerService.getByIdOrNull(it) ?: return null }
         val typeIds = items.map { it.typeId }.distinct()
-        if (typeIds.any { getTypeTenantId(it) != TenantDictConstants.SYSTEM_TENANT_ID }) return null
+        if (typeIds.any { !isSystemDictType(it) }) return null
         if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE)) {
             throw ForbiddenException()
         }
@@ -145,13 +137,13 @@ class ManagerTenantDictItemController(
         userAuthentication: UserAuthentication,
         @RequestParam typeId: Long
     ): ApiResponse<List<TenantDictItemTreeVO>> {
-        val typeTenantId = getTypeTenantId(typeId)
-        if (typeTenantId == TenantDictConstants.SYSTEM_TENANT_ID) {
+        if (isSystemDictType(typeId)) {
             // System dict tree: any authenticated user can read
         } else {
             if (!RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DICT_ITEM_READ)) {
                 val hasScopedPermission = RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM)
-                if (!hasScopedPermission || typeTenantId != userAuthentication.tenantId) {
+                val type = tenantDictTypeManagerService.getByIdOrNull(typeId)
+                if (!hasScopedPermission || type?.scopeId != userAuthentication.tenantId) {
                     throw ForbiddenException()
                 }
             }

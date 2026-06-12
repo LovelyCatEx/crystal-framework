@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface TenantDictTypeRepository : BaseRepository<TenantDictTypeEntity> {
-    fun findAllByTenantId(tenantId: Long): Flux<TenantDictTypeEntity>
+    fun findAllByScopeId(scopeId: Long): Flux<TenantDictTypeEntity>
 
-    fun countByTenantId(tenantId: Long): Mono<Long>
+    fun countByScopeId(scopeId: Long): Mono<Long>
 }
