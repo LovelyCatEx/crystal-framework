@@ -351,6 +351,37 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Approval Flow Definition
+    val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.approval.flow.definition",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/approval-flow-definitions"
+    )
+
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM = "i.tenant.approval.flow.definition.create"
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM = "i.tenant.approval.flow.definition.read"
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM = "i.tenant.approval.flow.definition.update"
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM = "i.tenant.approval.flow.definition.delete"
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = TenantPermissionDeclaration(
+        name = ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

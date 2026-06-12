@@ -2112,6 +2112,42 @@ export const enUS: I18nRules = {
         status: { label: 'Status' },
       },
     },
+    approvalFlowDefinitionManager: {
+      title: 'System Approval Flow Management',
+      subtitle: 'Manage system-level approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
+    tenantApprovalFlowDefinitionManager: {
+      title: 'Tenant Approval Flow Management',
+      subtitle: 'Manage tenant-level approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
+    myApprovalFlowDefinitionManager: {
+      title: 'Approval Flow Management',
+      subtitle: 'Manage organization approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
   },
 
   components: {
@@ -2566,6 +2602,12 @@ export const enUS: I18nRules = {
         status: 'Status',
         yes: 'Yes',
         no: 'No'
+      },
+      approvalFlowDefinition: {
+        name: 'Name',
+        description: 'Description',
+        currentVersion: 'Version',
+        status: 'Status'
       }
     },
     entityTable: {
@@ -2890,6 +2932,11 @@ export const enUS: I18nRules = {
     dictItemStatus: {
       0: 'Disabled',
       1: 'Enabled'
+    },
+    approvalFlowDefinitionStatus: {
+      0: 'Draft',
+      1: 'Published',
+      2: 'Disabled'
     }
   },
 
@@ -2921,7 +2968,8 @@ export const enUS: I18nRules = {
     sessionMonitor: 'Session',
     announcement: 'Announcement',
     tenantDictType: 'Dictionary Type',
-    tenantDictItem: 'Dictionary Item'
+    tenantDictItem: 'Dictionary Item',
+    approvalFlowDefinition: 'Approval Flow Definition'
   },
 
   menu: {
@@ -2942,7 +2990,8 @@ export const enUS: I18nRules = {
       profile: 'Organization Settings',
       messageChannels: 'Message Channel Management',
       personalProfile: 'Personal Profile',
-      dictTypes: 'Dictionary Management'
+      dictTypes: 'Dictionary Management',
+      approvalFlowDefinitions: 'Approval Flow Management'
     },
 
     // Admin menus
@@ -2977,7 +3026,9 @@ export const enUS: I18nRules = {
       systemMonitor: 'System Monitor',
       announcements: 'Announcement Management',
       tenantDictTypes: 'Dictionary Type Management',
-      tenantDictItems: 'Dictionary Item Management'
+      tenantDictItems: 'Dictionary Item Management',
+      approvalFlowDefinitions: 'Flow Definition Management',
+      tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management'
     },
 
     // Menu groups
@@ -2987,6 +3038,7 @@ export const enUS: I18nRules = {
       mail_template: 'Mail Templates',
       tenant: 'Tenant Management',
       i_tenant: 'Organization Management',
+      approval: 'Approval Management',
       logs: 'Log Management',
       monitor: 'System Monitor'
     }

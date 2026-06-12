@@ -80,3 +80,7 @@ export function getDictTypeStatus(status: number): string {
 export function getDictItemStatus(status: number): string {
     return translateEnum('dictItemStatus', status);
 }
+
+export function getApprovalFlowDefinitionStatus(status: number): string {
+    return translateEnum('approvalFlowDefinitionStatus', status);
+}

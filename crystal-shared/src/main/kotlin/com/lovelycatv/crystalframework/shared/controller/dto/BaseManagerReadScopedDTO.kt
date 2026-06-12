@@ -11,5 +11,5 @@ open class BaseManagerReadScopedDTO(
     override val page: Int,
     override val pageSize: Int,
     open val scope: Int,
-    open val scopeId: Long?,
+    open val scopeId: Long,
 ) : BaseManagerReadDTO(page, pageSize)

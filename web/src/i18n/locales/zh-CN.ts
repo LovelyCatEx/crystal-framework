@@ -2109,6 +2109,42 @@ export const zhCN: I18nRules = {
         status: { label: '状态' },
       },
     },
+    approvalFlowDefinitionManager: {
+      title: '系统审批流程管理',
+      subtitle: '管理系统级审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
+    tenantApprovalFlowDefinitionManager: {
+      title: '租户审批流程管理',
+      subtitle: '管理租户级审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
+    myApprovalFlowDefinitionManager: {
+      title: '审批流程管理',
+      subtitle: '管理组织审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
   },
 
   components: {
@@ -2564,6 +2600,12 @@ export const zhCN: I18nRules = {
         status: '状态',
         yes: '是',
         no: '否'
+      },
+      approvalFlowDefinition: {
+        name: '名称',
+        description: '描述',
+        currentVersion: '版本',
+        status: '状态'
       }
     },
     entityTable: {
@@ -2888,6 +2930,11 @@ export const zhCN: I18nRules = {
     dictItemStatus: {
       0: '禁用',
       1: '启用'
+    },
+    approvalFlowDefinitionStatus: {
+      0: '草稿',
+      1: '已发布',
+      2: '已禁用'
     }
   },
 
@@ -2919,7 +2966,8 @@ export const zhCN: I18nRules = {
     sessionMonitor: '会话',
     announcement: '公告',
     tenantDictType: '字典类型',
-    tenantDictItem: '字典项'
+    tenantDictItem: '字典项',
+    approvalFlowDefinition: '审批流程定义'
   },
 
   menu: {
@@ -2940,7 +2988,8 @@ export const zhCN: I18nRules = {
       profile: '组织设置',
       messageChannels: '消息渠道管理',
       personalProfile: '个人资料',
-      dictTypes: '字典管理'
+      dictTypes: '字典管理',
+      approvalFlowDefinitions: '审批流程管理'
     },
 
     // 管理员菜单
@@ -2975,7 +3024,9 @@ export const zhCN: I18nRules = {
       systemMonitor: '系统监控',
       announcements: '公告管理',
       tenantDictTypes: '字典类型管理',
-      tenantDictItems: '字典项管理'
+      tenantDictItems: '字典项管理',
+      approvalFlowDefinitions: '流程定义管理',
+      tenantApprovalFlowDefinitions: '租户流程定义管理'
     },
 
     // 菜单分组
@@ -2985,6 +3036,7 @@ export const zhCN: I18nRules = {
       mail_template: '邮件模板',
       tenant: '租户管理',
       i_tenant: '组织管理',
+      approval: '审批管理',
       logs: '日志管理',
       monitor: '系统监控'
     }

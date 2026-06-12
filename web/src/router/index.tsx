@@ -66,6 +66,9 @@ const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
 const MyTenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictItemManagerPage.tsx"));
+const ApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowDefinitionManagerPage.tsx"));
+const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowDefinitionManagerPage.tsx"));
+const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -111,6 +114,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'i_tenant',
             icon: <ShopOutlined />,
             label: t('menu.groups.i_tenant'),
+        },
+        {
+            name: 'approval',
+            icon: <ApartmentOutlined />,
+            label: t('menu.groups.approval'),
         },
         {
             name: 'logs',
@@ -240,6 +248,14 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             icon: <BookOutlined />,
             label: t('menu.myTenant.dictTypes'),
             page: <MyTenantDictItemManagerPage />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/approval-flow-definitions',
+            path: '/manager/tenant/approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.myTenant.approvalFlowDefinitions'),
+            page: <MyApprovalFlowDefinitionManagerPage />,
             group: 'i_tenant',
         },
         {
@@ -401,6 +417,30 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             group: 'tenant'
         },
         {
+            key: '/manager/tenant-dict-types',
+            path: '/manager/tenant-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictTypes'),
+            page: <TenantDictTypeManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-dict-items',
+            path: '/manager/tenant-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictItems'),
+            page: <TenantDictItemManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-approval-flow-definitions',
+            path: '/manager/tenant-approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.admin.tenantApprovalFlowDefinitions'),
+            page: <TenantApprovalFlowDefinitionManagerPage />,
+            group: 'tenant'
+        },
+        {
             key: '/manager/file-resources',
             path: '/manager/file-resources',
             icon: <FileOutlined />,
@@ -497,20 +537,12 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             page: <AnnouncementManagerPage />,
         },
         {
-            key: '/manager/tenant-dict-types',
-            path: '/manager/tenant-dict-types',
-            icon: <BookOutlined />,
-            label: t('menu.admin.tenantDictTypes'),
-            page: <TenantDictTypeManagerPage />,
-            group: 'tenant'
-        },
-        {
-            key: '/manager/tenant-dict-items',
-            path: '/manager/tenant-dict-items',
-            icon: <BookOutlined />,
-            label: t('menu.admin.tenantDictItems'),
-            page: <TenantDictItemManagerPage />,
-            group: 'tenant'
+            key: '/manager/approval-flow-definitions',
+            path: '/manager/approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.admin.approvalFlowDefinitions'),
+            page: <ApprovalFlowDefinitionManagerPage />,
+            group: 'approval'
         },
         {
             key: '/manager/settings',

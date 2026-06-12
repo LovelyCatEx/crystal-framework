@@ -39,11 +39,7 @@ interface BaseScopedManagerService<
     override suspend fun buildQueryCriteria(dto: READ_DTO): Criteria {
         val scopeCriteria = run {
             val typeCriteria = Criteria.where(COLUMN_SCOPE).`is`(dto.scope)
-            if (dto.scopeId != null) {
-                typeCriteria.and(Criteria.where(COLUMN_SCOPE_ID).`is`(dto.scopeId!!))
-            } else {
-                typeCriteria
-            }
+            typeCriteria.and(Criteria.where(COLUMN_SCOPE_ID).`is`(dto.scopeId))
         }
 
         val queryCriteria = if (dto.query != null) {

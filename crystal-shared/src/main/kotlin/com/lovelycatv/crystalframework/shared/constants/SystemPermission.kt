@@ -199,6 +199,22 @@ object SystemPermission {
     const val ACTION_ANNOUNCEMENT_DELETE = "announcement.delete"
     const val ACTION_ANNOUNCEMENT_LIST = "announcement.list"
 
+    // Approval Flow Definition (system scope)
+    const val MENU_APPROVAL_FLOW_DEFINITION_MANAGER = "approval.flow.definition:/manager/approval-flow-definitions"
+
+    const val ACTION_APPROVAL_FLOW_DEFINITION_CREATE = "approval.flow.definition.create"
+    const val ACTION_APPROVAL_FLOW_DEFINITION_READ = "approval.flow.definition.read"
+    const val ACTION_APPROVAL_FLOW_DEFINITION_UPDATE = "approval.flow.definition.update"
+    const val ACTION_APPROVAL_FLOW_DEFINITION_DELETE = "approval.flow.definition.delete"
+
+    // Approval Flow Definition (tenant scope, system admin access)
+    const val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = "tenant.approval.flow.definition:/manager/tenant-approval-flow-definitions"
+
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = "tenant.approval.flow.definition.create"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = "tenant.approval.flow.definition.read"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = "tenant.approval.flow.definition.update"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = "tenant.approval.flow.definition.delete"
+
     // System-level Dictionary (tenantId = 0)
     const val MENU_SYSTEM_DICT_TYPE_MANAGER = "system.dict.type:/manager/system-dict-types"
     const val ACTION_SYSTEM_DICT_TYPE_CREATE = "system.dict.type.create"
