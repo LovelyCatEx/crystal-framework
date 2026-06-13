@@ -13,6 +13,7 @@ export function useApprovalFlowDefinitionTableColumns(): EntityTableColumns<Appr
             title: t('components.columns.approvalFlowDefinition.name'),
             dataIndex: "name",
             key: "name",
+            render: (_: unknown, row: ApprovalFlowDefinition) => row.name
         },
         {
             title: t('components.columns.approvalFlowDefinition.description'),
