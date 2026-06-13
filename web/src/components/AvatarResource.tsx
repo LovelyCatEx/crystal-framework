@@ -5,13 +5,14 @@ import {useSWRState} from "../compositions/use-swr.ts";
 import type {ReactNode} from "react";
 import {UserOutlined} from "@ant-design/icons";
 
-export function AvatarResource({ fileEntityId, defaultIcon }: { fileEntityId?: string | null, defaultIcon?: ReactNode }) {
+export function AvatarResource({ fileEntityId, defaultIcon, size }: { fileEntityId?: string | null, defaultIcon?: ReactNode, size?: number }) {
     const [avatarUrl] = useSWRState<string | null>(
         fileEntityId ? `getFileDownloadUrl/${fileEntityId}` : undefined,
         () => fileEntityId ? getResourceFileDownloadUrlById(fileEntityId) : emptyApiResponseAsync()
     )
 
     return <Avatar
+        size={size}
         className={avatarUrl ? "" : "bg-black/50"}
         src={avatarUrl ?? defaultIcon ?? <UserOutlined />}
     />

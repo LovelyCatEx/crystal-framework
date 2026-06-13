@@ -2165,6 +2165,52 @@ export const enUS: I18nRules = {
   },
 
   components: {
+    approvalEditor: {
+      action: {
+        editFlow: 'Edit Flow',
+        close: 'Close'
+      },
+      header: {
+        loading: 'Loading...',
+        save: 'Save'
+      },
+      toolbar: {
+        undo: 'Undo (CTRL+Z)',
+        redo: 'Redo (CTRL+Y)',
+        fitViewport: 'Fit Viewport',
+        autoArrange: 'Auto Arrange',
+        autoArrangeTooltip: 'Arrange nodes automatically'
+      },
+      contextMenu: {
+        createNode: 'Create Node'
+      },
+      statusBar: {
+        position: 'Position',
+        scale: 'Scale'
+      },
+      inspector: {
+        title: 'Node Inspector',
+        emptyHint: 'Select a node to inspect',
+        id: 'ID',
+        nodeKey: 'Node Key',
+        name: 'Name',
+        type: 'Type',
+        config: 'Config',
+        formSchema: 'Form Schema',
+        position: 'Position',
+        newNode: '(new)',
+        emptyValue: '(empty)',
+        unnamed: '(unnamed)',
+        none: '(none)',
+        approveMode: 'Approve Mode',
+        approvers: 'Approvers'
+      },
+      validation: {
+        duplicateNodeKey: 'Duplicate node key: "{{nodeKey}}"',
+        emptyNodeKey: 'Node key cannot be empty (node: "{{name}}")',
+        duplicateStart: 'Only one Start node is allowed'
+      }
+    },
     addressPicker: {
       akMissing: 'Baidu map AK is not configured, address picker is unavailable',
       emptyNearby: 'No nearby addresses found',
@@ -2951,6 +2997,17 @@ export const enUS: I18nRules = {
       0: 'Draft',
       1: 'Published',
       2: 'Disabled'
+    },
+    approvalFlowNodeType: {
+      0: 'Start',
+      1: 'End',
+      2: 'Approval',
+      3: 'Condition',
+      4: 'CC'
+    },
+    approvalFlowApproveMode: {
+      0: 'Countersign (All approve)',
+      1: 'Or-sign (Any one approves)'
     }
   },
 

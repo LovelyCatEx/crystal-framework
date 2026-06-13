@@ -12,6 +12,7 @@ import {useApprovalFlowDefinitionTableColumns} from "@/components/columns/Approv
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
+import {ApprovalEditorButton} from "@/components/approval/ApprovalEditorOverlay.tsx";
 
 export default function ApprovalFlowDefinitionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -53,6 +54,9 @@ export default function ApprovalFlowDefinitionManagerPage() {
                 showActionBar={false}
                 columns={columns}
                 searchKeywords={['name']}
+                tableRowActionsRender={(record) => (
+                    <ApprovalEditorButton definitionId={record.id} />
+                )}
                 editModalFormChildren={
                     <>
                         <Row gutter={24}>

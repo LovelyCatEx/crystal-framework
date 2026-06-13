@@ -1,8 +1,10 @@
-import type {BaseEntity} from "@/types/BaseEntity.ts";
+import type {BaseScopedEntity} from "@/types/BaseScopedEntity.ts";
+import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";
+import type {ApprovalFlowEdge} from "@/types/approval/approval-flow-edge.types.ts";
 
-export interface ApprovalFlowDefinition extends BaseEntity {
-    scope: number;
-    scopeId: string;
+export {ApprovalFlowDefinitionStatus, ApprovalFlowScope, ResourceScope} from "./approval-enums.ts";
+
+export interface ApprovalFlowDefinition extends BaseScopedEntity {
     name: string;
     description: string | null;
     currentVersion: number;
@@ -10,13 +12,8 @@ export interface ApprovalFlowDefinition extends BaseEntity {
     formSchema: string | null;
 }
 
-export enum ResourceScope {
-    SYSTEM = 0,
-    TENANT = 1,
-}
-
-export enum ApprovalFlowDefinitionStatus {
-    DRAFT = 0,
-    PUBLISHED = 1,
-    DISABLED = 2,
+export interface ApprovalFlowDefinitionDetailsVO {
+    definition: ApprovalFlowDefinition;
+    nodes: ApprovalFlowNode[];
+    edges: ApprovalFlowEdge[];
 }

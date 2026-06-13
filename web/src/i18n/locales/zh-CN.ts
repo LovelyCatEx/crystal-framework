@@ -2162,6 +2162,52 @@ export const zhCN: I18nRules = {
   },
 
   components: {
+    approvalEditor: {
+      action: {
+        editFlow: '编辑流程',
+        close: '关闭'
+      },
+      header: {
+        loading: '加载中...',
+        save: '保存'
+      },
+      toolbar: {
+        undo: '撤销 (CTRL+Z)',
+        redo: '重做 (CTRL+Y)',
+        fitViewport: '适应视口',
+        autoArrange: '自动排列',
+        autoArrangeTooltip: '自动排列节点'
+      },
+      contextMenu: {
+        createNode: '创建节点'
+      },
+      statusBar: {
+        position: '坐标',
+        scale: '缩放'
+      },
+      inspector: {
+        title: '节点属性',
+        emptyHint: '选择一个节点以查看属性',
+        id: 'ID',
+        nodeKey: '节点标识',
+        name: '名称',
+        type: '类型',
+        config: '配置',
+        formSchema: '表单结构',
+        position: '位置',
+        newNode: '(新节点)',
+        emptyValue: '(空)',
+        unnamed: '(未命名)',
+        none: '(无)',
+        approveMode: '审批方式',
+        approvers: '审批人'
+      },
+      validation: {
+        duplicateNodeKey: '节点标识重复: "{{nodeKey}}"',
+        emptyNodeKey: '节点标识不能为空 (节点: "{{name}}")',
+        duplicateStart: '只允许存在一个开始节点'
+      }
+    },
     addressPicker: {
       triggerTooltip: '在地图上选择地址',
       akMissing: '未配置百度地图 AK，无法使用地图选址',
@@ -2949,6 +2995,17 @@ export const zhCN: I18nRules = {
       0: '草稿',
       1: '已发布',
       2: '已禁用'
+    },
+    approvalFlowNodeType: {
+      0: '开始',
+      1: '结束',
+      2: '审批',
+      3: '条件',
+      4: '抄送'
+    },
+    approvalFlowApproveMode: {
+      0: '会签（所有人通过）',
+      1: '或签（任一人通过）'
     }
   },
 

@@ -6,7 +6,7 @@ import {message} from "antd";
 export const useUserProfile = (userId?: string | null) => {
     const [userProfile, , isUserProfileLoading, refreshUserProfile] = useSWRState<UserProfileVO>(
         userId ? `getUserProfile?id=${userId}` : undefined,
-        getUserProfile,
+        () => getUserProfile(userId!),
         () => void message.error("无法获取用户资料")
     );
 

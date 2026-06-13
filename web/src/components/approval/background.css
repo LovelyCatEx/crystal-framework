@@ -1,0 +1,30 @@
+/**
+ * Copyright 2025 lovelycat
+ *
+ * Use of this source code is governed by the Apache License, Version 2.0,
+ * that can be found in the LICENSE file.
+ */
+.area-fill {
+    display: table;
+    z-index: -1;
+    position: absolute;
+    top: -640000px;
+    left: -640000px;
+    width: 1280000px;
+    height: 1280000px;
+}
+
+.area-background {
+    background-color: #262626;
+    opacity: 1;
+    background-image:
+            linear-gradient(#0f0f0f 1.5px, transparent 1.5px),
+            linear-gradient(90deg, #0f0f0f 1.5px, transparent 1.5px),
+            linear-gradient(#333333 1.5px, transparent 1.5px),
+            linear-gradient(90deg, #333333 1.5px, #262626 1.5px);
+    background-size: calc(64px * 8) calc(64px * 8),
+    calc(64px * 8) calc(64px * 8),
+    64px 64px,
+    64px 64px;
+    background-position: -1.5px -1.5px, -1.5px -1.5px, -1.5px -1.5px, -1.5px -1.5px;
+}

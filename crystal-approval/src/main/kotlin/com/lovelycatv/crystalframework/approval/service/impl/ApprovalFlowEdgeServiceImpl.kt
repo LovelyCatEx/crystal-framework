@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.approval.service.ApprovalFlowEdgeService
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
@@ -25,10 +26,10 @@ class ApprovalFlowEdgeServiceImpl(
     override fun getRepository(): ApprovalFlowEdgeRepository = approvalFlowEdgeRepository
 
     override fun findByDefinitionVersion(definitionId: Long, definitionVersion: Int): Flow<ApprovalFlowEdgeEntity> {
-        return approvalFlowEdgeRepository.findByDefinitionIdAndDefinitionVersion(definitionId, definitionVersion)
+        return approvalFlowEdgeRepository.findByDefinitionIdAndDefinitionVersion(definitionId, definitionVersion).asFlow()
     }
 
     override fun findBySourceNodeId(sourceNodeId: Long): Flow<ApprovalFlowEdgeEntity> {
-        return approvalFlowEdgeRepository.findBySourceNodeId(sourceNodeId)
+        return approvalFlowEdgeRepository.findBySourceNodeId(sourceNodeId).asFlow()
     }
 }

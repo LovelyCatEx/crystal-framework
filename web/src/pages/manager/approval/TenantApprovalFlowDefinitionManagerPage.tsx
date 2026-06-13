@@ -13,6 +13,7 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
+import {ApprovalEditorButton} from "@/components/approval/ApprovalEditorOverlay.tsx";
 
 export default function TenantApprovalFlowDefinitionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -73,6 +74,9 @@ export default function TenantApprovalFlowDefinitionManagerPage() {
                     showActionBar={false}
                     columns={columns}
                     searchKeywords={['name']}
+                    tableRowActionsRender={(record) => (
+                        <ApprovalEditorButton definitionId={record.id} />
+                    )}
                     editModalFormChildren={
                         <>
                             <Row gutter={24}>
