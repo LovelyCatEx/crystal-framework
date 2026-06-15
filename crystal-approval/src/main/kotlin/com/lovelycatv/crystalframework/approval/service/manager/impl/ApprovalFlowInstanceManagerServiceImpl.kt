@@ -43,7 +43,7 @@ class ApprovalFlowInstanceManagerServiceImpl(
                 definitionVersion = dto.definitionVersion,
                 initiatorId = dto.initiatorId,
                 formData = dto.formData,
-                currentNodeId = dto.currentNodeId,
+                latestNodeId = dto.latestNodeId,
             ) newEntity true
         ).awaitFirstOrNull() ?: throw BusinessException("Could not create approval flow instance")
     }
@@ -54,7 +54,7 @@ class ApprovalFlowInstanceManagerServiceImpl(
     ): ApprovalFlowInstanceEntity {
         return original.apply {
             if (dto.status != null) this.status = dto.status!!
-            if (dto.currentNodeId != null) this.currentNodeId = dto.currentNodeId!!
+            if (dto.latestNodeId != null) this.latestNodeId = dto.latestNodeId!!
             if (dto.formData != null) this.formData = dto.formData
         }
     }

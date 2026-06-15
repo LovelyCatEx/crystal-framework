@@ -28,9 +28,9 @@ class ApprovalFlowInstanceEntity(
     var status: Int = ApprovalFlowInstanceStatus.IN_PROGRESS.typeId,
     @Column("form_data")
     var formData: String? = null,
-    @Column("current_node_id")
+    @Column("latest_node_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
-    var currentNodeId: Long = 0,
+    var latestNodeId: Long = 0,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null

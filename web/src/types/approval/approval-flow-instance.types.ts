@@ -6,5 +6,5 @@ export interface ApprovalFlowInstance extends BaseScopedEntity {
     initiatorId: string;
     status: number;
     formData: string | null;
-    currentNodeId: string;
+    latestNodeId: string;
 }

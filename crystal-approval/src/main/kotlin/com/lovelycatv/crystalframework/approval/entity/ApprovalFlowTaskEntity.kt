@@ -22,6 +22,9 @@ class ApprovalFlowTaskEntity(
     @Column("node_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
     var nodeId: Long = 0,
+    @Column("token_id")
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    var tokenId: Long = 0,
     @Column("assignee_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
     var assigneeId: Long = 0,

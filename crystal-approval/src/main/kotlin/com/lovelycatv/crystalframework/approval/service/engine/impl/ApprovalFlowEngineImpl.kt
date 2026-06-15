@@ -20,6 +20,7 @@ class ApprovalFlowEngineImpl(
     private val instanceService: ApprovalFlowInstanceService,
     private val taskService: ApprovalFlowTaskService,
     private val recordService: ApprovalFlowRecordService,
+    private val tokenService: ApprovalFlowTokenService,
     private val snowIdGenerator: SnowIdGenerator
 ) : ApprovalFlowEngine {
 
@@ -55,7 +56,7 @@ class ApprovalFlowEngineImpl(
             initiatorId = initiatorId,
             status = ApprovalFlowInstanceStatus.IN_PROGRESS.typeId,
             formData = formData,
-            currentNodeId = firstTargetNodeId
+            latestNodeId = firstTargetNodeId
         ).apply { newEntity() }
 
         instanceService.getRepository().save(instance).awaitFirst()
@@ -71,12 +72,20 @@ class ApprovalFlowEngineImpl(
         ).apply { newEntity() }
         recordService.getRepository().save(record).awaitFirst()
 
-        advanceToNextNode(instance)
+        val initialToken = ApprovalFlowTokenEntity(
+            id = snowIdGenerator.nextId(),
+            instanceId = instance.id,
+            currentNodeId = firstTargetNodeId,
+            status = ApprovalFlowTokenStatus.ACTIVE.typeId,
+            forkNodeId = null
+        ).apply { newEntity() }
+        tokenService.getRepository().save(initialToken).awaitFirst()
+
+        advanceToken(initialToken, instance)
 
         return instance
     }
 
-    // PLACEHOLDER_ENGINE_METHODS
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun handleTask(
         taskId: Long,
@@ -100,6 +109,7 @@ class ApprovalFlowEngineImpl(
         }
 
         val instance = instanceService.getByIdOrThrow(task.instanceId)
+        val token = tokenService.getByIdOrThrow(task.tokenId)
 
         val record = ApprovalFlowRecordEntity(
             id = snowIdGenerator.nextId(),
@@ -129,67 +139,41 @@ class ApprovalFlowEngineImpl(
                             taskService.getRepository().save(it).awaitFirst()
                         }
                     }
-                    advanceToNextNode(instance)
+                    moveToNext(token, instance)
                 } else {
                     val hasPending = allTasks.any { it.id != task.id && it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }
                     if (!hasPending) {
-                        instance.status = ApprovalFlowInstanceStatus.REJECTED.typeId
-                        instanceService.withUpdateEntityContext(instance) {
-                            instance.onUpdate()
-                            instanceService.getRepository().save(instance).awaitFirst()
-                        }
+                        rejectInstance(instance)
                     }
                 }
             }
             ApprovalFlowApproveMode.AND -> {
                 if (!approved) {
-                    instance.status = ApprovalFlowInstanceStatus.REJECTED.typeId
-                    instanceService.withUpdateEntityContext(instance) {
-                        instance.onUpdate()
-                        instanceService.getRepository().save(instance).awaitFirst()
-                    }
+                    rejectInstance(instance)
                 } else {
                     val allApproved = allTasks.all { it.getRealStatus() == ApprovalFlowTaskStatus.APPROVED }
                     if (allApproved) {
-                        advanceToNextNode(instance)
+                        moveToNext(token, instance)
                     }
                 }
             }
         }
     }
 
-    override suspend fun advanceToNextNode(instance: ApprovalFlowInstanceEntity) {
-        val currentNode = nodeService.getByIdOrThrow(instance.currentNodeId)
+    override suspend fun advanceToken(token: ApprovalFlowTokenEntity, instance: ApprovalFlowInstanceEntity) {
+        val currentNode = nodeService.getByIdOrThrow(token.currentNodeId)
 
-        val edges = edgeService.findBySourceNodeId(currentNode.id).toList()
-        if (edges.isEmpty()) {
-            instance.status = ApprovalFlowInstanceStatus.APPROVED.typeId
-            instanceService.withUpdateEntityContext(instance) {
-                instance.onUpdate()
-                instanceService.getRepository().save(instance).awaitFirst()
-            }
-            return
-        }
-
-        val nextNodeId = edges.first().targetNodeId
-        val nextNode = nodeService.getByIdOrThrow(nextNodeId)
-
-        instance.currentNodeId = nextNodeId
-        instanceService.withUpdateEntityContext(instance) {
-            instance.onUpdate()
-            instanceService.getRepository().save(instance).awaitFirst()
-        }
-
-        when (nextNode.getRealType()) {
+        when (currentNode.getRealType()) {
             ApprovalFlowNodeType.APPROVAL -> {
-                val approvers = resolveApprovers(nextNode, instance)
+                val approvers = resolveApprovers(currentNode, instance)
                 approvers.forEach { assigneeId ->
                     val task = ApprovalFlowTaskEntity(
                         id = snowIdGenerator.nextId(),
                         scope = instance.scope,
                         scopeId = instance.scopeId,
                         instanceId = instance.id,
-                        nodeId = nextNode.id,
+                        nodeId = currentNode.id,
+                        tokenId = token.id,
                         assigneeId = assigneeId,
                         status = ApprovalFlowTaskStatus.PENDING.typeId
                     ).apply { newEntity() }
@@ -197,28 +181,97 @@ class ApprovalFlowEngineImpl(
                 }
             }
             ApprovalFlowNodeType.CONDITION -> {
-                val config = nextNode.config?.parseObject<ConditionNodeConfig>()
+                val config = currentNode.config?.parseObject<ConditionNodeConfig>()
                     ?: throw BusinessException("Condition node has no config")
                 val formData = instance.formData?.parseObject<Map<String, Any?>>() ?: emptyMap()
                 val targetNodeId = evaluateCondition(config, formData)
-                instance.currentNodeId = targetNodeId
-                instanceService.withUpdateEntityContext(instance) {
-                    instance.onUpdate()
-                    instanceService.getRepository().save(instance).awaitFirst()
+                moveToken(token, targetNodeId)
+                updateLatestNodeId(instance, targetNodeId)
+                advanceToken(token, instance)
+            }
+            ApprovalFlowNodeType.FORK -> {
+                completeToken(token)
+                val forkEdges = edgeService.findBySourceNodeId(currentNode.id).toList()
+                forkEdges.forEach { edge ->
+                    val childToken = ApprovalFlowTokenEntity(
+                        id = snowIdGenerator.nextId(),
+                        instanceId = instance.id,
+                        currentNodeId = edge.targetNodeId,
+                        status = ApprovalFlowTokenStatus.ACTIVE.typeId,
+                        forkNodeId = currentNode.id
+                    ).apply { newEntity() }
+                    tokenService.getRepository().save(childToken).awaitFirst()
+                    advanceToken(childToken, instance)
                 }
-                advanceToNextNode(instance)
+            }
+            ApprovalFlowNodeType.JOIN -> {
+                token.status = ApprovalFlowTokenStatus.WAITING.typeId
+                tokenService.withUpdateEntityContext(token) {
+                    token.onUpdate()
+                    tokenService.getRepository().save(token).awaitFirst()
+                }
+                tryMergeAtJoin(token, instance)
             }
             ApprovalFlowNodeType.END -> {
-                instance.status = ApprovalFlowInstanceStatus.APPROVED.typeId
-                instanceService.withUpdateEntityContext(instance) {
-                    instance.onUpdate()
-                    instanceService.getRepository().save(instance).awaitFirst()
-                }
+                completeToken(token)
+                completeInstance(instance)
             }
             else -> {
-                advanceToNextNode(instance)
+                moveToNext(token, instance)
             }
         }
+    }
+
+    private suspend fun moveToNext(token: ApprovalFlowTokenEntity, instance: ApprovalFlowInstanceEntity) {
+        val edges = edgeService.findBySourceNodeId(token.currentNodeId).toList()
+        if (edges.isEmpty()) {
+            completeToken(token)
+            completeInstance(instance)
+            return
+        }
+        val nextNodeId = edges.first().targetNodeId
+        moveToken(token, nextNodeId)
+        updateLatestNodeId(instance, nextNodeId)
+        advanceToken(token, instance)
+    }
+
+    private suspend fun tryMergeAtJoin(arrivedToken: ApprovalFlowTokenEntity, instance: ApprovalFlowInstanceEntity) {
+        val forkNodeId = arrivedToken.forkNodeId
+            ?: throw BusinessException("Token at JOIN has no forkNodeId")
+
+        val forkOutEdgeCount = edgeService.findBySourceNodeId(forkNodeId).toList().size
+        val waitingTokens = tokenService.findWaitingAtJoin(forkNodeId, arrivedToken.currentNodeId).toList()
+
+        if (waitingTokens.size < forkOutEdgeCount) {
+            return
+        }
+
+        waitingTokens.forEach { t ->
+            t.status = ApprovalFlowTokenStatus.COMPLETED.typeId
+            tokenService.withUpdateEntityContext(t) {
+                t.onUpdate()
+                tokenService.getRepository().save(t).awaitFirst()
+            }
+        }
+
+        val parentDerivedSource = findParentDerivedSource(forkNodeId, instance)
+
+        val mergedToken = ApprovalFlowTokenEntity(
+            id = snowIdGenerator.nextId(),
+            instanceId = instance.id,
+            currentNodeId = arrivedToken.currentNodeId,
+            status = ApprovalFlowTokenStatus.ACTIVE.typeId,
+            forkNodeId = parentDerivedSource
+        ).apply { newEntity() }
+        tokenService.getRepository().save(mergedToken).awaitFirst()
+
+        moveToNext(mergedToken, instance)
+    }
+
+    private suspend fun findParentDerivedSource(forkNodeId: Long, instance: ApprovalFlowInstanceEntity): Long? {
+        val completedTokenAtFork = tokenService.findByInstanceId(instance.id).toList()
+            .firstOrNull { it.currentNodeId == forkNodeId && it.getRealStatus() == ApprovalFlowTokenStatus.COMPLETED }
+        return completedTokenAtFork?.forkNodeId
     }
 
     override suspend fun resolveApprovers(
@@ -235,9 +288,48 @@ class ApprovalFlowEngineImpl(
                 userIds.map { it.toLong() }
             }
             else -> {
-                // TODO: implement other strategies (SPECIFIED_ROLE, DIRECT_SUPERIOR, DEPARTMENT_HEAD, INITIATOR_CHOOSE)
                 throw BusinessException("Approver strategy not yet implemented: ${config.strategy}")
             }
+        }
+    }
+
+    private suspend fun moveToken(token: ApprovalFlowTokenEntity, nodeId: Long) {
+        token.currentNodeId = nodeId
+        tokenService.withUpdateEntityContext(token) {
+            token.onUpdate()
+            tokenService.getRepository().save(token).awaitFirst()
+        }
+    }
+
+    private suspend fun completeToken(token: ApprovalFlowTokenEntity) {
+        token.status = ApprovalFlowTokenStatus.COMPLETED.typeId
+        tokenService.withUpdateEntityContext(token) {
+            token.onUpdate()
+            tokenService.getRepository().save(token).awaitFirst()
+        }
+    }
+
+    private suspend fun completeInstance(instance: ApprovalFlowInstanceEntity) {
+        instance.status = ApprovalFlowInstanceStatus.APPROVED.typeId
+        instanceService.withUpdateEntityContext(instance) {
+            instance.onUpdate()
+            instanceService.getRepository().save(instance).awaitFirst()
+        }
+    }
+
+    private suspend fun rejectInstance(instance: ApprovalFlowInstanceEntity) {
+        instance.status = ApprovalFlowInstanceStatus.REJECTED.typeId
+        instanceService.withUpdateEntityContext(instance) {
+            instance.onUpdate()
+            instanceService.getRepository().save(instance).awaitFirst()
+        }
+    }
+
+    private suspend fun updateLatestNodeId(instance: ApprovalFlowInstanceEntity, nodeId: Long) {
+        instance.latestNodeId = nodeId
+        instanceService.withUpdateEntityContext(instance) {
+            instance.onUpdate()
+            instanceService.getRepository().save(instance).awaitFirst()
         }
     }
 

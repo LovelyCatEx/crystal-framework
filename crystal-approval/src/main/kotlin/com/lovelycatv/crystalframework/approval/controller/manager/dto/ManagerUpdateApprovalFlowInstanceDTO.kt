@@ -5,6 +5,6 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDT
 class ManagerUpdateApprovalFlowInstanceDTO(
     override val id: Long = 0,
     var status: Int? = null,
-    var currentNodeId: Long? = null,
+    var latestNodeId: Long? = null,
     var formData: String? = null,
 ) : BaseManagerUpdateDTO(id)

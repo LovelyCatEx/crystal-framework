@@ -1,8 +1,9 @@
 package com.lovelycatv.crystalframework.approval.service.engine
 
-import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowInstanceEntity
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowNodeEntity
+import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowTokenEntity
+import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 
 interface ApprovalFlowEngine {
 
@@ -22,7 +23,7 @@ interface ApprovalFlowEngine {
         formData: String?
     )
 
-    suspend fun advanceToNextNode(instance: ApprovalFlowInstanceEntity)
+    suspend fun advanceToken(token: ApprovalFlowTokenEntity, instance: ApprovalFlowInstanceEntity)
 
     suspend fun resolveApprovers(
         node: ApprovalFlowNodeEntity,

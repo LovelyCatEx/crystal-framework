@@ -9,5 +9,5 @@ class ManagerCreateApprovalFlowInstanceDTO(
     var definitionVersion: Int = 0,
     var initiatorId: Long = 0,
     var formData: String? = null,
-    var currentNodeId: Long = 0,
+    var latestNodeId: Long = 0,
 ) : BaseManagerCreateScopedDTO(scope, scopeId)
