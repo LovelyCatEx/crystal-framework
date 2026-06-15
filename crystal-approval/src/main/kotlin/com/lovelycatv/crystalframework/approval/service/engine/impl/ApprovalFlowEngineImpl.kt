@@ -208,7 +208,7 @@ class ApprovalFlowEngineImpl(
                 token.status = ApprovalFlowTokenStatus.WAITING.typeId
                 tokenService.withUpdateEntityContext(token) {
                     token.onUpdate()
-                    tokenService.getRepository().save(token).awaitFirst()
+                    tokenService.getRepository().save(token newEntity false).awaitFirst()
                 }
                 tryMergeAtJoin(token, instance)
             }
@@ -250,7 +250,7 @@ class ApprovalFlowEngineImpl(
             t.status = ApprovalFlowTokenStatus.COMPLETED.typeId
             tokenService.withUpdateEntityContext(t) {
                 t.onUpdate()
-                tokenService.getRepository().save(t).awaitFirst()
+                tokenService.getRepository().save(t newEntity false).awaitFirst()
             }
         }
 
@@ -297,7 +297,7 @@ class ApprovalFlowEngineImpl(
         token.currentNodeId = nodeId
         tokenService.withUpdateEntityContext(token) {
             token.onUpdate()
-            tokenService.getRepository().save(token).awaitFirst()
+            tokenService.getRepository().save(token newEntity false).awaitFirst()
         }
     }
 
@@ -305,7 +305,7 @@ class ApprovalFlowEngineImpl(
         token.status = ApprovalFlowTokenStatus.COMPLETED.typeId
         tokenService.withUpdateEntityContext(token) {
             token.onUpdate()
-            tokenService.getRepository().save(token).awaitFirst()
+            tokenService.getRepository().save(token newEntity false).awaitFirst()
         }
     }
 
@@ -313,7 +313,7 @@ class ApprovalFlowEngineImpl(
         instance.status = ApprovalFlowInstanceStatus.APPROVED.typeId
         instanceService.withUpdateEntityContext(instance) {
             instance.onUpdate()
-            instanceService.getRepository().save(instance).awaitFirst()
+            instanceService.getRepository().save(instance newEntity false).awaitFirst()
         }
     }
 
@@ -321,7 +321,7 @@ class ApprovalFlowEngineImpl(
         instance.status = ApprovalFlowInstanceStatus.REJECTED.typeId
         instanceService.withUpdateEntityContext(instance) {
             instance.onUpdate()
-            instanceService.getRepository().save(instance).awaitFirst()
+            instanceService.getRepository().save(instance newEntity false).awaitFirst()
         }
     }
 
@@ -329,7 +329,7 @@ class ApprovalFlowEngineImpl(
         instance.latestNodeId = nodeId
         instanceService.withUpdateEntityContext(instance) {
             instance.onUpdate()
-            instanceService.getRepository().save(instance).awaitFirst()
+            instanceService.getRepository().save(instance newEntity false).awaitFirst()
         }
     }
 
