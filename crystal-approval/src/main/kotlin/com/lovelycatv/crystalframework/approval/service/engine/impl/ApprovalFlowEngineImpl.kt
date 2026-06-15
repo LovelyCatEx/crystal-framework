@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.approval.service.engine.impl
 
-import com.lovelycatv.crystalframework.approval.constants.ConditionLogic
 import com.lovelycatv.crystalframework.approval.types.*
 import com.lovelycatv.crystalframework.approval.entity.*
 import com.lovelycatv.crystalframework.approval.service.*
@@ -243,48 +242,38 @@ class ApprovalFlowEngineImpl(
     }
 
     private fun evaluateCondition(config: ConditionNodeConfig, formData: Map<String, Any?>): Long {
-        for (condition in config.conditions) {
-            val matched = evaluateRules(condition.logic, condition.rules, formData)
-            if (matched) {
-                return condition.targetNodeId
+        for (route in config.routes) {
+            if (evaluate(route.condition, formData)) {
+                return route.targetNodeId
             }
         }
         throw BusinessException("No condition matched and no default route")
     }
 
-    private fun evaluateRules(
-        logic: String,
-        rules: List<com.lovelycatv.crystalframework.approval.types.ExpressionRule>,
-        formData: Map<String, Any?>
-    ): Boolean {
-        if (rules.isEmpty()) return true
-
-        return when (logic) {
-            ConditionLogic.OR -> rules.any { evaluateRule(it, formData) }
-            else -> rules.all { evaluateRule(it, formData) }
+    private fun evaluate(node: ConditionNode, formData: Map<String, Any?>): Boolean {
+        return when (node) {
+            is ConditionGroup -> when (node.logic) {
+                ConditionLogic.AND -> node.children.all { evaluate(it, formData) }
+                ConditionLogic.OR -> node.children.any { evaluate(it, formData) }
+            }
+            is ConditionLeaf -> evaluateLeaf(node, formData)
         }
     }
 
-    private fun evaluateRule(
-        rule: com.lovelycatv.crystalframework.approval.types.ExpressionRule,
-        formData: Map<String, Any?>
-    ): Boolean {
-        val fieldValue = formData[rule.field] ?: return false
-        val targetValue = rule.value
-
-        return when (rule.operator) {
-            ">" -> compareValues(fieldValue, targetValue) > 0
-            ">=" -> compareValues(fieldValue, targetValue) >= 0
-            "<" -> compareValues(fieldValue, targetValue) < 0
-            "<=" -> compareValues(fieldValue, targetValue) <= 0
-            "==" -> fieldValue.toString() == targetValue.toString()
-            "!=" -> fieldValue.toString() != targetValue.toString()
-            "contains" -> fieldValue.toString().contains(targetValue.toString())
-            "in" -> {
-                val list = targetValue as? List<*> ?: return false
+    private fun evaluateLeaf(leaf: ConditionLeaf, formData: Map<String, Any?>): Boolean {
+        val fieldValue = formData[leaf.field] ?: return false
+        return when (leaf.operator) {
+            ConditionOperator.EQ -> fieldValue.toString() == leaf.value.toString()
+            ConditionOperator.NE -> fieldValue.toString() != leaf.value.toString()
+            ConditionOperator.GT -> compareValues(fieldValue, leaf.value!!) > 0
+            ConditionOperator.GTE -> compareValues(fieldValue, leaf.value!!) >= 0
+            ConditionOperator.LT -> compareValues(fieldValue, leaf.value!!) < 0
+            ConditionOperator.LTE -> compareValues(fieldValue, leaf.value!!) <= 0
+            ConditionOperator.CONTAINS -> fieldValue.toString().contains(leaf.value.toString())
+            ConditionOperator.IN -> {
+                val list = leaf.values ?: return false
                 fieldValue.toString() in list.map { it.toString() }
             }
-            else -> false
         }
     }
 
