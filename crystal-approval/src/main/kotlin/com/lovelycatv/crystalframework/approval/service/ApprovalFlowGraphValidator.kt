@@ -132,12 +132,14 @@ object ApprovalFlowGraphValidator {
                         if (ApprovalFlowApproverStrategy.getById(config.strategy) == null) {
                             errors += "APPROVAL node '${node.nodeKey}' has invalid strategy: ${config.strategy}"
                         }
-                        // Rule 8: APPROVAL node with SPECIFIED_USER strategy must have at least 1 userId
+                        // Rule 8: APPROVAL node with SPECIFIED_USER strategy must have at least 1 userId or memberIds
                         if (ApprovalFlowApproverStrategy.getById(config.strategy) == ApprovalFlowApproverStrategy.SPECIFIED_USER) {
                             @Suppress("UNCHECKED_CAST")
                             val userIds = config.strategyParams["userIds"] as? List<*> ?: emptyList<Any>()
-                            if (userIds.isEmpty()) {
-                                errors += "APPROVAL node '${node.nodeKey}' with SPECIFIED_USER strategy must have at least 1 userId"
+                            @Suppress("UNCHECKED_CAST")
+                            val memberIds = config.strategyParams["memberIds"] as? List<*> ?: emptyList<Any>()
+                            if (userIds.isEmpty() && memberIds.isEmpty()) {
+                                errors += "APPROVAL node '${node.nodeKey}' with SPECIFIED_USER strategy must have at least 1 userId or memberIds"
                             }
                         }
                     }

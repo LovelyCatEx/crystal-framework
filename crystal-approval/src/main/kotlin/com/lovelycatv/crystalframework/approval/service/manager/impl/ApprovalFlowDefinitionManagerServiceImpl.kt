@@ -69,10 +69,10 @@ class ApprovalFlowDefinitionManagerServiceImpl(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO) {
+    override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> {
         val validationErrors = ApprovalFlowGraphValidator.validate(dto)
         if (validationErrors.isNotEmpty()) {
-            throw BusinessException("Graph validation failed: ${validationErrors.joinToString("; ")}")
+            return validationErrors
         }
 
         val definition = getByIdOrNull(dto.definitionId)
@@ -128,6 +128,8 @@ class ApprovalFlowDefinitionManagerServiceImpl(
                 } newEntity false
             ).awaitFirstOrNull() ?: throw BusinessException("Could not update definition version")
         }
+
+        return emptyList()
     }
 
     override suspend fun findAllByScopeId(scopeId: Long): List<ApprovalFlowDefinitionEntity> {

@@ -64,8 +64,8 @@ class ManagerApprovalFlowDefinitionController(
         if (!checkOwnership(resolvedScope, definition.scopeId, userAuthentication)) {
             throw UnauthorizedException()
         }
-        managerService.updateGraph(dto)
-        return ApiResponse.success(null)
+        val errors = managerService.updateGraph(dto)
+        return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
 
     @GetMapping("/detailsById")

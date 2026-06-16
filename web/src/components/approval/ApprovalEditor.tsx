@@ -25,6 +25,7 @@ import {
     Form,
     Input,
     message,
+    Modal,
     Select,
     Tag,
     theme,
@@ -99,7 +100,7 @@ async function renderApprovalFlow(ctx: ApprovalFlowGraphEditorContext, details: 
     ctx.autoFitViewport();
 }
 
-async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): Promise<boolean> {
+async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): Promise<{ success: boolean; errors?: string[] }> {
     const nodes = ctx.rete.editor.getNodes();
     const connections = ctx.rete.editor.getConnections();
 
@@ -107,7 +108,7 @@ async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): 
     for (const n of nodes) {
         if (!n.node.nodeKey || !n.node.nodeKey.trim()) {
             message.error(i18n.t('components.approvalEditor.validation.emptyNodeKey', { name: n.node.name || n.id }));
-            return false;
+            return { success: false };
         }
     }
 
@@ -116,7 +117,7 @@ async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): 
     for (const n of nodes) {
         if (nodeKeySet.has(n.node.nodeKey)) {
             message.error(i18n.t('components.approvalEditor.validation.duplicateNodeKey', { nodeKey: n.node.nodeKey }));
-            return false;
+            return { success: false };
         }
         nodeKeySet.add(n.node.nodeKey);
     }
@@ -142,8 +143,16 @@ async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): 
         }),
     };
 
-    await updateApprovalFlowGraph(dto);
-    return true;
+    try {
+        const response = await updateApprovalFlowGraph(dto);
+        const data = response.data as { success: boolean; errors: string[] } | null;
+        if (data?.success) {
+            return { success: true };
+        }
+        return { success: false, errors: data?.errors ?? [] };
+    } catch {
+        return { success: false };
+    }
 }
 
 export default function ApprovalEditor(props: {
@@ -412,11 +421,23 @@ export default function ApprovalEditor(props: {
                         icon={<SaveOutlined />}
                         onClick={async () => {
                             if (!ctx) return;
-                            const success = await save(ctx, props.definitionId);
-                            if (success) {
+                            const result = await save(ctx, props.definitionId);
+                            if (result.success) {
                                 message.success(t('components.approvalEditor.header.saveSuccess'));
                                 setSelectedNode(null);
                                 await mutateDefinitionDetails();
+                            } else if (result.errors && result.errors.length > 0) {
+                                Modal.error({
+                                    title: t('components.approvalEditor.header.validationFailed'),
+                                    content: (
+                                        <ul style={{ paddingLeft: 16, marginTop: 8 }}>
+                                            {result.errors.map((err, idx) => (
+                                                <li key={idx} style={{ marginBottom: 4 }}>{err}</li>
+                                            ))}
+                                        </ul>
+                                    ),
+                                    width: 520,
+                                });
                             }
                         }}
                     >

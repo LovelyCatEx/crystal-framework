@@ -42,10 +42,10 @@ export function ApprovalNodeInspector({ node, scope, tenantId, onConfigChange }:
                 {scope === ResourceScope.TENANT ? (
                     <TenantMemberIdsSelector
                         tenantId={tenantId}
-                        value={(config.strategyParams?.userIds as string[]) ?? []}
+                        value={(config.strategyParams?.memberIds as string[]) ?? []}
                         onChange={(ids) => onConfigChange({
                             strategy: ApprovalFlowApproverStrategy.SPECIFIED_USER,
-                            strategyParams: { userIds: ids },
+                            strategyParams: { memberIds: ids },
                         })}
                     />
                 ) : (

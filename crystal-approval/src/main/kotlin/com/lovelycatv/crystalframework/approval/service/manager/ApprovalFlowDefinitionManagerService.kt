@@ -17,5 +17,5 @@ interface ApprovalFlowDefinitionManagerService : BaseScopedManagerService<
         ManagerUpdateApprovalFlowDefinitionDTO,
         ManagerDeleteApprovalFlowDefinitionDTO
 > {
-    suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO)
+    suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO): List<String>
 }

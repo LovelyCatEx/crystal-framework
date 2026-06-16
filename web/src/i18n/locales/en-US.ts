@@ -2173,7 +2173,8 @@ export const enUS: I18nRules = {
       header: {
         loading: 'Loading...',
         save: 'Save',
-        saveSuccess: 'Flow saved successfully'
+        saveSuccess: 'Flow saved successfully',
+        validationFailed: 'Graph Validation Failed'
       },
       toolbar: {
         undo: 'Undo (CTRL+Z)',
