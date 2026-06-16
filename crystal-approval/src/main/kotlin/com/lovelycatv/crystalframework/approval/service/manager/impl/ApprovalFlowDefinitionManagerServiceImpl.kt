@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowNodeEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowDefinitionRepository
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowEdgeRepository
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowNodeRepository
+import com.lovelycatv.crystalframework.approval.service.ApprovalFlowGraphValidator
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -69,6 +70,11 @@ class ApprovalFlowDefinitionManagerServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO) {
+        val validationErrors = ApprovalFlowGraphValidator.validate(dto)
+        if (validationErrors.isNotEmpty()) {
+            throw BusinessException("Graph validation failed: ${validationErrors.joinToString("; ")}")
+        }
+
         val definition = getByIdOrNull(dto.definitionId)
             ?: throw BusinessException("Definition not found")
 
