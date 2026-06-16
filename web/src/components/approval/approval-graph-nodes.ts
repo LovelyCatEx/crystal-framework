@@ -1,4 +1,10 @@
-import {BaseApprovalFlowGraphNode, approvalFlowGraphDefaultSocket} from "./rete-typs.ts";
+import {
+    BaseApprovalFlowGraphNode,
+    approvalFlowBaseInSocket,
+    approvalFlowBaseOutSocket,
+    approvalFlowMultiInSocket,
+    approvalFlowMultiOutSocket
+} from "./rete-typs.ts";
 import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";
 import {ApprovalFlowNodeType} from "@/types/approval/approval-enums.ts";
 
@@ -6,7 +12,7 @@ import {ApprovalFlowNodeType} from "@/types/approval/approval-enums.ts";
 export class StartNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addOutputSocket('out', approvalFlowBaseOutSocket, 'out');
     }
 }
 
@@ -14,52 +20,52 @@ export class StartNode extends BaseApprovalFlowGraphNode {
 export class EndNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
+        this.addInputSocket('in', approvalFlowBaseInSocket, 'in');
     }
 }
 
-/** Approval node: has input and output */
+/** Approval node: single in, single out */
 export class ApprovalNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addInputSocket('in', approvalFlowBaseInSocket, 'in');
+        this.addOutputSocket('out', approvalFlowBaseOutSocket, 'out');
     }
 }
 
-/** Condition node: has input and output */
+/** Condition node: single in, multiple out */
 export class ConditionNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addInputSocket('in', approvalFlowBaseInSocket, 'in');
+        this.addOutputSocket('out', approvalFlowMultiOutSocket, 'out');
     }
 }
 
-/** CC node: has input and output */
+/** CC node: single in, single out */
 export class CcNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addInputSocket('in', approvalFlowBaseInSocket, 'in');
+        this.addOutputSocket('out', approvalFlowBaseOutSocket, 'out');
     }
 }
 
-/** Fork node: has input and multiple outputs (parallel split) */
+/** Fork node: single in, multiple out (parallel split) */
 export class ForkNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addInputSocket('in', approvalFlowBaseInSocket, 'in');
+        this.addOutputSocket('out', approvalFlowMultiOutSocket, 'out');
     }
 }
 
-/** Join node: has multiple inputs and single output (parallel merge) */
+/** Join node: multiple in, single out (parallel merge) */
 export class JoinNode extends BaseApprovalFlowGraphNode {
     constructor(node: ApprovalFlowNode) {
         super(node);
-        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
-        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+        this.addInputSocket('in', approvalFlowMultiInSocket, 'in');
+        this.addOutputSocket('out', approvalFlowBaseOutSocket, 'out');
     }
 }
 

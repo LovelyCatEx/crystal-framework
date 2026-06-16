@@ -8,8 +8,11 @@ import {ClassicPreset} from "rete";
 import type {IGraphSocket} from "./IGraphSocket.ts";
 
 export abstract class BaseGraphSocket extends ClassicPreset.Socket implements IGraphSocket {
-  protected constructor(socketId: string) {
+  public readonly multipleConnections: boolean;
+
+  protected constructor(socketId: string, multipleConnections: boolean = false) {
     super(socketId);
+    this.multipleConnections = multipleConnections;
   }
 
   abstract isCompatibleWith(socket: ClassicPreset.Socket): boolean

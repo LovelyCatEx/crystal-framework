@@ -29,7 +29,7 @@ export abstract class BaseGraphNode<
   }
 
   public addInputSocket(label: string, socket: S, displayName?: string) {
-    this.addInput(label, new ClassicPreset.Input<S>(socket, displayName))
+    this.addInput(label, new ClassicPreset.Input<S>(socket, displayName, socket.multipleConnections))
   }
 
   public removeInputSocket(label: string) {
@@ -47,7 +47,7 @@ export abstract class BaseGraphNode<
   }
 
   public addOutputSocket(label: string, socket: S, displayName?: string) {
-    this.addOutput(label, new ClassicPreset.Output<S>(socket, displayName))
+    this.addOutput(label, new ClassicPreset.Output<S>(socket, displayName, socket.multipleConnections))
   }
 
   public removeOutputSocket(label: string) {
