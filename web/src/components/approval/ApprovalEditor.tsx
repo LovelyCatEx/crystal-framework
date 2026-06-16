@@ -39,7 +39,7 @@ import {ConditionNodeComponent} from "@/components/approval/node/ConditionNodeCo
 import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
 import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
 import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
-import {CcNode, ConditionNode, createApprovalFlowNode, EndNode, ForkNode, JoinNode, StartNode} from "./approval-graph-nodes.ts";
+import {createApprovalFlowNode} from "./approval-graph-nodes.ts";
 import {ApprovalNodeInspector} from "@/components/approval/node/ApprovalNodeInspector.tsx";
 import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
@@ -212,13 +212,22 @@ export default function ApprovalEditor(props: {
             },
             render: {
                 node: (_, node, emit) => {
-                    if (node instanceof StartNode) return <StartNodeComponent data={node} emit={emit} />;
-                    if (node instanceof EndNode) return <EndNodeComponent data={node} emit={emit} />;
-                    if (node instanceof ConditionNode) return <ConditionNodeComponent data={node} emit={emit} />;
-                    if (node instanceof CcNode) return <CcNodeComponent data={node} emit={emit} />;
-                    if (node instanceof ForkNode) return <ForkNodeComponent data={node} emit={emit} />;
-                    if (node instanceof JoinNode) return <JoinNodeComponent data={node} emit={emit} />;
-                    return <ApprovalNodeComponent data={node} emit={emit} />;
+                    switch (node.node.type) {
+                        case ApprovalFlowNodeType.START:
+                            return <StartNodeComponent data={node} emit={emit} />;
+                        case ApprovalFlowNodeType.END:
+                            return <EndNodeComponent data={node} emit={emit} />;
+                        case ApprovalFlowNodeType.CONDITION:
+                            return <ConditionNodeComponent data={node} emit={emit} />;
+                        case ApprovalFlowNodeType.CC:
+                            return <CcNodeComponent data={node} emit={emit} />;
+                        case ApprovalFlowNodeType.FORK:
+                            return <ForkNodeComponent data={node} emit={emit} />;
+                        case ApprovalFlowNodeType.JOIN:
+                            return <JoinNodeComponent data={node} emit={emit} />;
+                        default:
+                            return <ApprovalNodeComponent data={node} emit={emit} />;
+                    }
                 },
                 contextMenu: {
                     main: () => ContextMenuContainer({
@@ -291,8 +300,8 @@ export default function ApprovalEditor(props: {
         baseCtx.rete.editor.addPipe((context) => {
             if (context.type === 'nodecreate') {
                 const newNode = context.data as BaseApprovalFlowGraphNode;
-                if (newNode instanceof StartNode) {
-                    const hasStart = baseCtx.rete.editor.getNodes().some(n => n instanceof StartNode);
+                if (newNode.node.type === ApprovalFlowNodeType.START) {
+                    const hasStart = baseCtx.rete.editor.getNodes().some(n => n.node.type === ApprovalFlowNodeType.START);
                     if (hasStart) {
                         message.warning(i18n.t('components.approvalEditor.validation.duplicateStart'));
                         return undefined;

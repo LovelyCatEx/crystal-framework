@@ -4,6 +4,7 @@ import {css} from "styled-components";
 import {GitMerge} from "lucide-react";
 import {type ClassicScheme, Presets, type RenderEmit} from "rete-react-plugin";
 import classNames from "classnames";
+import {useNodeSize} from "@/rete/utils/react.ts";
 import './base-node-graph-styles.css';
 
 const { RefSocket } = Presets.classic;
@@ -16,6 +17,7 @@ type Props<S extends ClassicScheme> = {
 
 export function JoinNodeComponent<S extends ApprovalFlowGraphSchemes>(props: Props<S>) {
     const ref = useRef<HTMLDivElement>(null);
+    useNodeSize(ref, props.data, props.emit);
     const inputs = Object.entries(props.data.inputs);
     const outputs = Object.entries(props.data.outputs);
 

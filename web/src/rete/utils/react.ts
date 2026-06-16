@@ -19,13 +19,12 @@ export function useNodeSize(
     const el = ref.current;
     if (!el) return;
 
-    const observer = new ResizeObserver(entries => {
-      const entry = entries[0];
-      if (!entry) return;
-
-      const { width, height } = entry.contentRect;
-
-      node.confirmSize(width, height);
+    const observer = new ResizeObserver(() => {
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      if (width > 0 && height > 0) {
+        node.confirmSize(width, height);
+      }
     });
 
     observer.observe(el);
