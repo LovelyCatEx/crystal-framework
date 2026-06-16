@@ -2169,7 +2169,8 @@ export const zhCN: I18nRules = {
       },
       header: {
         loading: '加载中...',
-        save: '保存'
+        save: '保存',
+        saveSuccess: '流程保存成功'
       },
       toolbar: {
         undo: '撤销 (CTRL+Z)',

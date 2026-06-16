@@ -54,6 +54,14 @@ import {useTranslation} from "react-i18next";
 import i18n from "@/i18n";
 
 async function renderApprovalFlow(ctx: ApprovalFlowGraphEditorContext, details: ApprovalFlowDefinitionDetailsVO) {
+    // Clear existing nodes and connections
+    for (const conn of ctx.rete.editor.getConnections()) {
+        await ctx.rete.editor.removeConnection(conn.id);
+    }
+    for (const node of ctx.rete.editor.getNodes()) {
+        await ctx.rete.editor.removeNode(node.id);
+    }
+
     // Save positions before addNode (pipe will overwrite node.positionX/Y to 0)
     const positionMap = new Map<string, { x: number; y: number }>();
     for (const node of details.nodes) {
@@ -146,7 +154,7 @@ export default function ApprovalEditor(props: {
     const { token } = theme.useToken();
     const { t } = useTranslation();
 
-    const [definitionDetails] = useSWRState(
+    const [definitionDetails, , , mutateDefinitionDetails] = useSWRState(
         `approval-definition-details:${props.definitionId}`,
         () => getApprovalFlowDefinitionDetails(props.definitionId)
     );
@@ -393,7 +401,15 @@ export default function ApprovalEditor(props: {
                     <Button
                         type="primary"
                         icon={<SaveOutlined />}
-                        onClick={() => { if (ctx) void save(ctx, props.definitionId); }}
+                        onClick={async () => {
+                            if (!ctx) return;
+                            const success = await save(ctx, props.definitionId);
+                            if (success) {
+                                message.success(t('components.approvalEditor.header.saveSuccess'));
+                                setSelectedNode(null);
+                                await mutateDefinitionDetails();
+                            }
+                        }}
                     >
                         {t('components.approvalEditor.header.save')}
                     </Button>
@@ -459,6 +475,7 @@ export default function ApprovalEditor(props: {
                     />
                     <div className="flex-1 p-4 overflow-y-auto">
                     <NodeInspectorPanel
+                        key={selectedNode?.id ?? ''}
                         node={selectedNode}
                         scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
                         tenantId={definitionDetails?.definition.scopeId ?? ''}

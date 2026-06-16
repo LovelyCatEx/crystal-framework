@@ -2172,7 +2172,8 @@ export const enUS: I18nRules = {
       },
       header: {
         loading: 'Loading...',
-        save: 'Save'
+        save: 'Save',
+        saveSuccess: 'Flow saved successfully'
       },
       toolbar: {
         undo: 'Undo (CTRL+Z)',
