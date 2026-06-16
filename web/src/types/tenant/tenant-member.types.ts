@@ -21,3 +21,22 @@ export interface TenantMember extends BaseEntity {
 export interface TenantMemberVO extends TenantMember {
     user: User;
 }
+
+export interface TenantMemberProfileVO {
+    id: string;
+    tenantId: string;
+    tenantMemberId: string;
+    memberUserId: string;
+    name: string;
+    phone: string;
+    nickname: string | null;
+    avatar: string | null;
+    email: string | null;
+    bio: string | null;
+    gender: number | null;
+    birthday: string | null;
+    timezone: string | null;
+    locale: string | null;
+    createdTime: string;
+    modifiedTime: string;
+}

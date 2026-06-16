@@ -41,6 +41,7 @@ import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
 import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
 import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
 import {createApprovalFlowNode} from "./approval-graph-nodes.ts";
+import {ApprovalEditorProvider} from "./ApprovalEditorContext.tsx";
 import {ApprovalNodeInspector} from "@/components/approval/ApprovalNodeInspector.tsx";
 import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
@@ -402,6 +403,7 @@ export default function ApprovalEditor(props: {
     // --- PART3_PLACEHOLDER ---
 
     return (
+        <ApprovalEditorProvider value={{ scope: definitionDetails?.definition.scope ?? ResourceScope.SYSTEM, scopeId: definitionDetails?.definition.scopeId ?? '' }}>
         <div className="w-full h-[100vh] flex flex-col">
             {/* Header */}
             <div className="w-full flex flex-row items-center justify-between px-4 py-3 border-b" style={{ borderColor: token.colorBorder }}>
@@ -508,7 +510,7 @@ export default function ApprovalEditor(props: {
                         key={selectedNode?.id ?? ''}
                         node={selectedNode}
                         scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
-                        tenantId={definitionDetails?.definition.scopeId ?? ''}
+                        scopeId={definitionDetails?.definition.scopeId ?? ''}
                         onNodeChange={(field, value) => {
                             if (!ctx || !selectedNode) return;
                             const reteNode = ctx.rete.editor.getNodes().find(n => n.node.id === selectedNode.id);
@@ -522,13 +524,14 @@ export default function ApprovalEditor(props: {
                 </div>
             </div>
         </div>
+        </ApprovalEditorProvider>
     );
 }
 
-function NodeInspectorPanel({ node, scope, tenantId, onNodeChange }: {
+function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
     node: ApprovalFlowNode | null;
     scope: number;
-    tenantId: string;
+    scopeId: string;
     onNodeChange: (field: keyof ApprovalFlowNode, value: unknown) => void;
 }) {
     const { t } = useTranslation();
@@ -594,7 +597,7 @@ function NodeInspectorPanel({ node, scope, tenantId, onNodeChange }: {
                     <ApprovalNodeInspector
                         node={node}
                         scope={scope}
-                        tenantId={tenantId}
+                        scopeId={scopeId}
                         onConfigChange={updateConfig}
                     />
                 )}

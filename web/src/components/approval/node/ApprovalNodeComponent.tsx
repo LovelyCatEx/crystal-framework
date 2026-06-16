@@ -5,6 +5,12 @@ import {UserCheck} from "lucide-react";
 import {type ClassicScheme, Presets, type RenderEmit} from "rete-react-plugin";
 import classNames from "classnames";
 import {useNodeSize} from "@/rete/utils/react.ts";
+import {Tag} from "antd";
+import {UserChipById} from "@/components/UserChipById.tsx";
+import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
+import {ResourceScope} from "@/types/BaseScopedEntity.ts";
+import {useApprovalEditorContext} from "../ApprovalEditorContext.tsx";
+import {getApprovalFlowApproveMode} from "@/i18n/enum-helpers.ts";
 import './base-node-graph-styles.css';
 import './action-graph-node.styles.css';
 
@@ -21,6 +27,16 @@ export function ApprovalNodeComponent<S extends ApprovalFlowGraphSchemes>(props:
     useNodeSize(ref, props.data, props.emit);
     const inputs = Object.entries(props.data.inputs);
     const outputs = Object.entries(props.data.outputs);
+    const { scope } = useApprovalEditorContext();
+
+    const config = (() => {
+        try { return props.data.node.config ? JSON.parse(props.data.node.config) : null; }
+        catch { return null; }
+    })();
+
+    const userIds: string[] = config?.strategyParams?.userIds ?? [];
+    const memberIds: string[] = config?.strategyParams?.memberIds ?? [];
+    const approveMode: number | undefined = config?.approveMode;
 
     return (
         <div ref={ref} className={"base-graph-node action-graph-node " + classNames({"base-graph-node--selected": props.data.selected})}>
@@ -62,6 +78,19 @@ export function ApprovalNodeComponent<S extends ApprovalFlowGraphSchemes>(props:
                     ))}
                 </div>
             </div>
+            {(userIds.length > 0 || memberIds.length > 0) && (
+                <div className="px-4 pb-3">
+                    <div className="flex flex-wrap gap-1" style={{ maxWidth: 260 }}>
+                        {scope === ResourceScope.TENANT
+                            ? memberIds.map(id => <TenantMemberChip key={id} memberId={id} />)
+                            : userIds.map(id => <UserChipById key={id} userId={id} />)
+                        }
+                    </div>
+                    {approveMode !== undefined && (
+                        <Tag className="mt-2" color="processing">{getApprovalFlowApproveMode(approveMode)}</Tag>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

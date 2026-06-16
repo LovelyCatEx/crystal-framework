@@ -10,11 +10,11 @@ import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.t
 interface ApprovalNodeInspectorProps {
     node: ApprovalFlowNode;
     scope: number;
-    tenantId: string;
+    scopeId: string;
     onConfigChange: (patch: Record<string, unknown>) => void;
 }
 
-export function ApprovalNodeInspector({ node, scope, tenantId, onConfigChange }: ApprovalNodeInspectorProps) {
+export function ApprovalNodeInspector({ node, scope, scopeId, onConfigChange }: ApprovalNodeInspectorProps) {
     const { t } = useTranslation();
 
     const getConfig = () => {
@@ -41,7 +41,7 @@ export function ApprovalNodeInspector({ node, scope, tenantId, onConfigChange }:
             <Form.Item label={t('components.approvalEditor.inspector.approvers')}>
                 {scope === ResourceScope.TENANT ? (
                     <TenantMemberIdsSelector
-                        tenantId={tenantId}
+                        tenantId={scopeId}
                         value={(config.strategyParams?.memberIds as string[]) ?? []}
                         onChange={(ids) => onConfigChange({
                             strategy: ApprovalFlowApproverStrategy.SPECIFIED_USER,

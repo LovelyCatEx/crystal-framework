@@ -2786,6 +2786,11 @@ export const enUS: I18nRules = {
         notFound: 'User information not found',
         email: 'Email'
       },
+      tenantMember: {
+        notFound: 'Member information not found',
+        memberId: 'Member ID',
+        email: 'Email'
+      },
       tenantDepartment: {
         notFound: 'Department information not found',
         description: 'Description',

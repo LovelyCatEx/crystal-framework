@@ -2784,6 +2784,11 @@ export const zhCN: I18nRules = {
         notFound: '未找到用户信息',
         email: '邮箱'
       },
+      tenantMember: {
+        notFound: '未找到成员信息',
+        memberId: '成员 ID',
+        email: '邮箱'
+      },
       tenantDepartment: {
         notFound: '未找到部门信息',
         description: '描述',

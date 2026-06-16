@@ -406,7 +406,9 @@ export interface BaseEntity {
 
 所有 Api 文件必须放入 `api` 中的对应文件夹，必须按后端对应的模块/包进行分类，但 `request` / `system-request` 等特殊类型的 api 文件无需分类。
 
-所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹。
+**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
+**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
+**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
 
 **Long 类型接收规则：** 所有后端 `Long` 类型的字段（`id`、`xxxId`、`xxxTime` 等），前端 **只能用 `string` 类型来接**，禁止使用 `number`。后端序列化时用 `ToStringSerializer` 将 `Long` → `String` 再传给前端。详见后端 Controller 节的 Long 序列化规则。
 

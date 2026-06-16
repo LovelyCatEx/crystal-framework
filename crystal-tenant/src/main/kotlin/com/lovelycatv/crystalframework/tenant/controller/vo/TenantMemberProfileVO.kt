@@ -31,20 +31,20 @@ data class TenantMemberProfileVO(
     val modifiedTime: Long,
 ) {
     companion object {
-        fun fromEntity(entity: TenantMemberProfileEntity): TenantMemberProfileVO {
+        fun fromEntity(entity: TenantMemberProfileEntity, fullAccess: Boolean = true): TenantMemberProfileVO {
             return TenantMemberProfileVO(
                 id = entity.id,
                 tenantId = entity.tenantId,
                 tenantMemberId = entity.tenantMemberId,
                 memberUserId = entity.memberUserId,
                 name = entity.name,
-                phone = entity.phone,
+                phone = if (fullAccess) entity.phone else "",
                 nickname = entity.nickname,
                 avatar = entity.avatar,
-                email = entity.email,
+                email = if (fullAccess) entity.email else null,
                 bio = entity.bio,
                 gender = entity.gender,
-                birthday = entity.birthday,
+                birthday = if (fullAccess) entity.birthday else null,
                 timezone = entity.timezone,
                 locale = entity.locale,
                 createdTime = entity.createdTime,
