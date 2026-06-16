@@ -40,7 +40,7 @@ import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
 import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
 import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
 import {createApprovalFlowNode} from "./approval-graph-nodes.ts";
-import {ApprovalNodeInspector} from "@/components/approval/node/ApprovalNodeInspector.tsx";
+import {ApprovalNodeInspector} from "@/components/approval/ApprovalNodeInspector.tsx";
 import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
 import {ContextMenuItem} from "@/rete/ui/menu/ContextMenuItem.tsx";

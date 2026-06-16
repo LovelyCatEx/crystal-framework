@@ -1,0 +1,17 @@
+.sink-graph-node .header {
+    background: radial-gradient(80% 90%, #532323 10%, #85130F 100%);
+}
+
+.sink-graph-node .title {
+    font-size: 1.2em;
+    color: #e5e7ff;
+    white-space: nowrap;
+    font-weight: 500;
+    text-overflow: ellipsis;
+}
+
+.sink-graph-node .subtitle {
+    color: #b6b6b6;
+    font-weight: 500;
+    font-size: 1em;
+}

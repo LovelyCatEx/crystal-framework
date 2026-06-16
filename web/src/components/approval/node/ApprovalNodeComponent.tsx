@@ -6,6 +6,7 @@ import {type ClassicScheme, Presets, type RenderEmit} from "rete-react-plugin";
 import classNames from "classnames";
 import {useNodeSize} from "@/rete/utils/react.ts";
 import './base-node-graph-styles.css';
+import './action-graph-node.styles.css';
 
 const { RefSocket } = Presets.classic;
 
@@ -22,7 +23,7 @@ export function ApprovalNodeComponent<S extends ApprovalFlowGraphSchemes>(props:
     const outputs = Object.entries(props.data.outputs);
 
     return (
-        <div ref={ref} className={"base-graph-node " + classNames({"base-graph-node--selected": props.data.selected})}>
+        <div ref={ref} className={"base-graph-node action-graph-node " + classNames({"base-graph-node--selected": props.data.selected})}>
             <div className="header flex flex-col text-white pl-4 pr-4 pt-2 pb-2">
                 <div className="flex flex-row items-center space-x-2">
                     <UserCheck size="20" />
