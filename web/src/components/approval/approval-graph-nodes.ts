@@ -45,6 +45,24 @@ export class CcNode extends BaseApprovalFlowGraphNode {
     }
 }
 
+/** Fork node: has input and multiple outputs (parallel split) */
+export class ForkNode extends BaseApprovalFlowGraphNode {
+    constructor(node: ApprovalFlowNode) {
+        super(node);
+        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
+        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+    }
+}
+
+/** Join node: has multiple inputs and single output (parallel merge) */
+export class JoinNode extends BaseApprovalFlowGraphNode {
+    constructor(node: ApprovalFlowNode) {
+        super(node);
+        this.addInputSocket('in', approvalFlowGraphDefaultSocket, 'in');
+        this.addOutputSocket('out', approvalFlowGraphDefaultSocket, 'out');
+    }
+}
+
 /** Factory: create the correct node class based on type */
 export function createApprovalFlowNode(node: ApprovalFlowNode): BaseApprovalFlowGraphNode {
     switch (node.type) {
@@ -58,6 +76,10 @@ export function createApprovalFlowNode(node: ApprovalFlowNode): BaseApprovalFlow
             return new ConditionNode(node);
         case ApprovalFlowNodeType.CC:
             return new CcNode(node);
+        case ApprovalFlowNodeType.FORK:
+            return new ForkNode(node);
+        case ApprovalFlowNodeType.JOIN:
+            return new JoinNode(node);
         default:
             return new ApprovalNode(node);
     }

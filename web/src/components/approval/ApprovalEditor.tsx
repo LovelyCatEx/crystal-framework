@@ -37,7 +37,9 @@ import {EndNodeComponent} from "@/components/approval/node/EndNodeComponent.tsx"
 import {ApprovalNodeComponent} from "@/components/approval/node/ApprovalNodeComponent.tsx";
 import {ConditionNodeComponent} from "@/components/approval/node/ConditionNodeComponent.tsx";
 import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
-import {CcNode, ConditionNode, createApprovalFlowNode, EndNode, StartNode} from "./approval-graph-nodes.ts";
+import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
+import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
+import {CcNode, ConditionNode, createApprovalFlowNode, EndNode, ForkNode, JoinNode, StartNode} from "./approval-graph-nodes.ts";
 import {ApprovalNodeInspector} from "@/components/approval/node/ApprovalNodeInspector.tsx";
 import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
@@ -206,6 +208,8 @@ export default function ApprovalEditor(props: {
                     if (node instanceof EndNode) return <EndNodeComponent data={node} emit={emit} />;
                     if (node instanceof ConditionNode) return <ConditionNodeComponent data={node} emit={emit} />;
                     if (node instanceof CcNode) return <CcNodeComponent data={node} emit={emit} />;
+                    if (node instanceof ForkNode) return <ForkNodeComponent data={node} emit={emit} />;
+                    if (node instanceof JoinNode) return <JoinNodeComponent data={node} emit={emit} />;
                     return <ApprovalNodeComponent data={node} emit={emit} />;
                 },
                 contextMenu: {
@@ -302,8 +306,10 @@ export default function ApprovalEditor(props: {
             [ApprovalFlowNodeType.START]: null,
             [ApprovalFlowNodeType.END]: null,
             [ApprovalFlowNodeType.APPROVAL]: JSON.stringify({ approveMode: 0, strategy: 0, strategyParams: {} }),
-            [ApprovalFlowNodeType.CONDITION]: JSON.stringify({ conditions: [] }),
+            [ApprovalFlowNodeType.CONDITION]: JSON.stringify({ routes: [] }),
             [ApprovalFlowNodeType.CC]: JSON.stringify({ userIds: [], roleIds: [] }),
+            [ApprovalFlowNodeType.FORK]: null,
+            [ApprovalFlowNodeType.JOIN]: null,
         };
 
         baseCtx.registerContextMenu([
@@ -317,6 +323,10 @@ export default function ApprovalEditor(props: {
                 createApprovalFlowNode({ ...emptyNode(ApprovalFlowNodeType.CONDITION, `condition_${uid()}`), config: presetConfigs[ApprovalFlowNodeType.CONDITION] })],
             [getApprovalFlowNodeType(ApprovalFlowNodeType.CC), () =>
                 createApprovalFlowNode({ ...emptyNode(ApprovalFlowNodeType.CC, `cc_${uid()}`), config: presetConfigs[ApprovalFlowNodeType.CC] })],
+            [getApprovalFlowNodeType(ApprovalFlowNodeType.FORK), () =>
+                createApprovalFlowNode({ ...emptyNode(ApprovalFlowNodeType.FORK, `fork_${uid()}`), config: presetConfigs[ApprovalFlowNodeType.FORK] })],
+            [getApprovalFlowNodeType(ApprovalFlowNodeType.JOIN), () =>
+                createApprovalFlowNode({ ...emptyNode(ApprovalFlowNodeType.JOIN, `join_${uid()}`), config: presetConfigs[ApprovalFlowNodeType.JOIN] })],
         ]);
 
         baseCtx.rete.area.addPipe((context) => {

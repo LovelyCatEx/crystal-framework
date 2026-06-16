@@ -3001,7 +3001,9 @@ export const zhCN: I18nRules = {
       1: '结束',
       2: '审批',
       3: '条件',
-      4: '抄送'
+      4: '抄送',
+      5: '分支',
+      6: '汇合'
     },
     approvalFlowApproveMode: {
       0: '会签（所有人通过）',

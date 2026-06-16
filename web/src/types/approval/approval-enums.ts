@@ -29,6 +29,8 @@ export enum ApprovalFlowNodeType {
     APPROVAL = 2,
     CONDITION = 3,
     CC = 4,
+    FORK = 5,
+    JOIN = 6,
 }
 
 /** Approval mode (all approvers or any one) */

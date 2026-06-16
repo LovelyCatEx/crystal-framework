@@ -3003,7 +3003,9 @@ export const enUS: I18nRules = {
       1: 'End',
       2: 'Approval',
       3: 'Condition',
-      4: 'CC'
+      4: 'CC',
+      5: 'Fork',
+      6: 'Join'
     },
     approvalFlowApproveMode: {
       0: 'Countersign (All approve)',
