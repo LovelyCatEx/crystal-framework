@@ -382,6 +382,13 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // Tenant Approval Flow Instance (read-all permission for tenant admins)
+    const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM = "i.tenant.approval.flow.instance.read"
+    val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = TenantPermissionDeclaration(
+        name = ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

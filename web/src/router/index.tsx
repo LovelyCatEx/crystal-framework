@@ -7,6 +7,7 @@ import {
     DatabaseOutlined,
     FileOutlined,
     FolderOutlined,
+    FormOutlined,
     KeyOutlined,
     LineChartOutlined,
     MailOutlined,
@@ -71,6 +72,8 @@ const SystemDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict
 const ApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowDefinitionManagerPage.tsx"));
 const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowDefinitionManagerPage.tsx"));
 const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
+const InitiableApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/InitiableApprovalFlowsPage.tsx"));
+const MyApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowsPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -165,6 +168,22 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
+        },
+        {
+            key: '/manager/approval/initiate',
+            path: '/manager/approval/initiate',
+            icon: <FormOutlined />,
+            label: t('menu.pub.initiableApprovalFlows'),
+            page: <InitiableApprovalFlowsPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/approval/my-instances',
+            path: '/manager/approval/my-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.pub.myApprovalFlows'),
+            page: <MyApprovalFlowsPage />,
+            group: 'approval'
         },
         ...toTranslatedRouteItems(t, pluginRegistry.publicMenus),
     ];

@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -57,5 +58,9 @@ class ApprovalFlowInstanceManagerServiceImpl(
             if (dto.latestNodeId != null) this.latestNodeId = dto.latestNodeId!!
             if (dto.formData != null) this.formData = dto.formData
         }
+    }
+
+    override suspend fun findAllByScopeId(scopeId: Long): List<ApprovalFlowInstanceEntity> {
+        return approvalFlowInstanceRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
     }
 }

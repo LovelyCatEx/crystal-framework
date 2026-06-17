@@ -2171,6 +2171,29 @@ export const enUS: I18nRules = {
         status: { label: 'Status' },
       },
     },
+    initiableApprovalFlows: {
+      title: 'Initiate Approval',
+      subtitle: 'Approval flows you may currently initiate',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      noTenantTip: 'You have not joined any organization. Only system-level flows are available.',
+      noPermissionTip: 'No permission to view any scope.'
+    },
+    myApprovalFlows: {
+      title: 'My Approvals',
+      subtitle: 'Approval requests you have initiated',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization. Tenant data is unavailable.'
+    },
   },
 
   components: {
@@ -2679,6 +2702,15 @@ export const enUS: I18nRules = {
         description: 'Description',
         currentVersion: 'Version',
         status: 'Status'
+      },
+      approvalFlowInstance: {
+        scope: 'Scope',
+        definition: 'Flow',
+        definitionId: 'Flow ID',
+        definitionVersion: 'Version',
+        initiator: 'Initiator',
+        status: 'Status',
+        unknownDefinition: 'Flow deleted'
       }
     },
     entityTable: {
@@ -3031,6 +3063,16 @@ export const enUS: I18nRules = {
     approvalFlowApproveMode: {
       0: 'Countersign (All approve)',
       1: 'Or-sign (Any one approves)'
+    },
+    approvalFlowInstanceStatus: {
+      0: 'In Progress',
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'Cancelled'
+    },
+    approvalFlowScope: {
+      0: 'System',
+      1: 'Tenant'
     }
   },
 
@@ -3063,14 +3105,17 @@ export const enUS: I18nRules = {
     announcement: 'Announcement',
     tenantDictType: 'Dictionary Type',
     tenantDictItem: 'Dictionary Item',
-    approvalFlowDefinition: 'Approval Flow Definition'
+    approvalFlowDefinition: 'Approval Flow Definition',
+    approvalFlowInstance: 'Approval Request'
   },
 
   menu: {
     // Public menus
     pub: {
       dashboard: 'Dashboard',
-      profile: 'Profile'
+      profile: 'Profile',
+      initiableApprovalFlows: 'Initiate Approval',
+      myApprovalFlows: 'My Approvals'
     },
 
     // Tenant menus (i_tenant)

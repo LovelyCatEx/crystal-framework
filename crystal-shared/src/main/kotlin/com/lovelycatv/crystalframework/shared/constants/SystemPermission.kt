@@ -215,6 +215,12 @@ object SystemPermission {
     const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = "tenant.approval.flow.definition.update"
     const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = "tenant.approval.flow.definition.delete"
 
+    // Approval Flow Instance (system scope) - read-all permission for system admins
+    const val ACTION_APPROVAL_FLOW_INSTANCE_READ = "approval.flow.instance.read"
+
+    // Approval Flow Instance (tenant scope, system admin access) - read-all permission for system admins
+    const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = "tenant.approval.flow.instance.read"
+
     // System-level Dictionary (tenantId = 0)
     const val MENU_SYSTEM_DICT_TYPE_MANAGER = "system.dict.type:/manager/system-dict-types"
     const val ACTION_SYSTEM_DICT_TYPE_CREATE = "system.dict.type.create"

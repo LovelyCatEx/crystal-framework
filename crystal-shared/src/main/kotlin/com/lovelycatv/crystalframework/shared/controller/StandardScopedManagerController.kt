@@ -117,7 +117,10 @@ abstract class StandardScopedManagerController<
     // ─── Response shaping hooks ───
 
     /** Shape the response body for [query]. Default returns paginated entities. */
-    protected open suspend fun buildQueryResponse(dto: READ_DTO): Any {
+    protected open suspend fun buildQueryResponse(
+        dto: READ_DTO,
+        userAuthentication: UserAuthentication,
+    ): Any {
         return managerService.query(dto)
     }
 
@@ -162,7 +165,7 @@ abstract class StandardScopedManagerController<
     ): ApiResponse<*> {
         val resolvedScope = resolveScope(dto.scope)
         assertAccess(resolvedScope, dto.scopeId, ScopedOperation.READ, userAuthentication)
-        return ApiResponse.success(buildQueryResponse(dto))
+        return ApiResponse.success(buildQueryResponse(dto, userAuthentication))
     }
 
     @PostMapping("/update", version = "1")

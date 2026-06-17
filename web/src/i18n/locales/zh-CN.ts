@@ -2168,6 +2168,29 @@ export const zhCN: I18nRules = {
         status: { label: '状态' },
       },
     },
+    initiableApprovalFlows: {
+      title: '发起审批',
+      subtitle: '查看当前可发起的审批流程',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，仅可发起系统级审批',
+      noPermissionTip: '当前账号没有任何 scope 的查看权限'
+    },
+    myApprovalFlows: {
+      title: '我的审批',
+      subtitle: '查看我发起的审批',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据'
+    },
   },
 
   components: {
@@ -2677,6 +2700,15 @@ export const zhCN: I18nRules = {
         description: '描述',
         currentVersion: '版本',
         status: '状态'
+      },
+      approvalFlowInstance: {
+        scope: '范围',
+        definition: '流程',
+        definitionId: '流程ID',
+        definitionVersion: '版本',
+        initiator: '发起人',
+        status: '状态',
+        unknownDefinition: '流程已删除'
       }
     },
     entityTable: {
@@ -3029,6 +3061,16 @@ export const zhCN: I18nRules = {
     approvalFlowApproveMode: {
       0: '会签（所有人通过）',
       1: '或签（任一人通过）'
+    },
+    approvalFlowInstanceStatus: {
+      0: '审批中',
+      1: '已通过',
+      2: '已驳回',
+      3: '已取消'
+    },
+    approvalFlowScope: {
+      0: '系统',
+      1: '租户'
     }
   },
 
@@ -3061,14 +3103,17 @@ export const zhCN: I18nRules = {
     announcement: '公告',
     tenantDictType: '字典类型',
     tenantDictItem: '字典项',
-    approvalFlowDefinition: '审批流程定义'
+    approvalFlowDefinition: '审批流程定义',
+    approvalFlowInstance: '审批申请'
   },
 
   menu: {
     // 公共菜单
     pub: {
       dashboard: '仪表盘',
-      profile: '个人中心'
+      profile: '个人中心',
+      initiableApprovalFlows: '发起审批',
+      myApprovalFlows: '我的审批'
     },
 
     // 租户菜单 (i_tenant)

@@ -100,18 +100,22 @@ class ManagerApprovalFlowDefinitionController(
             }
             ResourceScope.TENANT -> when (operation) {
                 ScopedOperation.CREATE -> RbacUtils.hasAnyAuthority(
+                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
                     SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
                     TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM
                 )
                 ScopedOperation.READ -> RbacUtils.hasAnyAuthority(
+                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
                     SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
                     TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM
                 )
                 ScopedOperation.UPDATE -> RbacUtils.hasAnyAuthority(
+                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
                     SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
                     TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM
                 )
                 ScopedOperation.DELETE -> RbacUtils.hasAnyAuthority(
+                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
                     SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
                     TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM
                 )

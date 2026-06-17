@@ -92,3 +92,11 @@ export function getApprovalFlowNodeType(type: number): string {
 export function getApprovalFlowApproveMode(mode: number): string {
     return translateEnum('approvalFlowApproveMode', mode);
 }
+
+export function getApprovalFlowInstanceStatus(status: number): string {
+    return translateEnum('approvalFlowInstanceStatus', status);
+}
+
+export function getApprovalFlowScope(scope: number): string {
+    return translateEnum('approvalFlowScope', scope);
+}

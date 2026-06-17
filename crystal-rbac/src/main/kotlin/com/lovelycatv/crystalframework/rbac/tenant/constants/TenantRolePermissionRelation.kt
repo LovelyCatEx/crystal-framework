@@ -21,6 +21,8 @@ object TenantRolePermissionRelation {
             // Tenant Settings
             TenantPermission.ACTION_TENANT_SETTINGS_READ,
             TenantPermission.ACTION_TENANT_SETTINGS_UPDATE,
+            // Approval Flow Instance (read-all within own tenant)
+            TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
         ),
         TenantRole.ADMIN to listOf(
             // Profile

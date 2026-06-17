@@ -7,7 +7,6 @@ import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngin
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.parseObject
-import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
@@ -22,7 +21,6 @@ class ApprovalFlowEngineImpl(
     private val taskService: ApprovalFlowTaskService,
     private val recordService: ApprovalFlowRecordService,
     private val tokenService: ApprovalFlowTokenService,
-    private val tenantMemberService: TenantMemberService,
     private val snowIdGenerator: SnowIdGenerator
 ) : ApprovalFlowEngine {
 
@@ -290,10 +288,7 @@ class ApprovalFlowEngineImpl(
                     ApprovalFlowScope.TENANT -> {
                         @Suppress("UNCHECKED_CAST")
                         val memberIds = config.strategyParams["memberIds"] as? List<String> ?: emptyList()
-                        memberIds.map { memberId ->
-                            val member = tenantMemberService.getByIdOrThrow(memberId.toLong())
-                            member.memberUserId
-                        }
+                        memberIds.map { it.toLong() }
                     }
                     else -> {
                         @Suppress("UNCHECKED_CAST")
