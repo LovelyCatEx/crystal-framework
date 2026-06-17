@@ -41,7 +41,7 @@ import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
 import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
 import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
 import {createApprovalFlowNode} from "./approval-graph-nodes.ts";
-import {ApprovalEditorProvider} from "./ApprovalEditorContext.tsx";
+import {ApprovalEditorContext, type ApprovalEditorContextValue} from "./ApprovalEditorContext.tsx";
 import {ApprovalNodeInspector} from "@/components/approval/ApprovalNodeInspector.tsx";
 import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
@@ -172,6 +172,15 @@ export default function ApprovalEditor(props: {
     const [ctx, setCtx] = useState<ApprovalFlowGraphEditorContext | null>(null);
     const [selectedNode, setSelectedNode] = useState<ApprovalFlowNode | null>(null);
 
+    const contextValueRef = useRef<ApprovalEditorContextValue>({
+        scope: ResourceScope.SYSTEM,
+        scopeId: '',
+    });
+    contextValueRef.current = {
+        scope: definitionDetails?.definition.scope ?? ResourceScope.SYSTEM,
+        scopeId: definitionDetails?.definition.scopeId ?? '',
+    };
+
     // Resizable right panel
     const [panelWidth, setPanelWidth] = useState(25); // percentage
     const isResizing = useRef(false);
@@ -222,22 +231,29 @@ export default function ApprovalEditor(props: {
             },
             render: {
                 node: (_, node, emit) => {
-                    switch (node.node.type) {
-                        case ApprovalFlowNodeType.START:
-                            return <StartNodeComponent data={node} emit={emit} />;
-                        case ApprovalFlowNodeType.END:
-                            return <EndNodeComponent data={node} emit={emit} />;
-                        case ApprovalFlowNodeType.CONDITION:
-                            return <ConditionNodeComponent data={node} emit={emit} />;
-                        case ApprovalFlowNodeType.CC:
-                            return <CcNodeComponent data={node} emit={emit} />;
-                        case ApprovalFlowNodeType.FORK:
-                            return <ForkNodeComponent data={node} emit={emit} />;
-                        case ApprovalFlowNodeType.JOIN:
-                            return <JoinNodeComponent data={node} emit={emit} />;
-                        default:
-                            return <ApprovalNodeComponent data={node} emit={emit} />;
-                    }
+                    const renderNode = () => {
+                        switch (node.node.type) {
+                            case ApprovalFlowNodeType.START:
+                                return <StartNodeComponent data={node} emit={emit} />;
+                            case ApprovalFlowNodeType.END:
+                                return <EndNodeComponent data={node} emit={emit} />;
+                            case ApprovalFlowNodeType.CONDITION:
+                                return <ConditionNodeComponent data={node} emit={emit} />;
+                            case ApprovalFlowNodeType.CC:
+                                return <CcNodeComponent data={node} emit={emit} />;
+                            case ApprovalFlowNodeType.FORK:
+                                return <ForkNodeComponent data={node} emit={emit} />;
+                            case ApprovalFlowNodeType.JOIN:
+                                return <JoinNodeComponent data={node} emit={emit} />;
+                            default:
+                                return <ApprovalNodeComponent data={node} emit={emit} />;
+                        }
+                    };
+                    return (
+                        <ApprovalEditorContext.Provider value={contextValueRef.current}>
+                            {renderNode()}
+                        </ApprovalEditorContext.Provider>
+                    );
                 },
                 contextMenu: {
                     main: () => ContextMenuContainer({
@@ -403,7 +419,6 @@ export default function ApprovalEditor(props: {
     // --- PART3_PLACEHOLDER ---
 
     return (
-        <ApprovalEditorProvider value={{ scope: definitionDetails?.definition.scope ?? ResourceScope.SYSTEM, scopeId: definitionDetails?.definition.scopeId ?? '' }}>
         <div className="w-full h-[100vh] flex flex-col">
             {/* Header */}
             <div className="w-full flex flex-row items-center justify-between px-4 py-3 border-b" style={{ borderColor: token.colorBorder }}>
@@ -524,7 +539,6 @@ export default function ApprovalEditor(props: {
                 </div>
             </div>
         </div>
-        </ApprovalEditorProvider>
     );
 }
 

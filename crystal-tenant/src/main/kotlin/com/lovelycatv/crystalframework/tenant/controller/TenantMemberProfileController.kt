@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -9,6 +10,7 @@ import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpsertTenantMemberProfileDTO
 import com.lovelycatv.crystalframework.tenant.controller.vo.TenantMemberProfileVO
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
+import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/me/tenant-profile")
 class TenantMemberProfileController(
     private val tenantMemberProfileService: TenantMemberProfileService,
+    private val fileResourceService: FileResourceService,
 ) {
     @GetMapping("")
     suspend fun getTenantMemberProfile(
@@ -43,7 +46,7 @@ class TenantMemberProfileController(
         val profile = tenantMemberProfileService.getByTenantMemberId(targetMemberId)
             ?: return ApiResponse.success(null)
 
-        return ApiResponse.success(TenantMemberProfileVO.fromEntity(profile, fullAccess))
+        return ApiResponse.success(profile.toProfileVO(fileResourceService, fullAccess))
     }
 
     @PostMapping("/upsert")
@@ -70,6 +73,6 @@ class TenantMemberProfileController(
             locale = dto.locale,
         )
 
-        return ApiResponse.success(TenantMemberProfileVO.fromEntity(saved))
+        return ApiResponse.success(saved.toProfileVO(fileResourceService))
     }
 }

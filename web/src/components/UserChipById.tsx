@@ -24,7 +24,7 @@ export function UserChipById({ userId }: UserChipByIdProps) {
                 background: 'transparent',
             }}
         >
-            <AvatarResource fileEntityId={userProfile?.avatar} size={24} />
+            <AvatarResource url={userProfile?.avatar} size={24} />
             <span className="text-sm whitespace-nowrap">
                 {userProfile?.nickname || userProfile?.username || userId}
             </span>

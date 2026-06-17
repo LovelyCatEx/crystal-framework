@@ -30,6 +30,7 @@ export interface TenantMemberProfileVO {
     name: string;
     phone: string;
     nickname: string | null;
+    /** Resolved download URL for the avatar resource (null when not set). */
     avatar: string | null;
     email: string | null;
     bio: string | null;

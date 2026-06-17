@@ -24,7 +24,7 @@ export function TenantMemberChip({ memberId }: TenantMemberChipProps) {
                 background: 'transparent',
             }}
         >
-            <AvatarResource fileEntityId={member?.avatar} size={24} />
+            <AvatarResource url={member?.avatar} size={24} />
             <span className="text-sm whitespace-nowrap">
                 {member?.nickname || member?.name || memberId}
             </span>
