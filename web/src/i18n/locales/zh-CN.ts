@@ -2788,6 +2788,11 @@ export const zhCN: I18nRules = {
       optionalValues: '可选值',
       measurements: '测量值'
     },
+    chip: {
+      tenantMember: {
+        unknown: '未知成员'
+      }
+    },
     popCard: {
       user: {
         notFound: '未找到用户信息',

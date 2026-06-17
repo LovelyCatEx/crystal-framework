@@ -2790,6 +2790,11 @@ export const enUS: I18nRules = {
       optionalValues: 'Optional Values',
       measurements: 'Measurements'
     },
+    chip: {
+      tenantMember: {
+        unknown: 'Unknown member'
+      }
+    },
     popCard: {
       user: {
         notFound: 'User information not found',

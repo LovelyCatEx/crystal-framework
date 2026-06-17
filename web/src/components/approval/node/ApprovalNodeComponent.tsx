@@ -5,7 +5,6 @@ import {UserCheck} from "lucide-react";
 import {type ClassicScheme, Presets, type RenderEmit} from "rete-react-plugin";
 import classNames from "classnames";
 import {useNodeSize} from "@/rete/utils/react.ts";
-import {Tag} from "antd";
 import {UserChipById} from "@/components/UserChipById.tsx";
 import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
@@ -87,7 +86,9 @@ export function ApprovalNodeComponent<S extends ApprovalFlowGraphSchemes>(props:
                         }
                     </div>
                     {approveMode !== undefined && (
-                        <Tag className="mt-2" color="processing">{getApprovalFlowApproveMode(approveMode)}</Tag>
+                        <span className="inline-block mt-4 px-3 py-1 text-sm rounded-md bg-slate-700/70 text-slate-100 border border-slate-500/40">
+                            {getApprovalFlowApproveMode(approveMode)}
+                        </span>
                     )}
                 </div>
             )}

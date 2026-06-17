@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberProfileEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberProfileRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
+import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
@@ -25,6 +26,7 @@ class TenantMemberProfileServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val snowIdGenerator: SnowIdGenerator,
     private val fileResourceServiceManager: FileResourceServiceManager,
+    private val userService: UserService,
 ) : TenantMemberProfileService {
     private val logger = logger()
 
@@ -68,12 +70,17 @@ class TenantMemberProfileServiceImpl(
         val existing = this.getByTenantMemberId(tenantMemberId)
 
         return if (existing == null) {
+            val resolvedName = name?.takeIf { it.isNotBlank() }
+                ?: userService.getByIdOrNull(memberUserId)
+                    ?.let { it.nickname.takeIf { n -> n.isNotBlank() } ?: it.username }
+                ?: "user_${System.currentTimeMillis().toString().slice(0..5)}"
+
             val entity = TenantMemberProfileEntity(
                 id = snowIdGenerator.nextId(),
                 tenantId = tenantId,
                 tenantMemberId = tenantMemberId,
                 memberUserId = memberUserId,
-                name = name ?: "",
+                name = resolvedName,
                 phone = phone ?: "",
                 nickname = nickname,
                 avatar = avatar,
