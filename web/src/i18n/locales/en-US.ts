@@ -1888,6 +1888,15 @@ export const enUS: I18nRules = {
         bindSuccess: 'Bound successfully',
         bindFailed: 'Failed to bind',
         alreadyBoundToUser: 'This third-party account is already bound to a system user and cannot be bound again within the organization'
+      },
+      avatar: {
+        cropTitle: 'Crop Avatar',
+        confirmUpload: 'Confirm Upload',
+        cancel: 'Cancel',
+        uploadSuccess: 'Avatar uploaded',
+        uploadFailed: 'Failed to upload avatar',
+        invalidType: 'Please upload a JPG, PNG or WebP image',
+        maxSize: 'Image must be smaller than 5MB'
       }
     },
     tenantSettingsManager: {

@@ -12,12 +12,14 @@ import com.lovelycatv.crystalframework.tenant.controller.vo.TenantMemberProfileV
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
 import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import jakarta.validation.Valid
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 
 @Validated
@@ -64,13 +66,32 @@ class TenantMemberProfileController(
             memberUserId = userAuthentication.userId,
             phone = dto.phone,
             nickname = dto.nickname,
-            avatar = dto.avatar,
             email = dto.email,
             bio = dto.bio,
             gender = dto.gender,
             birthday = dto.birthday,
             timezone = dto.timezone,
             locale = dto.locale,
+        )
+
+        return ApiResponse.success(saved.toProfileVO(fileResourceService))
+    }
+
+    @PostMapping("/uploadAvatar")
+    suspend fun uploadAvatar(
+        userAuthentication: UserAuthentication,
+        @RequestPart("file")
+        file: FilePart,
+    ): ApiResponse<TenantMemberProfileVO> {
+        val tenantId = userAuthentication.assertTenantIdNotNull()
+        val tenantMemberId = userAuthentication.tenantMemberId
+            ?: throw BusinessException("invalid tenant authentication")
+
+        val saved = tenantMemberProfileService.uploadAvatar(
+            tenantId = tenantId,
+            tenantMemberId = tenantMemberId,
+            memberUserId = userAuthentication.userId,
+            file = file,
         )
 
         return ApiResponse.success(saved.toProfileVO(fileResourceService))

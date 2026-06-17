@@ -47,6 +47,7 @@ class FileResourceServiceImpl(
         val config = when (fileType) {
             ResourceFileType.USER_AVATAR -> resourceConfig.avatar
             ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
+            ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
         }
         return contentType in config.supportedContentTypes
     }

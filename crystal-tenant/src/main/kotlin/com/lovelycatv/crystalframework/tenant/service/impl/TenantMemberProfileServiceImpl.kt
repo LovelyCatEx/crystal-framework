@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
+import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
+import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
@@ -7,9 +9,13 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberProfileEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberProfileRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
+import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 import kotlin.reflect.KClass
 
 @Service
@@ -18,7 +24,10 @@ class TenantMemberProfileServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val snowIdGenerator: SnowIdGenerator,
+    private val fileResourceServiceManager: FileResourceServiceManager,
 ) : TenantMemberProfileService {
+    private val logger = logger()
+
     override val cacheStore: ReactiveExpiringKVStore<String, TenantMemberProfileEntity>
         get() = reactiveRedisService.asReactiveKVStore()
     override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantMemberProfileEntity>>
@@ -100,5 +109,38 @@ class TenantMemberProfileServiceImpl(
                     ?: throw BusinessException("could not update tenant user profile")
             }
         }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun uploadAvatar(
+        tenantId: Long,
+        tenantMemberId: Long,
+        memberUserId: Long,
+        file: FilePart,
+    ): TenantMemberProfileEntity {
+        val (_, extension) = file.filename().split(".")
+        val targetFileName = UUID.randomUUID().toString() + "." + extension
+
+        val service = fileResourceServiceManager
+            .getService(memberUserId, ResourceFileType.TENANT_MEMBER_AVATAR, targetFileName)
+
+        val result = service.uploadFile(
+            memberUserId,
+            ResourceFileType.TENANT_MEMBER_AVATAR,
+            file,
+            targetFileName
+        )
+
+        if (!result.success || result.fileResourceEntity == null) {
+            logger.error("could not upload avatar for tenant member: $tenantMemberId", result.exception)
+            throw BusinessException("could not upload tenant member avatar", result.exception)
+        }
+
+        return this.upsertProfile(
+            tenantId = tenantId,
+            tenantMemberId = tenantMemberId,
+            memberUserId = memberUserId,
+            avatar = result.fileResourceEntity!!.id,
+        )
     }
 }

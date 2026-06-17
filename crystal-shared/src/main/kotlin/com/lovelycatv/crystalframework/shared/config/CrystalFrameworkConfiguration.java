@@ -61,12 +61,18 @@ public class CrystalFrameworkConfiguration {
     public static class Resource {
         private ResourceConfig avatar = new ResourceConfig();
         private ResourceConfig tenantIcon = new ResourceConfig();
+        private ResourceConfig tenantMemberAvatar = new ResourceConfig();
 
         public ResourceConfig getAvatar() { return avatar; }
         public void setAvatar(ResourceConfig avatar) { this.avatar = avatar; }
 
         public ResourceConfig getTenantIcon() { return tenantIcon; }
         public void setTenantIcon(ResourceConfig tenantIcon) { this.tenantIcon = tenantIcon; }
+
+        public ResourceConfig getTenantMemberAvatar() { return tenantMemberAvatar; }
+        public void setTenantMemberAvatar(ResourceConfig tenantMemberAvatar) {
+            this.tenantMemberAvatar = tenantMemberAvatar;
+        }
 
         public static class ResourceConfig {
             private String[] supportedContentTypes = new String[0];

@@ -1885,6 +1885,15 @@ export const zhCN: I18nRules = {
         bindSuccess: '已绑定',
         bindFailed: '绑定失败',
         alreadyBoundToUser: '该第三方账号已绑定至其他系统账户，无法在当前组织内重复绑定'
+      },
+      avatar: {
+        cropTitle: '裁剪头像',
+        confirmUpload: '确认上传',
+        cancel: '取消',
+        uploadSuccess: '头像上传成功',
+        uploadFailed: '头像上传失败',
+        invalidType: '请上传 JPG、PNG 或 WebP 格式的图片',
+        maxSize: '图片大小不能超过 5MB'
       }
     },
     tenantSettingsManager: {
