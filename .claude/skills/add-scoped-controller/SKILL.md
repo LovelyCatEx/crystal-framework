@@ -139,6 +139,46 @@ override suspend fun checkPermission(
 | POST | `/update` | `@ModelAttribute` | 更新（scope 从已有实体读取） |
 | POST | `/delete` | `@ModelAttribute` | 删除（scope 从已有实体读取） |
 
+### 端点定制：禁止覆写，使用 hook
+
+**!!!禁止在具体 Controller 子类中 `override` 父类的 5 个端点函数：`readAll` / `create` / `query` / `update` / `delete`。!!!**
+**!!!禁止在具体 Controller 子类中 `override` 父类的 5 个端点函数：`readAll` / `create` / `query` / `update` / `delete`。!!!**
+**!!!禁止在具体 Controller 子类中 `override` 父类的 5 个端点函数：`readAll` / `create` / `query` / `update` / `delete`。!!!**
+
+**原因**：这 5 个函数是 `suspend` + 带泛型 DTO 的端点函数，签名上挂了 `@PostMapping` / `@GetMapping`。当 Kotlin 子类把泛型 DTO **specialize 为具体类型**（如 `READ_DTO` → `ManagerReadXxxDTO`）并 override 它们时，编译器为父类擦除签名生成的 **bridge 方法** 会和具体方法**同时**被 Spring `RequestMappingHandlerMapping` 注册成端点，启动时报 "Ambiguous mapping. Cannot map ... There is already 'xxxController' bean method ... mapped." 直接 BeanCreationException。
+
+**替代方案：使用父类提供的 open hook**
+
+| 需求 | 使用 hook | 默认行为 |
+|------|----------|---------|
+| 定制 `/query` 返回体（追加过滤条件、返回 enriched VO 等） | `buildQueryResponse(dto: READ_DTO, userAuthentication: UserAuthentication): Any` | `managerService.query(dto)` |
+| 定制 `/list` 返回体 | `buildReadAllResponse(scopeId: Long): Any` | `managerService.findAllByScopeId(scopeId)` |
+| 决定权限 | `checkPermission(scope, scopeId, operation, userAuthentication): Boolean`（**abstract，必须实现**） | — |
+| 定制 ownership 判断 | `checkOwnership(scope, scopeId, userAuthentication): Boolean` | SYSTEM 通过；TENANT 校验 `scopeId == userAuthentication.tenantId` |
+| 定制 scope 解析 | `resolveScope(scopeTypeId: Int): ResourceScope` | `ResourceScope.getById(typeId)` |
+
+**示例：在 `/query` 中按角色追加 initiator 过滤条件**
+
+```kotlin
+override suspend fun buildQueryResponse(
+    dto: ManagerReadXxxDTO,
+    userAuthentication: UserAuthentication,
+): Any {
+    val resolvedScope = resolveScope(dto.scope)
+    val canReadAll = when (resolvedScope) {
+        ResourceScope.SYSTEM -> RbacUtils.hasAuthority(SystemPermission.ACTION_XXX_READ)
+        ResourceScope.TENANT -> RbacUtils.hasAnyAuthority(
+            SystemPermission.ACTION_TENANT_XXX_READ,
+            TenantPermission.ACTION_TENANT_XXX_READ_PEM,
+        )
+    }
+    val effectiveDto = if (canReadAll) dto else dto.copy(query = appendOwnerCondition(dto.query, userAuthentication))
+    return managerService.query(effectiveDto)
+}
+```
+
+**如果 hook 不够用怎么办？**：在父类（`StandardScopedManagerController`）新增 `open suspend fun` hook（**不带任何映射注解**），子类 override 这个 hook，不要直接 override 端点。新增 hook 属于本框架文档缺失内容，必须先和用户确认设计。
+
 ### Repository
 
 需要添加 `findAllByScopeId` 方法（R2DBC 按命名约定自动生成查询）：
