@@ -3,9 +3,13 @@ package com.lovelycatv.crystalframework.approval.controller.manager
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowInstanceDTO
+import com.lovelycatv.crystalframework.approval.controller.manager.dto.StartApprovalFlowDTO
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowInstanceEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowInstanceRepository
+import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
+import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowInstanceManagerService
+import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
@@ -16,12 +20,17 @@ import com.lovelycatv.crystalframework.shared.database.GroupNode
 import com.lovelycatv.crystalframework.shared.database.QueryLogic
 import com.lovelycatv.crystalframework.shared.database.QueryNode
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -30,6 +39,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-instances")
 class ManagerApprovalFlowInstanceController(
     managerService: ApprovalFlowInstanceManagerService,
+    private val approvalFlowDefinitionManagerService: ApprovalFlowDefinitionManagerService,
+    private val approvalFlowEngine: ApprovalFlowEngine,
 ) : ReadonlyScopedManagerController<
         ApprovalFlowInstanceManagerService,
         ApprovalFlowInstanceRepository,
@@ -41,11 +52,9 @@ class ManagerApprovalFlowInstanceController(
 >(managerService) {
 
     /**
-     * Read is allowed for any authenticated user.
-     * Data filtering is performed in [buildQueryResponse]: callers without read-all authority
-     * see only instances they initiated (in SYSTEM: initiator_id == userId;
-     * in TENANT: initiator_id == tenantMemberId).
-     * Mutation operations are blocked by [ReadonlyScopedManagerController].
+     * Read is allowed for any authenticated user. Mutation operations are blocked by
+     * [ReadonlyScopedManagerController]. Data filtering for non-read-all callers is
+     * performed in [buildQueryResponse] by injecting `initiator_id == self`.
      */
     override suspend fun checkPermission(
         scope: ResourceScope,
@@ -56,6 +65,10 @@ class ManagerApprovalFlowInstanceController(
         return operation == ScopedOperation.READ
     }
 
+    /**
+     * Inject `initiator_id` filter for users without read-all authority before delegating
+     * to the manager service. Read-all authority lets the user see every instance in the scope.
+     */
     override suspend fun buildQueryResponse(
         dto: ManagerReadApprovalFlowInstanceDTO,
         userAuthentication: UserAuthentication,
@@ -84,6 +97,48 @@ class ManagerApprovalFlowInstanceController(
         return managerService.query(effectiveDto)
     }
 
+    /**
+     * Initiate an approval flow instance from a PUBLISHED definition. Authorization mirrors
+     * the standard READ logic on the definition's scope: any user who can read the definition
+     * is allowed to initiate. The initiator id stored on the new instance is scope-specific
+     * (userId for SYSTEM, tenantMemberId for TENANT) — see [ApprovalFlowEngine.startFlow].
+     */
+    @PostMapping("/start", version = "1")
+    suspend fun start(
+        userAuthentication: UserAuthentication,
+        @Valid @RequestBody dto: StartApprovalFlowDTO
+    ): ApiResponse<*> {
+        val definitionId = dto.definitionId
+            ?: throw BusinessException("definitionId is required")
+        val definition = approvalFlowDefinitionManagerService.getByIdOrNull(definitionId)
+            ?: throw BusinessException("Definition not found")
+        val resolvedScope = resolveScope(definition.scope)
+
+        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw ForbiddenException()
+        }
+        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw ForbiddenException()
+        }
+
+        val initiatorId = when (resolvedScope) {
+            ResourceScope.SYSTEM -> userAuthentication.userId
+            ResourceScope.TENANT -> userAuthentication.tenantMemberId
+                ?: throw ForbiddenException("Current user is not a member of this tenant")
+        }
+        val approvalScope = ApprovalFlowScope.getById(definition.scope)
+            ?: throw BusinessException("Unknown approval flow scope ${definition.scope}")
+
+        val instance = approvalFlowEngine.startFlow(
+            definitionId = definition.id,
+            initiatorId = initiatorId,
+            scope = approvalScope,
+            scopeId = definition.scopeId,
+            formData = dto.formData,
+        )
+        return ApiResponse.success(instance)
+    }
+
     private fun appendInitiatorCondition(existing: QueryNode?, initiatorId: Long): QueryNode {
         val initiatorCondition = ConditionNode(
             field = COLUMN_INITIATOR_ID,
@@ -101,3 +156,4 @@ class ManagerApprovalFlowInstanceController(
         private const val COLUMN_INITIATOR_ID = "initiator_id"
     }
 }
+

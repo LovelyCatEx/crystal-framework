@@ -2179,7 +2179,18 @@ export const enUS: I18nRules = {
         tenant: 'Tenant'
       },
       noTenantTip: 'You have not joined any organization. Only system-level flows are available.',
-      noPermissionTip: 'No permission to view any scope.'
+      noPermissionTip: 'No permission to view any scope.',
+      action: {
+        initiate: 'Initiate'
+      },
+      modal: {
+        title: 'Initiate Approval - {{name}}',
+        formPlaceholder: 'No form is configured for this flow. Click Confirm to initiate.',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        success: 'Initiated successfully',
+        failed: 'Failed to initiate'
+      }
     },
     myApprovalFlows: {
       title: 'My Approvals',

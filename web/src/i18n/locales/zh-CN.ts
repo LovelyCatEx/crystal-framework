@@ -2176,7 +2176,18 @@ export const zhCN: I18nRules = {
         tenant: '租户审批'
       },
       noTenantTip: '当前账号尚未加入任何组织，仅可发起系统级审批',
-      noPermissionTip: '当前账号没有任何 scope 的查看权限'
+      noPermissionTip: '当前账号没有任何 scope 的查看权限',
+      action: {
+        initiate: '发起'
+      },
+      modal: {
+        title: '发起审批 - {{name}}',
+        formPlaceholder: '当前流程暂无表单，点击确定即可发起',
+        confirm: '确定',
+        cancel: '取消',
+        success: '发起成功',
+        failed: '发起失败'
+      }
     },
     myApprovalFlows: {
       title: '我的审批',

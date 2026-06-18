@@ -4,6 +4,7 @@ import type {
     BaseManagerReadScopedDTO,
     BaseManagerUpdateDTO
 } from "@/types/api.types.ts";
+import {doPost} from "@/api/system-request.ts";
 import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
 
 export interface ManagerCreateApprovalFlowInstanceDTO {
@@ -26,6 +27,11 @@ export interface ManagerUpdateApprovalFlowInstanceDTO extends BaseManagerUpdateD
 
 export type ManagerDeleteApprovalFlowInstanceDTO = BaseManagerDeleteDTO;
 
+export interface StartApprovalFlowDTO {
+    definitionId: string;
+    formData?: string;
+}
+
 class ApprovalFlowInstanceManagerControllerClass extends BaseManagerController<
     ApprovalFlowInstance,
     ManagerCreateApprovalFlowInstanceDTO,
@@ -39,3 +45,12 @@ class ApprovalFlowInstanceManagerControllerClass extends BaseManagerController<
 }
 
 export const ApprovalFlowInstanceManagerController = new ApprovalFlowInstanceManagerControllerClass();
+
+export async function startApprovalFlow(dto: StartApprovalFlowDTO) {
+    return doPost<ApprovalFlowInstance>(
+        '/api/manager/approval-flow-instances/start',
+        dto,
+        {'Content-Type': 'application/json'},
+    );
+}
+
