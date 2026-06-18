@@ -66,6 +66,7 @@ object SystemRolePermissionRelation {
             SystemPermission.MENU_TENANT_MESSAGE_CHANNEL_MANAGER,
             SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
             // Approval Flow Instance (read-all)
+            SystemPermission.MENU_APPROVAL_FLOW_INSTANCE_MANAGER,
             SystemPermission.MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER,
             SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
             SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,

@@ -76,6 +76,7 @@ const InitiableApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/I
 const MyApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowsPage.tsx"));
 const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
 const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
+const ApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowInstanceManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -581,6 +582,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <ApartmentOutlined />,
             label: t('menu.admin.approvalFlowDefinitions'),
             page: <ApprovalFlowDefinitionManagerPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/approval-flow-instances',
+            path: '/manager/approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.admin.approvalFlowInstances'),
+            page: <ApprovalFlowInstanceManagerPage />,
             group: 'approval'
         },
         {

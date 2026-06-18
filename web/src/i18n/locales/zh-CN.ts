@@ -2219,6 +2219,14 @@ export const zhCN: I18nRules = {
         all: '全部'
       }
     },
+    approvalFlowInstanceManager: {
+      title: '用户审批管理',
+      subtitle: '查看系统级所有用户发起的审批',
+      filter: {
+        status: '状态',
+        all: '全部'
+      }
+    },
   },
 
   components: {
@@ -3194,6 +3202,7 @@ export const zhCN: I18nRules = {
       tenantDictTypes: '字典类型管理',
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',
+      approvalFlowInstances: '用户审批管理',
       tenantApprovalFlowDefinitions: '租户流程定义管理',
       tenantApprovalFlowInstances: '租户审批管理',
       systemDictTypes: '系统字典类型',

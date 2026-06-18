@@ -2222,6 +2222,14 @@ export const enUS: I18nRules = {
         all: 'All'
       }
     },
+    approvalFlowInstanceManager: {
+      title: 'User Approval Management',
+      subtitle: 'View approval requests initiated by all users at the system level',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      }
+    },
   },
 
   components: {
@@ -3196,6 +3204,7 @@ export const enUS: I18nRules = {
       tenantDictTypes: 'Dictionary Type Management',
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',
+      approvalFlowInstances: 'User Approval Management',
       tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
       tenantApprovalFlowInstances: 'Tenant Approval Management',
       systemDictTypes: 'System Dictionary Types',

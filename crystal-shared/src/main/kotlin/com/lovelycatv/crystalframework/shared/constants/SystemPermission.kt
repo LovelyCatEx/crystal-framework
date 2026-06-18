@@ -218,6 +218,7 @@ object SystemPermission {
     const val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = "tenant.approval.flow.definition:/manager/tenant-approval-flow-definitions"
 
     // Approval Flow Instance (system scope) - read-all permission for system admins
+    const val MENU_APPROVAL_FLOW_INSTANCE_MANAGER = "approval.flow.instance:/manager/approval-flow-instances"
     const val ACTION_APPROVAL_FLOW_INSTANCE_READ = "approval.flow.instance.read"
 
     // Approval Flow Instance (tenant scope, system admin access)
