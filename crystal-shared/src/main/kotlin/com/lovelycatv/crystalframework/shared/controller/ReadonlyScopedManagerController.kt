@@ -30,9 +30,11 @@ abstract class ReadonlyScopedManagerController<
         UPDATE_DTO : BaseManagerUpdateDTO,
         DELETE_DTO : BaseManagerDeleteDTO
 >(
-    managerService: SERVICE
+    managerService: SERVICE,
+    permissions: ScopedPermissionTriad? = null,
 ) : StandardScopedManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
-    managerService
+    managerService,
+    permissions,
 ) {
     override suspend fun create(
         userAuthentication: UserAuthentication,

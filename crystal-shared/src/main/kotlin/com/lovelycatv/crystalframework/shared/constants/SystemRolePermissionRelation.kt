@@ -68,6 +68,41 @@ object SystemRolePermissionRelation {
             // Approval Flow Instance (read-all)
             SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
             SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+            // Approval Flow Definition — menus
+            SystemPermission.MENU_APPROVAL_FLOW_DEFINITION_MANAGER,
+            SystemPermission.MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER,
+            // Approval Flow Definition — system scope
+            SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE,
+            SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
+            SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
+            SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
+            // Approval Flow Definition — super (cross-scope, admin-only)
+            SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
+            SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
+            SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
+            SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
+            // Dictionary — menus
+            SystemPermission.MENU_SYSTEM_DICT_TYPE_MANAGER,
+            SystemPermission.MENU_TENANT_DICT_TYPE_MANAGER,
+            SystemPermission.MENU_TENANT_DICT_ITEM_MANAGER,
+            // Dictionary — system scope
+            SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE,
+            SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ,
+            SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE,
+            SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE,
+            SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE,
+            SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
+            SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
+            SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
+            // Dictionary — super (cross-scope, admin-only)
+            SystemPermission.ACTION_DICT_TYPE_CREATE,
+            SystemPermission.ACTION_DICT_TYPE_READ,
+            SystemPermission.ACTION_DICT_TYPE_UPDATE,
+            SystemPermission.ACTION_DICT_TYPE_DELETE,
+            SystemPermission.ACTION_DICT_ITEM_CREATE,
+            SystemPermission.ACTION_DICT_ITEM_READ,
+            SystemPermission.ACTION_DICT_ITEM_UPDATE,
+            SystemPermission.ACTION_DICT_ITEM_DELETE,
         ),
         SystemRole.ROLE_USER to listOf(
             // Dashboard

@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -51,37 +52,39 @@ abstract class StandardScopedManagerController<
         DELETE_DTO : BaseManagerDeleteDTO
 >(
     protected val managerService: SERVICE,
+    /**
+     * Optional three-layer permission declaration. When provided, the default
+     * [checkPermission] implementation is driven by this triad and subclasses no longer
+     * need to override [checkPermission]. When null, subclasses must override
+     * [checkPermission] to implement custom authorization logic.
+     */
+    protected val permissions: ScopedPermissionTriad? = null,
 ) {
 
-    // ─── Abstract: subclass must implement ───
+    // ─── Permission decision ───
 
     /**
      * Permission decision callback.
      *
-     * Given the resolved [scope], [scopeId], and the [operation] being performed,
-     * return whether the current user is authorized.
+     * Default behavior:
+     * - When [permissions] is non-null, performs `hasAnyAuthority(super<op>, scopeSpecific<op>)`
+     *   based on the [ScopedPermissionTriad] supplied at construction.
+     * - When [permissions] is null, throws [IllegalStateException] — subclasses without a
+     *   triad MUST override this method.
      *
-     * Example:
-     * ```kotlin
-     * override suspend fun checkPermission(scope, scopeId, operation, userAuth) = when (scope) {
-     *     ResourceScope.SYSTEM -> when (operation) {
-     *         ScopedOperation.READ -> true
-     *         ScopedOperation.CREATE -> RbacUtils.hasAuthority(SYSTEM_DICT_CREATE)
-     *         ...
-     *     }
-     *     ResourceScope.TENANT -> when (operation) {
-     *         ScopedOperation.READ -> RbacUtils.hasAnyAuthority(SYSTEM_READ, TENANT_READ_PEM)
-     *         ...
-     *     }
-     * }
-     * ```
+     * Override directly when custom authorization logic is needed (e.g. always-allow READ,
+     * dynamic conditions, etc.).
      */
-    protected abstract suspend fun checkPermission(
+    protected open suspend fun checkPermission(
         scope: ResourceScope,
         scopeId: Long?,
         operation: ScopedOperation,
         userAuthentication: UserAuthentication
-    ): Boolean
+    ): Boolean {
+        val triad = permissions
+            ?: error("StandardScopedManagerController#checkPermission must be overridden when no ScopedPermissionTriad is supplied")
+        return RbacUtils.hasAnyAuthority(*triad.forScope(scope, operation))
+    }
 
     // ─── Overridable hooks ───
 
@@ -90,18 +93,30 @@ abstract class StandardScopedManagerController<
      *
      * Default behavior:
      * - [ResourceScope.SYSTEM]: always passes (permission check is sufficient).
-     * - [ResourceScope.TENANT]: scopeId must equal the user's tenantId.
+     * - [ResourceScope.TENANT]: holders of the **super** authority for [operation] (cross-scope
+     *   admins) bypass the tenant check; otherwise [scopeId] must equal the user's tenantId.
      *
-     * Override for custom ownership logic (e.g. nested resources, cross-tenant admin).
+     * The super-authority bypass is op-scoped: a user holding only `super.read` may read
+     * across tenants, but cannot update across tenants without also holding `super.update`.
+     *
+     * Override for custom ownership logic (e.g. nested resources).
      */
     protected open suspend fun checkOwnership(
         scope: ResourceScope,
         scopeId: Long?,
+        operation: ScopedOperation,
         userAuthentication: UserAuthentication
     ): Boolean {
         return when (scope) {
             ResourceScope.SYSTEM -> true
-            ResourceScope.TENANT -> scopeId == userAuthentication.tenantId
+            ResourceScope.TENANT -> {
+                val triad = permissions
+                if (triad != null && RbacUtils.hasAuthority(triad.superFor(operation))) {
+                    true
+                } else {
+                    scopeId == userAuthentication.tenantId
+                }
+            }
         }
     }
 
@@ -212,7 +227,7 @@ abstract class StandardScopedManagerController<
         if (!checkPermission(scope, scopeId, operation, userAuthentication)) {
             throw ForbiddenException()
         }
-        if (!checkOwnership(scope, scopeId, userAuthentication)) {
+        if (!checkOwnership(scope, scopeId, operation, userAuthentication)) {
             throw UnauthorizedException()
         }
     }

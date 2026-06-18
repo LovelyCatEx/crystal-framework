@@ -23,6 +23,23 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_TENANT_SETTINGS_UPDATE,
             // Approval Flow Instance (read-all within own tenant)
             TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+            // Approval Flow Definition (within own tenant)
+            TenantPermission.MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER,
+            TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
+            TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
+            TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
+            TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
+            // Dictionary (within own tenant)
+            TenantPermission.MENU_TENANT_DICT_TYPE_MANAGER,
+            TenantPermission.MENU_TENANT_DICT_ITEM_MANAGER,
+            TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE,
+            TenantPermission.ACTION_TENANT_DICT_TYPE_READ,
+            TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE,
+            TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE,
+            TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE,
+            TenantPermission.ACTION_TENANT_DICT_ITEM_READ,
+            TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
+            TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE,
         ),
         TenantRole.ADMIN to listOf(
             // Profile

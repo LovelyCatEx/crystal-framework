@@ -3,11 +3,14 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.StandardDerivedScopedManagerController
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictItemDTO
@@ -18,7 +21,6 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantDictItemEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDictItemRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDictItemManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDictTypeManagerService
-import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -29,9 +31,9 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/dict-item")
 class ManagerTenantDictItemController(
-    private val tenantDictItemManagerService: TenantDictItemManagerService,
+    managerService: TenantDictItemManagerService,
     private val tenantDictTypeManagerService: TenantDictTypeManagerService,
-) : StandardTenantManagerController<
+) : StandardDerivedScopedManagerController<
         TenantDictItemManagerService,
         TenantDictItemRepository,
         TenantDictItemEntity,
@@ -40,116 +42,60 @@ class ManagerTenantDictItemController(
         ManagerUpdateTenantDictItemDTO,
         ManagerDeleteTenantDictItemDTO
 >(
-    tenantDictItemManagerService,
-    createPermission = SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE,
-    scopedCreatePermission = TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE_PEM,
-    readPermission = SystemPermission.ACTION_TENANT_DICT_ITEM_READ,
-    scopedReadPermission = TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM,
-    updatePermission = SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
-    scopedUpdatePermission = TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE_PEM,
-    deletePermission = SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE,
-    scopedDeletePermission = TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE_PEM,
+    managerService,
+    permissions = ScopedPermissionTriad(
+        superCreate = SystemPermission.ACTION_DICT_ITEM_CREATE,
+        superRead = SystemPermission.ACTION_DICT_ITEM_READ,
+        superUpdate = SystemPermission.ACTION_DICT_ITEM_UPDATE,
+        superDelete = SystemPermission.ACTION_DICT_ITEM_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE,
+        systemRead = SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
+        systemDelete = SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE_PEM,
+    ),
 ) {
-    // region Scope-check hooks: DictItem → DictType → Tenant
 
-    override suspend fun isCreateInScope(
-        dto: ManagerCreateTenantDictItemDTO,
-        userAuthentication: UserAuthentication
-    ): Boolean {
-        return tenantDictTypeManagerService.checkIsRelatedToRootParent(
-            dto.typeId,
-            userAuthentication.tenantId!!
-        )
+    override suspend fun resolveScopeFromCreateDTO(dto: ManagerCreateTenantDictItemDTO): Pair<ResourceScope, Long> {
+        return resolveScopeByTypeId(dto.typeId)
     }
 
-    override suspend fun isQueryInScope(
-        dto: ManagerReadTenantDictItemDTO,
-        userAuthentication: UserAuthentication
-    ): Boolean {
-        return tenantDictTypeManagerService.checkIsRelatedToRootParent(
-            dto.typeId,
-            userAuthentication.tenantId!!
-        )
+    override suspend fun resolveScopeFromReadDTO(dto: ManagerReadTenantDictItemDTO): Pair<ResourceScope, Long> {
+        return resolveScopeByTypeId(dto.typeId)
     }
 
-    // endregion
-
-    // region System-scope routing: typeId → type.scope == SYSTEM requires system dict permissions
-
-    private suspend fun isSystemDictType(typeId: Long): Boolean {
-        val type = tenantDictTypeManagerService.getByIdOrNull(typeId) ?: return false
-        return type.scope == ResourceScope.SYSTEM.typeId
+    override suspend fun resolveScopeFromEntity(entity: TenantDictItemEntity): Pair<ResourceScope, Long> {
+        return resolveScopeByTypeId(entity.typeId)
     }
 
-    override suspend fun customCreate(
-        userAuthentication: UserAuthentication,
-        dto: ManagerCreateTenantDictItemDTO
-    ): ApiResponse<*>? {
-        if (!isSystemDictType(dto.typeId)) return null
-        if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE)) {
-            throw ForbiddenException()
-        }
-        managerService.create(dto)
-        return ApiResponse.success(null)
+    private suspend fun resolveScopeByTypeId(typeId: Long): Pair<ResourceScope, Long> {
+        val type = tenantDictTypeManagerService.getByIdOrNull(typeId)
+            ?: throw BusinessException("Dict type $typeId not found")
+        val scope = ResourceScope.getById(type.scope)
+            ?: throw BusinessException("Unknown scope ${type.scope} on dict type $typeId")
+        return scope to type.scopeId
     }
 
-    override suspend fun customQuery(
-        userAuthentication: UserAuthentication,
-        dto: ManagerReadTenantDictItemDTO
-    ): ApiResponse<*>? {
-        if (!isSystemDictType(dto.typeId)) return null
-        return ApiResponse.success(managerService.query(dto))
-    }
-
-    override suspend fun customUpdate(
-        userAuthentication: UserAuthentication,
-        dto: ManagerUpdateTenantDictItemDTO
-    ): ApiResponse<*>? {
-        val item = managerService.getByIdOrNull(dto.id) ?: return null
-        if (!isSystemDictType(item.typeId)) return null
-        if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE)) {
-            throw ForbiddenException()
-        }
-        managerService.update(dto)
-        return ApiResponse.success(null)
-    }
-
-    override suspend fun customDelete(
-        userAuthentication: UserAuthentication,
-        dto: ManagerDeleteTenantDictItemDTO
-    ): ApiResponse<*>? {
-        val items = dto.ids.map { managerService.getByIdOrNull(it) ?: return null }
-        val typeIds = items.map { it.typeId }.distinct()
-        if (typeIds.any { !isSystemDictType(it) }) return null
-        if (!RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE)) {
-            throw ForbiddenException()
-        }
-        managerService.deleteByDTO(dto)
-        return ApiResponse.success(null)
-    }
-
-    // endregion
-
-    // region Additional endpoint: tree view
-
+    /**
+     * Tree view of dict items under a given type. Authorization mirrors the standard
+     * READ logic: holders of the super or scope-specific READ authority pass; tenant-scoped
+     * data also requires `scopeId == tenantId` ownership (super.read holders bypass).
+     */
     @GetMapping("/tree")
     suspend fun tree(
         userAuthentication: UserAuthentication,
         @RequestParam typeId: Long
     ): ApiResponse<List<TenantDictItemTreeVO>> {
-        if (isSystemDictType(typeId)) {
-            // System dict tree: any authenticated user can read
-        } else {
-            if (!RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_DICT_ITEM_READ)) {
-                val hasScopedPermission = RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM)
-                val type = tenantDictTypeManagerService.getByIdOrNull(typeId)
-                if (!hasScopedPermission || type?.scopeId != userAuthentication.tenantId) {
-                    throw ForbiddenException()
-                }
-            }
+        val (scope, scopeId) = resolveScopeByTypeId(typeId)
+        if (!RbacUtils.hasAnyAuthority(*permissions.forScope(scope, ScopedOperation.READ))) {
+            throw ForbiddenException()
         }
-        return ApiResponse.success(tenantDictItemManagerService.getTreeByTypeId(typeId))
+        if (!checkOwnership(scope, scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw ForbiddenException()
+        }
+        return ApiResponse.success(managerService.getTreeByTypeId(typeId))
     }
-
-    // endregion
 }

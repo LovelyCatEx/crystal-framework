@@ -14,15 +14,14 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
-import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -47,7 +46,23 @@ class ManagerApprovalFlowDefinitionController(
         ManagerReadApprovalFlowDefinitionDTO,
         ManagerUpdateApprovalFlowDefinitionDTO,
         ManagerDeleteApprovalFlowDefinitionDTO
->(managerService) {
+>(
+    managerService,
+    permissions = ScopedPermissionTriad(
+        superCreate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
+        superRead = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
+        superUpdate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
+        superDelete = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE,
+        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
+        systemDelete = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM,
+    ),
+) {
     @PostMapping("/updateGraph")
     suspend fun updateGraph(
         userAuthentication: UserAuthentication,
@@ -61,7 +76,7 @@ class ManagerApprovalFlowDefinitionController(
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
             throw ForbiddenException()
         }
-        if (!checkOwnership(resolvedScope, definition.scopeId, userAuthentication)) {
+        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
             throw UnauthorizedException()
         }
         val errors = managerService.updateGraph(dto)
@@ -83,43 +98,5 @@ class ManagerApprovalFlowDefinitionController(
                 edges = approvalFlowEdgeManagerService.getEdgesByDefinitionsIdAndVersion(definition.id, definition.currentVersion)
             )
         )
-    }
-
-    override suspend fun checkPermission(
-        scope: ResourceScope,
-        scopeId: Long?,
-        operation: ScopedOperation,
-        userAuthentication: UserAuthentication
-    ): Boolean {
-        return when (scope) {
-            ResourceScope.SYSTEM -> when (operation) {
-                ScopedOperation.CREATE -> RbacUtils.hasAuthority(SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE)
-                ScopedOperation.READ -> RbacUtils.hasAuthority(SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ)
-                ScopedOperation.UPDATE -> RbacUtils.hasAuthority(SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE)
-                ScopedOperation.DELETE -> RbacUtils.hasAuthority(SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE)
-            }
-            ResourceScope.TENANT -> when (operation) {
-                ScopedOperation.CREATE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
-                    SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
-                    TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM
-                )
-                ScopedOperation.READ -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
-                    SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
-                    TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM
-                )
-                ScopedOperation.UPDATE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
-                    SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
-                    TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM
-                )
-                ScopedOperation.DELETE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
-                    SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
-                    TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM
-                )
-            }
-        }
     }
 }

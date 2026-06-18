@@ -3,11 +3,8 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
-import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
-import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerReadTenantDictTypeDTO
@@ -32,39 +29,20 @@ class ManagerTenantDictTypeController(
         ManagerReadTenantDictTypeDTO,
         ManagerUpdateTenantDictTypeDTO,
         ManagerDeleteTenantDictTypeDTO
->(managerService) {
-
-    override suspend fun checkPermission(
-        scope: ResourceScope,
-        scopeId: Long?,
-        operation: ScopedOperation,
-        userAuthentication: UserAuthentication
-    ): Boolean {
-        return when (scope) {
-            ResourceScope.SYSTEM -> when (operation) {
-                ScopedOperation.READ -> true
-                ScopedOperation.CREATE -> RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE)
-                ScopedOperation.UPDATE -> RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE)
-                ScopedOperation.DELETE -> RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE)
-            }
-            ResourceScope.TENANT -> when (operation) {
-                ScopedOperation.CREATE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE,
-                    TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM
-                )
-                ScopedOperation.READ -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_TENANT_DICT_TYPE_READ,
-                    TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM
-                )
-                ScopedOperation.UPDATE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE,
-                    TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM
-                )
-                ScopedOperation.DELETE -> RbacUtils.hasAnyAuthority(
-                    SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE,
-                    TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM
-                )
-            }
-        }
-    }
-}
+>(
+    managerService,
+    permissions = ScopedPermissionTriad(
+        superCreate = SystemPermission.ACTION_DICT_TYPE_CREATE,
+        superRead = SystemPermission.ACTION_DICT_TYPE_READ,
+        superUpdate = SystemPermission.ACTION_DICT_TYPE_UPDATE,
+        superDelete = SystemPermission.ACTION_DICT_TYPE_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE,
+        systemRead = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE,
+        systemDelete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM,
+    ),
+)
