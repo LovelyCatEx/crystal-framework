@@ -74,6 +74,8 @@ const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/a
 const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
 const InitiableApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/InitiableApprovalFlowsPage.tsx"));
 const MyApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowsPage.tsx"));
+const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
+const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -280,6 +282,14 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             group: 'i_tenant',
         },
         {
+            key: '/manager/tenant/approval-flow-instances',
+            path: '/manager/tenant/approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.myTenant.approvalFlowInstances'),
+            page: <MyTenantApprovalFlowInstanceManagerPage />,
+            group: 'i_tenant',
+        },
+        {
             key: '/manager/tenant/profile',
             path: '/manager/tenant/profile',
             icon: <SettingOutlined />,
@@ -459,6 +469,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <ApartmentOutlined />,
             label: t('menu.admin.tenantApprovalFlowDefinitions'),
             page: <TenantApprovalFlowDefinitionManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-approval-flow-instances',
+            path: '/manager/tenant-approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.admin.tenantApprovalFlowInstances'),
+            page: <TenantApprovalFlowInstanceManagerPage />,
             group: 'tenant'
         },
         {

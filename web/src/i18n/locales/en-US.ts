@@ -2205,6 +2205,23 @@ export const enUS: I18nRules = {
       },
       noTenantTip: 'You have not joined any organization. Tenant data is unavailable.'
     },
+    myTenantApprovalFlowInstanceManager: {
+      title: 'Approval Management',
+      subtitle: 'View all approvals initiated by members of your organization',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization.'
+    },
+    tenantApprovalFlowInstanceManager: {
+      title: 'Approval Management',
+      subtitle: 'Manage approval requests for any tenant',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      }
+    },
   },
 
   components: {
@@ -3141,7 +3158,8 @@ export const enUS: I18nRules = {
       messageChannels: 'Message Channel Management',
       personalProfile: 'Personal Profile',
       dictTypes: 'Dictionary Management',
-      approvalFlowDefinitions: 'Approval Flow Management'
+      approvalFlowDefinitions: 'Approval Flow Management',
+      approvalFlowInstances: 'Approval Management'
     },
 
     // Admin menus
@@ -3179,6 +3197,7 @@ export const enUS: I18nRules = {
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',
       tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
+      tenantApprovalFlowInstances: 'Tenant Approval Management',
       systemDictTypes: 'System Dictionary Types',
       systemDictItems: 'System Dictionary Items'
     },

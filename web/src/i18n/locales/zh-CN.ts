@@ -2202,6 +2202,23 @@ export const zhCN: I18nRules = {
       },
       noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据'
     },
+    myTenantApprovalFlowInstanceManager: {
+      title: '审批管理',
+      subtitle: '查看本组织成员发起的所有审批',
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织'
+    },
+    tenantApprovalFlowInstanceManager: {
+      title: '审批管理',
+      subtitle: '管理任一租户的审批申请',
+      filter: {
+        status: '状态',
+        all: '全部'
+      }
+    },
   },
 
   components: {
@@ -3139,7 +3156,8 @@ export const zhCN: I18nRules = {
       messageChannels: '消息渠道管理',
       personalProfile: '个人资料',
       dictTypes: '字典管理',
-      approvalFlowDefinitions: '审批流程管理'
+      approvalFlowDefinitions: '审批流程管理',
+      approvalFlowInstances: '审批管理'
     },
 
     // 管理员菜单
@@ -3177,6 +3195,7 @@ export const zhCN: I18nRules = {
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',
       tenantApprovalFlowDefinitions: '租户流程定义管理',
+      tenantApprovalFlowInstances: '租户审批管理',
       systemDictTypes: '系统字典类型',
       systemDictItems: '系统字典项'
     },

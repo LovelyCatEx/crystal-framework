@@ -383,6 +383,12 @@ object TenantPermission {
     )
 
     // Tenant Approval Flow Instance (read-all permission for tenant admins)
+    val MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER = TenantPermissionDeclaration(
+        name = "i.tenant.approval.flow.instance",
+        type = TenantPermissionType.MENU,
+        path = "/manager/tenant/approval-flow-instances"
+    )
+
     const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM = "i.tenant.approval.flow.instance.read"
     val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = TenantPermissionDeclaration(
         name = ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
