@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
 import com.lovelycatv.crystalframework.shared.database.GroupNode
@@ -49,12 +50,22 @@ class ManagerApprovalFlowInstanceController(
         ManagerReadApprovalFlowInstanceDTO,
         ManagerUpdateApprovalFlowInstanceDTO,
         BaseManagerDeleteDTO
->(managerService) {
+>(
+    managerService,
+    permissions = ScopedPermissionTriad.readonly(
+        superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    ),
+) {
 
     /**
-     * Read is allowed for any authenticated user. Mutation operations are blocked by
-     * [ReadonlyScopedManagerController]. Data filtering for non-read-all callers is
-     * performed in [buildQueryResponse] by injecting `initiator_id == self`.
+     * Read is intentionally allowed for any authenticated user — the endpoint is
+     * shared between read-all admins and ordinary initiators viewing their own flows.
+     * The triad declared above is only consulted by [buildQueryResponse] (and by
+     * [start]) to decide whether to inject an `initiator_id` filter for callers
+     * without read-all authority. Mutation endpoints are blocked by
+     * [ReadonlyScopedManagerController].
      */
     override suspend fun checkPermission(
         scope: ResourceScope,
@@ -75,13 +86,9 @@ class ManagerApprovalFlowInstanceController(
     ): Any {
         val resolvedScope = resolveScope(dto.scope)
 
-        val canReadAll = when (resolvedScope) {
-            ResourceScope.SYSTEM -> RbacUtils.hasAuthority(SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ)
-            ResourceScope.TENANT -> RbacUtils.hasAnyAuthority(
-                SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-                TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM
-            )
-        }
+        val triad = permissions
+            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionTriad")
+        val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
 
         val effectiveDto = if (canReadAll) {
             dto
@@ -156,4 +163,3 @@ class ManagerApprovalFlowInstanceController(
         private const val COLUMN_INITIATOR_ID = "initiator_id"
     }
 }
-

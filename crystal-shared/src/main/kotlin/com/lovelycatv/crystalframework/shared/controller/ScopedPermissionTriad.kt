@@ -64,4 +64,51 @@ data class ScopedPermissionTriad(
         ResourceScope.SYSTEM -> arrayOf(superFor(operation), systemFor(operation))
         ResourceScope.TENANT -> arrayOf(superFor(operation), tenantPemFor(operation))
     }
+
+    companion object {
+        /**
+         * Sentinel authority that is intentionally not declared anywhere in the system —
+         * no role can hold it, including `root` (which auto-grants every entry on
+         * [com.lovelycatv.crystalframework.shared.constants.SystemPermission], a class
+         * that does NOT contain this constant). Any RBAC check against this string
+         * therefore returns false unconditionally.
+         *
+         * Used by [readonly] to fill the unused CRUD slots so that, even if a future
+         * caller bypasses [com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController]
+         * and looks up `superFor(CREATE)` etc., the answer is "deny" rather than the
+         * resource's read authority. Carrying real read strings in those slots would
+         * silently grant CREATE/UPDATE/DELETE if the read-only wrapper were ever
+         * removed — this sentinel makes the failure mode safe instead.
+         *
+         * The leading/trailing `!!` markers are deliberately syntactically incompatible
+         * with the project's `<module>.<resource>.<op>` permission naming convention,
+         * so collision with a real permission is impossible.
+         */
+        const val NEVER_GRANTED: String = "!!never_granted!!"
+
+        /**
+         * Convenience factory for read-only scoped resources. Only the read authority
+         * for each layer is meaningful; the CRUD slots are filled with [NEVER_GRANTED]
+         * so that any accidental CRUD permission lookup denies by default rather than
+         * leaking the read authority.
+         */
+        fun readonly(
+            superRead: String,
+            systemRead: String,
+            tenantPemRead: String,
+        ): ScopedPermissionTriad = ScopedPermissionTriad(
+            superCreate = NEVER_GRANTED,
+            superRead = superRead,
+            superUpdate = NEVER_GRANTED,
+            superDelete = NEVER_GRANTED,
+            systemCreate = NEVER_GRANTED,
+            systemRead = systemRead,
+            systemUpdate = NEVER_GRANTED,
+            systemDelete = NEVER_GRANTED,
+            tenantPemCreate = NEVER_GRANTED,
+            tenantPemRead = tenantPemRead,
+            tenantPemUpdate = NEVER_GRANTED,
+            tenantPemDelete = NEVER_GRANTED,
+        )
+    }
 }
