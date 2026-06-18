@@ -171,6 +171,11 @@ export default function ApprovalEditor(props: {
 
     const [ctx, setCtx] = useState<ApprovalFlowGraphEditorContext | null>(null);
     const [selectedNode, setSelectedNode] = useState<ApprovalFlowNode | null>(null);
+    // Rete-assigned UID of the currently selected node. Used to look up the rete node
+    // when applying inspector edits, because freshly created ApprovalFlowNode.id is
+    // an empty string until the graph is saved — relying on it would conflate every
+    // unsaved node into one.
+    const [selectedReteNodeId, setSelectedReteNodeId] = useState<string | null>(null);
 
     const contextValueRef = useRef<ApprovalEditorContextValue>({
         scope: ResourceScope.SYSTEM,
@@ -224,9 +229,15 @@ export default function ApprovalEditor(props: {
                 return new ApprovalFlowConnection(fromNode, fromSocket, toNode, toSocket)
             },
             events: {
-                onNodeSelected: (node) => setSelectedNode(node.node),
+                onNodeSelected: (node) => {
+                    setSelectedReteNodeId(node.id);
+                    setSelectedNode(node.node);
+                },
                 onSelectedNodesChanged: (nodes) => {
-                    if (nodes.length === 0) setSelectedNode(null);
+                    if (nodes.length === 0) {
+                        setSelectedReteNodeId(null);
+                        setSelectedNode(null);
+                    }
                 },
             },
             render: {
@@ -441,6 +452,7 @@ export default function ApprovalEditor(props: {
                             const result = await save(ctx, props.definitionId);
                             if (result.success) {
                                 message.success(t('components.approvalEditor.header.saveSuccess'));
+                                setSelectedReteNodeId(null);
                                 setSelectedNode(null);
                                 await mutateDefinitionDetails();
                             } else if (result.errors && result.errors.length > 0) {
@@ -522,13 +534,13 @@ export default function ApprovalEditor(props: {
                     />
                     <div className="flex-1 p-4 overflow-y-auto">
                     <NodeInspectorPanel
-                        key={selectedNode?.id ?? ''}
+                        key={selectedReteNodeId ?? ''}
                         node={selectedNode}
                         scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
                         scopeId={definitionDetails?.definition.scopeId ?? ''}
                         onNodeChange={(field, value) => {
-                            if (!ctx || !selectedNode) return;
-                            const reteNode = ctx.rete.editor.getNodes().find(n => n.node.id === selectedNode.id);
+                            if (!ctx || !selectedReteNodeId) return;
+                            const reteNode = ctx.rete.editor.getNode(selectedReteNodeId);
                             if (reteNode) {
                                 (reteNode.node as unknown as Record<string, unknown>)[field] = value;
                                 setSelectedNode({ ...reteNode.node });
