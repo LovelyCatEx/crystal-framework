@@ -3,9 +3,11 @@ package com.lovelycatv.crystalframework.user.controller
 import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.user.controller.dto.*
 import com.lovelycatv.crystalframework.user.service.UserService
 import jakarta.validation.Valid
@@ -108,6 +110,7 @@ class UserController(
             userService.getUserProfileVO(
                 userId = targetUserId,
                 fullAccess = targetUserId == userAuthentication?.userId
+                        || RbacUtils.hasAuthority(SystemPermission.ACTION_USER_READ)
             )
         )
     }

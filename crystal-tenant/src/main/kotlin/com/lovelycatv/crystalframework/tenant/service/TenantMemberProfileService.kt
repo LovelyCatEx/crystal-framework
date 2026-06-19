@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberProfileEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantMemberProfileRepository
+import org.springframework.http.codec.multipart.FilePart
 
 interface TenantMemberProfileService : CachedBaseService<TenantMemberProfileRepository, TenantMemberProfileEntity> {
     suspend fun getByTenantMemberId(tenantMemberId: Long): TenantMemberProfileEntity?
@@ -29,5 +30,12 @@ interface TenantMemberProfileService : CachedBaseService<TenantMemberProfileRepo
         birthday: Long? = null,
         timezone: String? = null,
         locale: String? = null,
+    ): TenantMemberProfileEntity
+
+    suspend fun uploadAvatar(
+        tenantId: Long,
+        tenantMemberId: Long,
+        memberUserId: Long,
+        file: FilePart,
     ): TenantMemberProfileEntity
 }

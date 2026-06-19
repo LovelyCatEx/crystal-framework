@@ -80,3 +80,27 @@ export function getDictTypeStatus(status: number): string {
 export function getDictItemStatus(status: number): string {
     return translateEnum('dictItemStatus', status);
 }
+
+export function getApprovalFlowDefinitionStatus(status: number): string {
+    return translateEnum('approvalFlowDefinitionStatus', status);
+}
+
+export function getApprovalFlowNodeType(type: number): string {
+    return translateEnum('approvalFlowNodeType', type);
+}
+
+export function getApprovalFlowApproveMode(mode: number): string {
+    return translateEnum('approvalFlowApproveMode', mode);
+}
+
+export function getApprovalFlowInstanceStatus(status: number): string {
+    return translateEnum('approvalFlowInstanceStatus', status);
+}
+
+export function getApprovalFlowScope(scope: number): string {
+    return translateEnum('approvalFlowScope', scope);
+}
+
+export function getApprovalFlowTaskStatus(status: number): string {
+    return translateEnum('approvalFlowTaskStatus', status);
+}

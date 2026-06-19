@@ -2,11 +2,13 @@ import {
     ApartmentOutlined,
     AuditOutlined,
     BookOutlined,
+    CheckSquareOutlined,
     CloudOutlined,
     DashboardOutlined,
     DatabaseOutlined,
     FileOutlined,
     FolderOutlined,
+    FormOutlined,
     KeyOutlined,
     LineChartOutlined,
     MailOutlined,
@@ -66,6 +68,17 @@ const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
 const MyTenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictItemManagerPage.tsx"));
+const SystemDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/SystemDictTypeManagerPage.tsx"));
+const SystemDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/SystemDictItemManagerPage.tsx"));
+const ApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowDefinitionManagerPage.tsx"));
+const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowDefinitionManagerPage.tsx"));
+const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
+const InitiableApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/InitiableApprovalFlowsPage.tsx"));
+const MyApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowsPage.tsx"));
+const ApprovalTaskHandlePage = lazy(() => import("@/pages/manager/approval/ApprovalTaskHandlePage.tsx"));
+const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
+const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
+const ApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowInstanceManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -113,6 +126,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             label: t('menu.groups.i_tenant'),
         },
         {
+            name: 'approval',
+            icon: <ApartmentOutlined />,
+            label: t('menu.groups.approval'),
+        },
+        {
             name: 'logs',
             icon: <AuditOutlined />,
             label: t('menu.groups.logs'),
@@ -155,6 +173,30 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
+        },
+        {
+            key: '/manager/approval/initiate',
+            path: '/manager/approval/initiate',
+            icon: <FormOutlined />,
+            label: t('menu.pub.initiableApprovalFlows'),
+            page: <InitiableApprovalFlowsPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/approval/my-instances',
+            path: '/manager/approval/my-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.pub.myApprovalFlows'),
+            page: <MyApprovalFlowsPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/approval/handle',
+            path: '/manager/approval/handle',
+            icon: <CheckSquareOutlined />,
+            label: t('menu.pub.approvalTaskHandle'),
+            page: <ApprovalTaskHandlePage />,
+            group: 'approval'
         },
         ...toTranslatedRouteItems(t, pluginRegistry.publicMenus),
     ];
@@ -240,6 +282,22 @@ export function getTenantMenus(t: TFunction): RouteItem[] {
             icon: <BookOutlined />,
             label: t('menu.myTenant.dictTypes'),
             page: <MyTenantDictItemManagerPage />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/approval-flow-definitions',
+            path: '/manager/tenant/approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.myTenant.approvalFlowDefinitions'),
+            page: <MyApprovalFlowDefinitionManagerPage />,
+            group: 'i_tenant',
+        },
+        {
+            key: '/manager/tenant/approval-flow-instances',
+            path: '/manager/tenant/approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.myTenant.approvalFlowInstances'),
+            page: <MyTenantApprovalFlowInstanceManagerPage />,
             group: 'i_tenant',
         },
         {
@@ -401,6 +459,38 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             group: 'tenant'
         },
         {
+            key: '/manager/tenant-dict-types',
+            path: '/manager/tenant-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictTypes'),
+            page: <TenantDictTypeManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-dict-items',
+            path: '/manager/tenant-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.tenantDictItems'),
+            page: <TenantDictItemManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-approval-flow-definitions',
+            path: '/manager/tenant-approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.admin.tenantApprovalFlowDefinitions'),
+            page: <TenantApprovalFlowDefinitionManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant-approval-flow-instances',
+            path: '/manager/tenant-approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.admin.tenantApprovalFlowInstances'),
+            page: <TenantApprovalFlowInstanceManagerPage />,
+            group: 'tenant'
+        },
+        {
             key: '/manager/file-resources',
             path: '/manager/file-resources',
             icon: <FileOutlined />,
@@ -497,20 +587,36 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             page: <AnnouncementManagerPage />,
         },
         {
-            key: '/manager/tenant-dict-types',
-            path: '/manager/tenant-dict-types',
-            icon: <BookOutlined />,
-            label: t('menu.admin.tenantDictTypes'),
-            page: <TenantDictTypeManagerPage />,
-            group: 'tenant'
+            key: '/manager/approval-flow-definitions',
+            path: '/manager/approval-flow-definitions',
+            icon: <ApartmentOutlined />,
+            label: t('menu.admin.approvalFlowDefinitions'),
+            page: <ApprovalFlowDefinitionManagerPage />,
+            group: 'approval'
         },
         {
-            key: '/manager/tenant-dict-items',
-            path: '/manager/tenant-dict-items',
+            key: '/manager/approval-flow-instances',
+            path: '/manager/approval-flow-instances',
+            icon: <AuditOutlined />,
+            label: t('menu.admin.approvalFlowInstances'),
+            page: <ApprovalFlowInstanceManagerPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/system-dict-types',
+            path: '/manager/system-dict-types',
             icon: <BookOutlined />,
-            label: t('menu.admin.tenantDictItems'),
-            page: <TenantDictItemManagerPage />,
-            group: 'tenant'
+            label: t('menu.admin.systemDictTypes'),
+            page: <SystemDictTypeManagerPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/system-dict-items',
+            path: '/manager/system-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictItems'),
+            page: <SystemDictItemManagerPage />,
+            group: 'approval'
         },
         {
             key: '/manager/settings',

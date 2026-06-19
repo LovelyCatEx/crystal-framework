@@ -225,6 +225,21 @@ class XxxController(
 
 ---
 
+### ⛔ 端点定制：禁止覆写，使用 hook
+
+**!!!禁止在具体 Controller 子类中 `override` 父类（`StandardManagerController` / `ReadonlyManagerController`）的 5 个端点函数：`readAll` / `create` / `read` / `update` / `delete`。!!!**
+**!!!禁止在具体 Controller 子类中 `override` 父类（`StandardManagerController` / `ReadonlyManagerController`）的 5 个端点函数：`readAll` / `create` / `read` / `update` / `delete`。!!!**
+**!!!禁止在具体 Controller 子类中 `override` 父类（`StandardManagerController` / `ReadonlyManagerController`）的 5 个端点函数：`readAll` / `create` / `read` / `update` / `delete`。!!!**
+
+**原因**：这 5 个函数是 `suspend` + 带泛型 DTO 的端点函数，签名上挂了 `@PostMapping` / `@GetMapping`。当 Kotlin 子类把泛型 DTO **specialize 为具体类型**（如 `READ_DTO` → `ManagerReadXxxDTO`）并 override 它们时，编译器为父类擦除签名生成的 **bridge 方法** 会和具体方法**同时**被 Spring `RequestMappingHandlerMapping` 注册成端点，启动时报 "Ambiguous mapping. Cannot map ... There is already 'xxxController' bean method ... mapped." 直接 BeanCreationException。
+
+**替代方案：**
+- 需要返回体定制 / 注入额外参数 → 在父类增加 `open suspend fun` 的 hook（**不带映射注解**），子类 override 这个 hook。
+- 父类暂时没有合适 hook → 必须先和用户确认 hook 设计后再加；禁止直接 override 端点函数。
+- 需要"只读化"已有 CRUD → 改用 `ReadonlyManagerController` 父类，由它统一处理 403 返回（这是父类层面的合法 override，子类不要重复）。
+
+---
+
 ## 执行步骤总结
 
 1. 确认接口类型（Standard / Readonly / 普通）

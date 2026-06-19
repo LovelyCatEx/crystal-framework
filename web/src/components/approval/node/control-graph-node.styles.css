@@ -1,0 +1,17 @@
+.control-graph-node .header {
+    background: radial-gradient(80% 90%, #5e5e5e 10%, #bfbfbf 100%);
+}
+
+.control-graph-node .title {
+    font-size: 1.2em;
+    color: #e5e7ff;
+    white-space: nowrap;
+    font-weight: 500;
+    text-overflow: ellipsis;
+}
+
+.control-graph-node .subtitle {
+    color: #b6b6b6;
+    font-weight: 500;
+    font-size: 1em;
+}

@@ -17,7 +17,6 @@ export function getMyTenantUserProfile() {
 export interface UpsertMyTenantUserProfileDTO {
     phone?: string;
     nickname?: string;
-    avatar?: string;
     email?: string;
     bio?: string;
     gender?: Gender;
@@ -28,4 +27,12 @@ export interface UpsertMyTenantUserProfileDTO {
 
 export function upsertMyTenantUserProfile(dto: UpsertMyTenantUserProfileDTO) {
     return doPost<TenantUserProfile>('/api/me/tenant-profile/upsert', {...dto});
+}
+
+export function uploadMyTenantMemberAvatar(file: File) {
+    return doPost<TenantUserProfile>(
+        '/api/me/tenant-profile/uploadAvatar',
+        {file},
+        {'Content-Type': 'multipart/form-data'},
+    );
 }

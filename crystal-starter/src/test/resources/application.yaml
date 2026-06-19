@@ -92,6 +92,11 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+    tenant-member-avatar:
+      supported-content-types:
+        - image/png
+        - image/jpeg
+        - image/webp
   monitor:
     flush-interval-ms: 30000
   sharding:

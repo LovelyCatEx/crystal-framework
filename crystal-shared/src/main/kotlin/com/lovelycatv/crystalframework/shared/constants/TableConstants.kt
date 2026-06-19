@@ -35,4 +35,10 @@ object TableConstants {
     const val TABLE_TENANT_USER_PROFILES = "tenant_user_profiles"
     const val TABLE_TENANT_DICT_TYPES = "tenant_dict_type"
     const val TABLE_TENANT_DICT_ITEMS = "tenant_dict_item"
+    const val TABLE_APPROVAL_FLOW_DEFINITION = "approval_flow_definition"
+    const val TABLE_APPROVAL_FLOW_NODE = "approval_flow_node"
+    const val TABLE_APPROVAL_FLOW_EDGE = "approval_flow_edge"
+    const val TABLE_APPROVAL_FLOW_INSTANCE = "approval_flow_instance"
+    const val TABLE_APPROVAL_FLOW_TASK = "approval_flow_task"
+    const val TABLE_APPROVAL_FLOW_RECORD = "approval_flow_record"
 }

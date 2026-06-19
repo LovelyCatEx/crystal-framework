@@ -6,6 +6,16 @@
 1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
 :::
 
+## v1.11.0
+
+2026-06-19
+
+### Features
++ feat(approval): Add approval flow module, supporting system/tenant-isolated approvals.
++ feat(web): Add visual approval flow editor.
+
+---
+
 ## v1.10.0
 
 2026-06-11
