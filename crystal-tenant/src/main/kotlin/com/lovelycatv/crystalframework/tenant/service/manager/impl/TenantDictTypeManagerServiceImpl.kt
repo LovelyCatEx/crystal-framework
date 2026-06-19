@@ -34,14 +34,15 @@ class TenantDictTypeManagerServiceImpl(
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateTenantDictTypeDTO): TenantDictTypeEntity {
-        val entity = TenantDictTypeEntity(
+        val entity: TenantDictTypeEntity = TenantDictTypeEntity(
             id = snowIdGenerator.nextId(),
-            tenantId = dto.tenantId,
+            scope = dto.scope,
+            scopeId = dto.scopeId,
             code = dto.code,
             name = dto.name,
             remark = dto.remark,
             status = dto.status
-        ).apply { newEntity() }
+        ) newEntity true
         return tenantDictTypeRepository.save(entity).awaitFirstOrNull()
             ?: throw RuntimeException("Could not create tenant dict type")
     }
@@ -57,7 +58,7 @@ class TenantDictTypeManagerServiceImpl(
         }
     }
 
-    override suspend fun findAllByTenantId(tenantId: Long): List<TenantDictTypeEntity> {
-        return tenantDictTypeRepository.findAllByTenantId(tenantId).awaitListWithTimeout()
+    override suspend fun findAllByScopeId(scopeId: Long): List<TenantDictTypeEntity> {
+        return tenantDictTypeRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
     }
 }

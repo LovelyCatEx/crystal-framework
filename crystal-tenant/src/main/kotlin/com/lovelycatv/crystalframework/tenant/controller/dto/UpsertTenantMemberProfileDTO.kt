@@ -9,8 +9,6 @@ data class UpsertTenantMemberProfileDTO(
     @field:Size(max = 32, message = "Nickname length cannot exceed 32 characters")
     val nickname: String? = null,
 
-    val avatar: Long? = null,
-
     @field:Size(max = 256, message = "Email length cannot exceed 256 characters")
     val email: String? = null,
 

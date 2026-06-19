@@ -7,15 +7,13 @@ import {
 } from "@/api/tenant/tenant-dict-item.api.ts";
 import {DictItemStatus} from "@/types/tenant/tenant-dict-item.types.ts";
 import {getDictItemStatus} from "@/i18n/enum-helpers.ts";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {useTenantDictItemTableColumns} from "@/components/columns/TenantDictItemEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ArrowLeftOutlined, PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
-import {TenantDictTypeManagerController} from "@/api/tenant/tenant-dict-type.api.ts";
-import type {TenantDictType} from "@/types/tenant/tenant-dict-type.types.ts";
 
 export default function MyTenantDictItemManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -25,18 +23,6 @@ export default function MyTenantDictItemManagerPage() {
     const {t} = useTranslation();
     const navigate = useNavigate();
     const columns = useTenantDictItemTableColumns();
-
-    const [dictType, setDictType] = useState<TenantDictType | null>(null);
-
-    // Determine if this type belongs to system (readonly) or own tenant (editable)
-    const isSystemDict = dictType?.tenantId === '0';
-    const isReadonly = isSystemDict;
-
-    useEffect(() => {
-        if (typeId) {
-            TenantDictTypeManagerController.getById(typeId).then(setDictType);
-        }
-    }, [typeId]);
 
     useEffect(() => {
         if (typeId) {
@@ -78,7 +64,7 @@ export default function MyTenantDictItemManagerPage() {
         <>
             <ActionBarComponent
                 title={t('pages.tenantDictItemManager.title')}
-                subtitle={dictType ? `${dictType.name} (${dictType.code})` : ''}
+                subtitle={t('pages.tenantDictItemManager.subtitle')}
                 titleActions={
                     <div className="flex gap-3">
                         <Button
@@ -89,17 +75,15 @@ export default function MyTenantDictItemManagerPage() {
                         >
                             {t('pages.tenantDictItemManager.action.back')}
                         </Button>
-                        {!isReadonly && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined/>}
-                                size="large"
-                                className="rounded-xl h-12 shadow-lg"
-                                onClick={handleOpenAddModal}
-                            >
-                                {t('pages.tenantDictItemManager.action.addNew')}
-                            </Button>
-                        )}
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined/>}
+                            size="large"
+                            className="rounded-xl h-12 shadow-lg"
+                            onClick={handleOpenAddModal}
+                        >
+                            {t('pages.tenantDictItemManager.action.addNew')}
+                        </Button>
                     </div>
                 }
             />
@@ -110,7 +94,6 @@ export default function MyTenantDictItemManagerPage() {
                 title=""
                 subtitle=""
                 showActionBar={false}
-                readonlyMode={isReadonly}
                 columns={columns}
                 searchKeywords={['item_code', 'item_value']}
                 editModalFormChildren={

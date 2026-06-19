@@ -18,6 +18,11 @@ export interface BaseManagerReadDTO extends PageQuery {
     query?: GroupNode;
 }
 
+export interface BaseManagerReadScopedDTO extends BaseManagerReadDTO {
+    scope: number;
+    scopeId: string;
+}
+
 export interface BaseManagerDeleteDTO {
     ids: string[];
 }

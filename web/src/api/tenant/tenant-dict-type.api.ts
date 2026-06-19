@@ -1,19 +1,17 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
-import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
+import type {BaseManagerDeleteDTO, BaseManagerReadScopedDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import type {TenantDictType} from "@/types/tenant/tenant-dict-type.types.ts";
 
 export interface ManagerCreateTenantDictTypeDTO {
-    tenantId: string;
+    scope: number;
+    scopeId: string;
     code: string;
     name: string;
     remark?: string;
     status?: number;
 }
 
-export interface ManagerReadTenantDictTypeDTO {
-    tenantId: string;
-    page: number;
-    pageSize: number;
+export interface ManagerReadTenantDictTypeDTO extends BaseManagerReadScopedDTO {
 }
 
 export interface ManagerUpdateTenantDictTypeDTO extends BaseManagerUpdateDTO {

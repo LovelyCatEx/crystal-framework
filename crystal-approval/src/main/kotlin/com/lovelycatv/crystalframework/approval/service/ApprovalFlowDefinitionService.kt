@@ -1,0 +1,7 @@
+package com.lovelycatv.crystalframework.approval.service
+
+import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowDefinitionEntity
+import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowDefinitionRepository
+import com.lovelycatv.crystalframework.shared.service.CachedBaseService
+
+interface ApprovalFlowDefinitionService : CachedBaseService<ApprovalFlowDefinitionRepository, ApprovalFlowDefinitionEntity>

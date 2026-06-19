@@ -116,6 +116,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-auth</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-approval</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

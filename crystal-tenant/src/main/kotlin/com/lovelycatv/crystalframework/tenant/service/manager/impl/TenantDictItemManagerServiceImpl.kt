@@ -100,7 +100,7 @@ class TenantDictItemManagerServiceImpl(
     }
 
     override suspend fun findAllByTenantId(tenantId: Long): List<TenantDictItemEntity> {
-        val typeIds = tenantDictTypeManagerService.findAllByTenantId(tenantId).map { it.id }
+        val typeIds = tenantDictTypeManagerService.findAllByScopeId(tenantId).map { it.id }
         if (typeIds.isEmpty()) return emptyList()
         return typeIds.flatMap { typeId ->
             tenantDictItemRepository.findAllByTypeId(typeId).awaitListWithTimeout()

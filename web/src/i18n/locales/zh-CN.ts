@@ -1885,6 +1885,15 @@ export const zhCN: I18nRules = {
         bindSuccess: '已绑定',
         bindFailed: '绑定失败',
         alreadyBoundToUser: '该第三方账号已绑定至其他系统账户，无法在当前组织内重复绑定'
+      },
+      avatar: {
+        cropTitle: '裁剪头像',
+        confirmUpload: '确认上传',
+        cancel: '取消',
+        uploadSuccess: '头像上传成功',
+        uploadFailed: '头像上传失败',
+        invalidType: '请上传 JPG、PNG 或 WebP 格式的图片',
+        maxSize: '图片大小不能超过 5MB'
       }
     },
     tenantSettingsManager: {
@@ -2058,12 +2067,8 @@ export const zhCN: I18nRules = {
       },
     },
     tenantDictTypeManager: {
-      title: '字典类型管理',
-      subtitle: '管理系统和租户的字典类型',
-      scope: {
-        system: '系统字典',
-        tenant: '租户字典',
-      },
+      title: '租户字典类型管理',
+      subtitle: '管理租户的字典类型',
       action: {
         addNew: '新增字典类型',
         manageItems: '管理字典项',
@@ -2073,6 +2078,28 @@ export const zhCN: I18nRules = {
         name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
         remark: { label: '备注', placeholder: '请输入备注' },
         status: { label: '状态' },
+      },
+    },
+    systemDictTypeManager: {
+      title: '系统字典类型管理',
+      subtitle: '管理系统级字典类型',
+      action: {
+        addNew: '新增字典类型',
+        manageItems: '管理字典项',
+      },
+      modal: {
+        code: { label: '编码', placeholder: '请输入字典类型编码', required: '编码不能为空' },
+        name: { label: '名称', placeholder: '请输入字典类型名称', required: '名称不能为空' },
+        remark: { label: '备注', placeholder: '请输入备注' },
+        status: { label: '状态' },
+      },
+    },
+    systemDictItemManager: {
+      title: '系统字典项管理',
+      subtitle: '管理系统级字典项',
+      action: {
+        addNew: '新增字典项',
+        back: '返回',
       },
     },
     tenantDictItemManager: {
@@ -2093,11 +2120,7 @@ export const zhCN: I18nRules = {
     },
     myTenantDictTypeManager: {
       title: '字典管理',
-      subtitle: '管理组织字典和查看系统字典',
-      scope: {
-        myTenant: '组织字典',
-        system: '系统字典',
-      },
+      subtitle: '管理组织字典',
       action: {
         addNew: '新增字典类型',
         manageItems: '管理字典项',
@@ -2109,9 +2132,178 @@ export const zhCN: I18nRules = {
         status: { label: '状态' },
       },
     },
+    approvalFlowDefinitionManager: {
+      title: '系统审批流程管理',
+      subtitle: '管理系统级审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
+    tenantApprovalFlowDefinitionManager: {
+      title: '租户审批流程管理',
+      subtitle: '管理租户级审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
+    myApprovalFlowDefinitionManager: {
+      title: '审批流程管理',
+      subtitle: '管理组织审批流程定义',
+      action: {
+        addNew: '新增流程定义',
+      },
+      modal: {
+        name: { label: '名称', placeholder: '请输入流程定义名称', required: '名称不能为空' },
+        description: { label: '描述', placeholder: '请输入描述' },
+        status: { label: '状态' },
+      },
+    },
+    initiableApprovalFlows: {
+      title: '发起审批',
+      subtitle: '查看当前可发起的审批流程',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，仅可发起系统级审批',
+      noPermissionTip: '当前账号没有任何 scope 的查看权限',
+      action: {
+        initiate: '发起'
+      },
+      modal: {
+        title: '发起审批 - {{name}}',
+        formPlaceholder: '当前流程暂无表单，点击确定即可发起',
+        confirm: '确定',
+        cancel: '取消',
+        success: '发起成功',
+        failed: '发起失败'
+      }
+    },
+    myApprovalFlows: {
+      title: '我的审批',
+      subtitle: '查看我发起的审批',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据'
+    },
+    approvalTaskHandle: {
+      title: '审批处理',
+      subtitle: '查看并处理分配给我的审批任务',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据',
+      action: {
+        handle: '处理'
+      },
+      modal: {
+        title: '处理审批任务',
+        comment: '审批意见',
+        commentPlaceholder: '请输入审批意见（可选）',
+        approve: '同意',
+        reject: '拒绝',
+        cancel: '取消',
+        success: '处理成功',
+        failed: '处理失败'
+      }
+    },
+    myTenantApprovalFlowInstanceManager: {
+      title: '审批管理',
+      subtitle: '查看本组织成员发起的所有审批',
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织'
+    },
+    tenantApprovalFlowInstanceManager: {
+      title: '审批管理',
+      subtitle: '管理任一租户的审批申请',
+      filter: {
+        status: '状态',
+        all: '全部'
+      }
+    },
+    approvalFlowInstanceManager: {
+      title: '用户审批管理',
+      subtitle: '查看系统级所有用户发起的审批',
+      filter: {
+        status: '状态',
+        all: '全部'
+      }
+    },
   },
 
   components: {
+    approvalEditor: {
+      action: {
+        editFlow: '编辑流程',
+        close: '关闭'
+      },
+      header: {
+        loading: '加载中...',
+        save: '保存',
+        saveSuccess: '流程保存成功',
+        validationFailed: '流程图校验失败'
+      },
+      toolbar: {
+        undo: '撤销 (CTRL+Z)',
+        redo: '重做 (CTRL+Y)',
+        fitViewport: '适应视口',
+        autoArrange: '自动排列',
+        autoArrangeTooltip: '自动排列节点'
+      },
+      contextMenu: {
+        createNode: '创建节点'
+      },
+      statusBar: {
+        position: '坐标',
+        scale: '缩放'
+      },
+      inspector: {
+        title: '节点属性',
+        emptyHint: '选择一个节点以查看属性',
+        id: 'ID',
+        nodeKey: '节点标识',
+        name: '名称',
+        type: '类型',
+        config: '配置',
+        formSchema: '表单结构',
+        position: '位置',
+        newNode: '(新节点)',
+        emptyValue: '(空)',
+        unnamed: '(未命名)',
+        none: '(无)',
+        approveMode: '审批方式',
+        approvers: '审批人'
+      },
+      validation: {
+        duplicateNodeKey: '节点标识重复: "{{nodeKey}}"',
+        emptyNodeKey: '节点标识不能为空 (节点: "{{name}}")',
+        duplicateStart: '只允许存在一个开始节点'
+      }
+    },
     addressPicker: {
       triggerTooltip: '在地图上选择地址',
       akMissing: '未配置百度地图 AK，无法使用地图选址',
@@ -2564,6 +2756,31 @@ export const zhCN: I18nRules = {
         status: '状态',
         yes: '是',
         no: '否'
+      },
+      approvalFlowDefinition: {
+        name: '名称',
+        description: '描述',
+        currentVersion: '版本',
+        status: '状态'
+      },
+      approvalFlowInstance: {
+        scope: '范围',
+        definition: '流程',
+        definitionId: '流程ID',
+        definitionVersion: '版本',
+        initiator: '发起人',
+        status: '状态',
+        unknownDefinition: '流程已删除'
+      },
+      approvalFlowTask: {
+        scope: '范围',
+        flow: '流程',
+        instanceId: '实例ID',
+        node: '节点',
+        status: '状态',
+        comment: '审批意见',
+        unknownFlow: '流程已删除',
+        unknownNode: '节点已删除'
       }
     },
     entityTable: {
@@ -2675,9 +2892,19 @@ export const zhCN: I18nRules = {
       optionalValues: '可选值',
       measurements: '测量值'
     },
+    chip: {
+      tenantMember: {
+        unknown: '未知成员'
+      }
+    },
     popCard: {
       user: {
         notFound: '未找到用户信息',
+        email: '邮箱'
+      },
+      tenantMember: {
+        notFound: '未找到成员信息',
+        memberId: '成员 ID',
         email: '邮箱'
       },
       tenantDepartment: {
@@ -2888,6 +3115,40 @@ export const zhCN: I18nRules = {
     dictItemStatus: {
       0: '禁用',
       1: '启用'
+    },
+    approvalFlowDefinitionStatus: {
+      0: '草稿',
+      1: '已发布',
+      2: '已禁用'
+    },
+    approvalFlowNodeType: {
+      0: '开始',
+      1: '结束',
+      2: '审批',
+      3: '条件',
+      4: '抄送',
+      5: '分支',
+      6: '汇合'
+    },
+    approvalFlowApproveMode: {
+      0: '会签（所有人通过）',
+      1: '或签（任一人通过）'
+    },
+    approvalFlowInstanceStatus: {
+      0: '审批中',
+      1: '已通过',
+      2: '已驳回',
+      3: '已取消'
+    },
+    approvalFlowScope: {
+      0: '系统',
+      1: '租户'
+    },
+    approvalFlowTaskStatus: {
+      0: '待处理',
+      1: '已通过',
+      2: '已拒绝',
+      3: '已跳过'
     }
   },
 
@@ -2919,14 +3180,20 @@ export const zhCN: I18nRules = {
     sessionMonitor: '会话',
     announcement: '公告',
     tenantDictType: '字典类型',
-    tenantDictItem: '字典项'
+    tenantDictItem: '字典项',
+    approvalFlowDefinition: '审批流程定义',
+    approvalFlowInstance: '审批申请',
+    approvalFlowTask: '审批任务'
   },
 
   menu: {
     // 公共菜单
     pub: {
       dashboard: '仪表盘',
-      profile: '个人中心'
+      profile: '个人中心',
+      initiableApprovalFlows: '发起审批',
+      myApprovalFlows: '我的审批',
+      approvalTaskHandle: '审批处理'
     },
 
     // 租户菜单 (i_tenant)
@@ -2940,7 +3207,9 @@ export const zhCN: I18nRules = {
       profile: '组织设置',
       messageChannels: '消息渠道管理',
       personalProfile: '个人资料',
-      dictTypes: '字典管理'
+      dictTypes: '字典管理',
+      approvalFlowDefinitions: '审批流程管理',
+      approvalFlowInstances: '审批管理'
     },
 
     // 管理员菜单
@@ -2975,7 +3244,13 @@ export const zhCN: I18nRules = {
       systemMonitor: '系统监控',
       announcements: '公告管理',
       tenantDictTypes: '字典类型管理',
-      tenantDictItems: '字典项管理'
+      tenantDictItems: '字典项管理',
+      approvalFlowDefinitions: '流程定义管理',
+      approvalFlowInstances: '用户审批管理',
+      tenantApprovalFlowDefinitions: '租户流程定义管理',
+      tenantApprovalFlowInstances: '租户审批管理',
+      systemDictTypes: '系统字典类型',
+      systemDictItems: '系统字典项'
     },
 
     // 菜单分组
@@ -2985,6 +3260,7 @@ export const zhCN: I18nRules = {
       mail_template: '邮件模板',
       tenant: '租户管理',
       i_tenant: '组织管理',
+      approval: '审批管理',
       logs: '日志管理',
       monitor: '系统监控'
     }

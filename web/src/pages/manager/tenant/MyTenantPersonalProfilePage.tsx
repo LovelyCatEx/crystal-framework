@@ -1,7 +1,9 @@
-import {Avatar, Button, Card, DatePicker, Form, Input, message, Modal, Select, Space, Tabs, theme} from "antd";
+import {Avatar, Button, Card, DatePicker, Form, Input, message, Modal, Select, Space, Tabs, theme, Upload, type UploadProps} from "antd";
 import {
+    CameraOutlined,
     ClockCircleOutlined,
     ExclamationCircleFilled,
+    LoadingOutlined,
     MailOutlined,
     PhoneOutlined,
     PlusOutlined,
@@ -14,13 +16,13 @@ import dayjs from "dayjs";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useSWRState} from "@/compositions/use-swr.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
-import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {
     getTenantOAuthAccounts,
     unbindTenantOAuthAccount
 } from "@/api/tenant/tenant-oauth.api.ts";
 import {
     getMyTenantUserProfile,
+    uploadMyTenantMemberAvatar,
     upsertMyTenantUserProfile,
     type UpsertMyTenantUserProfileDTO
 } from "@/api/tenant/tenant-user-profile.api.ts";
@@ -29,6 +31,7 @@ import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types
 import {Gender} from "@/types/common/gender.types.ts";
 import {getGender} from "@/i18n/enum-helpers.ts";
 import {PlatformIcon} from "@/components/PlatformIcon.tsx";
+import {ImageCropper} from "@/components/ImageCropper.tsx";
 import {redirectToOAuthBind} from "@/utils/oauth2.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
@@ -293,54 +296,150 @@ const { useToken } = theme;
 function TenantPersonalProfileCard() {
     const { t } = useTranslation();
     const { token } = useToken();
-    const loggedUser = useLoggedUser();
 
-    const [profile] = useSWRState(
+    const [profile, , , reloadProfile] = useSWRState(
         'getMyTenantUserProfile',
         getMyTenantUserProfile,
     );
 
-    const displayName = profile?.nickname ?? loggedUser.userProfile?.nickname ?? '';
+    const displayName = profile?.nickname ?? '';
     const realName = profile?.name ?? '';
-    const email = profile?.email ?? loggedUser.userProfile?.email;
+    const email = profile?.email;
     const phone = profile?.phone ?? '';
     const joinedTime = profile ? Number(profile.createdTime) : null;
 
+    const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+    const [cropperOpen, setCropperOpen] = useState(false);
+    const [cropperImageUrl, setCropperImageUrl] = useState('');
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [cropperKey, setCropperKey] = useState(0);
+
+    const handleAvatarUpload = (file: File) => {
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            void message.error(t('pages.tenantPersonalProfile.avatar.invalidType'));
+            return false;
+        }
+
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            void message.error(t('pages.tenantPersonalProfile.avatar.maxSize'));
+            return false;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setCropperImageUrl(e.target?.result as string);
+            setPendingFile(file);
+            setCropperKey(prev => prev + 1);
+            setCropperOpen(true);
+        };
+        reader.readAsDataURL(file);
+
+        return false;
+    };
+
+    const handleCropConfirm = (croppedBlob: Blob) => {
+        setCropperOpen(false);
+        setIsAvatarUploading(true);
+
+        const croppedFile = new File([croppedBlob], pendingFile?.name || 'avatar.png', {
+            type: 'image/png',
+        });
+
+        uploadMyTenantMemberAvatar(croppedFile)
+            .then(() => {
+                void message.success(t('pages.tenantPersonalProfile.avatar.uploadSuccess'));
+                void reloadProfile();
+            })
+            .catch(() => {
+                void message.error(t('pages.tenantPersonalProfile.avatar.uploadFailed'));
+            })
+            .finally(() => {
+                setIsAvatarUploading(false);
+                setPendingFile(null);
+                setCropperImageUrl('');
+            });
+    };
+
+    const handleCropCancel = () => {
+        setCropperOpen(false);
+        setPendingFile(null);
+        setCropperImageUrl('');
+    };
+
+    const uploadAvatarProps: UploadProps = {
+        name: 'file',
+        showUploadList: false,
+        beforeUpload: handleAvatarUpload,
+        accept: 'image/jpeg,image/png,image/webp',
+        customRequest: ({ onSuccess }) => {
+            setTimeout(() => {
+                onSuccess?.('ok');
+            }, 0);
+        },
+    };
+
     return (
-        <Card className="rounded-2xl shadow-sm border-none overflow-hidden">
-            <div className="h-24 bg-gradient-to-r from-emerald-500 to-teal-600 -m-6 mb-0 dark:from-slate-800 dark:via-emerald-900/40 dark:to-slate-800"></div>
-            <div className="relative pt-0 px-6 pb-6">
-                <div className="flex justify-center -mt-12 mb-4 relative">
-                    <Avatar
-                        size={100}
-                        className="rounded-3xl border-4 shadow-md bg-black/50"
-                        icon={<UserOutlined />}
-                        src={loggedUser.userProfile?.avatar ?? undefined}
-                        style={{ borderColor: token.colorBorderSecondary }}
-                    />
-                </div>
-                <div className="text-center mb-6">
-                    <h2 className="text-xl font-bold text-slate-800">{displayName}</h2>
-                    {realName && <p className="text-slate-400 text-sm italic">{realName}</p>}
-                </div>
-                <div className="space-y-4">
-                    <div className="flex items-center text-slate-600 text-sm">
-                        <MailOutlined className="mr-3 text-slate-300" />
-                        {email || t('pages.tenantPersonalProfile.card.unboundEmail')}
+        <>
+            <Card className="rounded-2xl shadow-sm border-none overflow-hidden">
+                <div className="h-24 bg-gradient-to-r from-emerald-500 to-teal-600 -m-6 mb-0 dark:from-slate-800 dark:via-emerald-900/40 dark:to-slate-800"></div>
+                <div className="relative pt-0 px-6 pb-6">
+                    <div className="flex justify-center -mt-12 mb-4 relative">
+                        <Avatar
+                            size={100}
+                            className="rounded-3xl border-4 shadow-md bg-black/50"
+                            icon={<UserOutlined />}
+                            src={profile?.avatar ?? undefined}
+                            style={{ borderColor: token.colorBorderSecondary }}
+                        />
+                        <Upload {...uploadAvatarProps}>
+                            <Button
+                                icon={isAvatarUploading ? <LoadingOutlined /> : <CameraOutlined />}
+                                className="absolute bottom-0 right-1/2 translate-x-12 rounded-full border-none shadow-lg
+                                         bg-white text-slate-600 transition-all"
+                                size="small"
+                                loading={isAvatarUploading}
+                            />
+                        </Upload>
                     </div>
-                    <div className="flex items-center text-slate-600 text-sm">
-                        <PhoneOutlined className="mr-3 text-slate-300" />
-                        {phone || t('pages.tenantPersonalProfile.card.unboundPhone')}
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl font-bold text-slate-800">{displayName}</h2>
+                        {realName && <p className="text-slate-400 text-sm italic">{realName}</p>}
                     </div>
-                    {joinedTime !== null && (
+                    <div className="space-y-4">
                         <div className="flex items-center text-slate-600 text-sm">
-                            <ClockCircleOutlined className="mr-3 text-slate-300" />
-                            {t('pages.tenantPersonalProfile.card.joinedAt', { time: formatTimestamp(joinedTime) })}
+                            <MailOutlined className="mr-3 text-slate-300" />
+                            {email || t('pages.tenantPersonalProfile.card.unboundEmail')}
                         </div>
-                    )}
+                        <div className="flex items-center text-slate-600 text-sm">
+                            <PhoneOutlined className="mr-3 text-slate-300" />
+                            {phone || t('pages.tenantPersonalProfile.card.unboundPhone')}
+                        </div>
+                        {joinedTime !== null && (
+                            <div className="flex items-center text-slate-600 text-sm">
+                                <ClockCircleOutlined className="mr-3 text-slate-300" />
+                                {t('pages.tenantPersonalProfile.card.joinedAt', { time: formatTimestamp(joinedTime) })}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </Card>
+            </Card>
+
+            <ImageCropper
+                key={cropperKey}
+                componentKey={cropperKey}
+                open={cropperOpen}
+                imageUrl={cropperImageUrl}
+                onCancel={handleCropCancel}
+                onConfirm={handleCropConfirm}
+                aspectRatio={1}
+                shape="rect"
+                title={t('pages.tenantPersonalProfile.avatar.cropTitle')}
+                confirmText={t('pages.tenantPersonalProfile.avatar.confirmUpload')}
+                cancelText={t('pages.tenantPersonalProfile.avatar.cancel')}
+            />
+        </>
     );
 }
 

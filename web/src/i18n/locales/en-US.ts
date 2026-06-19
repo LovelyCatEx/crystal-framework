@@ -1888,6 +1888,15 @@ export const enUS: I18nRules = {
         bindSuccess: 'Bound successfully',
         bindFailed: 'Failed to bind',
         alreadyBoundToUser: 'This third-party account is already bound to a system user and cannot be bound again within the organization'
+      },
+      avatar: {
+        cropTitle: 'Crop Avatar',
+        confirmUpload: 'Confirm Upload',
+        cancel: 'Cancel',
+        uploadSuccess: 'Avatar uploaded',
+        uploadFailed: 'Failed to upload avatar',
+        invalidType: 'Please upload a JPG, PNG or WebP image',
+        maxSize: 'Image must be smaller than 5MB'
       }
     },
     tenantSettingsManager: {
@@ -2061,12 +2070,8 @@ export const enUS: I18nRules = {
       },
     },
     tenantDictTypeManager: {
-      title: 'Dictionary Type Management',
-      subtitle: 'Manage system and tenant dictionary types',
-      scope: {
-        system: 'System Dictionary',
-        tenant: 'Tenant Dictionary',
-      },
+      title: 'Tenant Dictionary Type Management',
+      subtitle: 'Manage tenant dictionary types',
       action: {
         addNew: 'Add Dictionary Type',
         manageItems: 'Manage Items',
@@ -2076,6 +2081,28 @@ export const enUS: I18nRules = {
         name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
         remark: { label: 'Remark', placeholder: 'Enter remark' },
         status: { label: 'Status' },
+      },
+    },
+    systemDictTypeManager: {
+      title: 'System Dictionary Type Management',
+      subtitle: 'Manage system-level dictionary types',
+      action: {
+        addNew: 'Add Dictionary Type',
+        manageItems: 'Manage Items',
+      },
+      modal: {
+        code: { label: 'Code', placeholder: 'Enter dictionary type code', required: 'Code is required' },
+        name: { label: 'Name', placeholder: 'Enter dictionary type name', required: 'Name is required' },
+        remark: { label: 'Remark', placeholder: 'Enter remark' },
+        status: { label: 'Status' },
+      },
+    },
+    systemDictItemManager: {
+      title: 'System Dictionary Item Management',
+      subtitle: 'Manage system-level dictionary items',
+      action: {
+        addNew: 'Add Dictionary Item',
+        back: 'Back',
       },
     },
     tenantDictItemManager: {
@@ -2096,11 +2123,7 @@ export const enUS: I18nRules = {
     },
     myTenantDictTypeManager: {
       title: 'Dictionary Management',
-      subtitle: 'Manage organization dictionaries and view system dictionaries',
-      scope: {
-        myTenant: 'Organization',
-        system: 'System',
-      },
+      subtitle: 'Manage organization dictionaries',
       action: {
         addNew: 'Add Dictionary Type',
         manageItems: 'Manage Items',
@@ -2112,9 +2135,178 @@ export const enUS: I18nRules = {
         status: { label: 'Status' },
       },
     },
+    approvalFlowDefinitionManager: {
+      title: 'System Approval Flow Management',
+      subtitle: 'Manage system-level approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
+    tenantApprovalFlowDefinitionManager: {
+      title: 'Tenant Approval Flow Management',
+      subtitle: 'Manage tenant-level approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
+    myApprovalFlowDefinitionManager: {
+      title: 'Approval Flow Management',
+      subtitle: 'Manage organization approval flow definitions',
+      action: {
+        addNew: 'Add Flow Definition',
+      },
+      modal: {
+        name: { label: 'Name', placeholder: 'Enter flow definition name', required: 'Name is required' },
+        description: { label: 'Description', placeholder: 'Enter description' },
+        status: { label: 'Status' },
+      },
+    },
+    initiableApprovalFlows: {
+      title: 'Initiate Approval',
+      subtitle: 'Approval flows you may currently initiate',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      noTenantTip: 'You have not joined any organization. Only system-level flows are available.',
+      noPermissionTip: 'No permission to view any scope.',
+      action: {
+        initiate: 'Initiate'
+      },
+      modal: {
+        title: 'Initiate Approval - {{name}}',
+        formPlaceholder: 'No form is configured for this flow. Click Confirm to initiate.',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        success: 'Initiated successfully',
+        failed: 'Failed to initiate'
+      }
+    },
+    myApprovalFlows: {
+      title: 'My Approvals',
+      subtitle: 'Approval requests you have initiated',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization. Tenant data is unavailable.'
+    },
+    approvalTaskHandle: {
+      title: 'Approval To-Do',
+      subtitle: 'Approval tasks assigned to you',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization. Tenant data is unavailable.',
+      action: {
+        handle: 'Handle'
+      },
+      modal: {
+        title: 'Handle Approval Task',
+        comment: 'Comment',
+        commentPlaceholder: 'Enter your comment (optional)',
+        approve: 'Approve',
+        reject: 'Reject',
+        cancel: 'Cancel',
+        success: 'Task handled successfully',
+        failed: 'Failed to handle task'
+      }
+    },
+    myTenantApprovalFlowInstanceManager: {
+      title: 'Approval Management',
+      subtitle: 'View all approvals initiated by members of your organization',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization.'
+    },
+    tenantApprovalFlowInstanceManager: {
+      title: 'Approval Management',
+      subtitle: 'Manage approval requests for any tenant',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      }
+    },
+    approvalFlowInstanceManager: {
+      title: 'User Approval Management',
+      subtitle: 'View approval requests initiated by all users at the system level',
+      filter: {
+        status: 'Status',
+        all: 'All'
+      }
+    },
   },
 
   components: {
+    approvalEditor: {
+      action: {
+        editFlow: 'Edit Flow',
+        close: 'Close'
+      },
+      header: {
+        loading: 'Loading...',
+        save: 'Save',
+        saveSuccess: 'Flow saved successfully',
+        validationFailed: 'Graph Validation Failed'
+      },
+      toolbar: {
+        undo: 'Undo (CTRL+Z)',
+        redo: 'Redo (CTRL+Y)',
+        fitViewport: 'Fit Viewport',
+        autoArrange: 'Auto Arrange',
+        autoArrangeTooltip: 'Arrange nodes automatically'
+      },
+      contextMenu: {
+        createNode: 'Create Node'
+      },
+      statusBar: {
+        position: 'Position',
+        scale: 'Scale'
+      },
+      inspector: {
+        title: 'Node Inspector',
+        emptyHint: 'Select a node to inspect',
+        id: 'ID',
+        nodeKey: 'Node Key',
+        name: 'Name',
+        type: 'Type',
+        config: 'Config',
+        formSchema: 'Form Schema',
+        position: 'Position',
+        newNode: '(new)',
+        emptyValue: '(empty)',
+        unnamed: '(unnamed)',
+        none: '(none)',
+        approveMode: 'Approve Mode',
+        approvers: 'Approvers'
+      },
+      validation: {
+        duplicateNodeKey: 'Duplicate node key: "{{nodeKey}}"',
+        emptyNodeKey: 'Node key cannot be empty (node: "{{name}}")',
+        duplicateStart: 'Only one Start node is allowed'
+      }
+    },
     addressPicker: {
       akMissing: 'Baidu map AK is not configured, address picker is unavailable',
       emptyNearby: 'No nearby addresses found',
@@ -2566,6 +2758,31 @@ export const enUS: I18nRules = {
         status: 'Status',
         yes: 'Yes',
         no: 'No'
+      },
+      approvalFlowDefinition: {
+        name: 'Name',
+        description: 'Description',
+        currentVersion: 'Version',
+        status: 'Status'
+      },
+      approvalFlowInstance: {
+        scope: 'Scope',
+        definition: 'Flow',
+        definitionId: 'Flow ID',
+        definitionVersion: 'Version',
+        initiator: 'Initiator',
+        status: 'Status',
+        unknownDefinition: 'Flow deleted'
+      },
+      approvalFlowTask: {
+        scope: 'Scope',
+        flow: 'Flow',
+        instanceId: 'Instance ID',
+        node: 'Node',
+        status: 'Status',
+        comment: 'Comment',
+        unknownFlow: 'Flow deleted',
+        unknownNode: 'Node deleted'
       }
     },
     entityTable: {
@@ -2677,9 +2894,19 @@ export const enUS: I18nRules = {
       optionalValues: 'Optional Values',
       measurements: 'Measurements'
     },
+    chip: {
+      tenantMember: {
+        unknown: 'Unknown member'
+      }
+    },
     popCard: {
       user: {
         notFound: 'User information not found',
+        email: 'Email'
+      },
+      tenantMember: {
+        notFound: 'Member information not found',
+        memberId: 'Member ID',
         email: 'Email'
       },
       tenantDepartment: {
@@ -2890,6 +3117,40 @@ export const enUS: I18nRules = {
     dictItemStatus: {
       0: 'Disabled',
       1: 'Enabled'
+    },
+    approvalFlowDefinitionStatus: {
+      0: 'Draft',
+      1: 'Published',
+      2: 'Disabled'
+    },
+    approvalFlowNodeType: {
+      0: 'Start',
+      1: 'End',
+      2: 'Approval',
+      3: 'Condition',
+      4: 'CC',
+      5: 'Fork',
+      6: 'Join'
+    },
+    approvalFlowApproveMode: {
+      0: 'Countersign (All approve)',
+      1: 'Or-sign (Any one approves)'
+    },
+    approvalFlowInstanceStatus: {
+      0: 'In Progress',
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'Cancelled'
+    },
+    approvalFlowScope: {
+      0: 'System',
+      1: 'Tenant'
+    },
+    approvalFlowTaskStatus: {
+      0: 'Pending',
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'Skipped'
     }
   },
 
@@ -2921,14 +3182,20 @@ export const enUS: I18nRules = {
     sessionMonitor: 'Session',
     announcement: 'Announcement',
     tenantDictType: 'Dictionary Type',
-    tenantDictItem: 'Dictionary Item'
+    tenantDictItem: 'Dictionary Item',
+    approvalFlowDefinition: 'Approval Flow Definition',
+    approvalFlowInstance: 'Approval Request',
+    approvalFlowTask: 'Approval Task'
   },
 
   menu: {
     // Public menus
     pub: {
       dashboard: 'Dashboard',
-      profile: 'Profile'
+      profile: 'Profile',
+      initiableApprovalFlows: 'Initiate Approval',
+      myApprovalFlows: 'My Approvals',
+      approvalTaskHandle: 'Approval To-Do'
     },
 
     // Tenant menus (i_tenant)
@@ -2942,7 +3209,9 @@ export const enUS: I18nRules = {
       profile: 'Organization Settings',
       messageChannels: 'Message Channel Management',
       personalProfile: 'Personal Profile',
-      dictTypes: 'Dictionary Management'
+      dictTypes: 'Dictionary Management',
+      approvalFlowDefinitions: 'Approval Flow Management',
+      approvalFlowInstances: 'Approval Management'
     },
 
     // Admin menus
@@ -2977,7 +3246,13 @@ export const enUS: I18nRules = {
       systemMonitor: 'System Monitor',
       announcements: 'Announcement Management',
       tenantDictTypes: 'Dictionary Type Management',
-      tenantDictItems: 'Dictionary Item Management'
+      tenantDictItems: 'Dictionary Item Management',
+      approvalFlowDefinitions: 'Flow Definition Management',
+      approvalFlowInstances: 'User Approval Management',
+      tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
+      tenantApprovalFlowInstances: 'Tenant Approval Management',
+      systemDictTypes: 'System Dictionary Types',
+      systemDictItems: 'System Dictionary Items'
     },
 
     // Menu groups
@@ -2987,6 +3262,7 @@ export const enUS: I18nRules = {
       mail_template: 'Mail Templates',
       tenant: 'Tenant Management',
       i_tenant: 'Organization Management',
+      approval: 'Approval Management',
       logs: 'Log Management',
       monitor: 'System Monitor'
     }
