@@ -2202,6 +2202,32 @@ export const zhCN: I18nRules = {
       },
       noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据'
     },
+    approvalTaskHandle: {
+      title: '审批处理',
+      subtitle: '查看并处理分配给我的审批任务',
+      tab: {
+        system: '系统审批',
+        tenant: '租户审批'
+      },
+      filter: {
+        status: '状态',
+        all: '全部'
+      },
+      noTenantTip: '当前账号尚未加入任何组织，租户范围暂无数据',
+      action: {
+        handle: '处理'
+      },
+      modal: {
+        title: '处理审批任务',
+        comment: '审批意见',
+        commentPlaceholder: '请输入审批意见（可选）',
+        approve: '同意',
+        reject: '拒绝',
+        cancel: '取消',
+        success: '处理成功',
+        failed: '处理失败'
+      }
+    },
     myTenantApprovalFlowInstanceManager: {
       title: '审批管理',
       subtitle: '查看本组织成员发起的所有审批',
@@ -2745,6 +2771,16 @@ export const zhCN: I18nRules = {
         initiator: '发起人',
         status: '状态',
         unknownDefinition: '流程已删除'
+      },
+      approvalFlowTask: {
+        scope: '范围',
+        flow: '流程',
+        instanceId: '实例ID',
+        node: '节点',
+        status: '状态',
+        comment: '审批意见',
+        unknownFlow: '流程已删除',
+        unknownNode: '节点已删除'
       }
     },
     entityTable: {
@@ -3107,6 +3143,12 @@ export const zhCN: I18nRules = {
     approvalFlowScope: {
       0: '系统',
       1: '租户'
+    },
+    approvalFlowTaskStatus: {
+      0: '待处理',
+      1: '已通过',
+      2: '已拒绝',
+      3: '已跳过'
     }
   },
 
@@ -3140,7 +3182,8 @@ export const zhCN: I18nRules = {
     tenantDictType: '字典类型',
     tenantDictItem: '字典项',
     approvalFlowDefinition: '审批流程定义',
-    approvalFlowInstance: '审批申请'
+    approvalFlowInstance: '审批申请',
+    approvalFlowTask: '审批任务'
   },
 
   menu: {
@@ -3149,7 +3192,8 @@ export const zhCN: I18nRules = {
       dashboard: '仪表盘',
       profile: '个人中心',
       initiableApprovalFlows: '发起审批',
-      myApprovalFlows: '我的审批'
+      myApprovalFlows: '我的审批',
+      approvalTaskHandle: '审批处理'
     },
 
     // 租户菜单 (i_tenant)

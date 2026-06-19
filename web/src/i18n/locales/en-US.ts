@@ -2205,6 +2205,32 @@ export const enUS: I18nRules = {
       },
       noTenantTip: 'You have not joined any organization. Tenant data is unavailable.'
     },
+    approvalTaskHandle: {
+      title: 'Approval To-Do',
+      subtitle: 'Approval tasks assigned to you',
+      tab: {
+        system: 'System',
+        tenant: 'Tenant'
+      },
+      filter: {
+        status: 'Status',
+        all: 'All'
+      },
+      noTenantTip: 'You have not joined any organization. Tenant data is unavailable.',
+      action: {
+        handle: 'Handle'
+      },
+      modal: {
+        title: 'Handle Approval Task',
+        comment: 'Comment',
+        commentPlaceholder: 'Enter your comment (optional)',
+        approve: 'Approve',
+        reject: 'Reject',
+        cancel: 'Cancel',
+        success: 'Task handled successfully',
+        failed: 'Failed to handle task'
+      }
+    },
     myTenantApprovalFlowInstanceManager: {
       title: 'Approval Management',
       subtitle: 'View all approvals initiated by members of your organization',
@@ -2747,6 +2773,16 @@ export const enUS: I18nRules = {
         initiator: 'Initiator',
         status: 'Status',
         unknownDefinition: 'Flow deleted'
+      },
+      approvalFlowTask: {
+        scope: 'Scope',
+        flow: 'Flow',
+        instanceId: 'Instance ID',
+        node: 'Node',
+        status: 'Status',
+        comment: 'Comment',
+        unknownFlow: 'Flow deleted',
+        unknownNode: 'Node deleted'
       }
     },
     entityTable: {
@@ -3109,6 +3145,12 @@ export const enUS: I18nRules = {
     approvalFlowScope: {
       0: 'System',
       1: 'Tenant'
+    },
+    approvalFlowTaskStatus: {
+      0: 'Pending',
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'Skipped'
     }
   },
 
@@ -3142,7 +3184,8 @@ export const enUS: I18nRules = {
     tenantDictType: 'Dictionary Type',
     tenantDictItem: 'Dictionary Item',
     approvalFlowDefinition: 'Approval Flow Definition',
-    approvalFlowInstance: 'Approval Request'
+    approvalFlowInstance: 'Approval Request',
+    approvalFlowTask: 'Approval Task'
   },
 
   menu: {
@@ -3151,7 +3194,8 @@ export const enUS: I18nRules = {
       dashboard: 'Dashboard',
       profile: 'Profile',
       initiableApprovalFlows: 'Initiate Approval',
-      myApprovalFlows: 'My Approvals'
+      myApprovalFlows: 'My Approvals',
+      approvalTaskHandle: 'Approval To-Do'
     },
 
     // Tenant menus (i_tenant)

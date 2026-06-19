@@ -2,6 +2,7 @@ import {
     ApartmentOutlined,
     AuditOutlined,
     BookOutlined,
+    CheckSquareOutlined,
     CloudOutlined,
     DashboardOutlined,
     DatabaseOutlined,
@@ -74,6 +75,7 @@ const MyApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/a
 const TenantApprovalFlowDefinitionManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowDefinitionManagerPage.tsx"));
 const InitiableApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/InitiableApprovalFlowsPage.tsx"));
 const MyApprovalFlowsPage = lazy(() => import("@/pages/manager/approval/MyApprovalFlowsPage.tsx"));
+const ApprovalTaskHandlePage = lazy(() => import("@/pages/manager/approval/ApprovalTaskHandlePage.tsx"));
 const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
 const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
 const ApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowInstanceManagerPage.tsx"));
@@ -186,6 +188,14 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <AuditOutlined />,
             label: t('menu.pub.myApprovalFlows'),
             page: <MyApprovalFlowsPage />,
+            group: 'approval'
+        },
+        {
+            key: '/manager/approval/handle',
+            path: '/manager/approval/handle',
+            icon: <CheckSquareOutlined />,
+            label: t('menu.pub.approvalTaskHandle'),
+            page: <ApprovalTaskHandlePage />,
             group: 'approval'
         },
         ...toTranslatedRouteItems(t, pluginRegistry.publicMenus),

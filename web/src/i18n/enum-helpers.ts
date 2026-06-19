@@ -100,3 +100,7 @@ export function getApprovalFlowInstanceStatus(status: number): string {
 export function getApprovalFlowScope(scope: number): string {
     return translateEnum('approvalFlowScope', scope);
 }
+
+export function getApprovalFlowTaskStatus(status: number): string {
+    return translateEnum('approvalFlowTaskStatus', status);
+}
