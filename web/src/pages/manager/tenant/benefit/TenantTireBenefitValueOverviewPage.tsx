@@ -9,19 +9,18 @@ import {queryBenefitOverview} from "@/api/tenant/tenant-benefit.api.ts";
 import type {TenantTireBenefitOverviewItemVO} from "@/types/tenant/tenant-benefit.types.ts";
 import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
+import {useTenantBenefitKeyToTranslationMap} from "@/i18n/tenant-benefit.tsx";
 import {useTranslation} from "react-i18next";
 import {BenefitValueEditCell, BenefitValueEditProvider} from "./BenefitValueEditCell.tsx";
 
 export default function BenefitOverviewPage() {
     const {t} = useTranslation();
+    const benefitKeyMap = useTenantBenefitKeyToTranslationMap();
     const [searchParams, setSearchParams] = useSearchParams();
     const [tireTypes, setTireTypes] = useState<{ id: string; name: string }[]>([]);
     const [selectedTireId, setSelectedTireId] = useState<string | null>(searchParams.get('tireId') || null);
     const [items, setItems] = useState<TenantTireBenefitOverviewItemVO[]>([]);
     const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
-    const [pageSize, setPageSize] = useState(Number(searchParams.get('pageSize')) || 20);
-    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         TenantTireTypeManagerController.list().then((res) => {
@@ -32,10 +31,9 @@ export default function BenefitOverviewPage() {
     const refreshData = () => {
         if (!selectedTireId) return;
         setLoading(true);
-        queryBenefitOverview({ page, pageSize, tireTypeIds: [selectedTireId] })
+        queryBenefitOverview({ tireTypeIds: [selectedTireId] })
             .then((res) => {
-                setItems(res.data?.records[0]?.items || []);
-                setTotal(res.data?.total ?? 0);
+                setItems(res.data?.[0]?.items || []);
             })
             .finally(() => setLoading(false));
     };
@@ -43,25 +41,30 @@ export default function BenefitOverviewPage() {
     useEffect(() => {
         refreshData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedTireId, page, pageSize]);
+    }, [selectedTireId]);
 
     const columns = [
         {
             title: t('pages.tenantTireBenefitValueManager.overview.name'),
             dataIndex: 'name',
             key: 'name',
-            render: (_: unknown, row: TenantTireBenefitOverviewItemVO) => (
-                <div>
-                    <div>{row.name}</div>
-                    {row.description && (
-                        <div className="text-gray-400 text-xs leading-tight mt-0.5">
-                            {row.description.length > 128
-                                ? `${row.description.slice(0, 128)}...`
-                                : row.description}
-                        </div>
-                    )}
-                </div>
-            ),
+            render: (_: unknown, row: TenantTireBenefitOverviewItemVO) => {
+                const translation = benefitKeyMap.get(row.featureKey);
+                const displayName = translation?.name ?? row.name;
+                const displayDesc = translation?.description ?? row.description;
+                return (
+                    <div className="inline-block align-top">
+                        <div>{displayName}</div>
+                        {displayDesc && (
+                            <div className="text-gray-400 text-xs leading-tight mt-0.5">
+                                {displayDesc.length > 128
+                                    ? `${displayDesc.slice(0, 128)}...`
+                                    : displayDesc}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             title: t('pages.tenantTireBenefitValueManager.overview.featureKey'),
@@ -131,10 +134,8 @@ export default function BenefitOverviewPage() {
                             value={selectedTireId}
                             onChange={(value) => {
                                 setSelectedTireId(value || null);
-                                setPage(1);
                                 const params = new URLSearchParams();
                                 if (value) params.set('tireId', value);
-                                params.set('page', '1');
                                 setSearchParams(params, { replace: true });
                             }}
                             options={(tireTypes ?? []).map((t) => ({ value: t.id, label: t.name }))}
@@ -146,21 +147,7 @@ export default function BenefitOverviewPage() {
                     loading={loading}
                     dataSource={items}
                     columns={columns}
-                    pagination={{
-                        showSizeChanger: true,
-                        current: page,
-                        pageSize,
-                        total,
-                        pageSizeOptions: [5, 10, 15, 20],
-                        onChange: (p, ps) => {
-                            setPage(p);
-                            setPageSize(ps);
-                            const params = new URLSearchParams(searchParams.toString());
-                            params.set('page', String(p));
-                            params.set('pageSize', String(ps));
-                            setSearchParams(params, { replace: true });
-                        },
-                    }}
+                    pagination={false}
                 />
                 </BenefitValueEditProvider>
             </StandardCard>

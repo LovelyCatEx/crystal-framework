@@ -709,7 +709,10 @@ export const enUS: I18nRules = {
         name: 'Name',
         description: 'Description',
         featureType: 'Feature Type',
-        featureTypePlaceholder: 'Select feature type'
+        featureTypePlaceholder: 'Select feature type',
+        useI18n: 'Display Source',
+        useI18nDb: 'DB',
+        useI18nLocale: 'i18n'
       },
       modal: {
         featureKey: {
@@ -802,7 +805,42 @@ export const enUS: I18nRules = {
           booleanTrue: 'Enabled',
           booleanFalse: 'Disabled'
         }
-      }
+      },
+      keys: {
+        'invitation.enabled': {
+          name: 'Create Invitation Code',
+          description: 'Whether the tenant can create invitation codes',
+        },
+        'invitation.max_count': {
+          name: 'Invitation Code Create Limit',
+          description: 'Maximum number of invitation codes a tenant can create in total',
+        },
+        'invitation.per_day_count': {
+          name: 'Daily Invitation Create Limit',
+          description: 'Number of invitation codes a tenant can create per day',
+        },
+        'invitation.per_code_usage_limit': {
+          name: 'Per-Code Usage Limit',
+          description: 'Maximum number of times a single invitation code can be used',
+        },
+        'invitation.max_validity_days': {
+          name: 'Invitation Max Validity',
+          description: 'Maximum validity period in days for an invitation code',
+        },
+        'member.max_count': {
+          name: 'Member Limit',
+          description: 'Maximum number of members a tenant can have',
+        },
+        'department.max_count': {
+          name: 'Department Limit',
+          description: 'Maximum number of departments a tenant can create',
+        },
+      },
+      groups: {
+        'invitation': 'Invitation',
+        'member': 'Member',
+        'department': 'Department',
+      },
     },
     tenantRoleManager: {
       title: 'Tenant Role Management',
@@ -2673,6 +2711,7 @@ export const enUS: I18nRules = {
         recordInfo: 'Record Info',
         tireType: 'Tier Type',
         feature: 'Feature',
+        featureType: 'Type',
         featureValue: 'Feature Value'
       },
       oAuthAccount: {

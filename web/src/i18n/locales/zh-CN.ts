@@ -706,7 +706,10 @@ export const zhCN: I18nRules = {
         name: '权益名称',
         description: '描述',
         featureType: '权益类型',
-        featureTypePlaceholder: '选择权益类型'
+        featureTypePlaceholder: '选择权益类型',
+        useI18n: '显示来源',
+        useI18nDb: '数据库',
+        useI18nLocale: '翻译'
       },
       modal: {
         featureKey: {
@@ -799,7 +802,42 @@ export const zhCN: I18nRules = {
           booleanTrue: '开启',
           booleanFalse: '关闭'
         }
-      }
+      },
+      keys: {
+        'invitation.enabled': {
+          name: '创建邀请码',
+          description: '租户是否可以创建邀请码',
+        },
+        'invitation.max_count': {
+          name: '邀请码创建上限',
+          description: '租户可创建的邀请码总数上限',
+        },
+        'invitation.per_day_count': {
+          name: '每日邀请码创建上限',
+          description: '租户每日可创建的邀请码数量',
+        },
+        'invitation.per_code_usage_limit': {
+          name: '单码使用上限',
+          description: '单个邀请码最多可被使用的次数',
+        },
+        'invitation.max_validity_days': {
+          name: '邀请码最长有效期',
+          description: '邀请码最长有效期（天）',
+        },
+        'member.max_count': {
+          name: '成员数量上限',
+          description: '租户可拥有的成员数量上限',
+        },
+        'department.max_count': {
+          name: '部门数量上限',
+          description: '租户可创建的部门数量上限',
+        },
+      },
+      groups: {
+        'invitation': '邀请码',
+        'member': '成员',
+        'department': '部门',
+      },
     },
     tenantRoleManager: {
       title: '租户角色管理',
@@ -2672,6 +2710,7 @@ export const zhCN: I18nRules = {
         recordInfo: '记录信息',
         tireType: '套餐类型',
         feature: '权益项',
+        featureType: '类型',
         featureValue: '权益值'
       },
       oAuthAccount: {

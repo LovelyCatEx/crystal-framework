@@ -15,4 +15,6 @@ interface TenantTireBenefitFeatureManagerService : CachedBaseManagerService<
         ManagerReadTenantTireBenefitFeatureDTO,
         ManagerUpdateTenantTireBenefitFeatureDTO,
         ManagerDeleteTenantTireBenefitFeatureDTO
->
+> {
+    suspend fun findAllFeatures(): List<TenantTireBenefitFeatureEntity>
+}

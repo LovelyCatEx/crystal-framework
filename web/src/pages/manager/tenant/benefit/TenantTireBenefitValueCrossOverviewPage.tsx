@@ -1,5 +1,5 @@
 import {CheckCircleOutlined, CloseCircleOutlined} from "@ant-design/icons";
-import {Space, Switch, Table, Typography} from "antd";
+import {Space, Switch, Table, Tag, Typography} from "antd";
 import {useEffect, useMemo, useState} from "react";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {StandardCard} from "@/components/card/StandardCard.tsx";
@@ -9,6 +9,11 @@ import type {TenantTireBenefitOverviewGroupVO, TenantTireBenefitOverviewItemVO} 
 import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {useTranslation} from "react-i18next";
 import {BenefitValueEditCell, BenefitValueEditProvider} from "./BenefitValueEditCell.tsx";
+import {
+    getBenefitGroupKey,
+    useTenantBenefitGroupToTranslationMap,
+    useTenantBenefitKeyToTranslationMap,
+} from "@/i18n/tenant-benefit.tsx";
 
 interface MatrixRow {
     featureId: string;
@@ -22,14 +27,30 @@ interface MatrixRow {
     tireCustomized: Record<string, boolean>;
 }
 
+interface GroupRow {
+    rowKey: string;
+    groupKey: string;
+    groupLabel: string;
+    groupIcon?: React.ReactNode;
+    childrenCount: number;
+    isGroup: true;
+    children: TableRow[];
+}
+
+type FeatureRow = MatrixRow & {
+    rowKey: string;
+    isGroup: false;
+};
+
+type TableRow = GroupRow | FeatureRow;
+
 export default function CrossTireOverviewPage() {
     const {t} = useTranslation();
+    const benefitKeyMap = useTenantBenefitKeyToTranslationMap();
+    const benefitGroupMap = useTenantBenefitGroupToTranslationMap();
     const [tireTypes, setTireTypes] = useState<{ id: string; name: string }[]>([]);
     const [groupData, setGroupData] = useState<TenantTireBenefitOverviewGroupVO[]>([]);
     const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
-    const [total, setTotal] = useState(0);
     const [readOnly, setReadOnly] = useState(true);
     const [showDefaultValue, setShowDefaultValue] = useState(true);
 
@@ -40,34 +61,30 @@ export default function CrossTireOverviewPage() {
         });
     }, []);
 
-    // 2. Load overview data for ALL tire types with pagination
+    // 2. Load overview data for ALL tire types in a single call (no pagination)
     useEffect(() => {
         if (tireTypes.length === 0) return;
         setLoading(true);
-        queryBenefitOverview({
-            tireTypeIds: tireTypes.map((t) => t.id),
-            page,
-            pageSize,
-        })
+        queryBenefitOverview({tireTypeIds: tireTypes.map((t) => t.id)})
             .then((res) => {
-                setGroupData(res.data?.records ?? []);
-                setTotal(res.data?.total ?? 0);
+                setGroupData(res.data ?? []);
             })
             .finally(() => setLoading(false));
-    }, [tireTypes, page, pageSize]);
+    }, [tireTypes]);
 
-    // 3. Build matrix: featureId → row with per-tire values
+    // 3. Build matrix: featureId → row with per-tire values, with i18n translations
     const matrixData: MatrixRow[] = useMemo(() => {
         const featureMap = new Map<string, MatrixRow>();
 
         groupData.forEach((group) => {
             group.items.forEach((item: TenantTireBenefitOverviewItemVO) => {
                 if (!featureMap.has(item.featureId)) {
+                    const translation = benefitKeyMap.get(item.featureKey);
                     featureMap.set(item.featureId, {
                         featureId: item.featureId,
                         featureKey: item.featureKey,
-                        name: item.name,
-                        description: item.description,
+                        name: translation?.name ?? item.name,
+                        description: translation?.description ?? item.description,
                         featureType: item.featureType,
                         defaultValue: item.defaultValue,
                         tireValues: {},
@@ -86,21 +103,41 @@ export default function CrossTireOverviewPage() {
         });
 
         return Array.from(featureMap.values());
-    }, [groupData]);
+    }, [groupData, benefitKeyMap]);
 
-    const refreshData = () => {
-        if (tireTypes.length === 0) return;
-        queryBenefitOverview({
-            tireTypeIds: tireTypes.map((t) => t.id),
-            page,
-            pageSize,
-        }).then((res) => {
-            setGroupData(res.data?.records ?? []);
-            setTotal(res.data?.total ?? 0);
+    // 4. Group flat matrix rows by featureKey first segment for two-level table display
+    const groupedTableData: TableRow[] = useMemo(() => {
+        const buckets = new Map<string, FeatureRow[]>();
+        matrixData.forEach((row) => {
+            const groupKey = getBenefitGroupKey(row.featureKey);
+            const featureRow: FeatureRow = {...row, rowKey: `feature_${row.featureId}`, isGroup: false};
+            if (!buckets.has(groupKey)) buckets.set(groupKey, []);
+            buckets.get(groupKey)!.push(featureRow);
         });
+
+        const result: TableRow[] = [];
+        buckets.forEach((children, groupKey) => {
+            const translation = benefitGroupMap.get(groupKey);
+            result.push({
+                rowKey: `group_${groupKey}`,
+                groupKey,
+                groupLabel: translation?.label ?? groupKey,
+                groupIcon: translation?.icon,
+                childrenCount: children.length,
+                isGroup: true,
+                children,
+            });
+        });
+        return result;
+    }, [matrixData, benefitGroupMap]);
+
+    const refreshData = async () => {
+        if (tireTypes.length === 0) return;
+        const res = await queryBenefitOverview({tireTypeIds: tireTypes.map((t) => t.id)});
+        setGroupData(res.data ?? []);
     };
 
-    // 4. Build table columns
+    // 4. Build table columns (handles both group parent rows and feature child rows)
     const columns = [
         {
             title: t('pages.tenantTireBenefitValueManager.crossOverview.name'),
@@ -108,18 +145,29 @@ export default function CrossTireOverviewPage() {
             key: 'name',
             fixed: 'left' as const,
             width: 240,
-            render: (_: unknown, row: MatrixRow) => (
-                <div>
-                    <div>{row.name}</div>
-                    {row.description && (
-                        <div className="text-gray-400 text-xs leading-tight mt-0.5">
-                            {row.description.length > 128
-                                ? `${row.description.slice(0, 128)}...`
-                                : row.description}
-                        </div>
-                    )}
-                </div>
-            ),
+            render: (_: unknown, row: TableRow) => {
+                if (row.isGroup) {
+                    return (
+                        <Space>
+                            {row.groupIcon}
+                            <span className="font-medium">{row.groupLabel}</span>
+                            <Tag color="blue">{row.childrenCount}</Tag>
+                        </Space>
+                    );
+                }
+                return (
+                    <div className="inline-block align-top">
+                        <div>{row.name}</div>
+                        {row.description && (
+                            <div className="text-gray-400 text-xs leading-tight mt-0.5">
+                                {row.description.length > 128
+                                    ? `${row.description.slice(0, 128)}...`
+                                    : row.description}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
         ...(readOnly ? [] : [
             {
@@ -127,9 +175,10 @@ export default function CrossTireOverviewPage() {
                 dataIndex: 'featureKey',
                 key: 'featureKey',
                 width: 260,
-                render: (_: unknown, row: MatrixRow) => (
-                    <Typography.Text copyable>{row.featureKey}</Typography.Text>
-                ),
+                render: (_: unknown, row: TableRow) => {
+                    if (row.isGroup) return null;
+                    return <Typography.Text copyable>{row.featureKey}</Typography.Text>;
+                },
             },
         ]),
         ...(showDefaultValue ? [
@@ -137,7 +186,8 @@ export default function CrossTireOverviewPage() {
                 title: t('pages.tenantTireBenefitValueManager.overview.defaultValue'),
                 key: 'defaultValue',
                 width: 100,
-                render: (_: unknown, row: MatrixRow) => {
+                render: (_: unknown, row: TableRow) => {
+                    if (row.isGroup) return null;
                     if (row.defaultValue === null) return <span>-</span>;
                     if (row.featureType === TenantBenefitType.BOOLEAN) {
                         return row.defaultValue === 'true'
@@ -152,7 +202,8 @@ export default function CrossTireOverviewPage() {
             title: tire.name,
             key: tire.id,
             width: readOnly ? 120 : 240,
-            render: (_: unknown, row: MatrixRow) => {
+            render: (_: unknown, row: TableRow) => {
+                if (row.isGroup) return null;
                 const value = row.tireValues[tire.id];
                 if (value === undefined) return <span>-</span>;
                 return (
@@ -196,23 +247,17 @@ export default function CrossTireOverviewPage() {
                         <span className="text-sm">{t('pages.tenantTireBenefitValueManager.crossOverview.edit')}</span>
                     </Space>
                 </div>
-                <Table
-                    rowKey="featureId"
+                <Table<TableRow>
+                    rowKey="rowKey"
                     loading={loading}
-                    dataSource={matrixData}
+                    dataSource={groupedTableData}
                     columns={columns}
-                    scroll={{ x: 'max-content' }}
-                    pagination={{
-                        showSizeChanger: true,
-                        current: page,
-                        pageSize,
-                        total,
-                        pageSizeOptions: [5, 10, 15, 20],
-                        onChange: (p, ps) => {
-                            setPage(p);
-                            setPageSize(ps);
-                        },
+                    expandable={{
+                        defaultExpandAllRows: true,
+                        rowExpandable: (row) => row.isGroup === true,
                     }}
+                    scroll={{ x: 'max-content' }}
+                    pagination={false}
                 />
                 </BenefitValueEditProvider>
             </StandardCard>

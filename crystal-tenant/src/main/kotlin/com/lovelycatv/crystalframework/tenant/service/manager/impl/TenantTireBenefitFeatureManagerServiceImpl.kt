@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerCreateTenantTireBenefitFeatureDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerUpdateTenantTireBenefitFeatureDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantTireBenefitFeatureEntity
@@ -99,5 +100,9 @@ class TenantTireBenefitFeatureManagerServiceImpl(
     override suspend fun batchDelete(ids: List<Long>) {
         benefitValueRepository.deleteByFeatureIdIn(ids).awaitFirstOrNull()
         super.batchDelete(ids)
+    }
+
+    override suspend fun findAllFeatures(): List<TenantTireBenefitFeatureEntity> {
+        return benefitFeatureRepository.findAll().awaitListWithTimeout()
     }
 }
