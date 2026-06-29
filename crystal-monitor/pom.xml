@@ -72,6 +72,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-schedule</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
