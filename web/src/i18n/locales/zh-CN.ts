@@ -2072,7 +2072,11 @@ export const zhCN: I18nRules = {
     sessionMonitor: {
       title: '在线会话监控',
       subtitle: '查看当前系统中的在线会话列表',
-      entityName: '会话'
+      entityName: '会话',
+      filter: {
+        type: '会话类型',
+        typePlaceholder: '按类型筛选'
+      }
     },
     systemMonitor: {
       title: '系统监控',
@@ -2781,6 +2785,7 @@ export const zhCN: I18nRules = {
       },
       sessionMonitor: {
         sessionId: '会话ID',
+        type: '类型',
         user: '用户',
         tenant: '租户',
         remoteIp: 'IP地址',
@@ -2995,6 +3000,10 @@ export const zhCN: I18nRules = {
       2: '已辞职',
       3: '审核中',
       4: '正常'
+    },
+    sessionType: {
+      0: '用户',
+      1: 'Prometheus'
     },
     tenantStatus: {
       0: '审核中',

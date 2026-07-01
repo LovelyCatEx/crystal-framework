@@ -17,6 +17,10 @@ export function getTenantMemberStatus(status: number): string {
     return translateEnum('tenantMemberStatus', status);
 }
 
+export function getSessionType(type: number): string {
+    return translateEnum('sessionType', type);
+}
+
 export function getTenantStatus(status: number): string {
     return translateEnum('tenantStatus', status);
 }

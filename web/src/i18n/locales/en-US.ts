@@ -2075,7 +2075,11 @@ export const enUS: I18nRules = {
     sessionMonitor: {
       title: 'Online Sessions Monitor',
       subtitle: 'View the list of online sessions in the system',
-      entityName: 'Session'
+      entityName: 'Session',
+      filter: {
+        type: 'Session Type',
+        typePlaceholder: 'Filter by type'
+      }
     },
     systemMonitor: {
       title: 'System Monitor',
@@ -2783,6 +2787,7 @@ export const enUS: I18nRules = {
       },
       sessionMonitor: {
         sessionId: 'Session ID',
+        type: 'Type',
         user: 'User',
         tenant: 'Tenant',
         remoteIp: 'IP Address',
@@ -2997,6 +3002,10 @@ export const enUS: I18nRules = {
       2: 'Quit',
       3: 'Pending',
       4: 'Active'
+    },
+    sessionType: {
+      0: 'User',
+      1: 'Prometheus'
     },
     tenantStatus: {
       0: 'Pending',

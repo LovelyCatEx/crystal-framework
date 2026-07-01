@@ -6,6 +6,7 @@ export interface SessionSearchDTO {
     page: number;
     pageSize: number;
     sessionId?: string;
+    type?: number;
 }
 
 export async function getOnlineSessions(dto: SessionSearchDTO): Promise<PaginatedResponseData<SessionDescription>> {
