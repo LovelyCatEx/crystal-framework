@@ -6,6 +6,21 @@
 1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
 :::
 
+## v1.11.1
+
+2026-07-01
+
+### Features
++ feat(monitor): Support Prometheus + Grafana monitoring metrics.
++ feat(web): Tenant benefit overview now returns the full view.
++ feat(system): Optionally toggle the approval and tenant modules.
++ feat(monitor): Distinguish between different session types.
+
+### Others
++ docs(skills): Update the tenant-benefit skill documentation.
+
+---
+
 ## v1.11.0
 
 2026-06-19

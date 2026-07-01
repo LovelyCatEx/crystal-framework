@@ -347,4 +347,20 @@ object SystemSettingsConstants {
         }
 
     }
+
+    object Module {
+        val TENANT_ENABLED = SettingsItemDeclaration(
+            key = "module.tenant.enabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 0
+        )
+
+        val APPROVAL_ENABLED = SettingsItemDeclaration(
+            key = "module.approval.enabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 1
+        )
+    }
 }

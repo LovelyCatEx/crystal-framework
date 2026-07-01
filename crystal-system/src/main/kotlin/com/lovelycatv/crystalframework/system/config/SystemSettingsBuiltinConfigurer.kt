@@ -58,6 +58,8 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.OAuth.Oicq.CLIENT_ID,
                 SystemSettingsConstants.OAuth.Oicq.CLIENT_SECRET,
                 SystemSettingsConstants.OAuth.Oicq.SCOPE,
+                SystemSettingsConstants.Module.TENANT_ENABLED,
+                SystemSettingsConstants.Module.APPROVAL_ENABLED,
             )
         )
     }

@@ -88,9 +88,12 @@ class ApprovalFlowEngineTest(
         return edgeService.getRepository().save(entity).awaitFirst()
     }
 
-    private fun approvalConfig(vararg userIds: Long): String {
+    private fun approvalConfig(
+        vararg userIds: Long,
+        approveMode: ApprovalFlowApproveMode = ApprovalFlowApproveMode.AND
+    ): String {
         return ApprovalNodeConfig(
-            approveMode = ApprovalFlowApproveMode.AND.typeId,
+            approveMode = approveMode.typeId,
             strategy = ApprovalFlowApproverStrategy.SPECIFIED_USER.typeId,
             strategyParams = mapOf("userIds" to userIds.map { it.toString() })
         ).toJSONString()
@@ -380,6 +383,185 @@ class ApprovalFlowEngineTest(
             val activeTokens = getActiveTokens(instance.id)
             assertTrue(activeTokens.isEmpty())
             println("[complex] P7 approved I → CC2 → END. Flow completed!")
+        }
+    }
+
+    /*
+     * AND approve mode — all approvers must approve before the flow advances:
+     *
+     *   START --> A(P1, P2, P3 - AND) --> END
+     *
+     * Token path:
+     *   T1 starts at A. P1 approves -> instance still IN_PROGRESS (2 pending at A).
+     *   P2 approves -> instance still IN_PROGRESS (1 pending at A).
+     *   P3 approves -> all 3 approved -> T1 moves to END -> instance APPROVED.
+     */
+    @Test
+    fun andApproveModeAllApproved() {
+        withTransactionalRollback("and-approve-mode-all-approved") {
+            val p1 = mockUserId()
+            val p2 = mockUserId()
+            val p3 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val nodeA = createNode(
+                def.id, 1, ApprovalFlowNodeType.APPROVAL, "A",
+                approvalConfig(p1, p2, p3, approveMode = ApprovalFlowApproveMode.AND)
+            )
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, nodeA.id)
+            createEdge(def.id, 1, nodeA.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+
+            var pendingTasks = getPendingTasks(instance.id)
+            assertEquals(3, pendingTasks.size)
+            val taskP1 = pendingTasks.first { it.assigneeId == p1 }
+            val taskP2 = pendingTasks.first { it.assigneeId == p2 }
+            val taskP3 = pendingTasks.first { it.assigneeId == p3 }
+            println("[and-all] 3 pending tasks created at node A")
+
+            approvalFlowEngine.handleTask(taskP1.id, p1, true, "ok", null)
+            var inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.IN_PROGRESS.typeId, inst.status)
+            assertEquals(2, getPendingTasks(instance.id).size)
+            println("[and-all] P1 approved, 2 pending remain")
+
+            approvalFlowEngine.handleTask(taskP2.id, p2, true, "ok", null)
+            inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.IN_PROGRESS.typeId, inst.status)
+            assertEquals(1, getPendingTasks(instance.id).size)
+            println("[and-all] P2 approved, 1 pending remains")
+
+            approvalFlowEngine.handleTask(taskP3.id, p3, true, "ok", null)
+            inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.APPROVED.typeId, inst.status)
+
+            val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, nodeA.id).toList()
+            assertEquals(3, allTasks.size)
+            assertTrue(allTasks.all { it.getRealStatus() == ApprovalFlowTaskStatus.APPROVED })
+
+            val activeTokens = getActiveTokens(instance.id)
+            assertTrue(activeTokens.isEmpty())
+            println("[and-all] P3 approved → all approved → instance APPROVED")
+        }
+    }
+
+    /*
+     * AND approve mode — one rejection vetoes the whole instance:
+     *
+     *   START --> A(P1, P2, P3 - AND) --> END
+     *
+     * Token path:
+     *   T1 starts at A. P1 approves -> instance still IN_PROGRESS.
+     *   P2 rejects -> rejectInstance -> instance REJECTED immediately.
+     *   P3's task remains PENDING (engine does not auto-skip in AND-reject path).
+     */
+    @Test
+    fun andApproveModeOneRejected() {
+        withTransactionalRollback("and-approve-mode-one-rejected") {
+            val p1 = mockUserId()
+            val p2 = mockUserId()
+            val p3 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val nodeA = createNode(
+                def.id, 1, ApprovalFlowNodeType.APPROVAL, "A",
+                approvalConfig(p1, p2, p3, approveMode = ApprovalFlowApproveMode.AND)
+            )
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, nodeA.id)
+            createEdge(def.id, 1, nodeA.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+
+            val pendingTasks = getPendingTasks(instance.id)
+            assertEquals(3, pendingTasks.size)
+            val taskP1 = pendingTasks.first { it.assigneeId == p1 }
+            val taskP2 = pendingTasks.first { it.assigneeId == p2 }
+
+            approvalFlowEngine.handleTask(taskP1.id, p1, true, "ok", null)
+            var inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.IN_PROGRESS.typeId, inst.status)
+            println("[and-reject] P1 approved, instance still IN_PROGRESS")
+
+            approvalFlowEngine.handleTask(taskP2.id, p2, false, "reject reason", null)
+            inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.REJECTED.typeId, inst.status)
+
+            val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, nodeA.id).toList()
+            val approvedTask = allTasks.first { it.assigneeId == p1 }
+            val rejectedTask = allTasks.first { it.assigneeId == p2 }
+            val remainingTask = allTasks.first { it.assigneeId == p3 }
+            assertEquals(ApprovalFlowTaskStatus.APPROVED, approvedTask.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.REJECTED, rejectedTask.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.PENDING, remainingTask.getRealStatus())
+            println("[and-reject] P2 rejected → instance REJECTED, P3 task remains PENDING")
+        }
+    }
+
+    /*
+     * OR approve mode — any approval advances the flow, remaining tasks are SKIPPED:
+     *
+     *   START --> A(P1, P2, P3 - OR) --> END
+     *
+     * Token path:
+     *   T1 starts at A with 3 pending tasks. P1 approves ->
+     *     P2 and P3 tasks are marked SKIPPED, T1 moves to END -> instance APPROVED.
+     */
+    @Test
+    fun orApproveModeFirstApproved() {
+        withTransactionalRollback("or-approve-mode-first-approved") {
+            val p1 = mockUserId()
+            val p2 = mockUserId()
+            val p3 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val nodeA = createNode(
+                def.id, 1, ApprovalFlowNodeType.APPROVAL, "A",
+                approvalConfig(p1, p2, p3, approveMode = ApprovalFlowApproveMode.OR)
+            )
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, nodeA.id)
+            createEdge(def.id, 1, nodeA.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+
+            val pendingTasks = getPendingTasks(instance.id)
+            assertEquals(3, pendingTasks.size)
+            val taskP1 = pendingTasks.first { it.assigneeId == p1 }
+            println("[or-first] 3 pending tasks created at node A")
+
+            approvalFlowEngine.handleTask(taskP1.id, p1, true, "ok", null)
+            val inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.APPROVED.typeId, inst.status)
+
+            val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, nodeA.id).toList()
+            val approvedTask = allTasks.first { it.assigneeId == p1 }
+            val skippedP2 = allTasks.first { it.assigneeId == p2 }
+            val skippedP3 = allTasks.first { it.assigneeId == p3 }
+            assertEquals(ApprovalFlowTaskStatus.APPROVED, approvedTask.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.SKIPPED, skippedP2.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.SKIPPED, skippedP3.getRealStatus())
+
+            val activeTokens = getActiveTokens(instance.id)
+            assertTrue(activeTokens.isEmpty())
+            println("[or-first] P1 approved → P2/P3 SKIPPED → instance APPROVED")
         }
     }
 }

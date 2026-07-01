@@ -93,6 +93,7 @@ import i18n from "@/i18n";
 import type {MenuGroup, MenuItem} from "@/types/menu.types.ts";
 import type {MenuItemType} from "antd/lib/menu/interface";
 import {menuPathDashboard, menuPathProfile} from "@/router/paths.ts";
+import {resolveDisabledMenuPrefixes} from "@/router/system-module-menu-paths.ts";
 
 
 
@@ -628,23 +629,35 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
     ];
 }
 
-export function computeAccessibleMenus(accessiblePathList: string[], t: TFunction): RouteItem[] {
+export function computeAccessibleMenus(
+    accessiblePathList: string[],
+    t: TFunction,
+    disabledModules: string[] = [],
+): RouteItem[] {
     const publicMenus = getPublicMenus(t);
     const tenantMenus = getTenantMenus(t);
     const adminMenus = getAdminMenus(t);
 
+    const disabledPrefixes = resolveDisabledMenuPrefixes(disabledModules);
+    const isDisabledByModule = (menu: RouteItem) =>
+        disabledPrefixes.some((prefix) => menu.path.startsWith(prefix));
+
+    const visiblePublicMenus = publicMenus.filter((menu) => !isDisabledByModule(menu));
+
     if (!accessiblePathList || accessiblePathList.length == 0) {
         return [
-            ...publicMenus,
+            ...visiblePublicMenus,
         ];
     }
 
     return [
-        ...publicMenus,
+        ...visiblePublicMenus,
         ...tenantMenus
-            .filter((menu) => accessiblePathList.includes(menu.path)),
+            .filter((menu) => accessiblePathList.includes(menu.path))
+            .filter((menu) => !isDisabledByModule(menu)),
         ...adminMenus
-            .filter((menu) => accessiblePathList.includes(menu.path)),
+            .filter((menu) => accessiblePathList.includes(menu.path))
+            .filter((menu) => !isDisabledByModule(menu)),
     ];
 }
 

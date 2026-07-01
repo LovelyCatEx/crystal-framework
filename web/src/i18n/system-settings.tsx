@@ -1,5 +1,6 @@
 import type {ReactNode} from "react";
 import {
+    AppstoreOutlined,
     CopyrightCircleOutlined,
     InfoCircleOutlined,
     LockOutlined,
@@ -73,6 +74,8 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['oauth.oicq.clientId', t('pages.systemSettingsManager.keys.oauth.oicq.clientId')],
         ['oauth.oicq.clientSecret', t('pages.systemSettingsManager.keys.oauth.oicq.clientSecret')],
         ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
+        ['module.tenant.enabled', t('pages.systemSettingsManager.keys.module.tenant.enabled')],
+        ['module.approval.enabled', t('pages.systemSettingsManager.keys.module.approval.enabled')],
     ]);
 
     for (const key of pluginKeys) {
@@ -98,6 +101,8 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['oauth.github', { label: t('pages.systemSettingsManager.groups.oauth.github'), icon: <ApiOutlined /> }],
         ['oauth.google', { label: t('pages.systemSettingsManager.groups.oauth.google'), icon: <ApiOutlined /> }],
         ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
+        ['module.tenant', { label: t('pages.systemSettingsManager.groups.module.tenant'), icon: <AppstoreOutlined /> }],
+        ['module.approval', { label: t('pages.systemSettingsManager.groups.module.approval'), icon: <AppstoreOutlined /> }],
     ]);
 
     for (const group of pluginGroups) {
@@ -120,6 +125,7 @@ export function useSettingsTabToTranslationMap(): Map<string, string> {
         ['messageChannel', t('pages.systemSettingsManager.tabs.messageChannel')],
         ['security', t('pages.systemSettingsManager.tabs.security')],
         ['oauth', t('pages.systemSettingsManager.tabs.oauth')],
+        ['module', t('pages.systemSettingsManager.tabs.module')],
     ]);
 
     for (const tab of pluginTabs) {

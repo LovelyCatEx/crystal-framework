@@ -22,7 +22,7 @@ class SessionsMonitorController(
     @GetMapping("/online")
     suspend fun getSessions(@Valid dto: SessionSearchDTO): ApiResponse<*> {
         return ApiResponse.success(
-            sessionMonitorService.getSessions(dto.page, dto.pageSize, dto.sessionId)
+            sessionMonitorService.getSessions(dto.page, dto.pageSize, dto.sessionId, dto.type)
         )
     }
 }

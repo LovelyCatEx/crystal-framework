@@ -2,6 +2,7 @@ export interface SystemIntegratedInfoVO {
     maintenance: MaintenanceInfoVO;
     waterMark: WaterMarkInfo;
     enabledOAuthPlatforms: number[];
+    disabledModules: string[];
 }
 
 export interface MaintenanceInfoVO {

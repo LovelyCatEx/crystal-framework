@@ -50,6 +50,10 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
         label: React.ReactNode | JSX.Element,
         children: React.ReactNode | JSX.Element,
     }[];
+    tableSuffixActions?: {
+        label: React.ReactNode | JSX.Element,
+        children: React.ReactNode | JSX.Element,
+    }[];
     filterableFields?: FilterableField[];
     /**
      * Fields the global search box will OR against.
@@ -618,6 +622,13 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                         </Button>
                     </Popover>
                 </div>
+
+                {props.tableSuffixActions?.map((action, index) => (
+                    <div key={`suffix-${index}`} className="flex flex-col space-y-2">
+                        <span>{action.label}</span>
+                        {action.children}
+                    </div>
+                ))}
             </Flex>
 
             <Table<ENTITY>

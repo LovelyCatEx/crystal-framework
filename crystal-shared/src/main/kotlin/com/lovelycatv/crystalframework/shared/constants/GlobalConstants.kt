@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.shared.constants
 import org.springframework.core.Ordered
 
 object GlobalConstants {
-    const val APP_VERSION = "1.11.0"
+    const val APP_VERSION = "1.11.1"
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
 
@@ -12,6 +12,9 @@ object GlobalConstants {
 
         // After AuthFilter
         const val SYSTEM_MAINTENANCE_GUARD = Ordered.LOWEST_PRECEDENCE - 1000
+
+        // After SystemMaintenanceGuardFilter
+        const val SYSTEM_MODULE_GUARD = SYSTEM_MAINTENANCE_GUARD + 1
 
         // After LoggerFilter
         const val AUDIT_FILTER = LOGGER_FILTER + 1000

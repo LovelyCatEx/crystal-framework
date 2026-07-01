@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.system.controller
 
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemModulePathConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.system.controller.vo.SystemIntegratedInfoVO
@@ -28,6 +29,10 @@ class SystemIntegratedInfoController(
             if (oauthSettings.google.enabled) add(OAuthPlatform.GOOGLE.typeId)
             if (oauthSettings.oicq.enabled) add(OAuthPlatform.OICQ.typeId)
         }
+        val disabledModules = buildList {
+            if (!systemSettings.module.tenantEnabled) add(SystemModulePathConstants.Tenant.KEY)
+            if (!systemSettings.module.approvalEnabled) add(SystemModulePathConstants.Approval.KEY)
+        }
         return ApiResponse.success(
             SystemIntegratedInfoVO(
                 maintenance = readinessController.getSystemMaintenance().data!!,
@@ -37,7 +42,8 @@ class SystemIntegratedInfoController(
                     customValue = systemSettings.basic.waterMark.customValue,
                     fontColor = systemSettings.basic.waterMark.fontColor
                 ),
-                enabledOAuthPlatforms = enabledPlatforms
+                enabledOAuthPlatforms = enabledPlatforms,
+                disabledModules = disabledModules,
             )
         )
     }
