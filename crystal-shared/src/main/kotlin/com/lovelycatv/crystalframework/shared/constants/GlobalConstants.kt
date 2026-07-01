@@ -13,6 +13,9 @@ object GlobalConstants {
         // After AuthFilter
         const val SYSTEM_MAINTENANCE_GUARD = Ordered.LOWEST_PRECEDENCE - 1000
 
+        // After SystemMaintenanceGuardFilter
+        const val SYSTEM_MODULE_GUARD = SYSTEM_MAINTENANCE_GUARD + 1
+
         // After LoggerFilter
         const val AUDIT_FILTER = LOGGER_FILTER + 1000
     }

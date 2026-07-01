@@ -54,6 +54,8 @@ import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
 import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
+import {SystemModuleKey} from "@/router/system-module-menu-paths.ts";
+import {SystemModuleGate} from "@/components/SystemModuleGate.tsx";
 import {MANAGER_PAGE_TABS_EXPIRES_IN, MANAGER_PAGE_TABS_STORAGE_KEY_PREFIX} from "@/global/constants.ts";
 import {ContextMenu} from "@/components/contextmenu";
 import type {ContextMenuItem} from "@/components/contextmenu";
@@ -510,7 +512,7 @@ function ManagerPageTabs({ availableMenus, availableMenusLoading, tabSize, stora
 }
 
 export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
-    const { waterMarkInfo } = useSystemIntegrated()
+    const { waterMarkInfo, disabledModules } = useSystemIntegrated()
     const { token } = useToken();
     const { t } = useTranslation();
 
@@ -610,8 +612,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
     const pageAnimationClass = pageAnimation === 'none' ? '' : `page-animation-${pageAnimation}`;
 
     const availableMenus = useMemo(() => {
-        return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t);
-    }, [loggedUser.accessibleMenuPaths, t]);
+        return computeAccessibleMenus(loggedUser.accessibleMenuPaths ?? [], t, disabledModules);
+    }, [loggedUser.accessibleMenuPaths, disabledModules, t]);
 
     const managerTabsStorageKey = useMemo(() => {
         const userId = loggedUser.userProfile?.id;
@@ -712,7 +714,9 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                             {ProjectDisplayName}
                         </span>
                     </div>
-                    <TenantSwitcher />
+                    <SystemModuleGate moduleKey={SystemModuleKey.TENANT}>
+                        <TenantSwitcher />
+                    </SystemModuleGate>
                 </div>
 
                 <div className="flex flex-row items-center gap-4">

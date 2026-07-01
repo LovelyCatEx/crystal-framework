@@ -8,6 +8,7 @@ interface SystemIntegratedContextValue {
     integratedInfo: SystemIntegratedInfoVO | undefined;
     maintenanceInfo: MaintenanceInfoVO | undefined;
     waterMarkInfo: WaterMarkInfo | undefined;
+    disabledModules: string[];
     isLoading: boolean;
     error: Error | undefined;
     mutate: () => void;
@@ -25,6 +26,7 @@ export function SystemIntegratedProvider({children}: { children: React.ReactNode
         integratedInfo: data,
         maintenanceInfo: data?.maintenance,
         waterMarkInfo: data?.waterMark,
+        disabledModules: data?.disabledModules ?? [],
         isLoading,
         error,
         mutate,

@@ -1851,6 +1851,8 @@ export const enUS: I18nRules = {
         'oauth.oicq.clientId': 'Client ID',
         'oauth.oicq.clientSecret': 'Client Secret',
         'oauth.oicq.scope': 'Scope',
+        'module.tenant.enabled': 'Enable Tenant Module',
+        'module.approval.enabled': 'Enable Approval Module',
       },
       groups: {
         'basic': 'Basic Settings',
@@ -1862,6 +1864,8 @@ export const enUS: I18nRules = {
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
+        'module.tenant': 'Tenant Module',
+        'module.approval': 'Approval Module',
       },
       tabs: {
         'basic': 'Basic',
@@ -1870,6 +1874,7 @@ export const enUS: I18nRules = {
         'messageChannel': 'Message Channel',
         'security': 'Security',
         'oauth': 'OAuth',
+        'module': 'Modules',
       },
       enums: {
         'security.api.encrypt.scope': {

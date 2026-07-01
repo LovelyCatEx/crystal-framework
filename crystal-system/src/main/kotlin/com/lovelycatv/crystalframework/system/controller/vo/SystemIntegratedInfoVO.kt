@@ -4,6 +4,7 @@ data class SystemIntegratedInfoVO(
     val maintenance: MaintenanceInfoVO,
     val waterMark: WaterMark,
     val enabledOAuthPlatforms: List<Int>,
+    val disabledModules: List<String>,
 ) {
     data class WaterMark(
         val enabled: Boolean,

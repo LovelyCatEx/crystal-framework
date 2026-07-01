@@ -1848,6 +1848,8 @@ export const zhCN: I18nRules = {
         'oauth.oicq.clientId': 'Client ID',
         'oauth.oicq.clientSecret': 'Client Secret',
         'oauth.oicq.scope': '授权范围',
+        'module.tenant.enabled': '启用租户模块',
+        'module.approval.enabled': '启用审批模块',
       },
       groups: {
         'basic': '基本设置',
@@ -1859,6 +1861,8 @@ export const zhCN: I18nRules = {
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
+        'module.tenant': '租户模块',
+        'module.approval': '审批模块',
       },
       tabs: {
         'basic': '基本',
@@ -1867,6 +1871,7 @@ export const zhCN: I18nRules = {
         'messageChannel': '消息渠道',
         'security': '安全',
         'oauth': 'OAuth',
+        'module': '功能模块',
       },
       enums: {
         'security.api.encrypt.scope': {
