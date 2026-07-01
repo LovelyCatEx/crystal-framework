@@ -6,4 +6,5 @@ data class SessionSearchDTO(
     override val page: Int,
     override val pageSize: Int,
     val sessionId: String?,
+    val type: Int?,
 ) : PageQuery(page, pageSize)

@@ -5,9 +5,18 @@ import type {TenantTireBenefitFeature} from "@/types/tenant/tenant-benefit.types
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
+import {useTenantBenefitKeyToTranslationMap} from "@/i18n/tenant-benefit.tsx";
 
-export function useTenantTireBenefitFeatureTableColumns(): EntityTableColumns<TenantTireBenefitFeature> {
+export interface TenantTireBenefitFeatureColumnsOptions {
+    useI18n?: boolean;
+}
+
+export function useTenantTireBenefitFeatureTableColumns(
+    options: TenantTireBenefitFeatureColumnsOptions = {}
+): EntityTableColumns<TenantTireBenefitFeature> {
     const { t } = useTranslation();
+    const { useI18n = false } = options;
+    const benefitKeyMap = useTenantBenefitKeyToTranslationMap();
 
     return [
         {
@@ -30,7 +39,8 @@ export function useTenantTireBenefitFeatureTableColumns(): EntityTableColumns<Te
             dataIndex: "name",
             key: "name",
             render: function (_: unknown, row: TenantTireBenefitFeature): React.ReactNode | JSX.Element {
-                return <span className="text-xs font-mono font-bold">{row.name}</span>
+                const translated = useI18n ? benefitKeyMap.get(row.featureKey)?.name : undefined;
+                return <span className="text-xs font-mono font-bold">{translated ?? row.name}</span>
             }
         },
         {
@@ -39,7 +49,8 @@ export function useTenantTireBenefitFeatureTableColumns(): EntityTableColumns<Te
             key: "description",
             width: 300,
             render: function (_: unknown, row: TenantTireBenefitFeature): React.ReactNode | JSX.Element {
-                return <span className="text-xs font-mono">{row.description ?? '-'}</span>
+                const translated = useI18n ? benefitKeyMap.get(row.featureKey)?.description : undefined;
+                return <span className="text-xs font-mono">{translated ?? row.description ?? '-'}</span>
             }
         },
         {

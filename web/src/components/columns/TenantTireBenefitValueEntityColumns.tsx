@@ -1,13 +1,17 @@
 import React, {type JSX, useEffect, useState} from "react";
 import {Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
-import type {TenantTireBenefitValue} from "@/types/tenant/tenant-benefit.types.ts";
+import type {TenantTireBenefitFeature, TenantTireBenefitValue} from "@/types/tenant/tenant-benefit.types.ts";
 import {TenantTireBenefitFeatureManagerController} from "@/api/tenant/tenant-benefit.api.ts";
 import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
 import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
-import type {TenantTireBenefitFeature} from "@/types/tenant/tenant-benefit.types.ts";
+import {useTenantBenefitKeyToTranslationMap} from "@/i18n/tenant-benefit.tsx";
+
+export interface TenantTireBenefitValueColumnsOptions {
+    useI18n?: boolean;
+}
 
 // ── TireType resolver ──
 
@@ -30,9 +34,9 @@ const TireTypeNameDisplay: React.FC<{ tireTypeId: string }> = ({ tireTypeId }) =
     );
 };
 
-// ── Feature resolver ──
+// ── Feature resolver: returns the full feature so columns can render name/desc/type independently ──
 
-const FeatureInfoDisplay: React.FC<{ featureId: string }> = ({ featureId }) => {
+function useFeatureById(featureId: string): { feature: TenantTireBenefitFeature | null; loading: boolean } {
     const [feature, setFeature] = useState<TenantTireBenefitFeature | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -44,22 +48,48 @@ const FeatureInfoDisplay: React.FC<{ featureId: string }> = ({ featureId }) => {
             .finally(() => setLoading(false));
     }, [featureId]);
 
-    if (loading) return <Spin size="small" />;
+    return { feature, loading };
+}
 
-    if (!feature) return <Tag color="red">Unknown</Tag>;
+const FeatureNameDescDisplay: React.FC<{ featureId: string; useI18n: boolean }> = ({ featureId, useI18n }) => {
+    const { feature, loading } = useFeatureById(featureId);
+    const benefitKeyMap = useTenantBenefitKeyToTranslationMap();
+
+    if (loading) return <Spin size="small" />;
+    if (!feature) return <span className="text-red-500">Unknown</span>;
+
+    const translation = useI18n ? benefitKeyMap.get(feature.featureKey) : undefined;
+    const displayName = translation?.name ?? feature.name;
+    const displayDesc = translation?.description ?? feature.description;
 
     return (
-        <Space size={4}>
-            <Tag color="purple">{feature.name}</Tag>
-            <Tag color="cyan">{getTenantBenefitType(feature.featureType)}</Tag>
-        </Space>
+        <div className="inline-block align-top">
+            <div>{displayName}</div>
+            {displayDesc && (
+                <div className="text-gray-400 text-xs leading-tight mt-0.5">
+                    {displayDesc.length > 128
+                        ? `${displayDesc.slice(0, 128)}...`
+                        : displayDesc}
+                </div>
+            )}
+        </div>
     );
+};
+
+const FeatureTypeDisplay: React.FC<{ featureId: string }> = ({ featureId }) => {
+    const { feature, loading } = useFeatureById(featureId);
+    if (loading) return <Spin size="small" />;
+    if (!feature) return <span className="text-red-500">-</span>;
+    return <Tag>{getTenantBenefitType(feature.featureType)}</Tag>;
 };
 
 // ── Columns ──
 
-export function useTenantTireBenefitValueTableColumns(): EntityTableColumns<TenantTireBenefitValue> {
+export function useTenantTireBenefitValueTableColumns(
+    options: TenantTireBenefitValueColumnsOptions = {}
+): EntityTableColumns<TenantTireBenefitValue> {
     const { t } = useTranslation();
+    const { useI18n = false } = options;
 
     return [
         {
@@ -93,7 +123,16 @@ export function useTenantTireBenefitValueTableColumns(): EntityTableColumns<Tena
             dataIndex: "featureId",
             key: "featureId",
             render: function (_: unknown, row: TenantTireBenefitValue): React.ReactNode | JSX.Element {
-                return <FeatureInfoDisplay featureId={row.featureId} />;
+                return <FeatureNameDescDisplay featureId={row.featureId} useI18n={useI18n} />;
+            }
+        },
+        {
+            title: t('components.columns.tenantTireBenefitValue.featureType'),
+            dataIndex: "featureType",
+            key: "featureType",
+            width: 120,
+            render: function (_: unknown, row: TenantTireBenefitValue): React.ReactNode | JSX.Element {
+                return <FeatureTypeDisplay featureId={row.featureId} />;
             }
         },
         {
@@ -101,7 +140,7 @@ export function useTenantTireBenefitValueTableColumns(): EntityTableColumns<Tena
             dataIndex: "featureValue",
             key: "featureValue",
             render: function (_: unknown, row: TenantTireBenefitValue): React.ReactNode | JSX.Element {
-                return <Tag color="green">{row.featureValue}</Tag>;
+                return <span>{row.featureValue}</span>;
             }
         },
     ];

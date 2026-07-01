@@ -1,5 +1,5 @@
-import {Col, Form, Input, InputNumber, Row, Select} from "antd";
-import {useEffect, useRef} from "react";
+import {Col, Form, Input, InputNumber, Row, Select, Space, Switch} from "antd";
+import {useEffect, useRef, useState} from "react";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantTireBenefitFeatureDTO,
@@ -16,7 +16,8 @@ export default function TenantTireBenefitFeatureManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const {t} = useTranslation();
     const { controller } = useProtectedController<TenantTireBenefitFeature, ManagerCreateTenantTireBenefitFeatureDTO, ManagerReadTenantTireBenefitFeatureDTO>();
-    const columns = useTenantTireBenefitFeatureTableColumns();
+    const [useI18n, setUseI18n] = useState(false);
+    const columns = useTenantTireBenefitFeatureTableColumns({ useI18n });
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { featureType: 'string' } });
 
     useEffect(() => {
@@ -75,6 +76,16 @@ export default function TenantTireBenefitFeatureManagerPage() {
                             { value: String(TenantBenefitType.ENUM), label: getTenantBenefitType(TenantBenefitType.ENUM) },
                         ]}
                     />,
+                },
+            ]}
+            tableSuffixActions={[
+                {
+                    label: <span>{t('pages.tenantTireBenefitFeatureManager.filter.useI18n')}</span>,
+                    children: <Space>
+                        <span className="text-xs text-gray-400">{t('pages.tenantTireBenefitFeatureManager.filter.useI18nDb')}</span>
+                        <Switch checked={useI18n} onChange={setUseI18n} />
+                        <span className="text-xs text-gray-400">{t('pages.tenantTireBenefitFeatureManager.filter.useI18nLocale')}</span>
+                    </Space>,
                 },
             ]}
             editModalFormChildren={<FeatureModalFormFields />}

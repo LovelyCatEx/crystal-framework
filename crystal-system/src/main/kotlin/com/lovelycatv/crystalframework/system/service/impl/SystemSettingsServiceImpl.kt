@@ -98,6 +98,7 @@ class SystemSettingsServiceImpl(
             messageChannel = getSystemMessageChannelSettings(),
             security = getSystemSecuritySettings(),
             oauth = getSystemOAuthSettings(),
+            module = getSystemModuleSettings(),
         ).also {
             this.cachedSystemSettings = it
             this.syncToCacheAsync()
@@ -158,6 +159,13 @@ class SystemSettingsServiceImpl(
                     securityLevel = getSettings<Long>(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt(),
                 )
             )
+        )
+    }
+
+    override suspend fun getSystemModuleSettings(): SystemSettings.Module {
+        return SystemSettings.Module(
+            tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
+            approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,
         )
     }
 
@@ -252,6 +260,9 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_ID, settings.oauth.oicq.clientId)
         setSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_SECRET, settings.oauth.oicq.clientSecret)
         setSettings(SystemSettingsConstants.OAuth.Oicq.SCOPE, settings.oauth.oicq.scope.toJSONString())
+
+        setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
+        setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
 
         this.refreshSystemSettings()
     }

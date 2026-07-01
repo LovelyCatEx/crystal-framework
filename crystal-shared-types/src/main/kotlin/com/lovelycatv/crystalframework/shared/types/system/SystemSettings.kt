@@ -9,6 +9,7 @@ data class SystemSettings(
     val messageChannel: MessageChannel,
     val security: Security,
     val oauth: OAuth,
+    val module: Module,
 ) {
     data class Basic(
         val baseUrl: String,
@@ -91,4 +92,9 @@ data class SystemSettings(
             val scope: List<String>,
         )
     }
+
+    data class Module(
+        val tenantEnabled: Boolean,
+        val approvalEnabled: Boolean,
+    )
 }

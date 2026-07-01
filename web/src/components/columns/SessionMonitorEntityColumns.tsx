@@ -1,6 +1,8 @@
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {SessionDescription} from "@/types/system/session.types.ts";
+import {SessionType} from "@/types/system/session.types.ts";
+import {getSessionType} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 import {Popover, Space, Spin, Tag} from "antd";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
@@ -115,14 +117,17 @@ function SessionUserAgentCell({ userAgent }: { userAgent: string }) {
     );
 }
 
-function SessionUserCell({ userId }: { userId: number }) {
-    const userIdStr = userId.toString();
+function SessionUserCell({ userId }: { userId: string | null }) {
     const { data: user, isLoading } = useSWRComposition<User | null>(
-        `session-user-${userId}`,
+        userId ? `session-user-${userId}` : undefined,
         async () => {
-            return await UserManagerController.getById(userIdStr);
+            return await UserManagerController.getById(userId!);
         }
     );
+
+    if (!userId) {
+        return <span className="text-gray-400">-</span>;
+    }
 
     if (isLoading) {
         return <Spin size="small" />;
@@ -130,7 +135,7 @@ function SessionUserCell({ userId }: { userId: number }) {
 
     if (user) {
         return (
-            <Popover content={<UserCard userId={userIdStr} />} placement="right" trigger="hover">
+            <Popover content={<UserCard userId={userId} />} placement="right" trigger="hover">
                 <Space size={8} className="cursor-pointer">
                     <AvatarResource fileEntityId={user.avatar} />
                     <Space orientation="vertical" size={0}>
@@ -143,24 +148,26 @@ function SessionUserCell({ userId }: { userId: number }) {
     }
 
     return <Space orientation='vertical' size={0}>
-        <CopyableToolTip title={userIdStr}>
+        <CopyableToolTip title={userId}>
             <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {userId}</Tag>
         </CopyableToolTip>
     </Space>;
 }
 
-function SessionTenantCell({ tenantId }: { tenantId: number }) {
-    if (tenantId <= 0) {
-        return <span className="text-gray-400">-</span>;
-    }
+function SessionTenantCell({ tenantId }: { tenantId: string | null }) {
+    const shouldFetch = tenantId != null && Number(tenantId) > 0;
 
-    const tenantIdStr = tenantId.toString();
+    // Hook must run on every render — feeding `undefined` as key tells SWR to skip fetching.
     const { data: tenant, isLoading } = useSWRComposition<Tenant | null>(
-        `session-tenant-${tenantId}`,
+        shouldFetch ? `session-tenant-${tenantId}` : undefined,
         async () => {
-            return await TenantManagerController.getById(tenantIdStr);
+            return await TenantManagerController.getById(tenantId!);
         }
     );
+
+    if (!shouldFetch) {
+        return <span className="text-gray-400">-</span>;
+    }
 
     if (isLoading) {
         return <Spin size="small" />;
@@ -172,7 +179,7 @@ function SessionTenantCell({ tenantId }: { tenantId: number }) {
         </CopyableToolTip>;
     }
 
-    return <CopyableToolTip title={tenantIdStr}>
+    return <CopyableToolTip title={tenantId}>
         <Tag color="purple" className="text-xs font-mono">{tenantId}</Tag>
     </CopyableToolTip>;
 }
@@ -191,6 +198,16 @@ export function useSessionMonitorTableColumns(): EntityTableColumns<SessionDescr
                     <Tag color="purple" className="text-xs font-mono">{record.sessionId}</Tag>
                 </CopyableToolTip>
             )
+        },
+        {
+            title: t('components.columns.sessionMonitor.type'),
+            dataIndex: "type",
+            key: "type",
+            width: 120,
+            render: (_: unknown, record: SessionDescription) => {
+                const color = record.type === SessionType.USER ? 'blue' : 'orange';
+                return <Tag color={color}>{getSessionType(record.type)}</Tag>;
+            }
         },
         {
             title: t('components.columns.sessionMonitor.user'),

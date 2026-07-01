@@ -3,9 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.benefit
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerReadTenantTireBenefitFeatureDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerReadTenantTireBenefitOverviewDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.ManagerReadTenantTireBenefitOverviewGroupVO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.ManagerReadTenantTireBenefitOverviewItemVO
@@ -34,28 +32,19 @@ class ManagerTenantTireBenefitOverviewController(
         @RequestBody
         @Valid
         dto: ManagerReadTenantTireBenefitOverviewDTO,
-    ): ApiResponse<*> {
-        // 1. Paginate features via feature manager service
-        val featurePage = featureManagerService.query(
-            ManagerReadTenantTireBenefitFeatureDTO(
-                page = dto.page,
-                pageSize = dto.pageSize,
-            )
-        )
+    ): ApiResponse<List<ManagerReadTenantTireBenefitOverviewGroupVO>> {
+        val features = featureManagerService.findAllFeatures()
 
-        // 2. Fetch bound values for ALL requested tire types
         val allValues = benefitValueRepository.findByTireTypeIdIn(dto.tireTypeIds)
             .collectList().awaitFirstOrNull() ?: emptyList()
 
-        // 3. Build: tireTypeId -> (featureId -> entity) lookup map
         val valueMapByTire = allValues
             .groupBy { it.tireTypeId }
             .mapValues { (_, values) -> values.associateBy { it.featureId } }
 
-        // 4. For each tire type, merge features with their values
         val records = dto.tireTypeIds.map { tireId ->
             val tireValueMap = valueMapByTire[tireId] ?: emptyMap()
-            val items = featurePage.records.map { feature ->
+            val items = features.map { feature ->
                 val existingValue = tireValueMap[feature.id]
                 ManagerReadTenantTireBenefitOverviewItemVO(
                     featureId = feature.id,
@@ -75,14 +64,6 @@ class ManagerTenantTireBenefitOverviewController(
             )
         }
 
-        return ApiResponse.success(
-            PaginatedResponseData(
-                page = featurePage.page,
-                pageSize = featurePage.pageSize,
-                total = featurePage.total,
-                totalPages = featurePage.totalPages,
-                records = records,
-            )
-        )
+        return ApiResponse.success(records)
     }
 }

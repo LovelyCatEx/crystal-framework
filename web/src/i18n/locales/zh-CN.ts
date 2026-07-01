@@ -706,7 +706,10 @@ export const zhCN: I18nRules = {
         name: '权益名称',
         description: '描述',
         featureType: '权益类型',
-        featureTypePlaceholder: '选择权益类型'
+        featureTypePlaceholder: '选择权益类型',
+        useI18n: '显示来源',
+        useI18nDb: '数据库',
+        useI18nLocale: '翻译'
       },
       modal: {
         featureKey: {
@@ -799,7 +802,42 @@ export const zhCN: I18nRules = {
           booleanTrue: '开启',
           booleanFalse: '关闭'
         }
-      }
+      },
+      keys: {
+        'invitation.enabled': {
+          name: '创建邀请码',
+          description: '租户是否可以创建邀请码',
+        },
+        'invitation.max_count': {
+          name: '邀请码创建上限',
+          description: '租户可创建的邀请码总数上限',
+        },
+        'invitation.per_day_count': {
+          name: '每日邀请码创建上限',
+          description: '租户每日可创建的邀请码数量',
+        },
+        'invitation.per_code_usage_limit': {
+          name: '单码使用上限',
+          description: '单个邀请码最多可被使用的次数',
+        },
+        'invitation.max_validity_days': {
+          name: '邀请码最长有效期',
+          description: '邀请码最长有效期（天）',
+        },
+        'member.max_count': {
+          name: '成员数量上限',
+          description: '租户可拥有的成员数量上限',
+        },
+        'department.max_count': {
+          name: '部门数量上限',
+          description: '租户可创建的部门数量上限',
+        },
+      },
+      groups: {
+        'invitation': '邀请码',
+        'member': '成员',
+        'department': '部门',
+      },
     },
     tenantRoleManager: {
       title: '租户角色管理',
@@ -1810,6 +1848,8 @@ export const zhCN: I18nRules = {
         'oauth.oicq.clientId': 'Client ID',
         'oauth.oicq.clientSecret': 'Client Secret',
         'oauth.oicq.scope': '授权范围',
+        'module.tenant.enabled': '启用租户模块',
+        'module.approval.enabled': '启用审批模块',
       },
       groups: {
         'basic': '基本设置',
@@ -1821,6 +1861,8 @@ export const zhCN: I18nRules = {
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
+        'module.tenant': '租户模块',
+        'module.approval': '审批模块',
       },
       tabs: {
         'basic': '基本',
@@ -1829,6 +1871,7 @@ export const zhCN: I18nRules = {
         'messageChannel': '消息渠道',
         'security': '安全',
         'oauth': 'OAuth',
+        'module': '功能模块',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -2029,7 +2072,11 @@ export const zhCN: I18nRules = {
     sessionMonitor: {
       title: '在线会话监控',
       subtitle: '查看当前系统中的在线会话列表',
-      entityName: '会话'
+      entityName: '会话',
+      filter: {
+        type: '会话类型',
+        typePlaceholder: '按类型筛选'
+      }
     },
     systemMonitor: {
       title: '系统监控',
@@ -2672,6 +2719,7 @@ export const zhCN: I18nRules = {
         recordInfo: '记录信息',
         tireType: '套餐类型',
         feature: '权益项',
+        featureType: '类型',
         featureValue: '权益值'
       },
       oAuthAccount: {
@@ -2737,6 +2785,7 @@ export const zhCN: I18nRules = {
       },
       sessionMonitor: {
         sessionId: '会话ID',
+        type: '类型',
         user: '用户',
         tenant: '租户',
         remoteIp: 'IP地址',
@@ -2951,6 +3000,10 @@ export const zhCN: I18nRules = {
       2: '已辞职',
       3: '审核中',
       4: '正常'
+    },
+    sessionType: {
+      0: '用户',
+      1: 'Prometheus'
     },
     tenantStatus: {
       0: '审核中',

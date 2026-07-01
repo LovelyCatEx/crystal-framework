@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/me/tenant-profile")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/tenant/me-profile")
 class TenantMemberProfileController(
     private val tenantMemberProfileService: TenantMemberProfileService,
     private val fileResourceService: FileResourceService,

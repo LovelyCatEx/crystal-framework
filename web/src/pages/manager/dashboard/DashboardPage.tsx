@@ -7,6 +7,8 @@ import {BusinessStatistics} from "@/components/dashboard/BusinessStatistics.tsx"
 import {MyJoinedTenants} from "@/components/dashboard/MyJoinedTenants.tsx";
 import {SystemAnnouncements} from "@/components/dashboard/SystemAnnouncements.tsx";
 import {ClockCircleOutlined} from "@ant-design/icons";
+import {SystemModuleGate} from "@/components/SystemModuleGate.tsx";
+import {SystemModuleKey} from "@/router/system-module-menu-paths.ts";
 
 const { useToken } = theme;
 
@@ -113,9 +115,11 @@ export default function DashboardPage() {
 
                 <Row gutter={[16, 16]} align="top">
                     {hasMyTenantsPermission && (
-                        <Col xs={24} lg={16}>
-                            <MyJoinedTenants />
-                        </Col>
+                        <SystemModuleGate moduleKey={SystemModuleKey.TENANT}>
+                            <Col xs={24} lg={16}>
+                                <MyJoinedTenants />
+                            </Col>
+                        </SystemModuleGate>
                     )}
                     {hasAnnouncementsPermission && (
                         <Col xs={24} lg={8}>

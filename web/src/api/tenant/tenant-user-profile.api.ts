@@ -4,14 +4,14 @@ import type {Gender} from "@/types/common/gender.types.ts";
 
 /**
  * Self-service tenant-scoped user profile.
- * Backend: MyTenantUserProfileController (crystal-tenant, /me/tenant-profile).
+ * Backend: TenantMemberProfileController (crystal-tenant, /tenant/me-profile).
  *
  * GET returns null when the current member has no profile row yet.
  * The upsert endpoint creates or updates by tenantMemberId.
  */
 
 export function getMyTenantUserProfile() {
-    return doGet<TenantUserProfile | null>('/api/me/tenant-profile');
+    return doGet<TenantUserProfile | null>('/api/tenant/me-profile');
 }
 
 export interface UpsertMyTenantUserProfileDTO {
@@ -26,12 +26,12 @@ export interface UpsertMyTenantUserProfileDTO {
 }
 
 export function upsertMyTenantUserProfile(dto: UpsertMyTenantUserProfileDTO) {
-    return doPost<TenantUserProfile>('/api/me/tenant-profile/upsert', {...dto});
+    return doPost<TenantUserProfile>('/api/tenant/me-profile/upsert', {...dto});
 }
 
 export function uploadMyTenantMemberAvatar(file: File) {
     return doPost<TenantUserProfile>(
-        '/api/me/tenant-profile/uploadAvatar',
+        '/api/tenant/me-profile/uploadAvatar',
         {file},
         {'Content-Type': 'multipart/form-data'},
     );

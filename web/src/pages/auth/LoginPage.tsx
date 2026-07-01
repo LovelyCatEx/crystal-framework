@@ -14,6 +14,7 @@ import {getJoinedTenants} from "@/api/tenant/tenant.api.ts";
 import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
+import {isModuleDisabled, SystemModuleKey} from "@/router/system-module-menu-paths.ts";
 
 interface LoginFormData {
     username: string,
@@ -140,8 +141,9 @@ export function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const navigate = useNavigate();
-    const { integratedInfo } = useSystemIntegrated();
+    const { integratedInfo, disabledModules } = useSystemIntegrated();
     const enabledOAuthPlatforms = integratedInfo?.enabledOAuthPlatforms ?? [];
+    const tenantModuleDisabled = isModuleDisabled(disabledModules, SystemModuleKey.TENANT);
 
     const [joinedTenants, setJoinedTenants] = useState<UserTenantVO[]>([]);
     const [loggedUsername, setLoggedUsername] = useState<string>("");
@@ -173,6 +175,14 @@ export function LoginPage() {
                     setUserAuthentication(loginData.token, loginData.expiresIn);
                     setLoggedUsername(values.username);
                     setLoggedUserPassword(values.password);
+
+                    // Tenant module disabled → tenants are unavailable; skip the
+                    // joined-tenants fetch (which would be blocked by SystemModuleGuardFilter)
+                    // and enter the app directly as a non-tenant user.
+                    if (tenantModuleDisabled) {
+                        turnToRedirectUrl(navigate);
+                        return;
+                    }
 
                     // Check joined tenants
                     // @ts-ignore

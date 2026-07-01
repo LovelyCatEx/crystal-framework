@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.config
+package com.lovelycatv.crystalframework.monitor.config
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties
 import org.springframework.context.annotation.Bean
@@ -12,7 +12,7 @@ class ActuatorConfig {
     fun webEndpointProperties(): WebEndpointProperties {
         val properties = WebEndpointProperties()
         properties.setBasePath("/api/v1/actuator")
-        properties.exposure.include = mutableSetOf("health")
+        properties.exposure.include = mutableSetOf("health", "prometheus")
         return properties
     }
 }

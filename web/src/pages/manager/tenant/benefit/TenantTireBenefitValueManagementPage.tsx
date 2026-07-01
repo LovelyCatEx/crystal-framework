@@ -1,4 +1,4 @@
-import {Col, Form, Input, InputNumber, Row, Select} from "antd";
+import {Col, Form, Input, InputNumber, Row, Select, Space, Switch} from "antd";
 import {useEffect, useRef, useState} from "react";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
@@ -15,7 +15,8 @@ import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api
 export default function TenantTireBenefitValueManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const {t} = useTranslation();
-    const columns = useTenantTireBenefitValueTableColumns();
+    const [useI18n, setUseI18n] = useState(false);
+    const columns = useTenantTireBenefitValueTableColumns({ useI18n });
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { tireTypeId: 'string', featureId: 'string' } });
     const [tireTypes, setTireTypes] = useState<{ id: string; name: string }[]>([]);
     const [features, setFeatures] = useState<TenantTireBenefitFeature[]>([]);
@@ -69,6 +70,16 @@ export default function TenantTireBenefitValueManagerPage() {
                         onChange={(value) => setFilter('featureId', value || undefined)}
                         options={(features ?? []).map((f) => ({ value: f.id, label: `${f.name} (${f.featureKey})` }))}
                     />,
+                },
+            ]}
+            tableSuffixActions={[
+                {
+                    label: <span>{t('pages.tenantTireBenefitFeatureManager.filter.useI18n')}</span>,
+                    children: <Space>
+                        <span className="text-xs text-gray-400">{t('pages.tenantTireBenefitFeatureManager.filter.useI18nDb')}</span>
+                        <Switch checked={useI18n} onChange={setUseI18n} />
+                        <span className="text-xs text-gray-400">{t('pages.tenantTireBenefitFeatureManager.filter.useI18nLocale')}</span>
+                    </Space>,
                 },
             ]}
             editModalFormChildren={<BenefitValueModalFormFields features={features} tireTypes={tireTypes} />}
