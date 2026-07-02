@@ -1,12 +1,12 @@
-# ReadOnly ManagerController
+# ReadonlyManagerController
 
-## Design Rationale
+## Design intent
 
-`ReadonlyManagerController` is not a separate reimplementation — it inherits from `StandardManagerController` and overrides three methods to block mutations, reusing the read endpoints with zero duplication.
+`ReadonlyManagerController` is not a from-scratch reimplementation of read-only CRUD. It extends `StandardManagerController` and overrides three methods, reusing the query endpoints at minimal cost while blocking mutations.
 
-## Source Analysis
+## Source
 
-Located in the `crystal-shared` module under `com.lovelycatv.crystalframework.shared.controller`:
+`crystal-shared/controller/ReadonlyManagerController.kt`:
 
 ```kotlin
 @Validated
@@ -16,40 +16,114 @@ abstract class ReadonlyManagerController<
 >(
     managerService: SERVICE
 ) : StandardManagerController<SERVICE, ...>(managerService) {
-    override suspend fun create(...) =
-        ApiResponse.forbidden("This resource is read-only and cannot be created")
-    override suspend fun update(...) =
-        ApiResponse.forbidden("This resource is read-only and cannot be updated")
-    override suspend fun delete(...) =
-        ApiResponse.forbidden("This resource is read-only and cannot be deleted")
+
+    override suspend fun create(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute dto: CREATE_DTO
+    ): ApiResponse<*> {
+        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be created")
+    }
+
+    override suspend fun update(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute dto: UPDATE_DTO
+    ): ApiResponse<*> {
+        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be updated")
+    }
+
+    override suspend fun delete(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute dto: DELETE_DTO
+    ): ApiResponse<*> {
+        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be deleted")
+    }
 }
 ```
 
-Key design points:
+Structural notes:
 
-- Three methods return `ApiResponse.forbidden()` (HTTP 403)
-- `list` and `query` are inherited unchanged from `StandardManagerController`
-- All four DTO types are still required in the type parameters — a Kotlin generics constraint
+- Overrides only the 3 mutation methods, returning `ApiResponse.forbidden` unconditionally
+- `list` and `query` remain untouched, fully inherited from `StandardManagerController`
+- Type parameters match the parent verbatim — generic inheritance forces bound propagation
 
-## AOP Chain
+## Two-layer defense
 
-ReadOnly controllers are still intercepted by `ManagerControllerPermissionAspect`:
+Mutation methods return 403 even if called, but before reaching them `ManagerControllerPermissionAspect` runs a permission check first. Complete flow:
+
+```
+POST /create
+  → ManagerControllerPermissionAspect (AOP)
+      ├─ Checks @ManagerPermissions.create
+      ├─ No permission → AuthorizationDeniedException (converted to 403 by GlobalExceptionHandler)
+      └─ Has permission → continue
+  → ReadonlyManagerController.create (business override)
+      └─ Always returns ApiResponse.forbidden (403)
+```
+
+Motivation for two layers: the permission layer is generic defense (misconfig, mis-assigned role); the business layer is a structural constraint — this Controller type shall not accept writes, encoded in code. Even if permission config is wrong and lets the request through, the business layer catches it.
+
+## Real-world permission configuration
+
+All 5 fields of `@ManagerPermissions` usually hold the same read permission:
+
+```kotlin
+@ManagerPermissions(
+    read    = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    create  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],  // even if AOP passes, business rejects
+    update  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    delete  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+)
+```
+
+If `create` were filled with a nonexistent string, AOP would block first. Using the read permission has a benefit: read-permission holders who call `create` receive the business layer's semantic 403 ("cannot be created") rather than AOP's generic "Access denied", making it easier for the frontend to distinguish "this resource cannot be modified" from "you lack permission".
+
+## Type parameter constraints
+
+Identical to `StandardManagerController`. Kotlin's generic inheritance rules require:
+
+```kotlin
+abstract class ReadonlyManagerController<
+    SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
+    ...
+> : StandardManagerController<SERVICE, ...>(managerService)
+```
+
+Bounds must be transmitted verbatim; Readonly cannot tighten them.
+
+## AOP interception chain
+
+Readonly Controllers are still caught by `ManagerControllerPermissionAspect` (pointcut is `StandardManagerController.*(..)`, covering all subclasses):
 
 ```
 StandardManagerController.* (pointcut)
-    → ManagerControllerPermissionAspect (@Order higher)
+    → ManagerControllerPermissionAspect (@Order — higher priority)
         → @ManagerPermissions check
-            → create/update/delete → 403 (business layer)
+            → create / update / delete → business method (overridden to 403)
 ```
 
-Permission checks execute before the method body. Even if `@ManagerPermissions` grants write access, `create/update/delete` will never execute — a defense-in-depth approach.
+The audit aspect `ManagerControllerAuditAspect` covers this too — rejected calls are also recorded, for post-hoc analysis of anomalous access patterns.
 
-## Known Implementations
+## Naming conventions
+
+Pick either style:
+
+- `Manager{Xxx}Controller` (e.g. `ManagerMailSendLogController`) — externally indistinguishable from Standard
+- `Manager{Xxx}ReadonlyController` — when you want "immutable resource" spelled out in the class name
+
+Keep naming consistent within a module.
+
+## Real usage locations
 
 | Module | Controller | Resource |
-|--------|-----------|----------|
-| `crystal-starter` | `ManagerUserLoginLogController` | User login logs |
-| `crystal-audit` | `ManagerAuditLogController` | Audit logs |
-| `crystal-mail` | `ManagerMailSendLogController` | Mail send records |
+|---|---|---|
+| `crystal-audit` | `ManagerAuditLogController` | Audit log |
+| `crystal-mail` | `ManagerMailSendLogController` | Mail-send records |
+| `crystal-auth` | `ManagerUserLoginLogController` | User login log |
 
-Before adding a new read-only resource, verify the data is entirely system-generated and must not be manually modified.
+When adding a read-only resource, verify:
+
+1. Data is fully system-generated (via triggers, event listeners, aspects, ...) with no user input
+2. Modifications would break business invariants (editing audit logs destroys audit's purpose)
+
+Only when both hold, use the Readonly family; otherwise consider Standard with fine-grained permission control.

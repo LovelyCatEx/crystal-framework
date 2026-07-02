@@ -51,11 +51,16 @@ export const zhThemeConfig: DefaultTheme.Config = {
         {
           text: '控制器',
           items: [
+            { text: '家族总览', link: '/develop/controller/overview' },
             { text: 'ApiResponse', link: '/develop/controller/api-response' },
+            { text: '异常处理', link: '/develop/controller/exception-handling' },
             { text: '普通控制器', link: '/develop/controller/generic-controller' },
             { text: '标准化控制器', link: '/develop/controller/standard-manager-controller' },
             { text: '只读标准化控制器', link: '/develop/controller/readonly-manager-controller' },
-            { text: '异常处理', link: '/develop/controller/exception-handling' },
+            { text: '领域范围控制器', link: '/develop/controller/scoped-manager-controller' },
+            { text: '只读领域范围控制器', link: '/develop/controller/readonly-scoped-manager-controller' },
+            { text: '派生范围控制器', link: '/develop/controller/derived-scoped-manager-controller' },
+            { text: '租户资源控制器', link: '/develop/controller/tenant-manager-controller' },
           ]
         },
         { text: '系统设置项', link: '/develop/sdk/system-settings' },
@@ -86,11 +91,16 @@ export const zhThemeConfig: DefaultTheme.Config = {
         {
           text: '控制器',
           items: [
+            { text: '家族总览', link: '/contribute/controller/overview' },
             { text: 'ApiResponse', link: '/contribute/controller/api-response' },
+            { text: '异常处理', link: '/contribute/controller/exception-handling' },
             { text: '普通控制器', link: '/contribute/controller/generic-controller' },
             { text: '标准化控制器', link: '/contribute/controller/standard-manager-controller' },
             { text: '只读标准化控制器', link: '/contribute/controller/readonly-manager-controller' },
-            { text: '异常处理', link: '/contribute/controller/exception-handling' },
+            { text: '领域范围控制器', link: '/contribute/controller/scoped-manager-controller' },
+            { text: '只读领域范围控制器', link: '/contribute/controller/readonly-scoped-manager-controller' },
+            { text: '派生范围控制器', link: '/contribute/controller/derived-scoped-manager-controller' },
+            { text: '租户资源控制器', link: '/contribute/controller/tenant-manager-controller' },
           ]
         },
         { text: '系统设置项', link: '/contribute/system-settings' },

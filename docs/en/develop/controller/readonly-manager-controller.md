@@ -1,93 +1,105 @@
-# ReadOnly ManagerController
+# ReadonlyManagerController
 
-## Overview
+The read-only variant of [`StandardManagerController`](./standard-manager-controller). Query endpoints inherit; mutations (create / update / delete) are overridden at the business layer to return 403. For log-like, system-generated, immutable resources.
 
-`ReadonlyManagerController` is a read-only variant of `StandardManagerController`. It inherits the `list` and `query` endpoints but rejects `create`, `update`, and `delete` operations.
+## Applicable scenarios
 
-## When to Use
+- Login logs, audit logs, mail-send records
+- Data written automatically by the system; admins only view
 
-System-generated data that should not be mutated through the admin interface:
+Other scenarios:
 
-- Login logs
-- Audit logs
-- Mail send records
+- Mutable resources → [StandardManagerController](./standard-manager-controller)
+- Dual-scope read-only → [ReadonlyScopedManagerController](./readonly-scoped-manager-controller)
 
-## Usage
+## Endpoints
 
-### 1. Create the Service
+Inherited from `StandardManagerController`; mutations return 403 at the business layer:
 
-After creating the Entity and Repository (see [Add Entity](../add-entity)), create a ManagerService:
+| HTTP | Path | Behavior |
+|---|---|---|
+| GET | `/list` | Normal |
+| POST | `/query` | Normal |
+| POST | `/create` | 403 Forbidden |
+| POST | `/update` | 403 Forbidden |
+| POST | `/delete` | 403 Forbidden |
 
-```kotlin
-@Service
-class ExtMyPluginLogManagerService(
-    repository: ExtMyPluginLogRepository
-) : CachedBaseManagerService<
-    ExtMyPluginLogRepository,
-    ExtMyPluginLogEntity,
-    ManagerCreateExtMyPluginLogDTO,
-    ManagerReadExtMyPluginLogDTO,
-    ManagerUpdateExtMyPluginLogDTO,
-    ManagerDeleteExtMyPluginLogDTO
->(repository) {
-    override fun getEntityClass(): KClass<*> = ExtMyPluginLogEntity::class
-}
-```
+## Usage steps
 
-### 2. Create DTOs
+Using `mail-send-log` as an example.
 
-All four DTOs are required (even for read-only controllers):
+### 1–4. Entity / Repository / Service / DTOs
+
+Set them up exactly like [StandardManagerController](./standard-manager-controller). Even though mutations always return 403, all four DTOs must still be provided (the generic base requires the type parameters).
 
 ```kotlin
-class ManagerReadExtMyPluginLogDTO : BaseManagerReadDTO()
-class ManagerUpdateExtMyPluginLogDTO : BaseManagerUpdateDTO()
-class ManagerDeleteExtMyPluginLogDTO : BaseManagerDeleteDTO()
-class ManagerCreateExtMyPluginLogDTO(
-    // your business fields...
+class ManagerCreateMailSendLogDTO(
+    // Never actually invoked; a minimal definition is fine
+    val placeholder: String = "",
 )
 ```
 
-### 3. Create the Controller
+Service extends `CachedBaseManagerService` (same as Standard).
+
+### 5. Controller
 
 ```kotlin
 @ManagerPermissions(
-    read = ["ext_my_plugin.log_read"],
-    readAll = ["ext_my_plugin.log_read"],
-    create = ["ext_my_plugin.log_read"],
-    update = ["ext_my_plugin.log_read"],
-    delete = ["ext_my_plugin.log_read"],
+    read = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    create = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    update = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+    delete = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
 )
 @Validated
 @RestController
-@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/ext-my-plugin-logs")
-class ExtMyPluginLogController(
-    managerService: ExtMyPluginLogManagerService
+@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-logs")
+class ManagerMailSendLogController(
+    managerService: MailSendLogManagerService
 ) : ReadonlyManagerController<
-    ExtMyPluginLogManagerService,
-    ExtMyPluginLogRepository,
-    ExtMyPluginLogEntity,
-    ManagerCreateExtMyPluginLogDTO,
-    ManagerReadExtMyPluginLogDTO,
-    ManagerUpdateExtMyPluginLogDTO,
-    ManagerDeleteExtMyPluginLogDTO
+    MailSendLogManagerService,
+    MailSendLogRepository,
+    MailSendLogEntity,
+    ManagerCreateMailSendLogDTO,
+    ManagerReadMailSendLogDTO,
+    ManagerUpdateMailSendLogDTO,
+    ManagerDeleteMailSendLogDTO
 >(managerService)
 ```
 
-Key points:
+All 5 `@ManagerPermissions` fields use the same read permission. Reasons:
 
-- Set the same permission for all five actions since this is read-only
-- All type parameters (service, repository, entity, 4 DTOs) are required by the base class constraint
-- No methods needed in the controller body — everything is inherited
+- `read` / `readAll` naturally use the read permission
+- Even if AOP lets a mutation through (a user somehow holds `_READ`), the business-layer override still returns 403 — defense in depth
 
-::: warning Return Type
-When extending `ReadonlyManagerController`, no method body is needed — the base class already returns `ApiResponse<*>`. If you add custom endpoints, all methods must explicitly return `ApiResponse<*>`.
-:::
+## Defense in depth is deliberate
 
-## Auto-Provided Endpoints
+You could configure mutations with real `_CREATE` / `_UPDATE` / `_DELETE` permissions and still have the business layer block them. But you shouldn't — the design intent is "this resource is API-immutable", so:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/list` | List all records |
-| `GET` | `/query` | Paginated query (supports keyword search & time range) |
+- Set all 5 fields to the read permission for clearest semantics
+- If you later need "allow admins to edit logs", write a separate non-Readonly Controller — do not repurpose this class
 
-`/create`, `/update`, `/delete` are inherited but overridden to always return 403 Forbidden.
+## Type parameters
+
+Same 7 parameters as [StandardManagerController](./standard-manager-controller) — this class extends Standard and overrides 3 methods only.
+
+## Adding custom endpoints
+
+`create` / `update` / `delete` are overridden to 403, but custom mutations can be added (e.g. "mark log as seen"):
+
+```kotlin
+@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_MAIL_SEND_LOG_READ}')")
+@PostMapping("/mark-as-seen")
+suspend fun markAsSeen(@RequestParam id: Long): ApiResponse<*> {
+    managerService.markAsSeen(id)
+    return ApiResponse.success(null)
+}
+```
+
+Custom endpoints write their own `@PreAuthorize`; the parent's 403 does not apply.
+
+## Notes
+
+- All 4 DTOs are still required — CREATE / UPDATE / DELETE are unused in practice, so keep them minimal
+- All 5 `@ManagerPermissions` fields must be set; empty arrays make AOP log a warn and allow the call
+- `ReadonlyManagerController` only blocks the API layer — the Service layer remains callable from internal jobs. For DB-level protection add DDL constraints

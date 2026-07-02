@@ -1,55 +1,85 @@
 # Exception Handling
 
-## Overview
+The framework's `GlobalExceptionHandler` catches every exception thrown by Controllers. On error paths, business code throws — no try-catch, no manual `ApiResponse.badRequest(...)`.
 
-The framework catches all controller exceptions globally via `GlobalExceptionHandler` and converts them to `ApiResponse` automatically. Just throw the exception in your business code — no try-catch needed.
+## Available exceptions
 
-## Available Exceptions
+| Exception | Frontend `code` | Usage |
+|---|---|---|
+| `BusinessException(message)` | 400 | Business validation failed; `message` propagates to the frontend |
+| `UnauthorizedException(message)` | 401 | Not logged in / token expired |
+| `ForbiddenException(message)` | 403 | Authenticated but lacks permission |
+| `@Valid` failure | 400 | No manual throw needed; framework auto-handles |
 
-| Exception | Resulting code | Description |
-|-----------|---------------|-------------|
-| `BusinessException(message)` | 400 | Business validation failed, frontend shows the message |
-| `UnauthorizedException(message)` | 401 | Not logged in or token expired |
-| `ForbiddenException(message)` | 403 | No permission |
-| Parameter validation error | 400 | Triggered automatically by `@Valid`, no manual throw needed |
+All three custom exceptions live in `com.lovelycatv.crystalframework.shared.exception` and extend `RuntimeException`.
 
-## Usage
+## Examples
 
-### Business Exception
+### Business exceptions
 
 ```kotlin
 @Service
-class MyService {
-    fun getById(id: Long): Entity {
-        val entity = repository.findById(id) ?: throw BusinessException("Entity not found")
-        return entity
+class UserService(...) {
+    suspend fun changePassword(userId: Long, newPassword: String) {
+        if (newPassword.length < 8) {
+            throw BusinessException("Password must be at least 8 characters")
+        }
+        // ...
     }
 }
 ```
 
-### Permission Exception
+`message` appears verbatim in the frontend's `ApiResponse.message`; use user-facing wording rather than internal jargon.
+
+### Permission exceptions
 
 ```kotlin
-if (!hasPermission) {
-    throw ForbiddenException("You cannot access this resource")
+if (approval.initiatorId != userAuthentication.userId) {
+    throw ForbiddenException("You can only cancel your own approvals")
 }
 ```
 
-### Parameter Validation
+### Unauthenticated exceptions
 
-Use `@Valid` on DTO parameters — the framework handles validation errors automatically:
+`UnauthorizedException` applies only inside custom auth logic. Framework-level login checks live in `CustomAuthFilter` and never surface to business code.
+
+### Parameter validation
 
 ```kotlin
+class ManagerCreateUserDTO(
+    @field:NotBlank(message = "username is required")
+    val username: String = "",
+
+    @field:Email(message = "invalid email format")
+    val email: String = "",
+)
+
 @PostMapping("/create")
 suspend fun create(
-    @ModelAttribute @Valid dto: CreateDTO
+    @ModelAttribute @Valid dto: ManagerCreateUserDTO
 ): ApiResponse<*> {
-    // If validation fails, the framework returns 400 without entering this method
+    // Framework returns 400 on failure; the method body is not entered
+    userService.create(dto)
+    return ApiResponse.success(null)
 }
 ```
 
-## Key Points
+When `@field:NotBlank` / `@field:Email` / `@field:Min` constraints fail, the framework composes the field-error `message` automatically.
 
-- Do NOT catch exceptions in controllers and return `ApiResponse.badRequest()` manually — just `throw BusinessException`
-- The `message` of `BusinessException` is passed through to the frontend, so write user-facing messages
-- Logging is handled by the framework — no need for `logger.error` in business code
+## Restrictions
+
+- Do not try-catch and translate to `ApiResponse` manually in business code — the framework already does that
+- Do not write `logger.error("...", e)` in business code — the global handler already logs at the right level
+- Do not throw `RuntimeException` or undefined exceptions — they become 500 Internal Server Error, degrading UX
+
+## Auto-mapped cases
+
+| Situation | Exception | code |
+|---|---|---|
+| DTO field validation failed | `WebExchangeBindException` (auto) | 400 |
+| `@RequestParam` missing | `MissingRequestValueException` (auto) | 400 |
+| `@PreAuthorize` denied | `AuthorizationDeniedException` (auto) | 403 |
+| Unique-key conflict | `DuplicateKeyException` (auto) | 400 |
+| Other uncaught | `Exception` fallback | 500 |
+
+All auto-mapped by the framework — business code only throws `BusinessException` / `ForbiddenException` where relevant.
