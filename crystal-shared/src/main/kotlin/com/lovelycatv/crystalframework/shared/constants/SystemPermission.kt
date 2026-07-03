@@ -232,6 +232,7 @@ object SystemPermission {
     const val ACTION_SYSTEM_DICT_TYPE_UPDATE = "system.dict.type.update"
     const val ACTION_SYSTEM_DICT_TYPE_DELETE = "system.dict.type.delete"
 
+    const val MENU_SYSTEM_DICT_ITEM_MANAGER = "system.dict.item:/manager/system-dict-items"
     const val ACTION_SYSTEM_DICT_ITEM_CREATE = "system.dict.item.create"
     const val ACTION_SYSTEM_DICT_ITEM_READ = "system.dict.item.read"
     const val ACTION_SYSTEM_DICT_ITEM_UPDATE = "system.dict.item.update"

@@ -588,6 +588,20 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             page: <AnnouncementManagerPage />,
         },
         {
+            key: '/manager/system-dict-types',
+            path: '/manager/system-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictTypes'),
+            page: <SystemDictTypeManagerPage />,
+        },
+        {
+            key: '/manager/system-dict-items',
+            path: '/manager/system-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictItems'),
+            page: <SystemDictItemManagerPage />,
+        },
+        {
             key: '/manager/approval-flow-definitions',
             path: '/manager/approval-flow-definitions',
             icon: <ApartmentOutlined />,
@@ -601,22 +615,6 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <AuditOutlined />,
             label: t('menu.admin.approvalFlowInstances'),
             page: <ApprovalFlowInstanceManagerPage />,
-            group: 'approval'
-        },
-        {
-            key: '/manager/system-dict-types',
-            path: '/manager/system-dict-types',
-            icon: <BookOutlined />,
-            label: t('menu.admin.systemDictTypes'),
-            page: <SystemDictTypeManagerPage />,
-            group: 'approval'
-        },
-        {
-            key: '/manager/system-dict-items',
-            path: '/manager/system-dict-items',
-            icon: <BookOutlined />,
-            label: t('menu.admin.systemDictItems'),
-            page: <SystemDictItemManagerPage />,
             group: 'approval'
         },
         {

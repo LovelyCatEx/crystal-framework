@@ -85,6 +85,7 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
             // Dictionary — menus
             SystemPermission.MENU_SYSTEM_DICT_TYPE_MANAGER,
+            SystemPermission.MENU_SYSTEM_DICT_ITEM_MANAGER,
             SystemPermission.MENU_TENANT_DICT_TYPE_MANAGER,
             SystemPermission.MENU_TENANT_DICT_ITEM_MANAGER,
             // Dictionary — system scope
