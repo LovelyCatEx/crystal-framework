@@ -189,17 +189,17 @@
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>vertex-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>cache</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>ai</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.qdrant</groupId>
