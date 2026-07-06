@@ -2346,7 +2346,10 @@ export const enUS: I18nRules = {
         unnamed: '(unnamed)',
         none: '(none)',
         approveMode: 'Approve Mode',
-        approvers: 'Approvers'
+        approvers: 'Approvers',
+        ccAssignees: 'CC Recipients',
+        ccRoles: 'CC Roles',
+        ccChannels: 'Message Channels'
       },
       validation: {
         duplicateNodeKey: 'Duplicate node key: "{{nodeKey}}"',

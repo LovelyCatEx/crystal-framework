@@ -361,7 +361,7 @@ export default function ApprovalEditor(props: {
             [ApprovalFlowNodeType.END]: null,
             [ApprovalFlowNodeType.APPROVAL]: JSON.stringify({ approveMode: 0, strategy: 0, strategyParams: {} }),
             [ApprovalFlowNodeType.CONDITION]: JSON.stringify({ routes: [] }),
-            [ApprovalFlowNodeType.CC]: JSON.stringify({ userIds: [], roleIds: [] }),
+            [ApprovalFlowNodeType.CC]: JSON.stringify({ userIds: [], roleIds: [], channelIds: [] }),
             [ApprovalFlowNodeType.FORK]: null,
             [ApprovalFlowNodeType.JOIN]: null,
         };

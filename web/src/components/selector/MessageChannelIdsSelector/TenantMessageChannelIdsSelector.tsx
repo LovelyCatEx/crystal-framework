@@ -2,8 +2,8 @@ import {Button, Space, Spin, Tag} from "antd";
 import {RobotOutlined} from "@ant-design/icons";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {EntitySelectorModal} from "./EntitySelector.tsx";
-import {useTenantMessageChannelTableColumns} from "../columns/TenantMessageChannelEntityColumns.tsx";
+import {EntitySelectorModal} from "../EntitySelector.tsx";
+import {useTenantMessageChannelTableColumns} from "@/components/columns/TenantMessageChannelEntityColumns.tsx";
 import {TenantMessageChannelManagerController} from "@/api/tenant/tenant-message-channel.api.ts";
 import type {TenantMessageChannel} from "@/types/tenant/tenant-message-channel.types.ts";
 

@@ -2343,7 +2343,10 @@ export const zhCN: I18nRules = {
         unnamed: '(未命名)',
         none: '(无)',
         approveMode: '审批方式',
-        approvers: '审批人'
+        approvers: '审批人',
+        ccAssignees: '抄送人',
+        ccRoles: '抄送角色',
+        ccChannels: '消息渠道'
       },
       validation: {
         duplicateNodeKey: '节点标识重复: "{{nodeKey}}"',

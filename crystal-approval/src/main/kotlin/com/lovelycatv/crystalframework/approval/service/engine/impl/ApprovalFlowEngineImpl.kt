@@ -21,6 +21,7 @@ class ApprovalFlowEngineImpl(
     private val taskService: ApprovalFlowTaskService,
     private val recordService: ApprovalFlowRecordService,
     private val tokenService: ApprovalFlowTokenService,
+    private val ccNotifier: ApprovalCcNotifier,
     private val snowIdGenerator: SnowIdGenerator
 ) : ApprovalFlowEngine {
 
@@ -215,6 +216,13 @@ class ApprovalFlowEngineImpl(
             ApprovalFlowNodeType.END -> {
                 completeToken(token)
                 completeInstance(instance)
+            }
+            ApprovalFlowNodeType.CC -> {
+                val ccConfig = currentNode.config?.parseObject<CcNodeConfig>()
+                if (ccConfig != null) {
+                    ccNotifier.notify(instance, currentNode, ccConfig)
+                }
+                moveToNext(token, instance)
             }
             else -> {
                 moveToNext(token, instance)
