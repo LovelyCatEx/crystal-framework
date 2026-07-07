@@ -9,17 +9,16 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.approval.types.CcNodeConfig
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
 import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
+import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageChannelManagerService
 import com.lovelycatv.crystalframework.messagechannel.types.chain.dsl.messageChain
 import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.types.content.ChainMessage
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
-import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.rbac.tenant.repository.TenantMemberRoleRelationRepository
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
-import com.lovelycatv.crystalframework.tenant.service.manager.TenantMessageChannelManagerService
 import com.lovelycatv.crystalframework.user.service.UserService
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.flow.toList
@@ -30,8 +29,7 @@ import java.time.Instant
 @Service
 class ApprovalCcNotifierImpl(
     private val messageChannelService: MessageChannelService,
-    private val systemChannelConfigProvider: SystemChannelConfigProvider,
-    private val tenantMessageChannelManagerService: TenantMessageChannelManagerService,
+    private val messageChannelManagerService: MessageChannelManagerService,
     private val tenantMemberService: TenantMemberService,
     private val tenantMemberRoleRelationRepository: TenantMemberRoleRelationRepository,
     private val userRoleRelationRepository: UserRoleRelationRepository,
@@ -67,7 +65,7 @@ class ApprovalCcNotifierImpl(
         val message = buildMessage(instance, node)
 
         config.channelIds.forEach { channelIdStr ->
-            val channelConfig = resolveChannelConfig(scope, channelIdStr) ?: return@forEach
+            val channelConfig = resolveChannelConfig(channelIdStr) ?: return@forEach
             val recipients: List<MessageRecipient> = emails.map { buildRecipient(channelConfig.channelType, it) }
             try {
                 val results = messageChannelService.broadcast(channelConfig, recipients, message)
@@ -116,31 +114,16 @@ class ApprovalCcNotifierImpl(
         }
     }
 
-    private suspend fun resolveChannelConfig(scope: ApprovalFlowScope, channelIdStr: String): ChannelConfig? {
-        return when (scope) {
-            ApprovalFlowScope.SYSTEM -> {
-                val channelType = runCatching { ChannelType.valueOf(channelIdStr) }.getOrNull()
-                if (channelType == null) {
-                    logger.warn("CC: unknown system channel id '$channelIdStr'")
-                    return null
-                }
-                systemChannelConfigProvider.resolveOrNull(channelType) ?: run {
-                    logger.warn("CC: system channel $channelType is not configured")
-                    null
-                }
-            }
-            ApprovalFlowScope.TENANT -> {
-                val channelId = channelIdStr.toLongOrNull() ?: run {
-                    logger.warn("CC: tenant channel id '$channelIdStr' is not a valid Long")
-                    return null
-                }
-                try {
-                    tenantMessageChannelManagerService.resolveConfig(channelId)
-                } catch (e: Exception) {
-                    logger.warn("CC: failed to resolve tenant channel $channelId: ${e.message}")
-                    null
-                }
-            }
+    private suspend fun resolveChannelConfig(channelIdStr: String): ChannelConfig? {
+        val channelId = channelIdStr.toLongOrNull() ?: run {
+            logger.warn("CC: channel id '$channelIdStr' is not a valid Long")
+            return null
+        }
+        return try {
+            messageChannelManagerService.resolveConfig(channelId)
+        } catch (e: Exception) {
+            logger.warn("CC: failed to resolve message channel $channelId: ${e.message}")
+            null
         }
     }
 

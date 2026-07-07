@@ -1,14 +1,15 @@
-package com.lovelycatv.crystalframework.tenant.entity
+package com.lovelycatv.crystalframework.messagechannel.entity
 
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
-import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("tenant_message_channels")
-class TenantMessageChannelEntity(
+@Table("message_channels")
+class MessageChannelEntity(
     id: Long = 0,
-    tenantId: Long = 0,
+    scope: Int = 0,
+    scopeId: Long = 0,
     @Column("channel_type")
     var channelType: Int = 0,
     @Column("name")
@@ -20,7 +21,7 @@ class TenantMessageChannelEntity(
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null,
-) : BaseTenantEntity(id, tenantId, createdTime, modifiedTime, deletedTime) {
+) : BaseScopedEntity(id, scope, scopeId, createdTime, modifiedTime, deletedTime) {
 
     fun getRealChannelType(): ChannelType =
         ChannelType.fromTypeId(channelType)

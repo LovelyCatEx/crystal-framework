@@ -1021,6 +1021,45 @@ export const enUS: I18nRules = {
         statusUpdateFailed: 'Failed to update status'
       }
     },
+    systemMessageChannelManager: {
+      title: 'System Message Channels',
+      subtitle: 'Manage system-scoped message channels',
+      addChannel: 'Add Channel',
+      filter: {
+        id: 'Channel ID',
+        idPlaceholder: 'Enter channel ID',
+        type: 'Channel Type',
+        all: 'All'
+      },
+      modal: {
+        channelType: {
+          label: 'Channel Type',
+          required: 'Please select a channel type',
+          placeholder: 'Select channel type',
+          switchConfirmTitle: 'Switch Channel Type',
+          switchConfirmContent: 'Switching the channel type will reset the current config. Continue?'
+        },
+        name: {
+          label: 'Channel Name',
+          required: 'Please enter a channel name',
+          maxLength: 'Channel name cannot exceed 64 characters',
+          placeholder: 'Enter channel name'
+        },
+        enabled: {
+          label: 'Enabled'
+        },
+        config: {
+          label: 'Channel Config',
+          required: 'Please fill in the channel config',
+          placeholder: 'Fill in the channel config (JSON)',
+          encryptedHint: 'For security, sensitive fields (e.g. password, secret) are not echoed back; please re-enter them when editing'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: 'Status updated successfully',
+        statusUpdateFailed: 'Failed to update status'
+      }
+    },
     tenantDepartmentManager: {
       title: 'Department Management',
       subtitle: 'Manage system tenant departments',
@@ -2708,6 +2747,16 @@ export const enUS: I18nRules = {
         statusDisabled: 'Disabled',
         config: 'Config'
       },
+      messageChannel: {
+        recordInfo: 'Record Info',
+        scopeId: 'Scope ID',
+        name: 'Channel Name',
+        channelType: 'Channel Type',
+        enabled: 'Status',
+        statusEnabled: 'Enabled',
+        statusDisabled: 'Disabled',
+        config: 'Config'
+      },
       tenantTireType: {
         name: 'Name',
         description: 'Description'
@@ -3222,6 +3271,7 @@ export const enUS: I18nRules = {
     tenantDepartment: 'Tenant Department',
     tenantInvitation: 'Invitation Code',
     tenantMessageChannel: 'Message Channel',
+    messageChannel: 'Message Channel',
     tenantTireType: 'Tire Type',
     tenantTireBenefitFeature: 'Benefit Feature',
     tenantTireBenefitValue: 'Tier Benefit Value',
@@ -3286,6 +3336,7 @@ export const enUS: I18nRules = {
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',
       tenantMessageChannels: 'Message Channel Management',
+      systemMessageChannels: 'System Message Channels',
       tenantTireTypes: 'Tire Type Management',
       tenantTireBenefitFeatures: 'Benefit Features',
       tenantTireBenefitValues: 'Tier Benefit Management',

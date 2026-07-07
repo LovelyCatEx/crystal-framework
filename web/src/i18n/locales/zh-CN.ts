@@ -1018,6 +1018,45 @@ export const zhCN: I18nRules = {
         statusUpdateFailed: '状态更新失败'
       }
     },
+    systemMessageChannelManager: {
+      title: '系统消息渠道',
+      subtitle: '管理系统级消息渠道',
+      addChannel: '新增渠道',
+      filter: {
+        id: '渠道ID',
+        idPlaceholder: '输入渠道 ID',
+        type: '渠道类型',
+        all: '全部'
+      },
+      modal: {
+        channelType: {
+          label: '渠道类型',
+          required: '请选择渠道类型',
+          placeholder: '选择渠道类型',
+          switchConfirmTitle: '切换渠道类型',
+          switchConfirmContent: '切换类型会重置当前配置，确认继续？'
+        },
+        name: {
+          label: '渠道名称',
+          required: '请输入渠道名称',
+          maxLength: '渠道名称不能超过 64 个字符',
+          placeholder: '输入渠道名称'
+        },
+        enabled: {
+          label: '是否启用'
+        },
+        config: {
+          label: '渠道配置',
+          required: '请填写渠道配置',
+          placeholder: '填写渠道配置（JSON）',
+          encryptedHint: '出于安全考虑，敏感字段（如密码、密钥）不会回显，编辑时请重新填写'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败'
+      }
+    },
     tenantDepartmentManager: {
       title: '部门管理',
       subtitle: '管理系统租户部门',
@@ -2707,6 +2746,16 @@ export const zhCN: I18nRules = {
         statusDisabled: '已禁用',
         config: '配置'
       },
+      messageChannel: {
+        recordInfo: '记录信息',
+        scopeId: '归属 ID',
+        name: '渠道名称',
+        channelType: '渠道类型',
+        enabled: '启用状态',
+        statusEnabled: '已启用',
+        statusDisabled: '已禁用',
+        config: '配置'
+      },
       tenantTireType: {
         name: '名称',
         description: '描述'
@@ -3220,6 +3269,7 @@ export const zhCN: I18nRules = {
     tenantDepartment: '租户部门',
     tenantInvitation: '邀请码',
     tenantMessageChannel: '消息渠道',
+    messageChannel: '消息渠道',
     tenantTireType: '套餐类型',
     tenantTireBenefitFeature: '权益项',
     tenantTireBenefitValue: '套餐权益取值',
@@ -3284,6 +3334,7 @@ export const zhCN: I18nRules = {
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
       tenantMessageChannels: '消息渠道管理',
+      systemMessageChannels: '系统消息渠道',
       tenantTireTypes: '套餐类型管理',
       tenantTireBenefitFeatures: '套餐权益项管理',
       tenantTireBenefitValues: '套餐权益管理',

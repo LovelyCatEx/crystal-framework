@@ -1,6 +1,6 @@
-package com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto
+package com.lovelycatv.crystalframework.messagechannel.controller.manager.dto
 
-import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTenantResourceDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateScopedDTO
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
@@ -11,8 +11,9 @@ import jakarta.validation.constraints.Size
  * deserializes it into the appropriate [com.lovelycatv.crystalframework.messagechannel
  * .types.config.ChannelConfig] subtype based on [channelType].
  */
-data class ManagerCreateTenantMessageChannelDTO(
-    override val tenantId: Long,
+data class ManagerCreateMessageChannelDTO(
+    override val scope: Int = 0,
+    override val scopeId: Long = 0,
 
     @field:NotNull(message = "channelType is required")
     @field:Positive(message = "channelType must be positive")
@@ -26,4 +27,4 @@ data class ManagerCreateTenantMessageChannelDTO(
 
     @field:NotBlank(message = "config is required")
     val config: String,
-) : BaseManagerCreateTenantResourceDTO(tenantId)
+) : BaseManagerCreateScopedDTO(scope, scopeId)

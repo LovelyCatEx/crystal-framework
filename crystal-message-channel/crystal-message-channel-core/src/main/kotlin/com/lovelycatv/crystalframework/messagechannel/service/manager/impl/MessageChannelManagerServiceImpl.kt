@@ -1,18 +1,18 @@
-package com.lovelycatv.crystalframework.tenant.service.manager.impl
+package com.lovelycatv.crystalframework.messagechannel.service.manager.impl
 
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
+import com.lovelycatv.crystalframework.messagechannel.controller.manager.dto.ManagerCreateMessageChannelDTO
+import com.lovelycatv.crystalframework.messagechannel.controller.manager.dto.ManagerUpdateMessageChannelDTO
+import com.lovelycatv.crystalframework.messagechannel.entity.MessageChannelEntity
+import com.lovelycatv.crystalframework.messagechannel.repository.MessageChannelRepository
+import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageChannelManagerService
 import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.utils.ChannelConfigCodec
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto.ManagerCreateTenantMessageChannelDTO
-import com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto.ManagerUpdateTenantMessageChannelDTO
-import com.lovelycatv.crystalframework.tenant.entity.TenantMessageChannelEntity
-import com.lovelycatv.crystalframework.tenant.repository.TenantMessageChannelRepository
-import com.lovelycatv.crystalframework.tenant.service.manager.TenantMessageChannelManagerService
-import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -20,59 +20,62 @@ import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
 @Service
-class TenantMessageChannelManagerServiceImpl(
-    private val tenantMessageChannelRepository: TenantMessageChannelRepository,
+class MessageChannelManagerServiceImpl(
+    private val messageChannelRepository: MessageChannelRepository,
     private val channelConfigCodec: ChannelConfigCodec,
     private val snowIdGenerator: SnowIdGenerator,
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
-) : TenantMessageChannelManagerService {
+) : MessageChannelManagerService {
 
-    override val cacheStore: ReactiveExpiringKVStore<String, TenantMessageChannelEntity>
+    override val cacheStore: ReactiveExpiringKVStore<String, MessageChannelEntity>
         get() = reactiveRedisService.asReactiveKVStore()
-    override val listCacheStore: ReactiveExpiringKVStore<String, List<TenantMessageChannelEntity>>
+    override val listCacheStore: ReactiveExpiringKVStore<String, List<MessageChannelEntity>>
         get() = reactiveRedisService.asReactiveKVStore()
-    override val entityClass: KClass<TenantMessageChannelEntity> = TenantMessageChannelEntity::class
+    override val entityClass: KClass<MessageChannelEntity> = MessageChannelEntity::class
 
-    override fun getRepository(): TenantMessageChannelRepository = tenantMessageChannelRepository
+    override fun getRepository(): MessageChannelRepository = messageChannelRepository
 
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
-    override suspend fun create(dto: ManagerCreateTenantMessageChannelDTO): TenantMessageChannelEntity {
+    override suspend fun create(dto: ManagerCreateMessageChannelDTO): MessageChannelEntity {
         val channelType = ChannelType.fromTypeId(dto.channelType)
             ?: throw BusinessException("Unknown channelType=${dto.channelType}")
 
         val config = parseConfigOrThrow(dto.config, channelType)
 
-        val duplicate = tenantMessageChannelRepository
-            .findByTenantIdAndChannelTypeAndName(dto.tenantId, channelType.typeId, dto.name)
+        val duplicate = messageChannelRepository
+            .findByScopeAndScopeIdAndChannelTypeAndName(dto.scope, dto.scopeId, channelType.typeId, dto.name)
             .awaitFirstOrNull()
         if (duplicate != null) {
             throw BusinessException("Channel name '${dto.name}' already exists for channelType=$channelType")
         }
 
-        val entity = TenantMessageChannelEntity(
+        val entity = MessageChannelEntity(
             id = snowIdGenerator.nextId(),
-            tenantId = dto.tenantId,
+            scope = dto.scope,
+            scopeId = dto.scopeId,
             channelType = channelType.typeId,
             name = dto.name,
             enabled = dto.enabled,
             config = channelConfigCodec.encode(config),
         ).apply { newEntity() }
 
-        return tenantMessageChannelRepository.save(entity).awaitFirstOrNull()
-            ?: throw BusinessException("Could not create tenant message channel")
+        return messageChannelRepository.save(entity).awaitFirstOrNull()
+            ?: throw BusinessException("Could not create message channel")
     }
 
     override suspend fun applyDTOToEntity(
-        dto: ManagerUpdateTenantMessageChannelDTO,
-        original: TenantMessageChannelEntity,
-    ): TenantMessageChannelEntity {
+        dto: ManagerUpdateMessageChannelDTO,
+        original: MessageChannelEntity,
+    ): MessageChannelEntity {
         dto.name?.let { newName ->
             if (newName != original.name) {
-                val duplicate = tenantMessageChannelRepository
-                    .findByTenantIdAndChannelTypeAndName(original.tenantId, original.channelType, newName)
+                val duplicate = messageChannelRepository
+                    .findByScopeAndScopeIdAndChannelTypeAndName(
+                        original.scope, original.scopeId, original.channelType, newName,
+                    )
                     .awaitFirstOrNull()
                 if (duplicate != null && duplicate.id != original.id) {
                     throw BusinessException(
@@ -92,8 +95,8 @@ class TenantMessageChannelManagerServiceImpl(
         }
     }
 
-    override suspend fun findAllByTenantId(tenantId: Long): List<TenantMessageChannelEntity> {
-        return getRepository().findAllByTenantId(tenantId).awaitListWithTimeout()
+    override suspend fun findAllByScopeId(scopeId: Long): List<MessageChannelEntity> {
+        return messageChannelRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
     }
 
     override suspend fun resolveConfig(channelId: Long): ChannelConfig {

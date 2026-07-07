@@ -167,15 +167,16 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
         return this.withUpdateEntityContext(entity.id, action)!!
     }
 
+    /**
+     * Evict-around update: delegates to [withInvalidateEntityCacheContext] so writes are
+     * bracketed by "clear cache → run action → clear cache again". Warming the cache with the
+     * post-write value here would risk stale entries when the surrounding transaction later
+     * rolls back (DB reverts, Redis keeps the phantom); the pre-clear also protects against a
+     * concurrent reader rehydrating the cache from the still-old row while the action is
+     * mid-flight.
+     */
     suspend fun withUpdateEntityContext(entityId: Long, action: suspend () -> ENTITY?): ENTITY? {
-        val result = action.invoke()
-
-        // Update cache
-        if (result != null) {
-            this.updateCache(result)
-        }
-
-        return result
+        return this.withInvalidateEntityCacheContext(entityId, action)
     }
 
     suspend fun <R> withDeleteEntityContext(entityId: Long, action: suspend () -> R): R {

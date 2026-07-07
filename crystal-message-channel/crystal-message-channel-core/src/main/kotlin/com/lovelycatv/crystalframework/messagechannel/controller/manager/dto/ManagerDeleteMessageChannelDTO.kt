@@ -1,7 +1,7 @@
-package com.lovelycatv.crystalframework.tenant.controller.manager.messagechannel.dto
+package com.lovelycatv.crystalframework.messagechannel.controller.manager.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 
-data class ManagerDeleteTenantMessageChannelDTO(
+data class ManagerDeleteMessageChannelDTO(
     override val ids: List<Long>
 ) : BaseManagerDeleteDTO(ids)

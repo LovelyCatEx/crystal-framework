@@ -49,6 +49,7 @@ const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/T
 const TenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/TenantDepartmentManagerPage.tsx"));
 const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/TenantInvitationManagerPage.tsx"));
 const TenantMessageChannelManagerPage = lazy(() => import("@/pages/manager/tenant/TenantMessageChannelManagerPage.tsx"));
+const SystemMessageChannelManagerPage = lazy(() => import("@/pages/manager/messagechannel/SystemMessageChannelManagerPage.tsx"));
 const AuditLogManagerPage = lazy(() => import("@/pages/manager/audit/AuditLogManagerPage.tsx"));
 const MyTenantProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantProfilePage.tsx"));
 const MyTenantPersonalProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantPersonalProfilePage.tsx"));
@@ -432,6 +433,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             label: t('menu.admin.tenantMessageChannels'),
             page: <TenantMessageChannelManagerPage />,
             group: 'tenant'
+        },
+        {
+            key: '/manager/system-message-channels',
+            path: '/manager/system-message-channels',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.systemMessageChannels'),
+            page: <SystemMessageChannelManagerPage />,
         },
         {
             key: '/manager/tenant-tire-types',

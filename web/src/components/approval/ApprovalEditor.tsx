@@ -619,7 +619,7 @@ function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
                 </Form.Item>
 
                 {/* Type-specific inspector */}
-                {node.type === ApprovalFlowNodeType.APPROVAL && (
+                {(node.type === ApprovalFlowNodeType.APPROVAL || node.type === ApprovalFlowNodeType.CC) && (
                     <ApprovalNodeInspector
                         node={node}
                         scope={scope}

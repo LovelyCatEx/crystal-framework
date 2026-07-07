@@ -1,4 +1,4 @@
-import {ChannelType} from "@/types/tenant/tenant-message-channel.types.ts";
+import {ChannelType} from "@/types/message-channel/message-channel.types.ts";
 
 /**
  * Strips persisted ciphertext out of a channel's `config` JSON before it is shown in the

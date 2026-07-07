@@ -5,8 +5,9 @@ export enum ChannelType {
     LARK = 2
 }
 
-export interface TenantMessageChannel extends BaseEntity {
-    tenantId: string;
+export interface MessageChannel extends BaseEntity {
+    scope: number;
+    scopeId: string;
     channelType: number;
     name: string;
     enabled: boolean;

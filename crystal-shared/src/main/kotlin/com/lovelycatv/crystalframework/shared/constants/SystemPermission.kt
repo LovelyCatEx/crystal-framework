@@ -159,12 +159,23 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
+    // Tenant-level Message Channel (tenantId > 0, system admin access)
     const val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = "tenant.message.channel:/manager/tenant-message-channels"
 
-    const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = "tenant.message.channel.create"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_READ = "tenant.message.channel.read"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = "tenant.message.channel.update"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = "tenant.message.channel.delete"
+    // System-level Message Channel
+    const val MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER = "system.message.channel:/manager/system-message-channels"
+
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE = "system.message.channel.create"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_READ = "system.message.channel.read"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE = "system.message.channel.update"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE = "system.message.channel.delete"
+
+    // Cross-scope (super) Message Channel permissions — holders may operate in any scope.
+    // Only granted to root and admin.
+    const val ACTION_MESSAGE_CHANNEL_CREATE = "message.channel.create"
+    const val ACTION_MESSAGE_CHANNEL_READ = "message.channel.read"
+    const val ACTION_MESSAGE_CHANNEL_UPDATE = "message.channel.update"
+    const val ACTION_MESSAGE_CHANNEL_DELETE = "message.channel.delete"
 
     const val MENU_AUDIT_LOG_MANAGER = "audit.log:/manager/audit-logs"
 

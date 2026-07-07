@@ -62,9 +62,19 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ,
             SystemPermission.MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER,
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ,
-            // Tenant Message Channel
+            // Message Channel — menus
+            SystemPermission.MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER,
             SystemPermission.MENU_TENANT_MESSAGE_CHANNEL_MANAGER,
-            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
+            // Message Channel — system scope
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE,
+            // Message Channel — super (cross-scope, admin-only)
+            SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_DELETE,
             // Approval Flow Instance (read-all)
             SystemPermission.MENU_APPROVAL_FLOW_INSTANCE_MANAGER,
             SystemPermission.MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER,
