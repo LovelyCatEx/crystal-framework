@@ -65,6 +65,11 @@ class ManagerApprovalFlowTaskController(
      * Always inject `assignee_id == self` so a user only ever sees their own tasks. The assignee id
      * is scope-specific (userId for SYSTEM, tenantMemberId for TENANT) — mirrors the initiator id
      * stored on the instance (see [ApprovalFlowEngine.resolveApprovers]).
+     *
+     * Also guards [com.lovelycatv.crystalframework.shared.service.BaseManagerService.query]'s
+     * `dto.id != null` short-circuit. That path bypasses buildQueryCriteria, so a caller could
+     * otherwise read any task by id. When id is set we fetch the row first and enforce
+     * `task.assigneeId == self`; unassigned callers get a 403.
      */
     override suspend fun buildQueryResponse(
         dto: ManagerReadApprovalFlowTaskDTO,
@@ -72,7 +77,34 @@ class ManagerApprovalFlowTaskController(
     ): Any {
         val resolvedScope = resolveScope(dto.scope)
         val assigneeId = resolveAssigneeId(resolvedScope, userAuthentication)
+        if (dto.id != null) {
+            val task = managerService.getByIdOrNull(dto.id!!)
+                ?: return managerService.query(dto)
+            if (task.assigneeId != assigneeId) {
+                throw ForbiddenException("Task not assigned to the current user")
+            }
+        }
         return managerService.query(dto.copy(query = appendAssigneeCondition(dto.query, assigneeId)))
+    }
+
+    /**
+     * Dedicated "my tasks" endpoint. Any authenticated user may call it; the result is
+     * unconditionally scoped to tasks assigned to the caller. [dto.id] is force-cleared so the
+     * id short-circuit cannot bypass the assignee filter — callers who need id lookup should go
+     * through `/query`, which still requires `task.assigneeId == self`.
+     */
+    @PostMapping("/my", version = "1")
+    suspend fun queryMyTasks(
+        userAuthentication: UserAuthentication,
+        @Valid @RequestBody dto: ManagerReadApprovalFlowTaskDTO,
+    ): ApiResponse<*> {
+        val resolvedScope = resolveScope(dto.scope)
+        val assigneeId = resolveAssigneeId(resolvedScope, userAuthentication)
+        val forcedDto = dto.copy(
+            id = null,
+            query = appendAssigneeCondition(dto.query, assigneeId),
+        )
+        return ApiResponse.success(managerService.query(forcedDto))
     }
 
     /**

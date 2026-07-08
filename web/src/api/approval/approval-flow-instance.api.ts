@@ -54,3 +54,16 @@ export async function startApprovalFlow(dto: StartApprovalFlowDTO) {
     );
 }
 
+/**
+ * Query approval flow instances initiated by the current user only.
+ * Backend force-clears `id` and injects `initiator_id = self`, ignoring any RBAC read-all authority.
+ * Use this from personal "my flows" pages so admins do not see everyone's flows via read-all.
+ */
+export async function queryMyApprovalFlowInstances(dto: ManagerReadApprovalFlowInstanceDTO) {
+    return doPost<import('@/types/api.types.ts').PaginatedResponseData<ApprovalFlowInstance>>(
+        '/api/manager/approval-flow-instances/my',
+        dto,
+        {'Content-Type': 'application/json'},
+    );
+}
+

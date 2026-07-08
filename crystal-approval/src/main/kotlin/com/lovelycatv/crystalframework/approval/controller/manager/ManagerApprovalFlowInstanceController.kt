@@ -79,6 +79,12 @@ class ManagerApprovalFlowInstanceController(
     /**
      * Inject `initiator_id` filter for users without read-all authority before delegating
      * to the manager service. Read-all authority lets the user see every instance in the scope.
+     *
+     * Also guards [com.lovelycatv.crystalframework.shared.service.BaseManagerService.query]'s
+     * `dto.id != null` short-circuit — that path bypasses buildQueryCriteria entirely, so a
+     * caller without read-all could otherwise read arbitrary instances by id. We require
+     * read-all authority for the scope before allowing id lookup here; callers who only need
+     * to see their own instances should go through [queryMyInstances].
      */
     override suspend fun buildQueryResponse(
         dto: ManagerReadApprovalFlowInstanceDTO,
@@ -89,6 +95,10 @@ class ManagerApprovalFlowInstanceController(
         val triad = permissions
             ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionTriad")
         val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
+
+        if (dto.id != null && !canReadAll) {
+            throw ForbiddenException("Id lookup on /query requires read-all authority for scope $resolvedScope")
+        }
 
         val effectiveDto = if (canReadAll) {
             dto
@@ -102,6 +112,35 @@ class ManagerApprovalFlowInstanceController(
         }
 
         return managerService.query(effectiveDto)
+    }
+
+    /**
+     * Dedicated "my instances" endpoint. Any authenticated user may call it; the result is
+     * unconditionally scoped to instances initiated by the caller (userId for SYSTEM,
+     * tenantMemberId for TENANT). No RBAC triad is consulted here — this is intentional so an
+     * admin viewing their personal "my flows" page does not see everyone's flows via read-all.
+     *
+     * [dto.id] is force-cleared so the [com.lovelycatv.crystalframework.shared.service
+     * .BaseManagerService.query] id short-circuit cannot bypass the initiator filter. Callers
+     * who need id lookup with cross-user visibility should go through `/query` with read-all
+     * authority.
+     */
+    @PostMapping("/my", version = "1")
+    suspend fun queryMyInstances(
+        userAuthentication: UserAuthentication,
+        @Valid @RequestBody dto: ManagerReadApprovalFlowInstanceDTO,
+    ): ApiResponse<*> {
+        val resolvedScope = resolveScope(dto.scope)
+        val initiatorId = when (resolvedScope) {
+            ResourceScope.SYSTEM -> userAuthentication.userId
+            ResourceScope.TENANT -> userAuthentication.tenantMemberId
+                ?: throw ForbiddenException("Current user is not a member of this tenant")
+        }
+        val forcedDto = dto.copy(
+            id = null,
+            query = appendInitiatorCondition(dto.query, initiatorId),
+        )
+        return ApiResponse.success(managerService.query(forcedDto))
     }
 
     /**

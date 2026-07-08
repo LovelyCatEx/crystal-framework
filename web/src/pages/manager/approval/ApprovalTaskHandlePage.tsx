@@ -5,8 +5,8 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowTaskTableColumns} from "@/components/columns/ApprovalFlowTaskEntityColumns.tsx";
 import {
-    ApprovalFlowTaskManagerController,
     handleApprovalFlowTask,
+    queryMyApprovalFlowTasks,
 } from "@/api/approval/approval-flow-task.api.ts";
 import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.ts";
 import {ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
@@ -168,7 +168,7 @@ export default function ApprovalTaskHandlePage() {
                         },
                     ]}
                     query={async (props) => (
-                        await ApprovalFlowTaskManagerController.query({
+                        await queryMyApprovalFlowTasks({
                             ...props,
                             scope: activeScope,
                             scopeId: effectiveScopeId,
