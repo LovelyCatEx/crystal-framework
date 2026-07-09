@@ -34,12 +34,18 @@ import org.springframework.web.bind.annotation.RequestBody
  * - [resolveScopeFromReadDTO]   — for POST `/query`
  * - [resolveScopeFromEntity]    — for POST `/update` and `/delete`
  *
- * Authorization is then driven uniformly by the supplied [ScopedPermissionTriad]:
- * `hasAnyAuthority(super<op>, scopeSpecific<op>)`, where `scopeSpecific` is `system<op>`
- * for SYSTEM and `tenantPem<op>` for TENANT.
+ * ⚠️ **Contract**: each `resolveScopeFromXxx` MUST return the **root** `(scope, scopeId)` — the
+ * outermost tenant the resource ultimately belongs to. Returning an intermediate parent's scope
+ * would let [checkOwnership] compare the wrong tenantId. Use
+ * [ScopedRelationshipResolvers.fromScopedParent] to walk one hop up to a scoped parent; compose
+ * multiple hops for deeper chains.
+ *
+ * Authorization is driven by the four-layer [ScopedPermissionMatrix]: SYSTEM consults super +
+ * system; TENANT consults super + tenantAdmin + tenantPem.
  *
  * Ownership is enforced via [checkOwnership]: TENANT-scoped resources require
- * `scopeId == userAuthentication.tenantId`; SYSTEM-scoped passes by default.
+ * `scopeId == userAuthentication.tenantId`, unless the caller holds a cross-tenant layer
+ * (super or tenantAdmin) for the requested operation.
  *
  * Provides POST `/create`, `/query`, `/update`, `/delete` endpoints. The `/list` endpoint
  * is intentionally omitted because there is no straightforward way to enumerate all
@@ -57,26 +63,25 @@ abstract class StandardDerivedScopedManagerController<
         DELETE_DTO : BaseManagerDeleteDTO
 >(
     protected val managerService: SERVICE,
-    protected val permissions: ScopedPermissionTriad,
+    protected val permissions: ScopedPermissionMatrix,
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<*> {
 
     // ─── Abstract: subclass must implement scope resolution ───
 
     /**
-     * Resolve `(scope, scopeId)` for a create DTO. Typically looks up the parent entity
-     * referenced by a foreign key on the DTO and returns its scope.
+     * Resolve **root** `(scope, scopeId)` for a create DTO. For a scoped parent, use
+     * [ScopedRelationshipResolvers.fromScopedParent].
      */
     protected abstract suspend fun resolveScopeFromCreateDTO(dto: CREATE_DTO): Pair<ResourceScope, Long>
 
     /**
-     * Resolve `(scope, scopeId)` for a read DTO. Typically looks up the parent entity
-     * referenced by a foreign key on the DTO and returns its scope.
+     * Resolve **root** `(scope, scopeId)` for a read DTO.
      */
     protected abstract suspend fun resolveScopeFromReadDTO(dto: READ_DTO): Pair<ResourceScope, Long>
 
     /**
-     * Resolve `(scope, scopeId)` for an existing entity (used by update / delete).
-     * Typically walks up to the parent entity via the relationship chain.
+     * Resolve **root** `(scope, scopeId)` for an existing entity (used by update / delete).
+     * Walk the entire relationship chain up to the outermost tenant.
      */
     protected abstract suspend fun resolveScopeFromEntity(entity: ENTITY): Pair<ResourceScope, Long>
 
@@ -87,11 +92,9 @@ abstract class StandardDerivedScopedManagerController<
      *
      * Defaults:
      * - SYSTEM: passes.
-     * - TENANT: holders of the **super** authority for [operation] (cross-scope admins)
-     *   bypass the tenant check; otherwise `scopeId == tenantId` is required.
-     *
-     * The super-authority bypass is op-scoped: a user holding only `super.read` may read
-     * across tenants but cannot update across tenants without also holding `super.update`.
+     * - TENANT: holders of a **cross-tenant** layer (super or tenantAdmin) for [operation] bypass
+     *   the tenant check; otherwise `scopeId == tenantId` is required. The bypass is op-scoped:
+     *   `super.read` alone does not authorize cross-tenant `update`.
      */
     protected open suspend fun checkOwnership(
         scope: ResourceScope,
@@ -102,7 +105,7 @@ abstract class StandardDerivedScopedManagerController<
         return when (scope) {
             ResourceScope.SYSTEM -> true
             ResourceScope.TENANT -> {
-                if (RbacUtils.hasAuthority(permissions.superFor(operation))) {
+                if (RbacUtils.hasAnyAuthority(*permissions.crossTenantLayersFor(operation))) {
                     true
                 } else {
                     scopeId == userAuthentication.tenantId
@@ -168,7 +171,7 @@ abstract class StandardDerivedScopedManagerController<
         dto: DELETE_DTO
     ): ApiResponse<*> {
         val entities = dto.ids.map { managerService.getByIdOrThrow(it) }
-        // Group by resolved scope, check each distinct scope group once.
+        // Group by resolved root scope, check each distinct scope group once.
         val resolved = entities.map { resolveScopeFromEntity(it) }
         resolved.toSet().forEach { (scope, scopeId) ->
             assertAccess(scope, scopeId, ScopedOperation.DELETE, userAuthentication)
@@ -185,7 +188,7 @@ abstract class StandardDerivedScopedManagerController<
         operation: ScopedOperation,
         userAuthentication: UserAuthentication
     ) {
-        if (!RbacUtils.hasAnyAuthority(*permissions.forScope(scope, operation))) {
+        if (!RbacUtils.hasAnyAuthority(*permissions.layersFor(scope, operation))) {
             throw ForbiddenException()
         }
         if (!checkOwnership(scope, scopeId, operation, userAuthentication)) {

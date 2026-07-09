@@ -70,6 +70,11 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ,
             SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE,
             SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE,
+            // Message Channel — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE,
             // Message Channel — super (cross-scope, admin-only)
             SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
             SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
@@ -88,6 +93,11 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
+            // Approval Flow Definition — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
             // Approval Flow Definition — super (cross-scope, admin-only)
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
@@ -107,6 +117,15 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
+            // Dictionary — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_READ,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_READ,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE,
             // Dictionary — super (cross-scope, admin-only)
             SystemPermission.ACTION_DICT_TYPE_CREATE,
             SystemPermission.ACTION_DICT_TYPE_READ,

@@ -159,8 +159,12 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
-    // Tenant-level Message Channel (tenantId > 0, system admin access)
+    // Tenant-level Message Channel (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = "tenant.message.channel:/manager/tenant-message-channels"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = "tenant.message.channel.create"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_READ = "tenant.message.channel.read"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = "tenant.message.channel.update"
+    const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = "tenant.message.channel.delete"
 
     // System-level Message Channel
     const val MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER = "system.message.channel:/manager/system-message-channels"
@@ -225,14 +229,18 @@ object SystemPermission {
     const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE = "system.approval.flow.definition.update"
     const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE = "system.approval.flow.definition.delete"
 
-    // Approval Flow Definition (tenant scope, system admin access)
+    // Approval Flow Definition (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = "tenant.approval.flow.definition:/manager/tenant-approval-flow-definitions"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = "tenant.approval.flow.definition.create"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = "tenant.approval.flow.definition.read"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = "tenant.approval.flow.definition.update"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = "tenant.approval.flow.definition.delete"
 
     // Approval Flow Instance (system scope) - read-all permission for system admins
     const val MENU_APPROVAL_FLOW_INSTANCE_MANAGER = "approval.flow.instance:/manager/approval-flow-instances"
     const val ACTION_APPROVAL_FLOW_INSTANCE_READ = "approval.flow.instance.read"
 
-    // Approval Flow Instance (tenant scope, system admin access)
+    // Approval Flow Instance (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER = "tenant.approval.flow.instance:/manager/tenant-approval-flow-instances"
     const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = "tenant.approval.flow.instance.read"
 
@@ -249,9 +257,18 @@ object SystemPermission {
     const val ACTION_SYSTEM_DICT_ITEM_UPDATE = "system.dict.item.update"
     const val ACTION_SYSTEM_DICT_ITEM_DELETE = "system.dict.item.delete"
 
-    // Tenant-level Dictionary (tenantId > 0, system admin access)
+    // Tenant-level Dictionary (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_DICT_TYPE_MANAGER = "tenant.dict.type:/manager/tenant-dict-types"
+    const val ACTION_TENANT_DICT_TYPE_CREATE = "tenant.dict.type.create"
+    const val ACTION_TENANT_DICT_TYPE_READ = "tenant.dict.type.read"
+    const val ACTION_TENANT_DICT_TYPE_UPDATE = "tenant.dict.type.update"
+    const val ACTION_TENANT_DICT_TYPE_DELETE = "tenant.dict.type.delete"
+
     const val MENU_TENANT_DICT_ITEM_MANAGER = "tenant.dict.item:/manager/tenant-dict-items"
+    const val ACTION_TENANT_DICT_ITEM_CREATE = "tenant.dict.item.create"
+    const val ACTION_TENANT_DICT_ITEM_READ = "tenant.dict.item.read"
+    const val ACTION_TENANT_DICT_ITEM_UPDATE = "tenant.dict.item.update"
+    const val ACTION_TENANT_DICT_ITEM_DELETE = "tenant.dict.item.delete"
 
     // Cross-scope (super) Dictionary permissions — holders may operate in any scope.
     // Only granted to root and admin.

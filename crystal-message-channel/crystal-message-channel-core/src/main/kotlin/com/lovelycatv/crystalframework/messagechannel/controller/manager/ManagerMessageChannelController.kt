@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageCha
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,7 +31,7 @@ class ManagerMessageChannelController(
         ManagerDeleteMessageChannelDTO
         >(
     managerService,
-    permissions = ScopedPermissionTriad(
+    permissions = ScopedPermissionMatrix(
         superCreate = SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
         superRead = SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
         superUpdate = SystemPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
@@ -40,6 +40,10 @@ class ManagerMessageChannelController(
         systemRead = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ,
         systemUpdate = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE,
         systemDelete = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE,
         tenantPemCreate = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE_PEM,
         tenantPemRead = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ_PEM,
         tenantPemUpdate = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE_PEM,

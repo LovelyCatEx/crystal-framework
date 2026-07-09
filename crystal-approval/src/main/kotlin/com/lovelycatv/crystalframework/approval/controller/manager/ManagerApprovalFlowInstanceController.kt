@@ -14,7 +14,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
 import com.lovelycatv.crystalframework.shared.database.GroupNode
@@ -52,9 +52,10 @@ class ManagerApprovalFlowInstanceController(
         BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad.readonly(
+    permissions = ScopedPermissionMatrix.readonly(
         superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
         systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
         tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
     ),
 ) {
@@ -92,9 +93,9 @@ class ManagerApprovalFlowInstanceController(
     ): Any {
         val resolvedScope = resolveScope(dto.scope)
 
-        val triad = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionTriad")
-        val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
+        val matrix = permissions
+            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+        val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
         if (dto.id != null && !canReadAll) {
             throw ForbiddenException("Id lookup on /query requires read-all authority for scope $resolvedScope")

@@ -25,21 +25,20 @@ import org.springframework.web.bind.annotation.RequestParam
 /**
  * Base controller for scope-aware manager endpoints (create / query / list / update / delete).
  *
- * Unlike [StandardTenantManagerController] which assumes a fixed dual-layer (system + tenant)
- * permission model, this controller receives an explicit `scope` + `scopeId` pair and delegates
- * all authorization decisions to the subclass via:
+ * Authorization is driven by a four-layer [ScopedPermissionMatrix]:
  *
- *  1. [checkPermission] — given scope + scopeId + operation, decide whether the user is authorized.
- *  2. [checkOwnership] (optional override) — verify the user can access data in this scope.
+ *  1. [checkPermission] verifies the caller holds **any** of the layers eligible for the current
+ *     `(scope, operation)` — SYSTEM consults super + system; TENANT consults super + tenantAdmin
+ *     + tenantPem.
+ *  2. [checkOwnership] additionally enforces tenant isolation for TENANT-scoped requests: a caller
+ *     holding a cross-tenant layer (super or tenantAdmin) is allowed anywhere; otherwise the
+ *     `scopeId` on the request must equal `userAuthentication.tenantId`.
  *
- * The `scope` field is the [ResourceScope.typeId] (e.g. 0=SYSTEM, 1=TENANT).
- * The `scopeId` field is the concrete ID within that scope (e.g. tenantId when scope=TENANT).
+ * For update/delete, scope is read directly from the entity's [BaseScopedEntity] columns (not
+ * from the client-supplied DTO) so a caller cannot lie about which tenant they are targeting.
  *
- * For update/delete, the scope is read directly from the entity's [BaseScopedEntity.scope]
- * and [BaseScopedEntity.scopeId] fields.
- *
- * Data isolation is handled at the service layer: [BaseScopedManagerService.buildQueryCriteria]
- * automatically injects scope-based filtering when scopeId is non-null.
+ * Data isolation is also enforced at the service layer: [BaseScopedManagerService.buildQueryCriteria]
+ * injects scope-based SQL filtering when scopeId is non-null.
  */
 @Validated
 abstract class StandardScopedManagerController<
@@ -53,27 +52,18 @@ abstract class StandardScopedManagerController<
 >(
     protected val managerService: SERVICE,
     /**
-     * Optional three-layer permission declaration. When provided, the default
-     * [checkPermission] implementation is driven by this triad and subclasses no longer
-     * need to override [checkPermission]. When null, subclasses must override
-     * [checkPermission] to implement custom authorization logic.
+     * Four-layer permission matrix (super / system / tenantAdmin / tenantPem). When non-null the
+     * default [checkPermission] and [checkOwnership] use it; when null, subclasses MUST override
+     * both hooks.
      */
-    protected val permissions: ScopedPermissionTriad? = null,
+    protected val permissions: ScopedPermissionMatrix? = null,
 ) {
 
     // ─── Permission decision ───
 
     /**
-     * Permission decision callback.
-     *
-     * Default behavior:
-     * - When [permissions] is non-null, performs `hasAnyAuthority(super<op>, scopeSpecific<op>)`
-     *   based on the [ScopedPermissionTriad] supplied at construction.
-     * - When [permissions] is null, throws [IllegalStateException] — subclasses without a
-     *   triad MUST override this method.
-     *
-     * Override directly when custom authorization logic is needed (e.g. always-allow READ,
-     * dynamic conditions, etc.).
+     * Default: `hasAnyAuthority` across the layers eligible for the current `(scope, operation)`.
+     * Override for special cases (e.g. `operation == READ` unconditionally, or dynamic rules).
      */
     protected open suspend fun checkPermission(
         scope: ResourceScope,
@@ -81,25 +71,26 @@ abstract class StandardScopedManagerController<
         operation: ScopedOperation,
         userAuthentication: UserAuthentication
     ): Boolean {
-        val triad = permissions
-            ?: error("StandardScopedManagerController#checkPermission must be overridden when no ScopedPermissionTriad is supplied")
-        return RbacUtils.hasAnyAuthority(*triad.forScope(scope, operation))
+        val matrix = permissions
+            ?: error("StandardScopedManagerController#checkPermission must be overridden when no ScopedPermissionMatrix is supplied")
+        return RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, operation))
     }
 
     // ─── Overridable hooks ───
 
     /**
-     * Ownership check: verify that the user is allowed to access data within this scope.
+     * Ownership check.
      *
      * Default behavior:
-     * - [ResourceScope.SYSTEM]: always passes (permission check is sufficient).
-     * - [ResourceScope.TENANT]: holders of the **super** authority for [operation] (cross-scope
-     *   admins) bypass the tenant check; otherwise [scopeId] must equal the user's tenantId.
+     * - [ResourceScope.SYSTEM]: always passes (permission check is sufficient — there is no
+     *   "primary id" concept inside SYSTEM).
+     * - [ResourceScope.TENANT]: holders of a **cross-tenant** layer (super or tenantAdmin) for
+     *   [operation] bypass the tenant check; otherwise [scopeId] must equal
+     *   `userAuthentication.tenantId`. The cross-tenant bypass is op-scoped: `super.read` alone
+     *   does not authorize cross-tenant `update`.
      *
-     * The super-authority bypass is op-scoped: a user holding only `super.read` may read
-     * across tenants, but cannot update across tenants without also holding `super.update`.
-     *
-     * Override for custom ownership logic (e.g. nested resources).
+     * Override for custom logic (e.g. nested resources whose ownership requires a service lookup
+     * beyond a plain equality check).
      */
     protected open suspend fun checkOwnership(
         scope: ResourceScope,
@@ -107,11 +98,11 @@ abstract class StandardScopedManagerController<
         operation: ScopedOperation,
         userAuthentication: UserAuthentication
     ): Boolean {
+        val matrix = permissions ?: return true
         return when (scope) {
             ResourceScope.SYSTEM -> true
             ResourceScope.TENANT -> {
-                val triad = permissions
-                if (triad != null && RbacUtils.hasAuthority(triad.superFor(operation))) {
+                if (RbacUtils.hasAnyAuthority(*matrix.crossTenantLayersFor(operation))) {
                     true
                 } else {
                     scopeId == userAuthentication.tenantId

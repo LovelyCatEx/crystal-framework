@@ -31,7 +31,7 @@ abstract class ReadonlyScopedManagerController<
         DELETE_DTO : BaseManagerDeleteDTO
 >(
     managerService: SERVICE,
-    permissions: ScopedPermissionTriad? = null,
+    permissions: ScopedPermissionMatrix? = null,
 ) : StandardScopedManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
     managerService,
     permissions,
