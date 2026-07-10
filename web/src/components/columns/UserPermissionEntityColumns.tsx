@@ -6,9 +6,20 @@ import {getPermissionType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 
-export function useUserPermissionTableColumns(): EntityTableColumns<UserPermission> {
+export interface UseUserPermissionTableColumnsOptions {
+    /**
+     * Override how the description column value is rendered. Return a string / node to display,
+     * or null / undefined to fall back to `row.description` verbatim.
+     */
+    descriptionRender?: (row: UserPermission) => React.ReactNode | null | undefined;
+}
+
+export function useUserPermissionTableColumns(
+    options?: UseUserPermissionTableColumnsOptions,
+): EntityTableColumns<UserPermission> {
     const { t } = useTranslation();
-    
+    const descriptionRender = options?.descriptionRender;
+
     return [
         {
             title: t('components.columns.userPermission.permission'),
@@ -47,9 +58,12 @@ export function useUserPermissionTableColumns(): EntityTableColumns<UserPermissi
             dataIndex: "description",
             key: "description",
             render: function (_: unknown, row: UserPermission): React.ReactNode | JSX.Element {
+                const custom = descriptionRender?.(row);
+                const value = custom !== undefined && custom !== null ? custom : row.description;
+                const tooltipTitle = typeof value === 'string' ? value : row.description;
                 return <Space orientation='vertical' size={0}>
-                    <CopyableToolTip title={row.description}>
-                        <span className="text-xs font-mono">{row.description}</span>
+                    <CopyableToolTip title={tooltipTitle}>
+                        <span className="text-xs font-mono">{value}</span>
                     </CopyableToolTip>
                 </Space>
             }

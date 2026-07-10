@@ -22,26 +22,32 @@ class SystemSystemRbacConfigurer : SystemRbacConfigurer {
     }
 
     private fun registerPermissions(registry: SystemRbacRegistry) {
-        SystemPermission::class.memberProperties.forEach { property ->
-            val permissionKey = property.getter.call() as? String?
-                ?: throw IllegalStateException("${property.name} is not a valid permission declaration.")
+        SystemPermission::class.memberProperties
+            .filter { it.returnType.classifier == String::class }
+            .forEach { property ->
+                val permissionKey = property.getter.call() as? String?
+                    ?: throw IllegalStateException("${property.name} is not a valid permission declaration.")
 
-            val declaration = when {
-                permissionKey.contains(":") -> {
-                    val (name, path) = permissionKey.split(":", limit = 2)
-                    SystemRbacPermissionDeclaration.menu(name = name, path = path)
+                val declaration = when {
+                    permissionKey.contains(":") -> {
+                        val (name, path) = permissionKey.split(":", limit = 2)
+                        SystemRbacPermissionDeclaration.menu(name = name, path = path)
+                    }
+
+                    permissionKey.contains("@") -> {
+                        val (name, path) = permissionKey.split("@", limit = 2)
+                        SystemRbacPermissionDeclaration.component(name = name, path = path)
+                    }
+
+                    else -> SystemRbacPermissionDeclaration.action(permissionKey)
                 }
 
-                permissionKey.contains("@") -> {
-                    val (name, path) = permissionKey.split("@", limit = 2)
-                    SystemRbacPermissionDeclaration.component(name = name, path = path)
-                }
+                val enriched = declaration.copy(
+                    description = SystemPermission.DESCRIPTIONS[declaration.name] ?: declaration.description
+                )
 
-                else -> SystemRbacPermissionDeclaration.action(permissionKey)
+                registry.permission(enriched)
             }
-
-            registry.permission(declaration)
-        }
     }
 
     private fun registerRoles(registry: SystemRbacRegistry) {

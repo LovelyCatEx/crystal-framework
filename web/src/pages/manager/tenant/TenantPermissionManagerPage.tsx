@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, Row, Select} from "antd";
+import {Button, Col, Form, Input, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     type ManagerCreateTenantPermissionDTO,
@@ -8,13 +8,14 @@ import {
 import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {TenantPermissionType} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {getTenantPermissionType} from "@/i18n/enum-helpers.ts";
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useTenantPermissionTableColumns} from "@/components/columns/TenantPermissionEntityColumns.tsx";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {usePermissionTranslator} from "@/i18n/permission-translations.tsx";
 
 export default function TenantPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -23,7 +24,14 @@ export default function TenantPermissionManagerPage() {
     });
     const { controller } = useProtectedController<TenantPermission, ManagerCreateTenantPermissionDTO, ManagerReadTenantPermissionDTO>();
     const {t} = useTranslation();
-    const columns = useTenantPermissionTableColumns();
+    const [useI18nDescription, setUseI18nDescription] = useState(true);
+    const translatePermission = usePermissionTranslator();
+    const columns = useTenantPermissionTableColumns({
+        descriptionRender: (row) => {
+            if (!useI18nDescription) return row.description || '-';
+            return translatePermission(row.name) ?? (row.description || '-');
+        },
+    });
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
@@ -177,7 +185,16 @@ export default function TenantPermissionManagerPage() {
                             ]}
                             onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                         />,
-                    }
+                    },
+                    {
+                        label: <span>{t('pages.permissionCatalog.source.label')}</span>,
+                        children: <Switch
+                            checked={useI18nDescription}
+                            checkedChildren={t('pages.permissionCatalog.source.i18n')}
+                            unCheckedChildren={t('pages.permissionCatalog.source.db')}
+                            onChange={setUseI18nDescription}
+                        />,
+                    },
                 ]}
                 delete={async (props) => {
                     return (await controller.delete(props)).data!
