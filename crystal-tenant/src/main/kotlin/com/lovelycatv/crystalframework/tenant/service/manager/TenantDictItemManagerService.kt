@@ -5,6 +5,8 @@ import com.lovelycatv.crystalframework.shared.database.GroupNode
 import com.lovelycatv.crystalframework.shared.database.QueryLogic
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
+import com.lovelycatv.crystalframework.shared.service.ScopedRelationshipCheckService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerReadTenantDictItemDTO
@@ -21,8 +23,15 @@ interface TenantDictItemManagerService : BaseTenantResourceManagerService<
         ManagerReadTenantDictItemDTO,
         ManagerUpdateTenantDictItemDTO,
         ManagerDeleteTenantDictItemDTO
-        > {
+        >, ScopedRelationshipCheckService {
     suspend fun getTreeByTypeId(typeId: Long): List<TenantDictItemTreeVO>
+
+    /**
+     * Resolve the root `(scope, scopeId)` from a dict type id — used by the controller in
+     * create / query flows where the item does not yet exist (so [resolveRootScope] cannot be
+     * called on an item id). Impl delegates to the parent DictType Service's resolver.
+     */
+    suspend fun resolveRootScopeFromTypeId(typeId: Long): Pair<ResourceScope, Long>?
 
     override suspend fun buildQueryCriteria(dto: ManagerReadTenantDictItemDTO): Criteria {
         return super.buildQueryCriteria(

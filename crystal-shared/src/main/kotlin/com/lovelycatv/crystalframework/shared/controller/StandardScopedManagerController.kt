@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.shared.controller
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateScopedDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScopedDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -9,10 +10,12 @@ import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseScopedManagerService
+import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
+import com.lovelycatv.crystalframework.shared.service.ScopedRelationshipCheckService
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
-import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
+import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
@@ -25,28 +28,43 @@ import org.springframework.web.bind.annotation.RequestParam
 /**
  * Base controller for scope-aware manager endpoints (create / query / list / update / delete).
  *
+ * **This controller covers both directly scoped and derived-scoped resources** — the difference
+ * lives at the Service layer via [ScopedRelationshipCheckService.resolveRootScope]:
+ *
+ *  - **Directly scoped entities** (implementing `BaseScopedEntity`): the default
+ *    [BaseScopedManagerService.resolveRootScope] reads the entity's own `scope / scopeId` columns.
+ *  - **Derived-scoped entities** (no scope columns of their own — e.g. `dict_item.type_id`): the
+ *    Service impl overrides [ScopedRelationshipCheckService.resolveRootScope] to delegate to the
+ *    scoped parent's Service. Deep chains compose recursively — the tenant side does the same
+ *    thing via `checkIsRelatedToRootParent`.
+ *
  * Authorization is driven by a four-layer [ScopedPermissionMatrix]:
  *
- *  1. [checkPermission] verifies the caller holds **any** of the layers eligible for the current
+ *  1. [checkPermission] verifies the caller holds any of the layers eligible for the current
  *     `(scope, operation)` — SYSTEM consults super + system; TENANT consults super + tenantAdmin
  *     + tenantPem.
  *  2. [checkOwnership] additionally enforces tenant isolation for TENANT-scoped requests: a caller
  *     holding a cross-tenant layer (super or tenantAdmin) is allowed anywhere; otherwise the
- *     `scopeId` on the request must equal `userAuthentication.tenantId`.
+ *     resolved root `scopeId` must equal `userAuthentication.tenantId`.
  *
- * For update/delete, scope is read directly from the entity's [BaseScopedEntity] columns (not
- * from the client-supplied DTO) so a caller cannot lie about which tenant they are targeting.
+ * The `(scope, scopeId)` for each operation is produced by three overridable hooks whose defaults
+ * cover the common case:
  *
- * Data isolation is also enforced at the service layer: [BaseScopedManagerService.buildQueryCriteria]
- * injects scope-based SQL filtering when scopeId is non-null.
+ *  - [resolveScopeFromCreateDTO] — DTO scoped fields (requires [BaseManagerCreateScopedDTO])
+ *  - [resolveScopeFromReadDTO]   — DTO scoped fields (requires [BaseManagerReadScopedDTO])
+ *  - [resolveScopeFromEntity]    — delegates to `managerService.resolveRootScope(entity.id)`
+ *
+ * Derived-scoped controllers whose DTOs do not carry `scope + scopeId` (they carry a parent id
+ * such as `typeId` instead) MUST override the two DTO-resolving hooks to look up the parent's
+ * root scope via the parent's Service.
  */
 @Validated
 abstract class StandardScopedManagerController<
-        SERVICE : BaseScopedManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
+        SERVICE,
         REPOSITORY : BaseRepository<ENTITY>,
-        ENTITY : BaseScopedEntity,
+        ENTITY : BaseEntity,
         CREATE_DTO : Any,
-        READ_DTO : BaseManagerReadScopedDTO,
+        READ_DTO : BaseManagerReadDTO,
         UPDATE_DTO : BaseManagerUpdateDTO,
         DELETE_DTO : BaseManagerDeleteDTO
 >(
@@ -57,7 +75,8 @@ abstract class StandardScopedManagerController<
      * both hooks.
      */
     protected val permissions: ScopedPermissionMatrix? = null,
-) {
+) where SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
+        SERVICE : ScopedRelationshipCheckService {
 
     // ─── Permission decision ───
 
@@ -79,18 +98,8 @@ abstract class StandardScopedManagerController<
     // ─── Overridable hooks ───
 
     /**
-     * Ownership check.
-     *
-     * Default behavior:
-     * - [ResourceScope.SYSTEM]: always passes (permission check is sufficient — there is no
-     *   "primary id" concept inside SYSTEM).
-     * - [ResourceScope.TENANT]: holders of a **cross-tenant** layer (super or tenantAdmin) for
-     *   [operation] bypass the tenant check; otherwise [scopeId] must equal
-     *   `userAuthentication.tenantId`. The cross-tenant bypass is op-scoped: `super.read` alone
-     *   does not authorize cross-tenant `update`.
-     *
-     * Override for custom logic (e.g. nested resources whose ownership requires a service lookup
-     * beyond a plain equality check).
+     * Ownership check. See class-level doc for the full rule; the short version: TENANT scope
+     * requires a cross-tenant layer (super / tenantAdmin) OR `scopeId == tenantId`.
      */
     protected open suspend fun checkOwnership(
         scope: ResourceScope,
@@ -111,13 +120,44 @@ abstract class StandardScopedManagerController<
         }
     }
 
-    /**
-     * Resolve [ResourceScope] from the raw scope typeId sent by the client.
-     * Default delegates to [ResourceScope.getById].
-     */
+    /** Resolve [ResourceScope] from the raw scope typeId. */
     protected open fun resolveScope(scopeTypeId: Int): ResourceScope {
         return ResourceScope.getById(scopeTypeId)
             ?: throw IllegalArgumentException("Unknown scope type: $scopeTypeId")
+    }
+
+    // ─── Scope resolution hooks ───
+
+    /**
+     * Resolve the root `(scope, scopeId)` for a create DTO. Default expects the DTO to implement
+     * [BaseManagerCreateScopedDTO] and reads its scope fields directly. Override when the DTO
+     * carries a parent id instead (derived-scope case).
+     */
+    protected open suspend fun resolveScopeFromCreateDTO(dto: CREATE_DTO): Pair<ResourceScope, Long> {
+        val scopedDto = dto as? BaseManagerCreateScopedDTO
+            ?: error("Default resolveScopeFromCreateDTO requires the DTO to implement BaseManagerCreateScopedDTO. Override it for derived-scope DTOs.")
+        return resolveScope(scopedDto.scope) to scopedDto.scopeId
+    }
+
+    /**
+     * Resolve the root `(scope, scopeId)` for a read DTO. Default expects [BaseManagerReadScopedDTO];
+     * override for derived-scope DTOs.
+     */
+    protected open suspend fun resolveScopeFromReadDTO(dto: READ_DTO): Pair<ResourceScope, Long> {
+        val scopedDto = dto as? BaseManagerReadScopedDTO
+            ?: error("Default resolveScopeFromReadDTO requires the DTO to implement BaseManagerReadScopedDTO. Override it for derived-scope DTOs.")
+        return resolveScope(scopedDto.scope) to scopedDto.scopeId
+    }
+
+    /**
+     * Resolve the root `(scope, scopeId)` for an existing entity — delegates to the Service's
+     * [ScopedRelationshipCheckService.resolveRootScope]. Directly scoped Service impls inherit
+     * the default (read entity fields); derived Service impls must override that method to walk
+     * up the parent chain.
+     */
+    protected open suspend fun resolveScopeFromEntity(entity: ENTITY): Pair<ResourceScope, Long> {
+        return managerService.resolveRootScope(entity.id)
+            ?: error("Could not resolve root scope for entity ${entity.id}. Ensure the Service overrides resolveRootScope for derived entities.")
     }
 
     // ─── Response shaping hooks ───
@@ -130,9 +170,18 @@ abstract class StandardScopedManagerController<
         return managerService.query(dto)
     }
 
-    /** Shape the response body for [readAll]. Default returns all entities for the scope. */
+    /**
+     * Shape the response body for [readAll]. Default calls the Service's `findAllByScopeId(scopeId)`
+     * via reflection-friendly cast — only works when the Service implements
+     * [BaseScopedManagerService]. Derived-scope controllers whose Service does not expose that
+     * API should override this hook (or simply not expose the `/list` endpoint in their route
+     * table).
+     */
     protected open suspend fun buildReadAllResponse(scopeId: Long): Any {
-        return managerService.findAllByScopeId(scopeId)
+        val scopedService = managerService as? BaseScopedManagerService<*, *, *, *, *, *>
+            ?: throw UnsupportedOperationException("/list endpoint requires the Service to implement BaseScopedManagerService, or override buildReadAllResponse")
+        @Suppress("UNCHECKED_CAST")
+        return (scopedService as BaseScopedManagerService<REPOSITORY, *, *, *, *, *>).findAllByScopeId(scopeId)
     }
 
     // ─── Endpoints ───
@@ -155,9 +204,8 @@ abstract class StandardScopedManagerController<
         @Valid
         dto: CREATE_DTO
     ): ApiResponse<*> {
-        val scopedDto = dto as BaseManagerCreateScopedDTO
-        val resolvedScope = resolveScope(scopedDto.scope)
-        assertAccess(resolvedScope, scopedDto.scopeId, ScopedOperation.CREATE, userAuthentication)
+        val (scope, scopeId) = resolveScopeFromCreateDTO(dto)
+        assertAccess(scope, scopeId, ScopedOperation.CREATE, userAuthentication)
         managerService.create(dto)
         return ApiResponse.success(null)
     }
@@ -169,8 +217,8 @@ abstract class StandardScopedManagerController<
         @Valid
         dto: READ_DTO
     ): ApiResponse<*> {
-        val resolvedScope = resolveScope(dto.scope)
-        assertAccess(resolvedScope, dto.scopeId, ScopedOperation.READ, userAuthentication)
+        val (scope, scopeId) = resolveScopeFromReadDTO(dto)
+        assertAccess(scope, scopeId, ScopedOperation.READ, userAuthentication)
         return ApiResponse.success(buildQueryResponse(dto, userAuthentication))
     }
 
@@ -182,8 +230,8 @@ abstract class StandardScopedManagerController<
         dto: UPDATE_DTO
     ): ApiResponse<*> {
         val entity = managerService.getByIdOrThrow(dto.id)
-        val resolvedScope = resolveScope(entity.scope)
-        assertAccess(resolvedScope, entity.scopeId, ScopedOperation.UPDATE, userAuthentication)
+        val (scope, scopeId) = resolveScopeFromEntity(entity)
+        assertAccess(scope, scopeId, ScopedOperation.UPDATE, userAuthentication)
         managerService.update(dto)
         return ApiResponse.success(null)
     }
@@ -196,13 +244,10 @@ abstract class StandardScopedManagerController<
         dto: DELETE_DTO
     ): ApiResponse<*> {
         val entities = dto.ids.map { managerService.getByIdOrThrow(it) }
-
-        // Check permission and ownership for each distinct scope group
-        entities.groupBy { it.scope to it.scopeId }.keys.forEach { (scopeType, scopeId) ->
-            val resolvedScope = resolveScope(scopeType)
-            assertAccess(resolvedScope, scopeId, ScopedOperation.DELETE, userAuthentication)
+        val resolved = entities.map { resolveScopeFromEntity(it) }
+        resolved.toSet().forEach { (scope, scopeId) ->
+            assertAccess(scope, scopeId, ScopedOperation.DELETE, userAuthentication)
         }
-
         managerService.deleteByDTO(dto)
         return ApiResponse.success(null)
     }

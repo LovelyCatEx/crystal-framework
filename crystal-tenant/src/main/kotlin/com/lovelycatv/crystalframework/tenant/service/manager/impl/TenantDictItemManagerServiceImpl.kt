@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.Manage
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.vo.TenantDictItemTreeVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantDictItemEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantDictItemRepository
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDictItemManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDictTypeManagerService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -97,6 +98,25 @@ class TenantDictItemManagerServiceImpl(
             }
         }
         return true
+    }
+
+    /**
+     * Derived-scope resolver: dict item does not own a `scope + scope_id` pair — its scope is
+     * whatever its parent [TenantDictTypeManagerService] resolves to. The parent Service inherits
+     * the default `BaseScopedManagerService.resolveRootScope` (reads `entity.scope / entity.scopeId`),
+     * so this one call bridges item → type → root.
+     */
+    override suspend fun resolveRootScope(id: Long): Pair<ResourceScope, Long>? {
+        val item = this.getByIdOrNull(id) ?: return null
+        return tenantDictTypeManagerService.resolveRootScope(item.typeId)
+    }
+
+    /**
+     * Public bridge for the controller: resolve root scope directly from a dict type id
+     * (used before an item exists in the create / query flow).
+     */
+    override suspend fun resolveRootScopeFromTypeId(typeId: Long): Pair<ResourceScope, Long>? {
+        return tenantDictTypeManagerService.resolveRootScope(typeId)
     }
 
     override suspend fun findAllByTenantId(tenantId: Long): List<TenantDictItemEntity> {
