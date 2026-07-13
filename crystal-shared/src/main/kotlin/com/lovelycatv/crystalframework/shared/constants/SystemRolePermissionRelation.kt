@@ -4,10 +4,12 @@ import kotlin.reflect.full.memberProperties
 
 object SystemRolePermissionRelation {
     val mapping = mapOf(
-        SystemRole.ROLE_ROOT to SystemPermission::class.memberProperties.map {
-            it.getter.call() as? String?
-                ?: throw IllegalStateException("could not call member property ${it.name} in ${SystemPermission::class.qualifiedName}")
-        },
+        SystemRole.ROLE_ROOT to SystemPermission::class.memberProperties
+            .filter { it.returnType.classifier == String::class }
+            .map {
+                it.getter.call() as? String
+                    ?: throw IllegalStateException("could not call member property ${it.name} in ${SystemPermission::class.qualifiedName}")
+            },
         SystemRole.ROLE_ADMIN to listOf(
             // System
             SystemPermission.ACTION_SYSTEM_MAINTENANCE_ACCESS,
