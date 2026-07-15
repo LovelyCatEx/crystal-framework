@@ -14,7 +14,7 @@ import {
     BaseApprovalFlowGraphNode,
     BaseApprovalFlowGraphNodeControl
 } from "./rete-typs.ts";
-import {type ReactNode, useCallback, useEffect, useRef, useState} from "react";
+import {type ReactNode, useEffect, useRef, useState} from "react";
 import {applyApprovalFlowEditorAreaBackground} from "@/components/approval/background.ts";
 import {
     Button,
@@ -33,17 +33,9 @@ import {
     Typography
 } from "antd";
 import {ApartmentOutlined, FullscreenExitOutlined, RedoOutlined, SaveOutlined, UndoOutlined} from "@ant-design/icons";
-import {StartNodeComponent} from "@/components/approval/node/StartNodeComponent.tsx";
-import {EndNodeComponent} from "@/components/approval/node/EndNodeComponent.tsx";
-import {ApprovalNodeComponent} from "@/components/approval/node/ApprovalNodeComponent.tsx";
-import {ConditionNodeComponent} from "@/components/approval/node/ConditionNodeComponent.tsx";
-import {CcNodeComponent} from "@/components/approval/node/CcNodeComponent.tsx";
-import {ForkNodeComponent} from "@/components/approval/node/ForkNodeComponent.tsx";
-import {JoinNodeComponent} from "@/components/approval/node/JoinNodeComponent.tsx";
 import {createApprovalFlowNode} from "./approval-graph-nodes.ts";
 import {ApprovalEditorContext, type ApprovalEditorContextValue} from "./ApprovalEditorContext.tsx";
 import {ApprovalNodeInspector} from "@/components/approval/ApprovalNodeInspector.tsx";
-import type {ApprovalFlowDefinitionDetailsVO} from "@/types/approval/approval-flow-definition.types.ts";
 import {ContextMenuContainer} from "@/rete/ui/menu/ContextMenuContainer.tsx";
 import {ContextMenuItem} from "@/rete/ui/menu/ContextMenuItem.tsx";
 import {ContextMenuSubItem} from "@/rete/ui/menu/ContextMenuSubItem.tsx";
@@ -54,52 +46,9 @@ import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {getApprovalFlowNodeType} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";
 import i18n from "@/i18n";
-
-async function renderApprovalFlow(ctx: ApprovalFlowGraphEditorContext, details: ApprovalFlowDefinitionDetailsVO) {
-    // Clear existing nodes and connections
-    for (const conn of ctx.rete.editor.getConnections()) {
-        await ctx.rete.editor.removeConnection(conn.id);
-    }
-    for (const node of ctx.rete.editor.getNodes()) {
-        await ctx.rete.editor.removeNode(node.id);
-    }
-
-    // Save positions before addNode (pipe will overwrite node.positionX/Y to 0)
-    const positionMap = new Map<string, { x: number; y: number }>();
-    for (const node of details.nodes) {
-        positionMap.set(node.id, { x: node.positionX, y: node.positionY });
-    }
-
-    // Add nodes
-    for (const node of details.nodes) {
-        await ctx.rete.editor.addNode(createApprovalFlowNode(node));
-    }
-
-    // Position nodes according to saved x/y
-    const reteNodes = ctx.rete.editor.getNodes();
-    for (const reteNode of reteNodes) {
-        const pos = positionMap.get(reteNode.node.id);
-        if (!pos) continue;
-        const view = ctx.rete.area.nodeViews.get(reteNode.id);
-        if (view) {
-            await view.translate(pos.x, pos.y);
-        }
-    }
-
-    // Build edges
-    for (const edge of details.edges) {
-        const sourceNode = reteNodes.find(n => n.node.id === edge.sourceNodeId);
-        const targetNode = reteNodes.find(n => n.node.id === edge.targetNodeId);
-        if (sourceNode && targetNode) {
-            await ctx.rete.editor.addConnection(
-                new ApprovalFlowConnection(sourceNode, 'out', targetNode, 'in')
-            );
-        }
-    }
-
-    // Fit viewport
-    ctx.autoFitViewport();
-}
+import {renderApprovalFlow, renderApprovalFlowNode} from "./utils/approval-graph-render.tsx";
+import {useResizablePanel} from "./utils/use-resizable-panel.ts";
+import {useGraphViewport} from "./utils/use-graph-viewport.ts";
 
 async function save(ctx: ApprovalFlowGraphEditorContext, definitionId: string): Promise<{ success: boolean; errors?: string[] }> {
     const nodes = ctx.rete.editor.getNodes();
@@ -186,33 +135,7 @@ export default function ApprovalEditor(props: {
         scopeId: definitionDetails?.definition.scopeId ?? '',
     };
 
-    // Resizable right panel
-    const [panelWidth, setPanelWidth] = useState(25); // percentage
-    const isResizing = useRef(false);
-
-    const handleResizeStart = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        isResizing.current = true;
-        const startX = e.clientX;
-        const startWidth = panelWidth;
-
-        const onMouseMove = (ev: MouseEvent) => {
-            if (!isResizing.current) return;
-            const containerWidth = document.body.clientWidth;
-            const delta = startX - ev.clientX;
-            const newWidth = Math.max(20, Math.min(60, startWidth + (delta / containerWidth) * 100));
-            setPanelWidth(newWidth);
-        };
-
-        const onMouseUp = () => {
-            isResizing.current = false;
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    }, [panelWidth]);
+    const {width: panelWidth, handleResizeStart} = useResizablePanel(25);
 
     const [ref, baseCtx] = useRete(
         useCreateReteBaseGraphEditor<
@@ -241,31 +164,11 @@ export default function ApprovalEditor(props: {
                 },
             },
             render: {
-                node: (_, node, emit) => {
-                    const renderNode = () => {
-                        switch (node.node.type) {
-                            case ApprovalFlowNodeType.START:
-                                return <StartNodeComponent data={node} emit={emit} />;
-                            case ApprovalFlowNodeType.END:
-                                return <EndNodeComponent data={node} emit={emit} />;
-                            case ApprovalFlowNodeType.CONDITION:
-                                return <ConditionNodeComponent data={node} emit={emit} />;
-                            case ApprovalFlowNodeType.CC:
-                                return <CcNodeComponent data={node} emit={emit} />;
-                            case ApprovalFlowNodeType.FORK:
-                                return <ForkNodeComponent data={node} emit={emit} />;
-                            case ApprovalFlowNodeType.JOIN:
-                                return <JoinNodeComponent data={node} emit={emit} />;
-                            default:
-                                return <ApprovalNodeComponent data={node} emit={emit} />;
-                        }
-                    };
-                    return (
-                        <ApprovalEditorContext.Provider value={contextValueRef.current}>
-                            {renderNode()}
-                        </ApprovalEditorContext.Provider>
-                    );
-                },
+                node: (_, node, emit) => (
+                    <ApprovalEditorContext.Provider value={contextValueRef.current}>
+                        {renderApprovalFlowNode(node, emit)}
+                    </ApprovalEditorContext.Provider>
+                ),
                 contextMenu: {
                     main: () => ContextMenuContainer({
                         className: "p-2 rounded-lg shadow-2xl min-w-[256px] backdrop-blur-md",
@@ -402,32 +305,7 @@ export default function ApprovalEditor(props: {
         void renderApprovalFlow(ctx, definitionDetails);
     }, [definitionDetails, ctx]);
 
-    const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
-    useEffect(() => {
-        if (!baseCtx) return;
-        const el = ref.current;
-        if (!el) return;
-        const onMove = (e: MouseEvent) => {
-            const rect = el.getBoundingClientRect();
-            const { x, y, k } = baseCtx.rete.area.area.transform;
-            setMousePos({
-                x: Math.round((e.clientX - rect.left - x) / k),
-                y: Math.round((e.clientY - rect.top - y) / k),
-            });
-        }
-        el.addEventListener('mousemove', onMove);
-        return () => el.removeEventListener('mousemove', onMove);
-    }, [baseCtx]);
-
-    const [zoom, setZoom] = useState(1);
-    useEffect(() => {
-        if (!baseCtx) return;
-        const area = baseCtx.rete.area;
-        const update = () => setZoom(area.area.transform.k);
-        update();
-        area.signal.addPipe((context) => { update(); return context; });
-    }, [baseCtx]);
-    // --- PART3_PLACEHOLDER ---
+    const {mousePos, zoom} = useGraphViewport(baseCtx, ref);
 
     return (
         <div className="w-full h-[100vh] flex flex-col">

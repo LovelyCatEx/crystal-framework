@@ -2682,6 +2682,35 @@ export const enUS: I18nRules = {
         duplicateStart: 'Only one Start node is allowed'
       }
     },
+    approvalFlowViewer: {
+      action: {
+        viewFlow: 'View flow',
+        close: 'Close'
+      },
+      header: {
+        loading: 'Loading...',
+        instanceStatus: 'Instance status',
+        version: 'Version'
+      },
+      statusBar: {
+        position: 'Position',
+        scale: 'Scale'
+      },
+      records: {
+        title: 'Approval records',
+        empty: 'No records',
+        emptyForNode: 'No records for this node',
+        selectNodeHint: 'Select a node to view its approval records',
+        operator: 'Operator',
+        action: 'Action',
+        comment: 'Comment',
+        time: 'Time',
+        node: 'Node'
+      },
+      error: {
+        loadFailed: 'Failed to load instance details'
+      }
+    },
     addressPicker: {
       akMissing: 'Baidu map AK is not configured, address picker is unavailable',
       emptyNearby: 'No nearby addresses found',
@@ -3547,6 +3576,12 @@ export const enUS: I18nRules = {
       1: 'Approved',
       2: 'Rejected',
       3: 'Skipped'
+    },
+    approvalFlowRecordAction: {
+      0: 'Initiated',
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'System forwarded'
     }
   },
 

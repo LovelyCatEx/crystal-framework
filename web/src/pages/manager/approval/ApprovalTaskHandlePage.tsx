@@ -13,6 +13,7 @@ import {ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-e
 import {getApprovalFlowTaskStatus} from "@/i18n/enum-helpers.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {ApprovalFlowViewerButton} from "@/components/approval/viewer/ApprovalFlowViewerOverlay.tsx";
 
 const SYSTEM_SCOPE_ID = '0';
 const STATUS_FILTER_ALL = '-1';
@@ -142,11 +143,14 @@ export default function ApprovalTaskHandlePage() {
                     queryParamsSync={syncToUrl}
                     initialQueryValues={initialQueryValues}
                     tableRowActionsRender={(record: ApprovalFlowTask) => (
-                        record.status === ApprovalFlowTaskStatus.PENDING
-                            ? <a onClick={() => openHandleModal(record)}>
-                                {t('pages.approvalTaskHandle.action.handle')}
-                            </a>
-                            : null
+                        <div className="flex gap-3 items-center">
+                            {record.status === ApprovalFlowTaskStatus.PENDING && (
+                                <a onClick={() => openHandleModal(record)}>
+                                    {t('pages.approvalTaskHandle.action.handle')}
+                                </a>
+                            )}
+                            <ApprovalFlowViewerButton instanceId={record.instanceId}/>
+                        </div>
                     )}
                     simpleFilters={[
                         {field: 'status', operator: 'eq', value: statusFilter},

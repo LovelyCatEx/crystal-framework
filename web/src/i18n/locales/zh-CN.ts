@@ -2679,6 +2679,35 @@ export const zhCN: I18nRules = {
         duplicateStart: '只允许存在一个开始节点'
       }
     },
+    approvalFlowViewer: {
+      action: {
+        viewFlow: '查看流程',
+        close: '关闭'
+      },
+      header: {
+        loading: '加载中...',
+        instanceStatus: '实例状态',
+        version: '版本'
+      },
+      statusBar: {
+        position: '坐标',
+        scale: '缩放'
+      },
+      records: {
+        title: '审批记录',
+        empty: '暂无审批记录',
+        emptyForNode: '该节点暂无审批记录',
+        selectNodeHint: '选中节点查看其审批记录',
+        operator: '操作人',
+        action: '操作',
+        comment: '备注',
+        time: '时间',
+        node: '节点'
+      },
+      error: {
+        loadFailed: '加载审批实例失败'
+      }
+    },
     addressPicker: {
       triggerTooltip: '在地图上选择地址',
       akMissing: '未配置百度地图 AK，无法使用地图选址',
@@ -3545,6 +3574,12 @@ export const zhCN: I18nRules = {
       1: '已通过',
       2: '已拒绝',
       3: '已跳过'
+    },
+    approvalFlowRecordAction: {
+      0: '发起',
+      1: '通过',
+      2: '拒绝',
+      3: '系统转办'
     }
   },
 

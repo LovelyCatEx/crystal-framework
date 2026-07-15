@@ -108,3 +108,7 @@ export function getApprovalFlowScope(scope: number): string {
 export function getApprovalFlowTaskStatus(status: number): string {
     return translateEnum('approvalFlowTaskStatus', status);
 }
+
+export function getApprovalFlowRecordAction(action: number): string {
+    return translateEnum('approvalFlowRecordAction', action);
+}

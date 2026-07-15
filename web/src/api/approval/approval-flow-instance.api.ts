@@ -4,8 +4,9 @@ import type {
     BaseManagerReadScopedDTO,
     BaseManagerUpdateDTO
 } from "@/types/api.types.ts";
-import {doPost} from "@/api/system-request.ts";
+import {doGet, doPost} from "@/api/system-request.ts";
 import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
+import type {ApprovalFlowInstanceDetailsVO} from "@/types/approval/approval-flow-instance-details.types.ts";
 
 export interface ManagerCreateApprovalFlowInstanceDTO {
     scope: number;
@@ -64,6 +65,19 @@ export async function queryMyApprovalFlowInstances(dto: ManagerReadApprovalFlowI
         '/api/manager/approval-flow-instances/my',
         dto,
         {'Content-Type': 'application/json'},
+    );
+}
+
+/**
+ * Fetch the full instance details (definition graph pinned to the instance's definitionVersion,
+ * per-node status aggregated from tasks, and every audit record). Backend enforces access:
+ * only read-all admins, the initiator, or any user with an assigned task on this instance
+ * (assignee) are allowed.
+ */
+export async function getApprovalFlowInstanceDetails(instanceId: string) {
+    return doGet<ApprovalFlowInstanceDetailsVO>(
+        '/api/manager/approval-flow-instances/detailsById',
+        {instanceId},
     );
 }
 
