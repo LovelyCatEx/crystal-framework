@@ -3163,11 +3163,13 @@ export const zhCN: I18nRules = {
         scope: '范围',
         flow: '流程',
         instanceId: '实例ID',
+        initiator: '发起人',
         node: '节点',
         status: '状态',
         comment: '审批意见',
         unknownFlow: '流程已删除',
-        unknownNode: '节点已删除'
+        unknownNode: '节点已删除',
+        unknownInitiator: '发起人已删除'
       }
     },
     entityTable: {
@@ -3321,6 +3323,9 @@ export const zhCN: I18nRules = {
       templateVariablesTag: {
         copySuccess: '已复制 {{variable}} 到剪切板'
       }
+    },
+    scopedUserDisplay: {
+      unknown: '用户不存在'
     }
   },
 

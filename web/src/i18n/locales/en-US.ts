@@ -3165,11 +3165,13 @@ export const enUS: I18nRules = {
         scope: 'Scope',
         flow: 'Flow',
         instanceId: 'Instance ID',
+        initiator: 'Initiator',
         node: 'Node',
         status: 'Status',
         comment: 'Comment',
         unknownFlow: 'Flow deleted',
-        unknownNode: 'Node deleted'
+        unknownNode: 'Node deleted',
+        unknownInitiator: 'Initiator deleted'
       }
     },
     entityTable: {
@@ -3323,6 +3325,9 @@ export const enUS: I18nRules = {
       templateVariablesTag: {
         copySuccess: 'Copied {{variable}} to clipboard'
       }
+    },
+    scopedUserDisplay: {
+      unknown: 'User not found'
     }
   },
 
