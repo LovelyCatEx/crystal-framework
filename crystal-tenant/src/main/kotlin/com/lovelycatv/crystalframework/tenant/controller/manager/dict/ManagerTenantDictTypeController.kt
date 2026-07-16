@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictTypeDTO
@@ -31,7 +31,7 @@ class ManagerTenantDictTypeController(
         ManagerDeleteTenantDictTypeDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad(
+    permissions = ScopedPermissionMatrix(
         superCreate = SystemPermission.ACTION_DICT_TYPE_CREATE,
         superRead = SystemPermission.ACTION_DICT_TYPE_READ,
         superUpdate = SystemPermission.ACTION_DICT_TYPE_UPDATE,
@@ -40,6 +40,10 @@ class ManagerTenantDictTypeController(
         systemRead = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ,
         systemUpdate = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE,
         systemDelete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DICT_TYPE_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE,
         tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM,
         tenantPemRead = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM,
         tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM,

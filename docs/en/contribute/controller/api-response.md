@@ -1,10 +1,16 @@
 # ApiResponse
 
-## Overview
+## Design intent
 
-`ApiResponse` is the framework's unified response type, defined in the `crystal-shared` module under `com.lovelycatv.crystalframework.shared.response`. Together with `GlobalExceptionHandler`, it forms a complete response pipeline.
+`ApiResponse` is the sole facade for API responses. The framework deliberately avoids transparent wrapping mechanisms such as `ResponseBodyAdvice`; every Controller method must explicitly declare `: ApiResponse<*>`. Rationale:
 
-## Source Analysis
+- The return type is visible in source — clients can be understood without consulting framework config
+- The `T` generic preserves the specific data-field type, letting frontend TypeScript definitions mirror backend signatures directly
+- The frontend parses across HTTP status codes uniformly (a backend 500 still comes out as HTTP 200 + `code: 500` in the body); HTTP status codes only matter to infrastructure (gateways, CDN, monitoring)
+
+## Source
+
+Located at `crystal-shared`'s `com.lovelycatv.crystalframework.shared.response.ApiResponse`:
 
 ```kotlin
 data class ApiResponse<T>(
@@ -37,11 +43,41 @@ data class ApiResponse<T>(
 }
 ```
 
-- `data class` provides `equals`, `hashCode`, `toString`, `copy` for free
-- The generic `T` preserves concrete type information through serialization
-- `data: T?` is nullable — error responses can omit data entirely
+## Key design decisions
 
-## Design Decisions
+### `data class` instead of a plain class
 
-- **No auto-wrapping**: The framework does not use `ResponseBodyAdvice` to automatically wrap return values. Controllers must explicitly return `ApiResponse<*>`, making the return type visible in the interface signature.
-- **Nullable data**: `data: T?` means `ApiResponse.success(null)` serializes to `"data": null` rather than omitting the field entirely.
+Using `data class` auto-generates `equals` / `hashCode` / `toString` / `copy`, which helps testing and debugging. `copy(data = ...)` is particularly useful when wrapping third-party SDK responses.
+
+### `T?` instead of `T`
+
+`data: T?` uses a nullable type; `ApiResponse.success(null)` serializes to `"data": null` (JSON field preserved with value `null`). Intentional: frontend types `data: T | null` always see the field, avoiding a distinction between "missing field" and "null field".
+
+### Decoupled from HTTP status codes
+
+`code` uses HTTP-status-code semantics (200/400/401/403/500), but the actual HTTP response is always 200 (unless a network-layer error is caught by `AbstractErrorWebExceptionHandler` as a last resort). Reasons:
+
+- Frontend has one code-check path (in `request.ts`); it does not juggle HTTP codes and business codes
+- Middleware, logs, and monitoring all see 200 — business failures don't pollute infra-level error metrics
+- New business codes (e.g. `429` for rate limiting) can be added without ripple through ops
+
+## Coordination with GlobalExceptionHandler
+
+When a Controller throws, `GlobalExceptionHandler` (`@RestControllerAdvice`) calls the corresponding `ApiResponse` factory:
+
+```
+BusinessException          → ApiResponse.badRequest(e.message)
+ForbiddenException         → ApiResponse.forbidden(e.message)
+UnauthorizedException      → ApiResponse.unauthorized(e.message)
+WebExchangeBindException   → ApiResponse.badRequest("<concatenated field errors>")
+Other Exception            → ApiResponse.internalServerError(...)
+```
+
+See [Exception Handling](./exception-handling).
+
+## Known call sites
+
+- All base classes under `crystal-shared/controller` (Standard / Readonly / Scoped families)
+- All `custom*` endpoints on subclass Controllers
+- Every `@ExceptionHandler` method in `GlobalExceptionHandler`
+- The routing-level fallback in `GlobalErrorWebExceptionHandler`

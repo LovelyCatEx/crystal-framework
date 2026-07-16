@@ -1,15 +1,16 @@
-import {Col, Form, Input, Row, Select} from "antd";
+import {Col, Form, Input, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {type ManagerCreatePermissionDTO, type ManagerReadPermissionDTO} from "@/api/user/rbac/user-permission.api.ts";
 import type {UserPermission} from "@/types/user/rbac/user-permission.types.ts";
 import {PermissionType} from "@/types/user/rbac/user-permission.types.ts";
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import {useUserPermissionTableColumns} from "@/components/columns/UserPermissionEntityColumns.tsx";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {usePermissionTranslator} from "@/i18n/permission-translations.tsx";
 
 export default function UserPermissionManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -18,7 +19,14 @@ export default function UserPermissionManagerPage() {
     });
     const { controller } = useProtectedController<UserPermission, ManagerCreatePermissionDTO, ManagerReadPermissionDTO>();
     const {t} = useTranslation();
-    const columns = useUserPermissionTableColumns();
+    const [useI18nDescription, setUseI18nDescription] = useState(true);
+    const translatePermission = usePermissionTranslator();
+    const columns = useUserPermissionTableColumns({
+        descriptionRender: (row) => {
+            if (!useI18nDescription) return row.description;
+            return translatePermission(row.name) ?? row.description;
+        },
+    });
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
@@ -139,7 +147,16 @@ export default function UserPermissionManagerPage() {
                         ]}
                         onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,
-                }
+                },
+                {
+                    label: <span>{t('pages.permissionCatalog.source.label')}</span>,
+                    children: <Switch
+                        checked={useI18nDescription}
+                        checkedChildren={t('pages.permissionCatalog.source.i18n')}
+                        unCheckedChildren={t('pages.permissionCatalog.source.db')}
+                        onChange={setUseI18nDescription}
+                    />,
+                },
             ]}
         >
 

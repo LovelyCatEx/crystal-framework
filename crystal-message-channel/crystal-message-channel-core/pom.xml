@@ -75,6 +75,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-rbac</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

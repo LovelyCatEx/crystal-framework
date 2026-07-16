@@ -7,8 +7,19 @@ import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import type {TenantPermission} from "@/types/tenant/rbac/tenant-permission.types.ts";
 import {useTranslation} from "react-i18next";
 
-export function useTenantPermissionTableColumns(): EntityTableColumns<TenantPermission> {
+export interface UseTenantPermissionTableColumnsOptions {
+    /**
+     * Override how the description column value is rendered. Return a string / node to display,
+     * or null / undefined to fall back to `row.description` verbatim.
+     */
+    descriptionRender?: (row: TenantPermission) => React.ReactNode | null | undefined;
+}
+
+export function useTenantPermissionTableColumns(
+    options?: UseTenantPermissionTableColumnsOptions,
+): EntityTableColumns<TenantPermission> {
     const { t } = useTranslation();
+    const descriptionRender = options?.descriptionRender;
 
     return [
         {
@@ -41,7 +52,9 @@ export function useTenantPermissionTableColumns(): EntityTableColumns<TenantPerm
             dataIndex: "description",
             key: "description",
             render: function (_: unknown, row: TenantPermission): React.ReactNode | JSX.Element {
-                return <span className="text-xs font-mono text-gray-600">{row.description || '-'}</span>
+                const custom = descriptionRender?.(row);
+                const value = custom !== undefined && custom !== null ? custom : (row.description || '-');
+                return <span className="text-xs font-mono text-gray-600">{value}</span>
             }
         },
         {

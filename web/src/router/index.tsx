@@ -49,6 +49,7 @@ const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/T
 const TenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/TenantDepartmentManagerPage.tsx"));
 const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/TenantInvitationManagerPage.tsx"));
 const TenantMessageChannelManagerPage = lazy(() => import("@/pages/manager/tenant/TenantMessageChannelManagerPage.tsx"));
+const SystemMessageChannelManagerPage = lazy(() => import("@/pages/manager/messagechannel/SystemMessageChannelManagerPage.tsx"));
 const AuditLogManagerPage = lazy(() => import("@/pages/manager/audit/AuditLogManagerPage.tsx"));
 const MyTenantProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantProfilePage.tsx"));
 const MyTenantPersonalProfilePage = lazy(() => import("@/pages/manager/tenant/MyTenantPersonalProfilePage.tsx"));
@@ -434,6 +435,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             group: 'tenant'
         },
         {
+            key: '/manager/system-message-channels',
+            path: '/manager/system-message-channels',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.systemMessageChannels'),
+            page: <SystemMessageChannelManagerPage />,
+        },
+        {
             key: '/manager/tenant-tire-types',
             path: '/manager/tenant-tire-types',
             icon: <ShopOutlined />,
@@ -588,6 +596,20 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             page: <AnnouncementManagerPage />,
         },
         {
+            key: '/manager/system-dict-types',
+            path: '/manager/system-dict-types',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictTypes'),
+            page: <SystemDictTypeManagerPage />,
+        },
+        {
+            key: '/manager/system-dict-items',
+            path: '/manager/system-dict-items',
+            icon: <BookOutlined />,
+            label: t('menu.admin.systemDictItems'),
+            page: <SystemDictItemManagerPage />,
+        },
+        {
             key: '/manager/approval-flow-definitions',
             path: '/manager/approval-flow-definitions',
             icon: <ApartmentOutlined />,
@@ -601,22 +623,6 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <AuditOutlined />,
             label: t('menu.admin.approvalFlowInstances'),
             page: <ApprovalFlowInstanceManagerPage />,
-            group: 'approval'
-        },
-        {
-            key: '/manager/system-dict-types',
-            path: '/manager/system-dict-types',
-            icon: <BookOutlined />,
-            label: t('menu.admin.systemDictTypes'),
-            page: <SystemDictTypeManagerPage />,
-            group: 'approval'
-        },
-        {
-            key: '/manager/system-dict-items',
-            path: '/manager/system-dict-items',
-            icon: <BookOutlined />,
-            label: t('menu.admin.systemDictItems'),
-            page: <SystemDictItemManagerPage />,
             group: 'approval'
         },
         {

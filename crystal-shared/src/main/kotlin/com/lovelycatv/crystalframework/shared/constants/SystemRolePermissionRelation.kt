@@ -4,10 +4,12 @@ import kotlin.reflect.full.memberProperties
 
 object SystemRolePermissionRelation {
     val mapping = mapOf(
-        SystemRole.ROLE_ROOT to SystemPermission::class.memberProperties.map {
-            it.getter.call() as? String?
-                ?: throw IllegalStateException("could not call member property ${it.name} in ${SystemPermission::class.qualifiedName}")
-        },
+        SystemRole.ROLE_ROOT to SystemPermission::class.memberProperties
+            .filter { it.returnType.classifier == String::class }
+            .map {
+                it.getter.call() as? String
+                    ?: throw IllegalStateException("could not call member property ${it.name} in ${SystemPermission::class.qualifiedName}")
+            },
         SystemRole.ROLE_ADMIN to listOf(
             // System
             SystemPermission.ACTION_SYSTEM_MAINTENANCE_ACCESS,
@@ -62,9 +64,24 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ,
             SystemPermission.MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER,
             SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ,
-            // Tenant Message Channel
+            // Message Channel — menus
+            SystemPermission.MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER,
             SystemPermission.MENU_TENANT_MESSAGE_CHANNEL_MANAGER,
+            // Message Channel — system scope
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE,
+            // Message Channel — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE,
             SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE,
+            // Message Channel — super (cross-scope, admin-only)
+            SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
+            SystemPermission.ACTION_MESSAGE_CHANNEL_DELETE,
             // Approval Flow Instance (read-all)
             SystemPermission.MENU_APPROVAL_FLOW_INSTANCE_MANAGER,
             SystemPermission.MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER,
@@ -78,6 +95,11 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
             SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
+            // Approval Flow Definition — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
+            SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
             // Approval Flow Definition — super (cross-scope, admin-only)
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
@@ -85,6 +107,7 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
             // Dictionary — menus
             SystemPermission.MENU_SYSTEM_DICT_TYPE_MANAGER,
+            SystemPermission.MENU_SYSTEM_DICT_ITEM_MANAGER,
             SystemPermission.MENU_TENANT_DICT_TYPE_MANAGER,
             SystemPermission.MENU_TENANT_DICT_ITEM_MANAGER,
             // Dictionary — system scope
@@ -96,6 +119,15 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
             SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
+            // Dictionary — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_READ,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE,
+            SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_READ,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
+            SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE,
             // Dictionary — super (cross-scope, admin-only)
             SystemPermission.ACTION_DICT_TYPE_CREATE,
             SystemPermission.ACTION_DICT_TYPE_READ,

@@ -14,7 +14,7 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -48,7 +48,7 @@ class ManagerApprovalFlowDefinitionController(
         ManagerDeleteApprovalFlowDefinitionDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad(
+    permissions = ScopedPermissionMatrix(
         superCreate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
         superRead = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
         superUpdate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
@@ -57,6 +57,10 @@ class ManagerApprovalFlowDefinitionController(
         systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
         systemUpdate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
         systemDelete = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
         tenantPemCreate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM,
         tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM,
         tenantPemUpdate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM,

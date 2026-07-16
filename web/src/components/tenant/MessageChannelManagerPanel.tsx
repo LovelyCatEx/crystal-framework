@@ -1,15 +1,15 @@
 import {Alert, Col, Form, Input, message, Modal, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
-    type ManagerCreateTenantMessageChannelDTO,
-    type ManagerReadTenantMessageChannelDTO,
-    type ManagerUpdateTenantMessageChannelDTO,
-    TenantMessageChannelManagerController
-} from "@/api/tenant/tenant-message-channel.api.ts";
+    type ManagerCreateMessageChannelDTO,
+    type ManagerReadMessageChannelDTO,
+    type ManagerUpdateMessageChannelDTO,
+    MessageChannelManagerController
+} from "@/api/message-channel/message-channel.api.ts";
 import React, {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
-import {ChannelType, type TenantMessageChannel} from "@/types/tenant/tenant-message-channel.types.ts";
+import {ChannelType, type MessageChannel} from "@/types/message-channel/message-channel.types.ts";
 import {MessageChannelConfigEditor} from "@/components/MessageChannelConfigEditor.tsx";
-import {useTenantMessageChannelTableColumns} from "@/components/columns/TenantMessageChannelEntityColumns.tsx";
+import {useMessageChannelTableColumns} from "@/components/columns/MessageChannelEntityColumns.tsx";
 import {
     getDefaultPreset,
     isEmptyConfig,
@@ -21,8 +21,10 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 import type {BaseManagerReadDTO} from "@/types/api.types.ts";
 
 export interface MessageChannelManagerPanelProps {
-    /** The tenant whose channels are managed. Both the admin and tenant-self pages resolve this differently. */
-    tenantId: string;
+    /** Scope typeId (e.g. ResourceScope.SYSTEM=0 / TENANT=1). */
+    scope: number;
+    /** ID within that scope (0 for SYSTEM, tenantId for TENANT). */
+    scopeId: string;
     /** i18n page namespace, e.g. `pages.tenantMessageChannelManager` or `pages.myTenantMessageChannelManager`. */
     i18nPrefix: string;
 }
@@ -32,7 +34,7 @@ export interface MessageChannelManagerPanelRef {
 }
 
 interface EditFormBodyProps {
-    editingItem: TenantMessageChannel | null;
+    editingItem: MessageChannel | null;
     i18nPrefix: string;
     channelTypeOptions: { label: string; value: ChannelType }[];
 }
@@ -148,10 +150,10 @@ function EditFormBody({editingItem, i18nPrefix, channelTypeOptions}: EditFormBod
 }
 
 export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelRef, MessageChannelManagerPanelProps>(
-    function MessageChannelManagerPanel({tenantId, i18nPrefix}, ref) {
+    function MessageChannelManagerPanel({scope, scopeId, i18nPrefix}, ref) {
     const {t} = useTranslation();
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
-    const baseColumns = useTenantMessageChannelTableColumns();
+    const baseColumns = useMessageChannelTableColumns();
     const {filters, setFilter, syncToUrl, initialQueryValues} = useManagerQueryParams({
         schema: {type: 'number', id: 'string'}
     });
@@ -164,8 +166,8 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
         pageRef?.current?.refreshData?.({resetPage: true});
     }, [filters.type, filters.id]);
 
-    const handleEnabledChange = (enabled: boolean, row: TenantMessageChannel) => {
-        TenantMessageChannelManagerController
+    const handleEnabledChange = (enabled: boolean, row: MessageChannel) => {
+        MessageChannelManagerController
             .update({id: row.id, enabled})
             .then(() => {
                 void message.success(t(`${i18nPrefix}.messages.statusUpdateSuccess`));
@@ -179,11 +181,11 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
     const columns = [
         ...baseColumns,
         {
-            title: t('components.columns.tenantMessageChannel.enabled'),
+            title: t('components.columns.messageChannel.enabled'),
             dataIndex: "enabled",
             key: "enabled",
             width: 100,
-            render: function (_: unknown, row: TenantMessageChannel): React.ReactNode {
+            render: function (_: unknown, row: MessageChannel): React.ReactNode {
                 return <Switch value={row.enabled} onChange={(enabled) => handleEnabledChange(enabled, row)}/>;
             }
         }
@@ -198,7 +200,7 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
         <ManagerPageContainer
             ref={pageRef}
             className="mt-4"
-            entityName={t('entityNames.tenantMessageChannel')}
+            entityName={t('entityNames.messageChannel')}
             title=""
             subtitle=""
             showActionBar={false}
@@ -244,29 +246,31 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
                 />
             )}
             query={async (props: BaseManagerReadDTO) => {
-                return (await TenantMessageChannelManagerController.query({
-                    ...(props as ManagerReadTenantMessageChannelDTO),
-                    tenantId
+                return (await MessageChannelManagerController.query({
+                    ...(props as ManagerReadMessageChannelDTO),
+                    scope,
+                    scopeId,
                 })).data!
             }}
             delete={async (props) => {
-                return (await TenantMessageChannelManagerController.delete(props)).data!
+                return (await MessageChannelManagerController.delete(props)).data!
             }}
-            update={async (props: ManagerUpdateTenantMessageChannelDTO) => {
+            update={async (props: ManagerUpdateMessageChannelDTO) => {
                 // The form is seeded with the raw entity config (sensitive fields still `ENC:`-prefixed).
                 // Sanitize on submit so what is sent matches what the operator saw (secrets blanked unless
                 // re-entered), avoiding double-encryption of an untouched ciphertext on the backend.
-                const updateProps: ManagerUpdateTenantMessageChannelDTO = {
+                const updateProps: ManagerUpdateMessageChannelDTO = {
                     ...props,
                     config: typeof props.config === 'string' ? sanitizeMessageChannelConfig(props.config) : props.config
                 };
-                return (await TenantMessageChannelManagerController.update(updateProps)).data!
+                return (await MessageChannelManagerController.update(updateProps)).data!
             }}
             create={async (props) => {
-                const values = props as unknown as ManagerCreateTenantMessageChannelDTO;
-                return (await TenantMessageChannelManagerController.create({
+                const values = props as unknown as ManagerCreateMessageChannelDTO;
+                return (await MessageChannelManagerController.create({
                     ...values,
-                    tenantId
+                    scope,
+                    scopeId,
                 })).data!
             }}
         />

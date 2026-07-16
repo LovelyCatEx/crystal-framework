@@ -42,7 +42,7 @@ class SessionMonitorServiceImpl(
                 PaginatedResponseData(
                     page = 1,
                     pageSize = pageSize,
-                    records = listOf(session!!),
+                    records = listOf(session),
                     total = 1,
                     totalPages = 1
                 )

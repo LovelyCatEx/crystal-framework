@@ -21,7 +21,7 @@ import kotlin.reflect.jvm.javaField
 
 /**
  * Serializes/deserializes [ChannelConfig] subclasses to/from the JSON string used to persist a
- * channel record (e.g. the `config` column of `tenant_message_channels`).
+ * channel record (e.g. the `config` column of `message_channels`).
  *
  * Sensitive fields (annotated with [SensitiveField]) are AES-encrypted and prefixed with
  * [ENC_PREFIX] in the persisted JSON so the resulting blob is human-distinguishable
