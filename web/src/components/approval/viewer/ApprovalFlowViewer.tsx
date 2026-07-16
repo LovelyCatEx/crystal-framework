@@ -75,7 +75,7 @@ export default function ApprovalFlowViewer(props: {
     const statusContextRef = useRef<ApprovalNodeStatusContextValue>(statusContextValue);
     statusContextRef.current = statusContextValue;
 
-    const {width: panelWidth, handleResizeStart} = useResizablePanel(35);
+    const {width: panelWidth, handleResizeStart} = useResizablePanel(20);
 
     const [ref, baseCtx] = useRete(
         useCreateReteBaseGraphEditor<
@@ -210,7 +210,12 @@ export default function ApprovalFlowViewer(props: {
                 {/* Right Panel: Records */}
                 <div
                     className="relative border-l flex flex-row"
-                    style={{width: `${panelWidth}%`, minWidth: '30%', borderColor: token.colorBorder}}
+                    style={{
+                        width: `${panelWidth}%`,
+                        minWidth: 360,
+                        maxWidth: 640,
+                        borderColor: token.colorBorder,
+                    }}
                 >
                     {/* Resize handle */}
                     <div
