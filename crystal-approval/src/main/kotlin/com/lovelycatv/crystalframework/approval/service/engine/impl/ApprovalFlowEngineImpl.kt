@@ -101,6 +101,11 @@ class ApprovalFlowEngineImpl(
             throw BusinessException("Task is not pending")
         }
 
+        val instance = instanceService.getByIdOrThrow(task.instanceId)
+        if (instance.getRealStatus() != ApprovalFlowInstanceStatus.IN_PROGRESS) {
+            throw BusinessException("Approval instance is not in progress")
+        }
+
         task.status = if (approved) ApprovalFlowTaskStatus.APPROVED.typeId else ApprovalFlowTaskStatus.REJECTED.typeId
         task.comment = comment
         task.formData = formData
@@ -109,7 +114,6 @@ class ApprovalFlowEngineImpl(
             taskService.getRepository().save(task).awaitFirst()
         }
 
-        val instance = instanceService.getByIdOrThrow(task.instanceId)
         val token = tokenService.getByIdOrThrow(task.tokenId)
 
         val record = ApprovalFlowRecordEntity(
@@ -341,6 +345,26 @@ class ApprovalFlowEngineImpl(
             instance.onUpdate()
             instanceService.getRepository().save(instance newEntity false).awaitFirst()
         }
+        cancelPendingWork(instance.id)
+    }
+
+    private suspend fun cancelPendingWork(instanceId: Long) {
+        tokenService.findByInstanceId(instanceId).toList()
+            .filter {
+                val status = it.getRealStatus()
+                status == ApprovalFlowTokenStatus.ACTIVE || status == ApprovalFlowTokenStatus.WAITING
+            }
+            .forEach { completeToken(it) }
+
+        taskService.getRepository().findByInstanceId(instanceId).toList()
+            .filter { it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }
+            .forEach { task ->
+                task.status = ApprovalFlowTaskStatus.SKIPPED.typeId
+                taskService.withUpdateEntityContext(task) {
+                    task.onUpdate()
+                    taskService.getRepository().save(task newEntity false).awaitFirst()
+                }
+            }
     }
 
     private suspend fun updateLatestNodeId(instance: ApprovalFlowInstanceEntity, nodeId: Long) {

@@ -459,8 +459,8 @@ class ApprovalFlowEngineTest(
      *
      * Token path:
      *   T1 starts at A. P1 approves -> instance still IN_PROGRESS.
-     *   P2 rejects -> rejectInstance -> instance REJECTED immediately.
-     *   P3's task remains PENDING (engine does not auto-skip in AND-reject path).
+     *   P2 rejects -> rejectInstance -> instance REJECTED and cancelPendingWork cascades:
+     *     P3's still-pending task is SKIPPED and T1 is COMPLETED.
      */
     @Test
     fun andApproveModeOneRejected() {
@@ -505,8 +505,9 @@ class ApprovalFlowEngineTest(
             val remainingTask = allTasks.first { it.assigneeId == p3 }
             assertEquals(ApprovalFlowTaskStatus.APPROVED, approvedTask.getRealStatus())
             assertEquals(ApprovalFlowTaskStatus.REJECTED, rejectedTask.getRealStatus())
-            assertEquals(ApprovalFlowTaskStatus.PENDING, remainingTask.getRealStatus())
-            println("[and-reject] P2 rejected → instance REJECTED, P3 task remains PENDING")
+            assertEquals(ApprovalFlowTaskStatus.SKIPPED, remainingTask.getRealStatus())
+            assertTrue(getActiveTokens(instance.id).isEmpty())
+            println("[and-reject] P2 rejected → instance REJECTED, P3 task SKIPPED, tokens all completed")
         }
     }
 
@@ -562,6 +563,116 @@ class ApprovalFlowEngineTest(
             val activeTokens = getActiveTokens(instance.id)
             assertTrue(activeTokens.isEmpty())
             println("[or-first] P1 approved → P2/P3 SKIPPED → instance APPROVED")
+        }
+    }
+
+    /*
+     * FORK + AND-reject cascade — a rejection in one parallel branch terminates the whole
+     * instance, and the sibling branch's still-pending work is cleaned up:
+     *
+     *                       +-- B(P1) --+
+     *                       |           |
+     *   START --> FORK -----+           +--> JOIN --> END
+     *                       |           |
+     *                       +-- C(P2) --+
+     *
+     * Token path:
+     *   T1 starts at FORK -> T1 completes. FORK spawns T2 at B and T3 at C.
+     *   P2 rejects at C -> rejectInstance -> instance REJECTED and cancelPendingWork cascades:
+     *     P1's task at B is SKIPPED and T2 (still ACTIVE at B) is COMPLETED.
+     */
+    @Test
+    fun forkOneBranchRejectedCascades() {
+        withTransactionalRollback("fork-one-branch-rejected-cascades") {
+            val p1 = mockUserId()
+            val p2 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val fork = createNode(def.id, 1, ApprovalFlowNodeType.FORK, "fork")
+            val nodeB = createNode(def.id, 1, ApprovalFlowNodeType.APPROVAL, "B", approvalConfig(p1))
+            val nodeC = createNode(def.id, 1, ApprovalFlowNodeType.APPROVAL, "C", approvalConfig(p2))
+            val join = createNode(def.id, 1, ApprovalFlowNodeType.JOIN, "join")
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, fork.id)
+            createEdge(def.id, 1, fork.id, nodeB.id)
+            createEdge(def.id, 1, fork.id, nodeC.id)
+            createEdge(def.id, 1, nodeB.id, join.id)
+            createEdge(def.id, 1, nodeC.id, join.id)
+            createEdge(def.id, 1, join.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+
+            val pendingTasks = getPendingTasks(instance.id)
+            assertEquals(2, pendingTasks.size)
+            val taskAtB = pendingTasks.first { it.assigneeId == p1 }
+            val taskAtC = pendingTasks.first { it.assigneeId == p2 }
+            println("[fork-reject] FORK spawned pending tasks at B and C")
+
+            approvalFlowEngine.handleTask(taskAtC.id, p2, false, "reject", null)
+
+            val inst = instanceService.getByIdOrThrow(instance.id)
+            assertEquals(ApprovalFlowInstanceStatus.REJECTED.typeId, inst.status)
+
+            val bTask = taskService.getByIdOrThrow(taskAtB.id)
+            val cTask = taskService.getByIdOrThrow(taskAtC.id)
+            assertEquals(ApprovalFlowTaskStatus.SKIPPED, bTask.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.REJECTED, cTask.getRealStatus())
+
+            assertTrue(getActiveTokens(instance.id).isEmpty())
+            val waitingTokens = tokenService.findByInstanceIdAndStatus(
+                instance.id, ApprovalFlowTokenStatus.WAITING.typeId
+            ).toList()
+            assertTrue(waitingTokens.isEmpty())
+            println("[fork-reject] C rejected → instance REJECTED, B's task SKIPPED, all tokens completed")
+        }
+    }
+
+    /*
+     * handleTask must refuse to operate on a task whose instance is no longer IN_PROGRESS —
+     * this guards against advancing a token / flipping instance state after the instance has
+     * already reached a terminal outcome via any code path.
+     */
+    @Test
+    fun handleTaskRefusedWhenInstanceNotInProgress() {
+        withTransactionalRollback("handle-task-refused-when-instance-terminal") {
+            val p1 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val nodeA = createNode(def.id, 1, ApprovalFlowNodeType.APPROVAL, "A", approvalConfig(p1))
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, nodeA.id)
+            createEdge(def.id, 1, nodeA.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+            val pendingTasks = getPendingTasks(instance.id)
+            assertEquals(1, pendingTasks.size)
+            val taskP1 = pendingTasks.first()
+
+            instance.status = ApprovalFlowInstanceStatus.CANCELLED.typeId
+            instanceService.withUpdateEntityContext(instance) {
+                instance.onUpdate()
+                instanceService.getRepository().save(instance newEntity false).awaitFirst()
+            }
+
+            val error = kotlin.runCatching {
+                approvalFlowEngine.handleTask(taskP1.id, p1, true, "should be blocked", null)
+            }.exceptionOrNull()
+            assertNotNull(error)
+            assertTrue(error is com.lovelycatv.crystalframework.shared.exception.BusinessException)
+
+            val stillPending = taskService.getByIdOrThrow(taskP1.id)
+            assertEquals(ApprovalFlowTaskStatus.PENDING, stillPending.getRealStatus())
+            println("[guard] handleTask refused when instance is CANCELLED, task untouched")
         }
     }
 }
