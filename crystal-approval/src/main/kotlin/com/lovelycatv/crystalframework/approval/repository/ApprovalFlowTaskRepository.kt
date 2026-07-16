@@ -14,4 +14,6 @@ interface ApprovalFlowTaskRepository : BaseRepository<ApprovalFlowTaskEntity> {
     fun findByAssigneeIdAndStatus(assigneeId: Long, status: Int): Flow<ApprovalFlowTaskEntity>
 
     fun findAllByScopeId(scopeId: Long): Flux<ApprovalFlowTaskEntity>
+
+    suspend fun existsByInstanceIdAndAssigneeId(instanceId: Long, assigneeId: Long): Boolean
 }

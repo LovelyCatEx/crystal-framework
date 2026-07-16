@@ -5,6 +5,8 @@ import {Play} from "lucide-react";
 import {type ClassicScheme, Presets, type RenderEmit} from "rete-react-plugin";
 import classNames from "classnames";
 import {useNodeSize} from "@/rete/utils/react.ts";
+import {useApprovalNodeStatus} from "@/components/approval/viewer/ApprovalNodeStatusContext.tsx";
+import {ApprovalFlowTaskStatus} from "@/types/approval/approval-enums.ts";
 import './base-node-graph-styles.css';
 import './source-graph-node.styles.css';
 
@@ -20,9 +22,14 @@ export function StartNodeComponent<S extends ApprovalFlowGraphSchemes>(props: Pr
     const ref = useRef<HTMLDivElement>(null);
     useNodeSize(ref, props.data, props.emit);
     const outputs = Object.entries(props.data.outputs);
+    const nodeState = useApprovalNodeStatus(props.data.node.id);
 
     return (
-        <div ref={ref} className={"base-graph-node source-graph-node " + classNames({"base-graph-node--selected": props.data.selected})}>
+        <div ref={ref} className={classNames("base-graph-node", "source-graph-node", {
+            "base-graph-node--selected": props.data.selected,
+            "base-graph-node--status-approved": nodeState?.status === ApprovalFlowTaskStatus.APPROVED,
+            "base-graph-node--status-rejected": nodeState?.status === ApprovalFlowTaskStatus.REJECTED,
+        })}>
             <div className="header flex flex-col text-white pl-4 pr-4 pt-2 pb-2">
                 <div className="flex flex-row items-center space-x-2">
                     <Play size="20" />

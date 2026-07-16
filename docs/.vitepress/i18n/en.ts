@@ -51,11 +51,16 @@ export const enThemeConfig: DefaultTheme.Config = {
         {
           text: 'Controllers',
           items: [
+            { text: 'Family Overview', link: '/en/develop/controller/overview' },
             { text: 'ApiResponse', link: '/en/develop/controller/api-response' },
+            { text: 'Exception Handling', link: '/en/develop/controller/exception-handling' },
             { text: 'Generic Controller', link: '/en/develop/controller/generic-controller' },
             { text: 'StandardManagerController', link: '/en/develop/controller/standard-manager-controller' },
-            { text: 'ReadOnly ManagerController', link: '/en/develop/controller/readonly-manager-controller' },
-            { text: 'Exception Handling', link: '/en/develop/controller/exception-handling' },
+            { text: 'ReadonlyManagerController', link: '/en/develop/controller/readonly-manager-controller' },
+            { text: 'StandardScopedManagerController', link: '/en/develop/controller/scoped-manager-controller' },
+            { text: 'ReadonlyScopedManagerController', link: '/en/develop/controller/readonly-scoped-manager-controller' },
+            { text: 'StandardDerivedScopedManagerController', link: '/en/develop/controller/derived-scoped-manager-controller' },
+            { text: 'StandardTenantManagerController', link: '/en/develop/controller/tenant-manager-controller' },
           ]
         },
         { text: 'System Settings', link: '/en/develop/sdk/system-settings' },
@@ -86,11 +91,16 @@ export const enThemeConfig: DefaultTheme.Config = {
         {
           text: 'Controllers',
           items: [
+            { text: 'Family Overview', link: '/en/contribute/controller/overview' },
             { text: 'ApiResponse', link: '/en/contribute/controller/api-response' },
+            { text: 'Exception Handling', link: '/en/contribute/controller/exception-handling' },
             { text: 'Generic Controller', link: '/en/contribute/controller/generic-controller' },
             { text: 'StandardManagerController', link: '/en/contribute/controller/standard-manager-controller' },
-            { text: 'ReadOnly ManagerController', link: '/en/contribute/controller/readonly-manager-controller' },
-            { text: 'Exception Handling', link: '/en/contribute/controller/exception-handling' },
+            { text: 'ReadonlyManagerController', link: '/en/contribute/controller/readonly-manager-controller' },
+            { text: 'StandardScopedManagerController', link: '/en/contribute/controller/scoped-manager-controller' },
+            { text: 'ReadonlyScopedManagerController', link: '/en/contribute/controller/readonly-scoped-manager-controller' },
+            { text: 'StandardDerivedScopedManagerController', link: '/en/contribute/controller/derived-scoped-manager-controller' },
+            { text: 'StandardTenantManagerController', link: '/en/contribute/controller/tenant-manager-controller' },
           ]
         },
         { text: 'System Settings', link: '/en/contribute/system-settings' },

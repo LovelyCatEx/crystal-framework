@@ -38,6 +38,7 @@ export interface ApprovalNodeConfig {
 export interface CcNodeConfig {
     userIds: string[];
     roleIds: string[];
+    channelIds: string[];
 }
 
 /** Condition node config */

@@ -59,12 +59,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and install VertexLib
-        run: |
-          git clone https://github.com/LovelyCatEx/VertexLib.git /tmp/VertexLib
-          cd /tmp/VertexLib
-          mvn install -DskipTests -B
-
       - name: Update version in pom.xml
         run: |
           mvn versions:set -DnewVersion=${{ needs.prepare.outputs.maven_version }} -DgenerateBackupPoms=false

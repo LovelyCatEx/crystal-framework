@@ -6,6 +6,24 @@
 1. v1.5.* ~ v1.9.* 版本存在严重的安全漏洞，请勿使用，详见 v1.10.0 更新日志。
 :::
 
+## v1.12.0
+
+2026-07-16
+
+### 新功能
++ refactor(shared): 重构 ScopedController 体系。
++ refactor(message-channel): 租户消息渠道重构为支持多 scope 的结构。
++ feat(rbac): 前端支持展示 i18n 权限描述。
++ feat(approval): 完善审批流程抄送节点功能。
++ feat(web): 支持查看审批中的流程图。
+
+### Bug 修复
++ fix(web): 修复系统字典项目管理无法进入。
++ fix(approval): 修复我的审批页面内查询超出范围。
++ fix(approval): 修复审批被拒绝后流程依然进行。
+
+---
+
 ## v1.11.1
 
 2026-07-01

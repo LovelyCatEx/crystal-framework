@@ -25,8 +25,5 @@ ENV PATH="$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH"
 # Create tmp directory for Kotlin daemon
 RUN mkdir -p /tmp/kotlin-daemon
 
-# Clone VertexLib dependency
-RUN git clone https://github.com/LovelyCatEx/VertexLib.git /tmp/VertexLib
-
 # Set workspace
 WORKDIR /crystalframework

@@ -7,6 +7,7 @@ import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.t
 import {ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowScope, getApprovalFlowTaskStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import {ScopedUserDisplay} from "@/components/ScopedUserDisplay.tsx";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 
 const FlowDisplay: React.FC<{ instanceId: string }> = ({instanceId}) => {
@@ -49,6 +50,39 @@ const FlowDisplay: React.FC<{ instanceId: string }> = ({instanceId}) => {
             </CopyableToolTip>
         </div>
     );
+};
+
+const InitiatorDisplay: React.FC<{ instanceId: string; scope: ResourceScope }> = ({instanceId, scope}) => {
+    const [initiatorId, setInitiatorId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        ApprovalFlowInstanceManagerController.getById(instanceId)
+            .then((instance) => {
+                if (!cancelled) setInitiatorId(instance?.initiatorId ?? null);
+            })
+            .catch(() => {
+                if (!cancelled) setInitiatorId(null);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [instanceId]);
+
+    if (loading) {
+        return <Spin size="small"/>;
+    }
+
+    if (!initiatorId) {
+        return <Tag color="red" className="m-0">Unknown</Tag>;
+    }
+
+    return <ScopedUserDisplay scope={scope} resourceId={initiatorId}/>;
 };
 
 const NodeDisplay: React.FC<{ instanceId: string; nodeId: string }> = ({instanceId, nodeId}) => {
@@ -123,6 +157,14 @@ export function useApprovalFlowTaskTableColumns(): EntityTableColumns<ApprovalFl
             key: 'instanceId',
             render: (_: unknown, row: ApprovalFlowTask) => (
                 <FlowDisplay instanceId={row.instanceId}/>
+            ),
+        },
+        {
+            title: t('components.columns.approvalFlowTask.initiator'),
+            dataIndex: 'instanceId',
+            key: 'initiator',
+            render: (_: unknown, row: ApprovalFlowTask) => (
+                <InitiatorDisplay instanceId={row.instanceId} scope={row.scope}/>
             ),
         },
         {

@@ -159,12 +159,27 @@ object SystemPermission {
     const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
     const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
 
+    // Tenant-level Message Channel (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = "tenant.message.channel:/manager/tenant-message-channels"
-
     const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = "tenant.message.channel.create"
     const val ACTION_TENANT_MESSAGE_CHANNEL_READ = "tenant.message.channel.read"
     const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = "tenant.message.channel.update"
     const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = "tenant.message.channel.delete"
+
+    // System-level Message Channel
+    const val MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER = "system.message.channel:/manager/system-message-channels"
+
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE = "system.message.channel.create"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_READ = "system.message.channel.read"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE = "system.message.channel.update"
+    const val ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE = "system.message.channel.delete"
+
+    // Cross-scope (super) Message Channel permissions — holders may operate in any scope.
+    // Only granted to root and admin.
+    const val ACTION_MESSAGE_CHANNEL_CREATE = "message.channel.create"
+    const val ACTION_MESSAGE_CHANNEL_READ = "message.channel.read"
+    const val ACTION_MESSAGE_CHANNEL_UPDATE = "message.channel.update"
+    const val ACTION_MESSAGE_CHANNEL_DELETE = "message.channel.delete"
 
     const val MENU_AUDIT_LOG_MANAGER = "audit.log:/manager/audit-logs"
 
@@ -214,14 +229,18 @@ object SystemPermission {
     const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE = "system.approval.flow.definition.update"
     const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE = "system.approval.flow.definition.delete"
 
-    // Approval Flow Definition (tenant scope, system admin access)
+    // Approval Flow Definition (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = "tenant.approval.flow.definition:/manager/tenant-approval-flow-definitions"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = "tenant.approval.flow.definition.create"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = "tenant.approval.flow.definition.read"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = "tenant.approval.flow.definition.update"
+    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = "tenant.approval.flow.definition.delete"
 
     // Approval Flow Instance (system scope) - read-all permission for system admins
     const val MENU_APPROVAL_FLOW_INSTANCE_MANAGER = "approval.flow.instance:/manager/approval-flow-instances"
     const val ACTION_APPROVAL_FLOW_INSTANCE_READ = "approval.flow.instance.read"
 
-    // Approval Flow Instance (tenant scope, system admin access)
+    // Approval Flow Instance (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER = "tenant.approval.flow.instance:/manager/tenant-approval-flow-instances"
     const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = "tenant.approval.flow.instance.read"
 
@@ -232,14 +251,24 @@ object SystemPermission {
     const val ACTION_SYSTEM_DICT_TYPE_UPDATE = "system.dict.type.update"
     const val ACTION_SYSTEM_DICT_TYPE_DELETE = "system.dict.type.delete"
 
+    const val MENU_SYSTEM_DICT_ITEM_MANAGER = "system.dict.item:/manager/system-dict-items"
     const val ACTION_SYSTEM_DICT_ITEM_CREATE = "system.dict.item.create"
     const val ACTION_SYSTEM_DICT_ITEM_READ = "system.dict.item.read"
     const val ACTION_SYSTEM_DICT_ITEM_UPDATE = "system.dict.item.update"
     const val ACTION_SYSTEM_DICT_ITEM_DELETE = "system.dict.item.delete"
 
-    // Tenant-level Dictionary (tenantId > 0, system admin access)
+    // Tenant-level Dictionary (tenant-admin layer: cross-tenant admin, TENANT scope only)
     const val MENU_TENANT_DICT_TYPE_MANAGER = "tenant.dict.type:/manager/tenant-dict-types"
+    const val ACTION_TENANT_DICT_TYPE_CREATE = "tenant.dict.type.create"
+    const val ACTION_TENANT_DICT_TYPE_READ = "tenant.dict.type.read"
+    const val ACTION_TENANT_DICT_TYPE_UPDATE = "tenant.dict.type.update"
+    const val ACTION_TENANT_DICT_TYPE_DELETE = "tenant.dict.type.delete"
+
     const val MENU_TENANT_DICT_ITEM_MANAGER = "tenant.dict.item:/manager/tenant-dict-items"
+    const val ACTION_TENANT_DICT_ITEM_CREATE = "tenant.dict.item.create"
+    const val ACTION_TENANT_DICT_ITEM_READ = "tenant.dict.item.read"
+    const val ACTION_TENANT_DICT_ITEM_UPDATE = "tenant.dict.item.update"
+    const val ACTION_TENANT_DICT_ITEM_DELETE = "tenant.dict.item.delete"
 
     // Cross-scope (super) Dictionary permissions — holders may operate in any scope.
     // Only granted to root and admin.
@@ -252,4 +281,243 @@ object SystemPermission {
     const val ACTION_DICT_ITEM_READ = "dict.item.read"
     const val ACTION_DICT_ITEM_UPDATE = "dict.item.update"
     const val ACTION_DICT_ITEM_DELETE = "dict.item.delete"
+
+    /**
+     * Short English description for every system permission, keyed by the stripped permission name
+     * (i.e. the part before `:` for menus or `@` for components, and the full string for actions).
+     *
+     * The i18n layer on the frontend maps `name` → localized label; this map is the DB-side
+     * default used when the frontend switch is toggled to "DB" or when no i18n key is registered.
+     */
+    val DESCRIPTIONS: Map<String, String> = mapOf(
+        // Menus
+        "permission" to "Manage user permissions menu",
+        "role" to "Manage user roles menu",
+        "user" to "Manage users menu",
+        "user.role" to "Manage user-role assignments menu",
+        "settings" to "Access system settings menu",
+        "oauth.account" to "Manage OAuth accounts menu",
+        "file.resource" to "Manage file resources menu",
+        "storage.provider" to "Manage storage providers menu",
+        "mail.template.category" to "Manage mail template categories menu",
+        "mail.template.type" to "Manage mail template types menu",
+        "mail.template" to "Manage mail templates menu",
+        "tenant" to "Manage tenants menu",
+        "tenant.tire.type" to "Manage tenant tire types menu",
+        "tenant.tire.benefit.feature" to "Manage tenant tire benefit features menu",
+        "tenant.tire.benefit.value" to "Manage tenant tire benefit values menu",
+        "tenant.department" to "Manage tenant departments menu",
+        "tenant.role" to "Manage tenant roles menu",
+        "tenant.permission" to "Manage tenant permissions menu",
+        "tenant.member" to "Manage tenant members menu",
+        "tenant.department.member" to "Manage tenant department members menu",
+        "tenant.member.role" to "Manage tenant member roles menu",
+        "tenant.role.permission" to "Manage tenant role permissions menu",
+        "tenant.invitation" to "Manage tenant invitations menu",
+        "tenant.message.channel" to "Manage tenant message channels menu",
+        "system.message.channel" to "Manage system message channels menu",
+        "audit.log" to "Manage audit logs menu",
+        "mail.send.log" to "Manage mail send logs menu",
+        "user.login.log" to "Manage user login logs menu",
+        "monitor.sessions" to "Manage active sessions menu",
+        "announcement" to "Manage announcements menu",
+        "approval.flow.definition" to "Manage approval flow definitions menu",
+        "tenant.approval.flow.definition" to "Manage tenant approval flow definitions menu",
+        "approval.flow.instance" to "Manage approval flow instances menu",
+        "tenant.approval.flow.instance" to "Manage tenant approval flow instances menu",
+        "system.dict.type" to "Manage system dictionary types menu",
+        "system.dict.item" to "Manage system dictionary items menu",
+        "tenant.dict.type" to "Manage tenant dictionary types menu",
+        "tenant.dict.item" to "Manage tenant dictionary items menu",
+
+        // Components
+        "dashboard.business.statistics" to "Dashboard business statistics widget",
+        "dashboard.system.metrics" to "Dashboard system metrics widget",
+        "dashboard.tenant.joined" to "Dashboard joined tenants widget",
+        "dashboard.announcements" to "Dashboard announcements widget",
+
+        // Actions - user permission / role / user
+        "permission.create" to "Create user permissions",
+        "permission.read" to "Read user permissions",
+        "permission.update" to "Update user permissions",
+        "permission.delete" to "Delete user permissions",
+        "role.create" to "Create user roles",
+        "role.read" to "Read user roles",
+        "role.update" to "Update user roles",
+        "role.delete" to "Delete user roles",
+        "user.create" to "Create users",
+        "user.read" to "Read users",
+        "user.update" to "Update users",
+        "user.delete" to "Delete users",
+        "role.permission.read" to "Read role permission assignments",
+        "role.permission.update" to "Update role permission assignments",
+        "user.role.read" to "Read user role assignments",
+        "user.role.update" to "Update user role assignments",
+
+        // Actions - system settings / maintenance
+        "settings.read" to "Read system settings",
+        "settings.update" to "Update system settings",
+        "settings.test.sendEmail" to "Send test email via system settings",
+        "settings.test.sendMessage" to "Send test message via system settings",
+        "maintenance.access" to "Access maintenance operations",
+        "maintenance.update" to "Update maintenance operations",
+
+        // Actions - oauth account
+        "oauth.account.create" to "Create OAuth accounts",
+        "oauth.account.read" to "Read OAuth accounts",
+        "oauth.account.update" to "Update OAuth accounts",
+        "oauth.account.delete" to "Delete OAuth accounts",
+
+        // Actions - file resource / storage provider
+        "file.resource.create" to "Create file resources",
+        "file.resource.read" to "Read file resources",
+        "file.resource.update" to "Update file resources",
+        "file.resource.delete" to "Delete file resources",
+        "storage.provider.create" to "Create storage providers",
+        "storage.provider.read" to "Read storage providers",
+        "storage.provider.update" to "Update storage providers",
+        "storage.provider.delete" to "Delete storage providers",
+
+        // Actions - mail template
+        "mail.template.category.create" to "Create mail template categories",
+        "mail.template.category.read" to "Read mail template categories",
+        "mail.template.category.update" to "Update mail template categories",
+        "mail.template.category.delete" to "Delete mail template categories",
+        "mail.template.type.create" to "Create mail template types",
+        "mail.template.type.read" to "Read mail template types",
+        "mail.template.type.update" to "Update mail template types",
+        "mail.template.type.delete" to "Delete mail template types",
+        "mail.template.create" to "Create mail templates",
+        "mail.template.read" to "Read mail templates",
+        "mail.template.update" to "Update mail templates",
+        "mail.template.delete" to "Delete mail templates",
+
+        // Actions - tenant (top-level)
+        "tenant.create" to "Create tenants",
+        "tenant.read" to "Read tenants",
+        "tenant.update" to "Update tenants",
+        "tenant.delete" to "Delete tenants",
+
+        // Actions - tenant tire type / benefit
+        "tenant.tire.type.create" to "Create tenant tire types",
+        "tenant.tire.type.read" to "Read tenant tire types",
+        "tenant.tire.type.update" to "Update tenant tire types",
+        "tenant.tire.type.delete" to "Delete tenant tire types",
+        "tenant.tire.benefit.feature.create" to "Create tenant tire benefit features",
+        "tenant.tire.benefit.feature.read" to "Read tenant tire benefit features",
+        "tenant.tire.benefit.feature.update" to "Update tenant tire benefit features",
+        "tenant.tire.benefit.feature.delete" to "Delete tenant tire benefit features",
+        "tenant.tire.benefit.value.create" to "Create tenant tire benefit values",
+        "tenant.tire.benefit.value.read" to "Read tenant tire benefit values",
+        "tenant.tire.benefit.value.update" to "Update tenant tire benefit values",
+        "tenant.tire.benefit.value.delete" to "Delete tenant tire benefit values",
+
+        // Actions - tenant admin scope (cross-tenant management)
+        "tenant.department.create" to "Create tenant departments across tenants",
+        "tenant.department.read" to "Read tenant departments across tenants",
+        "tenant.department.update" to "Update tenant departments across tenants",
+        "tenant.department.delete" to "Delete tenant departments across tenants",
+        "tenant.role.create" to "Create tenant roles across tenants",
+        "tenant.role.read" to "Read tenant roles across tenants",
+        "tenant.role.update" to "Update tenant roles across tenants",
+        "tenant.role.delete" to "Delete tenant roles across tenants",
+        "tenant.permission.create" to "Create tenant permissions across tenants",
+        "tenant.permission.read" to "Read tenant permissions across tenants",
+        "tenant.permission.update" to "Update tenant permissions across tenants",
+        "tenant.permission.delete" to "Delete tenant permissions across tenants",
+        "tenant.member.create" to "Create tenant members across tenants",
+        "tenant.member.read" to "Read tenant members across tenants",
+        "tenant.member.update" to "Update tenant members across tenants",
+        "tenant.member.delete" to "Delete tenant members across tenants",
+        "tenant.department.member.create" to "Assign tenant department members across tenants",
+        "tenant.department.member.read" to "Read tenant department members across tenants",
+        "tenant.department.member.update" to "Update tenant department members across tenants",
+        "tenant.department.member.delete" to "Remove tenant department members across tenants",
+        "tenant.member.role.read" to "Read tenant member role assignments across tenants",
+        "tenant.member.role.update" to "Update tenant member role assignments across tenants",
+        "tenant.role.permission.read" to "Read tenant role permission assignments across tenants",
+        "tenant.role.permission.update" to "Update tenant role permission assignments across tenants",
+        "tenant.invitation.create" to "Create tenant invitations across tenants",
+        "tenant.invitation.read" to "Read tenant invitations across tenants",
+        "tenant.invitation.update" to "Update tenant invitations across tenants",
+        "tenant.invitation.delete" to "Delete tenant invitations across tenants",
+
+        // Actions - message channel (tenant-admin scope / system scope / super)
+        "tenant.message.channel.create" to "Create tenant-scope message channels across tenants",
+        "tenant.message.channel.read" to "Read tenant-scope message channels across tenants",
+        "tenant.message.channel.update" to "Update tenant-scope message channels across tenants",
+        "tenant.message.channel.delete" to "Delete tenant-scope message channels across tenants",
+        "system.message.channel.create" to "Create system-scope message channels",
+        "system.message.channel.read" to "Read system-scope message channels",
+        "system.message.channel.update" to "Update system-scope message channels",
+        "system.message.channel.delete" to "Delete system-scope message channels",
+        "message.channel.create" to "Create message channels in any scope",
+        "message.channel.read" to "Read message channels in any scope",
+        "message.channel.update" to "Update message channels in any scope",
+        "message.channel.delete" to "Delete message channels in any scope",
+
+        // Actions - logs
+        "audit.log.create" to "Create audit logs",
+        "audit.log.read" to "Read audit logs",
+        "audit.log.update" to "Update audit logs",
+        "audit.log.delete" to "Delete audit logs",
+        "mail.send.log.read" to "Read mail send logs",
+        "user.login.log.read" to "Read user login logs",
+
+        // Actions - dashboard / monitor
+        "dashboard.business.statistics.read" to "Read dashboard business statistics",
+        "dashboard.system.metrics.read" to "Read dashboard system metrics",
+        "monitor.sessions.read" to "Read active session monitor data",
+
+        // Actions - announcement
+        "announcement.create" to "Create announcements",
+        "announcement.read" to "Read announcements",
+        "announcement.update" to "Update announcements",
+        "announcement.delete" to "Delete announcements",
+        "announcement.list" to "List published announcements",
+
+        // Actions - approval flow definition
+        "approval.flow.definition.create" to "Create approval flow definitions in any scope",
+        "approval.flow.definition.read" to "Read approval flow definitions in any scope",
+        "approval.flow.definition.update" to "Update approval flow definitions in any scope",
+        "approval.flow.definition.delete" to "Delete approval flow definitions in any scope",
+        "system.approval.flow.definition.create" to "Create system-scope approval flow definitions",
+        "system.approval.flow.definition.read" to "Read system-scope approval flow definitions",
+        "system.approval.flow.definition.update" to "Update system-scope approval flow definitions",
+        "system.approval.flow.definition.delete" to "Delete system-scope approval flow definitions",
+        "tenant.approval.flow.definition.create" to "Create tenant-scope approval flow definitions across tenants",
+        "tenant.approval.flow.definition.read" to "Read tenant-scope approval flow definitions across tenants",
+        "tenant.approval.flow.definition.update" to "Update tenant-scope approval flow definitions across tenants",
+        "tenant.approval.flow.definition.delete" to "Delete tenant-scope approval flow definitions across tenants",
+
+        // Actions - approval flow instance
+        "approval.flow.instance.read" to "Read approval flow instances in any scope",
+        "tenant.approval.flow.instance.read" to "Read tenant-scope approval flow instances across tenants",
+
+        // Actions - dictionary (system / tenant-admin / super)
+        "system.dict.type.create" to "Create system-scope dictionary types",
+        "system.dict.type.read" to "Read system-scope dictionary types",
+        "system.dict.type.update" to "Update system-scope dictionary types",
+        "system.dict.type.delete" to "Delete system-scope dictionary types",
+        "system.dict.item.create" to "Create system-scope dictionary items",
+        "system.dict.item.read" to "Read system-scope dictionary items",
+        "system.dict.item.update" to "Update system-scope dictionary items",
+        "system.dict.item.delete" to "Delete system-scope dictionary items",
+        "tenant.dict.type.create" to "Create tenant-scope dictionary types across tenants",
+        "tenant.dict.type.read" to "Read tenant-scope dictionary types across tenants",
+        "tenant.dict.type.update" to "Update tenant-scope dictionary types across tenants",
+        "tenant.dict.type.delete" to "Delete tenant-scope dictionary types across tenants",
+        "tenant.dict.item.create" to "Create tenant-scope dictionary items across tenants",
+        "tenant.dict.item.read" to "Read tenant-scope dictionary items across tenants",
+        "tenant.dict.item.update" to "Update tenant-scope dictionary items across tenants",
+        "tenant.dict.item.delete" to "Delete tenant-scope dictionary items across tenants",
+        "dict.type.create" to "Create dictionary types in any scope",
+        "dict.type.read" to "Read dictionary types in any scope",
+        "dict.type.update" to "Update dictionary types in any scope",
+        "dict.type.delete" to "Delete dictionary types in any scope",
+        "dict.item.create" to "Create dictionary items in any scope",
+        "dict.item.read" to "Read dictionary items in any scope",
+        "dict.item.update" to "Update dictionary items in any scope",
+        "dict.item.delete" to "Delete dictionary items in any scope",
+    )
 }

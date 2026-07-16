@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCr
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.StartApprovalFlowDTO
+import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalFlowInstanceDetailsVO
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowInstanceEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowInstanceRepository
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
@@ -14,7 +15,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionTriad
+import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
 import com.lovelycatv.crystalframework.shared.database.GroupNode
@@ -23,6 +24,7 @@ import com.lovelycatv.crystalframework.shared.database.QueryNode
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -30,9 +32,11 @@ import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Validated
@@ -52,9 +56,10 @@ class ManagerApprovalFlowInstanceController(
         BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad.readonly(
+    permissions = ScopedPermissionMatrix.readonly(
         superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
         systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
         tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
     ),
 ) {
@@ -79,6 +84,12 @@ class ManagerApprovalFlowInstanceController(
     /**
      * Inject `initiator_id` filter for users without read-all authority before delegating
      * to the manager service. Read-all authority lets the user see every instance in the scope.
+     *
+     * Also guards [com.lovelycatv.crystalframework.shared.service.BaseManagerService.query]'s
+     * `dto.id != null` short-circuit — that path bypasses buildQueryCriteria entirely, so a
+     * caller without read-all could otherwise read arbitrary instances by id. We require
+     * read-all authority for the scope before allowing id lookup here; callers who only need
+     * to see their own instances should go through [queryMyInstances].
      */
     override suspend fun buildQueryResponse(
         dto: ManagerReadApprovalFlowInstanceDTO,
@@ -86,9 +97,13 @@ class ManagerApprovalFlowInstanceController(
     ): Any {
         val resolvedScope = resolveScope(dto.scope)
 
-        val triad = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionTriad")
-        val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
+        val matrix = permissions
+            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+        val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
+
+        if (dto.id != null && !canReadAll) {
+            throw ForbiddenException("Id lookup on /query requires read-all authority for scope $resolvedScope")
+        }
 
         val effectiveDto = if (canReadAll) {
             dto
@@ -102,6 +117,35 @@ class ManagerApprovalFlowInstanceController(
         }
 
         return managerService.query(effectiveDto)
+    }
+
+    /**
+     * Dedicated "my instances" endpoint. Any authenticated user may call it; the result is
+     * unconditionally scoped to instances initiated by the caller (userId for SYSTEM,
+     * tenantMemberId for TENANT). No RBAC triad is consulted here — this is intentional so an
+     * admin viewing their personal "my flows" page does not see everyone's flows via read-all.
+     *
+     * [dto.id] is force-cleared so the [com.lovelycatv.crystalframework.shared.service
+     * .BaseManagerService.query] id short-circuit cannot bypass the initiator filter. Callers
+     * who need id lookup with cross-user visibility should go through `/query` with read-all
+     * authority.
+     */
+    @PostMapping("/my", version = "1")
+    suspend fun queryMyInstances(
+        userAuthentication: UserAuthentication,
+        @Valid @RequestBody dto: ManagerReadApprovalFlowInstanceDTO,
+    ): ApiResponse<*> {
+        val resolvedScope = resolveScope(dto.scope)
+        val initiatorId = when (resolvedScope) {
+            ResourceScope.SYSTEM -> userAuthentication.userId
+            ResourceScope.TENANT -> userAuthentication.tenantMemberId
+                ?: throw ForbiddenException("Current user is not a member of this tenant")
+        }
+        val forcedDto = dto.copy(
+            id = null,
+            query = appendInitiatorCondition(dto.query, initiatorId),
+        )
+        return ApiResponse.success(managerService.query(forcedDto))
     }
 
     /**
@@ -144,6 +188,50 @@ class ManagerApprovalFlowInstanceController(
             formData = dto.formData,
         )
         return ApiResponse.success(instance)
+    }
+
+    /**
+     * Read-only aggregation for the instance viewer: instance + pinned-version graph +
+     * per-node aggregated task status + records.
+     *
+     * Access follows a short-circuit chain independent of the matrix's read-all triad:
+     *
+     *   1. read-all admin (matrix READ layers hold) — full visibility inside the scope.
+     *   2. the instance initiator — always allowed to see their own flow.
+     *   3. a participant assignee — anyone with at least one task assigned on this instance
+     *      may view the flow (needed so approvers can inspect other approvers' remarks).
+     *
+     * Ownership (tenant isolation) is still enforced afterwards.
+     */
+    @GetMapping("/detailsById", version = "1")
+    suspend fun detailsById(
+        userAuthentication: UserAuthentication,
+        @RequestParam instanceId: Long,
+    ): ApiResponse<ApprovalFlowInstanceDetailsVO> {
+        val instance = managerService.getByIdOrNull(instanceId)
+            ?: throw BusinessException("Instance not found")
+        val resolvedScope = resolveScope(instance.scope)
+
+        val callerScopedId = when (resolvedScope) {
+            ResourceScope.SYSTEM -> userAuthentication.userId
+            ResourceScope.TENANT -> userAuthentication.tenantMemberId
+                ?: throw ForbiddenException("Current user is not a member of this tenant")
+        }
+
+        val matrix = permissions
+            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+        val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
+        val isInitiator = instance.initiatorId == callerScopedId
+        val isParticipant = !canReadAll && !isInitiator
+            && managerService.isAssigneeOfInstance(instance.id, callerScopedId)
+        if (!(canReadAll || isInitiator || isParticipant)) {
+            throw ForbiddenException()
+        }
+        if (!checkOwnership(resolvedScope, instance.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw UnauthorizedException()
+        }
+
+        return ApiResponse.success(managerService.getInstanceDetails(instance))
     }
 
     private fun appendInitiatorCondition(existing: QueryNode?, initiatorId: Long): QueryNode {

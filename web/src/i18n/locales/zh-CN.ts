@@ -911,6 +911,292 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    permissionCatalog: {
+      source: {
+        db: '数据库描述',
+        i18n: '翻译描述',
+        label: '描述来源',
+      },
+      byName: {
+        // System permissions - Menus
+        'permission': '用户权限菜单',
+        'role': '用户角色菜单',
+        'user': '用户菜单',
+        'user.role': '用户-角色关系菜单',
+        'settings': '系统设置菜单',
+        'oauth.account': 'OAuth 账号菜单',
+        'file.resource': '文件资源菜单',
+        'storage.provider': '存储供应商菜单',
+        'mail.template.category': '邮件模板分类菜单',
+        'mail.template.type': '邮件模板类型菜单',
+        'mail.template': '邮件模板菜单',
+        'tenant': '租户菜单',
+        'tenant.tire.type': '租户档位类型菜单',
+        'tenant.tire.benefit.feature': '租户档位权益功能菜单',
+        'tenant.tire.benefit.value': '租户档位权益值菜单',
+        'tenant.department': '租户部门菜单',
+        'tenant.role': '租户角色菜单',
+        'tenant.permission': '租户权限菜单',
+        'tenant.member': '租户成员菜单',
+        'tenant.department.member': '租户部门成员菜单',
+        'tenant.member.role': '租户成员角色菜单',
+        'tenant.role.permission': '租户角色权限菜单',
+        'tenant.invitation': '租户邀请菜单',
+        'tenant.message.channel': '租户消息通道菜单',
+        'system.message.channel': '系统消息通道菜单',
+        'audit.log': '审计日志菜单',
+        'mail.send.log': '邮件发送日志菜单',
+        'user.login.log': '用户登录日志菜单',
+        'monitor.sessions': '会话监控菜单',
+        'announcement': '公告菜单',
+        'approval.flow.definition': '审批流程定义菜单',
+        'tenant.approval.flow.definition': '租户审批流程定义菜单',
+        'approval.flow.instance': '审批流程实例菜单',
+        'tenant.approval.flow.instance': '租户审批流程实例菜单',
+        'system.dict.type': '系统字典类型菜单',
+        'system.dict.item': '系统字典项菜单',
+        'tenant.dict.type': '租户字典类型菜单',
+        'tenant.dict.item': '租户字典项菜单',
+        // System permissions - Components
+        'dashboard.business.statistics': '仪表盘业务统计组件',
+        'dashboard.system.metrics': '仪表盘系统指标组件',
+        'dashboard.tenant.joined': '仪表盘已加入租户组件',
+        'dashboard.announcements': '仪表盘公告组件',
+        // System permissions - Actions (user permission / role / user)
+        'permission.create': '创建用户权限',
+        'permission.read': '读取用户权限',
+        'permission.update': '更新用户权限',
+        'permission.delete': '删除用户权限',
+        'role.create': '创建用户角色',
+        'role.read': '读取用户角色',
+        'role.update': '更新用户角色',
+        'role.delete': '删除用户角色',
+        'user.create': '创建用户',
+        'user.read': '读取用户',
+        'user.update': '更新用户',
+        'user.delete': '删除用户',
+        'role.permission.read': '读取角色的权限分配',
+        'role.permission.update': '更新角色的权限分配',
+        'user.role.read': '读取用户的角色分配',
+        'user.role.update': '更新用户的角色分配',
+        // System settings / maintenance
+        'settings.read': '读取系统设置',
+        'settings.update': '更新系统设置',
+        'settings.test.sendEmail': '通过系统设置发送测试邮件',
+        'settings.test.sendMessage': '通过系统设置发送测试消息',
+        'maintenance.access': '访问维护操作',
+        'maintenance.update': '更新维护操作',
+        // OAuth account
+        'oauth.account.create': '创建 OAuth 账号',
+        'oauth.account.read': '读取 OAuth 账号',
+        'oauth.account.update': '更新 OAuth 账号',
+        'oauth.account.delete': '删除 OAuth 账号',
+        // File resource / storage
+        'file.resource.create': '创建文件资源',
+        'file.resource.read': '读取文件资源',
+        'file.resource.update': '更新文件资源',
+        'file.resource.delete': '删除文件资源',
+        'storage.provider.create': '创建存储供应商',
+        'storage.provider.read': '读取存储供应商',
+        'storage.provider.update': '更新存储供应商',
+        'storage.provider.delete': '删除存储供应商',
+        // Mail template
+        'mail.template.category.create': '创建邮件模板分类',
+        'mail.template.category.read': '读取邮件模板分类',
+        'mail.template.category.update': '更新邮件模板分类',
+        'mail.template.category.delete': '删除邮件模板分类',
+        'mail.template.type.create': '创建邮件模板类型',
+        'mail.template.type.read': '读取邮件模板类型',
+        'mail.template.type.update': '更新邮件模板类型',
+        'mail.template.type.delete': '删除邮件模板类型',
+        'mail.template.create': '创建邮件模板',
+        'mail.template.read': '读取邮件模板',
+        'mail.template.update': '更新邮件模板',
+        'mail.template.delete': '删除邮件模板',
+        // Tenant top-level
+        'tenant.create': '创建租户',
+        'tenant.read': '读取租户',
+        'tenant.update': '更新租户',
+        'tenant.delete': '删除租户',
+        // Tenant tire type / benefit
+        'tenant.tire.type.create': '创建租户档位类型',
+        'tenant.tire.type.read': '读取租户档位类型',
+        'tenant.tire.type.update': '更新租户档位类型',
+        'tenant.tire.type.delete': '删除租户档位类型',
+        'tenant.tire.benefit.feature.create': '创建租户档位权益功能',
+        'tenant.tire.benefit.feature.read': '读取租户档位权益功能',
+        'tenant.tire.benefit.feature.update': '更新租户档位权益功能',
+        'tenant.tire.benefit.feature.delete': '删除租户档位权益功能',
+        'tenant.tire.benefit.value.create': '创建租户档位权益值',
+        'tenant.tire.benefit.value.read': '读取租户档位权益值',
+        'tenant.tire.benefit.value.update': '更新租户档位权益值',
+        'tenant.tire.benefit.value.delete': '删除租户档位权益值',
+        // Tenant admin scope (cross-tenant)
+        'tenant.department.create': '跨租户创建租户部门',
+        'tenant.department.read': '跨租户读取租户部门',
+        'tenant.department.update': '跨租户更新租户部门',
+        'tenant.department.delete': '跨租户删除租户部门',
+        'tenant.role.create': '跨租户创建租户角色',
+        'tenant.role.read': '跨租户读取租户角色',
+        'tenant.role.update': '跨租户更新租户角色',
+        'tenant.role.delete': '跨租户删除租户角色',
+        'tenant.permission.create': '跨租户创建租户权限',
+        'tenant.permission.read': '跨租户读取租户权限',
+        'tenant.permission.update': '跨租户更新租户权限',
+        'tenant.permission.delete': '跨租户删除租户权限',
+        'tenant.member.create': '跨租户创建租户成员',
+        'tenant.member.read': '跨租户读取租户成员',
+        'tenant.member.update': '跨租户更新租户成员',
+        'tenant.member.delete': '跨租户删除租户成员',
+        'tenant.department.member.create': '跨租户为部门分配成员',
+        'tenant.department.member.read': '跨租户读取部门成员',
+        'tenant.department.member.update': '跨租户更新部门成员',
+        'tenant.department.member.delete': '跨租户移除部门成员',
+        'tenant.member.role.read': '跨租户读取成员角色分配',
+        'tenant.member.role.update': '跨租户更新成员角色分配',
+        'tenant.role.permission.read': '跨租户读取角色权限分配',
+        'tenant.role.permission.update': '跨租户更新角色权限分配',
+        'tenant.invitation.create': '跨租户创建租户邀请',
+        'tenant.invitation.read': '跨租户读取租户邀请',
+        'tenant.invitation.update': '跨租户更新租户邀请',
+        'tenant.invitation.delete': '跨租户删除租户邀请',
+        // Message channel
+        'tenant.message.channel.create': '跨租户创建租户级消息通道',
+        'tenant.message.channel.read': '跨租户读取租户级消息通道',
+        'tenant.message.channel.update': '跨租户更新租户级消息通道',
+        'tenant.message.channel.delete': '跨租户删除租户级消息通道',
+        'system.message.channel.create': '创建系统级消息通道',
+        'system.message.channel.read': '读取系统级消息通道',
+        'system.message.channel.update': '更新系统级消息通道',
+        'system.message.channel.delete': '删除系统级消息通道',
+        'message.channel.create': '在任意作用域创建消息通道',
+        'message.channel.read': '在任意作用域读取消息通道',
+        'message.channel.update': '在任意作用域更新消息通道',
+        'message.channel.delete': '在任意作用域删除消息通道',
+        // Logs
+        'audit.log.create': '创建审计日志',
+        'audit.log.read': '读取审计日志',
+        'audit.log.update': '更新审计日志',
+        'audit.log.delete': '删除审计日志',
+        'mail.send.log.read': '读取邮件发送日志',
+        'user.login.log.read': '读取用户登录日志',
+        // Dashboard / monitor
+        'dashboard.business.statistics.read': '读取仪表盘业务统计',
+        'dashboard.system.metrics.read': '读取仪表盘系统指标',
+        'monitor.sessions.read': '读取活跃会话监控数据',
+        // Announcement
+        'announcement.create': '创建公告',
+        'announcement.read': '读取公告',
+        'announcement.update': '更新公告',
+        'announcement.delete': '删除公告',
+        'announcement.list': '查看已发布公告',
+        // Approval flow definition
+        'approval.flow.definition.create': '在任意作用域创建审批流程定义',
+        'approval.flow.definition.read': '在任意作用域读取审批流程定义',
+        'approval.flow.definition.update': '在任意作用域更新审批流程定义',
+        'approval.flow.definition.delete': '在任意作用域删除审批流程定义',
+        'system.approval.flow.definition.create': '创建系统级审批流程定义',
+        'system.approval.flow.definition.read': '读取系统级审批流程定义',
+        'system.approval.flow.definition.update': '更新系统级审批流程定义',
+        'system.approval.flow.definition.delete': '删除系统级审批流程定义',
+        'tenant.approval.flow.definition.create': '跨租户创建租户级审批流程定义',
+        'tenant.approval.flow.definition.read': '跨租户读取租户级审批流程定义',
+        'tenant.approval.flow.definition.update': '跨租户更新租户级审批流程定义',
+        'tenant.approval.flow.definition.delete': '跨租户删除租户级审批流程定义',
+        // Approval flow instance
+        'approval.flow.instance.read': '在任意作用域读取审批流程实例',
+        'tenant.approval.flow.instance.read': '跨租户读取租户级审批流程实例',
+        // Dictionary
+        'system.dict.type.create': '创建系统级字典类型',
+        'system.dict.type.read': '读取系统级字典类型',
+        'system.dict.type.update': '更新系统级字典类型',
+        'system.dict.type.delete': '删除系统级字典类型',
+        'system.dict.item.create': '创建系统级字典项',
+        'system.dict.item.read': '读取系统级字典项',
+        'system.dict.item.update': '更新系统级字典项',
+        'system.dict.item.delete': '删除系统级字典项',
+        'tenant.dict.type.create': '跨租户创建租户级字典类型',
+        'tenant.dict.type.read': '跨租户读取租户级字典类型',
+        'tenant.dict.type.update': '跨租户更新租户级字典类型',
+        'tenant.dict.type.delete': '跨租户删除租户级字典类型',
+        'tenant.dict.item.create': '跨租户创建租户级字典项',
+        'tenant.dict.item.read': '跨租户读取租户级字典项',
+        'tenant.dict.item.update': '跨租户更新租户级字典项',
+        'tenant.dict.item.delete': '跨租户删除租户级字典项',
+        'dict.type.create': '在任意作用域创建字典类型',
+        'dict.type.read': '在任意作用域读取字典类型',
+        'dict.type.update': '在任意作用域更新字典类型',
+        'dict.type.delete': '在任意作用域删除字典类型',
+        'dict.item.create': '在任意作用域创建字典项',
+        'dict.item.read': '在任意作用域读取字典项',
+        'dict.item.update': '在任意作用域更新字典项',
+        'dict.item.delete': '在任意作用域删除字典项',
+        // Tenant permissions - Menus
+        'i.tenant.dashboard': '我的租户仪表盘菜单',
+        'i.tenant.profile': '我的租户资料菜单',
+        'i.tenant.personal.profile': '我的租户个人资料菜单',
+        'i.tenant.member': '我的租户成员菜单',
+        'i.tenant.invitation': '我的租户邀请菜单',
+        'i.tenant.role': '我的租户角色菜单',
+        'i.tenant.member.role': '我的租户成员角色菜单',
+        'i.tenant.department': '我的租户部门菜单',
+        'i.tenant.message.channel': '我的租户消息通道菜单',
+        'i.tenant.dict.type': '我的租户字典类型菜单',
+        'i.tenant.dict.item': '我的租户字典项菜单',
+        'i.tenant.approval.flow.definition': '我的租户审批流程定义菜单',
+        'i.tenant.approval.flow.instance': '我的租户审批流程实例菜单',
+        // Tenant permissions - Actions
+        'i.tenant.profile.read.basic': '读取租户基础资料',
+        'i.tenant.profile.read': '读取租户资料',
+        'i.tenant.profile.update': '更新租户资料',
+        'i.tenant.personal.profile.oauth.read': '读取自己的 OAuth 绑定',
+        'i.tenant.personal.profile.oauth.bind': '绑定 OAuth 账号',
+        'i.tenant.personal.profile.oauth.unbind': '解绑 OAuth 账号',
+        'i.tenant.member.read': '读取本租户成员',
+        'i.tenant.member.update': '更新本租户成员',
+        'i.tenant.member.delete': '移除本租户成员',
+        'i.tenant.invitation.create': '为本租户创建邀请',
+        'i.tenant.invitation.read': '读取本租户邀请',
+        'i.tenant.invitation.update': '更新本租户邀请',
+        'i.tenant.invitation.delete': '删除本租户邀请',
+        'i.tenant.role.create': '创建本租户角色',
+        'i.tenant.role.read': '读取本租户角色',
+        'i.tenant.role.update': '更新本租户角色',
+        'i.tenant.role.delete': '删除本租户角色',
+        'i.tenant.member.role.read': '读取本租户成员角色分配',
+        'i.tenant.member.role.update': '更新本租户成员角色分配',
+        'i.tenant.role.permission.read': '读取本租户角色权限分配',
+        'i.tenant.role.permission.update': '更新本租户角色权限分配',
+        'i.tenant.department.create': '创建本租户部门',
+        'i.tenant.department.read': '读取本租户部门',
+        'i.tenant.department.update': '更新本租户部门',
+        'i.tenant.department.delete': '删除本租户部门',
+        'i.tenant.department.member.create': '为本租户部门分配成员',
+        'i.tenant.department.member.read': '读取本租户部门成员',
+        'i.tenant.department.member.update': '更新本租户部门成员',
+        'i.tenant.department.member.delete': '从本租户部门移除成员',
+        'i.tenant.mail.member.join': '接收租户成员加入审核邮件',
+        'i.tenant.settings.read': '读取本租户设置',
+        'i.tenant.settings.update': '更新本租户设置',
+        'i.tenant.message.channel.create': '创建本租户消息通道',
+        'i.tenant.message.channel.read': '读取本租户消息通道',
+        'i.tenant.message.channel.update': '更新本租户消息通道',
+        'i.tenant.message.channel.delete': '删除本租户消息通道',
+        'i.tenant.dict.type.create': '创建本租户字典类型',
+        'i.tenant.dict.type.read': '读取本租户字典类型',
+        'i.tenant.dict.type.update': '更新本租户字典类型',
+        'i.tenant.dict.type.delete': '删除本租户字典类型',
+        'i.tenant.dict.item.create': '创建本租户字典项',
+        'i.tenant.dict.item.read': '读取本租户字典项',
+        'i.tenant.dict.item.update': '更新本租户字典项',
+        'i.tenant.dict.item.delete': '删除本租户字典项',
+        'i.tenant.approval.flow.definition.create': '创建本租户审批流程定义',
+        'i.tenant.approval.flow.definition.read': '读取本租户审批流程定义',
+        'i.tenant.approval.flow.definition.update': '更新本租户审批流程定义',
+        'i.tenant.approval.flow.definition.delete': '删除本租户审批流程定义',
+        'i.tenant.approval.flow.instance.read': '读取本租户审批流程实例',
+      },
+    },
     tenantMemberManager: {
       title: '租户成员管理',
       subtitle: '管理系统租户成员',
@@ -982,6 +1268,45 @@ export const zhCN: I18nRules = {
     tenantMessageChannelManager: {
       title: '消息渠道管理',
       subtitle: '管理系统租户的消息渠道',
+      addChannel: '新增渠道',
+      filter: {
+        id: '渠道ID',
+        idPlaceholder: '输入渠道 ID',
+        type: '渠道类型',
+        all: '全部'
+      },
+      modal: {
+        channelType: {
+          label: '渠道类型',
+          required: '请选择渠道类型',
+          placeholder: '选择渠道类型',
+          switchConfirmTitle: '切换渠道类型',
+          switchConfirmContent: '切换类型会重置当前配置，确认继续？'
+        },
+        name: {
+          label: '渠道名称',
+          required: '请输入渠道名称',
+          maxLength: '渠道名称不能超过 64 个字符',
+          placeholder: '输入渠道名称'
+        },
+        enabled: {
+          label: '是否启用'
+        },
+        config: {
+          label: '渠道配置',
+          required: '请填写渠道配置',
+          placeholder: '填写渠道配置（JSON）',
+          encryptedHint: '出于安全考虑，敏感字段（如密码、密钥）不会回显，编辑时请重新填写'
+        }
+      },
+      messages: {
+        statusUpdateSuccess: '状态更新成功',
+        statusUpdateFailed: '状态更新失败'
+      }
+    },
+    systemMessageChannelManager: {
+      title: '系统消息渠道',
+      subtitle: '管理系统级消息渠道',
       addChannel: '新增渠道',
       filter: {
         id: '渠道ID',
@@ -2343,12 +2668,44 @@ export const zhCN: I18nRules = {
         unnamed: '(未命名)',
         none: '(无)',
         approveMode: '审批方式',
-        approvers: '审批人'
+        approvers: '审批人',
+        ccAssignees: '抄送人',
+        ccRoles: '抄送角色',
+        ccChannels: '消息渠道'
       },
       validation: {
         duplicateNodeKey: '节点标识重复: "{{nodeKey}}"',
         emptyNodeKey: '节点标识不能为空 (节点: "{{name}}")',
         duplicateStart: '只允许存在一个开始节点'
+      }
+    },
+    approvalFlowViewer: {
+      action: {
+        viewFlow: '查看流程',
+        close: '关闭'
+      },
+      header: {
+        loading: '加载中...',
+        instanceStatus: '实例状态',
+        version: '版本'
+      },
+      statusBar: {
+        position: '坐标',
+        scale: '缩放'
+      },
+      records: {
+        title: '审批记录',
+        empty: '暂无审批记录',
+        emptyForNode: '该节点暂无审批记录',
+        selectNodeHint: '选中节点查看其审批记录',
+        operator: '操作人',
+        action: '操作',
+        comment: '备注',
+        time: '时间',
+        node: '节点'
+      },
+      error: {
+        loadFailed: '加载审批实例失败'
       }
     },
     addressPicker: {
@@ -2704,6 +3061,16 @@ export const zhCN: I18nRules = {
         statusDisabled: '已禁用',
         config: '配置'
       },
+      messageChannel: {
+        recordInfo: '记录信息',
+        scopeId: '归属 ID',
+        name: '渠道名称',
+        channelType: '渠道类型',
+        enabled: '启用状态',
+        statusEnabled: '已启用',
+        statusDisabled: '已禁用',
+        config: '配置'
+      },
       tenantTireType: {
         name: '名称',
         description: '描述'
@@ -2825,11 +3192,13 @@ export const zhCN: I18nRules = {
         scope: '范围',
         flow: '流程',
         instanceId: '实例ID',
+        initiator: '发起人',
         node: '节点',
         status: '状态',
         comment: '审批意见',
         unknownFlow: '流程已删除',
-        unknownNode: '节点已删除'
+        unknownNode: '节点已删除',
+        unknownInitiator: '发起人已删除'
       }
     },
     entityTable: {
@@ -2983,6 +3352,9 @@ export const zhCN: I18nRules = {
       templateVariablesTag: {
         copySuccess: '已复制 {{variable}} 到剪切板'
       }
+    },
+    scopedUserDisplay: {
+      unknown: '用户不存在'
     }
   },
 
@@ -3202,6 +3574,12 @@ export const zhCN: I18nRules = {
       1: '已通过',
       2: '已拒绝',
       3: '已跳过'
+    },
+    approvalFlowRecordAction: {
+      0: '发起',
+      1: '通过',
+      2: '拒绝',
+      3: '系统转办'
     }
   },
 
@@ -3217,6 +3595,7 @@ export const zhCN: I18nRules = {
     tenantDepartment: '租户部门',
     tenantInvitation: '邀请码',
     tenantMessageChannel: '消息渠道',
+    messageChannel: '消息渠道',
     tenantTireType: '套餐类型',
     tenantTireBenefitFeature: '权益项',
     tenantTireBenefitValue: '套餐权益取值',
@@ -3281,6 +3660,7 @@ export const zhCN: I18nRules = {
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
       tenantMessageChannels: '消息渠道管理',
+      systemMessageChannels: '系统消息渠道',
       tenantTireTypes: '套餐类型管理',
       tenantTireBenefitFeatures: '套餐权益项管理',
       tenantTireBenefitValues: '套餐权益管理',

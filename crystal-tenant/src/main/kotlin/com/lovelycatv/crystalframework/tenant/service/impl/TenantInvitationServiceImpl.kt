@@ -23,7 +23,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantInvitationReposit
 import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
-import com.lovelycatv.crystalframework.tenant.service.manager.TenantMessageChannelManagerService
+import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageChannelManagerService
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
 import com.lovelycatv.crystalframework.shared.types.tenant.DepartmentMemberRoleType
 import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
@@ -53,7 +53,7 @@ class TenantInvitationServiceImpl(
     private val mailTemplateService: MailTemplateService,
     private val messageChannelService: MessageChannelService,
     private val systemChannelConfigProvider: SystemChannelConfigProvider,
-    private val tenantMessageChannelManagerService: TenantMessageChannelManagerService,
+    private val tenantMessageChannelManagerService: MessageChannelManagerService,
     private val tenantSettingsService: TenantSettingsService,
 ) : TenantInvitationService {
     private val logger = logger()

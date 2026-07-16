@@ -16,7 +16,7 @@ import {
 } from "@/i18n/tenant-settings.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
 import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
-import {TenantMessageChannelIdsSelector} from "@/components/selector/TenantMessageChannelIdsSelector.tsx";
+import {TenantMessageChannelIdsSelector} from "@/components/selector/MessageChannelIdsSelector/TenantMessageChannelIdsSelector.tsx";
 import {MessageChainEditor} from "@/components/message-chain-editor";
 
 const xmlContentRenderer: SettingsItemRenderer = (ctx) => (

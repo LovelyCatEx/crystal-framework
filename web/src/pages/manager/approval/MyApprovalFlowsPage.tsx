@@ -4,7 +4,7 @@ import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowInstanceTableColumns} from "@/components/columns/ApprovalFlowInstanceEntityColumns.tsx";
-import {ApprovalFlowInstanceManagerController} from "@/api/approval/approval-flow-instance.api.ts";
+import {queryMyApprovalFlowInstances} from "@/api/approval/approval-flow-instance.api.ts";
 import {ApprovalFlowInstanceStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowInstanceStatus} from "@/i18n/enum-helpers.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
@@ -144,7 +144,7 @@ export default function MyApprovalFlowsPage() {
                         },
                     ]}
                     query={async (props) => (
-                        await ApprovalFlowInstanceManagerController.query({
+                        await queryMyApprovalFlowInstances({
                             ...props,
                             scope: activeScope,
                             scopeId: effectiveScopeId,

@@ -5,14 +5,15 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowTaskTableColumns} from "@/components/columns/ApprovalFlowTaskEntityColumns.tsx";
 import {
-    ApprovalFlowTaskManagerController,
     handleApprovalFlowTask,
+    queryMyApprovalFlowTasks,
 } from "@/api/approval/approval-flow-task.api.ts";
 import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.ts";
 import {ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowTaskStatus} from "@/i18n/enum-helpers.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {ApprovalFlowViewerButton} from "@/components/approval/viewer/ApprovalFlowViewerOverlay.tsx";
 
 const SYSTEM_SCOPE_ID = '0';
 const STATUS_FILTER_ALL = '-1';
@@ -142,11 +143,14 @@ export default function ApprovalTaskHandlePage() {
                     queryParamsSync={syncToUrl}
                     initialQueryValues={initialQueryValues}
                     tableRowActionsRender={(record: ApprovalFlowTask) => (
-                        record.status === ApprovalFlowTaskStatus.PENDING
-                            ? <a onClick={() => openHandleModal(record)}>
-                                {t('pages.approvalTaskHandle.action.handle')}
-                            </a>
-                            : null
+                        <div className="flex gap-3 items-center">
+                            {record.status === ApprovalFlowTaskStatus.PENDING && (
+                                <a onClick={() => openHandleModal(record)}>
+                                    {t('pages.approvalTaskHandle.action.handle')}
+                                </a>
+                            )}
+                            <ApprovalFlowViewerButton instanceId={record.instanceId}/>
+                        </div>
                     )}
                     simpleFilters={[
                         {field: 'status', operator: 'eq', value: statusFilter},
@@ -168,7 +172,7 @@ export default function ApprovalTaskHandlePage() {
                         },
                     ]}
                     query={async (props) => (
-                        await ApprovalFlowTaskManagerController.query({
+                        await queryMyApprovalFlowTasks({
                             ...props,
                             scope: activeScope,
                             scopeId: effectiveScopeId,

@@ -10,6 +10,8 @@ import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {useApprovalEditorContext} from "../ApprovalEditorContext.tsx";
 import {getApprovalFlowApproveMode} from "@/i18n/enum-helpers.ts";
+import {useApprovalNodeStatus} from "@/components/approval/viewer/ApprovalNodeStatusContext.tsx";
+import {ApprovalFlowTaskStatus} from "@/types/approval/approval-enums.ts";
 import './base-node-graph-styles.css';
 import './action-graph-node.styles.css';
 
@@ -36,9 +38,14 @@ export function ApprovalNodeComponent<S extends ApprovalFlowGraphSchemes>(props:
     const userIds: string[] = config?.strategyParams?.userIds ?? [];
     const memberIds: string[] = config?.strategyParams?.memberIds ?? [];
     const approveMode: number | undefined = config?.approveMode;
+    const nodeState = useApprovalNodeStatus(props.data.node.id);
 
     return (
-        <div ref={ref} className={"base-graph-node action-graph-node " + classNames({"base-graph-node--selected": props.data.selected})}>
+        <div ref={ref} className={classNames("base-graph-node", "action-graph-node", {
+            "base-graph-node--selected": props.data.selected,
+            "base-graph-node--status-approved": nodeState?.status === ApprovalFlowTaskStatus.APPROVED,
+            "base-graph-node--status-rejected": nodeState?.status === ApprovalFlowTaskStatus.REJECTED,
+        })}>
             <div className="header flex flex-col text-white pl-4 pr-4 pt-2 pb-2">
                 <div className="flex flex-row items-center space-x-2">
                     <UserCheck size="20" />

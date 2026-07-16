@@ -1,10 +1,14 @@
 import {Form, Select} from "antd";
 import {useTranslation} from "react-i18next";
-import {ApprovalFlowApproveMode, ApprovalFlowApproverStrategy} from "@/types/approval/approval-enums.ts";
+import {ApprovalFlowApproveMode, ApprovalFlowApproverStrategy, ApprovalFlowNodeType} from "@/types/approval/approval-enums.ts";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {getApprovalFlowApproveMode} from "@/i18n/enum-helpers.ts";
 import {TenantMemberIdsSelector} from "@/components/selector/TenantMemberIdsSelector.tsx";
 import {UserIdsSelector} from "@/components/selector/UserIdsSelector.tsx";
+import {TenantRoleIdsSelector} from "@/components/selector/RoleIdsSelector/TenantRoleIdsSelector.tsx";
+import {UserRoleIdsSelector} from "@/components/selector/RoleIdsSelector/UserRoleIdsSelector.tsx";
+import {TenantMessageChannelIdsSelector} from "@/components/selector/MessageChannelIdsSelector/TenantMessageChannelIdsSelector.tsx";
+import {SystemMessageChannelIdsSelector} from "@/components/selector/MessageChannelIdsSelector/SystemMessageChannelIdsSelector.tsx";
 import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";
 
 interface ApprovalNodeInspectorProps {
@@ -16,6 +20,12 @@ interface ApprovalNodeInspectorProps {
 
 export function ApprovalNodeInspector({ node, scope, scopeId, onConfigChange }: ApprovalNodeInspectorProps) {
     const { t } = useTranslation();
+
+    if (node.type === ApprovalFlowNodeType.CC) {
+        return (
+            <CcNodeInspector node={node} scope={scope} scopeId={scopeId} onConfigChange={onConfigChange} />
+        );
+    }
 
     const getConfig = () => {
         if (!node.config) return { approveMode: 0, strategy: 0, strategyParams: {} as Record<string, unknown> };
@@ -55,6 +65,79 @@ export function ApprovalNodeInspector({ node, scope, scopeId, onConfigChange }: 
                             strategy: ApprovalFlowApproverStrategy.SPECIFIED_USER,
                             strategyParams: { userIds: ids },
                         })}
+                    />
+                )}
+            </Form.Item>
+        </>
+    );
+}
+
+interface CcConfigShape {
+    userIds: string[];
+    roleIds: string[];
+    channelIds: string[];
+}
+
+function CcNodeInspector({ node, scope, scopeId, onConfigChange }: ApprovalNodeInspectorProps) {
+    const { t } = useTranslation();
+
+    const parseCcConfig = (): CcConfigShape => {
+        if (!node.config) return { userIds: [], roleIds: [], channelIds: [] };
+        try {
+            const parsed = JSON.parse(node.config) as Partial<CcConfigShape>;
+            return {
+                userIds: parsed.userIds ?? [],
+                roleIds: parsed.roleIds ?? [],
+                channelIds: parsed.channelIds ?? [],
+            };
+        } catch {
+            return { userIds: [], roleIds: [], channelIds: [] };
+        }
+    };
+
+    const config = parseCcConfig();
+
+    return (
+        <>
+            <Form.Item label={t('components.approvalEditor.inspector.ccAssignees')}>
+                {scope === ResourceScope.TENANT ? (
+                    <TenantMemberIdsSelector
+                        tenantId={scopeId}
+                        value={config.userIds}
+                        onChange={(ids) => onConfigChange({ userIds: ids })}
+                    />
+                ) : (
+                    <UserIdsSelector
+                        value={config.userIds}
+                        onChange={(ids) => onConfigChange({ userIds: ids })}
+                    />
+                )}
+            </Form.Item>
+            <Form.Item label={t('components.approvalEditor.inspector.ccRoles')}>
+                {scope === ResourceScope.TENANT ? (
+                    <TenantRoleIdsSelector
+                        tenantId={scopeId}
+                        value={config.roleIds}
+                        onChange={(ids) => onConfigChange({ roleIds: ids })}
+                    />
+                ) : (
+                    <UserRoleIdsSelector
+                        value={config.roleIds}
+                        onChange={(ids) => onConfigChange({ roleIds: ids })}
+                    />
+                )}
+            </Form.Item>
+            <Form.Item label={t('components.approvalEditor.inspector.ccChannels')}>
+                {scope === ResourceScope.TENANT ? (
+                    <TenantMessageChannelIdsSelector
+                        tenantId={scopeId}
+                        value={config.channelIds}
+                        onChange={(ids) => onConfigChange({ channelIds: ids })}
+                    />
+                ) : (
+                    <SystemMessageChannelIdsSelector
+                        value={config.channelIds}
+                        onChange={(ids) => onConfigChange({ channelIds: ids })}
                     />
                 )}
             </Form.Item>

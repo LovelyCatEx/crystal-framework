@@ -2,7 +2,7 @@ import {Button, Modal, Select, Space, Tooltip} from "antd";
 import {JsonEditor} from "./JsonEditor.tsx";
 import {useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {ChannelType} from "@/types/tenant/tenant-message-channel.types.ts";
+import {ChannelType} from "@/types/message-channel/message-channel.types.ts";
 import {
     isEmptyConfig,
     MESSAGE_CHANNEL_PRESETS,

@@ -6,6 +6,24 @@
 1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
 :::
 
+## v1.12.0
+
+2026-07-16
+
+### Features
++ refactor(shared): Restructure the ScopedController hierarchy.
++ refactor(message-channel): Restructure tenant message channels to support multiple scopes.
++ feat(rbac): Support displaying i18n permission descriptions on the frontend.
++ feat(approval): Enhance the CC node in approval flows.
++ feat(web): Support viewing the flow diagram of in-progress approvals.
+
+### Bug Fixes
++ fix(web): Fix inaccessible system dictionary item management page.
++ fix(approval): Fix out-of-scope query on the My Approvals page.
++ fix(approval): Fix approval flow continuing after being rejected.
+
+---
+
 ## v1.11.1
 
 2026-07-01

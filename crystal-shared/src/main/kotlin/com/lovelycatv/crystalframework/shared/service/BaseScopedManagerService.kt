@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScop
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
 import org.springframework.data.relational.core.query.Criteria
 
@@ -23,7 +24,8 @@ interface BaseScopedManagerService<
         UPDATE_DTO : BaseManagerUpdateDTO,
         DELETE_DTO : BaseManagerDeleteDTO
 > : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
-    TenantRelationshipCheckService
+    TenantRelationshipCheckService,
+    ScopedRelationshipCheckService
 {
     companion object {
         private const val COLUMN_SCOPE = "scope"
@@ -34,6 +36,17 @@ interface BaseScopedManagerService<
         return ids
             .map { this.getByIdOrNull(it) ?: return false }
             .all { it.scopeId == parentId }
+    }
+
+    /**
+     * Default root-scope resolver for directly scoped entities: read `entity.scope / entity.scopeId`
+     * as-is. Services whose entities are nested deeper (no `scope + scope_id` columns of their own)
+     * should override this to walk up to a scoped parent Service and delegate.
+     */
+    override suspend fun resolveRootScope(id: Long): Pair<ResourceScope, Long>? {
+        val entity = this.getByIdOrNull(id) ?: return null
+        val scope = ResourceScope.getById(entity.scope) ?: return null
+        return scope to entity.scopeId
     }
 
     override suspend fun buildQueryCriteria(dto: READ_DTO): Criteria {

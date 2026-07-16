@@ -38,7 +38,7 @@ export function TenantMemberPopCard({ memberId }: TenantMemberPopCardProps) {
             className="w-72"
             title={
                 <div className="flex items-center gap-3 pt-2 pb-2">
-                    <Avatar icon={<UserOutlined />} />
+                    <Avatar src={member.avatar ?? undefined} icon={<UserOutlined />} />
                     <div className="flex flex-col">
                         <CopyableToolTip title={member.nickname || member.name}>
                             <span className="font-bold">{member.nickname || member.name}</span>

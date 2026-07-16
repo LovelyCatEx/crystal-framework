@@ -163,12 +163,16 @@ object ApprovalFlowGraphValidator {
                     }
                 }
                 ApprovalFlowNodeType.CC.typeId -> {
-                    // Rule 13: CC node must have parseable CcNodeConfig
+                    // Rule 13: CC node must have parseable CcNodeConfig with non-empty channelIds
                     if (node.config != null) {
                         val config = runCatching { node.config!!.parseObject<CcNodeConfig>() }.getOrNull()
                         if (config == null) {
                             errors += "CC node '${node.nodeKey}' has invalid config"
+                        } else if (config.channelIds.isEmpty()) {
+                            errors += "CC node '${node.nodeKey}' must have at least one channelId"
                         }
+                    } else {
+                        errors += "CC node '${node.nodeKey}' must have config"
                     }
                 }
                 ApprovalFlowNodeType.FORK.typeId, ApprovalFlowNodeType.JOIN.typeId -> {

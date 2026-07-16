@@ -5,6 +5,7 @@ import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDe
 import {MessageChannelManagerPanel, type MessageChannelManagerPanelRef} from "@/components/tenant/MessageChannelManagerPanel.tsx";
 import {PlusOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
+import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 
 const I18N_PREFIX = 'pages.tenantMessageChannelManager';
 
@@ -39,7 +40,8 @@ export default function TenantMessageChannelManagerPage() {
             {selectedTenantId && (
                 <MessageChannelManagerPanel
                     ref={panelRef}
-                    tenantId={selectedTenantId}
+                    scope={ResourceScope.TENANT}
+                    scopeId={selectedTenantId}
                     i18nPrefix={I18N_PREFIX}
                 />
             )}

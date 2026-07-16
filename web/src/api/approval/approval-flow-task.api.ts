@@ -54,3 +54,15 @@ export async function handleApprovalFlowTask(dto: HandleApprovalFlowTaskDTO) {
         {'Content-Type': 'application/json'},
     );
 }
+
+/**
+ * Query approval flow tasks assigned to the current user only. Backend force-clears `id` and
+ * injects `assignee_id = self`. Use this from the personal "my tasks" page.
+ */
+export async function queryMyApprovalFlowTasks(dto: ManagerReadApprovalFlowTaskDTO) {
+    return doPost<import('@/types/api.types.ts').PaginatedResponseData<ApprovalFlowTask>>(
+        '/api/manager/approval-flow-tasks/my',
+        dto,
+        {'Content-Type': 'application/json'},
+    );
+}
