@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDT
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScopedDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
@@ -135,7 +136,7 @@ abstract class StandardScopedManagerController<
      */
     protected open suspend fun resolveScopeFromCreateDTO(dto: CREATE_DTO): Pair<ResourceScope, Long> {
         val scopedDto = dto as? BaseManagerCreateScopedDTO
-            ?: error("Default resolveScopeFromCreateDTO requires the DTO to implement BaseManagerCreateScopedDTO. Override it for derived-scope DTOs.")
+            ?: throw BusinessException("Default resolveScopeFromCreateDTO requires the DTO to implement BaseManagerCreateScopedDTO. Override it for derived-scope DTOs.")
         return resolveScope(scopedDto.scope) to scopedDto.scopeId
     }
 
@@ -145,7 +146,7 @@ abstract class StandardScopedManagerController<
      */
     protected open suspend fun resolveScopeFromReadDTO(dto: READ_DTO): Pair<ResourceScope, Long> {
         val scopedDto = dto as? BaseManagerReadScopedDTO
-            ?: error("Default resolveScopeFromReadDTO requires the DTO to implement BaseManagerReadScopedDTO. Override it for derived-scope DTOs.")
+            ?: throw BusinessException("Default resolveScopeFromReadDTO requires the DTO to implement BaseManagerReadScopedDTO. Override it for derived-scope DTOs.")
         return resolveScope(scopedDto.scope) to scopedDto.scopeId
     }
 

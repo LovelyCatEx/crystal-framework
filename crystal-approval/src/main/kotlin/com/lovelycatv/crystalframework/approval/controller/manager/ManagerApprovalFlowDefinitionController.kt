@@ -89,11 +89,19 @@ class ManagerApprovalFlowDefinitionController(
 
     @GetMapping("/detailsById")
     suspend fun getApprovalFlowDefinitionDetails(
+        userAuthentication: UserAuthentication,
         @RequestParam
         definitionId: Long
     ): ApiResponse<*> {
         val definition = managerService.getByIdOrNull(definitionId)
             ?: throw BusinessException("Definition not found")
+        val resolvedScope = resolveScope(definition.scope)
+        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw ForbiddenException()
+        }
+        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw UnauthorizedException()
+        }
 
         return ApiResponse.success(
             ApprovalFlowDefinitionDetailsVO(

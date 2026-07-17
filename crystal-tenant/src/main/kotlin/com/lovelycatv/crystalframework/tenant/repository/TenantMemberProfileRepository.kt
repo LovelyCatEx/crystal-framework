@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono
 
 @Repository
 interface TenantMemberProfileRepository : BaseRepository<TenantMemberProfileEntity> {
-    fun findByTenantMemberId(tenantMemberId: Long): Mono<TenantMemberProfileEntity>
+    fun findByTenantIdAndTenantMemberId(tenantId: Long, tenantMemberId: Long): Mono<TenantMemberProfileEntity>
 
     fun findByTenantIdAndMemberUserId(tenantId: Long, memberUserId: Long): Mono<TenantMemberProfileEntity>
 }

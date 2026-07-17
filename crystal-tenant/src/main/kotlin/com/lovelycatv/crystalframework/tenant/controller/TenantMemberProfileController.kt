@@ -45,7 +45,8 @@ class TenantMemberProfileController(
         val fullAccess = targetMemberId == userAuthentication.tenantMemberId
                 || RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_MEMBER_READ_PEM)
 
-        val profile = tenantMemberProfileService.getByTenantMemberId(targetMemberId)
+        val tenantId = userAuthentication.assertTenantIdNotNull()
+        val profile = tenantMemberProfileService.getByTenantIdAndTenantMemberId(tenantId, targetMemberId)
             ?: return ApiResponse.success(null)
 
         return ApiResponse.success(profile.toProfileVO(fileResourceService, fullAccess))

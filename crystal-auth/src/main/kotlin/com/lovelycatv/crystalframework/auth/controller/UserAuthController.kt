@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.auth.controller.dto.UserSwitchAuthenticat
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.impl.CustomUserDetailsService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -41,6 +42,7 @@ class UserAuthController(
             .findByUsername("${user.username}:${dto.tenantId}")
             .awaitFirstOrNull()
             as? UserEntity?
+            ?: throw BusinessException("target tenant not found or you are not a member of it")
 
         userAuthorizationService.clearUserAuthorityCache(userAuthentication.userId)
 
@@ -48,16 +50,8 @@ class UserAuthController(
         // Prevents dead redis lock produces consistent blocking
         // delay(100.milliseconds)
 
-        return ApiResponse.success(
-            userWithTenant?.let {
-                userAuthorizationService.buildLoginSuccessResponse(it).also {
-                    logger.info("user ${user.username} - ${user.id} is switched tenant authentication to ${dto.tenantId}")
-                }
-            } ?: userAuthorizationService.buildLoginSuccessResponse(user).also {
-                logger.warn("could not switch tenant authentication for user ${user.username} - ${user.id}, " +
-                        "target tenant ${dto.tenantId} not found or not the member of this tenant"
-                )
-            }
-        )
+        logger.info("user ${user.username} - ${user.id} is switched tenant authentication to ${dto.tenantId}")
+
+        return ApiResponse.success(userAuthorizationService.buildLoginSuccessResponse(userWithTenant))
     }
 }

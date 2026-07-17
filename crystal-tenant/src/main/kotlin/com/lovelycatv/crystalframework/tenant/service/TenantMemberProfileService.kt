@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberProfileRepo
 import org.springframework.http.codec.multipart.FilePart
 
 interface TenantMemberProfileService : CachedBaseService<TenantMemberProfileRepository, TenantMemberProfileEntity> {
-    suspend fun getByTenantMemberId(tenantMemberId: Long): TenantMemberProfileEntity?
+    suspend fun getByTenantIdAndTenantMemberId(tenantId: Long, tenantMemberId: Long): TenantMemberProfileEntity?
 
     suspend fun getByTenantIdAndUserId(tenantId: Long, userId: Long): TenantMemberProfileEntity?
 

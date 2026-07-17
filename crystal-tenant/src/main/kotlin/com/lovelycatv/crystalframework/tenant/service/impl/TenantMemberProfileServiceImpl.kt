@@ -40,9 +40,9 @@ class TenantMemberProfileServiceImpl(
         return this.tenantMemberProfileRepository
     }
 
-    override suspend fun getByTenantMemberId(tenantMemberId: Long): TenantMemberProfileEntity? {
+    override suspend fun getByTenantIdAndTenantMemberId(tenantId: Long, tenantMemberId: Long): TenantMemberProfileEntity? {
         return this.getRepository()
-            .findByTenantMemberId(tenantMemberId)
+            .findByTenantIdAndTenantMemberId(tenantId, tenantMemberId)
             .awaitFirstOrNull()
     }
 
@@ -67,7 +67,7 @@ class TenantMemberProfileServiceImpl(
         timezone: String?,
         locale: String?,
     ): TenantMemberProfileEntity {
-        val existing = this.getByTenantMemberId(tenantMemberId)
+        val existing = this.getByTenantIdAndTenantMemberId(tenantId, tenantMemberId)
 
         return if (existing == null) {
             val resolvedName = name?.takeIf { it.isNotBlank() }
