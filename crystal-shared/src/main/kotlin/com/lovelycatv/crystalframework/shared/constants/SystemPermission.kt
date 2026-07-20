@@ -83,6 +83,7 @@ object SystemPermission {
     const val ACTION_TENANT_READ = "tenant.read"
     const val ACTION_TENANT_UPDATE = "tenant.update"
     const val ACTION_TENANT_DELETE = "tenant.delete"
+    const val ACTION_TENANT_LIFECYCLE_UPDATE = "tenant.lifecycle.update"
 
     const val MENU_TENANT_TIRE_TYPE_MANAGER = "tenant.tire.type:/manager/tenant-tire-types"
 
@@ -397,6 +398,7 @@ object SystemPermission {
         "tenant.read" to "Read tenants",
         "tenant.update" to "Update tenants",
         "tenant.delete" to "Delete tenants",
+        "tenant.lifecycle.update" to "Update tenant ownership, tire, subscription window, status, or settings",
 
         // Actions - tenant tire type / benefit
         "tenant.tire.type.create" to "Create tenant tire types",

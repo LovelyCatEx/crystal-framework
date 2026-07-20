@@ -1,6 +1,9 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto.ManagerCreateTenantDTO
@@ -72,6 +75,16 @@ class TenantManagerServiceImpl(
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantDTO, original: TenantEntity): TenantEntity {
+        val touchesLifecycle = dto.ownerUserId != null
+                || dto.tireTypeId != null
+                || dto.subscribedTime != null
+                || dto.expiresTime != null
+                || dto.status != null
+                || dto.settings != null
+        if (touchesLifecycle && !RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_LIFECYCLE_UPDATE)) {
+            throw ForbiddenException("Lifecycle fields require ${SystemPermission.ACTION_TENANT_LIFECYCLE_UPDATE}")
+        }
+
         if (dto.ownerUserId != null) {
             tenantService.transferOwnership(dto.id, dto.ownerUserId)
         }
