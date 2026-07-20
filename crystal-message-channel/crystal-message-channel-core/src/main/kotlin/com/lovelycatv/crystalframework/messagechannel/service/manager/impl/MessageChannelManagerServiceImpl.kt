@@ -9,7 +9,9 @@ import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageCha
 import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.utils.ChannelConfigCodec
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
@@ -99,8 +101,17 @@ class MessageChannelManagerServiceImpl(
         return messageChannelRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
     }
 
-    override suspend fun resolveConfig(channelId: Long): ChannelConfig {
+    override suspend fun resolveConfig(
+        channelId: Long,
+        expectedScope: ResourceScope,
+        expectedScopeId: Long?,
+    ): ChannelConfig {
         val entity = getByIdOrThrow(channelId)
+        val entityScope = ResourceScope.getById(entity.scope)
+            ?: throw BusinessException("Unknown channel scope ${entity.scope} for channel $channelId")
+        if (entityScope != expectedScope || entity.scopeId != expectedScopeId) {
+            throw ForbiddenException("Channel $channelId does not belong to the expected scope")
+        }
         if (!entity.enabled) {
             throw BusinessException("Channel $channelId is disabled")
         }
