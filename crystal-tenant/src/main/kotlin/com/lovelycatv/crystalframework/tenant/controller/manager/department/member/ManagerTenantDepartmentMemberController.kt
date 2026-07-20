@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.tenant.entity.TenantDepartmentMemberRelat
 import com.lovelycatv.crystalframework.tenant.repository.TenantDepartmentMemberRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantDepartmentMemberManagerService
+import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerTenantDepartmentMemberController(
     private val tenantDepartmentMemberManagerService: TenantDepartmentMemberManagerService,
     private val tenantDepartmentManagerService: TenantDepartmentManagerService,
+    private val tenantMemberManagerService: TenantMemberManagerService,
 ) : StandardTenantManagerController<
         TenantDepartmentMemberManagerService,
         TenantDepartmentMemberRelationRepository,
@@ -52,10 +54,9 @@ class ManagerTenantDepartmentMemberController(
         dto: ManagerCreateTenantDepartmentMemberDTO,
         userAuthentication: UserAuthentication
     ): Boolean {
-        return tenantDepartmentManagerService.checkIsRelatedToRootParent(
-            dto.departmentId,
-            userAuthentication.tenantId!!,
-        )
+        val tenantId = userAuthentication.tenantId!!
+        return tenantDepartmentManagerService.checkIsRelatedToRootParent(dto.departmentId, tenantId)
+                && tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, tenantId)
     }
 
     override suspend fun isQueryInScope(
@@ -66,6 +67,19 @@ class ManagerTenantDepartmentMemberController(
             dto.departmentId,
             userAuthentication.tenantId!!,
         )
+    }
+
+    /**
+     * Update also carries `departmentId` + `memberId`; both must belong to the caller's tenant
+     * (mirrors the create-side check to prevent cross-tenant injection on the update path).
+     */
+    override suspend fun isUpdateInScope(
+        dto: ManagerUpdateTenantDepartmentMemberDTO,
+        userAuthentication: UserAuthentication
+    ): Boolean {
+        val tenantId = userAuthentication.tenantId!!
+        return tenantDepartmentManagerService.checkIsRelatedToRootParent(dto.departmentId, tenantId)
+                && tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, tenantId)
     }
 
     /**
