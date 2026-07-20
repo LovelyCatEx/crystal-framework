@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.reflect.KClass
 
+private const val SECRET_MASK = "***"
+
 @Service
 class SystemSettingsServiceImpl(
     private val systemSettingsRepository: SystemSettingsRepository,
@@ -304,7 +306,7 @@ class SystemSettingsServiceImpl(
                 }
             ).awaitFirstOrNull()
 
-            logger.info("System settings $key updated to ${existing.configValue}")
+            logger.info("System settings $key updated to ${displayValue(key, value)}")
         } else {
             // insert
             this.getRepository().save(
@@ -315,8 +317,14 @@ class SystemSettingsServiceImpl(
                 ) newEntity true
             ).awaitFirstOrNull()
 
-            logger.info("System settings $key saved, value: $value")
+            logger.info("System settings $key saved, value: ${displayValue(key, value)}")
         }
+    }
+
+    private fun displayValue(key: String, value: String?): String? {
+        if (value.isNullOrBlank()) return value
+        val declaration = systemSettingsRegistry.settingDeclarations().firstOrNull { it.key == key }
+        return if (declaration?.isSecret == true) SECRET_MASK else value
     }
 
     override suspend fun getSettings(

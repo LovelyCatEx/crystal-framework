@@ -12,6 +12,8 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
+private const val SECRET_MASK = "***"
+
 @Order(1)
 @Component
 class SystemSettingsTableDataCheckRunner(
@@ -42,12 +44,13 @@ class SystemSettingsTableDataCheckRunner(
             if (copiedConfigValue != null) {
                 val declaration = keyWithDeclarationMap[it.configKey] ?: throw IllegalStateException("System settings declaration not found for key: ${it.configKey}")
                 val validation = declaration.validateConfigValue(copiedConfigValue)
+                val displayValue = if (declaration.isSecret) SECRET_MASK else copiedConfigValue
 
                 if (validation.pass) {
-                    logger.info("  √ ${it.configKey} = $copiedConfigValue")
+                    logger.info("  √ ${it.configKey} = $displayValue")
                     null
                 } else {
-                    logger.info("  × ${it.configKey} = $copiedConfigValue (expectedType: ${declaration.valueType}, enums: ${declaration.enumValues?.joinToString(" | ")}, message: ${validation.errorMessage})")
+                    logger.info("  × ${it.configKey} = $displayValue (expectedType: ${declaration.valueType}, enums: ${declaration.enumValues?.joinToString(" | ")}, message: ${validation.errorMessage})")
                     it
                 }
             } else {

@@ -27,6 +27,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
+private const val SECRET_MASK = "***"
+
 @Service
 class TenantSettingsServiceImpl(
     private val tenantSettingsRepository: TenantSettingsRepository,
@@ -144,7 +146,7 @@ class TenantSettingsServiceImpl(
                 .save(existing.apply { this.configValue = value })
                 .awaitFirstOrNull()
 
-            logger.info("Tenant($tenantId) settings $key updated to ${existing.configValue}")
+            logger.info("Tenant($tenantId) settings $key updated to ${displayValue(key, value)}")
         } else {
             this.getRepository().save(
                 TenantSettingsEntity(
@@ -155,8 +157,14 @@ class TenantSettingsServiceImpl(
                 ) newEntity true
             ).awaitFirstOrNull()
 
-            logger.info("Tenant($tenantId) settings $key saved, value: $value")
+            logger.info("Tenant($tenantId) settings $key saved, value: ${displayValue(key, value)}")
         }
+    }
+
+    private fun displayValue(key: String, value: String?): String? {
+        if (value.isNullOrBlank()) return value
+        val declaration = tenantSettingsRegistry.settingDeclarations().firstOrNull { it.key == key }
+        return if (declaration?.isSecret == true) SECRET_MASK else value
     }
 
     override suspend fun getSettings(

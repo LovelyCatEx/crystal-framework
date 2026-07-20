@@ -13,6 +13,8 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
+private const val SECRET_MASK = "***"
+
 @Order(1)
 @Component
 class TenantSettingsTableDataCheckRunner(
@@ -55,13 +57,14 @@ class TenantSettingsTableDataCheckRunner(
                             return@mapNotNull null
                         }
                     val validation = declaration.validateConfigValue(copiedConfigValue)
+                    val displayValue = if (declaration.isSecret) SECRET_MASK else copiedConfigValue
 
                     if (validation.pass) {
-                        logger.info("  √ tenant=$tenantId ${row.configKey} = $copiedConfigValue")
+                        logger.info("  √ tenant=$tenantId ${row.configKey} = $displayValue")
                         null
                     } else {
                         logger.info(
-                            "  × tenant=$tenantId ${row.configKey} = $copiedConfigValue " +
+                            "  × tenant=$tenantId ${row.configKey} = $displayValue " +
                                 "(expectedType: ${declaration.valueType}, " +
                                 "enums: ${declaration.enumValues?.joinToString(" | ")}, " +
                                 "message: ${validation.errorMessage})"

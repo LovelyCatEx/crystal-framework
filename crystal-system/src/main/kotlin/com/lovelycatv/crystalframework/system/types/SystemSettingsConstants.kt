@@ -85,7 +85,8 @@ object SystemSettingsConstants {
                 key = "mail.smtp.password",
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "password",
-                sort = 4
+                sort = 4,
+                isSecret = true,
             )
 
             val FROM_EMAIL = SettingsItemDeclaration(
@@ -117,7 +118,8 @@ object SystemSettingsConstants {
                 key = "messageChannel.lark.appSecret",
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
-                sort = 2
+                sort = 2,
+                isSecret = true,
             )
 
             val BASE_URL = SettingsItemDeclaration(
@@ -184,7 +186,8 @@ object SystemSettingsConstants {
                 key = "oauth.github.clientSecret",
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
-                sort = 8
+                sort = 8,
+                isSecret = true,
             )
 
             val SCOPE = SettingsItemDeclaration(
@@ -249,7 +252,8 @@ object SystemSettingsConstants {
                 key = "oauth.google.clientSecret",
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
-                sort = 8
+                sort = 8,
+                isSecret = true,
             )
 
             val SCOPE = SettingsItemDeclaration(
@@ -307,7 +311,8 @@ object SystemSettingsConstants {
                 key = "oauth.oicq.clientSecret",
                 valueType = SettingsItemValueType.STRING,
                 defaultValue = "",
-                sort = 7
+                sort = 7,
+                isSecret = true,
             )
 
             val SCOPE = SettingsItemDeclaration(

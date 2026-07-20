@@ -6,4 +6,5 @@ data class SettingsItemDeclaration(
     val defaultValue: String? = null,
     val sort: Int = 0,
     val enumValues: List<String>? = null,
+    val isSecret: Boolean = false,
 )

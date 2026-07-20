@@ -25,6 +25,7 @@ description: 为租户添加设置项，当用户提到添加某项租户/组织
 3. `defaultValue`: 默认值（`String?`，必须是字符串）
 4. `enumValues`: 当值类型为 `ENUM_*` 时必填，否则不填
 5. `sort`: 前端展示顺序，数字越小越靠前
+6. `isSecret`: 是否为敏感值（`Boolean`，默认 `false`）。为 `true` 时，`/schema` 端点、启动检查日志、setSettings 日志均会将该值掩码为 `***`。**规则：SMTP 密码、OAuth clientSecret、消息渠道 appSecret 等一律标记 `isSecret = true`。**
 
 ### 支持的值类型 SettingsItemValueType
 
