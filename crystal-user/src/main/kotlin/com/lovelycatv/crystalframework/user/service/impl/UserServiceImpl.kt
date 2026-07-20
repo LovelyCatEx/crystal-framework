@@ -89,7 +89,7 @@ class UserServiceImpl(
         // Add role relations
         userRoleRelationService.setUserRolesByNames(user.id, listOf(SystemRole.ROLE_USER))
 
-        logger.info("User ${user.username} / ${user.email} registered successfully, details: ${user.toJSONString()}")
+        logger.info("User ${user.username} registered successfully, id=${user.id}, email=${user.email}")
     }
 
     override suspend fun requestRegisterEmailConfirmationCode(email: String) {
@@ -314,7 +314,7 @@ class UserServiceImpl(
         // Bind OAuth Account
         oAuthAccountService.bindUser(oauthAccountId, user.id)
 
-        logger.info("User $username registered from OAuth account $oauthAccountId successfully, details: ${user.toJSONString()}")
+        logger.info("User $username registered from OAuth account $oauthAccountId successfully, id=${user.id}")
 
         return user
     }
