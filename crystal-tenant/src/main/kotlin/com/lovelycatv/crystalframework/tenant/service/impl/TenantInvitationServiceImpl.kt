@@ -11,8 +11,11 @@ import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecip
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
 import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
@@ -87,110 +90,115 @@ class TenantInvitationServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun acceptInvitation(userId: Long, invitationCode: String, realName: String, phoneNumber: String) {
-        val invitation = this.getInvitationByCode(invitationCode)
+        reactiveRedisService.withDistributedLock(
+            lockKey = "${RedisConstants.LOCK_INVITATION_ACCEPT_PREFIX}$invitationCode",
+            busyMessage = "invitation is being processed, please retry",
+        ) {
+            val invitation = this.getInvitationByCode(invitationCode)
 
-        // 0. Check the invitation code usages
-        if (this.isOverInvitationCount(invitation)) {
-            throw BusinessException("invitation has reached its usage limit")
-        }
-
-        // 0.1 Check the invitation code expiration
-        invitation.expiresTime?.let { expiresTime ->
-            if (System.currentTimeMillis() > expiresTime) {
-                throw BusinessException("invitation has expired")
+            // 0. Check the invitation code usages
+            if (this.isOverInvitationCount(invitation)) {
+                throw BusinessException("invitation has reached its usage limit")
             }
-        }
 
-        val user = userService.getByIdOrThrow(userId)
-        val tenant = tenantService.getByIdOrThrow(invitation.tenantId)
+            // 0.1 Check the invitation code expiration
+            invitation.expiresTime?.let { expiresTime ->
+                if (System.currentTimeMillis() > expiresTime) {
+                    throw BusinessException("invitation has expired")
+                }
+            }
 
-        // 1. Check whether the user is already in the target tenant
-        val existingMember = tenantMemberService.getByTenantIdAndUserId(tenant.id, userId)
-        if (existingMember != null) {
-            // 1.1 User is already joined this tenant
-            logger.info("User ${user.username} - ${user.id} is already in the tenant ${tenant.name} - ${tenant.id}")
-            throw BusinessException("user is already a member of this tenant")
-        }
-        // 1.2 Not found — create
-        val memberEntity = tenantMemberManagerService.create(
-            ManagerCreateTenantMemberDTO(
-                tenantId = tenant.id,
-                memberUserId = userId,
-                status = if (invitation.requiresReviewing)
-                    TenantMemberStatus.REVIEWING.typeId
-                else
-                    TenantMemberStatus.ACTIVE.typeId
-            )
-        ).also {
-            logger.info("User ${user.username} - ${user.id} joined the tenant ${tenant.name} - ${tenant.id}")
-        }
+            val user = userService.getByIdOrThrow(userId)
+            val tenant = tenantService.getByIdOrThrow(invitation.tenantId)
 
-        // 1.3 Persist tenant-scoped profile in the same transaction so member and profile stay consistent.
-        // Empty / fallback fields stay NULL — UI falls back to system-level users.* on display.
-        tenantMemberProfileService.upsertProfile(
-            tenantId = tenant.id,
-            tenantMemberId = memberEntity.id,
-            memberUserId = userId,
-            name = realName,
-            phone = phoneNumber,
-        )
-
-        // 2. Check whether the invitation includes department
-        invitation.departmentId?.let { departmentId ->
-            // 2.1 Check whether the department exists
-            val department = tenantDepartmentService.getByIdOrThrow(departmentId)
-
-            // 2.2 Join department (including check whether the member is already in department)
-            tenantDepartmentMemberManagerService.create(
-                ManagerCreateTenantDepartmentMemberDTO(
-                    departmentId = department.id,
-                    memberId = memberEntity.id,
-                    roleType = DepartmentMemberRoleType.MEMBER.typeId
+            // 1. Check whether the user is already in the target tenant
+            val existingMember = tenantMemberService.getByTenantIdAndUserId(tenant.id, userId)
+            if (existingMember != null) {
+                // 1.1 User is already joined this tenant
+                logger.info("User ${user.username} - ${user.id} is already in the tenant ${tenant.name} - ${tenant.id}")
+                throw BusinessException("user is already a member of this tenant")
+            }
+            // 1.2 Not found — create
+            val memberEntity = tenantMemberManagerService.create(
+                ManagerCreateTenantMemberDTO(
+                    tenantId = tenant.id,
+                    memberUserId = userId,
+                    status = if (invitation.requiresReviewing)
+                        TenantMemberStatus.REVIEWING.typeId
+                    else
+                        TenantMemberStatus.ACTIVE.typeId
                 )
+            ).also {
+                logger.info("User ${user.username} - ${user.id} joined the tenant ${tenant.name} - ${tenant.id}")
+            }
+
+            // 1.3 Persist tenant-scoped profile in the same transaction so member and profile stay consistent.
+            // Empty / fallback fields stay NULL — UI falls back to system-level users.* on display.
+            tenantMemberProfileService.upsertProfile(
+                tenantId = tenant.id,
+                tenantMemberId = memberEntity.id,
+                memberUserId = userId,
+                name = realName,
+                phone = phoneNumber,
             )
 
-            logger.info("User ${user.username} - ${user.id} " +
-                    "joined the department ${department.name} - ${department.id} " +
-                    "of tenant ${tenant.name} - ${tenant.id}"
-            )
-        }
+            // 2. Check whether the invitation includes department
+            invitation.departmentId?.let { departmentId ->
+                // 2.1 Check whether the department exists
+                val department = tenantDepartmentService.getByIdOrThrow(departmentId)
 
-        // 3. Record invitation code usage
-        tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
+                // 2.2 Join department (including check whether the member is already in department)
+                tenantDepartmentMemberManagerService.create(
+                    ManagerCreateTenantDepartmentMemberDTO(
+                        departmentId = department.id,
+                        memberId = memberEntity.id,
+                        roleType = DepartmentMemberRoleType.MEMBER.typeId
+                    )
+                )
 
-        // 4. Notify members according to tenant settings
-        val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
-        val notification = tenantSettings.notification
+                logger.info("User ${user.username} - ${user.id} " +
+                        "joined the department ${department.name} - ${department.id} " +
+                        "of tenant ${tenant.name} - ${tenant.id}"
+                )
+            }
 
-        if (invitation.requiresReviewing) {
-            // Resolving reviewers also guards the join request: reviewing is required but
-            // nobody can handle it -> deny.
-            val reviewerEmails = resolveReviewerEmails(tenant)
-            if (notification.memberJoinReview.email) {
-                sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, reviewerEmails)
-            } else {
-                logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+            // 3. Record invitation code usage
+            tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
+
+            // 4. Notify members according to tenant settings
+            val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
+            val notification = tenantSettings.notification
+
+            if (invitation.requiresReviewing) {
+                // Resolving reviewers also guards the join request: reviewing is required but
+                // nobody can handle it -> deny.
+                val reviewerEmails = resolveReviewerEmails(tenant)
+                if (notification.memberJoinReview.email) {
+                    sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, reviewerEmails)
+                } else {
+                    logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+                }
+                notifyViaChannels(
+                    tenantId = tenant.id,
+                    channelIds = notification.memberJoinReview.channels,
+                    content = notification.memberJoinReview.content,
+                    recipientEmails = reviewerEmails,
+                    label = "tenant member join review",
+                )
+            }
+
+            val ownerEmail = resolveOwnerEmail(tenant)
+            if (notification.memberJoin.email) {
+                sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber, ownerEmail)
             }
             notifyViaChannels(
                 tenantId = tenant.id,
-                channelIds = notification.memberJoinReview.channels,
-                content = notification.memberJoinReview.content,
-                recipientEmails = reviewerEmails,
-                label = "tenant member join review",
+                channelIds = notification.memberJoin.channels,
+                content = notification.memberJoin.content,
+                recipientEmails = listOfNotNull(ownerEmail),
+                label = "tenant member join notify",
             )
         }
-
-        val ownerEmail = resolveOwnerEmail(tenant)
-        if (notification.memberJoin.email) {
-            sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber, ownerEmail)
-        }
-        notifyViaChannels(
-            tenantId = tenant.id,
-            channelIds = notification.memberJoin.channels,
-            content = notification.memberJoin.content,
-            recipientEmails = listOfNotNull(ownerEmail),
-            label = "tenant member join notify",
-        )
     }
 
     /**
@@ -291,7 +299,11 @@ class TenantInvitationServiceImpl(
 
         channelIds.forEach { channelId ->
             val config = try {
-                tenantMessageChannelManagerService.resolveConfig(channelId)
+                tenantMessageChannelManagerService.resolveConfig(
+                    channelId,
+                    ResourceScope.TENANT,
+                    tenantId,
+                )
             } catch (e: Exception) {
                 logger.warn("Skip channel $channelId for $label of tenant $tenantId: ${e.message}")
                 return@forEach

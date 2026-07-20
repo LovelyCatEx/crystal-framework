@@ -4,9 +4,12 @@ import com.lovelycatv.crystalframework.approval.types.*
 import com.lovelycatv.crystalframework.approval.entity.*
 import com.lovelycatv.crystalframework.approval.service.*
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.parseObject
+import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
@@ -22,7 +25,8 @@ class ApprovalFlowEngineImpl(
     private val recordService: ApprovalFlowRecordService,
     private val tokenService: ApprovalFlowTokenService,
     private val ccNotifier: ApprovalCcNotifier,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val reactiveRedisService: ReactiveRedisService
 ) : ApprovalFlowEngine {
 
     @Transactional(rollbackFor = [Exception::class])
@@ -95,70 +99,75 @@ class ApprovalFlowEngineImpl(
         comment: String?,
         formData: String?
     ) {
-        val task = taskService.getByIdOrThrow(taskId)
+        reactiveRedisService.withDistributedLock(
+            lockKey = "${RedisConstants.LOCK_APPROVAL_TASK_PREFIX}$taskId",
+            busyMessage = "task is being processed, please retry later",
+        ) {
+            val task = taskService.getByIdOrThrow(taskId)
 
-        if (task.getRealStatus() != ApprovalFlowTaskStatus.PENDING) {
-            throw BusinessException("Task is not pending")
-        }
+            if (task.getRealStatus() != ApprovalFlowTaskStatus.PENDING) {
+                throw BusinessException("Task is not pending")
+            }
 
-        val instance = instanceService.getByIdOrThrow(task.instanceId)
-        if (instance.getRealStatus() != ApprovalFlowInstanceStatus.IN_PROGRESS) {
-            throw BusinessException("Approval instance is not in progress")
-        }
+            val instance = instanceService.getByIdOrThrow(task.instanceId)
+            if (instance.getRealStatus() != ApprovalFlowInstanceStatus.IN_PROGRESS) {
+                throw BusinessException("Approval instance is not in progress")
+            }
 
-        task.status = if (approved) ApprovalFlowTaskStatus.APPROVED.typeId else ApprovalFlowTaskStatus.REJECTED.typeId
-        task.comment = comment
-        task.formData = formData
-        taskService.withUpdateEntityContext(task) {
-            task.onUpdate()
-            taskService.getRepository().save(task).awaitFirst()
-        }
+            task.status = if (approved) ApprovalFlowTaskStatus.APPROVED.typeId else ApprovalFlowTaskStatus.REJECTED.typeId
+            task.comment = comment
+            task.formData = formData
+            taskService.withUpdateEntityContext(task) {
+                task.onUpdate()
+                taskService.getRepository().save(task).awaitFirst()
+            }
 
-        val token = tokenService.getByIdOrThrow(task.tokenId)
+            val token = tokenService.getByIdOrThrow(task.tokenId)
 
-        val record = ApprovalFlowRecordEntity(
-            id = snowIdGenerator.nextId(),
-            scope = instance.scope,
-            scopeId = instance.scopeId,
-            instanceId = instance.id,
-            nodeId = task.nodeId,
-            operatorId = operatorId,
-            action = if (approved) ApprovalFlowRecordAction.APPROVE.typeId else ApprovalFlowRecordAction.REJECT.typeId,
-            comment = comment
-        ).apply { newEntity() }
-        recordService.getRepository().save(record).awaitFirst()
+            val record = ApprovalFlowRecordEntity(
+                id = snowIdGenerator.nextId(),
+                scope = instance.scope,
+                scopeId = instance.scopeId,
+                instanceId = instance.id,
+                nodeId = task.nodeId,
+                operatorId = operatorId,
+                action = if (approved) ApprovalFlowRecordAction.APPROVE.typeId else ApprovalFlowRecordAction.REJECT.typeId,
+                comment = comment
+            ).apply { newEntity() }
+            recordService.getRepository().save(record).awaitFirst()
 
-        val node = nodeService.getByIdOrThrow(task.nodeId)
-        val config = node.config?.parseObject<ApprovalNodeConfig>()
-        val approveMode = config?.approveMode?.let { ApprovalFlowApproveMode.getById(it) } ?: ApprovalFlowApproveMode.AND
+            val node = nodeService.getByIdOrThrow(task.nodeId)
+            val config = node.config?.parseObject<ApprovalNodeConfig>()
+            val approveMode = config?.approveMode?.let { ApprovalFlowApproveMode.getById(it) } ?: ApprovalFlowApproveMode.AND
 
-        val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, node.id).toList()
+            val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, node.id).toList()
 
-        when (approveMode) {
-            ApprovalFlowApproveMode.OR -> {
-                if (approved) {
-                    allTasks.filter { it.id != task.id && it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }.forEach {
-                        it.status = ApprovalFlowTaskStatus.SKIPPED.typeId
-                        taskService.withUpdateEntityContext(it) {
-                            it.onUpdate()
-                            taskService.getRepository().save(it).awaitFirst()
+            when (approveMode) {
+                ApprovalFlowApproveMode.OR -> {
+                    if (approved) {
+                        allTasks.filter { it.id != task.id && it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }.forEach {
+                            it.status = ApprovalFlowTaskStatus.SKIPPED.typeId
+                            taskService.withUpdateEntityContext(it) {
+                                it.onUpdate()
+                                taskService.getRepository().save(it).awaitFirst()
+                            }
+                        }
+                        moveToNext(token, instance)
+                    } else {
+                        val hasPending = allTasks.any { it.id != task.id && it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }
+                        if (!hasPending) {
+                            rejectInstance(instance)
                         }
                     }
-                    moveToNext(token, instance)
-                } else {
-                    val hasPending = allTasks.any { it.id != task.id && it.getRealStatus() == ApprovalFlowTaskStatus.PENDING }
-                    if (!hasPending) {
-                        rejectInstance(instance)
-                    }
                 }
-            }
-            ApprovalFlowApproveMode.AND -> {
-                if (!approved) {
-                    rejectInstance(instance)
-                } else {
-                    val allApproved = allTasks.all { it.getRealStatus() == ApprovalFlowTaskStatus.APPROVED }
-                    if (allApproved) {
-                        moveToNext(token, instance)
+                ApprovalFlowApproveMode.AND -> {
+                    if (!approved) {
+                        rejectInstance(instance)
+                    } else {
+                        val allApproved = allTasks.all { it.getRealStatus() == ApprovalFlowTaskStatus.APPROVED }
+                        if (allApproved) {
+                            moveToNext(token, instance)
+                        }
                     }
                 }
             }
