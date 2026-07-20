@@ -28,4 +28,10 @@ object RedisConstants {
     fun getRequestResetPasswordEmailCodeKey(email: String) = "reset-password-email-code:$email"
 
     fun getRequestResetEmailAddressEmailCodeKey(email: String) = "reset-email-address-email-code:$email"
+
+    const val LOCK_INVITATION_ACCEPT_PREFIX = "lock:invitation:accept:"
+
+    const val LOCK_OAUTH_BIND_PREFIX = "lock:oauth:bind:"
+
+    const val LOCK_APPROVAL_TASK_PREFIX = "lock:approval:task:"
 }
