@@ -6,8 +6,11 @@ import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRelationRepo
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleService
+import com.lovelycatv.crystalframework.shared.constants.SystemRole
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.rbac.UserAuthoritiesInvalidationEvent
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
@@ -46,6 +49,16 @@ class UserRoleRelationServiceImpl(
 
     @Transactional
     override suspend fun setUserRoles(userId: Long, roleIds: List<Long>) {
+        // Guard (H3): prevent granting protected system roles from a non-root user context.
+        val targetRoleNames = userRoleService.getAllRoles()
+            .filter { it.id in roleIds }
+            .map { it.name }
+            .toSet()
+        val touchesProtected = (targetRoleNames intersect SystemRole.PROTECTED_ROLE_NAMES).isNotEmpty()
+        if (touchesProtected && !RbacUtils.isSystemContext() && !RbacUtils.isRoot()) {
+            throw ForbiddenException("Cannot assign protected system roles")
+        }
+
         // Delete existing relations
         val existing = userRoleRelationRepository
             .findByUserId(userId)
@@ -70,6 +83,12 @@ class UserRoleRelationServiceImpl(
 
     @Transactional
     override suspend fun setUserRolesByNames(userId: Long, roleNames: List<String>) {
+        // Guard (H3): prevent granting protected system roles from a non-root user context.
+        val touchesProtected = (roleNames.toSet() intersect SystemRole.PROTECTED_ROLE_NAMES).isNotEmpty()
+        if (touchesProtected && !RbacUtils.isSystemContext() && !RbacUtils.isRoot()) {
+            throw ForbiddenException("Cannot assign protected system roles")
+        }
+
         val roleIds = userRoleService
             .getAllRoles()
             .filter { it.name in roleNames }

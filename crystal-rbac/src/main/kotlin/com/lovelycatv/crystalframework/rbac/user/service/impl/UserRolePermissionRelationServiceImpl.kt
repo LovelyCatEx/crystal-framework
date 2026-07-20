@@ -5,7 +5,9 @@ import com.lovelycatv.crystalframework.rbac.user.entity.UserRolePermissionRelati
 import com.lovelycatv.crystalframework.rbac.user.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.types.rbac.SystemRoleAuthoritiesInvalidationEvent
@@ -46,6 +48,18 @@ class UserRolePermissionRelationServiceImpl(
 
     @Transactional
     override suspend fun setRolePermissions(roleId: Long, permissionIds: List<Long>) {
+        // Guard (H4): a caller may only attach permissions they themselves currently hold.
+        val targetPermissionNames = userPermissionRepository
+            .findAllById(permissionIds)
+            .awaitListWithTimeout()
+            .map { it.name }
+        if (!RbacUtils.isSystemContext() &&
+            !RbacUtils.isRoot() &&
+            !RbacUtils.hasAllAuthorities(targetPermissionNames)
+        ) {
+            throw ForbiddenException("Cannot grant permissions you do not hold")
+        }
+
         // Delete existing relations
         val existing = this.getRepository()
             .findByRoleId(roleId)
