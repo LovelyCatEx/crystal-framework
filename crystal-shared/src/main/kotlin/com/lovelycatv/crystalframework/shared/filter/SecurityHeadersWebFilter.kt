@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono
 private const val HEADER_X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
 private const val HEADER_X_FRAME_OPTIONS = "X-Frame-Options"
 private const val HEADER_REFERRER_POLICY = "Referrer-Policy"
+private const val HEADER_STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security"
 private const val HEADER_CONTENT_SECURITY_POLICY = "Content-Security-Policy"
 private const val VALUE_NOSNIFF = "nosniff"
 private const val VALUE_DENY = "DENY"
@@ -27,13 +28,13 @@ class SecurityHeadersWebFilter : WebFilter {
         headers.setIfAbsent(HEADER_X_CONTENT_TYPE_OPTIONS, VALUE_NOSNIFF)
         headers.setIfAbsent(HEADER_X_FRAME_OPTIONS, VALUE_DENY)
         headers.setIfAbsent(HEADER_REFERRER_POLICY, VALUE_REFERRER_POLICY)
-        headers.setIfAbsent(HttpHeaders.STRICT_TRANSPORT_SECURITY, VALUE_HSTS)
+        headers.setIfAbsent(HEADER_STRICT_TRANSPORT_SECURITY, VALUE_HSTS)
         headers.setIfAbsent(HEADER_CONTENT_SECURITY_POLICY, VALUE_CSP)
         return chain.filter(exchange)
     }
 
     private fun HttpHeaders.setIfAbsent(name: String, value: String) {
-        if (!this.containsKey(name)) {
+        if (!this.containsHeader(name)) {
             this.set(name, value)
         }
     }

@@ -2937,6 +2937,20 @@ export const enUS: I18nRules = {
       applyOverwriteContent: 'Applying this template will overwrite the current config. Continue?'
     },
 
+    settings: {
+      secretPlaceholderConfigured: 'Configured, leave empty to keep unchanged',
+      secretPlaceholderEmpty: 'Not configured',
+      viewChanges: 'View Changes',
+      noChanges: 'No changes to save',
+      changesModalTitle: 'Pending Changes ({{count}})',
+      changesColumnKey: 'Setting',
+      changesColumnBefore: 'Current Value',
+      changesColumnAfter: 'New Value',
+      valueEmpty: '(empty)',
+      secretUnchangedTag: 'Configured',
+      secretModifiedTag: 'Will update to new secret'
+    },
+
     columns: {
       fileResource: {
         preview: 'Preview',

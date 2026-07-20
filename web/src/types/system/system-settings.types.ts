@@ -13,6 +13,8 @@ export interface SystemSettingsSchema {
     enumValues: string[] | null;
     tab: string | null;
     group: string | null;
+    isSecret: boolean;
+    hasValue: boolean;
 }
 
 export enum SystemSettingsItemValueType {

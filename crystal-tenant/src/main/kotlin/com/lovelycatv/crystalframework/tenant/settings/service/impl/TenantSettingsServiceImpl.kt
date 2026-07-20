@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.settings.service.impl
 
+import com.lovelycatv.crystalframework.sdk.common.settings.SettingsMaskConstants
 import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
@@ -26,8 +27,6 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
-
-private const val SECRET_MASK = "***"
 
 @Service
 class TenantSettingsServiceImpl(
@@ -115,7 +114,11 @@ class TenantSettingsServiceImpl(
     override suspend fun updateTenantSettings(tenantId: Long, settings: Map<String, String?>) {
         val declarationsByKey = tenantSettingsRegistry.declarationMap()
 
-        settings.forEach { (key, value) ->
+        val effective = settings.filterNot { (key, value) ->
+            declarationsByKey[key]?.isSecret == true && value.isNullOrEmpty()
+        }
+
+        effective.forEach { (key, value) ->
             val declaration = declarationsByKey[key]
                 ?: throw BusinessException("setting key '$key' is not declared")
             if (value != null && !declaration.valueType.matches(value)) {
@@ -125,7 +128,7 @@ class TenantSettingsServiceImpl(
             }
         }
 
-        settings.forEach { (key, value) ->
+        effective.forEach { (key, value) ->
             this.setSettings(tenantId, key, value)
         }
 
@@ -164,7 +167,7 @@ class TenantSettingsServiceImpl(
     private fun displayValue(key: String, value: String?): String? {
         if (value.isNullOrBlank()) return value
         val declaration = tenantSettingsRegistry.settingDeclarations().firstOrNull { it.key == key }
-        return if (declaration?.isSecret == true) SECRET_MASK else value
+        return if (declaration?.isSecret == true) SettingsMaskConstants.SECRET_LOG_MASK else value
     }
 
     override suspend fun getSettings(

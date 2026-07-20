@@ -2935,6 +2935,20 @@ export const zhCN: I18nRules = {
       applyOverwriteContent: '应用模板会覆盖当前已编辑的配置，确认继续？'
     },
 
+    settings: {
+      secretPlaceholderConfigured: '已配置，留空保持不变',
+      secretPlaceholderEmpty: '尚未配置',
+      viewChanges: '查看变更',
+      noChanges: '没有需要保存的变更',
+      changesModalTitle: '待保存的变更（{{count}} 项）',
+      changesColumnKey: '设置项',
+      changesColumnBefore: '当前值',
+      changesColumnAfter: '新值',
+      valueEmpty: '(空)',
+      secretUnchangedTag: '已配置',
+      secretModifiedTag: '将更新为新密钥'
+    },
+
     columns: {
       fileResource: {
         preview: '预览',
