@@ -25,6 +25,32 @@ import java.nio.charset.StandardCharsets
 class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
     private val logger = logger()
 
+    companion object {
+        private const val MASK = "***"
+        private val SENSITIVE_HEADER_NAMES = setOf(
+            "authorization", "cookie", "set-cookie",
+            "proxy-authorization", "x-api-key", "x-forwarded-authorization"
+        )
+        private val SENSITIVE_JSON_KEY_REGEX = Regex(
+            """"(password|newPassword|oldPassword|token|accessToken|refreshToken|clientSecret|appSecret|emailCode|smsCode)"\s*:\s*"[^"]*"""",
+            RegexOption.IGNORE_CASE
+        )
+        private val SENSITIVE_FORM_KEY_REGEX = Regex(
+            """\b(password|newPassword|oldPassword|token|accessToken|refreshToken|clientSecret|appSecret|emailCode|smsCode)=[^&\s]+""",
+            RegexOption.IGNORE_CASE
+        )
+
+        internal fun redactBody(body: String): String =
+            if (body.isEmpty()) body
+            else body
+                .replace(SENSITIVE_JSON_KEY_REGEX) { m -> "\"${m.groupValues[1]}\":\"$MASK\"" }
+                .replace(SENSITIVE_FORM_KEY_REGEX) { m -> "${m.groupValues[1]}=$MASK" }
+
+        internal fun redactHeader(name: String, values: List<String>): String =
+            if (name.lowercase() in SENSITIVE_HEADER_NAMES) MASK
+            else values.joinToString(separator = ", ")
+    }
+
     override fun filter(
         exchange: ServerWebExchange,
         chain: WebFilterChain
@@ -60,12 +86,13 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
                     String(bytes, StandardCharsets.UTF_8)
                 }
 
+                val logJoined = redactBody(joined)
                 logger.debug("[$id] Request Body:")
                 if (joined.isNotEmpty()) {
-                    if (joined.length > 2000) {
-                        logger.debug("[$id]   ${joined.substring(0, 2000)}... (truncated)")
+                    if (logJoined.length > 2000) {
+                        logger.debug("[$id]   ${logJoined.substring(0, 2000)}... (truncated)")
                     } else {
-                        logger.debug("[$id]   $joined")
+                        logger.debug("[$id]   $logJoined")
                     }
                 } else {
                     logger.debug("[$id]   (empty)")
@@ -93,13 +120,13 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
             // Request Headers
             logger.debug("[$id] Request Headers:")
             originalRequest.headers.forEach { headerName, values ->
-                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${redactHeader(headerName, values)}")
             }
 
             // Response Headers
             logger.debug("[$id] Response Headers:")
             delegate.headers.forEach { headerName, values ->
-                logger.debug("[$id]   - $headerName = ${values.joinToString(separator = ", ")}")
+                logger.debug("[$id]   - $headerName = ${redactHeader(headerName, values)}")
             }
 
             val bufferProcessor = { buffer: DataBuffer ->
@@ -144,7 +171,7 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
         private fun printResponseBodyString(id: Long, bodyStr: String) {
             if (bodyStr.isNotEmpty()) {
                 if (bodyStr.startsWith("{")) {
-                    logger.debug("[$id]   $bodyStr")
+                    logger.debug("[$id]   ${redactBody(bodyStr)}")
                 } else {
                     logger.debug("[$id]   (response body does not seem to be a json object) contentLength: ${bodyStr.length}")
                 }
