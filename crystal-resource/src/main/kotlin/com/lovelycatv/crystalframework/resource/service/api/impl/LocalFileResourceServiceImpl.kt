@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -79,7 +80,11 @@ class LocalFileResourceServiceImpl(
 
     private fun resolvePath(objectKey: String): Path {
         val normalizedObjectKey = objectKey.removePrefix("/")
-        return baseDirectory.resolve(normalizedObjectKey).normalize()
+        val resolved = baseDirectory.resolve(normalizedObjectKey).normalize()
+        if (!resolved.startsWith(baseDirectory)) {
+            throw BusinessException("Invalid object key")
+        }
+        return resolved
     }
 
 }
