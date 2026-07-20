@@ -94,6 +94,13 @@ class TenantInvitationServiceImpl(
             throw BusinessException("invitation has reached its usage limit")
         }
 
+        // 0.1 Check the invitation code expiration
+        invitation.expiresTime?.let { expiresTime ->
+            if (System.currentTimeMillis() > expiresTime) {
+                throw BusinessException("invitation has expired")
+            }
+        }
+
         val user = userService.getByIdOrThrow(userId)
         val tenant = tenantService.getByIdOrThrow(invitation.tenantId)
 
