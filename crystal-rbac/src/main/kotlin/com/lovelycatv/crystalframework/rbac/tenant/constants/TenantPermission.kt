@@ -460,4 +460,10 @@ object TenantPermission {
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }
+
+    private val ALL_PERMISSION_NAMES: Set<String> by lazy {
+        allPermissions().map { it.name }.toSet()
+    }
+
+    fun allPermissionNames(): Set<String> = ALL_PERMISSION_NAMES
 }

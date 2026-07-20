@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.member
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.SetMemberRolesDTO
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -25,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/member/role")
 class ManagerTenantMemberRoleRelationController(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
-    private val tenantMemberManagerService: TenantMemberManagerService
+    private val tenantMemberManagerService: TenantMemberManagerService,
+    private val tenantRoleManagerService: TenantRoleManagerService
 ) {
     @GetMapping("/get", version = "1")
     suspend fun getMemberRoles(
@@ -57,7 +59,11 @@ class ManagerTenantMemberRoleRelationController(
             tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
         } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_MEMBER_ROLE_UPDATE_PEM)) {
             userAuthentication.assertTenantIdNotNull()
-            if (tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, userAuthentication.tenantId!!)) {
+            val tenantId = userAuthentication.tenantId!!
+            if (tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, tenantId)) {
+                if (!tenantRoleManagerService.checkIsRelatedToRootParent(dto.roleIds, tenantId)) {
+                    throw ForbiddenException("Roles do not belong to your tenant")
+                }
                 tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
             } else {
                 throw UnauthorizedException()
