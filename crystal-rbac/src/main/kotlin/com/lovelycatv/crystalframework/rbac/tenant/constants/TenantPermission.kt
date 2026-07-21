@@ -461,9 +461,12 @@ object TenantPermission {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }
 
-    private val ALL_PERMISSION_NAMES: Set<String> by lazy {
-        allPermissions().map { it.name }.toSet()
-    }
-
     fun allPermissionNames(): Set<String> = ALL_PERMISSION_NAMES
+}
+
+// Kept at file top-level (not as a TenantPermission member) so it is invisible to
+// KotlinObjectClassUtils.extractAllValProperties, which reflects over
+// TenantPermission::class.memberProperties and cannot access private members.
+private val ALL_PERMISSION_NAMES: Set<String> by lazy {
+    TenantPermission.allPermissions().map { it.name }.toSet()
 }
