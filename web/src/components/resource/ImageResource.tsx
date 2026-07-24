@@ -1,8 +1,8 @@
 import {Image, Spin} from "antd";
 import {FileImageOutlined} from "@ant-design/icons";
-import {emptyApiResponseAsync} from "../api/system-request.ts";
-import {getResourceFileDownloadUrlById} from "../api/resource/file-resource.api.ts";
-import {useSWRState} from "../compositions/use-swr.ts";
+import {emptyApiResponseAsync} from "../../api/system-request.ts";
+import {getResourceFileDownloadUrlById} from "../../api/resource/file-resource.api.ts";
+import {useSWRState} from "../../compositions/use-swr.ts";
 import type {CSSProperties} from "react";
 
 export function ImageResource({

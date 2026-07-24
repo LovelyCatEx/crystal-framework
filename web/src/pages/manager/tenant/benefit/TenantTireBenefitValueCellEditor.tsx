@@ -3,7 +3,7 @@ import {Button, Input, InputNumber, Select, Space} from "antd";
 import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {useTranslation} from "react-i18next";
 
-export interface BenefitValueCellEditorProps {
+export interface TenantTireBenefitValueCellEditorProps {
     featureType: number;
     /** Pre-computed display value — for booleans pass the raw "true"/"false" string */
     value: string | null;
@@ -18,7 +18,7 @@ export interface BenefitValueCellEditorProps {
     onCancel: () => void;
 }
 
-export function BenefitValueCellEditor(props: BenefitValueCellEditorProps) {
+export function TenantTireBenefitValueCellEditor(props: TenantTireBenefitValueCellEditorProps) {
     const {t} = useTranslation();
 
     if (!props.editing) {

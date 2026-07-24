@@ -8,7 +8,7 @@ import {queryBenefitOverview} from "@/api/tenant/tenant-benefit.api.ts";
 import type {TenantTireBenefitOverviewGroupVO, TenantTireBenefitOverviewItemVO} from "@/types/tenant/tenant-benefit.types.ts";
 import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {useTranslation} from "react-i18next";
-import {BenefitValueEditCell, BenefitValueEditProvider} from "./BenefitValueEditCell.tsx";
+import {TenantTireBenefitValueEditCell, TenantTireBenefitValueEditProvider} from "./TenantTireBenefitValueEditCell.tsx";
 import {
     getBenefitGroupKey,
     useTenantBenefitGroupToTranslationMap,
@@ -207,7 +207,7 @@ export default function CrossTireOverviewPage() {
                 const value = row.tireValues[tire.id];
                 if (value === undefined) return <span>-</span>;
                 return (
-                    <BenefitValueEditCell
+                    <TenantTireBenefitValueEditCell
                         cellKey={`cross_${tire.id}_${row.featureId}`}
                         featureType={row.featureType}
                         value={value}
@@ -229,7 +229,7 @@ export default function CrossTireOverviewPage() {
                 subtitle={t('pages.tenantTireBenefitValueManager.crossOverview.subtitle')}
             />
             <StandardCard className="mt-4">
-                <BenefitValueEditProvider>
+                <TenantTireBenefitValueEditProvider>
                 <div className="flex justify-between mb-4">
                     <Space>
                         <Switch
@@ -259,7 +259,7 @@ export default function CrossTireOverviewPage() {
                     scroll={{ x: 'max-content' }}
                     pagination={false}
                 />
-                </BenefitValueEditProvider>
+                </TenantTireBenefitValueEditProvider>
             </StandardCard>
         </>
     );

@@ -1,4 +1,4 @@
-import {ColorPickerInput} from "@/components/ColorPickerInput.tsx";
+import {ColorPickerInput} from "@/components/input/ColorPickerInput.tsx";
 import {TestSendEmailButton} from "@/components/TestSendEmailButton.tsx";
 import {TestSendLarkButton} from "@/components/TestSendLarkButton.tsx";
 import type {

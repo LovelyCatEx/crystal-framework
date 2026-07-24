@@ -10,7 +10,7 @@ import type {ReactEditor as ReactEditorType} from "slate-react";
 import {withHistory} from "slate-history";
 import {useTranslation} from "react-i18next";
 import {parseMessageChainXml} from "@/utils/message-chain-xml.ts";
-import {ImageResource} from "@/components/ImageResource.tsx";
+import {ImageResource} from "@/components/resource/ImageResource.tsx";
 import type {MessageSegmentNode} from "./types.ts";
 
 // --- Slate custom types ---

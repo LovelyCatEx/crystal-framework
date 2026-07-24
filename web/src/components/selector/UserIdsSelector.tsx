@@ -3,7 +3,7 @@ import {EntityIdsSelector} from "./EntityIdsSelector.tsx";
 import {useUserTableColumns} from "../columns/UserEntityColumns.tsx";
 import {UserManagerController} from "@/api/user/user.api.ts";
 import type {User} from "@/types/user/user.types.ts";
-import {UserChip} from "@/components/UserChip.tsx";
+import {UserChip} from "@/components/chip/UserChip.tsx";
 
 interface UserIdsSelectorProps {
     value?: string[] | null;

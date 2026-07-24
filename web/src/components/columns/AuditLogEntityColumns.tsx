@@ -7,7 +7,7 @@ import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {UserManagerController} from "@/api/user/user.api.ts";
 import type {User} from "@/types/user/user.types.ts";
 import {UserCard} from "../card/pop/UserCard.tsx";
-import {AvatarResource} from "../AvatarResource.tsx";
+import {AvatarResource} from "../resource/AvatarResource.tsx";
 import {useTranslation} from "react-i18next";
 
 function getAuditActionLabel(action: number, t: (key: string) => string): { label: string; color: string } {

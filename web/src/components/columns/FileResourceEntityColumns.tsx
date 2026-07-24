@@ -10,8 +10,8 @@ import {UserManagerController} from "@/api/user/user.api.ts";
 import {type StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import type {User} from "@/types/user/user.types.ts";
 import {StorageProviderCard, UserCard} from "../card/pop";
-import {AvatarResource} from "../AvatarResource.tsx";
-import {ImageResource} from "../ImageResource.tsx";
+import {AvatarResource} from "../resource/AvatarResource.tsx";
+import {ImageResource} from "../resource/ImageResource.tsx";
 import {useTranslation} from "react-i18next";
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'avif'];

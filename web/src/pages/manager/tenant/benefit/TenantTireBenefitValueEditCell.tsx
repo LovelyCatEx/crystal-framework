@@ -2,7 +2,7 @@ import {createContext, useContext, useState, type ReactNode} from "react";
 import {message} from "antd";
 import {useTranslation} from "react-i18next";
 import {TenantTireBenefitValueManagerController} from "@/api/tenant/tenant-benefit.api.ts";
-import {BenefitValueCellEditor} from "./BenefitValueCellEditor.tsx";
+import {TenantTireBenefitValueCellEditor} from "./TenantTireBenefitValueCellEditor.tsx";
 
 // ── Context ──────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ const EditContext = createContext<EditContextValue>({
     cancelEdit: () => {},
 });
 
-export function BenefitValueEditProvider({children}: { children: ReactNode }) {
+export function TenantTireBenefitValueEditProvider({children}: { children: ReactNode }) {
     const [editingKey, setEditingKey] = useState<string | null>(null);
     const [editValue, setEditValue] = useState('');
 
@@ -45,7 +45,7 @@ export function BenefitValueEditProvider({children}: { children: ReactNode }) {
 
 // ── Cell Component ───────────────────────────────────────
 
-export interface BenefitValueEditCellProps {
+export interface TenantTireBenefitValueEditCellProps {
     cellKey: string;
     featureType: number;
     /** Display value (caller should pass the effective value: customized || default) */
@@ -58,7 +58,7 @@ export interface BenefitValueEditCellProps {
     onSaved: () => void;
 }
 
-export function BenefitValueEditCell(props: BenefitValueEditCellProps) {
+export function TenantTireBenefitValueEditCell(props: TenantTireBenefitValueEditCellProps) {
     const ctx = useContext(EditContext);
     const {t} = useTranslation();
     const isEditing = ctx.editingKey === props.cellKey;
@@ -85,7 +85,7 @@ export function BenefitValueEditCell(props: BenefitValueEditCellProps) {
     };
 
     return (
-        <BenefitValueCellEditor
+        <TenantTireBenefitValueCellEditor
             featureType={props.featureType}
             value={props.value}
             defaultValue={props.defaultValue}

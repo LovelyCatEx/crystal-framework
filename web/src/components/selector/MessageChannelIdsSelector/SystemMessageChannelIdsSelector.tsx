@@ -3,7 +3,7 @@ import {EntityIdsSelector} from "../EntityIdsSelector.tsx";
 import {useMessageChannelTableColumns} from "@/components/columns/MessageChannelEntityColumns.tsx";
 import {MessageChannelManagerController} from "@/api/message-channel/message-channel.api.ts";
 import type {MessageChannel} from "@/types/message-channel/message-channel.types.ts";
-import {MessageChannelChip} from "@/components/MessageChannelChip.tsx";
+import {MessageChannelChip} from "@/components/chip/MessageChannelChip.tsx";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 
 interface SystemMessageChannelIdsSelectorProps {

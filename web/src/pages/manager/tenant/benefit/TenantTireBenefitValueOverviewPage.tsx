@@ -11,7 +11,7 @@ import {TenantBenefitType} from "@/types/tenant/tenant-benefit.types.ts";
 import {getTenantBenefitType} from "@/i18n/enum-helpers.ts";
 import {useTenantBenefitKeyToTranslationMap} from "@/i18n/tenant-benefit.tsx";
 import {useTranslation} from "react-i18next";
-import {BenefitValueEditCell, BenefitValueEditProvider} from "./BenefitValueEditCell.tsx";
+import {TenantTireBenefitValueEditCell, TenantTireBenefitValueEditProvider} from "./TenantTireBenefitValueEditCell.tsx";
 
 export default function BenefitOverviewPage() {
     const {t} = useTranslation();
@@ -103,7 +103,7 @@ export default function BenefitOverviewPage() {
             key: 'currentValue',
             width: 220,
             render: (_: unknown, row: TenantTireBenefitOverviewItemVO) => (
-                <BenefitValueEditCell
+                <TenantTireBenefitValueEditCell
                     cellKey={`overview_${row.featureId}`}
                     featureType={row.featureType}
                     value={row.value ?? row.defaultValue}
@@ -123,7 +123,7 @@ export default function BenefitOverviewPage() {
                 subtitle={t('pages.tenantTireBenefitValueManager.overview.subtitle')}
             />
             <StandardCard className="mt-4">
-                <BenefitValueEditProvider>
+                <TenantTireBenefitValueEditProvider>
                 <div className="mb-4">
                     <Space>
                         <span className="font-medium">{t('pages.tenantTireBenefitValueManager.overview.selectTireType')}</span>
@@ -149,7 +149,7 @@ export default function BenefitOverviewPage() {
                     columns={columns}
                     pagination={false}
                 />
-                </BenefitValueEditProvider>
+                </TenantTireBenefitValueEditProvider>
             </StandardCard>
         </>
     );

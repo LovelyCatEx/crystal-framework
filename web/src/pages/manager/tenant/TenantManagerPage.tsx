@@ -12,7 +12,7 @@ import {useTenantTableColumns} from "@/components/columns/TenantEntityColumns.ts
 import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
 import type {TenantTireType} from "@/types/tenant/tenant.types.ts";
 import {TenantStatus} from "@/types/tenant/tenant.types.ts";
-import {JsonEditor} from "@/components/JsonEditor.tsx";
+import {JsonEditor} from "@/components/editor/JsonEditor.tsx";
 import {UserIdSelector} from "@/components/selector/UserIdSelector.tsx";
 import {getTenantStatus} from "@/i18n/enum-helpers.ts";
 import {useTranslation} from "react-i18next";

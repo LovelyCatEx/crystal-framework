@@ -1,6 +1,6 @@
 import {Popover, Spin, theme} from "antd";
 import {useTranslation} from "react-i18next";
-import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {AvatarResource} from "@/components/resource/AvatarResource.tsx";
 import {TenantMemberPopCard} from "@/components/card/pop/TenantMemberPopCard.tsx";
 import {useTenantMemberProfile} from "@/compositions/use-tenant-member-profile.ts";
 

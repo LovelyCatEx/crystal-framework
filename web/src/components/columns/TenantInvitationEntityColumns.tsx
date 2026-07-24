@@ -9,7 +9,7 @@ import {TenantDepartmentManagerController} from "@/api/tenant/tenant-department.
 import type {TenantMemberVO} from "@/types/tenant/tenant-member.types.ts";
 import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
 import {UserCard} from "@/components/card/pop";
-import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {AvatarResource} from "@/components/resource/AvatarResource.tsx";
 import {useTranslation} from "react-i18next";
 
 const { Text } = Typography;

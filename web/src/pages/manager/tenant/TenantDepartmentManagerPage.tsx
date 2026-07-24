@@ -1,9 +1,11 @@
-import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, theme, Tree} from "antd";
+import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Table, Tag, theme} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantSelectorWithDetail} from "@/components/tenant/TenantSelectorWithDetail.tsx";
 import {TenantDepartmentIdSelector} from "@/components/selector/TenantDepartmentIdSelector.tsx";
 import {EntitySelectorModal} from "@/components/selector/EntitySelector.tsx";
 import {TenantDepartmentPopCard} from "@/components/card/pop/TenantDepartmentPopCard.tsx";
+import {TreeDetailLayout} from "@/components/layouts/TreeDetailLayout.tsx";
+import {useEntityTree} from "@/compositions/use-entity-tree.ts";
 import {
     type ManagerCreateTenantDepartmentDTO,
     type ManagerUpdateTenantDepartmentDTO,
@@ -28,32 +30,46 @@ import {
     TeamOutlined,
     UserAddOutlined
 } from "@ant-design/icons";
-import type {Key} from "react";
 import {useEffect, useState} from "react";
-import type {DataNode} from "antd/es/tree";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
 import type {TenantDepartmentMemberVO} from "@/types/tenant/tenant-department-member.types.ts";
 import type {TenantMemberVO} from "@/types/tenant/tenant-member.types.ts";
 import {useTranslation} from "react-i18next";
 
-interface TreeNodeData extends DataNode {
-    department: TenantDepartment;
-}
-
 export default function TenantDepartmentManagerPage() {
-    const { token } = theme.useToken();
+    const {token} = theme.useToken();
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const {t} = useTranslation();
     const baseDepartmentMemberColumns = useTenantDepartmentMemberTableColumns();
     const memberColumnsForSelector = useTenantMemberTableColumns();
-    const [departments, setDepartments] = useState<TenantDepartment[]>([]);
-    const [selectedDepartment, setSelectedDepartment] = useState<TenantDepartment | null>(null);
-    const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [memberLoading, setMemberLoading] = useState(false);
 
-    // Members table
+    // Tree state (departments + selection + URL sync) is fully owned by useEntityTree.
+    const {
+        items: departments,
+        treeData,
+        loading,
+        selectedItem: selectedDepartment,
+        selectItem: selectDepartment,
+        refresh: refreshDepartments,
+        clearSelection: clearDepartmentSelection
+    } = useEntityTree<TenantDepartment>({
+        fetch: async () => {
+            if (!selectedTenantId) return [];
+            const res = await TenantDepartmentManagerController.list({tenantId: selectedTenantId});
+            return res.data ?? [];
+        },
+        renderNodeTitle: (dept) => (
+            <Space size="small">
+                <span>{dept.name}</span>
+            </Space>
+        ),
+        urlParamKey: 'departmentId',
+        deps: [selectedTenantId],
+        onFetchError: () => void message.error(t('pages.tenantDepartmentManager.messages.fetchDepartmentsFailed'))
+    });
+
+    const [memberLoading, setMemberLoading] = useState(false);
     const [departmentMembers, setDepartmentMembers] = useState<TenantDepartmentMemberVO[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
@@ -73,71 +89,6 @@ export default function TenantDepartmentManagerPage() {
     // Current department member IDs (for disabling already added members)
     const [existingMemberIds, setExistingMemberIds] = useState<Set<string>>(new Set());
     const [modal, contextHolder] = Modal.useModal();
-
-    const handleTenantChange = (tenantId: string | null) => {
-        setSelectedTenantId(tenantId);
-        setSelectedDepartment(null);
-        setDepartmentMembers([]);
-    };
-
-    const buildTreeData = (depts: TenantDepartment[]): TreeNodeData[] => {
-        const map = new Map<string, TreeNodeData>();
-        const roots: TreeNodeData[] = [];
-
-        // First pass: create all nodes
-        depts.forEach(dept => {
-            map.set(dept.id, {
-                key: dept.id,
-                title: (
-                    <Space size="small">
-                        <span>{dept.name}</span>
-                    </Space>
-                ),
-                department: dept,
-                children: []
-            });
-        });
-
-        // Second pass: build tree structure
-        depts.forEach(dept => {
-            const node = map.get(dept.id)!;
-            if (dept.parentId && map.has(dept.parentId)) {
-                const parent = map.get(dept.parentId)!;
-                if (!parent.children) parent.children = [];
-                parent.children.push(node);
-            } else {
-                roots.push(node);
-            }
-        });
-
-        return roots;
-    };
-
-    const fetchDepartments = async (tenantId = selectedTenantId) => {
-        if (!tenantId) return;
-        setLoading(true);
-        try {
-            const res = await TenantDepartmentManagerController.list({ tenantId: tenantId });
-            const depts = res.data || [];
-            setDepartments(depts);
-            setTreeData(buildTreeData(depts));
-
-            // Check URL query parameter for departmentId
-            const urlParams = new URLSearchParams(window.location.search);
-            const deptIdFromUrl = urlParams.get('departmentId');
-            if (deptIdFromUrl) {
-                const dept = depts.find(d => d.id === deptIdFromUrl);
-                if (dept) {
-                    setSelectedDepartment(dept);
-                    void fetchDepartmentMembers(dept.id);
-                }
-            }
-        } catch {
-            void message.error(t('pages.tenantDepartmentManager.messages.fetchDepartmentsFailed'));
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchDepartmentMembers = async (departmentId: string, page = currentPage, pageSize = currentPageSize) => {
         setMemberLoading(true);
@@ -162,34 +113,27 @@ export default function TenantDepartmentManagerPage() {
         }
     };
 
-    const updateDepartmentIdInUrl = (departmentId: string | null) => {
-        const url = new URL(window.location.href);
-        if (departmentId) {
-            url.searchParams.set('departmentId', departmentId);
+    // Reload members whenever the tree selection changes (user click, URL restore,
+    // or tenant switch clearing to null).
+    useEffect(() => {
+        if (selectedDepartment) {
+            void fetchDepartmentMembers(selectedDepartment.id);
         } else {
-            url.searchParams.delete('departmentId');
+            setDepartmentMembers([]);
+            setTotal(0);
+            setExistingMemberIds(new Set());
         }
-        window.history.replaceState({}, '', url.toString());
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedDepartment?.id]);
 
-    const handleTreeSelect = (selectedKeys: Key[]) => {
-        const deptId = selectedKeys[0] as string;
-        const dept = departments.find(d => d.id === deptId) || null;
-        setSelectedDepartment(dept);
-        if (dept) {
-            void fetchDepartmentMembers(dept.id);
-            // Update URL query parameter
-            updateDepartmentIdInUrl(dept.id);
-        } else {
-            // Remove departmentId from URL if no department selected
-            updateDepartmentIdInUrl(null);
-        }
+    const handleTenantChange = (tenantId: string | null) => {
+        setSelectedTenantId(tenantId);
     };
 
     const openAddModal = () => {
         setEditingItem(null);
         form.resetFields();
-        form.setFieldsValue({ tenantId: selectedTenantId });
+        form.setFieldsValue({tenantId: selectedTenantId});
         setIsEditModalVisible(true);
     };
 
@@ -208,17 +152,16 @@ export default function TenantDepartmentManagerPage() {
     const handleDelete = (dept: TenantDepartment) => {
         modal.confirm({
             title: t('pages.tenantDepartmentManager.modal.delete.title'),
-            icon: <ExclamationCircleFilled />,
-            content: t('pages.tenantDepartmentManager.modal.delete.content', { name: dept.name }),
+            icon: <ExclamationCircleFilled/>,
+            content: t('pages.tenantDepartmentManager.modal.delete.content', {name: dept.name}),
             onOk() {
-                return TenantDepartmentManagerController.delete({ ids: [dept.id] })
+                return TenantDepartmentManagerController.delete({ids: [dept.id]})
                     .then(() => {
                         void message.success(t('pages.tenantDepartmentManager.messages.deleteSuccess'));
-                        void fetchDepartments();
                         if (selectedDepartment?.id === dept.id) {
-                            setSelectedDepartment(null);
-                            setDepartmentMembers([]);
+                            clearDepartmentSelection();
                         }
+                        void refreshDepartments();
                     })
                     .catch(() => {
                         void message.error(t('pages.tenantDepartmentManager.messages.deleteFailed'));
@@ -241,7 +184,7 @@ export default function TenantDepartmentManagerPage() {
             }
 
             setIsEditModalVisible(false);
-            void fetchDepartments();
+            void refreshDepartments();
         } catch {
             // Form validation error or API error
         } finally {
@@ -273,7 +216,7 @@ export default function TenantDepartmentManagerPage() {
                     roleType: DepartmentMemberRoleType.MEMBER
                 });
             }
-            void message.success(t('pages.tenantDepartmentManager.messages.addMembersSuccess', { count: selectedMembers.length }));
+            void message.success(t('pages.tenantDepartmentManager.messages.addMembersSuccess', {count: selectedMembers.length}));
             setIsMemberSelectorVisible(false);
             void fetchDepartmentMembers(selectedDepartment.id);
         } catch {
@@ -286,26 +229,14 @@ export default function TenantDepartmentManagerPage() {
         return existingMemberIds.has(String(member.id));
     };
 
-    useEffect(() => {
-        if (selectedTenantId) {
-            void fetchDepartments(selectedTenantId);
-        } else {
-            setDepartments([]);
-            setTreeData([]);
-            setSelectedDepartment(null);
-            setDepartmentMembers([]);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedTenantId]);
-
     const handleRemoveMember = (row: TenantDepartmentMemberVO) => {
         if (!selectedDepartment) return;
         modal.confirm({
             title: t('pages.tenantDepartmentManager.modal.removeMember.title'),
-            icon: <ExclamationCircleFilled />,
-            content: t('pages.tenantDepartmentManager.modal.removeMember.content', { name: row.member.user?.nickname || row.member.user?.username || row.id }),
+            icon: <ExclamationCircleFilled/>,
+            content: t('pages.tenantDepartmentManager.modal.removeMember.content', {name: row.member.user?.nickname || row.member.user?.username || row.id}),
             onOk() {
-                return TenantDepartmentMemberManagerController.delete({ ids: [row.id] })
+                return TenantDepartmentMemberManagerController.delete({ids: [row.id]})
                     .then(() => {
                         void message.success(t('pages.tenantDepartmentManager.messages.removeMemberSuccess'));
                         void fetchDepartmentMembers(selectedDepartment.id);
@@ -358,7 +289,7 @@ export default function TenantDepartmentManagerPage() {
                 <Space size="small">
                     <Button
                         size="small"
-                        icon={<SettingOutlined />}
+                        icon={<SettingOutlined/>}
                         onClick={() => openRoleEditModal(row)}
                     >
                         {t('pages.tenantDepartmentManager.action.editRole')}
@@ -374,6 +305,115 @@ export default function TenantDepartmentManagerPage() {
             )
         }
     ];
+
+    const treeEmptyContent = (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+            <TeamOutlined className="text-4xl mb-4"/>
+            <p className="text-sm mb-4">{t('pages.tenantDepartmentManager.empty.noDepartments')}</p>
+            <Button
+                type="primary"
+                icon={<PlusOutlined/>}
+                onClick={openAddModal}
+            >
+                {t('pages.tenantDepartmentManager.action.addDepartment')}
+            </Button>
+        </div>
+    );
+
+    const detailEmptyContent = (
+        <div className="text-gray-400 text-center">
+            <TeamOutlined style={{fontSize: 48}}/>
+            <p className="mt-4">{t('pages.tenantDepartmentManager.empty.selectDepartment')}</p>
+        </div>
+    );
+
+    const detailContent = selectedDepartment && (
+        <>
+            {/* Department Info Card */}
+            <Card
+                className="border-none shadow-sm rounded-2xl overflow-hidden mb-4"
+                title={
+                    <Space>
+                        <span>{selectedDepartment.name}</span>
+                        <Tag color="blue">ID: {selectedDepartment.id}</Tag>
+                    </Space>
+                }
+                extra={
+                    <Space>
+                        <Button
+                            icon={<EditOutlined/>}
+                            onClick={() => openEditModal(selectedDepartment)}
+                        >
+                            {t('pages.tenantDepartmentManager.action.edit')}
+                        </Button>
+                        <Button
+                            danger
+                            icon={<DeleteOutlined/>}
+                            onClick={() => handleDelete(selectedDepartment)}
+                        >
+                            {t('pages.tenantDepartmentManager.action.delete')}
+                        </Button>
+                    </Space>
+                }
+            >
+                <p><strong>{t('pages.tenantDepartmentManager.info.description')}：</strong>{selectedDepartment.description || '-'}</p>
+                <p>
+                    <strong>{t('pages.tenantDepartmentManager.info.parentDepartment')}：</strong>
+                    {selectedDepartment.parentId ? (
+                        <Popover
+                            content={<TenantDepartmentPopCard departmentId={selectedDepartment.parentId}/>}
+                            placement="right"
+                            trigger="hover"
+                        >
+                            <Tag color="orange" className="cursor-pointer">
+                                {departments.find(d => d.id === selectedDepartment.parentId)?.name || selectedDepartment.parentId}
+                            </Tag>
+                        </Popover>
+                    ) : (
+                        '-'
+                    )}
+                </p>
+                <p><strong>{t('pages.tenantDepartmentManager.info.createdTime')}：</strong>{formatTimestamp(selectedDepartment.createdTime)}</p>
+            </Card>
+
+            {/* Members Table */}
+            <Card
+                className="border-none shadow-sm rounded-2xl overflow-hidden"
+                title={t('pages.tenantDepartmentManager.card.members')}
+                extra={
+                    <Button
+                        type="primary"
+                        icon={<UserAddOutlined/>}
+                        onClick={openMemberSelector}
+                    >
+                        {t('pages.tenantDepartmentManager.action.addMember')}
+                    </Button>
+                }
+            >
+                <Table
+                    columns={memberColumns}
+                    dataSource={departmentMembers}
+                    rowKey="id"
+                    loading={memberLoading}
+                    scroll={{x: 1200}}
+                    pagination={{
+                        current: currentPage,
+                        pageSize: currentPageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        showQuickJumper: true,
+                        onChange: (page, pageSize) => {
+                            setCurrentPage(page);
+                            setCurrentPageSize(pageSize);
+                            if (selectedDepartment) {
+                                void fetchDepartmentMembers(selectedDepartment.id, page, pageSize);
+                            }
+                        }
+                    }}
+                />
+            </Card>
+        </>
+    );
 
     return (
         <>
@@ -400,137 +440,20 @@ export default function TenantDepartmentManagerPage() {
                 onChange={handleTenantChange}
             />
             {selectedTenantId && (
-                <Row gutter={24} className="mt-4">
-                    {/* Left: Department Tree */}
-                    <Col xs={24} xl={5} className="mb-4 xl:mb-0">
-                        <Card
-                            title={<span style={{ color: token.colorTextHeading }}>{t('pages.tenantDepartmentManager.card.departmentList')}</span>}
-                            className="border-none shadow-sm rounded-2xl overflow-hidden"
-                            loading={loading}
-                        >
-                            {treeData.length > 0 ? (
-                                <Tree
-                                    treeData={treeData}
-                                    onSelect={handleTreeSelect}
-                                    selectedKeys={selectedDepartment ? [selectedDepartment.id] : []}
-                                    defaultExpandAll
-                                    blockNode
-                                    showLine
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                                    <TeamOutlined className="text-4xl mb-4" />
-                                    <p className="text-sm mb-4">{t('pages.tenantDepartmentManager.empty.noDepartments')}</p>
-                                    <Button
-                                        type="primary"
-                                        icon={<PlusOutlined />}
-                                        onClick={openAddModal}
-                                    >
-                                        {t('pages.tenantDepartmentManager.action.addDepartment')}
-                                    </Button>
-                                </div>
-                            )}
-                        </Card>
-                    </Col>
-
-                    {/* Right: Department Details & Members */}
-                    <Col xs={24} xl={19}>
-                        {selectedDepartment ? (
-                            <>
-                                {/* Department Info Card */}
-                                <Card
-                                    className="border-none shadow-sm rounded-2xl overflow-hidden mb-4"
-                                    title={
-                                        <Space>
-                                            <span>{selectedDepartment.name}</span>
-                                            <Tag color="blue">ID: {selectedDepartment.id}</Tag>
-                                        </Space>
-                                    }
-                                    extra={
-                                        <Space>
-                                            <Button
-                                                icon={<EditOutlined />}
-                                                onClick={() => openEditModal(selectedDepartment)}
-                                            >
-                                                {t('pages.tenantDepartmentManager.action.edit')}
-                                            </Button>
-                                            <Button
-                                                danger
-                                                icon={<DeleteOutlined />}
-                                                onClick={() => handleDelete(selectedDepartment)}
-                                            >
-                                                {t('pages.tenantDepartmentManager.action.delete')}
-                                            </Button>
-                                        </Space>
-                                    }
-                                >
-                                    <p><strong>{t('pages.tenantDepartmentManager.info.description')}：</strong>{selectedDepartment.description || '-'}</p>
-                                    <p>
-                                        <strong>{t('pages.tenantDepartmentManager.info.parentDepartment')}：</strong>
-                                        {selectedDepartment.parentId ? (
-                                            <Popover
-                                                content={<TenantDepartmentPopCard departmentId={selectedDepartment.parentId} />}
-                                                placement="right"
-                                                trigger="hover"
-                                            >
-                                                <Tag color="orange" className="cursor-pointer">
-                                                    {departments.find(d => d.id === selectedDepartment.parentId)?.name || selectedDepartment.parentId}
-                                                </Tag>
-                                            </Popover>
-                                        ) : (
-                                            '-'
-                                        )}
-                                    </p>
-                                    <p><strong>{t('pages.tenantDepartmentManager.info.createdTime')}：</strong>{formatTimestamp(selectedDepartment.createdTime)}</p>
-                                </Card>
-
-                                {/* Members Table */}
-                                <Card
-                                    className="border-none shadow-sm rounded-2xl overflow-hidden"
-                                    title={t('pages.tenantDepartmentManager.card.members')}
-                                    extra={
-                                        <Button
-                                            type="primary"
-                                            icon={<UserAddOutlined />}
-                                            onClick={openMemberSelector}
-                                        >
-                                            {t('pages.tenantDepartmentManager.action.addMember')}
-                                        </Button>
-                                    }
-                                >
-                                    <Table
-                                        columns={memberColumns}
-                                        dataSource={departmentMembers}
-                                        rowKey="id"
-                                        loading={memberLoading}
-                                        scroll={{ x: 1200 }}
-                                        pagination={{
-                                            current: currentPage,
-                                            pageSize: currentPageSize,
-                                            total: total,
-                                            showSizeChanger: true,
-                                            showQuickJumper: true,
-                                            onChange: (page, pageSize) => {
-                                                setCurrentPage(page);
-                                                setCurrentPageSize(pageSize);
-                                                if (selectedDepartment) {
-                                                    void fetchDepartmentMembers(selectedDepartment.id, page, pageSize);
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </Card>
-                            </>
-                        ) : (
-                            <Card className="border-none shadow-sm rounded-2xl overflow-hidden h-full flex items-center justify-center">
-                                <div className="text-gray-400 text-center">
-                                    <TeamOutlined style={{ fontSize: 48 }} />
-                                    <p className="mt-4">{t('pages.tenantDepartmentManager.empty.selectDepartment')}</p>
-                                </div>
-                            </Card>
-                        )}
-                    </Col>
-                </Row>
+                <TreeDetailLayout
+                    tree={{
+                        title: t('pages.tenantDepartmentManager.card.departmentList'),
+                        treeData,
+                        selectedKey: selectedDepartment?.id ?? null,
+                        loading,
+                        onSelect: selectDepartment,
+                        emptyContent: treeEmptyContent
+                    }}
+                    detail={{
+                        content: detailContent,
+                        emptyContent: detailEmptyContent
+                    }}
+                />
             )}
 
             {/* Edit Modal */}
@@ -544,24 +467,24 @@ export default function TenantDepartmentManagerPage() {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item name="id" hidden>
-                        <Input />
+                        <Input/>
                     </Form.Item>
                     <Form.Item name="tenantId" hidden>
-                        <Input />
+                        <Input/>
                     </Form.Item>
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
                                 name="name"
                                 label={t('pages.tenantDepartmentManager.modal.name.label')}
-                                rules={[{ required: true, message: t('pages.tenantDepartmentManager.modal.name.required') }]}
+                                rules={[{required: true, message: t('pages.tenantDepartmentManager.modal.name.required')}]}
                             >
-                                <Input placeholder={t('pages.tenantDepartmentManager.modal.name.placeholder')} maxLength={64} showCount />
+                                <Input placeholder={t('pages.tenantDepartmentManager.modal.name.placeholder')} maxLength={64} showCount/>
                             </Form.Item>
                         </Col>
                         <Col span={12}>
                             <Form.Item name="parentId" label={t('pages.tenantDepartmentManager.modal.parentId.label')}>
-                                <TenantDepartmentIdSelector tenantId={selectedTenantId || ''} disabledDepartmentId={editingItem?.id ?? null} />
+                                <TenantDepartmentIdSelector tenantId={selectedTenantId || ''} disabledDepartmentId={editingItem?.id ?? null}/>
                             </Form.Item>
                         </Col>
                     </Row>
@@ -580,7 +503,7 @@ export default function TenantDepartmentManagerPage() {
             <EntitySelectorModal<TenantMemberVO>
                 type="checkbox"
                 visible={isMemberSelectorVisible}
-                title={t('pages.tenantDepartmentManager.memberSelectorModal.title', { name: selectedDepartment?.name || '' })}
+                title={t('pages.tenantDepartmentManager.memberSelectorModal.title', {name: selectedDepartment?.name || ''})}
                 entityName={t('entityNames.tenantMember')}
                 columns={memberColumnsForSelector}
                 query={async (props) => {
@@ -596,7 +519,7 @@ export default function TenantDepartmentManagerPage() {
 
             {/* Role Edit Modal */}
             <Modal
-                title={t('pages.tenantDepartmentManager.roleEditModal.title', { name: editingMember?.member.user?.nickname || editingMember?.member.user?.username || '' })}
+                title={t('pages.tenantDepartmentManager.roleEditModal.title', {name: editingMember?.member.user?.nickname || editingMember?.member.user?.username || ''})}
                 open={isRoleEditModalVisible}
                 onOk={handleRoleEditSave}
                 onCancel={handleRoleEditCancel}

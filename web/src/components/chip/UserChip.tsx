@@ -1,5 +1,5 @@
 import {Popover, theme} from "antd";
-import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {AvatarResource} from "@/components/resource/AvatarResource.tsx";
 import {UserCard} from "@/components/card/pop/UserCard.tsx";
 
 interface UserChipProps {

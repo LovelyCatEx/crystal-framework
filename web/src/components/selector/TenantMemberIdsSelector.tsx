@@ -3,7 +3,7 @@ import {EntityIdsSelector} from "./EntityIdsSelector.tsx";
 import {useTenantMemberTableColumns} from "../columns/TenantMemberEntityColumns.tsx";
 import {TenantMemberManagerController} from "@/api/tenant/tenant-member.api.ts";
 import type {TenantMemberVO} from "@/types/tenant/tenant-member.types.ts";
-import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
+import {TenantMemberChip} from "@/components/chip/TenantMemberChip.tsx";
 
 interface TenantMemberIdsSelectorProps {
     tenantId: string;

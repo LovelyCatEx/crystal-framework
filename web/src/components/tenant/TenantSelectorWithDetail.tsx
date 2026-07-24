@@ -8,7 +8,7 @@ import {useTranslation} from "react-i18next";
 import {RedoOutlined, ShopOutlined} from "@ant-design/icons";
 import {TenantManagerController} from "@/api/tenant/tenant.api.ts";
 import type {EntityIdSelectorRef} from "@/components/selector/EntityIdSelector.tsx";
-import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {AvatarResource} from "@/components/resource/AvatarResource.tsx";
 
 const { useToken } = theme;
 

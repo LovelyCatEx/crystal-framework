@@ -8,7 +8,7 @@ import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {TenantTireTypeManagerController} from "@/api/tenant/tenant-tire-type.api.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {ShopOutlined} from "@ant-design/icons";
-import {AvatarResource} from "@/components/AvatarResource.tsx";
+import {AvatarResource} from "@/components/resource/AvatarResource.tsx";
 import {useTranslation} from "react-i18next";
 
 function TireTypeCell({ tireTypeId }: { tireTypeId: string }) {

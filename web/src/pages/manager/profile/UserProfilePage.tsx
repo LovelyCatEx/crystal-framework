@@ -40,10 +40,10 @@ import {
     unbindOAuthAccount
 } from "@/api/auth/auth.api.ts";
 import {updateUserProfile, type UpdateUserProfileDTO, uploadUserAvatar} from "@/api/user/user.api.ts";
-import {ImageCropper} from "@/components/ImageCropper.tsx";
+import {ImageCropper} from "@/components/input/ImageCropper.tsx";
 import {useSWRState} from "@/compositions/use-swr.ts";
 import {getUserOAuthAccounts} from "@/api/user/user-oauth.api.ts";
-import PlatformIcon from "../../../components/PlatformIcon.tsx";
+import PlatformIcon from "../../../components/resource/PlatformIcon.tsx";
 import type {UserOAuthAccountVO} from "@/types/user/user-oauth.types.ts";
 import {OAuthPlatform, OAuthBindingScope} from "@/types/user/oauth-account.types.ts";
 import {redirectToOAuthBind} from "@/utils/oauth2.ts";
