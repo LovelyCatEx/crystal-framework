@@ -61,6 +61,7 @@ export const zhThemeConfig: DefaultTheme.Config = {
             { text: '只读领域范围控制器', link: '/develop/controller/readonly-scoped-manager-controller' },
             { text: '派生范围控制器', link: '/develop/controller/derived-scoped-manager-controller' },
             { text: '租户资源控制器', link: '/develop/controller/tenant-manager-controller' },
+            { text: 'URL 命名规范', link: '/develop/controller/url-naming' },
           ]
         },
         { text: '系统设置项', link: '/develop/sdk/system-settings' },

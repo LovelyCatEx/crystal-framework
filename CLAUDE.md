@@ -297,6 +297,17 @@ Controller 方法接收前端参数时只允许以下三种方式，前端据此
 - `@ModelAttribute` 用于 `@PostMapping`，接收 `application/x-www-form-urlencoded` 格式
 - `@RequestParam` 用于 `@GetMapping`，绑定 URL 查询参数
 
+**URL 命名规范：**
+
+Manager Controller 的 URL 结构为 `${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/<resource>/<action>`，三段一律 **kebab-case**（小写字母、数字、`-`）：
+
+- 资源段用**单数**：`user` / `oauth-account` / `mail-send-log`，禁止使用 `users` / `mail-send-logs` 之类的复数形式
+- 动作段沿用 base 类的 `list` / `create` / `query` / `update` / `delete`；自定义额外端点也必须 kebab-case（如 `/update-graph` / `/details-by-id`）
+- 单个单词的额外端点直接使用（`/my` / `/tree` / `/start` / `/handle`）
+- 禁止在 URL path 中出现大写字母、下划线、camelCase、PascalCase
+- 前端 `.api.ts` 的 `BaseManagerController` 构造参数、`doGet` / `doPost` 硬编码路径必须与后端一致
+- 详见 `docs/develop/controller/url-naming.md`，`crystal-starter` 的 `ControllerUrlConventionTest` 会自动扫描全部 `@RequestMapping` / `@XxxMapping` 拦截违规
+
 #### 实体类
 
 关于实体类请见项目根目录下的 `.claude` 文件夹中关于添加实体的技能。

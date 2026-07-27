@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/user-login-logs")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/user-login-log")
 class ManagerUserLoginLogController(
     managerService: UserLoginLogManagerService
 ) : ReadonlyManagerController<

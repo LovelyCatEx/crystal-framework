@@ -41,7 +41,7 @@ class ApprovalFlowInstanceManagerControllerClass extends BaseManagerController<
     ManagerDeleteApprovalFlowInstanceDTO
 > {
     constructor() {
-        super('/manager/approval-flow-instances');
+        super('/manager/approval-flow-instance');
     }
 }
 
@@ -49,7 +49,7 @@ export const ApprovalFlowInstanceManagerController = new ApprovalFlowInstanceMan
 
 export async function startApprovalFlow(dto: StartApprovalFlowDTO) {
     return doPost<ApprovalFlowInstance>(
-        '/api/manager/approval-flow-instances/start',
+        '/api/manager/approval-flow-instance/start',
         dto,
         {'Content-Type': 'application/json'},
     );
@@ -62,7 +62,7 @@ export async function startApprovalFlow(dto: StartApprovalFlowDTO) {
  */
 export async function queryMyApprovalFlowInstances(dto: ManagerReadApprovalFlowInstanceDTO) {
     return doPost<import('@/types/api.types.ts').PaginatedResponseData<ApprovalFlowInstance>>(
-        '/api/manager/approval-flow-instances/my',
+        '/api/manager/approval-flow-instance/my',
         dto,
         {'Content-Type': 'application/json'},
     );
@@ -76,7 +76,7 @@ export async function queryMyApprovalFlowInstances(dto: ManagerReadApprovalFlowI
  */
 export async function getApprovalFlowInstanceDetails(instanceId: string) {
     return doGet<ApprovalFlowInstanceDetailsVO>(
-        '/api/manager/approval-flow-instances/detailsById',
+        '/api/manager/approval-flow-instance/details-by-id',
         {instanceId},
     );
 }

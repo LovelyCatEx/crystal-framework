@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-definitions")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-definition")
 class ManagerApprovalFlowDefinitionController(
     managerService: ApprovalFlowDefinitionManagerService,
     private val approvalFlowNodeManagerService: ApprovalFlowNodeManagerService,
@@ -67,7 +67,7 @@ class ManagerApprovalFlowDefinitionController(
         tenantPemDelete = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM,
     ),
 ) {
-    @PostMapping("/updateGraph")
+    @PostMapping("/update-graph")
     suspend fun updateGraph(
         userAuthentication: UserAuthentication,
         @Valid
@@ -87,7 +87,7 @@ class ManagerApprovalFlowDefinitionController(
         return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
 
-    @GetMapping("/detailsById")
+    @GetMapping("/details-by-id")
     suspend fun getApprovalFlowDefinitionDetails(
         userAuthentication: UserAuthentication,
         @RequestParam

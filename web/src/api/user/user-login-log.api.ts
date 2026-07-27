@@ -13,4 +13,4 @@ export const UserLoginLogManagerController = new BaseManagerController<
     ManagerReadUserLoginLogDTO,
     ManagerUpdateUserLoginLogDTO,
     ManagerDeleteUserLoginLogDTO
->('/manager/user-login-logs');
+>('/manager/user-login-log');

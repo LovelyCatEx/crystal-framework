@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-instances")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-instance")
 class ManagerApprovalFlowInstanceController(
     managerService: ApprovalFlowInstanceManagerService,
     private val approvalFlowDefinitionManagerService: ApprovalFlowDefinitionManagerService,
@@ -203,7 +203,7 @@ class ManagerApprovalFlowInstanceController(
      *
      * Ownership (tenant isolation) is still enforced afterwards.
      */
-    @GetMapping("/detailsById", version = "1")
+    @GetMapping("/details-by-id", version = "1")
     suspend fun detailsById(
         userAuthentication: UserAuthentication,
         @RequestParam instanceId: Long,

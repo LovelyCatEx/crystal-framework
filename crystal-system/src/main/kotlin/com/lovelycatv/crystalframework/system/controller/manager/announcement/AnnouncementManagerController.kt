@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/announcements")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/announcement")
 class AnnouncementManagerController(
     managerService: AnnouncementManagerService,
 ) : StandardManagerController<
