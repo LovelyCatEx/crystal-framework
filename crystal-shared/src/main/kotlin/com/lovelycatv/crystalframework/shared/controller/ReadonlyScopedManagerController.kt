@@ -4,24 +4,19 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDT
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
-import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.service.ScopedRelationshipCheckService
-import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
-import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.ModelAttribute
 
 /**
- * A read-only variant of [StandardScopedManagerController].
+ * A read-only variant of [StandardScopedManagerController]. Inherits the `readAll` and `read`
+ * endpoints unchanged; the three write endpoints are blocked by [Mutability.READ_ONLY], which
+ * throws [com.lovelycatv.crystalframework.shared.exception.ForbiddenException] with the same
+ * message as the historical hand-rolled overrides.
  *
- * Inherits the `readAll` and `query` endpoints from [StandardScopedManagerController],
- * but overrides `create`, `update`, and `delete` to always return 403 Forbidden.
- *
- * Use this for scope-aware resources that are system-generated and should not be mutated
- * through the manager API (e.g. approval flow instances).
+ * Use this for scope-aware resources that are system-generated and should not be mutated through
+ * the manager API (e.g. approval flow instances / tasks).
  */
-@Validated
 abstract class ReadonlyScopedManagerController<
         SERVICE,
         REPOSITORY : BaseRepository<ENTITY>,
@@ -36,27 +31,6 @@ abstract class ReadonlyScopedManagerController<
 ) : StandardScopedManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
     managerService,
     permissions,
+    mutability = Mutability.READ_ONLY,
 ) where SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
-        SERVICE : ScopedRelationshipCheckService {
-
-    override suspend fun create(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: CREATE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be created")
-    }
-
-    override suspend fun update(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: UPDATE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be updated")
-    }
-
-    override suspend fun delete(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: DELETE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be deleted")
-    }
-}
+        SERVICE : ScopedRelationshipCheckService

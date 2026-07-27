@@ -5,7 +5,8 @@ import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
 import com.lovelycatv.crystalframework.audit.service.AuditLogService
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.AbstractManagerController
+import com.lovelycatv.crystalframework.shared.controller.ManagerAction
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
@@ -39,12 +40,13 @@ class ManagerControllerAuditAspect(
      */
     private val resourceTypeCache = mutableMapOf<Class<*>, String?>()
 
-    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
+    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.AbstractManagerController+.*(..))")
     fun audit(joinPoint: ProceedingJoinPoint): Any? {
         val methodSignature = joinPoint.signature as MethodSignature
         val methodName = methodSignature.method.name
 
-        val action = resolveAction(methodName) ?: return joinPoint.proceed()
+        val managerAction = ManagerAction.fromMethodName(methodName) ?: return joinPoint.proceed()
+        val action = resolveAction(managerAction) ?: return joinPoint.proceed()
 
         val targetClass = AopUtils.getTargetClass(joinPoint.target)
         val resourceType = resolveResourceType(targetClass)
@@ -63,7 +65,7 @@ class ManagerControllerAuditAspect(
             return joinPoint.proceed()
         }
 
-        val resourceIds = extractResourceIds(joinPoint.args, methodName)
+        val resourceIds = extractResourceIds(joinPoint.args, managerAction)
 
         @Suppress("UNCHECKED_CAST")
         val result = joinPoint.proceed() as Mono<Any>
@@ -106,14 +108,11 @@ class ManagerControllerAuditAspect(
         }
     }
 
-    private fun resolveAction(methodName: String): AuditAction? {
-        return when (methodName) {
-            "create" -> AuditAction.CREATE
-            "read", "readAll" -> AuditAction.READ
-            "update" -> AuditAction.UPDATE
-            "delete" -> AuditAction.DELETE
-            else -> null
-        }
+    private fun resolveAction(managerAction: ManagerAction): AuditAction? = when (managerAction) {
+        ManagerAction.CREATE -> AuditAction.CREATE
+        ManagerAction.READ, ManagerAction.READ_ALL -> AuditAction.READ
+        ManagerAction.UPDATE -> AuditAction.UPDATE
+        ManagerAction.DELETE -> AuditAction.DELETE
     }
 
     private fun resolveResourceType(controllerClass: Class<*>): String? {
@@ -129,8 +128,9 @@ class ManagerControllerAuditAspect(
             val genericSuper = current.genericSuperclass
             if (genericSuper is ParameterizedType) {
                 val rawType = genericSuper.rawType as? Class<*>
-                if (rawType != null && StandardManagerController::class.java.isAssignableFrom(rawType)) {
-                    // ENTITY is the 3rd type argument (index 2)
+                if (rawType != null && AbstractManagerController::class.java.isAssignableFrom(rawType)) {
+                    // ENTITY is the 3rd type argument (index 2) — the shape is preserved across
+                    // AbstractManagerController and every concrete main line beneath it.
                     val entityType = genericSuper.actualTypeArguments[2]
                     return entityType as? Class<*>
                 }
@@ -140,21 +140,21 @@ class ManagerControllerAuditAspect(
         return null
     }
 
-    private fun extractResourceIds(args: Array<Any>, methodName: String): List<Long>? {
-        return when (methodName) {
-            "read", "readAll" -> {
+    private fun extractResourceIds(args: Array<Any>, action: ManagerAction): List<Long>? {
+        return when (action) {
+            ManagerAction.READ, ManagerAction.READ_ALL -> {
                 val dto = args.filterIsInstance<BaseManagerReadDTO>().firstOrNull()
                 dto?.id?.let { listOf(it) }
             }
-            "update" -> {
+            ManagerAction.UPDATE -> {
                 val dto = args.filterIsInstance<BaseManagerUpdateDTO>().firstOrNull()
                 dto?.let { listOf(it.id) }
             }
-            "delete" -> {
+            ManagerAction.DELETE -> {
                 val dto = args.filterIsInstance<BaseManagerDeleteDTO>().firstOrNull()
                 dto?.ids
             }
-            else -> null
+            ManagerAction.CREATE -> null
         }
     }
 }

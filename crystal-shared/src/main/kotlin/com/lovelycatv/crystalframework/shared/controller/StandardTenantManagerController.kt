@@ -2,7 +2,6 @@ package com.lovelycatv.crystalframework.shared.controller
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTenantResourceDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
-import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadTenantResourceDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -15,49 +14,50 @@ import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.types.entity.ScopedEntity
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import jakarta.validation.Valid
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 
 /**
- * Base controller for tenant-scoped manager endpoints (create / query / list / update / delete).
+ * Base controller for tenant-scoped manager endpoints. Inherits the four DTO-shaped CRUD endpoints
+ * from [AbstractManagerController] and adds a `GET /list` endpoint that requires an explicit
+ * `tenantId` query parameter.
  *
- * The class wires up the standard authorization flow that every CRUD operation needs:
+ * The class wires up the standard authorisation flow that every CRUD operation needs:
  *
  *  1. Holders of the **system** permission can act unconditionally.
- *  2. Holders of the **scoped** permission can only act within their own tenant — the
- *     check is delegated to the overridable `isXxxInScope` hooks below.
+ *  2. Holders of the **scoped** permission can only act within their own tenant — the check is
+ *     delegated to the overridable `isXxxInScope` hooks below.
  *  3. Otherwise the request is rejected.
  *
  * The defaults assume the resource is *directly* tenant-scoped (i.e. its DTO carries a
- * `tenantId`). Resources nested deeper in the tenant hierarchy (for example a
- * department member, whose `departmentId` is the immediate parent and whose tenant
- * must be looked up via the parent service) should override the relevant scope-check
- * hook to plug in their own logic — typically by delegating to
- * [com.lovelycatv.crystalframework.shared.service.TenantRelationshipCheckService.checkIsRelatedToRootParent] on a sibling service.
+ * `tenantId`). Resources nested deeper in the tenant hierarchy (for example a department member,
+ * whose `departmentId` is the immediate parent and whose tenant must be looked up via the parent
+ * service) should override the relevant scope-check hook to plug in their own logic — typically
+ * by delegating to
+ * [com.lovelycatv.crystalframework.shared.service.TenantRelationshipCheckService.checkIsRelatedToRootParent]
+ * on a sibling service.
  *
- * `customXxx` hooks are also still available for cases where the entire flow needs to
- * be replaced (return a non-null [com.lovelycatv.crystalframework.shared.response.ApiResponse] to short-circuit).
+ * `customXxx` hooks are still available for cases where the entire flow needs to be replaced
+ * (return a non-null [ApiResponse] to short-circuit). The endpoint methods on this class are
+ * overridden to run the short-circuit check before delegating to the parent's standard path.
  */
-@Validated
 abstract class StandardTenantManagerController<
         SERVICE : BaseTenantResourceManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
         REPOSITORY : BaseRepository<ENTITY>,
         ENTITY,
-        CREATE_DTO: Any,
-        READ_DTO: BaseManagerReadTenantResourceDTO,
-        UPDATE_DTO: BaseManagerUpdateDTO,
-        DELETE_DTO: BaseManagerDeleteDTO
+        CREATE_DTO : Any,
+        READ_DTO : BaseManagerReadTenantResourceDTO,
+        UPDATE_DTO : BaseManagerUpdateDTO,
+        DELETE_DTO : BaseManagerDeleteDTO
 >(
-    protected val managerService: SERVICE,
+    managerService: SERVICE,
     protected val createPermission: String,
     /**
-     * Tenant-scoped permission required to perform the action against your own tenant.
-     * Pass [DISABLED_SCOPED_PERMISSION] (or any blank string) to disable scoped access entirely;
-     * in that case only holders of the corresponding system permission can call the endpoint.
+     * Tenant-scoped permission required to perform the action against your own tenant. Pass
+     * [DISABLED_SCOPED_PERMISSION] (or any blank string) to disable scoped access entirely; in
+     * that case only holders of the corresponding system permission can call the endpoint.
      */
     protected val scopedCreatePermission: String,
     protected val readPermission: String,
@@ -65,8 +65,13 @@ abstract class StandardTenantManagerController<
     protected val updatePermission: String,
     protected val scopedUpdatePermission: String,
     protected val deletePermission: String,
-    protected val scopedDeletePermission: String
+    protected val scopedDeletePermission: String,
+    mutability: Mutability = Mutability.READ_WRITE,
+) : AbstractManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
+    managerService,
+    mutability,
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<Long> {
+
     companion object {
         /** Sentinel for [scopedCreatePermission] etc. meaning "tenant-scoped users are not allowed". */
         const val DISABLED_SCOPED_PERMISSION: String = ""
@@ -85,7 +90,7 @@ abstract class StandardTenantManagerController<
 
     /**
      * Whether the create [dto] targets data that lives within the calling user's tenant.
-     * Default: cast to [com.lovelycatv.crystalframework.rbac.tenant.controller.manager.BaseManagerCreateTenantResourceDTO] and compare `tenantId`.
+     * Default: cast to [BaseManagerCreateTenantResourceDTO] and compare `tenantId`.
      */
     protected suspend fun isCreateInScope(
         dto: CREATE_DTO,
@@ -98,7 +103,7 @@ abstract class StandardTenantManagerController<
 
     /**
      * Whether the read [dto] targets data that lives within the calling user's tenant.
-     * Default: cast to [com.lovelycatv.crystalframework.rbac.tenant.controller.manager.BaseManagerReadTenantResourceDTO] and compare `tenantId`.
+     * Default: cast to [BaseManagerReadTenantResourceDTO] and compare `tenantId`.
      */
     protected suspend fun isQueryInScope(
         dto: READ_DTO,
@@ -148,7 +153,7 @@ abstract class StandardTenantManagerController<
 
     // region Response shaping hooks (override to return VOs instead of raw entities)
 
-    /** Shape the response body for [query]. Default returns paginated entities. */
+    /** Shape the response body for `POST /query`. Default returns paginated entities. */
     protected suspend fun buildQueryResponse(dto: READ_DTO): Any {
         return managerService.query(dto)
     }
@@ -160,11 +165,146 @@ abstract class StandardTenantManagerController<
 
     // endregion
 
-    @GetMapping("/list", version = "1")
-    suspend fun readAll(
+    // region Custom-flow hooks (return non-null to short-circuit the standard path)
+
+    /**
+     * Hook for [readAll]. Return non-null to short-circuit the standard logic with a custom
+     * response; return null (default) to fall through to the standard implementation.
+     */
+    protected suspend fun customReadAll(
         userAuthentication: UserAuthentication,
-        @RequestParam
         tenantId: Long,
+    ): ApiResponse<*>? = null
+
+    /** Hook for [create] — see [customReadAll]. */
+    protected suspend fun customCreate(
+        userAuthentication: UserAuthentication,
+        dto: CREATE_DTO
+    ): ApiResponse<*>? = null
+
+    /** Hook for [read] (`POST /query`) — see [customReadAll]. */
+    protected suspend fun customQuery(
+        userAuthentication: UserAuthentication,
+        dto: READ_DTO
+    ): ApiResponse<*>? = null
+
+    /** Hook for [update] — see [customReadAll]. */
+    protected suspend fun customUpdate(
+        userAuthentication: UserAuthentication,
+        dto: UPDATE_DTO
+    ): ApiResponse<*>? = null
+
+    /** Hook for [delete] — see [customReadAll]. */
+    protected suspend fun customDelete(
+        userAuthentication: UserAuthentication,
+        dto: DELETE_DTO
+    ): ApiResponse<*>? = null
+
+    // endregion
+
+    // ─── AbstractManagerController hooks ───
+
+    override suspend fun buildReadResponse(
+        dto: READ_DTO,
+        userAuthentication: UserAuthentication,
+    ): Any = buildQueryResponse(dto)
+
+    override suspend fun authorize(
+        action: ManagerAction,
+        userAuthentication: UserAuthentication,
+        createDto: CREATE_DTO?,
+        readDto: READ_DTO?,
+        updateDto: UPDATE_DTO?,
+        deleteDto: DELETE_DTO?,
+    ) {
+        when (action) {
+            ManagerAction.CREATE -> authorizeCreate(userAuthentication, createDto!!)
+            ManagerAction.READ -> authorizeRead(userAuthentication, readDto!!)
+            ManagerAction.UPDATE -> authorizeUpdate(userAuthentication, updateDto!!)
+            ManagerAction.DELETE -> authorizeDelete(userAuthentication, deleteDto!!)
+            ManagerAction.READ_ALL -> Unit
+        }
+    }
+
+    private suspend fun authorizeCreate(auth: UserAuthentication, dto: CREATE_DTO) {
+        if (RbacUtils.hasAuthority(this.createPermission)) return
+        if (hasScopedAuthority(this.scopedCreatePermission)) {
+            auth.assertTenantIdNotNull()
+            if (!isCreateInScope(dto, auth)) throw UnauthorizedException()
+            return
+        }
+        throw ForbiddenException()
+    }
+
+    private suspend fun authorizeRead(auth: UserAuthentication, dto: READ_DTO) {
+        if (RbacUtils.hasAuthority(this.readPermission)) return
+        if (hasScopedAuthority(this.scopedReadPermission)) {
+            if (!isQueryInScope(dto, auth)) throw UnauthorizedException()
+            return
+        }
+        throw ForbiddenException()
+    }
+
+    private suspend fun authorizeUpdate(auth: UserAuthentication, dto: UPDATE_DTO) {
+        if (RbacUtils.hasAuthority(this.updatePermission)) return
+        if (hasScopedAuthority(this.scopedUpdatePermission)) {
+            auth.assertTenantIdNotNull()
+            if (!isUpdateInScope(dto, auth)) throw UnauthorizedException()
+            return
+        }
+        throw ForbiddenException()
+    }
+
+    private suspend fun authorizeDelete(auth: UserAuthentication, dto: DELETE_DTO) {
+        if (RbacUtils.hasAuthority(this.deletePermission)) return
+        if (hasScopedAuthority(this.scopedDeletePermission)) {
+            auth.assertTenantIdNotNull()
+            if (!isDeleteInScope(dto, auth)) throw UnauthorizedException()
+            return
+        }
+        throw ForbiddenException()
+    }
+
+    // ─── Endpoint overrides (customXxx short-circuit + delegate to super) ───
+
+    override suspend fun create(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute @Valid dto: CREATE_DTO,
+    ): ApiResponse<*> {
+        customCreate(userAuthentication, dto)?.let { return it }
+        return super.create(userAuthentication, dto)
+    }
+
+    override suspend fun read(
+        userAuthentication: UserAuthentication,
+        @RequestBody @Valid dto: READ_DTO,
+    ): ApiResponse<*> {
+        customQuery(userAuthentication, dto)?.let { return it }
+        return super.read(userAuthentication, dto)
+    }
+
+    override suspend fun update(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute @Valid dto: UPDATE_DTO,
+    ): ApiResponse<*> {
+        customUpdate(userAuthentication, dto)?.let { return it }
+        return super.update(userAuthentication, dto)
+    }
+
+    override suspend fun delete(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute @Valid dto: DELETE_DTO,
+    ): ApiResponse<*> {
+        customDelete(userAuthentication, dto)?.let { return it }
+        return super.delete(userAuthentication, dto)
+    }
+
+    // ─── readAll endpoint (unique @RequestParam signature keeps it on this class) ───
+
+    @GetMapping("/list", version = "1")
+    open suspend fun readAll(
+        userAuthentication: UserAuthentication,
+        @RequestParam tenantId: Long,
     ): ApiResponse<*> {
         customReadAll(userAuthentication, tenantId)?.let { return it }
 
@@ -180,143 +320,4 @@ abstract class StandardTenantManagerController<
             throw ForbiddenException()
         }
     }
-
-    /**
-     * Hook for [readAll]. Return non-null to short-circuit the standard logic with a custom response;
-     * return null (default) to fall through to the standard implementation.
-     */
-    protected suspend fun customReadAll(
-        userAuthentication: UserAuthentication,
-        tenantId: Long,
-    ): ApiResponse<*>? = null
-
-    @PostMapping("/create", version = "1")
-    suspend fun create(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: CREATE_DTO
-    ): ApiResponse<*> {
-        customCreate(userAuthentication, dto)?.let { return it }
-
-        if (RbacUtils.hasAuthority(this.createPermission)) {
-            managerService.create(dto)
-        } else if (hasScopedAuthority(this.scopedCreatePermission)) {
-            userAuthentication.assertTenantIdNotNull()
-            if (isCreateInScope(dto, userAuthentication)) {
-                managerService.create(dto)
-            } else {
-                throw UnauthorizedException()
-            }
-        } else {
-            throw ForbiddenException()
-        }
-        return ApiResponse.success(null)
-    }
-
-    /**
-     * Hook for [create]. Return non-null to short-circuit the standard logic with a custom response;
-     * return null (default) to fall through to the standard implementation.
-     */
-    protected suspend fun customCreate(
-        userAuthentication: UserAuthentication,
-        dto: CREATE_DTO
-    ): ApiResponse<*>? = null
-
-    @PostMapping("/query", version = "1")
-    suspend fun query(
-        userAuthentication: UserAuthentication,
-        @RequestBody
-        @Valid
-        dto: READ_DTO
-    ): ApiResponse<*> {
-        customQuery(userAuthentication, dto)?.let { return it }
-
-        return if (RbacUtils.hasAuthority(this.readPermission)) {
-            ApiResponse.success(buildQueryResponse(dto))
-        } else if (hasScopedAuthority(this.scopedReadPermission)) {
-            if (isQueryInScope(dto, userAuthentication)) {
-                ApiResponse.success(buildQueryResponse(dto))
-            } else {
-                throw UnauthorizedException()
-            }
-        } else {
-            throw ForbiddenException()
-        }
-    }
-
-    /**
-     * Hook for [query]. Return non-null to short-circuit the standard logic with a custom response;
-     * return null (default) to fall through to the standard implementation.
-     */
-    protected suspend fun customQuery(
-        userAuthentication: UserAuthentication,
-        dto: READ_DTO
-    ): ApiResponse<*>? = null
-
-    @PostMapping("/update", version = "1")
-    suspend fun update(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: UPDATE_DTO
-    ): ApiResponse<*> {
-        customUpdate(userAuthentication, dto)?.let { return it }
-
-        if (RbacUtils.hasAuthority(this.updatePermission)) {
-            managerService.update(dto)
-        } else if (hasScopedAuthority(this.scopedUpdatePermission)) {
-            userAuthentication.assertTenantIdNotNull()
-            if (isUpdateInScope(dto, userAuthentication)) {
-                managerService.update(dto)
-            } else {
-                throw UnauthorizedException()
-            }
-        } else {
-            throw ForbiddenException()
-        }
-        return ApiResponse.success(null)
-    }
-
-    /**
-     * Hook for [update]. Return non-null to short-circuit the standard logic with a custom response;
-     * return null (default) to fall through to the standard implementation.
-     */
-    protected suspend fun customUpdate(
-        userAuthentication: UserAuthentication,
-        dto: UPDATE_DTO
-    ): ApiResponse<*>? = null
-
-    @PostMapping("/delete", version = "1")
-    suspend fun delete(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: DELETE_DTO
-    ): ApiResponse<*> {
-        customDelete(userAuthentication, dto)?.let { return it }
-
-        if (RbacUtils.hasAuthority(this.deletePermission)) {
-            managerService.deleteByDTO(dto)
-        } else if (hasScopedAuthority(this.scopedDeletePermission)) {
-            userAuthentication.assertTenantIdNotNull()
-            if (isDeleteInScope(dto, userAuthentication)) {
-                managerService.deleteByDTO(dto)
-            } else {
-                throw UnauthorizedException()
-            }
-        } else {
-            throw ForbiddenException()
-        }
-        return ApiResponse.success(null)
-    }
-
-    /**
-     * Hook for [delete]. Return non-null to short-circuit the standard logic with a custom response;
-     * return null (default) to fall through to the standard implementation.
-     */
-    protected suspend fun customDelete(
-        userAuthentication: UserAuthentication,
-        dto: DELETE_DTO
-    ): ApiResponse<*>? = null
 }

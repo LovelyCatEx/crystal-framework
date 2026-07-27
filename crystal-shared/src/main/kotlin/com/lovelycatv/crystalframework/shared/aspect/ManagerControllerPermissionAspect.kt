@@ -2,6 +2,9 @@ package com.lovelycatv.crystalframework.shared.aspect
 
 import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.controller.ManagerAction
+import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
+import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
 import com.lovelycatv.vertex.log.logger
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -22,26 +25,36 @@ import reactor.core.publisher.Mono
 class ManagerControllerPermissionAspect {
     private val logger = logger()
 
-    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
+    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.AbstractManagerController+.*(..))")
     fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
         val controller = joinPoint.target
 
         // AopUtils.getTargetClass + AnnotationUtils.findAnnotation walk through CGLIB
         // proxies and the inheritance chain, which Class.getAnnotation cannot do.
         val targetClass = AopUtils.getTargetClass(controller)
+
+        // Scoped/Tenant main lines run authorisation in-line via their `authorize` hook.
+        // Skipping the annotation-driven aspect here prevents double checking and keeps
+        // subclasses that legitimately have no @ManagerPermissions from being rejected.
+        if (StandardScopedManagerController::class.java.isAssignableFrom(targetClass) ||
+            StandardTenantManagerController::class.java.isAssignableFrom(targetClass)
+        ) {
+            return joinPoint.proceed()
+        }
+
         val permissions = AnnotationUtils.findAnnotation(targetClass, ManagerPermissions::class.java)
             ?: return joinPoint.proceed()
 
         val methodSignature = joinPoint.signature as MethodSignature
         val methodName = methodSignature.method.name
 
-        val requiredPermissions = when (methodName) {
-            "readAll" -> permissions.readAll
-            "read" -> permissions.read
-            "create" -> permissions.create
-            "update" -> permissions.update
-            "delete" -> permissions.delete
-            else -> null
+        val requiredPermissions = when (ManagerAction.fromMethodName(methodName)) {
+            ManagerAction.READ_ALL -> permissions.readAll
+            ManagerAction.READ -> permissions.read
+            ManagerAction.CREATE -> permissions.create
+            ManagerAction.UPDATE -> permissions.update
+            ManagerAction.DELETE -> permissions.delete
+            null -> null
         }
             ?.filter { it.isNotEmpty() }
             ?.toList()
