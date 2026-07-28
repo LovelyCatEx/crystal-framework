@@ -14,22 +14,24 @@ import kotlin.test.assertTrue
  * [PermissionMatrixIntegrationTestBase.withAuthenticatedUser] block — never on `runCatching`
  * results directly, so a `null` caught value always means the endpoint returned normally.
  *
- * The three exception kinds each helper distinguishes correspond to the three enforcement paths in
- * the manager-controller family:
+ * The exception kinds each helper distinguishes correspond to the enforcement paths in the
+ * manager-controller family:
  *
  *  - [AuthorizationDeniedException] — thrown by [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize]
  *    when the RBAC OR-check across `matrix.layersFor(...)` fails. Standard main line.
- *  - [ForbiddenException]           — thrown either by
- *    [com.lovelycatv.crystalframework.shared.controller.Mutability.READ_ONLY.assertXxxAllowed] (write on a
- *    Readonly controller) or by [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.assertAccess]
- *    when [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.checkPermission] returns false.
- *    Scoped and Tenant main lines.
- *  - [UnauthorizedException]        — thrown by
- *    [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.assertAccess]
- *    when [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.checkOwnership]
- *    returns false (permission held but tenant-id mismatch). Also thrown by
- *    [com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController]'s inline
- *    tenant-scope check on the same mismatch.
+ *  - [ForbiddenException]           — thrown by three separate paths, all mapped to HTTP 403:
+ *    - [com.lovelycatv.crystalframework.shared.controller.Mutability.READ_ONLY.assertXxxAllowed]
+ *      (write attempted on a Readonly controller — reached before authorize).
+ *    - [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.assertAccess]
+ *      when [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.checkPermission]
+ *      returns false (missing layer authority) OR when
+ *      [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.checkOwnership]
+ *      returns false (authority held but tenant-id / scope-id mismatch).
+ *    - [com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController]'s inline
+ *      tenant-scope check on both missing-authority and cross-tenant-mismatch branches.
+ *  - [UnauthorizedException]        — not thrown by any current manager-controller enforcement
+ *    path; retained for defensive coverage in case a future refactor reintroduces 401 semantics
+ *    for a corner case (e.g. token-expiry check inside a controller).
  *
  * Using distinct helpers keeps every controller test's failure message precise ("expected mutability
  * to reject the write" vs "expected the RBAC check to reject the read"), so a regression that flips
@@ -72,8 +74,10 @@ fun assertDeniedByForbidden(caught: Throwable?, context: String) {
 }
 
 /**
- * Assert the endpoint denied the caller via [UnauthorizedException] — Scoped/Tenant ownership
- * failure (authority held for the layer, but tenant-id/scope-id does not match).
+ * Assert the endpoint denied the caller via [UnauthorizedException]. Retained for defensive
+ * coverage — currently no manager-controller path throws this (cross-tenant scope mismatch is
+ * classified as 403 [ForbiddenException] per RFC 9110 §15.5.4, since the caller is authenticated
+ * and the request is refused rather than lacking credentials).
  */
 fun assertDeniedByUnauthorized(caught: Throwable?, context: String) {
     assertNotNull(caught, "$context must be denied but the call succeeded")
@@ -84,9 +88,11 @@ fun assertDeniedByUnauthorized(caught: Throwable?, context: String) {
 }
 
 /**
- * Assert the endpoint denied the caller either by [ForbiddenException] (missing authority) or
- * [UnauthorizedException] (authority held but scope-id mismatch). Used when the concrete outcome
- * depends on the controller's authorize path and the test does not want to over-specify.
+ * Assert the endpoint denied the caller either by [ForbiddenException] or [UnauthorizedException].
+ * Since M1 (HTTP 401→403 status fix) the current codebase never throws Unauthorized from
+ * manager-controller enforcement — the OR variant is retained so a future refactor that
+ * reintroduces 401 for some corner case (e.g. token-expiry inside a controller) still passes.
+ * Used when the test does not want to over-specify the enforcement path.
  */
 fun assertDeniedByForbiddenOrUnauthorized(caught: Throwable?, context: String) {
     assertNotNull(caught, "$context must be denied but the call succeeded")

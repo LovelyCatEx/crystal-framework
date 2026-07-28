@@ -8,7 +8,6 @@ import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.test.permission.PermissionMatrixIntegrationTestBase
 import com.lovelycatv.crystalframework.test.permission.assertDeniedByForbidden
-import com.lovelycatv.crystalframework.test.permission.assertDeniedByUnauthorized
 import com.lovelycatv.crystalframework.test.permission.assertLayerAllowed
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -105,7 +104,7 @@ class ManagerTenantMemberControllerIntegrationTest(
             withAuthenticatedUser(user) {
                 caught = runCatching { managerTenantMemberController.read(user.authentication, readDto(FOREIGN_TENANT_ID)) }.exceptionOrNull()
             }
-            assertDeniedByUnauthorized(caught, "TENANT_PEM cross-tenant read")
+            assertDeniedByForbidden(caught, "TENANT_PEM cross-tenant read")
         }
     }
 

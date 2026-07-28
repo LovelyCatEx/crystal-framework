@@ -29,10 +29,11 @@ import org.springframework.context.ApplicationContext
  *  - tenantPem → denied on any read because `isQueryInScope` calls
  *    `tenantDepartmentManagerService.checkIsRelatedToRootParent(departmentId, tenantId)` which
  *    returns false on an empty DB → the branch throws
- *    [com.lovelycatv.crystalframework.shared.exception.UnauthorizedException]. Either
- *    `ForbiddenException` (from a missing authority path) or `UnauthorizedException` (from the
- *    scope check) is a valid deny outcome; the [assertDeniedByForbiddenOrUnauthorized] helper
- *    tolerates both without over-specifying the enforcement path.
+ *    [com.lovelycatv.crystalframework.shared.exception.ForbiddenException] (same 403 semantics
+ *    as the missing-authority path — cross-tenant scope mismatch is not an authentication
+ *    failure). The [assertDeniedByForbiddenOrUnauthorized] helper tolerates both variants;
+ *    the `Unauthorized` branch is kept for defensive coverage in case a future refactor
+ *    reintroduces 401 semantics for some corner case.
  */
 class ManagerTenantDepartmentMemberControllerIntegrationTest(
     @Autowired private val managerTenantDepartmentMemberController: ManagerTenantDepartmentMemberController,

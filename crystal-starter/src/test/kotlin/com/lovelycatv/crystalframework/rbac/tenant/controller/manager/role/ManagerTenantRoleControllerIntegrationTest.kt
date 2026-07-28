@@ -8,7 +8,6 @@ import com.lovelycatv.crystalframework.shared.controller.tenantOnly
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.test.permission.PermissionMatrixIntegrationTestBase
 import com.lovelycatv.crystalframework.test.permission.assertDeniedByForbidden
-import com.lovelycatv.crystalframework.test.permission.assertDeniedByUnauthorized
 import com.lovelycatv.crystalframework.test.permission.assertLayerAllowed
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +25,8 @@ import org.springframework.context.ApplicationContext
  *    also succeed.
  *  - `tenantPem` holds `i.tenant.role.read` (TenantPermission) — the `scopedReadPermission`;
  *    `isQueryInScope` compares `dto.tenantId == userAuthentication.tenantId`, so a mismatch throws
- *    [com.lovelycatv.crystalframework.shared.exception.UnauthorizedException].
+ *    [com.lovelycatv.crystalframework.shared.exception.ForbiddenException] (403 — cross-tenant
+ *    scope mismatch is not an authentication failure).
  */
 class ManagerTenantRoleControllerIntegrationTest(
     @Autowired private val managerTenantRoleController: ManagerTenantRoleController,
@@ -119,7 +119,7 @@ class ManagerTenantRoleControllerIntegrationTest(
             withAuthenticatedUser(user) {
                 caught = runCatching { managerTenantRoleController.read(user.authentication, readDto(tenantId = FOREIGN_TENANT_ID)) }.exceptionOrNull()
             }
-            assertDeniedByUnauthorized(caught, "TENANT_PEM cross-tenant read")
+            assertDeniedByForbidden(caught, "TENANT_PEM cross-tenant read")
         }
     }
 

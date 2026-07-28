@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDT
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadTenantResourceDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
-import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
@@ -224,7 +223,7 @@ abstract class StandardTenantManagerController<
         if (RbacUtils.hasAuthority(permissions.tenantAdminCreate)) return
         if (hasScopedAuthority(permissions.tenantPemCreate)) {
             auth.assertTenantIdNotNull()
-            if (!isCreateInScope(dto, auth)) throw UnauthorizedException()
+            if (!isCreateInScope(dto, auth)) throw ForbiddenException()
             return
         }
         throw ForbiddenException()
@@ -233,7 +232,7 @@ abstract class StandardTenantManagerController<
     private suspend fun authorizeRead(auth: UserAuthentication, dto: READ_DTO) {
         if (RbacUtils.hasAuthority(permissions.tenantAdminRead)) return
         if (hasScopedAuthority(permissions.tenantPemRead)) {
-            if (!isQueryInScope(dto, auth)) throw UnauthorizedException()
+            if (!isQueryInScope(dto, auth)) throw ForbiddenException()
             return
         }
         throw ForbiddenException()
@@ -243,7 +242,7 @@ abstract class StandardTenantManagerController<
         if (RbacUtils.hasAuthority(permissions.tenantAdminUpdate)) return
         if (hasScopedAuthority(permissions.tenantPemUpdate)) {
             auth.assertTenantIdNotNull()
-            if (!isUpdateInScope(dto, auth)) throw UnauthorizedException()
+            if (!isUpdateInScope(dto, auth)) throw ForbiddenException()
             return
         }
         throw ForbiddenException()
@@ -253,7 +252,7 @@ abstract class StandardTenantManagerController<
         if (RbacUtils.hasAuthority(permissions.tenantAdminDelete)) return
         if (hasScopedAuthority(permissions.tenantPemDelete)) {
             auth.assertTenantIdNotNull()
-            if (!isDeleteInScope(dto, auth)) throw UnauthorizedException()
+            if (!isDeleteInScope(dto, auth)) throw ForbiddenException()
             return
         }
         throw ForbiddenException()
@@ -296,7 +295,7 @@ abstract class StandardTenantManagerController<
             if (isReadAllInScope(tenantId, userAuthentication)) {
                 ApiResponse.success(buildReadAllResponse(tenantId))
             } else {
-                throw UnauthorizedException()
+                throw ForbiddenException()
             }
         } else {
             throw ForbiddenException()

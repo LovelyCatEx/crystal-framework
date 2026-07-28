@@ -7,7 +7,6 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScop
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
-import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseScopedManagerService
@@ -250,7 +249,7 @@ abstract class StandardScopedManagerController<
             throw ForbiddenException()
         }
         if (!checkOwnership(scope, scopeId, operation, userAuthentication)) {
-            throw UnauthorizedException()
+            throw ForbiddenException()
         }
     }
 }
