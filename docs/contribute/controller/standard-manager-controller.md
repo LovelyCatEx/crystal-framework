@@ -2,7 +2,7 @@
 
 ## 设计意图
 
-`StandardManagerController` 是框架管理端 CRUD 的核心抽象。它约束了 Controller → Service → Repository 的分层协作模式，配合 AOP 实现权限校验和审计日志的自动化。7 个类型参数把整条链路（Service、Repository、Entity、四个 DTO）串联起来，编译期保证类型一致，运行期由 AOP 完成权限拦截。
+`StandardManagerController` 是框架管理端 CRUD 的核心抽象。它约束了 Controller → Service → Repository 的分层协作模式，权限校验由 `authorize` 方法内联完成（新走 `PermissionMatrix`），审计日志仍由 AOP 自动处理。7 个类型参数把整条链路（Service、Repository、Entity、四个 DTO）串联起来，编译期保证类型一致。
 
 ## 源码
 
@@ -53,7 +53,7 @@ abstract class StandardManagerController<
 
 ## 关键结构决策
 
-- **方法名 `read` vs URL `/query`** 的历史遗留。早期 API 用 `read` 作为方法名（对应 `/read` URL），后来路径调整为 `/query`（更符合"分页查询"语义），但方法名保留是因为 `ManagerControllerPermissionAspect` 按方法名反射匹配 `@ManagerPermissions.read`。修改此方法名会破坏 AOP 权限映射，改动前必须同步修改 aspect。
+- **方法名 `read` vs URL `/query`** 的历史遗留。早期 API 用 `read` 作为方法名（对应 `/read` URL），后来路径调整为 `/query`（更符合"分页查询"语义），但方法名保留至今。旧的 `ManagerControllerPermissionAspect` 仍按方法名反射匹配 `@ManagerPermissions.read`，改动此方法名会破坏兼容路径下的 AOP 权限映射；`PermissionMatrix` 走的是 `authorize(ManagerAction, ...)` + `ScopedOperation` 分派，不依赖方法名。
 
 - **`version = "1"`** 是 `@GetMapping` / `@PostMapping` 的自定义属性，配合框架自定义的 `RequestMappingHandlerMapping` 生成 `/api/v1/xxx` 路径。
 
@@ -63,40 +63,43 @@ abstract class StandardManagerController<
 
 ## 方法命名约定
 
-`ManagerControllerPermissionAspect` 按方法名反射匹配权限配置。方法名是约定接口：
+方法名承担两种匹配用途：新的 `PermissionMatrix` 走 `ManagerAction` → `ScopedOperation` 映射（`readAll` 和 `read` 都归为 `READ`）；老的 `ManagerControllerPermissionAspect` 兼容路径按方法名反射匹配 `@ManagerPermissions` 字段：
 
-| 方法名 | 匹配 `@ManagerPermissions` 字段 | HTTP |
-|---|---|---|
-| `readAll` | `readAll`（空数组时回退到 `read`） | GET `/list` |
-| `read` | `read` | POST `/query` |
-| `create` | `create` | POST `/create` |
-| `update` | `update` | POST `/update` |
-| `delete` | `delete` | POST `/delete` |
+| 方法名 | ManagerAction | ScopedOperation（Matrix 路径） | `@ManagerPermissions` 字段（兼容路径） | HTTP |
+|---|---|---|---|---|
+| `readAll` | READ_ALL | READ | `readAll`（空数组时回退到 `read`） | GET `/list` |
+| `read` | READ | READ | `read` | POST `/query` |
+| `create` | CREATE | CREATE | `create` | POST `/create` |
+| `update` | UPDATE | UPDATE | `update` | POST `/update` |
+| `delete` | DELETE | DELETE | `delete` | POST `/delete` |
 
-Subclass override 时不能修改方法名，否则 AOP 无法匹配。
+Subclass override 时保留方法名可同时兼容 Matrix 和 AOP 两条路径。
 
-## @ManagerPermissions 注解
+## 权限声明：PermissionMatrix
+
+`PermissionMatrix` 通过构造参数 `permissions = ...` 传入。`StandardManagerController.authorize` 按 `ManagerAction` 转成 `ScopedOperation`，再 OR-check `matrix.layersFor(SYSTEM, op)`：
 
 ```kotlin
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ManagerPermissions(
-    val read: Array<String> = [],
-    val readAll: Array<String> = [],
-    val create: Array<String> = [],
-    val update: Array<String> = [],
-    val delete: Array<String> = []
-)
+override suspend fun authorize(action: ManagerAction, userAuthentication, ...) {
+    val matrix = permissions ?: return  // permissions == null → fall back to legacy AOP
+    val op = when (action) {
+        ManagerAction.CREATE -> ScopedOperation.CREATE
+        ManagerAction.READ, ManagerAction.READ_ALL -> ScopedOperation.READ
+        ManagerAction.UPDATE -> ScopedOperation.UPDATE
+        ManagerAction.DELETE -> ScopedOperation.DELETE
+    }
+    val required = matrix.layersFor(ResourceScope.SYSTEM, op)
+    if (!RbacUtils.hasAnyAuthority(*required)) {
+        throw AuthorizationDeniedException("Access denied: required any of ${required.toList()}")
+    }
+}
 ```
 
-- `AnnotationTarget.CLASS` — 类级别注解，作用于整个 Controller
-- 每个字段是权限标识数组，OR 语义
-- `readAll` 空数组时降级到 `read`——逻辑在 aspect 内部；大多数场景只需配置 `read` 即可同时覆盖 list 和 query
-- 空数组等同于"不校验"，aspect 打 warn 日志并放行；适合测试或临时开放接口
+Standard 资源用 `PermissionMatrix.systemOnly(...)` 构造 —— tenant 层默认 `NOT_APPLICABLE`；super 层可选。`layersFor(SYSTEM, op)` 过滤 `NOT_APPLICABLE` 后通常返回 `[system<op>]` 单元素数组（或 `[super<op>, system<op>]`）。
 
-## AOP 拦截体系
+## 兼容 AOP 路径
 
-### ManagerControllerPermissionAspect
+老的 `@ManagerPermissions` 类注解由 `ManagerControllerPermissionAspect` 处理，仅在 `permissions == null` 时生效：
 
 ```kotlin
 @Aspect
@@ -105,45 +108,20 @@ annotation class ManagerPermissions(
 class ManagerControllerPermissionAspect {
     @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
     fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
+        // 若 Controller 已设 permissions，直接放行（authorize 已处理）
         val targetClass = AopUtils.getTargetClass(joinPoint.target)
         val permissions = AnnotationUtils.findAnnotation(targetClass, ManagerPermissions::class.java)
             ?: return joinPoint.proceed()
-
-        val methodName = (joinPoint.signature as MethodSignature).method.name
-        val requiredPermissions = when (methodName) {
-            "readAll" -> permissions.readAll
-            "read"    -> permissions.read
-            "create"  -> permissions.create
-            "update"  -> permissions.update
-            "delete"  -> permissions.delete
-            else      -> null
-        }?.filter { it.isNotEmpty() }?.toList()
-
-        if (requiredPermissions.isNullOrEmpty()) {
-            logger.warn("No valid permission required for $methodSignature, skipped.")
-            return joinPoint.proceed()
-        }
-
-        return ReactiveSecurityContextHolder.getContext()
-            .mapNotNull { it.authentication }
-            .flatMap { authentication ->
-                if (!hasAnyPermission(authentication, requiredPermissions)) {
-                    throw AuthorizationDeniedException("Access denied: ...")
-                }
-                @Suppress("UNCHECKED_CAST")
-                joinPoint.proceed() as Mono<Any>
-            }
+        // ... 按方法名反射匹配 @ManagerPermissions 字段
     }
 }
 ```
 
-切入点覆盖范围：`StandardManagerController.*(..)` 覆盖 Standard 及其所有子类（含 Readonly），不包括 Scoped / DerivedScoped / Tenant 家族。这是 Scoped 家族在方法体内自行校验权限的原因。
-
-`AopUtils.getTargetClass` 穿透 CGLIB 代理拿到真实类；`AnnotationUtils.findAnnotation` 沿类继承链查找 `@ManagerPermissions`，允许注解写在中间层的抽象子类上。直接调用 `class.getAnnotation()` 不支持这两种场景。
+`AopUtils.getTargetClass` 穿透 CGLIB 代理拿到真实类；`AnnotationUtils.findAnnotation` 沿类继承链查找 `@ManagerPermissions`，允许注解写在中间层的抽象子类上。此路径已带 `@Deprecated`，保留一版以便迁移期间不破坏老 Controller。
 
 ### ManagerControllerAuditAspect（在 crystal-audit）
 
-同一切入点，`@Order` 排在权限切面之后。执行顺序：权限检查 → 审计日志 → 业务方法。
+同一切入点，`@Order` 排在权限切面之后。执行顺序：权限检查（Matrix 或 AOP 兼容路径）→ 审计日志 → 业务方法。
 
 审计切面记录：
 

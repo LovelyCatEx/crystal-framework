@@ -25,15 +25,16 @@
 | POST | `/update` | 403 Forbidden |
 | POST | `/delete` | 403 Forbidden |
 
-## 使用 `Triad.readonly(...)` 工厂
+## 使用 `PermissionMatrix.readonly(...)` 工厂
 
-`ScopedPermissionTriad` 有 12 个权限位，只读场景只需要 3 个读权限。工厂方法 `readonly` 会把其他 9 个 CRUD 位填成 `NEVER_GRANTED`（一个永远不被授予的常量），确保即使某天代码绕过 ReadonlyScoped 直接查权限也拒绝匹配：
+`PermissionMatrix` 有 16 个权限位，只读场景只需要 4 个读权限。工厂方法 `readonly` 会把其他 12 个 CRUD 位填成 `NEVER_GRANTED`（一个永远不被授予的哨兵），确保即使某天代码绕过 ReadonlyScoped 直接查权限也拒绝匹配：
 
 ```kotlin
-permissions = ScopedPermissionTriad.readonly(
-    superRead      = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    systemRead     = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    tenantPemRead  = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+permissions = PermissionMatrix.readonly(
+    superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+    systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
+    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+    tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
 )
 ```
 
@@ -104,10 +105,11 @@ class ManagerApprovalFlowInstanceController(
     BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad.readonly(
-        superRead     = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        systemRead    = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    permissions = PermissionMatrix.readonly(
+        superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+        tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
     ),
 ) {
 
@@ -135,7 +137,7 @@ override suspend fun buildQueryResponse(
     dto: ManagerReadApprovalFlowInstanceDTO,
     userAuthentication: UserAuthentication,
 ): Any {
-    val canReadAll = RbacUtils.hasAnyAuthority(*permissions!!.forScope(scope, READ))
+    val canReadAll = RbacUtils.hasAnyAuthority(*permissions!!.layersFor(scope, READ))
     val effectiveDto = if (canReadAll) dto
                        else dto.copy(query = 追加 initiator_id 过滤条件)
     return managerService.query(effectiveDto)
@@ -149,7 +151,7 @@ override suspend fun buildQueryResponse(
 
 ## 注意事项
 
-- Triad 必须使用 `readonly(...)` 工厂——手动填 12 位很容易漏 `NEVER_GRANTED`
+- 必须使用 `PermissionMatrix.readonly(...)` 工厂——手动填 16 位很容易漏 `NEVER_GRANTED`
 - 写操作的自定义端点需自行做权限校验——父类的 403 只挡了 `/create` / `/update` / `/delete` 三个端点，新加的 `/mark-as-seen` 之类需要自行添加 `@PreAuthorize` 或在方法内 `checkPermission`
-- `@ManagerPermissions` 在此类上无效（同 Scoped 家族）
+- 权限声明必须使用 `PermissionMatrix`；老的 `ScopedPermissionTriad.readonly` / `ScopedPermissionMatrix.readonly` 别名均已弃用，见 [权限模型迁移指南](./permission-migration)
 - Delete DTO 可以直接使用基类（`BaseManagerDeleteDTO`），因为业务层直接返回 403，无需在 DTO 上带额外字段

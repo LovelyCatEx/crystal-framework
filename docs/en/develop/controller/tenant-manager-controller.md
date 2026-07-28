@@ -1,6 +1,6 @@
 # StandardTenantManagerController
 
-Base class for resources that live exclusively under tenant scope (cannot exist at SYSTEM level). tenantId is the mandatory scope; permissions come as 8 String constructor parameters.
+Base class for resources that live exclusively under tenant scope (cannot exist at SYSTEM level). tenantId is the mandatory scope; permissions are declared via `PermissionMatrix.tenantOnly(...)`.
 
 ::: tip Legacy design note
 `StandardTenantManagerController` predates the Scoped family. For newly designed resources that could span SYSTEM / TENANT, prefer [StandardScopedManagerController](./scoped-manager-controller). This class is primarily for existing resources hard-locked to tenantId.
@@ -28,17 +28,17 @@ Other scenarios:
 
 ## Permission model
 
-Two layers: each CRUD op has one system permission and one scoped (tenant) permission. Authorization rule:
+Within the unified `PermissionMatrix`, Tenant resources use two layers: `tenantAdmin` (with `tenant.` prefix, cross-tenant ops) + `tenantPem` (with `i.tenant.` prefix, own tenant). Authorization rule:
 
 ```
-Check system permission → yes → allow immediately, skip in-scope
-Check scoped permission → yes → check tenant ownership → allow if ok
+Check tenantAdmin permission → yes → allow immediately, skip in-scope
+Check tenantPem permission → yes → check tenant ownership → allow if ok
 Neither → 403
 ```
 
-The scoped layer is stricter: holders of the scoped permission additionally prove the resource is in their tenant.
+The tenantPem layer is stricter: holders additionally prove the resource is in their tenant. The super / system layers default to `NOT_APPLICABLE` (Tenant resources have no SYSTEM scope concept).
 
-Disable the scoped layer: pass `DISABLED_SCOPED_PERMISSION = ""` (empty string) as `scopedXxxPermission`; the endpoint then only accepts system-level callers.
+To disable a layer, pass `PermissionMatrix.NOT_APPLICABLE` for the corresponding parameter (the legacy `DISABLED_SCOPED_PERMISSION = ""` empty string is still equivalent; `hasScopedAuthority` short-circuits both to false).
 
 ## Usage steps
 
@@ -104,7 +104,7 @@ class ManagerDeleteTenantRoleDTO(
 
 ### 4. Controller
 
-No `@ManagerPermissions` — 8 permissions go through the constructor:
+Permissions come in via `PermissionMatrix.tenantOnly(...)`. Old `xxxPermission` maps to `tenantAdmin*`, old `scopedXxxPermission` maps to `tenantPem*`:
 
 ```kotlin
 @Validated
@@ -122,16 +122,20 @@ class ManagerTenantRoleController(
     ManagerDeleteTenantRoleDTO
 >(
     managerService,
-    createPermission        = SystemPermission.ACTION_TENANT_ROLE_CREATE,
-    scopedCreatePermission  = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
-    readPermission          = SystemPermission.ACTION_TENANT_ROLE_READ,
-    scopedReadPermission    = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
-    updatePermission        = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
-    scopedUpdatePermission  = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
-    deletePermission        = SystemPermission.ACTION_TENANT_ROLE_DELETE,
-    scopedDeletePermission  = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
+        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
+        tenantPemCreate   = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
+        tenantPemRead     = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
+        tenantPemUpdate   = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
+        tenantPemDelete   = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+    ),
 )
 ```
+
+The legacy 8-String constructor (`createPermission = ..., scopedCreatePermission = ..., ...`) is `@Deprecated` and delegates internally to `PermissionMatrix.tenantOnly`, retained one release for legacy compatibility; new code uses the primary constructor only.
 
 ## Type parameters
 
@@ -175,20 +179,28 @@ override suspend fun customCreate(userAuth, dto): ApiResponse<*>? {
 
 Rarely used; most cases don't touch these.
 
-## `DISABLED_SCOPED_PERMISSION`
+## Disabling a layer
 
-Disable the scoped layer, restricting the endpoint to system-permission holders:
+To restrict the endpoint to tenantAdmin holders, fill the tenantPem layer with `NOT_APPLICABLE`:
 
 ```kotlin
-scopedCreatePermission = StandardTenantManagerController.DISABLED_SCOPED_PERMISSION,
-// or the equivalent empty string ""
+permissions = PermissionMatrix.tenantOnly(
+    tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
+    tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
+    tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
+    tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
+    tenantPemCreate   = PermissionMatrix.NOT_APPLICABLE,   // disable tenantPem layer
+    tenantPemRead     = PermissionMatrix.NOT_APPLICABLE,
+    tenantPemUpdate   = PermissionMatrix.NOT_APPLICABLE,
+    tenantPemDelete   = PermissionMatrix.NOT_APPLICABLE,
+)
 ```
 
-Implementation: `hasScopedAuthority` returns false immediately for an empty string, bypassing the scoped check.
+The legacy empty string `DISABLED_SCOPED_PERMISSION = ""` still works (`hasScopedAuthority` short-circuits both empty string and `NOT_APPLICABLE` to false), but new code should use `PermissionMatrix.NOT_APPLICABLE` for clearer semantics.
 
 ## Notes
 
 - Entity must implement `ScopedEntity<Long>` — not `ScopedEntity<*>`; parent id type is fixed to Long. Default `checkIsRelatedToRootParent` recursion assumes Long
 - Use the tenant DTO bases: `BaseManagerCreateTenantResourceDTO` / `BaseManagerReadTenantResourceDTO`. Using plain DTOs fails the default `isCreateInScope` / `isQueryInScope` casts with `error(...)`
 - Don't try to handle system-level resources with this Controller — it doesn't model SYSTEM scope. Use the Scoped family for cross-scope cases
-- All 8 permissions are required — even if a scoped permission is temporarily unused, pass `DISABLED_SCOPED_PERMISSION` rather than omitting the argument
+- Declare permissions via `PermissionMatrix.tenantOnly(...)`; the legacy 8-String constructor stays but is `@Deprecated`, see the [Permission Model Migration Guide](./permission-migration)

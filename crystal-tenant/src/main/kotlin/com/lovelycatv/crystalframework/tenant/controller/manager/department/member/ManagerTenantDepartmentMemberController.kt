@@ -4,7 +4,9 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.controller.tenantOnly
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerDeleteTenantDepartmentMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerReadTenantDepartmentMemberDTO
@@ -35,14 +37,16 @@ class ManagerTenantDepartmentMemberController(
         ManagerDeleteTenantDepartmentMemberDTO
 >(
     tenantDepartmentMemberManagerService,
-    createPermission = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE,
-    scopedCreatePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM,
-    readPermission = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ,
-    scopedReadPermission = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM,
-    updatePermission = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE,
-    scopedUpdatePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM,
-    deletePermission = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE,
-    scopedDeletePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM,
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM,
+    ),
 ) {
     /**
      * Department-member relations are scoped under a department, not directly under a

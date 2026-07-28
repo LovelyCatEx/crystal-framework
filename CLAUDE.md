@@ -274,6 +274,32 @@ class DashboardController
 
 **DTO 使用规则：** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO **仅限标准化 Controller（即 `StandardManagerController` 的子类）使用**。自定义 Controller（非标准化 Controller、普通 Controller、自定义端点）禁止混用这些 DTO，应使用更轻量的基类如 `PageQuery`。
 
+**权限声明规则（强制）**
+
+**Manager Controller 家族的权限声明必须使用统一的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`），禁止使用旧的 `@ManagerPermissions` 类注解、`ScopedPermissionTriad`、`ScopedPermissionMatrix` 别名，或 `StandardTenantManagerController` 的 8 字符串构造参数。**
+**Manager Controller 家族的权限声明必须使用统一的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`），禁止使用旧的 `@ManagerPermissions` 类注解、`ScopedPermissionTriad`、`ScopedPermissionMatrix` 别名，或 `StandardTenantManagerController` 的 8 字符串构造参数。**
+
+`PermissionMatrix` 有 4 个授权层：
+
+| 层             | authority 前缀     | 常量来源                | 语义                              |
+|---------------|-----------------|---------------------|---------------------------------|
+| `super`       | 无前缀             | `SystemPermission`  | 跨 SYSTEM + TENANT 的超级管理员         |
+| `system`      | `system.`       | `SystemPermission`  | 仅 SYSTEM scope                  |
+| `tenantAdmin` | `tenant.`       | `SystemPermission`  | TENANT scope 且跨租户（无 tenantId 匹配） |
+| `tenantPem`   | `i.tenant.`     | `TenantPermission`  | TENANT scope 且严格匹配 tenantId      |
+
+按基类选择对应的构造方式：
+
+- `StandardManagerController` 子类 → `permissions = PermissionMatrix.systemOnly(systemCreate = ..., systemRead = ..., systemUpdate = ..., systemDelete = ...)`
+- `StandardScopedManagerController` 子类 → `permissions = PermissionMatrix.of { \`super\` { ... }; system { ... }; tenantAdmin { ... }; tenantPem { ... } }`（`super` 是 Kotlin 关键字，DSL 调用必须反引号包裹）
+- `StandardTenantManagerController` 子类 → `permissions = PermissionMatrix.tenantOnly(tenantAdminCreate = ..., ..., tenantPemCreate = ..., ...)`
+- `ReadonlyManagerController` 子类 → `permissions = PermissionMatrix.systemOnlyReadonly(systemRead = ...)`
+- `ReadonlyScopedManagerController` 子类 → `permissions = PermissionMatrix.readonly(superRead = ..., systemRead = ..., tenantAdminRead = ..., tenantPemRead = ...)`
+
+哨兵值：不适用的层用 `PermissionMatrix.NOT_APPLICABLE`（`layersFor` 会过滤掉，不参与决策），显式禁用的层用 `PermissionMatrix.NEVER_GRANTED`（会参与决策但没有任何角色能匹配）。便捷工厂已经把默认值填好，通常无需手写。
+
+前缀约定由 `PermissionMatrix.init` 校验（当前 emit warn，未来会升级为 hard error），迁移步骤和常见坑详见 [权限模型迁移指南](docs/develop/controller/permission-migration.md)。
+
 **非标准化 Controller**
 
 默认情况下，所有接口都要求访问时携带合法 Token，但允许使用 `@Unauthorized` 注解表示无需任何授权即可访问的接口。

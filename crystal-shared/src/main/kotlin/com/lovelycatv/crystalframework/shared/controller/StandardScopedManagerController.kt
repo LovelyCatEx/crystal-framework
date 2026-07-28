@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam
  *    scoped parent's Service. Deep chains compose recursively — the tenant side does the same
  *    thing via `checkIsRelatedToRootParent`.
  *
- * Authorisation is driven by a four-layer [ScopedPermissionMatrix]:
+ * Authorisation is driven by a four-layer [PermissionMatrix]:
  *
  *  1. [checkPermission] verifies the caller holds any of the layers eligible for the current
  *     `(scope, operation)` — SYSTEM consults super + system; TENANT consults super + tenantAdmin
@@ -71,7 +71,7 @@ abstract class StandardScopedManagerController<
      * default [checkPermission] and [checkOwnership] use it; when null, subclasses MUST override
      * both hooks.
      */
-    protected val permissions: ScopedPermissionMatrix? = null,
+    protected val permissions: PermissionMatrix? = null,
     mutability: Mutability = Mutability.READ_WRITE,
 ) : AbstractManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
     managerService,
@@ -92,7 +92,7 @@ abstract class StandardScopedManagerController<
         userAuthentication: UserAuthentication
     ): Boolean {
         val matrix = permissions
-            ?: error("StandardScopedManagerController#checkPermission must be overridden when no ScopedPermissionMatrix is supplied")
+            ?: error("StandardScopedManagerController#checkPermission must be overridden when no PermissionMatrix is supplied")
         return RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, operation))
     }
 

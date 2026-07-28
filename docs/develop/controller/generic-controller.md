@@ -7,7 +7,7 @@
 - 非 CRUD 业务端点（登录、注册、修改密码、发送验证码）
 - 面向用户的 API（非管理后台）
 - 上传下载、代理转发、Webhook 接收
-- 权限规则超出 `@ManagerPermissions` / `ScopedPermissionTriad` 表达能力
+- 权限规则超出 `PermissionMatrix` 表达能力（需要动态推断、按字段脱敏等）
 
 ## 基本骨架
 
@@ -44,7 +44,7 @@ class ExtMyPluginToolsController(
 
 ## 权限校验
 
-普通控制器不能使用 `@ManagerPermissions`（该注解仅对 `StandardManagerController` 家族生效）。使用 Spring Security 的 `@PreAuthorize`：
+普通控制器不使用 `PermissionMatrix`（`PermissionMatrix` 仅供 Manager 家族标准 5 端点使用）。使用 Spring Security 的 `@PreAuthorize`：
 
 ```kotlin
 @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_UPDATE_PEM}')")

@@ -12,48 +12,38 @@
 @Validated
 abstract class ReadonlyScopedManagerController<...>(
     managerService: SERVICE,
-    permissions: ScopedPermissionTriad? = null,
-) : StandardScopedManagerController<SERVICE, ...>(managerService, permissions) {
-
-    override suspend fun create(userAuthentication, @ModelAttribute dto: CREATE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be created")
-    }
-
-    override suspend fun update(userAuthentication, @ModelAttribute dto: UPDATE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be updated")
-    }
-
-    override suspend fun delete(userAuthentication, @ModelAttribute dto: DELETE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be deleted")
-    }
-}
+    permissions: PermissionMatrix? = null,
+) : StandardScopedManagerController<SERVICE, ...>(
+    managerService,
+    permissions,
+    mutability = Mutability.READ_ONLY,   // CUD blocked by AbstractManagerController's ForbiddenException
+)
 ```
 
-Structurally symmetric to `ReadonlyManagerController`, only the parent changes to `StandardScopedManagerController`.
+Structurally symmetric to `ReadonlyManagerController`, only the parent changes to `StandardScopedManagerController`; the only real addition is `Mutability.READ_ONLY`.
 
-## Triple-layer defense
+## Two-layer defense
 
-The Scoped-family read-only adds a `NEVER_GRANTED` layer at the permission level on top of `ReadonlyManagerController`'s design. Full flow:
+The Scoped-family read-only combines the permission-layer `NEVER_GRANTED` fallback with the parent `Mutability.READ_ONLY` block. Full flow:
 
 ```
 POST /create
-  → StandardScopedManagerController.create (parent method, not AOP)
-      └─ Overridden by ReadonlyScopedManagerController
-          → Returns ApiResponse.forbidden (Layer 1: business rejection)
+  → StandardScopedManagerController.create (parent implementation)
+      → assertAccess → checkPermission(scope, scopeId, CREATE, userAuth)
+          └─ matrix.layersFor(scope, CREATE) returns [NEVER_GRANTED, NEVER_GRANTED, ...]
+              → hasAnyAuthority("!!never_granted!!", ...) = false
+                  → ForbiddenException (Layer 1: permission rejection)
 
-Even if ReadonlyScoped is bypassed, the parent's create calls assertAccess:
-  → checkPermission(scope, scopeId, CREATE, userAuth)
-      └─ triad.forScope(scope, CREATE) returns [NEVER_GRANTED, NEVER_GRANTED]
-          → hasAnyAuthority("!!never_granted!!", "!!never_granted!!") = false
-              → ForbiddenException (Layer 2: permission rejection)
+Even if the permission layer is bypassed (e.g. subclass overrides checkPermission to always true):
+  → AbstractManagerController entry
+      └─ Mutability.READ_ONLY → throw ForbiddenException (Layer 2: business rejection)
 
-If instead super / system / tenantPem CRUD slots were filled with the real read permission:
+If CUD slots were manually filled with a real read permission:
   → checkPermission passes (a user holding read perm trips the CREATE slot too)
-      → checkOwnership may also pass
-          → managerService.create(dto) actually runs   ← Disaster
+      → But Mutability.READ_ONLY still blocks   ← fail-safe backstop
 ```
 
-That's why `ScopedPermissionTriad.readonly(...)` forces CRUD slots to `NEVER_GRANTED` — not cosmetic, but the backstop against permission-escalation bugs.
+That's why `PermissionMatrix.readonly(...)` forces CUD slots to `NEVER_GRANTED` — not cosmetic, but the backstop against permission-escalation bugs, combined with `Mutability.READ_ONLY` for two independent layers.
 
 ## Reusing the base Delete DTO
 
@@ -91,8 +81,8 @@ override suspend fun buildQueryResponse(
     userAuthentication: UserAuthentication,
 ): Any {
     val resolvedScope = resolveScope(dto.scope)
-    val triad = permissions ?: error(...)
-    val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
+    val matrix = permissions ?: error(...)
+    val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
     val effectiveDto = if (canReadAll) dto
                        else dto.copy(query = appendInitiatorCondition(dto.query, initiatorId))
@@ -115,11 +105,11 @@ Benefit: one endpoint serves both audiences; the frontend doesn't need to know a
 | | ReadonlyManagerController | ReadonlyScopedManagerController |
 |---|---|---|
 | Parent | `StandardManagerController` | `StandardScopedManagerController` |
-| Permission declaration | `@ManagerPermissions` (class-level, 5 fields) | `ScopedPermissionTriad` (constructor arg, 12 slots) |
+| Permission declaration | `PermissionMatrix.systemOnlyReadonly(...)` | `PermissionMatrix.readonly(...)` (16 CUD slots `NEVER_GRANTED`) |
 | Scope support | None | Mandatory SYSTEM / TENANT |
 | Entity bound | `BaseEntity` | `BaseScopedEntity` |
-| AOP coverage | Yes | No, inline self-check |
-| NEVER_GRANTED fallback | None (unnecessary) | Yes (critical) |
+| Mutability | `READ_ONLY` (parent blocks CUD) | Same |
+| NEVER_GRANTED fallback | Covered by `systemOnlyReadonly` at the permission layer | Covered by `readonly` at the permission layer |
 
 ## Real usage locations
 

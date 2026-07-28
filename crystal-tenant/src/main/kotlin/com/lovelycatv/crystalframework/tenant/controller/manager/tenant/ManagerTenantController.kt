@@ -1,9 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.tenant
 
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto.ManagerCreateTenantDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto.ManagerDeleteTenantDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.tenant.dto.ManagerReadTenantDTO
@@ -15,13 +16,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_TENANT_READ],
-    readAll = [SystemPermission.ACTION_TENANT_READ],
-    create = [SystemPermission.ACTION_TENANT_CREATE],
-    update = [SystemPermission.ACTION_TENANT_UPDATE],
-    delete = [SystemPermission.ACTION_TENANT_DELETE],
-)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant")
@@ -35,4 +29,19 @@ class ManagerTenantController(
         ManagerReadTenantDTO,
         ManagerUpdateTenantDTO,
         ManagerDeleteTenantDTO
->(managerService)
+>(
+    managerService,
+    // ACTION_TENANT_* constants use the "tenant." prefix; placing them in the super layer
+    // preserves current aspect OR-check behaviour. Prefix warnings are expected since neither
+    // super nor system layer perfectly fits these legacy tenant-scoped Standard resources.
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = PermissionMatrix.NOT_APPLICABLE,
+        systemRead = PermissionMatrix.NOT_APPLICABLE,
+        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
+        systemDelete = PermissionMatrix.NOT_APPLICABLE,
+        superCreate = SystemPermission.ACTION_TENANT_CREATE,
+        superRead = SystemPermission.ACTION_TENANT_READ,
+        superUpdate = SystemPermission.ACTION_TENANT_UPDATE,
+        superDelete = SystemPermission.ACTION_TENANT_DELETE,
+    ),
+)

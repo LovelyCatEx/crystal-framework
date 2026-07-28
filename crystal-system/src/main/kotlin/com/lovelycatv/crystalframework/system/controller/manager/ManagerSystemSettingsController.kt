@@ -28,7 +28,7 @@ import tools.jackson.databind.json.JsonMapper
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/settings")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/setting")
 class ManagerSystemSettingsController(
     private val systemSettingsService: SystemSettingsService,
     private val systemSettingsRegistry: SystemSettingsRegistry,

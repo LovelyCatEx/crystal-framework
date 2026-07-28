@@ -88,9 +88,11 @@ suspend fun register(...): ApiResponse<*> { ... }
 ```
 
 **RBAC 精细控制**：
-- 简单授权：类级 `@ManagerPermissions`（仅对继承 `StandardManagerController` 的 5 端点生效）
+- 简单授权：Spring Security 原生 `@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_XXX}')")`
 - 端点级：方法内手动调 `RbacUtils.hasAuthority(...)` 或 `RbacUtils.hasAnyAuthority(...)` 判断
-- Scoped 授权：直接注入 `UserAuthentication` 参数，调 `ScopedPermissionMatrix` / 手写规则
+- Scoped 授权：直接注入 `UserAuthentication` 参数，手写规则；若需要 Manager 家族的 4 层权限逻辑（super / system / tenantAdmin / tenantPem），走标准/Scoped/Tenant Controller，别复制 `PermissionMatrix` 到普通端点
+
+> Manager Controller 家族的权限声明规则（必须用 `permissions = PermissionMatrix.systemOnly(...) / of { ... } / tenantOnly(...) / systemOnlyReadonly(...) / readonly(...)`）仅对继承 `StandardManagerController` / `StandardScopedManagerController` / `StandardTenantManagerController` / 其只读变体的 5 个标准 CRUD 端点生效。普通端点走 `@PreAuthorize` + `RbacUtils`。
 
 ### `UserAuthentication` 注入
 
@@ -151,7 +153,7 @@ DTO / VO / entity 里所有 `Long` 字段（`id` / `xxxId` / `xxxTime`）序列�
 4. **每个端点**：
    - 选好 HTTP method + 参数绑定注解
    - 决定 `@Unauthorized` 与否
-   - 决定授权粒度（`@ManagerPermissions` / `RbacUtils.hasAuthority` / 无 RBAC）
+   - 决定授权粒度（`@PreAuthorize` / `RbacUtils.hasAuthority` / 无 RBAC；`PermissionMatrix` 只用于 Manager 家族的标准 CRUD，普通端点用不到）
    - 方法签名声明必要的 `UserAuthentication` 参数
    - 返回 `ApiResponse<*>`
 5. **前端 API 对接**：

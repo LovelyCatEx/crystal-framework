@@ -26,7 +26,15 @@ abstract class ReadonlyManagerController<
         DELETE_DTO : BaseManagerDeleteDTO
 >(
     managerService: SERVICE,
+    /**
+     * Unified permission matrix. Read-only resources should populate only the two `read` slots
+     * (super/system) with meaningful authorities and leave every CUD slot as [PermissionMatrix.NEVER_GRANTED]
+     * — the convenience factory [PermissionMatrix.Companion.systemOnlyReadonly] does exactly that.
+     * Delegated to [StandardManagerController] which owns the authorisation logic.
+     */
+    permissions: PermissionMatrix? = null,
 ) : StandardManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
     managerService,
+    permissions = permissions,
     mutability = Mutability.READ_ONLY,
 )

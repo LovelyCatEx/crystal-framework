@@ -9,7 +9,9 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.controller.tenantOnly
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerDeleteInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerReadInvitationDTO
@@ -38,14 +40,16 @@ class ManagerTenantInvitationController(
         ManagerDeleteInvitationDTO
 >(
     tenantInvitationManagerService,
-    createPermission = SystemPermission.ACTION_TENANT_INVITATION_CREATE,
-    scopedCreatePermission = TenantPermission.ACTION_TENANT_INVITATION_CREATE_PEM,
-    readPermission = SystemPermission.ACTION_TENANT_INVITATION_READ,
-    scopedReadPermission = TenantPermission.ACTION_TENANT_INVITATION_READ_PEM,
-    updatePermission = SystemPermission.ACTION_TENANT_INVITATION_UPDATE,
-    scopedUpdatePermission = TenantPermission.ACTION_TENANT_INVITATION_UPDATE_PEM,
-    deletePermission = SystemPermission.ACTION_TENANT_INVITATION_DELETE,
-    scopedDeletePermission = TenantPermission.ACTION_TENANT_INVITATION_DELETE_PEM
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_INVITATION_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_INVITATION_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_INVITATION_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_INVITATION_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_INVITATION_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_INVITATION_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_INVITATION_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_INVITATION_DELETE_PEM,
+    ),
 ) {
     override suspend fun customCreate(
         userAuthentication: UserAuthentication,
@@ -55,7 +59,7 @@ class ManagerTenantInvitationController(
             .getByTenantIdAndUserId(dto.tenantId, userAuthentication.userId)
             ?.id
 
-        if (RbacUtils.hasAuthority(this.createPermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminCreate)) {
             // System-level callers may attribute the invitation to any member, but that
             // member must actually belong to the target tenant.
             dto.creatorMemberId?.let { memberId ->
@@ -70,7 +74,7 @@ class ManagerTenantInvitationController(
                     this.creatorMemberId = userSelfMemberId
                 }
             })
-        } else if (RbacUtils.hasAuthority(this.scopedCreatePermission)) {
+        } else if (RbacUtils.hasAuthority(permissions.tenantPemCreate)) {
             userAuthentication.assertTenantIdNotNull()
             if (dto.tenantId == userAuthentication.tenantId) {
                 // Lock the creator to the user in authentication
@@ -91,9 +95,9 @@ class ManagerTenantInvitationController(
         userAuthentication: UserAuthentication,
         dto: ManagerUpdateInvitationDTO
     ): ApiResponse<*>? {
-        if (RbacUtils.hasAuthority(this.updatePermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminUpdate)) {
             tenantInvitationManagerService.update(dto)
-        } else if (RbacUtils.hasAuthority(this.scopedUpdatePermission)) {
+        } else if (RbacUtils.hasAuthority(permissions.tenantPemUpdate)) {
             userAuthentication.assertTenantIdNotNull()
             if (tenantInvitationManagerService.checkIsRelatedToRootParent(dto.id, userAuthentication.tenantId!!)) {
                 // Could not update the creator

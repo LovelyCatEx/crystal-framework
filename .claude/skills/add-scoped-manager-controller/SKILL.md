@@ -40,7 +40,7 @@ description: 为需要按 scope（SYSTEM/TENANT）区分数据可见性的实体
 
 ### 权限：4 层 Matrix
 
-`ScopedPermissionMatrix` 是四层 × 四 op 的授权表：
+`PermissionMatrix` 是四层 × 四 op 的授权表：
 
 | 层 | name 前缀 | 定义位置 | 语义 |
 |---|---|---|---|
@@ -91,7 +91,7 @@ override suspend fun resolveRootScopeFromParentId(parentId: Long): Pair<Resource
 
 ### Controller 结构
 
-**直接 scoped**（最简，5 个 DTO + Matrix 声明）：
+**直接 scoped**（最简，5 个 DTO + Matrix DSL 声明）：
 
 ```kotlin
 @Validated
@@ -101,18 +101,36 @@ class ManagerXxxController(
     managerService: XxxManagerService
 ) : StandardScopedManagerController<...>(
     managerService,
-    permissions = ScopedPermissionMatrix(
-        superCreate = SystemPermission.ACTION_XXX_CREATE,
-        superRead = SystemPermission.ACTION_XXX_READ,
-        superUpdate = SystemPermission.ACTION_XXX_UPDATE,
-        superDelete = SystemPermission.ACTION_XXX_DELETE,
-        systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
-        // ... 其余 3 层 × 4 op 全部列出
-        tenantPemCreate = TenantPermission.ACTION_TENANT_XXX_CREATE_PEM,
-        // ...
-    ),
+    permissions = PermissionMatrix.of {
+        `super` {
+            create = SystemPermission.ACTION_XXX_CREATE
+            read   = SystemPermission.ACTION_XXX_READ
+            update = SystemPermission.ACTION_XXX_UPDATE
+            delete = SystemPermission.ACTION_XXX_DELETE
+        }
+        system {
+            create = SystemPermission.ACTION_SYSTEM_XXX_CREATE
+            read   = SystemPermission.ACTION_SYSTEM_XXX_READ
+            update = SystemPermission.ACTION_SYSTEM_XXX_UPDATE
+            delete = SystemPermission.ACTION_SYSTEM_XXX_DELETE
+        }
+        tenantAdmin {
+            create = SystemPermission.ACTION_TENANT_XXX_CREATE
+            read   = SystemPermission.ACTION_TENANT_XXX_READ
+            update = SystemPermission.ACTION_TENANT_XXX_UPDATE
+            delete = SystemPermission.ACTION_TENANT_XXX_DELETE
+        }
+        tenantPem {
+            create = TenantPermission.ACTION_TENANT_XXX_CREATE_PEM
+            read   = TenantPermission.ACTION_TENANT_XXX_READ_PEM
+            update = TenantPermission.ACTION_TENANT_XXX_UPDATE_PEM
+            delete = TenantPermission.ACTION_TENANT_XXX_DELETE_PEM
+        }
+    },
 )
 ```
+
+DSL 要点：`` `super` `` 是 Kotlin 关键字，必须反引号包裹。未打开的 layer 默认全部 `NOT_APPLICABLE`（不参与决策），无需显式写出。
 
 **派生 scoped**：额外 override 两个 DTO 解析 hook：
 
@@ -151,7 +169,7 @@ Create 同理（DTO 继承 `BaseManagerCreateScopedDTO`）。
 2. **admin 角色绑定新权限** —— `SystemRolePermissionRelation.ROLE_ADMIN` 加上 super + tenantAdmin + system 三层
 3. **DTO 4 个** —— Create/Read 继承 `BaseManagerCreateScopedDTO` / `BaseManagerReadScopedDTO`
 4. **Service 继承 `BaseScopedManagerService`** —— 默认 resolveRootScope 已实现
-5. **Controller 继承 `StandardScopedManagerController`**，permissions 传 `ScopedPermissionMatrix(...)`
+5. **Controller 继承 `StandardScopedManagerController`**，permissions 用 `PermissionMatrix.of { ... }` DSL 声明
 6. 前端 API 层继承 `BaseManagerController`，调用时带 `scope + scopeId`
 
 ### 派生 scoped 场景
@@ -166,7 +184,9 @@ Create 同理（DTO 继承 `BaseManagerCreateScopedDTO`）。
 
 | 错误 | 修正 |
 |---|---|
-| Matrix 只填 3 层，忘了 tenantAdmin | 必须填齐 4 层 16 个 permission，未使用位用 `ScopedPermissionMatrix.NEVER_GRANTED` |
+| Matrix 只填 3 层，忘了 tenantAdmin | 必须填齐 4 层。未使用的 layer 让 DSL 默认走 `NOT_APPLICABLE`（不参与决策），只有"层存在但操作禁止"的场景才用 `NEVER_GRANTED` |
+| `` `super` `` 写成 `super`（忘反引号） | Kotlin 关键字必须反引号：`` `super` { ... } `` |
+| `system*` 权限没有 `system.` 前缀 / `tenantAdmin*` 没有 `tenant.` 前缀 / `tenantPem*` 没有 `i.tenant.` 前缀 | 前缀违规启动会 emit warn；严格按前缀命名 |
 | tenantPem 权限用 `SystemPermission.ACTION_TENANT_XXX_YYY` | tenantPem 必须来自 `TenantPermission.ACTION_TENANT_XXX_YYY_PEM`（`i.` 前缀） |
 | 派生场景 Service impl 只 override `checkIsRelatedToRootParent` 忘了 `resolveRootScope` | 两者不同：前者返回 boolean（tenant 侧），后者返回 pair（scoped 侧）；scoped controller 只调后者 |
 | 派生场景 controller 没 override 两个 DTO hook，或者 override 后走 `entity.id` | Create/Query DTO 里没有 item id，只有父外键；必须调 Service 的桥接方法 |

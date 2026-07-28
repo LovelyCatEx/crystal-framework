@@ -12,7 +12,7 @@
 |---|---|---|
 | 定位 | 业务 API | 管理后台 CRUD |
 | 路由前缀 | 自由（`/api/{version}/ext/...` / `/api/{version}/oauth/...`） | 强制 `/api/{version}/manager/...` |
-| 权限机制 | `@PreAuthorize` + Spring Security SpEL | `@ManagerPermissions` + AOP / `ScopedPermissionTriad` |
+| 权限机制 | `@PreAuthorize` + Spring Security SpEL | `PermissionMatrix`（构造参数，authorize 内联校验） |
 | 审计切面 | 不覆盖 | `ManagerControllerAuditAspect` 自动记录 |
 | 参数注入 | 支持 `UserAuthentication` | 支持 `UserAuthentication` |
 | 端点数 | 完全自定义 | 5 个标准端点（可 override，可加自定义） |

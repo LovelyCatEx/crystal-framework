@@ -3,7 +3,9 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.department
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.controller.tenantOnly
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerCreateTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerDeleteTenantDepartmentDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.dto.ManagerReadTenantDepartmentDTO
@@ -30,12 +32,14 @@ class ManagerTenantDepartmentController(
         ManagerDeleteTenantDepartmentDTO
 >(
     managerService,
-    createPermission = SystemPermission.ACTION_TENANT_DEPARTMENT_CREATE,
-    scopedCreatePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_CREATE_PEM,
-    readPermission = SystemPermission.ACTION_TENANT_DEPARTMENT_READ,
-    scopedReadPermission = TenantPermission.ACTION_TENANT_DEPARTMENT_READ_PEM,
-    updatePermission = SystemPermission.ACTION_TENANT_DEPARTMENT_UPDATE,
-    scopedUpdatePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_UPDATE_PEM,
-    deletePermission = SystemPermission.ACTION_TENANT_DEPARTMENT_DELETE,
-    scopedDeletePermission = TenantPermission.ACTION_TENANT_DEPARTMENT_DELETE_PEM
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_CREATE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_DELETE,
+        tenantPemCreate = TenantPermission.ACTION_TENANT_DEPARTMENT_CREATE_PEM,
+        tenantPemRead = TenantPermission.ACTION_TENANT_DEPARTMENT_READ_PEM,
+        tenantPemUpdate = TenantPermission.ACTION_TENANT_DEPARTMENT_UPDATE_PEM,
+        tenantPemDelete = TenantPermission.ACTION_TENANT_DEPARTMENT_DELETE_PEM,
+    ),
 )

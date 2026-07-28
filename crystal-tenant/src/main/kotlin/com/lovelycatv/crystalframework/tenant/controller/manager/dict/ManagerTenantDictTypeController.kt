@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerDeleteTenantDictTypeDTO
@@ -31,7 +31,7 @@ class ManagerTenantDictTypeController(
         ManagerDeleteTenantDictTypeDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix(
+    permissions = PermissionMatrix(
         superCreate = SystemPermission.ACTION_DICT_TYPE_CREATE,
         superRead = SystemPermission.ACTION_DICT_TYPE_READ,
         superUpdate = SystemPermission.ACTION_DICT_TYPE_UPDATE,

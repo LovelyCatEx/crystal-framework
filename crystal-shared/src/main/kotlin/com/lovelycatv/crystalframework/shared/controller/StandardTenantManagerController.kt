@@ -23,10 +23,16 @@ import org.springframework.web.bind.annotation.RequestParam
  *
  * The class wires up the standard authorisation flow that every CRUD operation needs:
  *
- *  1. Holders of the **system** permission can act unconditionally.
- *  2. Holders of the **scoped** permission can only act within their own tenant — the check is
- *     delegated to the overridable `isXxxInScope` hooks below.
+ *  1. Holders of the **tenantAdmin** permission (e.g. `tenant.role.create`) can act unconditionally
+ *     — the cross-tenant layer needs no `tenantId` match.
+ *  2. Holders of the **tenantPem** permission (e.g. `i.tenant.role.create`) can only act within
+ *     their own tenant — the check is delegated to the overridable `isXxxInScope` hooks below.
  *  3. Otherwise the request is rejected.
+ *
+ * Authorisation is driven by a [PermissionMatrix] passed to the constructor; use
+ * [PermissionMatrix.tenantOnly] to build one that leaves `super` / `system` layers as
+ * [PermissionMatrix.NOT_APPLICABLE] (the common case — Tenant-only resources have no SYSTEM scope
+ * semantics).
  *
  * The defaults assume the resource is *directly* tenant-scoped (i.e. its DTO carries a
  * `tenantId`). Resources nested deeper in the tenant hierarchy (for example a department member,
@@ -50,19 +56,11 @@ abstract class StandardTenantManagerController<
         DELETE_DTO : BaseManagerDeleteDTO
 >(
     managerService: SERVICE,
-    protected val createPermission: String,
     /**
-     * Tenant-scoped permission required to perform the action against your own tenant. Pass
-     * [DISABLED_SCOPED_PERMISSION] (or any blank string) to disable scoped access entirely; in
-     * that case only holders of the corresponding system permission can call the endpoint.
+     * Four-layer permission matrix. For Tenant-only resources use [PermissionMatrix.tenantOnly]
+     * which leaves `super` / `system` layers as [PermissionMatrix.NOT_APPLICABLE].
      */
-    protected val scopedCreatePermission: String,
-    protected val readPermission: String,
-    protected val scopedReadPermission: String,
-    protected val updatePermission: String,
-    protected val scopedUpdatePermission: String,
-    protected val deletePermission: String,
-    protected val scopedDeletePermission: String,
+    protected val permissions: PermissionMatrix,
     mutability: Mutability = Mutability.READ_WRITE,
 ) : AbstractManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
     managerService,
@@ -70,16 +68,15 @@ abstract class StandardTenantManagerController<
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<Long> {
 
     companion object {
-        /** Sentinel for [scopedCreatePermission] etc. meaning "tenant-scoped users are not allowed". */
-        const val DISABLED_SCOPED_PERMISSION: String = ""
-
         private const val DEFAULT_SCOPE_CHECK_REQUIRES_TENANT_DTO =
             "Default scope check expects the DTO to extend %s. Override the corresponding " +
                     "isXxxInScope() in your controller to provide a custom scope check."
     }
 
     private suspend fun hasScopedAuthority(authority: String): Boolean {
-        if (authority.isBlank()) return false
+        // NOT_APPLICABLE means the layer does not apply to this resource: short-circuit to false
+        // without touching RBAC.
+        if (authority == PermissionMatrix.NOT_APPLICABLE) return false
         return RbacUtils.hasAuthority(authority)
     }
 
@@ -224,8 +221,8 @@ abstract class StandardTenantManagerController<
     }
 
     private suspend fun authorizeCreate(auth: UserAuthentication, dto: CREATE_DTO) {
-        if (RbacUtils.hasAuthority(this.createPermission)) return
-        if (hasScopedAuthority(this.scopedCreatePermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminCreate)) return
+        if (hasScopedAuthority(permissions.tenantPemCreate)) {
             auth.assertTenantIdNotNull()
             if (!isCreateInScope(dto, auth)) throw UnauthorizedException()
             return
@@ -234,8 +231,8 @@ abstract class StandardTenantManagerController<
     }
 
     private suspend fun authorizeRead(auth: UserAuthentication, dto: READ_DTO) {
-        if (RbacUtils.hasAuthority(this.readPermission)) return
-        if (hasScopedAuthority(this.scopedReadPermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminRead)) return
+        if (hasScopedAuthority(permissions.tenantPemRead)) {
             if (!isQueryInScope(dto, auth)) throw UnauthorizedException()
             return
         }
@@ -243,8 +240,8 @@ abstract class StandardTenantManagerController<
     }
 
     private suspend fun authorizeUpdate(auth: UserAuthentication, dto: UPDATE_DTO) {
-        if (RbacUtils.hasAuthority(this.updatePermission)) return
-        if (hasScopedAuthority(this.scopedUpdatePermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminUpdate)) return
+        if (hasScopedAuthority(permissions.tenantPemUpdate)) {
             auth.assertTenantIdNotNull()
             if (!isUpdateInScope(dto, auth)) throw UnauthorizedException()
             return
@@ -253,8 +250,8 @@ abstract class StandardTenantManagerController<
     }
 
     private suspend fun authorizeDelete(auth: UserAuthentication, dto: DELETE_DTO) {
-        if (RbacUtils.hasAuthority(this.deletePermission)) return
-        if (hasScopedAuthority(this.scopedDeletePermission)) {
+        if (RbacUtils.hasAuthority(permissions.tenantAdminDelete)) return
+        if (hasScopedAuthority(permissions.tenantPemDelete)) {
             auth.assertTenantIdNotNull()
             if (!isDeleteInScope(dto, auth)) throw UnauthorizedException()
             return
@@ -293,9 +290,9 @@ abstract class StandardTenantManagerController<
     ): ApiResponse<*> {
         customReadAll(userAuthentication, tenantId)?.let { return it }
 
-        return if (RbacUtils.hasAuthority(this.readPermission)) {
+        return if (RbacUtils.hasAuthority(permissions.tenantAdminRead)) {
             ApiResponse.success(buildReadAllResponse(tenantId))
-        } else if (hasScopedAuthority(this.scopedReadPermission)) {
+        } else if (hasScopedAuthority(permissions.tenantPemRead)) {
             if (isReadAllInScope(tenantId, userAuthentication)) {
                 ApiResponse.success(buildReadAllResponse(tenantId))
             } else {

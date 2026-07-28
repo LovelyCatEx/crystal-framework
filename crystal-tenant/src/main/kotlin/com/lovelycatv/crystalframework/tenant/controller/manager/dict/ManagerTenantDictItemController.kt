@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -41,7 +41,7 @@ class ManagerTenantDictItemController(
         ManagerDeleteTenantDictItemDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix(
+    permissions = PermissionMatrix(
         superCreate = SystemPermission.ACTION_DICT_ITEM_CREATE,
         superRead = SystemPermission.ACTION_DICT_ITEM_READ,
         superUpdate = SystemPermission.ACTION_DICT_ITEM_UPDATE,
@@ -79,7 +79,7 @@ class ManagerTenantDictItemController(
 
     /**
      * Tree view of dict items under a given type. Authorization mirrors the standard READ
-     * pipeline: consult [ScopedPermissionMatrix.layersFor] then run [checkOwnership].
+     * pipeline: consult [PermissionMatrix.layersFor] then run [checkOwnership].
      */
     @GetMapping("/tree")
     suspend fun tree(

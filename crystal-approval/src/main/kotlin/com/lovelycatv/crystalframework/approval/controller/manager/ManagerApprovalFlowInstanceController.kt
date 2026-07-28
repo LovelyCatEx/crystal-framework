@@ -14,8 +14,8 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
 import com.lovelycatv.crystalframework.shared.database.GroupNode
@@ -56,7 +56,7 @@ class ManagerApprovalFlowInstanceController(
         BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix.readonly(
+    permissions = PermissionMatrix.readonly(
         superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
         systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
         tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
@@ -98,7 +98,7 @@ class ManagerApprovalFlowInstanceController(
         val resolvedScope = resolveScope(dto.scope)
 
         val matrix = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+            ?: error("ManagerApprovalFlowInstanceController requires a PermissionMatrix")
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
         if (dto.id != null && !canReadAll) {
@@ -219,7 +219,7 @@ class ManagerApprovalFlowInstanceController(
         }
 
         val matrix = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+            ?: error("ManagerApprovalFlowInstanceController requires a PermissionMatrix")
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
         val isInitiator = instance.initiatorId == callerScopedId
         val isParticipant = !canReadAll && !isInitiator

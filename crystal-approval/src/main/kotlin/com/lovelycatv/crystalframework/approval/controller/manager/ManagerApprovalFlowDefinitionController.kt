@@ -14,7 +14,7 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -48,7 +48,7 @@ class ManagerApprovalFlowDefinitionController(
         ManagerDeleteApprovalFlowDefinitionDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix(
+    permissions = PermissionMatrix(
         superCreate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
         superRead = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
         superUpdate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,

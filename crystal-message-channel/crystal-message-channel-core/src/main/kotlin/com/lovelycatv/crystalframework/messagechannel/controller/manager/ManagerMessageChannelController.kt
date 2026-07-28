@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageCha
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,7 +31,7 @@ class ManagerMessageChannelController(
         ManagerDeleteMessageChannelDTO
         >(
     managerService,
-    permissions = ScopedPermissionMatrix(
+    permissions = PermissionMatrix(
         superCreate = SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
         superRead = SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
         superUpdate = SystemPermission.ACTION_MESSAGE_CHANNEL_UPDATE,

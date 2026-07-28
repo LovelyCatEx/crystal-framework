@@ -2,13 +2,13 @@
 
 ## 设计意图
 
-`StandardTenantManagerController` 是 Scoped 家族之前的租户资源专用基类。它建立了"system 级权限 + 租户级权限"的双层授权模型，通过 `isXxxInScope` 钩子处理"非直接租户"的嵌套资源（如部门成员）。
+`StandardTenantManagerController` 是 Scoped 家族之前的租户资源专用基类。它建立了双层授权模型（老命名："system 级权限 + 租户级权限"；`PermissionMatrix` 统一后对应 `tenantAdmin` + `tenantPem`），通过 `isXxxInScope` 钩子处理"非直接租户"的嵌套资源（如部门成员）。
 
 历史脉络：
 
 - v1.x 早期：所有租户资源都使用此 Controller
 - v1.10 后：抽出通用的 `StandardScopedManagerController`，把"跨 SYSTEM / TENANT 的双 scope"能力泛化
-- 目前：老的租户资源仍留在此 Controller；新写"只属于租户"的资源可选此类，也可选 Scoped（scope 固定 TENANT 的用法）
+- 目前：老的租户资源仍留在此 Controller；权限统一到 `PermissionMatrix`（8 String 构造函数标 `@Deprecated`，内部转发到 `PermissionMatrix.tenantOnly(...)`），新写"只属于租户"的资源可选此类，也可选 Scoped（scope 固定 TENANT 的用法）
 
 不建议扩展此 base 引入新的抽象——新能力应向 Scoped 家族添加。
 
@@ -20,18 +20,34 @@
 @Validated
 abstract class StandardTenantManagerController<...>(
     protected val managerService: SERVICE,
-    protected val createPermission: String,        protected val scopedCreatePermission: String,
-    protected val readPermission: String,          protected val scopedReadPermission: String,
-    protected val updatePermission: String,        protected val scopedUpdatePermission: String,
-    protected val deletePermission: String,        protected val scopedDeletePermission: String,
+    protected val permissions: PermissionMatrix,   // 主构造函数走 Matrix
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<Long> {
 
+    // 老的 8-String 构造函数保留一版兼容，标 @Deprecated，内部转发到主构造函数
+    @Deprecated("Use the primary constructor with PermissionMatrix.tenantOnly(...) instead.")
+    constructor(
+        managerService, createPermission, scopedCreatePermission,
+        readPermission, scopedReadPermission,
+        updatePermission, scopedUpdatePermission,
+        deletePermission, scopedDeletePermission,
+    ) : this(
+        managerService,
+        permissions = PermissionMatrix.tenantOnly(
+            tenantAdminCreate = createPermission, tenantAdminRead = readPermission,
+            tenantAdminUpdate = updatePermission, tenantAdminDelete = deletePermission,
+            tenantPemCreate = scopedCreatePermission, tenantPemRead = scopedReadPermission,
+            tenantPemUpdate = scopedUpdatePermission, tenantPemDelete = scopedDeletePermission,
+        ),
+    )
+
     companion object {
-        const val DISABLED_SCOPED_PERMISSION: String = ""
+        @Deprecated("Use PermissionMatrix.NOT_APPLICABLE instead")
+        const val DISABLED_SCOPED_PERMISSION: String = PermissionMatrix.NOT_APPLICABLE
     }
 
     private suspend fun hasScopedAuthority(authority: String): Boolean {
-        if (authority.isBlank()) return false
+        // 空串（老 DISABLED_SCOPED_PERMISSION）和 NOT_APPLICABLE 都短路
+        if (authority.isBlank() || authority == PermissionMatrix.NOT_APPLICABLE) return false
         return RbacUtils.hasAuthority(authority)
     }
 
@@ -74,42 +90,41 @@ abstract class StandardTenantManagerController<...>(
 
 ## 关键设计决策
 
-### 8 个 String 而非结构化 Triad
+### 从 8 个 String 到 PermissionMatrix.tenantOnly
 
-Tenant Controller 使用 8 个独立的 String 参数：`createPermission` / `scopedCreatePermission` / …。相比 Scoped 家族的 `ScopedPermissionTriad` 数据类，此设计的问题：
+Tenant Controller 早期使用 8 个独立的 String 参数（`createPermission` / `scopedCreatePermission` / …）。这个设计有几个短板：
 
 - 没有 `super` 层的显式表达——跨租户运维需依赖 system 权限，权限继承语义模糊
 - 构造函数签名冗长——8 个 String 参数容易顺序错乱
-- 无法方便地表达"只读"变体——没有类似 `Triad.readonly(...)` 的工厂
+- 无法方便地表达"只读"变体——没有类似 `readonly(...)` 的工厂
 
-但这是老代码的历史遗留，重写成本高，暂时保留。
+`PermissionMatrix.tenantOnly(...)` 是当前主构造函数，直接命名 `tenantAdmin*` + `tenantPem*` 两层。老的 8-String 构造函数保留一版兼容（`@Deprecated`），内部把 `createPermission` 转成 `tenantAdminCreate`、`scopedCreatePermission` 转成 `tenantPemCreate` 等，再委托给主构造函数。`createPermission` 之类 protected 属性也提供 getter 转发（如 `get() = permissions.tenantAdminCreate`），存量子类无需改动。
 
-### 双层权限：system → scoped
+### 双层权限：tenantAdmin → tenantPem
 
 授权顺序：
 
 ```
-1. RbacUtils.hasAuthority(systemPermission) → true → 立即放行，跳过 in-scope 检查
-2. hasScopedAuthority(scopedPermission) → true → 检查 isXxxInScope → true 才放行
+1. RbacUtils.hasAuthority(tenantAdminPermission) → true → 立即放行，跳过 in-scope 检查
+2. hasScopedAuthority(tenantPemPermission) → true → 检查 isXxxInScope → true 才放行
 3. 两者都无 → 403
 ```
 
-system 级放行不查 in-scope 是刻意的——system 权限本身即表示"跨租户运维能力"，无需再限制 tenantId。scoped 权限则是"在自己租户内的授权"，必须证明操作的资源在自己租户内。
+`tenantAdmin` 放行不查 in-scope 是刻意的——`tenantAdmin` 权限本身即表示"跨租户运维能力"，无需再限制 tenantId。`tenantPem` 权限则是"在自己租户内的授权"，必须证明操作的资源在自己租户内。super / system 层在此 Controller 中默认 `NOT_APPLICABLE`（Tenant 资源无 SYSTEM scope 概念）。
 
-### `DISABLED_SCOPED_PERMISSION = ""` 常量
+### `DISABLED_SCOPED_PERMISSION` 与 `NOT_APPLICABLE`
 
-用空字符串禁用 scoped 层：
+老 `DISABLED_SCOPED_PERMISSION = ""`（空字符串）用于禁用 scoped 层，`hasScopedAuthority` 遇空串短路返回 false。现在推荐使用 `PermissionMatrix.NOT_APPLICABLE`（`"!!not_applicable!!"`）—— `hasScopedAuthority` 对二者都短路，语义等价但更清晰：
 
 ```kotlin
 private suspend fun hasScopedAuthority(authority: String): Boolean {
-    if (authority.isBlank()) return false
+    // 空串（老 DISABLED_SCOPED_PERMISSION）和 NOT_APPLICABLE 都短路
+    if (authority.isBlank() || authority == PermissionMatrix.NOT_APPLICABLE) return false
     return RbacUtils.hasAuthority(authority)
 }
 ```
 
-选用空字符串而非 nullable 的原因：Kotlin 中 `""` 作为 constant 使用比 `null` 简洁（`const val` 只能是非空字面量）。语义等价："空字符串 = 未配置 scoped 权限"。
-
-对比 `ScopedPermissionTriad.NEVER_GRANTED`：那是一个"看起来像权限但永不匹配"的字符串（`"!!never_granted!!"`），走 `hasAuthority` 校验但恒返回 false；空字符串是在校验前就短路，两种设计意图不同。
+对比 `PermissionMatrix.NEVER_GRANTED`：那是一个"看起来像权限但永不匹配"的字符串，走 `hasAuthority` 校验但恒返回 false；`NOT_APPLICABLE` / 空字符串是在校验前就短路，两种设计意图不同。
 
 ### isUpdateInScope / isDeleteInScope 走链式查找
 

@@ -31,10 +31,9 @@ import org.springframework.web.bind.annotation.RequestBody
  *    methods directly is unsafe when the subclass tightens a DTO generic bound — Kotlin generates
  *    bridge methods that collide with Spring's `@PostMapping` registration; go through [preflight]
  *    instead.
- *  - [authorize] — invoked after [preflight] on every write and before [read]. Default is a no-op
- *    (Standard main line delegates permission checks to `ManagerControllerPermissionAspect` /
- *    `@ManagerPermissions`). Scoped/Tenant main lines override this to run their in-line permission
- *    logic.
+ *  - [authorize] — invoked after [preflight] on every write and before [read]. Default is a no-op.
+ *    All three main lines (Standard / Scoped / Tenant) override this to run in-line permission
+ *    checks against a [PermissionMatrix] injected via the constructor.
  *  - [buildReadResponse] — shapes the `POST /query` response. Default returns paginated entities via
  *    `managerService.query(dto)`; subclasses override to inject scope filtering or return VOs.
  *
@@ -78,9 +77,10 @@ abstract class AbstractManagerController<
     ): ApiResponse<*>? = null
 
     /**
-     * Permission decision hook. Default is a no-op — the Standard main line relies on
-     * `ManagerControllerPermissionAspect` + `@ManagerPermissions` for authorisation. Scoped/Tenant
-     * main lines override this to run in-line permission checks and throw on denial.
+     * Permission decision hook. Default is a no-op; all three main lines (Standard / Scoped /
+     * Tenant) override this to run in-line permission checks against a [PermissionMatrix]
+     * injected via the constructor, and throw on denial. `ManagerControllerPermissionAspect`
+     * additionally denies by default if a subclass leaves `permissions` null.
      *
      * All four DTOs are passed as nullable parameters so the override can branch on [action] and
      * dereference only the relevant DTO. `readAll` invokes this with all DTOs null when applicable.

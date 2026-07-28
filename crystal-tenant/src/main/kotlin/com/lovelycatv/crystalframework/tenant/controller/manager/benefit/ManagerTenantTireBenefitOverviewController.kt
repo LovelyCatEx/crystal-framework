@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.benefit
 
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -12,13 +11,13 @@ import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitF
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitValueManagerService
 import jakarta.validation.Valid
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(read = [SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ])
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/tire/benefit/overview")
@@ -27,6 +26,7 @@ class ManagerTenantTireBenefitOverviewController(
     private val featureManagerService: TenantTireBenefitFeatureManagerService,
     private val benefitValueRepository: TenantTireBenefitValueRepository,
 ) {
+    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ}')")
     @PostMapping("/query")
     suspend fun queryOverview(
         @RequestBody

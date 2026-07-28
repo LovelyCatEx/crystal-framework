@@ -7,21 +7,15 @@ import com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerUpdate
 import com.lovelycatv.crystalframework.mail.entity.MailSendLogEntity
 import com.lovelycatv.crystalframework.mail.repository.MailSendLogRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailSendLogManagerService
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnlyReadonly
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    create = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    update = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    delete = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-log")
@@ -35,4 +29,12 @@ class ManagerMailSendLogController(
         ManagerReadMailSendLogDTO,
         ManagerUpdateMailSendLogDTO,
         ManagerDeleteMailSendLogDTO
->(managerService)
+>(
+    managerService,
+    // Legacy annotation incorrectly bound CUD to the READ constant; systemOnlyReadonly fills every
+    // CUD slot with PermissionMatrix.NEVER_GRANTED which the Mutability.READ_ONLY guard also blocks.
+    permissions = PermissionMatrix.systemOnlyReadonly(
+        systemRead = PermissionMatrix.NOT_APPLICABLE,
+        superRead = SystemPermission.ACTION_MAIL_SEND_LOG_READ,
+    ),
+)
