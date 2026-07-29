@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-tasks")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-task")
 class ManagerApprovalFlowTaskController(
     managerService: ApprovalFlowTaskManagerService,
     private val approvalFlowEngine: ApprovalFlowEngine,

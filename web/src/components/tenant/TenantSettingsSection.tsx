@@ -1,5 +1,5 @@
 import {Button, Form, message} from "antd";
-import {SaveOutlined} from "@ant-design/icons";
+import {DiffOutlined, SaveOutlined} from "@ant-design/icons";
 import {useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useSearchParams} from "react-router-dom";
@@ -7,6 +7,7 @@ import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {getTenantSettingsSchema, updateTenantSettings} from "@/api/tenant/tenant-settings.api.ts";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
+import {SettingsChangesModal} from "@/components/settings/SettingsChangesModal.tsx";
 import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
 import {pluginRegistry} from "@/plugin/registry.ts";
 import {
@@ -15,7 +16,11 @@ import {
     useTenantSettingsTabToTranslationMap,
 } from "@/i18n/tenant-settings.tsx";
 import type {SettingsGroupExtraRenderer, SettingsItemRenderer} from "@/components/settings/types.ts";
-import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
+import {
+    deserializeSettingsValues,
+    diffSettingsValues,
+    serializeSettingsValues,
+} from "@/utils/settings-value.ts";
 import {TenantMessageChannelIdsSelector} from "@/components/selector/MessageChannelIdsSelector/TenantMessageChannelIdsSelector.tsx";
 import {MessageChainEditor} from "@/components/message-chain-editor";
 
@@ -74,19 +79,49 @@ export function TenantSettingsSection() {
         () => void message.error(t('pages.tenantSettingsManager.fetchFailed'))
     );
 
+    const baseline = useMemo(
+        () => (data ? deserializeSettingsValues(data.items) : {}),
+        [data],
+    );
+
+    const watchedValues = Form.useWatch([], form);
+
+    const changeCount = useMemo(
+        () => diffSettingsValues(data?.items ?? {}, baseline, watchedValues ?? {}).length,
+        [data, baseline, watchedValues],
+    );
+
+    const [changesModalOpen, setChangesModalOpen] = useState(false);
+
     useEffect(() => {
         if (!data) {
             return;
         }
-        const kv = deserializeSettingsValues(data.items);
-        form.setFieldsValue(kv);
-    }, [data]);
+        form.setFieldsValue(baseline);
+    }, [data, baseline]);
+
+    const computeChanges = () => {
+        const items = data?.items ?? {};
+        const current = form.getFieldsValue(true) as Record<string, unknown>;
+        return diffSettingsValues(items, baseline, current);
+    };
 
     const onSave = (values: Record<string, unknown>) => {
+        const items = data?.items ?? {};
+        const changes = diffSettingsValues(items, baseline, values);
+        if (changes.length === 0) {
+            void message.info(t('components.settings.noChanges'));
+            return;
+        }
+        const changedItems = Object.fromEntries(
+            changes.map((c) => [c.key, items[c.key]]).filter(([, s]) => Boolean(s)),
+        );
+        const changedValues = Object.fromEntries(changes.map((c) => [c.key, values[c.key]]));
         setSaving(true);
-        updateTenantSettings(serializeSettingsValues(data?.items ?? {}, values))
+        updateTenantSettings(serializeSettingsValues(changedItems, changedValues))
             .then(() => {
                 void message.success(t('pages.tenantSettingsManager.saveSuccess'));
+                setChangesModalOpen(false);
             })
             .catch(() => {
                 void message.error(t('pages.tenantSettingsManager.saveFailed'));
@@ -118,7 +153,14 @@ export function TenantSettingsSection() {
                 onTabChange={handleTabChange}
             />
 
-            <div className="mt-8 flex justify-end">
+            <div className="mt-8 flex justify-end space-x-3">
+                <Button
+                    icon={<DiffOutlined/>}
+                    onClick={() => setChangesModalOpen(true)}
+                    className="rounded-xl px-6 h-auto py-2"
+                >
+                    {`${t('components.settings.viewChanges')} (${changeCount})`}
+                </Button>
                 <Button
                     type="primary"
                     icon={<SaveOutlined/>}
@@ -129,6 +171,13 @@ export function TenantSettingsSection() {
                     {t('pages.tenantSettingsManager.saveSettings')}
                 </Button>
             </div>
+
+            <SettingsChangesModal
+                open={changesModalOpen}
+                onClose={() => setChangesModalOpen(false)}
+                changes={changesModalOpen ? computeChanges() : []}
+                keyTranslationMap={tenantSettingsKeyToTranslationMap}
+            />
         </Form>
     );
 }

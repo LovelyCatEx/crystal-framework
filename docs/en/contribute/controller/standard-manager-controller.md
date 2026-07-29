@@ -2,7 +2,7 @@
 
 ## Design intent
 
-`StandardManagerController` is the core abstraction for manager-side CRUD in the framework. It enforces the Controller → Service → Repository layered collaboration and pairs with AOP to automate permission checks and audit logging. 7 type parameters thread the entire chain (Service, Repository, Entity, four DTOs) together — compile-time type safety plus runtime AOP interception.
+`StandardManagerController` is the core abstraction for manager-side CRUD in the framework. It enforces the Controller → Service → Repository layered collaboration; permission checks are now inline via the `authorize` method (backed by `PermissionMatrix`), while audit logging remains automated via AOP. 7 type parameters thread the entire chain (Service, Repository, Entity, four DTOs) together — compile-time type safety.
 
 ## Source
 
@@ -53,7 +53,7 @@ abstract class StandardManagerController<
 
 ## Key structural decisions
 
-- **Method name `read` vs URL `/query`** is a historical artifact. Early APIs used `read` as the method name (with `/read` URL); the path was renamed to `/query` (matching "paginated query" semantics), but the method name stayed because `ManagerControllerPermissionAspect` reflects by method name to match `@ManagerPermissions.read`. Renaming this method breaks AOP permission mapping — the aspect must be updated in tandem.
+- **Method name `read` vs URL `/query`** is a historical artifact. Early APIs used `read` as the method name (with `/read` URL); the path was renamed to `/query` (matching "paginated query" semantics), but the method name persists. The legacy `ManagerControllerPermissionAspect` still reflects by method name to match `@ManagerPermissions.read` — renaming would break that compat path. The `PermissionMatrix` path dispatches via `authorize(ManagerAction, ...)` + `ScopedOperation` and does not depend on method names.
 
 - **`version = "1"`** is a custom property on `@GetMapping` / `@PostMapping`, paired with the framework's customized `RequestMappingHandlerMapping` to produce `/api/v1/xxx` paths.
 
@@ -63,40 +63,43 @@ abstract class StandardManagerController<
 
 ## Method naming convention
 
-`ManagerControllerPermissionAspect` reflects on method name to match permission config. Method names are a public contract:
+Method names now serve two matchers: the new `PermissionMatrix` path uses `ManagerAction` → `ScopedOperation` mapping (`readAll` and `read` both fold into `READ`); the legacy `ManagerControllerPermissionAspect` compat path still reflects the method name to pick the `@ManagerPermissions` field:
 
-| Method name | Matched `@ManagerPermissions` field | HTTP |
-|---|---|---|
-| `readAll` | `readAll` (falls back to `read` when empty) | GET `/list` |
-| `read` | `read` | POST `/query` |
-| `create` | `create` | POST `/create` |
-| `update` | `update` | POST `/update` |
-| `delete` | `delete` | POST `/delete` |
+| Method name | ManagerAction | ScopedOperation (Matrix path) | `@ManagerPermissions` field (legacy) | HTTP |
+|---|---|---|---|---|
+| `readAll` | READ_ALL | READ | `readAll` (falls back to `read` when empty) | GET `/list` |
+| `read` | READ | READ | `read` | POST `/query` |
+| `create` | CREATE | CREATE | `create` | POST `/create` |
+| `update` | UPDATE | UPDATE | `update` | POST `/update` |
+| `delete` | DELETE | DELETE | `delete` | POST `/delete` |
 
-Subclass overrides must preserve the name; otherwise AOP cannot match.
+Preserving method names on subclass overrides keeps both the Matrix and AOP paths matching.
 
-## @ManagerPermissions annotation
+## Permission declaration: PermissionMatrix
+
+`PermissionMatrix` is passed via the constructor arg `permissions = ...`. `StandardManagerController.authorize` maps `ManagerAction` to `ScopedOperation` and OR-checks `matrix.layersFor(SYSTEM, op)`:
 
 ```kotlin
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ManagerPermissions(
-    val read: Array<String> = [],
-    val readAll: Array<String> = [],
-    val create: Array<String> = [],
-    val update: Array<String> = [],
-    val delete: Array<String> = []
-)
+override suspend fun authorize(action: ManagerAction, userAuthentication, ...) {
+    val matrix = permissions ?: return  // permissions == null → fall back to legacy AOP
+    val op = when (action) {
+        ManagerAction.CREATE -> ScopedOperation.CREATE
+        ManagerAction.READ, ManagerAction.READ_ALL -> ScopedOperation.READ
+        ManagerAction.UPDATE -> ScopedOperation.UPDATE
+        ManagerAction.DELETE -> ScopedOperation.DELETE
+    }
+    val required = matrix.layersFor(ResourceScope.SYSTEM, op)
+    if (!RbacUtils.hasAnyAuthority(*required)) {
+        throw AuthorizationDeniedException("Access denied: required any of ${required.toList()}")
+    }
+}
 ```
 
-- `AnnotationTarget.CLASS` — class-level, covers the whole Controller
-- Each field is a permission array with OR semantics
-- Empty `readAll` falls back to `read` — logic inside the aspect; in most cases only `read` needs to be set
-- Empty array means "no check" — the aspect logs a warn and lets the call through; suitable for tests or temporarily open endpoints
+Standard resources use `PermissionMatrix.systemOnly(...)` — tenant layers default to `NOT_APPLICABLE`; the super layer is optional. `layersFor(SYSTEM, op)` filters `NOT_APPLICABLE` and typically returns `[system<op>]` (or `[super<op>, system<op>]`).
 
-## AOP interception
+## Legacy AOP path
 
-### ManagerControllerPermissionAspect
+The legacy `@ManagerPermissions` class annotation is handled by `ManagerControllerPermissionAspect`, active only when `permissions == null`:
 
 ```kotlin
 @Aspect
@@ -105,45 +108,20 @@ annotation class ManagerPermissions(
 class ManagerControllerPermissionAspect {
     @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
     fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
+        // If the Controller already supplies `permissions`, `authorize` handled it; proceed
         val targetClass = AopUtils.getTargetClass(joinPoint.target)
         val permissions = AnnotationUtils.findAnnotation(targetClass, ManagerPermissions::class.java)
             ?: return joinPoint.proceed()
-
-        val methodName = (joinPoint.signature as MethodSignature).method.name
-        val requiredPermissions = when (methodName) {
-            "readAll" -> permissions.readAll
-            "read"    -> permissions.read
-            "create"  -> permissions.create
-            "update"  -> permissions.update
-            "delete"  -> permissions.delete
-            else      -> null
-        }?.filter { it.isNotEmpty() }?.toList()
-
-        if (requiredPermissions.isNullOrEmpty()) {
-            logger.warn("No valid permission required for $methodSignature, skipped.")
-            return joinPoint.proceed()
-        }
-
-        return ReactiveSecurityContextHolder.getContext()
-            .mapNotNull { it.authentication }
-            .flatMap { authentication ->
-                if (!hasAnyPermission(authentication, requiredPermissions)) {
-                    throw AuthorizationDeniedException("Access denied: ...")
-                }
-                @Suppress("UNCHECKED_CAST")
-                joinPoint.proceed() as Mono<Any>
-            }
+        // ... reflect method name → match @ManagerPermissions field
     }
 }
 ```
 
-Pointcut coverage: `StandardManagerController.*(..)` covers Standard and all its subclasses (including Readonly), but not Scoped / DerivedScoped / Tenant. This is why the Scoped family checks permissions inline.
-
-`AopUtils.getTargetClass` peels off CGLIB proxies to get the real class; `AnnotationUtils.findAnnotation` walks the class inheritance chain, allowing `@ManagerPermissions` to be written on an intermediate abstract subclass. `class.getAnnotation()` supports neither.
+`AopUtils.getTargetClass` peels off CGLIB proxies to get the real class; `AnnotationUtils.findAnnotation` walks the class inheritance chain, allowing `@ManagerPermissions` to be written on an intermediate abstract subclass. This path carries `@Deprecated`, retained one release so legacy Controllers keep working during migration.
 
 ### ManagerControllerAuditAspect (in crystal-audit)
 
-Same pointcut, `@Order` runs after the permission aspect. Execution order: permission check → audit log → business method.
+Same pointcut, `@Order` runs after the permission aspect. Execution order: permission check (Matrix or legacy AOP) → audit log → business method.
 
 The audit aspect records:
 

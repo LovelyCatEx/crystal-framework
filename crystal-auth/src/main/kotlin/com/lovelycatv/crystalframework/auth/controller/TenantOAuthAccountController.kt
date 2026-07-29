@@ -6,7 +6,6 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.auth.controller.dto.BindTenantOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.dto.UnbindTenantOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.vo.TenantOAuthAccountVO
-import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 class TenantOAuthAccountController(
     private val oAuthAccountService: OAuthAccountService,
 ) {
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_OAUTH_READ_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.read')")
     @GetMapping("/accounts")
     suspend fun getTenantOAuthAccounts(
         userAuthentication: UserAuthentication,
@@ -51,7 +50,7 @@ class TenantOAuthAccountController(
         )
     }
 
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_OAUTH_BIND_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.bind')")
     @PostMapping("/bind")
     suspend fun bindTenantOAuthAccount(
         userAuthentication: UserAuthentication,
@@ -79,7 +78,7 @@ class TenantOAuthAccountController(
         )
     }
 
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_OAUTH_UNBIND_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.unbind')")
     @PostMapping("/unbind")
     suspend fun unbindTenantOAuthAccount(
         userAuthentication: UserAuthentication,

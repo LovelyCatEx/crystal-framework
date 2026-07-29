@@ -17,6 +17,7 @@ import com.lovelycatv.crystalframework.messagechannel.types.recipient.EmailRecip
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.LarkRecipient
 import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient
 import com.lovelycatv.crystalframework.rbac.tenant.repository.TenantMemberRoleRelationRepository
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRelationRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.user.service.UserService
@@ -52,7 +53,7 @@ class ApprovalCcNotifierImpl(
             return
         }
 
-        val recipientUserIds = resolveRecipientUserIds(scope, config)
+        val recipientUserIds = resolveRecipientUserIds(scope, config, instance.scopeId)
         val emails = recipientUserIds
             .mapNotNull { userService.getByIdOrNull(it)?.email }
             .filter { it.isNotBlank() }
@@ -64,8 +65,13 @@ class ApprovalCcNotifierImpl(
 
         val message = buildMessage(instance, node)
 
+        val resourceScope = when (scope) {
+            ApprovalFlowScope.SYSTEM -> ResourceScope.SYSTEM
+            ApprovalFlowScope.TENANT -> ResourceScope.TENANT
+        }
+
         config.channelIds.forEach { channelIdStr ->
-            val channelConfig = resolveChannelConfig(channelIdStr) ?: return@forEach
+            val channelConfig = resolveChannelConfig(channelIdStr, resourceScope, instance.scopeId) ?: return@forEach
             val recipients: List<MessageRecipient> = emails.map { buildRecipient(channelConfig.channelType, it) }
             try {
                 val results = messageChannelService.broadcast(channelConfig, recipients, message)
@@ -89,19 +95,23 @@ class ApprovalCcNotifierImpl(
         }
     }
 
-    private suspend fun resolveRecipientUserIds(scope: ApprovalFlowScope, config: CcNodeConfig): Set<Long> {
+    private suspend fun resolveRecipientUserIds(
+        scope: ApprovalFlowScope,
+        config: CcNodeConfig,
+        instanceTenantId: Long,
+    ): Set<Long> {
         val directIds = config.userIds.mapNotNull { it.toLongOrNull() }
         val roleIds = config.roleIds.mapNotNull { it.toLongOrNull() }
 
         return when (scope) {
             ApprovalFlowScope.TENANT -> {
                 val memberUserIdsFromDirect = directIds.mapNotNull { memberId ->
-                    tenantMemberService.getByIdOrNull(memberId)?.memberUserId
+                    resolveTenantMemberUserId(memberId, instanceTenantId)
                 }
                 val memberUserIdsFromRoles = roleIds.flatMap { roleId ->
                     tenantMemberRoleRelationRepository.findAllByRoleId(roleId).asFlow().toList()
                 }.mapNotNull { rel ->
-                    tenantMemberService.getByIdOrNull(rel.memberId)?.memberUserId
+                    resolveTenantMemberUserId(rel.memberId, instanceTenantId)
                 }
                 (memberUserIdsFromDirect + memberUserIdsFromRoles).toSet()
             }
@@ -114,13 +124,34 @@ class ApprovalCcNotifierImpl(
         }
     }
 
-    private suspend fun resolveChannelConfig(channelIdStr: String): ChannelConfig? {
+    /**
+     * Look up a tenant member by id and return its userId only when the member belongs to the
+     * expected tenant. Cross-tenant references (which could arise from a maliciously crafted CC
+     * node config) are dropped with a warn log so the rest of the CC delivery still proceeds.
+     */
+    private suspend fun resolveTenantMemberUserId(memberId: Long, expectedTenantId: Long): Long? {
+        val member = tenantMemberService.getByIdOrNull(memberId) ?: return null
+        if (member.tenantId != expectedTenantId) {
+            logger.warn(
+                "CC recipient tenantMember {} belongs to tenant {} but instance is on tenant {}, skipped",
+                memberId, member.tenantId, expectedTenantId,
+            )
+            return null
+        }
+        return member.memberUserId
+    }
+
+    private suspend fun resolveChannelConfig(
+        channelIdStr: String,
+        expectedScope: ResourceScope,
+        expectedScopeId: Long?,
+    ): ChannelConfig? {
         val channelId = channelIdStr.toLongOrNull() ?: run {
             logger.warn("CC: channel id '$channelIdStr' is not a valid Long")
             return null
         }
         return try {
-            messageChannelManagerService.resolveConfig(channelId)
+            messageChannelManagerService.resolveConfig(channelId, expectedScope, expectedScopeId)
         } catch (e: Exception) {
             logger.warn("CC: failed to resolve message channel $channelId: ${e.message}")
             null

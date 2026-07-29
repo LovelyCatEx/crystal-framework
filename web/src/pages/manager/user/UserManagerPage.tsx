@@ -1,10 +1,17 @@
-import {Col, Form, Input, Row} from "antd";
+import {Button, Col, Form, Input, message, Popconfirm, Row, Tooltip} from "antd";
+import {ReloadOutlined} from "@ant-design/icons";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
-import {type ManagerCreateUserDTO, type ManagerReadUserDTO, UserManagerController} from "@/api/user/user.api.ts";
+import {
+    type ManagerCreateUserDTO,
+    type ManagerReadUserDTO,
+    refreshUserAuthorities,
+    UserManagerController,
+} from "@/api/user/user.api.ts";
 import {useUserTableColumns} from "@/components/columns/UserEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {useEffect, useRef} from "react";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import type {User} from "@/types/user/user.types.ts";
 
 export default function UserManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -31,6 +38,15 @@ export default function UserManagerPage() {
         { field: 'nickname',      type: 'text'   as const, label: t('pages.userManager.filter.nickname') },
     ];
 
+    const handleRefreshSingleAuthority = async (userId: string) => {
+        try {
+            await refreshUserAuthorities({ userIds: [userId] });
+            void message.success(t('pages.userManager.messages.refreshAuthoritySuccess'));
+        } catch {
+            void message.error(t('pages.userManager.messages.refreshAuthorityFailed'));
+        }
+    };
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -46,6 +62,30 @@ export default function UserManagerPage() {
                 { field: 'id', operator: 'eq', value: filters.id },
                 { field: 'username', value: filters.username },
                 { field: 'nickname', value: filters.nickname },
+            ]}
+            tableRowActionsRender={(record: User) => (
+                <Popconfirm
+                    title={t('pages.userManager.action.refreshAuthority')}
+                    description={<span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.refreshAuthorityConfirm')}</span>}
+                    onConfirm={() => handleRefreshSingleAuthority(record.id)}
+                    okText={t('components.managerPageContainer.confirm')}
+                    cancelText={t('components.managerPageContainer.cancel')}
+                >
+                    <Tooltip title={t('pages.userManager.action.refreshAuthority')}>
+                        <Button type="text" size="small" icon={<ReloadOutlined />} />
+                    </Tooltip>
+                </Popconfirm>
+            )}
+            extraBatchActions={[
+                {
+                    key: 'refreshAuthority',
+                    label: t('pages.userManager.action.refreshAuthority'),
+                    confirmTitle: t('pages.userManager.action.refreshAuthority'),
+                    confirmContent: <span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.refreshAuthorityBatchConfirm')}</span>,
+                    successMessage: t('pages.userManager.messages.refreshAuthoritySuccess'),
+                    failedMessage: t('pages.userManager.messages.refreshAuthorityFailed'),
+                    handler: (entities) => refreshUserAuthorities({ userIds: entities.map((it) => it.id) }),
+                },
             ]}
             tableActions={[
                 {

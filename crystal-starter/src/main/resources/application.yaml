@@ -88,6 +88,15 @@ crystalframework:
   message-channel:
     encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+
 logging:
   level:
     root: info

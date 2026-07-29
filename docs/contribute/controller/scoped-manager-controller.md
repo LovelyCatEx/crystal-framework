@@ -2,7 +2,7 @@
 
 ## 设计意图
 
-`StandardScopedManagerController` 解决了 `StandardTenantManagerController` 无法优雅表达的场景：同一份资源既可能属于 SYSTEM 也可能属于 TENANT。核心抽象是 `ResourceScope` + `ScopedPermissionTriad`，把"scope 是什么"和"哪个权限"两件事解耦。
+`StandardScopedManagerController` 解决了 `StandardTenantManagerController` 无法优雅表达的场景：同一份资源既可能属于 SYSTEM 也可能属于 TENANT。核心抽象是 `ResourceScope` + `PermissionMatrix`，把"scope 是什么"和"哪个权限"两件事解耦。
 
 ## 三个核心抽象
 
@@ -31,59 +31,82 @@ enum class ScopedOperation { CREATE, READ, UPDATE, DELETE }
 
 四个 CRUD 值，用于 Triad 内部按操作分派权限。
 
-### ScopedPermissionTriad
+### PermissionMatrix
 
 ```kotlin
-data class ScopedPermissionTriad(
+data class PermissionMatrix(
     val superCreate: String, val superRead: String, val superUpdate: String, val superDelete: String,
     val systemCreate: String, val systemRead: String, val systemUpdate: String, val systemDelete: String,
+    val tenantAdminCreate: String, val tenantAdminRead: String, val tenantAdminUpdate: String, val tenantAdminDelete: String,
     val tenantPemCreate: String, val tenantPemRead: String, val tenantPemUpdate: String, val tenantPemDelete: String,
 ) {
-    fun forScope(scope: ResourceScope, operation: ScopedOperation): Array<String> = when (scope) {
-        ResourceScope.SYSTEM -> arrayOf(superFor(operation), systemFor(operation))
-        ResourceScope.TENANT -> arrayOf(superFor(operation), tenantPemFor(operation))
-    }
+    fun layersFor(scope: ResourceScope, operation: ScopedOperation): Array<String> = when (scope) {
+        ResourceScope.SYSTEM -> arrayOf(superFor(op), systemFor(op))
+        ResourceScope.TENANT -> arrayOf(superFor(op), tenantAdminFor(op), tenantPemFor(op))
+    }.filter { it != NOT_APPLICABLE }.toTypedArray()
+
+    fun crossTenantLayersFor(operation: ScopedOperation): Array<String> = arrayOf(
+        superFor(op), tenantAdminFor(op),
+    ).filter { it != NOT_APPLICABLE }.toTypedArray()
 }
 ```
 
-12 个权限 = 3 层 × 4 操作。设计理由：
+16 个权限 = 4 层 × 4 操作。设计理由：
 
-- 3 层不是"权限继承"关系，而是"授权维度"：
+- 4 层不是"权限继承"关系，而是"授权维度"：
   - `super`：跨 scope（框架管理员）
   - `system`：仅 SYSTEM 内
-  - `tenantPem`：仅 TENANT 内
-- `forScope()` 返回一个数组，`hasAnyAuthority(...)` 对数组做 OR 匹配
-- SYSTEM 请求走 `[super, system]`，TENANT 请求走 `[super, tenantPem]`
+  - `tenantAdmin`：TENANT 但跨租户（运维管理员），从旧 Triad 的"super 兜底跨租户"抽出为独立层
+  - `tenantPem`：仅 TENANT 且本租户
+- `layersFor()` 返回一个数组，`hasAnyAuthority(...)` 对数组做 OR 匹配
+- SYSTEM 请求走 `[super, system]`，TENANT 请求走 `[super, tenantAdmin, tenantPem]`
+- `crossTenantLayersFor()` 提取 `[super, tenantAdmin]`，`checkOwnership` 用它判定"跨租户"层
 - 不存在 `[super, system, tenantPem]` 全组合——SYSTEM 资源不能被 tenantPem 权限持有者操作（会破坏 scope 隔离）
+- `NOT_APPLICABLE` 会被 `layersFor` / `crossTenantLayersFor` 过滤掉，让"层不适用"变成 no-op 而非死策略
 
-## `NEVER_GRANTED` 兜底
+## 两个哨兵值：NOT_APPLICABLE vs NEVER_GRANTED
 
 ```kotlin
 companion object {
+    /** 该层对本资源不适用（如 SYSTEM-only 资源的 tenant 层） */
+    const val NOT_APPLICABLE: String = "!!not_applicable!!"
+
+    /** 该层存在但操作被禁止（Readonly 变体的 CUD 用它） */
     const val NEVER_GRANTED: String = "!!never_granted!!"
-    fun readonly(superRead: String, systemRead: String, tenantPemRead: String) = ScopedPermissionTriad(
+
+    fun readonly(superRead, systemRead, tenantAdminRead, tenantPemRead) = PermissionMatrix(
         superCreate = NEVER_GRANTED, superRead = superRead, superUpdate = NEVER_GRANTED, superDelete = NEVER_GRANTED,
         systemCreate = NEVER_GRANTED, systemRead = systemRead, systemUpdate = NEVER_GRANTED, systemDelete = NEVER_GRANTED,
+        tenantAdminCreate = NEVER_GRANTED, tenantAdminRead = tenantAdminRead, tenantAdminUpdate = NEVER_GRANTED, tenantAdminDelete = NEVER_GRANTED,
         tenantPemCreate = NEVER_GRANTED, tenantPemRead = tenantPemRead, tenantPemUpdate = NEVER_GRANTED, tenantPemDelete = NEVER_GRANTED,
     )
 }
 ```
 
-`NEVER_GRANTED` 是刻意的死字符串：
+两个哨兵都是刻意的死字符串：前后缀 `!!` 违反项目 `<module>.<resource>.<op>` 命名规范，不属于任何真实权限常量，`root` 角色的全权自动授权也不包含它。但两者语义不同：
 
-- 不属于任何真实权限常量（`SystemPermission` / `TenantPermission` 中均无）
-- `root` 角色的全权自动授权也不包含它（因为不在 `SystemPermission` 反射得到的清单里）
-- 前后缀 `!!` 违反项目 `<module>.<resource>.<op>` 命名规范，与真实权限不可能冲突
+- **`NOT_APPLICABLE`**：`layersFor` **过滤掉**，不参与 OR 判定。用于"该层对本资源不适用"（如 SYSTEM-only 资源的两个 tenant 层）—— 数组少一个元素，等同于"这一层不存在"
+- **`NEVER_GRANTED`**：`layersFor` **保留占位**，让 OR-check 看到它并确定性失败。用于"该层存在但操作禁止"（Readonly 变体的 CUD）—— fail-safe 而非 fail-open
 
-设想若 `Triad.readonly` 的 CRUD 位填的是读权限：
+设想若 `readonly(...)` 的 CRUD 位填的是读权限：
 
 1. 用户 A 持有读权限
 2. 某天 `ReadonlyScopedManagerController` 被绕开或误改为 `Standard`
-3. `triad.superFor(CREATE)` 返回读权限
-4. `hasAnyAuthority(readPerm, readPerm) = true`
+3. `matrix.superFor(CREATE)` 返回读权限
+4. `hasAnyAuthority(readPerm, ...) = true`
 5. 用户 A 的读权限被静默升级为写权限
 
-`NEVER_GRANTED` 用于兜底：即使发生上述情况，`hasAnyAuthority("!!never_granted!!", "!!never_granted!!")` 恒为 false，拒绝到底。此为防御性编程的正确用法——让错误路径的失败模式安全（fail-safe），而非静默升级权限（fail-open）。
+`NEVER_GRANTED` 用于兜底：即使发生上述情况，`hasAnyAuthority("!!never_granted!!", ...)` 恒为 false，拒绝到底。此为防御性编程的正确用法——让错误路径的失败模式安全（fail-safe），而非静默升级权限（fail-open）。
+
+## 前缀约定与 collectPrefixViolations
+
+```kotlin
+init {
+    collectPrefixViolations(this).forEach { logger.warn("PermissionMatrix: $it. This will become a hard error in a future release.") }
+}
+```
+
+四层各有强制前缀：`super*` 不能带 `system.` / `tenant.` / `i.tenant.` 前缀；`system*` 必须以 `system.` 开头；`tenantAdmin*` 必须以 `tenant.` 开头；`tenantPem*` 必须以 `i.tenant.` 开头。`init` 遇违规 emit warn 日志，`collectPrefixViolations(matrix)` 用于测试/gating 严格校验。当前是软约束，未来会升级为 hard error。
 
 ## 源码结构
 
@@ -93,18 +116,19 @@ companion object {
 @Validated
 abstract class StandardScopedManagerController<...>(
     protected val managerService: SERVICE,
-    protected val permissions: ScopedPermissionTriad? = null,   // 允许为 null，此时子类必须 override checkPermission
+    protected val permissions: PermissionMatrix? = null,   // 允许为 null，此时子类必须 override checkPermission
 ) {
     protected open suspend fun checkPermission(scope, scopeId, operation, userAuth): Boolean {
-        val triad = permissions ?: error("...override checkPermission when no Triad")
-        return RbacUtils.hasAnyAuthority(*triad.forScope(scope, operation))
+        val matrix = permissions ?: error("...override checkPermission when no Matrix")
+        return RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, operation))
     }
 
     protected open suspend fun checkOwnership(scope, scopeId, operation, userAuth): Boolean {
         return when (scope) {
             SYSTEM -> true
             TENANT -> {
-                if (RbacUtils.hasAuthority(triad.superFor(operation))) true
+                // super 或 tenantAdmin 层持有者 → 跨租户放行
+                if (RbacUtils.hasAnyAuthority(*matrix.crossTenantLayersFor(operation))) true
                 else scopeId == userAuth.tenantId
             }
         }

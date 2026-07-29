@@ -9,7 +9,7 @@ import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {UserManagerController} from "@/api/user/user.api.ts";
 import type {User} from "@/types/user/user.types.ts";
 import {UserCard} from "../card/pop/UserCard.tsx";
-import {AvatarResource} from "../AvatarResource.tsx";
+import {AvatarResource} from "../resource/AvatarResource.tsx";
 import {TenantManagerController} from "@/api/tenant/tenant.api.ts";
 import type {Tenant} from "@/types/tenant/tenant.types.ts";
 import {DesktopOutlined, GlobalOutlined} from "@ant-design/icons";

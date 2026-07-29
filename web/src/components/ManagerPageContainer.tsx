@@ -26,6 +26,16 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 
 type DivHTMLAttributes = Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'>;
 
+export interface ManagerPageContainerBatchAction<ENTITY extends BaseEntity> {
+    key: string;
+    label: React.ReactNode;
+    confirmTitle?: React.ReactNode;
+    confirmContent?: React.ReactNode;
+    successMessage?: string;
+    failedMessage?: string;
+    handler: (entities: ENTITY[]) => Promise<unknown>;
+}
+
 export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps, EntityTableProps<ENTITY>, DivHTMLAttributes {
     delete: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
     update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
@@ -35,6 +45,7 @@ export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends Ac
     showActionBar?: boolean;
     readonlyMode?: boolean;
     showRowActions?: boolean;
+    extraBatchActions?: ManagerPageContainerBatchAction<ENTITY>[];
 }
 
 export interface ManagerPageContainerRef extends EntityTableRef {
@@ -71,32 +82,49 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     // Selector
     const [selectedEntities, setSelectedEntities] = useState<ENTITY[]>([]);
-    const [batchOperationType, setBatchOperationType] = useState(0);
+    const [batchOperationKey, setBatchOperationKey] = useState<string | null>(null);
+
+    const runBatchAction = useCallback((action: ManagerPageContainerBatchAction<ENTITY>) => {
+        modal.confirm({
+            title: action.confirmTitle ?? action.label,
+            icon: <ExclamationCircleFilled />,
+            content: action.confirmContent,
+            onOk() {
+                return action
+                    .handler(selectedEntities)
+                    .then(() => {
+                        if (action.successMessage) void message.success(action.successMessage);
+                        setSelectedEntities([]);
+                        entityTableRef?.current?.clearSelection();
+                        entityTableRef?.current?.refreshData();
+                    })
+                    .catch(() => {
+                        if (action.failedMessage) void message.error(action.failedMessage);
+                    });
+            },
+        });
+    }, [modal, selectedEntities]);
+
+    const builtinBatchActions = useMemo<ManagerPageContainerBatchAction<ENTITY>[]>(() => [
+        {
+            key: 'delete',
+            label: t('components.managerPageContainer.batchDelete'),
+            confirmTitle: t('components.managerPageContainer.batchDeleteTitle'),
+            confirmContent: t('components.managerPageContainer.batchDeleteConfirm'),
+            successMessage: t('components.managerPageContainer.batchDeleteSuccess'),
+            failedMessage: t('components.managerPageContainer.batchDeleteFailed'),
+            handler: (entities) => props.delete({ ids: entities.map((entity) => entity.id) }),
+        },
+        ...(props.extraBatchActions ?? []),
+    ], [t, props]);
 
     const handleOnBatchOperationClick = useCallback(() => {
-        if (batchOperationType === 1) {
-            if (selectedEntities.length <= 0) return;
-
-            modal.confirm({
-                title: t('components.managerPageContainer.batchDeleteTitle'),
-                icon: <ExclamationCircleFilled />,
-                content: t('components.managerPageContainer.batchDeleteConfirm'),
-                onOk() {
-                    return props
-                        .delete({ ids: selectedEntities.map((entity) => entity.id) })
-                        .then(() => {
-                            void message.success(t('components.managerPageContainer.batchDeleteSuccess'));
-                            setSelectedEntities([]);
-                            entityTableRef?.current?.clearSelection();
-                            entityTableRef?.current?.refreshData();
-                        })
-                        .catch(() => {
-                            void message.error(t('components.managerPageContainer.batchDeleteFailed'));
-                        });
-                },
-            });
-        }
-    }, [batchOperationType, selectedEntities, modal, props, t]);
+        if (!batchOperationKey) return;
+        if (selectedEntities.length <= 0) return;
+        const action = builtinBatchActions.find((it) => it.key === batchOperationKey);
+        if (!action) return;
+        runBatchAction(action);
+    }, [batchOperationKey, selectedEntities, builtinBatchActions, runBatchAction]);
 
     const openModal = (item: ENTITY | null = null) => {
         setEditingItem(item);
@@ -174,9 +202,9 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                     <div className="flex flex-row items-center gap-2">
                         <Select
                             className="min-w-32"
-                            style={{ width: 120 }}
-                            options={[{ value: '1', label: t('components.managerPageContainer.batchDelete') }]}
-                            onChange={(value) => setBatchOperationType(Number.parseInt(value))}
+                            style={{ width: 160 }}
+                            options={builtinBatchActions.map((it) => ({ value: it.key, label: it.label }))}
+                            onChange={(value) => setBatchOperationKey(value)}
                             placeholder={t('components.managerPageContainer.batchOperation')}
                         />
                         <Button type="primary" onClick={handleOnBatchOperationClick}>
@@ -187,7 +215,7 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
             },
             ...(props.tablePrefixActions ?? []),
         ];
-    }, [readonlyMode, isCustomTableSelector, props.tablePrefixActions, t, handleOnBatchOperationClick]);
+    }, [readonlyMode, isCustomTableSelector, props.tablePrefixActions, t, builtinBatchActions, handleOnBatchOperationClick]);
 
     const builtinTableSelection = useMemo<EntityTableProps<ENTITY>['tableSelection']>(() => {
         if (readonlyMode) return { type: 'disabled' };

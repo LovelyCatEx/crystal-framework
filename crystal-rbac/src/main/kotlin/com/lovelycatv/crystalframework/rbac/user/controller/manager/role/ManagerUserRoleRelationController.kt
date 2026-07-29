@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.rbac.user.controller.manager.role
 import com.lovelycatv.crystalframework.rbac.user.controller.manager.role.dto.SetUserRolesDTO
 import com.lovelycatv.crystalframework.rbac.user.service.impl.UserRoleRelationServiceImpl
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import jakarta.validation.Valid
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerUserRoleRelationController(
     private val userRoleRelationService: UserRoleRelationServiceImpl
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_ROLE_READ}')")
+    @PreAuthorize("hasAnyAuthority('system.user.role.read')")
     @GetMapping("/get", version = "1")
     suspend fun getUserRoles(
         userAuthentication: UserAuthentication,
@@ -31,7 +30,7 @@ class ManagerUserRoleRelationController(
         return ApiResponse.success(userRoleRelationService.getUserRoles(userId))
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_USER_ROLE_UPDATE}')")
+    @PreAuthorize("hasAnyAuthority('system.user.role.update')")
     @PostMapping("/set", version = "1")
     suspend fun setUserRoles(
         userAuthentication: UserAuthentication,

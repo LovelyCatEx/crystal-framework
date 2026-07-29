@@ -18,26 +18,31 @@ StandardManagerController                          v1.0 起点，全局 CRUD 基
       └─ StandardDerivedScopedManagerController    资源无自身 scope 列
                                                    scope 从父实体链推导
                                                    无 /list（无父上下文无法列举）
+
+统一到 PermissionMatrix（当前）：三套权限模型（@ManagerPermissions / ScopedPermissionTriad
+/ 8 String）合并为一个 4 层 × 4 操作 = 16 权限的 `PermissionMatrix` 数据类，所有基类
+统一通过构造参数 `permissions = ...` 接收。`ScopedPermissionMatrix` 保留为 typealias、
+`StandardTenantManagerController` 保留兼容构造函数一版，标 @Deprecated 引导迁移。
 ```
 
 `StandardTenantManagerController` 早于 `StandardScopedManagerController`。新代码在 SYSTEM/TENANT 双 scope 场景下优先选 Scoped 家族。
 
 ## 六个基类的定位差异
 
-| 基类 | 关键抽象 | 数据模型 | 权限模型 |
+| 基类 | 关键抽象 | 数据模型 | 权限声明（PermissionMatrix 工厂） |
 |---|---|---|---|
-| `StandardManagerController` | 泛型链 + AOP 权限 | 全局资源，无 scope | `@ManagerPermissions` 5 字段数组，OR 语义 |
-| `ReadonlyManagerController` | 继承 Standard 三方法重写 | 同上，读特化 | 同上 |
-| `StandardScopedManagerController` | `BaseScopedEntity` 显式 scope 列 | 资源自带 `scope` + `scopeId` | `ScopedPermissionTriad` 三层 × 四操作 |
-| `ReadonlyScopedManagerController` | 继承 Scoped 三方法重写 | 同 Scoped，读特化 | `Triad.readonly(...)` + `NEVER_GRANTED` 兜底 |
-| `StandardDerivedScopedManagerController` | `resolveScopeFromXXX` 三抽象方法 | 靠父实体推 scope | 同 Scoped |
-| `StandardTenantManagerController` | 8 个 String 权限 + `isXxxInScope` 钩子 | 强制 tenantId 为 scope | 双层权限（system + scoped） |
+| `StandardManagerController` | 泛型链 + `authorize` 方法 | 全局资源，无 scope | `PermissionMatrix.systemOnly(...)` |
+| `ReadonlyManagerController` | 继承 Standard + `Mutability.READ_ONLY` | 同上，读特化 | `PermissionMatrix.systemOnlyReadonly(...)` |
+| `StandardScopedManagerController` | `BaseScopedEntity` 显式 scope 列 | 资源自带 `scope` + `scopeId` | `PermissionMatrix.of { ... }` |
+| `ReadonlyScopedManagerController` | 继承 Scoped + `Mutability.READ_ONLY` | 同 Scoped，读特化 | `PermissionMatrix.readonly(...)`（16 位 CUD 填 `NEVER_GRANTED`） |
+| `StandardDerivedScopedManagerController` | `resolveScopeFromXXX` 三抽象方法 | 靠父实体推 scope | `PermissionMatrix.of { ... }` |
+| `StandardTenantManagerController` | `isXxxInScope` 钩子 + `preflight` | 强制 tenantId 为 scope | `PermissionMatrix.tenantOnly(...)` |
 
-## 权限体系的三次演化
+## 权限体系的四代演化
 
-### 第一层：@ManagerPermissions（AOP）
+### 第一代：@ManagerPermissions（AOP，已弃用）
 
-`StandardManagerController` 采用类注解 + AOP 拦截。
+`StandardManagerController` 初期采用类注解 + AOP 拦截：
 
 ```kotlin
 @Aspect
@@ -55,11 +60,11 @@ class ManagerControllerPermissionAspect {
 - 按方法名反射匹配（`readAll` / `read` / `create` / `update` / `delete`）
 - `AopUtils.getTargetClass` 穿透 CGLIB 代理，`AnnotationUtils.findAnnotation` 支持注解继承查找
 
-局限：数组只能声明静态权限清单，无法表达"根据 scope 动态选权限"。这是后续 Scoped 家族改走 Triad 的原因。
+局限：数组只能声明静态权限清单，无法表达"根据 scope 动态选权限"。这是后续 Scoped 家族改走 Triad、并最终统一到 `PermissionMatrix` 的动因之一。当前 AOP 路径仅在 Controller 未设 `permissions` 时作为兼容回退，且带 `@Deprecated`。
 
-### 第二层：ScopedPermissionTriad（构造参数）
+### 第二代：ScopedPermissionTriad（构造参数，已弃用）
 
-Scoped 家族用 `ScopedPermissionTriad` 数据类装 12 个权限：
+Scoped 家族曾用 `ScopedPermissionTriad` 数据类装 12 个权限：
 
 ```
 super × CRUD      跨 scope 的管理员权限
@@ -74,11 +79,11 @@ SYSTEM scope → hasAnyAuthority(super<op>, system<op>)
 TENANT scope → hasAnyAuthority(super<op>, tenantPem<op>)
 ```
 
-`NEVER_GRANTED` 常量用于兜底。`Triad.readonly(...)` 只填读权限，其他 CRUD 位塞 `"!!never_granted!!"`——不是任何真实权限，也不属于 `SystemPermission` 常量集合，`root` 角色的全权自动授权也不包含它。即使有人绕开 `ReadonlyScopedManagerController` 直接查 `triad.superFor(CREATE)`，返回值也拒绝匹配，避免只读权限被误用为写权限的静默 bypass。
+局限：缺少"TENANT 但跨租户"这一层 —— 让 SYSTEM 管理员编辑租户数据必须持有 `super*`，把"跨 scope"和"跨租户运维"揉在一起。`ScopedPermissionTriad` 类型已合并进 `PermissionMatrix`，`ScopedPermissionMatrix` typealias 保留一版兼容，携带 `@Deprecated`。
 
-### 第三层：8 个 String 参数（TenantManager 老设计）
+### 第三代：8 个 String 参数（TenantManager 老设计，已弃用）
 
-`StandardTenantManagerController` 早于 Triad，权限模型较扁平：
+`StandardTenantManagerController` 早于 Triad，权限模型更扁平：
 
 ```kotlin
 createPermission,      scopedCreatePermission,     // system + tenant
@@ -87,21 +92,42 @@ updatePermission,      scopedUpdatePermission,
 deletePermission,      scopedDeletePermission,
 ```
 
-匹配规则：先查 system 级 → 再查 scoped 级 → 都无则 403。此模型缺少"跨 scope 管理员"（super 层）的概念——`super` 被 system 位吞并，导致跨租户运维必须依赖系统级权限。此为 Scoped 家族引入 Triad 的动机之一。
+匹配规则：先查 system 级 → 再查 scoped 级 → 都无则 403。同样缺少"跨 scope 管理员"（super 层）。老 8-String 构造函数带 `@Deprecated`、内部转发到 `PermissionMatrix.tenantOnly(...)`，保留一版兼容。
 
-`DISABLED_SCOPED_PERMISSION = ""` 用于禁用 tenant-scoped 访问，只允许 system 级调用者。
+### 第四代：PermissionMatrix（当前）
+
+`PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`）用 4 层 × 4 操作 = 16 权限统一以上三种声明方式：
+
+| 层             | authority 前缀     | 常量来源               | 语义                                |
+|---------------|-----------------|--------------------|-----------------------------------|
+| `super`       | 无前缀             | `SystemPermission` | 跨 SYSTEM + TENANT 的超级管理员          |
+| `system`      | `system.`       | `SystemPermission` | 仅 SYSTEM scope                    |
+| `tenantAdmin` | `tenant.`       | `SystemPermission` | TENANT scope 且跨租户                 |
+| `tenantPem`   | `i.tenant.`     | `TenantPermission` | TENANT scope 且严格匹配 tenantId       |
+
+匹配规则（`layersFor(scope, op)`）：
+
+```
+SYSTEM scope → hasAnyAuthority(super, system)
+TENANT scope → hasAnyAuthority(super, tenantAdmin, tenantPem)
+```
+
+关键设计：
+
+- **两个哨兵值**：`NOT_APPLICABLE`（层不适用，`layersFor` 过滤掉，不参与决策）+ `NEVER_GRANTED`（层存在但操作禁止，`layersFor` 保留占位但永不匹配任何真实 authority）。设计动机同旧 `Triad.NEVER_GRANTED` —— 让错误路径 fail-safe 而非 fail-open
+- **前缀约定**：`super*` 不能有前缀；`system*` 必须以 `system.` 开头；`tenantAdmin*` 必须以 `tenant.` 开头；`tenantPem*` 必须以 `i.tenant.` 开头。`PermissionMatrix.init` 遇违规 emit warn（未来会升级为 hard error），`collectPrefixViolations(matrix)` 用于测试/gating 严格校验
+- **DSL + 4 个便捷工厂**：`of { ... }` / `systemOnly(...)` / `tenantOnly(...)` / `readonly(...)` / `systemOnlyReadonly(...)`，未打开层默认 `NOT_APPLICABLE`
+- **兼容层**：老 `ScopedPermissionMatrix` typealias、Tenant 老构造函数、`@ManagerPermissions` AOP 回退路径都保留一版并标 `@Deprecated`，无破坏性迁移
 
 ## 权限切面与显式校验的区别
 
 | 家族 | 权限检查方式 | 检查时机 |
 |---|---|---|
-| Standard / Readonly | AOP 切面（`ManagerControllerPermissionAspect`） | 方法调用前 |
+| Standard / Readonly | `StandardManagerController.authorize` 里显式 OR-check `matrix.layersFor(SYSTEM, op)` | 每个端点方法开头 |
 | Scoped / DerivedScoped / ReadonlyScoped | 方法内显式 `assertAccess` | 端点第一行 |
-| Tenant | 方法内显式 `RbacUtils.hasAuthority` | 端点内部 |
+| Tenant | 方法内显式 `RbacUtils.hasAuthority`，用 `PermissionMatrix.tenantAdminFor` / `tenantPemFor` 分派 | 端点内部 |
 
-Scoped 家族不走 AOP 的原因：权限决策依赖 DTO 里的 `scope` 和 `scopeId`，AOP 拦截时 DTO 尚未反序列化为 typed 对象；`update` / `delete` 场景还需要数据库查询结果参与决策。方法内显式校验 + `checkPermission` / `checkOwnership` 钩子更适合。
-
-Standard 家族相反——权限清单在类注解上静态可读，AOP 处理最省事。
+Scoped 家族原本就走内联校验，Standard / Readonly 在 `PermissionMatrix` 引入后也从 AOP 迁到 `authorize` 方法（保留 AOP 回退是为了兼容仍带 `@ManagerPermissions` 的旧 Controller）。这样所有家族的权限决策都统一在 typed DTO + typed Matrix 上，AOP 只留兼容用途。
 
 ## 泛型链条
 

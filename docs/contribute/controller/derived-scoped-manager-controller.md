@@ -18,7 +18,7 @@
 @Validated
 abstract class StandardDerivedScopedManagerController<...>(
     protected val managerService: SERVICE,
-    protected val permissions: ScopedPermissionTriad,      // 必须提供，非 nullable
+    protected val permissions: PermissionMatrix,      // 必须提供，非 nullable
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<*> {
 
     // 三个抽象方法：从不同来源解析 scope
@@ -30,7 +30,7 @@ abstract class StandardDerivedScopedManagerController<...>(
         return when (scope) {
             SYSTEM -> true
             TENANT -> {
-                if (RbacUtils.hasAuthority(permissions.superFor(operation))) true
+                if (RbacUtils.hasAnyAuthority(*permissions.crossTenantLayersFor(operation))) true
                 else scopeId == userAuth.tenantId
             }
         }
@@ -94,10 +94,10 @@ Kotlin 的 `where` 子句表达多重上界，同时要求：
 
 ### permissions 参数为非空
 
-对比 `StandardScopedManagerController` 的 `permissions: ScopedPermissionTriad? = null`（允许为空、子类必须 override `checkPermission`），DerivedScoped 的 `permissions: ScopedPermissionTriad` 是强制非空的：
+对比 `StandardScopedManagerController` 的 `permissions: PermissionMatrix? = null`（允许为空、子类必须 override `checkPermission`），DerivedScoped 的 `permissions: PermissionMatrix` 是强制非空的：
 
-- 派生实体的鉴权非常规律（12 位）
-- 没有理由完全绕过 Triad 走自定义权限——不像 Scoped 家族里 `ManagerApprovalFlowInstanceController` 那种"允许所有登录用户读"的特殊需求
+- 派生实体的鉴权非常规律（16 位）
+- 没有理由完全绕过 Matrix 走自定义权限——不像 Scoped 家族里 `ManagerApprovalFlowInstanceController` 那种"允许所有登录用户读"的特殊需求
 - 强制非空简化实现，避免 `?: error(...)` 分支
 
 ## Update / Delete 的 scope 溯源

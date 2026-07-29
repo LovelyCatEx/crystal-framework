@@ -1,9 +1,10 @@
 package com.lovelycatv.crystalframework.system.controller.manager.announcement
 
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import com.lovelycatv.crystalframework.system.controller.manager.announcement.dto.ManagerCreateAnnouncementDTO
 import com.lovelycatv.crystalframework.system.controller.manager.announcement.dto.ManagerDeleteAnnouncementDTO
 import com.lovelycatv.crystalframework.system.controller.manager.announcement.dto.ManagerReadAnnouncementDTO
@@ -15,16 +16,9 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_ANNOUNCEMENT_READ],
-    readAll = [SystemPermission.ACTION_ANNOUNCEMENT_READ],
-    create = [SystemPermission.ACTION_ANNOUNCEMENT_CREATE],
-    update = [SystemPermission.ACTION_ANNOUNCEMENT_UPDATE],
-    delete = [SystemPermission.ACTION_ANNOUNCEMENT_DELETE],
-)
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/announcements")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/announcement")
 class AnnouncementManagerController(
     managerService: AnnouncementManagerService,
 ) : StandardManagerController<
@@ -35,4 +29,12 @@ class AnnouncementManagerController(
         ManagerReadAnnouncementDTO,
         ManagerUpdateAnnouncementDTO,
         ManagerDeleteAnnouncementDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_DELETE.name,
+    ),
+)

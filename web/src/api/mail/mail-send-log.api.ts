@@ -13,4 +13,4 @@ export const MailSendLogManagerController = new BaseManagerController<
     ManagerReadMailSendLogDTO,
     ManagerUpdateMailSendLogDTO,
     ManagerDeleteMailSendLogDTO
->('/manager/mail-send-logs');
+>('/manager/mail-send-log');

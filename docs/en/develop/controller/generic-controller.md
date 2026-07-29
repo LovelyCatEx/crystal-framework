@@ -7,7 +7,7 @@ A generic Controller is a `@RestController` without any framework base class. Us
 - Non-CRUD business endpoints (login, sign-up, password reset, send-verify-code)
 - User-facing APIs (not admin backend)
 - Uploads, downloads, proxy forwarding, webhook receivers
-- Permission rules too complex for `@ManagerPermissions` or `ScopedPermissionTriad`
+- Permission rules too complex for `PermissionMatrix` to express (dynamic inference, per-field masking, etc.)
 
 ## Skeleton
 
@@ -44,7 +44,7 @@ Required annotations:
 
 ## Permission checks
 
-Generic Controllers cannot use `@ManagerPermissions` (that annotation only applies to the `StandardManagerController` family). Use Spring Security's `@PreAuthorize`:
+Generic Controllers do not use `PermissionMatrix` (`PermissionMatrix` only powers the Manager family's 5 standard endpoints). Use Spring Security's `@PreAuthorize`:
 
 ```kotlin
 @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_UPDATE_PEM}')")

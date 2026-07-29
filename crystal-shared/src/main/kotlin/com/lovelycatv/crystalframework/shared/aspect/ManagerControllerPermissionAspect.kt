@@ -1,76 +1,76 @@
 package com.lovelycatv.crystalframework.shared.aspect
 
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.vertex.log.logger
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
+import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.aop.support.AopUtils
-import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.core.annotation.Order
 import org.springframework.security.authorization.AuthorizationDeniedException
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Mono
 
+/**
+ * Safety-net aspect for `AbstractManagerController` subclasses. Two-way decision:
+ *
+ *  1. Scoped/Tenant main lines run authorisation in-line via [AbstractManagerController.authorize];
+ *     skip the aspect entirely to avoid double-checking.
+ *  2. If the subclass has a non-null `permissions: PermissionMatrix` field, authorisation runs in
+ *     the subclass's `override authorize` — skip the aspect.
+ *  3. Otherwise deny by default — an unconfigured controller must not serve requests undetected.
+ */
 @Aspect
 @Component
 @Order(GlobalConstants.AspectPriority.MANAGER_CONTROLLER_PERMISSION_CHECK)
 class ManagerControllerPermissionAspect {
-    private val logger = logger()
 
-    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.StandardManagerController.*(..))")
+    @Around("execution(* com.lovelycatv.crystalframework.shared.controller.AbstractManagerController+.*(..))")
     fun checkPermission(joinPoint: ProceedingJoinPoint): Any? {
         val controller = joinPoint.target
 
-        // AopUtils.getTargetClass + AnnotationUtils.findAnnotation walk through CGLIB
-        // proxies and the inheritance chain, which Class.getAnnotation cannot do.
+        // AopUtils.getTargetClass walks through CGLIB proxies and the inheritance chain,
+        // which Class.getClass cannot do.
         val targetClass = AopUtils.getTargetClass(controller)
-        val permissions = AnnotationUtils.findAnnotation(targetClass, ManagerPermissions::class.java)
-            ?: return joinPoint.proceed()
 
-        val methodSignature = joinPoint.signature as MethodSignature
-        val methodName = methodSignature.method.name
-
-        val requiredPermissions = when (methodName) {
-            "readAll" -> permissions.readAll
-            "read" -> permissions.read
-            "create" -> permissions.create
-            "update" -> permissions.update
-            "delete" -> permissions.delete
-            else -> null
-        }
-            ?.filter { it.isNotEmpty() }
-            ?.toList()
-
-        if (requiredPermissions.isNullOrEmpty()) {
-            logger.warn("No valid permission required for $methodSignature, skipped.")
+        // Scoped/Tenant main lines run authorisation in-line via their `authorize` hook.
+        // Skipping the aspect here prevents double checking.
+        if (StandardScopedManagerController::class.java.isAssignableFrom(targetClass) ||
+            StandardTenantManagerController::class.java.isAssignableFrom(targetClass)
+        ) {
             return joinPoint.proceed()
         }
 
-        return ReactiveSecurityContextHolder
-            .getContext()
-            .mapNotNull { it.authentication }
-            .flatMap { authentication ->
-                if (!hasAnyPermission(authentication, requiredPermissions)) {
-                    throw AuthorizationDeniedException(
-                        "Access denied: Required any of permissions $requiredPermissions for this action"
-                    )
-                }
+        // Standard main line: the subclass injected a `permissions: PermissionMatrix?` field.
+        // When non-null, authorisation runs in the subclass's `override authorize`; skip the aspect.
+        if (hasNonNullPermissionsField(controller, targetClass)) {
+            return joinPoint.proceed()
+        }
 
-                @Suppress("UNCHECKED_CAST")
-                joinPoint.proceed() as Mono<Any>
-            }
+        // Deny by default — no PermissionMatrix means the subclass has no configured authorisation.
+        throw AuthorizationDeniedException(
+            "No authorization configured for ${targetClass.simpleName}. " +
+                "Inject permissions: PermissionMatrix into the constructor."
+        )
     }
 
-    private fun hasAnyPermission(
-        authentication: Authentication,
-        requiredPermissions: List<String>
-    ): Boolean {
-        val granted = authentication.authorities.mapNotNullTo(HashSet()) { it.authority }
-        return requiredPermissions.any { it in granted }
+    /**
+     * Reflectively check whether the subclass declares `permissions: PermissionMatrix?` and holds
+     * a non-null value. Walks the entire inheritance chain so an intermediate base class also matches.
+     */
+    private fun hasNonNullPermissionsField(controller: Any, targetClass: Class<*>): Boolean {
+        var cls: Class<*>? = targetClass
+        while (cls != null && cls != Any::class.java) {
+            val field = cls.declaredFields.firstOrNull {
+                it.name == "permissions" && PermissionMatrix::class.java.isAssignableFrom(it.type)
+            }
+            if (field != null) {
+                field.isAccessible = true
+                return field.get(controller) != null
+            }
+            cls = cls.superclass
+        }
+        return false
     }
 }

@@ -4,14 +4,16 @@
 
 ## Base class lookup
 
-| Base class | Permission mechanism | Endpoints | Applicable resource |
+All bases declare permissions **uniformly through `PermissionMatrix`** (constructor arg `permissions = ...`). The legacy `@ManagerPermissions` class annotation, `ScopedPermissionTriad`, and 8-String constructor parameters are deprecated; see the [Permission Model Migration Guide](./permission-migration).
+
+| Base class | Matrix convenience factory | Endpoints | Applicable resource |
 |---|---|---|---|
-| `StandardManagerController` | `@ManagerPermissions` class annotation + AOP | `list` / `create` / `query` / `update` / `delete` | Global CRUD without tenant/system distinction |
-| `ReadonlyManagerController` | Same, mutations overridden to 403 | `list` / `query` (mutations return 403) | System-generated, immutable log-like data |
-| `StandardScopedManagerController` | `ScopedPermissionTriad` (12 permissions) | `list?scope&scopeId` / `create` / `query` / `update` / `delete` | Entity carries `scope` + `scopeId` columns |
-| `ReadonlyScopedManagerController` | `ScopedPermissionTriad.readonly(...)` | `list` / `query` (mutations return 403) | Read-only variant of the Scoped family |
-| `StandardDerivedScopedManagerController` | `ScopedPermissionTriad` + three abstract hooks | `create` / `query` / `update` / `delete` (no `list`) | Entity has no scope column; scope derived from parent |
-| `StandardTenantManagerController` | 8 String constructor parameters | `list?tenantId` / `create` / `query` / `update` / `delete` | Scope hard-locked to tenantId |
+| `StandardManagerController` | `PermissionMatrix.systemOnly(...)` | `list` / `create` / `query` / `update` / `delete` | Global CRUD without tenant/system distinction |
+| `ReadonlyManagerController` | `PermissionMatrix.systemOnlyReadonly(...)` | `list` / `query` (mutations return 403) | System-generated, immutable log-like data |
+| `StandardScopedManagerController` | `PermissionMatrix.of { ... }` | `list?scope&scopeId` / `create` / `query` / `update` / `delete` | Entity carries `scope` + `scopeId` columns |
+| `ReadonlyScopedManagerController` | `PermissionMatrix.readonly(...)` | `list` / `query` (mutations return 403) | Read-only variant of the Scoped family |
+| `StandardDerivedScopedManagerController` | `PermissionMatrix.of { ... }` + three abstract hooks | `create` / `query` / `update` / `delete` (no `list`) | Entity has no scope column; scope derived from parent |
+| `StandardTenantManagerController` | `PermissionMatrix.tenantOnly(...)` | `list?tenantId` / `create` / `query` / `update` / `delete` | Scope hard-locked to tenantId |
 
 ## Selection guide
 
@@ -25,15 +27,59 @@ Read top to bottom, pick the first matching row:
 | Dual SYSTEM / TENANT scope | Has scope column: [StandardScopedManagerController](./scoped-manager-controller); derives from parent: [StandardDerivedScopedManagerController](./derived-scoped-manager-controller) |
 | Plain global CRUD | [StandardManagerController](./standard-manager-controller) |
 
-## Permission mechanisms
+## Unified permission model (PermissionMatrix)
 
-| Mechanism | Declared at | Applicable base |
-|---|---|---|
-| `@ManagerPermissions(read=..., create=..., ...)` | Class annotation | `StandardManagerController` / `ReadonlyManagerController` |
-| `ScopedPermissionTriad(...)` | Constructor argument | Scoped / DerivedScoped / ReadonlyScoped |
-| 8 String constructor parameters | Constructor argument | Tenant |
+`PermissionMatrix` (`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`) is a data class with 4 layers × 4 operations = 16 authority fields. Passed to the base via `permissions = ...`; `layersFor(scope, op)` returns the set of authorities to OR-check.
 
-`@ManagerPermissions` + AOP has its pointcut hard-wired to `StandardManagerController.*(..)`, effective only on Standard / Readonly. Other families check permissions inline.
+### Four-layer semantics
+
+| Layer          | authority prefix   | Constant source     | Semantics                                    |
+|----------------|--------------------|---------------------|----------------------------------------------|
+| `super`        | none               | `SystemPermission`  | Cross-scope super admin (SYSTEM + TENANT)     |
+| `system`       | `system.`          | `SystemPermission`  | SYSTEM scope only                            |
+| `tenantAdmin`  | `tenant.`          | `SystemPermission`  | TENANT scope, cross-tenant (ops admin)        |
+| `tenantPem`    | `i.tenant.`        | `TenantPermission`  | TENANT scope, strict tenantId match           |
+
+Match rule: SYSTEM requests OR-check `[super, system]`; TENANT requests OR-check `[super, tenantAdmin, tenantPem]`.
+
+### Two sentinel values
+
+- `PermissionMatrix.NOT_APPLICABLE` — the layer does not apply to the resource (e.g. tenant layers on a SYSTEM-only resource); `layersFor` filters it out
+- `PermissionMatrix.NEVER_GRANTED` — the layer exists but the operation is sealed off (e.g. CUD on Readonly); `layersFor` keeps it but no real authority matches
+
+### Quick start
+
+```kotlin
+// SYSTEM-only resource
+permissions = PermissionMatrix.systemOnly(
+    systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
+    systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
+    systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
+    systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+)
+
+// SYSTEM + TENANT dual-scope (Scoped / DerivedScoped family)
+permissions = PermissionMatrix.of {
+    `super`     { create = ...; read = ...; update = ...; delete = ... }
+    system      { create = ...; read = ...; update = ...; delete = ... }
+    tenantAdmin { create = ...; read = ...; update = ...; delete = ... }
+    tenantPem   { create = ...; read = ...; update = ...; delete = ... }
+}
+```
+
+`` `super` `` is a Kotlin keyword; the DSL requires backticks. Unopened layers default entirely to `NOT_APPLICABLE`.
+
+### Factory lookup
+
+| Factory                                    | For                       |
+|--------------------------------------------|---------------------------|
+| `PermissionMatrix.of { ... }`               | Full DSL, any combination |
+| `PermissionMatrix.systemOnly(...)`          | Global CRUD without scope (Standard) |
+| `PermissionMatrix.tenantOnly(...)`          | TENANT-only resources (Tenant) |
+| `PermissionMatrix.systemOnlyReadonly(...)`  | SYSTEM-only + read-only   |
+| `PermissionMatrix.readonly(...)`            | Read-only variant of Scoped |
+
+Full migration steps, pitfalls, and FAQ live in the [Permission Model Migration Guide](./permission-migration).
 
 ## Required components
 

@@ -14,8 +14,8 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
 import com.lovelycatv.crystalframework.shared.database.GroupNode
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-instances")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-instance")
 class ManagerApprovalFlowInstanceController(
     managerService: ApprovalFlowInstanceManagerService,
     private val approvalFlowDefinitionManagerService: ApprovalFlowDefinitionManagerService,
@@ -56,11 +56,11 @@ class ManagerApprovalFlowInstanceController(
         BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix.readonly(
-        superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    permissions = PermissionMatrix.readonly(
+        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
+        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
     ),
 ) {
 
@@ -98,7 +98,7 @@ class ManagerApprovalFlowInstanceController(
         val resolvedScope = resolveScope(dto.scope)
 
         val matrix = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+            ?: error("ManagerApprovalFlowInstanceController requires a PermissionMatrix")
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
         if (dto.id != null && !canReadAll) {
@@ -203,7 +203,7 @@ class ManagerApprovalFlowInstanceController(
      *
      * Ownership (tenant isolation) is still enforced afterwards.
      */
-    @GetMapping("/detailsById", version = "1")
+    @GetMapping("/details-by-id", version = "1")
     suspend fun detailsById(
         userAuthentication: UserAuthentication,
         @RequestParam instanceId: Long,
@@ -219,7 +219,7 @@ class ManagerApprovalFlowInstanceController(
         }
 
         val matrix = permissions
-            ?: error("ManagerApprovalFlowInstanceController requires a ScopedPermissionMatrix")
+            ?: error("ManagerApprovalFlowInstanceController requires a PermissionMatrix")
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
         val isInitiator = instance.initiatorId == callerScopedId
         val isParticipant = !canReadAll && !isInitiator

@@ -1,6 +1,6 @@
 # StandardScopedManagerController
 
-Base class for resources that can live under either SYSTEM or TENANT scope. The entity carries its own `scope` + `scopeId` columns; the Controller uses `ScopedPermissionTriad` (12 permissions) to pick the right permission at runtime.
+Base class for resources that can live under either SYSTEM or TENANT scope. The entity carries its own `scope` + `scopeId` columns; the Controller uses `PermissionMatrix` (4 layers × 4 operations = 16 permissions) to pick the right permission at runtime.
 
 ## Applicable scenarios
 
@@ -27,27 +27,35 @@ Other scenarios:
 
 `scope` is `Int`: `0 = SYSTEM`, `1 = TENANT` (from `ResourceScope.typeId`).
 
-## Permission model: ScopedPermissionTriad
+## Permission model: PermissionMatrix (4 layers)
 
-Each CRUD operation has three slots in the Triad (12 permissions total):
+Scoped resources cover SYSTEM + TENANT simultaneously; 4 layers × 4 CRUD = 16 permissions:
 
-```
-super × CRUD      Cross-scope admin (root / admin), works in any scope
-system × CRUD     SYSTEM scope only
-tenantPem × CRUD  Own-tenant scope only
-```
+| Layer          | authority prefix   | Constant source     | Semantics                                    |
+|----------------|--------------------|---------------------|----------------------------------------------|
+| `super`        | none               | `SystemPermission`  | Cross-scope super admin (SYSTEM + TENANT)     |
+| `system`       | `system.`          | `SystemPermission`  | SYSTEM scope only                            |
+| `tenantAdmin`  | `tenant.`          | `SystemPermission`  | TENANT scope, cross-tenant (ops admin)        |
+| `tenantPem`    | `i.tenant.`        | `TenantPermission`  | TENANT scope, strict tenantId match           |
 
-Authorization rule:
+Authorization rule (`PermissionMatrix.layersFor(scope, op)`):
 
 ```
 SYSTEM scope → hasAnyAuthority(super<op>, system<op>)
-TENANT scope → hasAnyAuthority(super<op>, tenantPem<op>)
+TENANT scope → hasAnyAuthority(super<op>, tenantAdmin<op>, tenantPem<op>)
 ```
 
-Ownership rule (inside `checkOwnership`):
+Ownership rule (`checkOwnership`, using `crossTenantLayersFor(op)` to identify cross-tenant layers):
 
 - SYSTEM: passes once permission check passes
-- TENANT: either hold cross-tenant `super<op>`, or `scopeId == user's tenantId`
+- TENANT: hold `super<op>` or `tenantAdmin<op>` (cross-tenant layers) → pass; else require `scopeId == user's tenantId`
+
+### Two sentinel values
+
+- `PermissionMatrix.NOT_APPLICABLE` — the layer doesn't apply (e.g. resource doesn't expose a super admin); `layersFor` filters it out, no role in the decision
+- `PermissionMatrix.NEVER_GRANTED` — the layer exists but the op is sealed off (Readonly variants use it for CUD); `layersFor` keeps it as a placeholder but nothing ever matches
+
+**Rule**: use the convenience factories or DSL defaults for unfilled layers; don't overload `NEVER_GRANTED` to mean "not applicable".
 
 ## Usage steps
 
@@ -115,7 +123,7 @@ class ManagerDeleteTenantDictTypeDTO(
 
 ### 4. Controller
 
-The Scoped family does not use `@ManagerPermissions`; permissions go through `ScopedPermissionTriad` in the constructor:
+Permissions for the Scoped family are passed via `PermissionMatrix` in the constructor, with the DSL spelling out the 4 layers:
 
 ```kotlin
 @Validated
@@ -133,24 +141,36 @@ class ManagerTenantDictTypeController(
     ManagerDeleteTenantDictTypeDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad(
-        superCreate    = SystemPermission.ACTION_DICT_TYPE_CREATE,
-        superRead      = SystemPermission.ACTION_DICT_TYPE_READ,
-        superUpdate    = SystemPermission.ACTION_DICT_TYPE_UPDATE,
-        superDelete    = SystemPermission.ACTION_DICT_TYPE_DELETE,
-        systemCreate   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE,
-        systemRead     = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ,
-        systemUpdate   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE,
-        systemDelete   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM,
-        tenantPemRead   = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM,
-    ),
+    permissions = PermissionMatrix.of {
+        `super` {
+            create = SystemPermission.ACTION_DICT_TYPE_CREATE
+            read   = SystemPermission.ACTION_DICT_TYPE_READ
+            update = SystemPermission.ACTION_DICT_TYPE_UPDATE
+            delete = SystemPermission.ACTION_DICT_TYPE_DELETE
+        }
+        system {
+            create = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE
+            read   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ
+            update = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE
+            delete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE
+        }
+        tenantAdmin {
+            create = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE
+            read   = SystemPermission.ACTION_TENANT_DICT_TYPE_READ
+            update = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE
+            delete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE
+        }
+        tenantPem {
+            create = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM
+            read   = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM
+            update = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM
+            delete = TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM
+        }
+    },
 )
 ```
 
-The Controller needs no method body; all 5 endpoints inherit.
+`` `super` `` is a Kotlin keyword; the DSL requires backticks. Unopened layers default entirely to `NOT_APPLICABLE` and stay out of the decision. The Controller needs no method body; all 5 endpoints inherit.
 
 ## Type parameters
 
@@ -166,8 +186,8 @@ The Controller needs no method body; all 5 endpoints inherit.
 
 ## Overridable hooks
 
-- `checkPermission(scope, scopeId, operation, userAuth)` — permission decision. Default routes through Triad `hasAnyAuthority`; subclasses must override when no Triad is supplied
-- `checkOwnership(scope, scopeId, operation, userAuth)` — ownership check. Default requires `scopeId == tenantId` for TENANT (unless a super holder)
+- `checkPermission(scope, scopeId, operation, userAuth)` — permission decision. Default routes through Matrix as `RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, op))`; subclasses must override when no Matrix is supplied
+- `checkOwnership(scope, scopeId, operation, userAuth)` — ownership check. Default requires a cross-tenant layer (super / tenantAdmin) or `scopeId == tenantId` for TENANT
 - `buildQueryResponse(dto, userAuth)` — shape `/query` response, defaults to `managerService.query(dto)`
 - `buildReadAllResponse(scopeId)` — shape `/list` response, defaults to `managerService.findAllByScopeId(scopeId)`
 - `resolveScope(scopeTypeId)` — resolve `ResourceScope` from typeId; defaults to `ResourceScope.getById`
@@ -189,12 +209,12 @@ override suspend fun checkPermission(
 
 ## Registering permissions
 
-All 12 permissions in the Triad must be defined in `SystemPermission` / matching `TenantPermission` constants and registered via `SystemRbacRegistry` / `TenantRbacRegistry`. See [System Permission](/en/develop/sdk/system-permission) and [Tenant Permission](/en/develop/sdk/tenant-permission).
+Every real authority in the Matrix (not `NOT_APPLICABLE` / `NEVER_GRANTED`) must be defined in `SystemPermission` / `TenantPermission` constants and registered via `SystemRbacRegistry` / `TenantRbacRegistry`. See [System Permission](/en/develop/sdk/system-permission) and [Tenant Permission](/en/develop/sdk/tenant-permission).
 
 ## Notes
 
 - DTO bases must use the Scoped variants (`BaseManagerCreateScopedDTO` / `BaseManagerReadScopedDTO`); the plain `BaseManagerReadDTO` cannot propagate scope
 - Update / Delete DTOs do not carry scope — the Controller resolves scope from the DB entity; the client should not send it again
-- `@ManagerPermissions` has no effect here (AOP pointcut doesn't cover this base)
-- All 12 permissions must be filled — even for slots unused in practice, put a real string; a well-designed permission tree usually avoids this
+- Declare permissions via `PermissionMatrix`; the `@ManagerPermissions` annotation and the legacy `ScopedPermissionTriad` / `ScopedPermissionMatrix` alias are deprecated — see the [Permission Model Migration Guide](./permission-migration)
+- Convenience factories fill defaults for you; do not manually stuff unused layers with `NEVER_GRANTED`. `NOT_APPLICABLE` (layer doesn't apply) and `NEVER_GRANTED` (layer exists but op is forbidden) mean different things — don't mix them
 - Entity must extend `BaseScopedEntity`; the generic bound rejects non-compliant entities at compile time

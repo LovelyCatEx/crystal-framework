@@ -12,7 +12,7 @@ Generic Controllers and Manager Controllers are complementary, not substitutes:
 |---|---|---|
 | Purpose | Business API | Admin CRUD |
 | Path prefix | Free (`/api/{version}/ext/...` / `/api/{version}/oauth/...`) | Mandatory `/api/{version}/manager/...` |
-| Permission mechanism | `@PreAuthorize` + Spring Security SpEL | `@ManagerPermissions` + AOP / `ScopedPermissionTriad` |
+| Permission mechanism | `@PreAuthorize` + Spring Security SpEL | `PermissionMatrix` (constructor arg, inline authorize check) |
 | Audit aspect | Not covered | `ManagerControllerAuditAspect` records automatically |
 | Argument injection | `UserAuthentication` supported | `UserAuthentication` supported |
 | Endpoints | Fully custom | 5 standard endpoints (overridable, extendable) |

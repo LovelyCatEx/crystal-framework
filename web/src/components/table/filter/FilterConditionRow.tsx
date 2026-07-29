@@ -1,6 +1,6 @@
 import {useCallback} from 'react';
 import {Button, DatePicker, Input, Select} from 'antd';
-import {EnhancedNumberInput} from '@/components/EnhancedNumberInput.tsx';
+import {EnhancedNumberInput} from '@/components/input/EnhancedNumberInput.tsx';
 import {CloseOutlined} from '@ant-design/icons';
 import {useTranslation} from 'react-i18next';
 import type {FilterableField, FilterRowState} from './filter-builder.types.ts';

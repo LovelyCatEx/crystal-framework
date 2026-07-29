@@ -7,16 +7,22 @@ import {
 } from "@/api/system/system-settings.api.ts";
 import type {MenuProps} from "antd";
 import {Button, Card, Dropdown, Form, message, Modal} from "antd";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useSearchParams} from "react-router-dom";
 import {
     useSettingsGroupToTranslationMap,
     useSettingsKeyToTranslationMap,
     useSettingsTabToTranslationMap
 } from "@/i18n/system-settings.tsx";
-import {deserializeSettingsValues, serializeSettingsValues} from "@/utils/settings-value.ts";
+import {
+    deserializeSettingsValues,
+    diffSettingsValues,
+    serializeSettingsValues,
+} from "@/utils/settings-value.ts";
+import {SettingsChangesModal} from "@/components/settings/SettingsChangesModal.tsx";
 import {
     ApiOutlined,
+    DiffOutlined,
     ExclamationCircleFilled,
     ExportOutlined,
     ImportOutlined,
@@ -53,26 +59,53 @@ export default function SystemSettingsManagerPage() {
 
     const [modal, contextHolder] = Modal.useModal();
     const [form] = Form.useForm();
+    const [changesModalOpen, setChangesModalOpen] = useState(false);
+
+    const baseline = useMemo(
+        () => (data ? deserializeSettingsValues(data.items) : {}),
+        [data],
+    );
+
+    const watchedValues = Form.useWatch([], form);
+
+    const changeCount = useMemo(
+        () => diffSettingsValues(data?.items ?? {}, baseline, watchedValues ?? {}).length,
+        [data, baseline, watchedValues],
+    );
 
     useEffect(() => {
         if (!data) {
             return;
         }
-
-        const kv = deserializeSettingsValues(data.items)
-
-        form.setFieldsValue(kv)
-    }, [data]);
+        form.setFieldsValue(baseline)
+    }, [data, baseline]);
 
     useEffect(() => {
         setRefreshing(isLoading);
     }, [isLoading]);
 
+    const computeChanges = () => {
+        const items = data?.items ?? {};
+        const current = form.getFieldsValue(true) as Record<string, unknown>;
+        return diffSettingsValues(items, baseline, current);
+    };
+
     const updateSettings = (values: Record<string, unknown>) => {
-        const props = serializeSettingsValues(data?.items ?? {}, values)
+        const items = data?.items ?? {};
+        const changes = diffSettingsValues(items, baseline, values);
+        if (changes.length === 0) {
+            void message.info(t('components.settings.noChanges'))
+            return;
+        }
+        const changedItems = Object.fromEntries(
+            changes.map((c) => [c.key, items[c.key]]).filter(([, s]) => Boolean(s)),
+        );
+        const changedValues = Object.fromEntries(changes.map((c) => [c.key, values[c.key]]));
+        const props = serializeSettingsValues(changedItems, changedValues)
         updateSystemSettings(props)
             .then(() => {
                 void message.success(t('pages.systemSettingsManager.saveSuccess'))
+                setChangesModalOpen(false)
             })
             .catch(() => {
                 void message.error(t('pages.systemSettingsManager.saveFailed'))
@@ -173,6 +206,14 @@ export default function SystemSettingsManagerPage() {
                             </Button>
                         </Dropdown>
                         <Button
+                            icon={<DiffOutlined/>}
+                            size="large"
+                            className="rounded-xl h-12 px-6"
+                            onClick={() => setChangesModalOpen(true)}
+                        >
+                            {`${t('components.settings.viewChanges')} (${changeCount})`}
+                        </Button>
+                        <Button
                             type="primary"
                             icon={<SaveOutlined/>}
                             size="large"
@@ -208,6 +249,13 @@ export default function SystemSettingsManagerPage() {
                     </Form>
                 </Card>
             </div>
+
+            <SettingsChangesModal
+                open={changesModalOpen}
+                onClose={() => setChangesModalOpen(false)}
+                changes={changesModalOpen ? computeChanges() : []}
+                keyTranslationMap={settingsKeyToTranslationMap}
+            />
         </>
     )
 }

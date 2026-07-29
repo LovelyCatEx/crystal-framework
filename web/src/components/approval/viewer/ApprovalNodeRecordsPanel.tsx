@@ -5,8 +5,8 @@ import type {ApprovalFlowRecordVO} from "@/types/approval/approval-flow-instance
 import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";
 import {ApprovalFlowRecordAction} from "@/types/approval/approval-enums.ts";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
-import {UserChipById} from "@/components/UserChipById.tsx";
-import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
+import {UserChipById} from "@/components/chip/UserChipById.tsx";
+import {TenantMemberChip} from "@/components/chip/TenantMemberChip.tsx";
 import {getApprovalFlowRecordAction} from "@/i18n/enum-helpers.ts";
 
 export interface ApprovalNodeRecordsPanelProps {

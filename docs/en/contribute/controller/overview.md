@@ -18,26 +18,32 @@ StandardManagerController                          v1.0 seed, global CRUD baseli
       └─ StandardDerivedScopedManagerController    Resource has no scope column of its own
                                                    Scope derived from parent entity chain
                                                    No /list (no way to enumerate w/o parent)
+
+Unified to PermissionMatrix (current): the three permission models (@ManagerPermissions
+/ ScopedPermissionTriad / 8 Strings) merge into one 4-layer × 4-operation = 16-permission
+`PermissionMatrix` data class; every base receives it via constructor arg `permissions = ...`.
+`ScopedPermissionMatrix` stays as a typealias; `StandardTenantManagerController` keeps a
+compat constructor — both `@Deprecated`, one release, to guide migration.
 ```
 
 `StandardTenantManagerController` predates `StandardScopedManagerController`. For new code that must work in both SYSTEM and TENANT scopes, prefer the Scoped family.
 
 ## Positioning per base class
 
-| Base class | Key abstraction | Data model | Permission model |
+| Base class | Key abstraction | Data model | Permission declaration (PermissionMatrix factory) |
 |---|---|---|---|
-| `StandardManagerController` | Generic chain + AOP permissions | Global resource, no scope | `@ManagerPermissions` 5 string arrays, OR semantics |
-| `ReadonlyManagerController` | Extends Standard with 3 method overrides | Same, read-only specialization | Same |
-| `StandardScopedManagerController` | `BaseScopedEntity` with explicit scope columns | Entity carries `scope` + `scopeId` | `ScopedPermissionTriad` 3-layer × 4-op |
-| `ReadonlyScopedManagerController` | Extends Scoped with 3 method overrides | Same as Scoped, read-only | `Triad.readonly(...)` + `NEVER_GRANTED` fallback |
-| `StandardDerivedScopedManagerController` | 3 abstract `resolveScopeFromXXX` hooks | Scope resolved via parent chain | Same as Scoped |
-| `StandardTenantManagerController` | 8 String permissions + `isXxxInScope` hooks | tenantId hard-locked as scope | Two-layer permissions (system + scoped) |
+| `StandardManagerController` | Generic chain + `authorize` method | Global resource, no scope | `PermissionMatrix.systemOnly(...)` |
+| `ReadonlyManagerController` | Extends Standard + `Mutability.READ_ONLY` | Same, read-only specialization | `PermissionMatrix.systemOnlyReadonly(...)` |
+| `StandardScopedManagerController` | `BaseScopedEntity` with explicit scope columns | Entity carries `scope` + `scopeId` | `PermissionMatrix.of { ... }` |
+| `ReadonlyScopedManagerController` | Extends Scoped + `Mutability.READ_ONLY` | Same as Scoped, read-only | `PermissionMatrix.readonly(...)` (16 CUD slots `NEVER_GRANTED`) |
+| `StandardDerivedScopedManagerController` | 3 abstract `resolveScopeFromXXX` hooks | Scope resolved via parent chain | `PermissionMatrix.of { ... }` |
+| `StandardTenantManagerController` | `isXxxInScope` hooks + `preflight` | tenantId hard-locked as scope | `PermissionMatrix.tenantOnly(...)` |
 
-## Three generations of the permission model
+## Four generations of the permission model
 
-### Generation 1: @ManagerPermissions (AOP)
+### Generation 1: @ManagerPermissions (AOP, deprecated)
 
-`StandardManagerController` uses class annotation + AOP interception.
+`StandardManagerController` originally used class annotation + AOP interception:
 
 ```kotlin
 @Aspect
@@ -55,11 +61,11 @@ Notes:
 - Matches by method name via reflection (`readAll` / `read` / `create` / `update` / `delete`)
 - `AopUtils.getTargetClass` sees through CGLIB proxies; `AnnotationUtils.findAnnotation` supports annotation inheritance
 
-Limitation: an array can only declare a static permission list, and cannot express "pick the permission based on runtime scope". This motivated the Scoped family's switch to Triad.
+Limitation: an array can only declare a static permission list, and cannot express "pick the permission based on runtime scope". That motivated first the Scoped family's Triad and eventually unification via `PermissionMatrix`. The AOP path is retained only as a legacy fallback when `permissions == null`, and now carries `@Deprecated`.
 
-### Generation 2: ScopedPermissionTriad (constructor arg)
+### Generation 2: ScopedPermissionTriad (constructor arg, deprecated)
 
-The Scoped family packs 12 permissions into a `ScopedPermissionTriad` data class:
+The Scoped family used to pack 12 permissions into a `ScopedPermissionTriad` data class:
 
 ```
 super × CRUD      Cross-scope admin authority
@@ -74,9 +80,9 @@ SYSTEM scope → hasAnyAuthority(super<op>, system<op>)
 TENANT scope → hasAnyAuthority(super<op>, tenantPem<op>)
 ```
 
-The `NEVER_GRANTED` constant is the deliberate fallback. `Triad.readonly(...)` fills only the read slots and stuffs `"!!never_granted!!"` into every other CRUD slot — a string that is not a real permission, not part of `SystemPermission`, and not auto-granted to `root`. If any caller bypasses `ReadonlyScopedManagerController` and looks up `triad.superFor(CREATE)`, the result still fails to match, preventing the read-only wrapper from silently leaking write permission.
+Limitation: no "TENANT but cross-tenant" layer — a SYSTEM admin editing tenant data had to hold `super*`, conflating "cross-scope" with "cross-tenant ops". The `ScopedPermissionTriad` type is now merged into `PermissionMatrix`; the `ScopedPermissionMatrix` typealias is retained one release with `@Deprecated`.
 
-### Generation 3: 8 String parameters (legacy Tenant design)
+### Generation 3: 8 String parameters (legacy Tenant design, deprecated)
 
 `StandardTenantManagerController` predates Triad and has a flatter permission model:
 
@@ -87,21 +93,42 @@ updatePermission,      scopedUpdatePermission,
 deletePermission,      scopedDeletePermission,
 ```
 
-Match rule: check system-level → check scoped-level → 403. Missing here is the "cross-scope admin" (super) layer — `super` gets folded into the system slot, meaning cross-tenant operations require system-wide permissions. This friction motivated the Triad design in the Scoped family.
+Match rule: check system-level → check scoped-level → 403. Missing here is the "cross-scope admin" (super) layer. The legacy 8-String constructor is `@Deprecated` and delegates to `PermissionMatrix.tenantOnly(...)`; retained one release.
 
-`DISABLED_SCOPED_PERMISSION = ""` disables tenant-scoped access entirely, restricting the endpoint to system-level callers.
+### Generation 4: PermissionMatrix (current)
 
-## AOP interception vs explicit checks
+`PermissionMatrix` (`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`) unifies the three declarations into 4 layers × 4 operations = 16 permissions:
+
+| Layer          | authority prefix   | Constant source     | Semantics                                    |
+|----------------|--------------------|---------------------|----------------------------------------------|
+| `super`        | none               | `SystemPermission`  | Cross-scope super admin (SYSTEM + TENANT)     |
+| `system`       | `system.`          | `SystemPermission`  | SYSTEM scope only                            |
+| `tenantAdmin`  | `tenant.`          | `SystemPermission`  | TENANT scope, cross-tenant                   |
+| `tenantPem`    | `i.tenant.`        | `TenantPermission`  | TENANT scope, strict tenantId match           |
+
+Match rule (`layersFor(scope, op)`):
+
+```
+SYSTEM scope → hasAnyAuthority(super, system)
+TENANT scope → hasAnyAuthority(super, tenantAdmin, tenantPem)
+```
+
+Key design points:
+
+- **Two sentinel values**: `NOT_APPLICABLE` (layer doesn't apply, `layersFor` filters it out, excluded from decision) and `NEVER_GRANTED` (layer exists but the op is sealed, `layersFor` keeps it as a placeholder but nothing ever matches). Motivation matches the legacy `Triad.NEVER_GRANTED` — make error paths fail-safe rather than fail-open
+- **Prefix convention**: `super*` may not carry a prefix; `system*` must start with `system.`; `tenantAdmin*` with `tenant.`; `tenantPem*` with `i.tenant.`. `PermissionMatrix.init` emits `logger.warn` on violation (will be promoted to a hard error), and `collectPrefixViolations(matrix)` supports strict testing / gating
+- **DSL + 4 convenience factories**: `of { ... }` / `systemOnly(...)` / `tenantOnly(...)` / `readonly(...)` / `systemOnlyReadonly(...)`; unopened layers default to `NOT_APPLICABLE`
+- **Compat layer**: the legacy `ScopedPermissionMatrix` typealias, the Tenant 8-String constructor, and the `@ManagerPermissions` AOP fallback are all retained one release with `@Deprecated`; migration is non-breaking
+
+## Aspect interception vs explicit checks
 
 | Family | Permission check style | When |
 |---|---|---|
-| Standard / Readonly | AOP aspect (`ManagerControllerPermissionAspect`) | Before method invocation |
+| Standard / Readonly | `StandardManagerController.authorize` OR-checks `matrix.layersFor(SYSTEM, op)` inline | At the top of every endpoint |
 | Scoped / DerivedScoped / ReadonlyScoped | Inline `assertAccess` | First line of endpoint |
-| Tenant | Inline `RbacUtils.hasAuthority` | Inside endpoint body |
+| Tenant | Inline `RbacUtils.hasAuthority`, dispatched via `PermissionMatrix.tenantAdminFor` / `tenantPemFor` | Inside endpoint body |
 
-The Scoped family avoids AOP because permission checks depend on `scope` and `scopeId` fields inside the DTO. The aspect cannot access the typed DTO — deserialization happens after; `update` / `delete` also require DB queries. Inline "explicit check + `checkPermission` / `checkOwnership` hooks" fits better.
-
-The Standard family is the opposite — the permission list is statically readable on the class annotation, and AOP is the lightest option.
+The Scoped family always used inline checks; after `PermissionMatrix` landed, Standard / Readonly also moved from AOP to the `authorize` method (AOP is kept as a fallback for legacy controllers still on `@ManagerPermissions`). All families now share typed-DTO-plus-typed-Matrix decisions; AOP survives only for compatibility.
 
 ## Generic chain
 

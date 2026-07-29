@@ -3,11 +3,13 @@ package com.lovelycatv.crystalframework.shared.service
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.database.collectFields
 import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
+import com.lovelycatv.crystalframework.shared.utils.EntityQueryableFieldsResolver
 import com.lovelycatv.crystalframework.shared.utils.toPaginatedResponseData
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.Sort
@@ -80,6 +82,12 @@ interface BaseManagerService<
     suspend fun buildQueryCriteria(dto: READ_DTO): Criteria {
         return when {
             dto.query != null -> {
+                val allowlist = queryableFields()
+                val used = dto.query!!.collectFields()
+                val forbidden = used - allowlist
+                if (forbidden.isNotEmpty()) {
+                    throw BusinessException("Fields not queryable: $forbidden")
+                }
                 criteriaFromQueryNode(dto.query!!)
             }
             else -> {
@@ -87,6 +95,12 @@ interface BaseManagerService<
             }
         }
     }
+
+    /**
+     * Fields exposed to `QueryNode`-based filtering. Defaults to `@Column` fields
+     * on the entity minus any `@NotQueryable`. Override to further restrict.
+     */
+    fun queryableFields(): Set<String> = EntityQueryableFieldsResolver.resolve(entityClass)
 
     suspend fun create(dto: CREATE_DTO): ENTITY
 

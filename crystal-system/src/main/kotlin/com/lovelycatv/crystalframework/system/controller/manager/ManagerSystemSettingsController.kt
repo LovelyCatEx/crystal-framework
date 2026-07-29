@@ -13,7 +13,6 @@ import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaRe
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendEmailDTO
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendMessageDTO
@@ -28,7 +27,7 @@ import tools.jackson.databind.json.JsonMapper
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/settings")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/setting")
 class ManagerSystemSettingsController(
     private val systemSettingsService: SystemSettingsService,
     private val systemSettingsRegistry: SystemSettingsRegistry,
@@ -38,7 +37,7 @@ class ManagerSystemSettingsController(
     private val jsonMapper: JsonMapper,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
 ) {
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_READ}')")
+    @PreAuthorize("hasAnyAuthority('system.settings.read')")
     @GetMapping("/schema")
     suspend fun getSystemSettings(): ApiResponse<*> {
         val data = buildSettingsSchemaResponse(systemSettingsRegistry.settingDeclarations()) { key ->
@@ -47,7 +46,7 @@ class ManagerSystemSettingsController(
         return ApiResponse.success(data)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_UPDATE}')")
+    @PreAuthorize("hasAnyAuthority('system.settings.update')")
     @PostMapping("/update")
     suspend fun updateSystemSettings(
         @RequestBody dto: Map<String, String?>
@@ -57,7 +56,7 @@ class ManagerSystemSettingsController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_EMAIL}')")
+    @PreAuthorize("hasAnyAuthority('system.settings.test.sendEmail')")
     @PostMapping("/test-send-email")
     suspend fun testSendEmail(
         @ModelAttribute @Valid dto: ManagerTestSendEmailDTO
@@ -72,7 +71,7 @@ class ManagerSystemSettingsController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_MESSAGE}')")
+    @PreAuthorize("hasAnyAuthority('system.settings.test.sendMessage')")
     @PostMapping("/test-send-message")
     suspend fun testSendMessage(
         @RequestBody @Valid dto: ManagerTestSendMessageDTO,

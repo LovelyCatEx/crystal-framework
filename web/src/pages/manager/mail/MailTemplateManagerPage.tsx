@@ -9,7 +9,7 @@ import {useEffect, useRef, useState} from "react";
 import type {MailTemplate, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {useMailTemplateTableColumns} from "@/components/columns/MailTemplateEntityColumns.tsx";
 import {MailTemplateTypeManagerController} from "@/api/mail/mail-template-type.api.ts";
-import {HtmlEditor} from "@/components/HtmlEditor.tsx";
+import {HtmlEditor} from "@/components/editor/HtmlEditor.tsx";
 import {CopyOutlined} from "@ant-design/icons";
 import type {EntityTableColumns} from "@/components/table/entity-table.types.ts";
 import {useTranslation} from "react-i18next";

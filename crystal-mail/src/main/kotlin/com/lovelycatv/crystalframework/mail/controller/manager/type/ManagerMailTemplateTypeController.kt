@@ -7,21 +7,15 @@ import com.lovelycatv.crystalframework.mail.controller.manager.type.dto.ManagerU
 import com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity
 import com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository
 import com.lovelycatv.crystalframework.mail.service.manager.MailTemplateTypeManagerService
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_READ],
-    readAll = [SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_READ],
-    create = [SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_CREATE],
-    update = [SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_UPDATE],
-    delete = [SystemPermission.ACTION_MAIL_TEMPLATE_TYPE_DELETE],
-)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-template-type")
@@ -35,4 +29,12 @@ class ManagerMailTemplateTypeController(
         ManagerReadMailTemplateTypeDTO,
         ManagerUpdateMailTemplateTypeDTO,
         ManagerDeleteMailTemplateTypeDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_DELETE.name,
+    ),
+)

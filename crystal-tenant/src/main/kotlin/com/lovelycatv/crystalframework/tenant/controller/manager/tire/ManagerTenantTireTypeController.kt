@@ -1,9 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.tire
 
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerCreateTenantTireTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerDeleteTenantTireTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.tire.dto.ManagerReadTenantTireTypeDTO
@@ -15,13 +16,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_TENANT_TIRE_TYPE_READ],
-    readAll = [SystemPermission.ACTION_TENANT_TIRE_TYPE_READ],
-    create = [SystemPermission.ACTION_TENANT_TIRE_TYPE_CREATE],
-    update = [SystemPermission.ACTION_TENANT_TIRE_TYPE_UPDATE],
-    delete = [SystemPermission.ACTION_TENANT_TIRE_TYPE_DELETE],
-)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/tenant/tire")
@@ -35,4 +29,12 @@ class ManagerTenantTireTypeController(
         ManagerReadTenantTireTypeDTO,
         ManagerUpdateTenantTireTypeDTO,
         ManagerDeleteTenantTireTypeDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_TYPE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_TYPE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_TYPE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_TYPE_DELETE.name,
+    ),
+)

@@ -10,7 +10,7 @@ import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageCha
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
@@ -31,22 +31,22 @@ class ManagerMessageChannelController(
         ManagerDeleteMessageChannelDTO
         >(
     managerService,
-    permissions = ScopedPermissionMatrix(
-        superCreate = SystemPermission.ACTION_MESSAGE_CHANNEL_CREATE,
-        superRead = SystemPermission.ACTION_MESSAGE_CHANNEL_READ,
-        superUpdate = SystemPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
-        superDelete = SystemPermission.ACTION_MESSAGE_CHANNEL_DELETE,
-        systemCreate = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE,
-        systemRead = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE,
-        systemDelete = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE,
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE_PEM,
+    permissions = PermissionMatrix(
+        superCreate = SystemPermission.ACTION_X_MESSAGE_CHANNEL_CREATE.name,
+        superRead = SystemPermission.ACTION_X_MESSAGE_CHANNEL_READ.name,
+        superUpdate = SystemPermission.ACTION_X_MESSAGE_CHANNEL_UPDATE.name,
+        superDelete = SystemPermission.ACTION_X_MESSAGE_CHANNEL_DELETE.name,
+        systemCreate = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE.name,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_MESSAGE_CHANNEL_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_MESSAGE_CHANNEL_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_MESSAGE_CHANNEL_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_MESSAGE_CHANNEL_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_MESSAGE_CHANNEL_DELETE.name,
     ),
 )

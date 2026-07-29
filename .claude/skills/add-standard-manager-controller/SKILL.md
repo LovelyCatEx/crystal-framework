@@ -1,6 +1,6 @@
 ---
 name: add-standard-manager-controller
-description: 为普通实体（非 scoped）添加标准化的 CRUD 管理端点，继承 StandardManagerController，包括 5 个端点、DTO 分包、@ManagerPermissions 权限声明。
+description: 为普通实体（非 scoped）添加标准化的 CRUD 管理端点，继承 StandardManagerController，包括 5 个端点、DTO 分包、PermissionMatrix.systemOnly 权限声明。
 ---
 
 # 添加标准 Manager Controller
@@ -63,19 +63,28 @@ DTO 必须是 `data class`。
 
 ### 权限声明
 
-在 Controller 类上加 `@ManagerPermissions` annotation，`ManagerControllerPermissionAspect` 自动拦截 5 个端点并做 authority 校验：
+通过构造参数 `permissions = PermissionMatrix.systemOnly(...)` 传入，`StandardManagerController.authorize` 在 5 个端点入口自动做 OR-check：
 
 ```kotlin
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_XXX_READ],
-    readAll = [SystemPermission.ACTION_XXX_READ],
-    create = [SystemPermission.ACTION_XXX_CREATE],
-    update = [SystemPermission.ACTION_XXX_UPDATE],
-    delete = [SystemPermission.ACTION_XXX_DELETE],
+permissions = PermissionMatrix.systemOnly(
+    systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
+    systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
+    systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
+    systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+    // 可选：跨 scope 超级管理员
+    // superCreate = SystemPermission.ACTION_XXX_CREATE,
+    // superRead   = SystemPermission.ACTION_XXX_READ,
+    // ...
 )
 ```
 
-`read` 对应 `/query`，`readAll` 对应 `/list`。每个字段是 `Array<String>`，写多个表示 OR 关系（持任一即可）。
+- 4 个 `system*` 参数必填，authority 必须以 `system.` 前缀命名（前缀违规启动 emit warn）
+- 4 个 `super*` 可选，默认 `NOT_APPLICABLE`；`super` 无前缀
+- tenant 层由工厂自动填 `NOT_APPLICABLE`
+- 前端 `layersFor(SYSTEM, op)` 过滤 `NOT_APPLICABLE`，OR 匹配剩余 authority
+- **禁止**在类顶部再加 `@ManagerPermissions` 注解（已弃用，仅在 `permissions == null` 时作兼容回退）
+
+`readAll` 与 `read` 在 `PermissionMatrix` 中都归到 `ScopedOperation.READ`，用同一份 `systemRead` 即可。
 
 ### Manager Service 要求
 
@@ -89,14 +98,13 @@ Service 必须：
 必须严格是：
 
 ```kotlin
-@ManagerPermissions(...)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/xxx")
 class ManagerXxxController(...)
 ```
 
-`GlobalConstants.REQUEST_MAPPING_PREFIX` 会加上 `/api` 前缀 + 版本号，禁止硬编码 `/api/v1/...`。
+`GlobalConstants.REQUEST_MAPPING_PREFIX` 会加上 `/api` 前缀 + 版本号，禁止硬编码 `/api/v1/...`。禁止在类顶部再加 `@ManagerPermissions`（已弃用）。
 
 ## 执行步骤
 
@@ -109,13 +117,6 @@ class ManagerXxxController(...)
 
 3. **创建 Controller 类**：
    ```kotlin
-   @ManagerPermissions(
-       read = [SystemPermission.ACTION_XXX_READ],
-       readAll = [SystemPermission.ACTION_XXX_READ],
-       create = [SystemPermission.ACTION_XXX_CREATE],
-       update = [SystemPermission.ACTION_XXX_UPDATE],
-       delete = [SystemPermission.ACTION_XXX_DELETE],
-   )
    @Validated
    @RestController
    @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/xxx")
@@ -129,7 +130,15 @@ class ManagerXxxController(...)
            ManagerReadXxxDTO,
            ManagerUpdateXxxDTO,
            ManagerDeleteXxxDTO
-   >(managerService)
+   >(
+       managerService,
+       permissions = PermissionMatrix.systemOnly(
+           systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
+           systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
+           systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
+           systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+       ),
+   )
    ```
 
 4. **前端 API 对接**：
@@ -154,7 +163,8 @@ class ManagerXxxController(...)
 | 多个 DTO 写在一个文件里 | 单文件单定义，每个 DTO 独立 `.kt` |
 | 硬编码 `/api/v1/manager/xxx` | 用 `${GlobalConstants.REQUEST_MAPPING_PREFIX}` |
 | 忘加 `@Validated` | 必须加，否则 `@Valid` 不生效 |
-| `@ManagerPermissions` 只写 `read` 不写 `readAll` | `/list` 用 `readAll`，`/query` 用 `read`，两者独立 |
+| 仍在类顶部加 `@ManagerPermissions` 注解 | 已弃用；权限统一走 `permissions = PermissionMatrix.systemOnly(...)` |
+| `system*` 权限没加 `system.` 前缀 | 前缀违规启动会 emit warn；`system*` 必须以 `system.` 开头 |
 | Service 不继承 `CachedBaseManagerService` | 必须继承，否则泛型对不上 |
 
 ## 输出格式

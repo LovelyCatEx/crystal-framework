@@ -1,6 +1,6 @@
 # 标准化控制器（StandardManagerController）
 
-管理后台全局 CRUD 的基类。资源无 SYSTEM / TENANT 之分——继承此类，配置 7 个类型参数和 1 个 `@ManagerPermissions` 注解，即自动生成 5 个 CRUD 端点。
+管理后台全局 CRUD 的基类。资源无 SYSTEM / TENANT 之分——继承此类，配置 7 个类型参数并通过构造参数 `permissions = PermissionMatrix.systemOnly(...)` 声明权限，即自动生成 5 个 CRUD 端点。
 
 ## 适用场景
 
@@ -24,7 +24,7 @@
 | POST | `/update` | `update` | `@ModelAttribute` | form-urlencoded |
 | POST | `/delete` | `delete` | `@ModelAttribute` | form-urlencoded |
 
-分页查询的方法名是 `read`（不是 `query`），但 URL 是 `/query`；`@ManagerPermissions` 中对应字段名为 `read`。此处的不对称是历史遗留。
+分页查询的方法名是 `read`（不是 `query`），但 URL 是 `/query`。此处的不对称是历史遗留。
 
 ## 使用步骤
 
@@ -113,13 +113,6 @@ class ManagerDeleteStorageProviderDTO(
 放入 `controller/manager/`：
 
 ```kotlin
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_STORAGE_PROVIDER_READ],
-    readAll = [SystemPermission.ACTION_STORAGE_PROVIDER_READ],
-    create = [SystemPermission.ACTION_STORAGE_PROVIDER_CREATE],
-    update = [SystemPermission.ACTION_STORAGE_PROVIDER_UPDATE],
-    delete = [SystemPermission.ACTION_STORAGE_PROVIDER_DELETE],
-)
 @Validated
 @RestController
 @RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/storage-provider")
@@ -133,7 +126,15 @@ class ManagerStorageProviderController(
     ManagerReadStorageProviderDTO,
     ManagerUpdateStorageProviderDTO,
     ManagerDeleteStorageProviderDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE,
+        systemRead   = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE,
+        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE,
+    ),
+)
 ```
 
 Controller 无需方法体，5 个端点全部从父类继承。
@@ -150,25 +151,28 @@ Controller 无需方法体，5 个端点全部从父类继承。
 | 6 | `UPDATE_DTO` | `BaseManagerUpdateDTO` |
 | 7 | `DELETE_DTO` | `BaseManagerDeleteDTO` |
 
-## @ManagerPermissions
+## 权限声明（PermissionMatrix.systemOnly）
+
+Standard 资源无 scope 概念，只用 `system` 层即可。`PermissionMatrix.systemOnly(...)` 会把两个 tenant 层填成 `NOT_APPLICABLE`，`super` 层默认也是 `NOT_APPLICABLE`（如需超级管理员，传入 `superCreate = ..., superRead = ..., ...` 4 个可选参数）。
 
 ```kotlin
-@ManagerPermissions(
-    read = [权限1, 权限2],       // 也是 /query 端点使用的权限
-    readAll = [权限1],            // 空数组时自动降级到 read
-    create = [权限1],
-    update = [权限1],
-    delete = [权限1],
+permissions = PermissionMatrix.systemOnly(
+    systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
+    systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
+    systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
+    systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+    // 可选：跨 scope 超级管理员
+    // superRead = SystemPermission.ACTION_XXX_READ,
+    // ...
 )
 ```
 
 规则：
 
-- 类级别注解，覆盖 5 个端点
-- 每个字段是权限数组，用户持有其中任一即通过（OR 语义）
-- `readAll` 空数组时自动降级到 `read`
-- 空数组表示不设权限校验（AOP 打 warn 日志），不推荐
+- `system*` authority 必须以 `system.` 前缀命名，前缀违规启动时 emit warn 日志
 - 权限字符串必须引用 `SystemPermission.XXX` 等常量，禁止字面量
+- `layersFor(SYSTEM, op)` 返回 `[super, system]` 数组，`hasAnyAuthority(...)` OR 匹配；`NOT_APPLICABLE` 会被过滤，无 super 权限时数组只剩 `[system]`
+- 老的 `@ManagerPermissions` 类注解已弃用，见 [权限模型迁移指南](./permission-migration) 迁移说明
 
 ## 添加自定义端点
 
@@ -188,7 +192,7 @@ class ManagerStorageProviderController(...) : StandardManagerController<...>(man
 }
 ```
 
-自定义方法不受 `@ManagerPermissions` 约束（AOP 仅匹配固定的 5 个方法名），需要自行添加 `@PreAuthorize`。
+自定义方法不受 `PermissionMatrix` 约束（`authorize` 仅在标准 5 个端点内被调用），需要自行添加 `@PreAuthorize`。
 
 ## 前端对接
 
@@ -210,7 +214,7 @@ export const managerStorageProviderController = new ManagerStorageProviderContro
 
 ## 注意事项
 
-- `@ManagerPermissions` 仅对 Standard 和 Readonly 生效。给 Scoped / DerivedScoped / Tenant 添加此注解无效——AOP 的 pointcut 写死在 `StandardManagerController.*(..)`
+- 权限声明必须使用 `PermissionMatrix`，禁止再挂 `@ManagerPermissions` 注解（`authorize` 优先使用 `permissions` 字段，注解仅在 `permissions == null` 时作为兼容回退且带 `@Deprecated`）
 - 所有 `Long` 字段必须加 `@get:JsonSerialize(using = ToStringSerializer::class)`，前端接为 `string`
 - Controller 内禁止注入 Repository，数据库操作走 Service 层
 - Manager Controller 只能注入 Manager Service，禁止注入普通 Service

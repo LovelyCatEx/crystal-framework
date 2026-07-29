@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.sdk.rbac.system
 
-import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRbacPermissionDeclaration
+import com.lovelycatv.crystalframework.shared.types.rbac.system.SystemRbacPermissionDeclaration
 import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRoleDeclaration
 import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRolePermissionBindingDeclaration
 
