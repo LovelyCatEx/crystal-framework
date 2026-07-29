@@ -1,6 +1,6 @@
 # 租户资源控制器（StandardTenantManagerController）
 
-只属于租户（不能挂在 SYSTEM 下）的资源的基类。tenantId 强制作为 scope，权限通过 8 个 String 构造参数传入。
+只属于租户（不能挂在 SYSTEM 下）的资源的基类。tenantId 强制作为 scope，权限通过 `PermissionMatrix.tenantOnly(...)` 声明。
 
 ::: tip 老设计说明
 `StandardTenantManagerController` 早于 Scoped 家族。对于新设计的可跨 SYSTEM / TENANT 的资源，优先使用 [StandardScopedManagerController](./scoped-manager-controller)。此类主要用于已有的、强制以 tenantId 为唯一 scope 的资源。
@@ -28,17 +28,17 @@
 
 ## 权限模型
 
-双层权限：每个 CRUD 操作对应两个权限，一个 system 级、一个 scoped（tenant 级）。授权规则：
+统一 `PermissionMatrix` 中，Tenant 资源用两层：`tenantAdmin`（`tenant.` 前缀，跨租户运维）+ `tenantPem`（`i.tenant.` 前缀，本租户）。授权规则：
 
 ```
-先查 system 权限 → 有 → 立即放行，跳过 in-scope 检查
-再查 scoped 权限 → 有 → 检查 tenant 归属 → 归属正确才放行
+先查 tenantAdmin 权限 → 有 → 立即放行，跳过 in-scope 检查
+再查 tenantPem 权限 → 有 → 检查 tenant 归属 → 归属正确才放行
 两者都无 → 403
 ```
 
-scoped 层比 system 层更严格：持有 scoped 权限的用户还需证明操作的资源在自己租户内。
+tenantPem 层比 tenantAdmin 层更严格：持有 tenantPem 的用户还需证明操作的资源在自己租户内。super / system 层默认 `NOT_APPLICABLE`（Tenant 资源无 SYSTEM scope 概念）。
 
-禁用 scoped 权限：把 `scopedXxxPermission` 传成空字符串（`DISABLED_SCOPED_PERMISSION = ""`），端点仅允许 system 级权限持有者调用。
+禁用某一层：把对应参数传成 `PermissionMatrix.NOT_APPLICABLE`（老的空字符串 `DISABLED_SCOPED_PERMISSION = ""` 仍等价可用，`hasScopedAuthority` 对二者都短路返回 false）。
 
 ## 使用步骤
 
@@ -104,7 +104,7 @@ class ManagerDeleteTenantRoleDTO(
 
 ### 4. Controller
 
-不使用 `@ManagerPermissions`——8 个权限通过构造参数传入：
+权限通过 `PermissionMatrix.tenantOnly(...)` 传入构造参数。旧 `xxxPermission` 语义映射到 `tenantAdmin*`，旧 `scopedXxxPermission` 语义映射到 `tenantPem*`：
 
 ```kotlin
 @Validated
@@ -122,16 +122,20 @@ class ManagerTenantRoleController(
     ManagerDeleteTenantRoleDTO
 >(
     managerService,
-    createPermission        = SystemPermission.ACTION_TENANT_ROLE_CREATE,
-    scopedCreatePermission  = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
-    readPermission          = SystemPermission.ACTION_TENANT_ROLE_READ,
-    scopedReadPermission    = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
-    updatePermission        = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
-    scopedUpdatePermission  = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
-    deletePermission        = SystemPermission.ACTION_TENANT_ROLE_DELETE,
-    scopedDeletePermission  = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
+        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
+        tenantPemCreate   = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
+        tenantPemRead     = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
+        tenantPemUpdate   = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
+        tenantPemDelete   = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+    ),
 )
 ```
+
+老的 8-String 构造函数（`createPermission = ..., scopedCreatePermission = ..., ...`）已被 `@Deprecated` 标注，内部转发到 `PermissionMatrix.tenantOnly`，保留一版以兼容存量代码；新代码只用主构造函数。
 
 ## 类型参数
 
@@ -175,20 +179,28 @@ override suspend fun customCreate(userAuth, dto): ApiResponse<*>? {
 
 大多数场景不使用这些钩子。
 
-## `DISABLED_SCOPED_PERMISSION`
+## 禁用某一层
 
-禁用 scoped 层、让端点只对 system 权限持有者开放：
+让端点只对 tenantAdmin 权限持有者开放，把 tenantPem 层填成 `NOT_APPLICABLE`：
 
 ```kotlin
-scopedCreatePermission = StandardTenantManagerController.DISABLED_SCOPED_PERMISSION,
-// 或等价的空字符串 ""
+permissions = PermissionMatrix.tenantOnly(
+    tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
+    tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
+    tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
+    tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
+    tenantPemCreate   = PermissionMatrix.NOT_APPLICABLE,   // 禁用 tenantPem 层
+    tenantPemRead     = PermissionMatrix.NOT_APPLICABLE,
+    tenantPemUpdate   = PermissionMatrix.NOT_APPLICABLE,
+    tenantPemDelete   = PermissionMatrix.NOT_APPLICABLE,
+)
 ```
 
-内部实现：`hasScopedAuthority` 遇到空字符串直接返回 false，跳过 scoped 检查。
+老的空字符串 `DISABLED_SCOPED_PERMISSION = ""` 仍等价（`hasScopedAuthority` 对空字符串与 `NOT_APPLICABLE` 都短路返回 false），但新代码用 `PermissionMatrix.NOT_APPLICABLE` 语义更清晰。
 
 ## 注意事项
 
 - Entity 必须实现 `ScopedEntity<Long>`——不是 `ScopedEntity<*>`，parent id 类型固定为 Long。默认的 `checkIsRelatedToRootParent` 递归使用 Long
 - DTO 基类使用租户版：`BaseManagerCreateTenantResourceDTO` / `BaseManagerReadTenantResourceDTO`。使用普通 DTO 会在默认 `isCreateInScope` / `isQueryInScope` 中强转失败并 `error(...)`
 - 此类不处理系统级资源——设计上不含 SYSTEM scope 概念。跨 scope 场景使用 Scoped 家族
-- 8 个权限一个都不能省——即使某个 scoped 权限暂时不用，也需传 `DISABLED_SCOPED_PERMISSION` 而非省略参数
+- 权限声明必须使用 `PermissionMatrix.tenantOnly(...)`；老的 8-String 构造函数仍在但已 `@Deprecated`，见 [权限模型迁移指南](./permission-migration)

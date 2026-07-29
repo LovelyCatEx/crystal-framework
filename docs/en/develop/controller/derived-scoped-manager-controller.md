@@ -122,20 +122,32 @@ class ManagerTenantDictItemController(
     ManagerDeleteTenantDictItemDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad(
-        superCreate     = SystemPermission.ACTION_DICT_ITEM_CREATE,
-        superRead       = SystemPermission.ACTION_DICT_ITEM_READ,
-        superUpdate     = SystemPermission.ACTION_DICT_ITEM_UPDATE,
-        superDelete     = SystemPermission.ACTION_DICT_ITEM_DELETE,
-        systemCreate    = SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE,
-        systemRead      = SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
-        systemUpdate    = SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
-        systemDelete    = SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE_PEM,
-        tenantPemRead   = TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE_PEM,
-    ),
+    permissions = PermissionMatrix.of {
+        `super` {
+            create = SystemPermission.ACTION_DICT_ITEM_CREATE
+            read   = SystemPermission.ACTION_DICT_ITEM_READ
+            update = SystemPermission.ACTION_DICT_ITEM_UPDATE
+            delete = SystemPermission.ACTION_DICT_ITEM_DELETE
+        }
+        system {
+            create = SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE
+            read   = SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ
+            update = SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE
+            delete = SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE
+        }
+        tenantAdmin {
+            create = SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE
+            read   = SystemPermission.ACTION_TENANT_DICT_ITEM_READ
+            update = SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE
+            delete = SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE
+        }
+        tenantPem {
+            create = TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE_PEM
+            read   = TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM
+            update = TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE_PEM
+            delete = TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE_PEM
+        }
+    },
 ) {
 
     override suspend fun resolveScopeFromCreateDTO(dto: ManagerCreateTenantDictItemDTO): Pair<ResourceScope, Long> {
@@ -165,7 +177,7 @@ class ManagerTenantDictItemController(
         @RequestParam typeId: Long
     ): ApiResponse<List<TenantDictItemTreeVO>> {
         val (scope, scopeId) = resolveScopeByTypeId(typeId)
-        if (!RbacUtils.hasAnyAuthority(*permissions.forScope(scope, ScopedOperation.READ))) {
+        if (!RbacUtils.hasAnyAuthority(*permissions.layersFor(scope, ScopedOperation.READ))) {
             throw ForbiddenException()
         }
         if (!checkOwnership(scope, scopeId, ScopedOperation.READ, userAuthentication)) {
@@ -192,7 +204,7 @@ The ENTITY union constraint: `where ENTITY : BaseEntity, ENTITY : ScopedEntity<*
 
 ## Permission model
 
-Same as [StandardScopedManagerController](./scoped-manager-controller) — the 12-permission `ScopedPermissionTriad`. Only the scope source differs: Scoped reads from the entity's scope column; DerivedScoped gets it from the abstract methods.
+Same as [StandardScopedManagerController](./scoped-manager-controller) — the 16-permission `PermissionMatrix` (4 layers × 4 operations). Only the scope source differs: Scoped reads from the entity's scope column; DerivedScoped gets it from the three abstract methods.
 
 ## Overridable hooks
 

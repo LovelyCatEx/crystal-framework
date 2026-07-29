@@ -54,7 +54,11 @@ fun SettingsItemDeclaration.validateConfigValue(value: String): SettingsValidati
             else -> this.valueType.convertValue(value)
         } != null
     } catch (e: Exception) {
-        errorMessage = e.localizedMessage ?: e.message ?: "${this.key} = $value"
+        errorMessage = if (this.isSecret) {
+            "${this.key} validation failed"
+        } else {
+            e.localizedMessage ?: e.message ?: "${this.key} = $value"
+        }
         false
     }
     return SettingsValidationResult(pass, errorMessage)

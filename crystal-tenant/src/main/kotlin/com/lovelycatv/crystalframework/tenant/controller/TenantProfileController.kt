@@ -39,7 +39,7 @@ class TenantProfileController(
         val tenantProfileVO = tenant.toProfileVO(fileResourceService)
 
         return ApiResponse.success(tenantProfileVO.apply {
-            if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_PROFILE_READ_PEM)) {
+            if (RbacUtils.hasAuthority(TenantPermission.ACTION_PROFILE_READ.name)) {
                 // Do nothing
             } else {
                 this.ownerUserId = null
@@ -47,7 +47,7 @@ class TenantProfileController(
                 this.subscribedTime = null
                 this.expiresTime = null
 
-                if (!RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_PROFILE_READ_BASIC_PEM)) {
+                if (!RbacUtils.hasAuthority(TenantPermission.ACTION_PROFILE_READ_BASIC.name)) {
                     this.contactName = null
                     this.contactEmail = null
                     this.contactPhone = null
@@ -56,7 +56,7 @@ class TenantProfileController(
         })
     }
 
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_UPDATE_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
     @PostMapping("/update")
     suspend fun updateTenantProfile(
         userAuthentication: UserAuthentication,
@@ -69,7 +69,7 @@ class TenantProfileController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_PROFILE_UPDATE_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
     @PostMapping("/uploadIcon")
     suspend fun uploadTenantIcon(
         userAuthentication: UserAuthentication,

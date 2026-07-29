@@ -18,7 +18,7 @@ Trade-offs:
 @Validated
 abstract class StandardDerivedScopedManagerController<...>(
     protected val managerService: SERVICE,
-    protected val permissions: ScopedPermissionTriad,      // required, non-nullable
+    protected val permissions: PermissionMatrix,      // required, non-nullable
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<*> {
 
     // Three abstract methods: resolve scope from different sources
@@ -30,7 +30,7 @@ abstract class StandardDerivedScopedManagerController<...>(
         return when (scope) {
             SYSTEM -> true
             TENANT -> {
-                if (RbacUtils.hasAuthority(permissions.superFor(operation))) true
+                if (RbacUtils.hasAnyAuthority(*permissions.crossTenantLayersFor(operation))) true
                 else scopeId == userAuth.tenantId
             }
         }
@@ -94,10 +94,10 @@ Kotlin's `where` clause expresses multi-bound generics, requiring simultaneously
 
 ### `permissions` parameter is non-nullable
 
-Compared with `StandardScopedManagerController`'s `permissions: ScopedPermissionTriad? = null` (nullable; subclass must then override `checkPermission`), DerivedScoped's `permissions: ScopedPermissionTriad` is strictly non-nullable:
+Compared with `StandardScopedManagerController`'s `permissions: PermissionMatrix? = null` (nullable; subclass must then override `checkPermission`), DerivedScoped's `permissions: PermissionMatrix` is strictly non-nullable:
 
-- Derived-entity authorization follows the standard 12-slot pattern
-- No reason to fully bypass the Triad — no equivalent of the "any logged-in user can read" pattern seen in `ManagerApprovalFlowInstanceController`
+- Derived-entity authorization follows the standard 16-slot pattern
+- No reason to fully bypass the Matrix — no equivalent of the "any logged-in user can read" pattern seen in `ManagerApprovalFlowInstanceController`
 - Non-nullable simplifies the implementation and avoids `?: error(...)` branches
 
 ## Update / Delete scope tracing

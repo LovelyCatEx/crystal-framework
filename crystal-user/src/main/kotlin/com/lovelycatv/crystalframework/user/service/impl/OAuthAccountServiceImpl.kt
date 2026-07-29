@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -7,6 +8,7 @@ import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
 import com.lovelycatv.crystalframework.user.converters.OAuth2AuthenticationTokenAccountConverterManager
 import com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity
 import com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository
@@ -73,28 +75,38 @@ class OAuthAccountServiceImpl(
     }
 
     override suspend fun bindUser(accountId: Long, userId: Long) {
-        withUpdateEntityContext(accountId) {
-            val result = withUpdateById(accountId) {
-                if (this.userId != null) {
-                    throw BusinessException("This account is already linked to a user")
+        // Resolve the third-party identity (platform + identifier) so the lock scope matches
+        // the cross-row invariant being protected: at most one userId per (platform, identifier).
+        val target = getByIdOrThrow(accountId, BusinessException("OAuth account $accountId not found"))
+        val lockKey = "${RedisConstants.LOCK_OAUTH_BIND_PREFIX}${target.platform}:${target.identifier}"
+
+        reactiveRedisService.withDistributedLock(
+            lockKey = lockKey,
+            busyMessage = "OAuth account is being processed, please retry later",
+        ) {
+            withUpdateEntityContext(accountId) {
+                val result = withUpdateById(accountId) {
+                    if (this.userId != null) {
+                        throw BusinessException("This account is already linked to a user")
+                    }
+
+                    // The third-party identity must not already belong to another user (cross-row invariant).
+                    val conflictingOwner = this@OAuthAccountServiceImpl.getRepository()
+                        .findAllByPlatformAndIdentifier(this.platform, this.identifier)
+                        .awaitListWithTimeout()
+                        .firstOrNull { it.userId != null && it.userId != userId }
+
+                    if (conflictingOwner != null) {
+                        throw BusinessException("This account already belongs to another user")
+                    }
+
+                    this.userId = userId
                 }
 
-                // The third-party identity must not already belong to another user (cross-row invariant).
-                val conflictingOwner = this@OAuthAccountServiceImpl.getRepository()
-                    .findAllByPlatformAndIdentifier(this.platform, this.identifier)
-                    .awaitListWithTimeout()
-                    .firstOrNull { it.userId != null && it.userId != userId }
+                logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been bound to user $userId")
 
-                if (conflictingOwner != null) {
-                    throw BusinessException("This account already belongs to another user")
-                }
-
-                this.userId = userId
+                result
             }
-
-            logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been bound to user $userId")
-
-            result
         }
     }
 

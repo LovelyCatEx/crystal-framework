@@ -21,8 +21,8 @@ class DashboardController(
     private val dashboardService: DashboardService
 ) {
     @PreAuthorize(
-        "hasAuthority('${SystemPermission.ACTION_DASHBOARD_BUSINESS_STATISTICS_READ}') " +
-            "and hasAuthority('${SystemPermission.ACTION_DASHBOARD_SYSTEM_METRICS_READ}')"
+        "hasAuthority('system.dashboard.business.statistics.read') " +
+            "and hasAuthority('system.dashboard.system.metrics.read')"
     )
     @GetMapping("/stats")
     suspend fun getDashboardStats(
@@ -32,7 +32,7 @@ class DashboardController(
         return ApiResponse.success(stats)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_DASHBOARD_BUSINESS_STATISTICS_READ}')")
+    @PreAuthorize("hasAnyAuthority('system.dashboard.business.statistics.read')")
     @GetMapping("/business-stats")
     suspend fun getBusinessStats(
         @RequestParam(name = "timeRange", defaultValue = "1m") timeRange: String
@@ -41,7 +41,7 @@ class DashboardController(
         return ApiResponse.success(stats)
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_DASHBOARD_SYSTEM_METRICS_READ}')")
+    @PreAuthorize("hasAnyAuthority('system.dashboard.system.metrics.read')")
     @GetMapping("/system-metrics")
     suspend fun getSystemMetrics(): ApiResponse<SystemMetricsVO> {
         val metrics = dashboardService.getSystemMetrics()

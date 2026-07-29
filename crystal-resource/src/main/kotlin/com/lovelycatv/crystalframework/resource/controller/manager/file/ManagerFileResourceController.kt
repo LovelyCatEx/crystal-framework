@@ -7,21 +7,15 @@ import com.lovelycatv.crystalframework.resource.controller.manager.file.dto.Mana
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
 import com.lovelycatv.crystalframework.resource.service.FileResourceManagerService
-import com.lovelycatv.crystalframework.shared.annotations.ManagerPermissions
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
+import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_FILE_RESOURCE_READ],
-    readAll = [SystemPermission.ACTION_FILE_RESOURCE_READ],
-    create = [SystemPermission.ACTION_FILE_RESOURCE_CREATE],
-    update = [SystemPermission.ACTION_FILE_RESOURCE_UPDATE],
-    delete = [SystemPermission.ACTION_FILE_RESOURCE_DELETE],
-)
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/file-resource")
@@ -35,4 +29,12 @@ class ManagerFileResourceController(
         ManagerReadFileResourceDTO,
         ManagerUpdateFileResourceDTO,
         ManagerDeleteFileResourceDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnly(
+        systemCreate = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_DELETE.name,
+    ),
+)

@@ -11,7 +11,7 @@ import type {OAuthBindMeta} from "@/utils/oauth2.ts";
 import {setUserAuthentication} from "@/utils/token.utils.ts";
 import type {LoginResponse, OAuth2LoginResponse, OAuth2UserInfo} from "@/types/auth/auth.types.ts";
 import {GithubOutlined, LockOutlined, UserOutlined} from "@ant-design/icons";
-import PlatformIcon from "../../components/PlatformIcon.tsx";
+import PlatformIcon from "../../components/resource/PlatformIcon.tsx";
 import {getOAuthPlatformByName} from "@/types/user/oauth-account.types.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 

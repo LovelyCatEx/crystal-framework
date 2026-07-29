@@ -14,7 +14,7 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-definitions")
+@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/approval-flow-definition")
 class ManagerApprovalFlowDefinitionController(
     managerService: ApprovalFlowDefinitionManagerService,
     private val approvalFlowNodeManagerService: ApprovalFlowNodeManagerService,
@@ -48,26 +48,26 @@ class ManagerApprovalFlowDefinitionController(
         ManagerDeleteApprovalFlowDefinitionDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix(
-        superCreate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE,
-        superRead = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ,
-        superUpdate = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE,
-        superDelete = SystemPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE,
-        systemCreate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE,
-        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE,
-        systemDelete = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE,
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE_PEM,
+    permissions = PermissionMatrix(
+        superCreate = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_CREATE.name,
+        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_READ.name,
+        superUpdate = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_UPDATE.name,
+        superDelete = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_DELETE.name,
+        systemCreate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE.name,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE.name,
     ),
 ) {
-    @PostMapping("/updateGraph")
+    @PostMapping("/update-graph")
     suspend fun updateGraph(
         userAuthentication: UserAuthentication,
         @Valid
@@ -87,13 +87,21 @@ class ManagerApprovalFlowDefinitionController(
         return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
 
-    @GetMapping("/detailsById")
+    @GetMapping("/details-by-id")
     suspend fun getApprovalFlowDefinitionDetails(
+        userAuthentication: UserAuthentication,
         @RequestParam
         definitionId: Long
     ): ApiResponse<*> {
         val definition = managerService.getByIdOrNull(definitionId)
             ?: throw BusinessException("Definition not found")
+        val resolvedScope = resolveScope(definition.scope)
+        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw ForbiddenException()
+        }
+        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
+            throw UnauthorizedException()
+        }
 
         return ApiResponse.success(
             ApprovalFlowDefinitionDetailsVO(

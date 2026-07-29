@@ -14,69 +14,51 @@ abstract class ReadonlyManagerController<
     SERVICE : CachedBaseManagerService<...>,
     ...
 >(
-    managerService: SERVICE
-) : StandardManagerController<SERVICE, ...>(managerService) {
-
-    override suspend fun create(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: CREATE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be created")
-    }
-
-    override suspend fun update(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: UPDATE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be updated")
-    }
-
-    override suspend fun delete(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute dto: DELETE_DTO
-    ): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be deleted")
-    }
-}
+    managerService: SERVICE,
+    permissions: PermissionMatrix? = null,
+) : StandardManagerController<SERVICE, ...>(
+    managerService,
+    permissions = permissions,
+    mutability = Mutability.READ_ONLY,   // Key: CUD endpoints throw ForbiddenException at entry
+)
 ```
 
 Structural notes:
 
-- Overrides only the 3 mutation methods, returning `ApiResponse.forbidden` unconditionally
+- The only addition is `Mutability.READ_ONLY`; `AbstractManagerController` checks the flag at the CUD endpoint entry and throws `ForbiddenException`
 - `list` and `query` remain untouched, fully inherited from `StandardManagerController`
 - Type parameters match the parent verbatim — generic inheritance forces bound propagation
+- `permissions` is passed through to the parent — recommended: `PermissionMatrix.systemOnlyReadonly(...)` factory
 
 ## Two-layer defense
 
-Mutation methods return 403 even if called, but before reaching them `ManagerControllerPermissionAspect` runs a permission check first. Complete flow:
+CUD endpoints are blocked by `Mutability.READ_ONLY` even if reached; before that, `StandardManagerController.authorize` (via `PermissionMatrix`) already ran a permission check. Complete flow:
 
 ```
 POST /create
-  → ManagerControllerPermissionAspect (AOP)
-      ├─ Checks @ManagerPermissions.create
+  → StandardManagerController.authorize
+      ├─ Checks permissions.layersFor(SYSTEM, CREATE)
       ├─ No permission → AuthorizationDeniedException (converted to 403 by GlobalExceptionHandler)
       └─ Has permission → continue
-  → ReadonlyManagerController.create (business override)
-      └─ Always returns ApiResponse.forbidden (403)
+  → AbstractManagerController entry
+      └─ Mutability.READ_ONLY → throw ForbiddenException (403)
 ```
 
 Motivation for two layers: the permission layer is generic defense (misconfig, mis-assigned role); the business layer is a structural constraint — this Controller type shall not accept writes, encoded in code. Even if permission config is wrong and lets the request through, the business layer catches it.
 
 ## Real-world permission configuration
 
-All 5 fields of `@ManagerPermissions` usually hold the same read permission:
+Prefer `PermissionMatrix.systemOnlyReadonly(...)` — just fill `systemRead` (and optionally `superRead`):
 
 ```kotlin
-@ManagerPermissions(
-    read    = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    create  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],  // even if AOP passes, business rejects
-    update  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    delete  = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
+permissions = PermissionMatrix.systemOnlyReadonly(
+    systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ,
 )
 ```
 
-If `create` were filled with a nonexistent string, AOP would block first. Using the read permission has a benefit: read-permission holders who call `create` receive the business layer's semantic 403 ("cannot be created") rather than AOP's generic "Access denied", making it easier for the frontend to distinguish "this resource cannot be modified" from "you lack permission".
+The factory sets the 4 CUD slots to `NEVER_GRANTED` and the 8 tenant slots to `NOT_APPLICABLE` — even if `Mutability` protection is bypassed, `NEVER_GRANTED` at the permission layer keeps CUD denied. That's the essence of defense in depth.
+
+Manually stuffing real mutation permissions into CUD would still be blocked by `Mutability.READ_ONLY`, but you'd lose the permission-layer fail-safe; always use the factory rather than hand-constructing.
 
 ## Type parameter constraints
 
@@ -93,13 +75,14 @@ Bounds must be transmitted verbatim; Readonly cannot tighten them.
 
 ## AOP interception chain
 
-Readonly Controllers are still caught by `ManagerControllerPermissionAspect` (pointcut is `StandardManagerController.*(..)`, covering all subclasses):
+Readonly Controllers are still caught by `ManagerControllerPermissionAspect` (pointcut is `StandardManagerController.*(..)`, covering all subclasses), but it only kicks in on the legacy path where `permissions == null` and `@ManagerPermissions` is present; new code with `PermissionMatrix` is handled by the parent's `authorize` and passed through by AOP:
 
 ```
 StandardManagerController.* (pointcut)
     → ManagerControllerPermissionAspect (@Order — higher priority)
-        → @ManagerPermissions check
-            → create / update / delete → business method (overridden to 403)
+        → permissions != null → proceed (authorize handled it)
+        → permissions == null + @ManagerPermissions → legacy check path
+    → AbstractManagerController → Mutability.READ_ONLY blocks CUD
 ```
 
 The audit aspect `ManagerControllerAuditAspect` covers this too — rejected calls are also recorded, for post-hoc analysis of anomalous access patterns.

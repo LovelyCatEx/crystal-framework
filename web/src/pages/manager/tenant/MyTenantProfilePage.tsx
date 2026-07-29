@@ -35,7 +35,7 @@ import {
 } from "@/api/tenant/tenant-profile.api.ts";
 import type {TenantProfileVO} from "@/types/tenant/tenant.types.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import {ImageCropper} from "@/components/ImageCropper.tsx";
+import {ImageCropper} from "@/components/input/ImageCropper.tsx";
 import {TenantSettingsSection} from "@/components/tenant/TenantSettingsSection.tsx";
 import {AddressInput} from "@/components/map/AddressInput.tsx";
 

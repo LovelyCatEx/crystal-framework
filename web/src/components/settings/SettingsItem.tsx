@@ -18,7 +18,7 @@ export interface SettingsItemProps {
 
 export function SettingsItem(props: SettingsItemProps) {
     const {token} = useToken();
-    const {t: _t} = useTranslation();
+    const {t} = useTranslation();
     const formItemProps: Record<string, unknown> | undefined =
         props.schema.valueType === SystemSettingsItemValueType.BOOLEAN
             ? {getValueProps: (value: string | boolean) => ({checked: value === 'true' || value === true})}
@@ -42,6 +42,17 @@ export function SettingsItem(props: SettingsItemProps) {
                     schema: props.schema,
                     loading: props.loading
                 })
+            ) : props.schema.isSecret ? (
+                <Input.Password
+                    className="rounded-lg h-10"
+                    placeholder={
+                        props.schema.hasValue
+                            ? t('components.settings.secretPlaceholderConfigured')
+                            : t('components.settings.secretPlaceholderEmpty')
+                    }
+                    disabled={props.loading}
+                    autoComplete="new-password"
+                />
             ) : props.schema.valueType == SystemSettingsItemValueType.STRING ? (
                 <Input
                     className="rounded-lg h-10"

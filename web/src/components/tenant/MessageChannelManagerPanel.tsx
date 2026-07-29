@@ -8,7 +8,7 @@ import {
 } from "@/api/message-channel/message-channel.api.ts";
 import React, {forwardRef, useEffect, useImperativeHandle, useRef} from "react";
 import {ChannelType, type MessageChannel} from "@/types/message-channel/message-channel.types.ts";
-import {MessageChannelConfigEditor} from "@/components/MessageChannelConfigEditor.tsx";
+import {MessageChannelConfigEditor} from "@/components/editor/MessageChannelConfigEditor.tsx";
 import {useMessageChannelTableColumns} from "@/components/columns/MessageChannelEntityColumns.tsx";
 import {
     getDefaultPreset,
@@ -19,6 +19,7 @@ import {
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import type {BaseManagerReadDTO} from "@/types/api.types.ts";
+import {getChannelType} from "@/i18n/enum-helpers.ts";
 
 export interface MessageChannelManagerPanelProps {
     /** Scope typeId (e.g. ResourceScope.SYSTEM=0 / TENANT=1). */
@@ -192,8 +193,8 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
     ];
 
     const channelTypeOptions = [
-        {label: t('enums.channelType.1'), value: ChannelType.EMAIL},
-        {label: t('enums.channelType.2'), value: ChannelType.LARK}
+        {label: getChannelType(ChannelType.EMAIL), value: ChannelType.EMAIL},
+        {label: getChannelType(ChannelType.LARK), value: ChannelType.LARK}
     ];
 
     return (
@@ -231,8 +232,8 @@ export const MessageChannelManagerPanel = forwardRef<MessageChannelManagerPanelR
                         style={{width: 120}}
                         options={[
                             {value: '-1', label: t(`${i18nPrefix}.filter.all`)},
-                            {label: t('enums.channelType.1'), value: String(ChannelType.EMAIL)},
-                            {label: t('enums.channelType.2'), value: String(ChannelType.LARK)},
+                            {label: getChannelType(ChannelType.EMAIL), value: String(ChannelType.EMAIL)},
+                            {label: getChannelType(ChannelType.LARK), value: String(ChannelType.LARK)},
                         ]}
                         onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,

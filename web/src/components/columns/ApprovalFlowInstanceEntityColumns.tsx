@@ -6,8 +6,8 @@ import type {ApprovalFlowDefinition} from "@/types/approval/approval-flow-defini
 import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
 import {ApprovalFlowInstanceStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowInstanceStatus, getApprovalFlowScope} from "@/i18n/enum-helpers.ts";
-import {UserChipById} from "@/components/UserChipById.tsx";
-import {TenantMemberChip} from "@/components/TenantMemberChip.tsx";
+import {UserChipById} from "@/components/chip/UserChipById.tsx";
+import {TenantMemberChip} from "@/components/chip/TenantMemberChip.tsx";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 

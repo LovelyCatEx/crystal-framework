@@ -41,7 +41,7 @@ class ApprovalFlowTaskManagerControllerClass extends BaseManagerController<
     ManagerDeleteApprovalFlowTaskDTO
 > {
     constructor() {
-        super('/manager/approval-flow-tasks');
+        super('/manager/approval-flow-task');
     }
 }
 
@@ -49,7 +49,7 @@ export const ApprovalFlowTaskManagerController = new ApprovalFlowTaskManagerCont
 
 export async function handleApprovalFlowTask(dto: HandleApprovalFlowTaskDTO) {
     return doPost(
-        '/api/manager/approval-flow-tasks/handle',
+        '/api/manager/approval-flow-task/handle',
         dto,
         {'Content-Type': 'application/json'},
     );
@@ -61,7 +61,7 @@ export async function handleApprovalFlowTask(dto: HandleApprovalFlowTaskDTO) {
  */
 export async function queryMyApprovalFlowTasks(dto: ManagerReadApprovalFlowTaskDTO) {
     return doPost<import('@/types/api.types.ts').PaginatedResponseData<ApprovalFlowTask>>(
-        '/api/manager/approval-flow-tasks/my',
+        '/api/manager/approval-flow-task/my',
         dto,
         {'Content-Type': 'application/json'},
     );

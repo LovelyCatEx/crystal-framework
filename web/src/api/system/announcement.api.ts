@@ -29,7 +29,7 @@ export const AnnouncementManagerController = new BaseManagerController<
     ManagerCreateAnnouncementDTO,
     ManagerReadAnnouncementDTO,
     ManagerUpdateAnnouncementDTO
->('/manager/announcements');
+>('/manager/announcement');
 
 export async function getPublishedAnnouncements() {
     return doGet<Announcement[]>('/api/announcements/list');

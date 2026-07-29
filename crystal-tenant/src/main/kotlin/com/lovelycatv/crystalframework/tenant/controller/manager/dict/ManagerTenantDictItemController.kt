@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
-import com.lovelycatv.crystalframework.shared.controller.ScopedPermissionMatrix
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -41,23 +41,23 @@ class ManagerTenantDictItemController(
         ManagerDeleteTenantDictItemDTO
 >(
     managerService,
-    permissions = ScopedPermissionMatrix(
-        superCreate = SystemPermission.ACTION_DICT_ITEM_CREATE,
-        superRead = SystemPermission.ACTION_DICT_ITEM_READ,
-        superUpdate = SystemPermission.ACTION_DICT_ITEM_UPDATE,
-        superDelete = SystemPermission.ACTION_DICT_ITEM_DELETE,
-        systemCreate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE,
-        systemRead = SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE,
-        systemDelete = SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE,
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_DICT_ITEM_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_DICT_ITEM_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_DICT_ITEM_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_DICT_ITEM_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_DICT_ITEM_DELETE_PEM,
+    permissions = PermissionMatrix(
+        superCreate = SystemPermission.ACTION_X_DICT_ITEM_CREATE.name,
+        superRead = SystemPermission.ACTION_X_DICT_ITEM_READ.name,
+        superUpdate = SystemPermission.ACTION_X_DICT_ITEM_UPDATE.name,
+        superDelete = SystemPermission.ACTION_X_DICT_ITEM_DELETE.name,
+        systemCreate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_DICT_ITEM_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_DICT_ITEM_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_DICT_ITEM_DELETE.name,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DICT_ITEM_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DICT_ITEM_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_DICT_ITEM_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_DICT_ITEM_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_DICT_ITEM_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_DICT_ITEM_DELETE.name,
     ),
 ) {
 
@@ -79,7 +79,7 @@ class ManagerTenantDictItemController(
 
     /**
      * Tree view of dict items under a given type. Authorization mirrors the standard READ
-     * pipeline: consult [ScopedPermissionMatrix.layersFor] then run [checkOwnership].
+     * pipeline: consult [PermissionMatrix.layersFor] then run [checkOwnership].
      */
     @GetMapping("/tree")
     suspend fun tree(

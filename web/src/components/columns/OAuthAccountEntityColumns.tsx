@@ -6,8 +6,8 @@ import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {UserManagerController} from "@/api/user/user.api.ts";
 import type {User} from "@/types/user/user.types.ts";
-import {AvatarResource} from "../AvatarResource.tsx";
-import PlatformIcon from "../PlatformIcon.tsx";
+import {AvatarResource} from "../resource/AvatarResource.tsx";
+import PlatformIcon from "../resource/PlatformIcon.tsx";
 import {UserCard} from "../card/pop/UserCard.tsx";
 import {useTranslation} from "react-i18next";
 

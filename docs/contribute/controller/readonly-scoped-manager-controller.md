@@ -12,24 +12,15 @@
 @Validated
 abstract class ReadonlyScopedManagerController<...>(
     managerService: SERVICE,
-    permissions: ScopedPermissionTriad? = null,
-) : StandardScopedManagerController<SERVICE, ...>(managerService, permissions) {
-
-    override suspend fun create(userAuthentication, @ModelAttribute dto: CREATE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be created")
-    }
-
-    override suspend fun update(userAuthentication, @ModelAttribute dto: UPDATE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be updated")
-    }
-
-    override suspend fun delete(userAuthentication, @ModelAttribute dto: DELETE_DTO): ApiResponse<*> {
-        return ApiResponse.forbidden<Nothing>("This resource is read-only and cannot be deleted")
-    }
-}
+    permissions: PermissionMatrix? = null,
+) : StandardScopedManagerController<SERVICE, ...>(
+    managerService,
+    permissions,
+    mutability = Mutability.READ_ONLY,   // CUD 端点由父类 AbstractManagerController 抛 ForbiddenException
+)
 ```
 
-结构与 `ReadonlyManagerController` 对称，只是父类换成 `StandardScopedManagerController`。
+结构与 `ReadonlyManagerController` 对称，只是父类换成 `StandardScopedManagerController`；同样只是加了 `Mutability.READ_ONLY` 一件事。
 
 ## 三重防护体系
 
@@ -37,23 +28,22 @@ Scoped 家族的只读比 `ReadonlyManagerController` 多了权限层的 `NEVER_
 
 ```
 POST /create
-  → StandardScopedManagerController.create（父类原实现，不走 AOP）
-      └─ 被 ReadonlyScopedManagerController override
-          → 直接返回 ApiResponse.forbidden（第 1 层：业务层拒绝）
+  → StandardScopedManagerController.create（父类原实现）
+      → assertAccess → checkPermission(scope, scopeId, CREATE, userAuth)
+          └─ matrix.layersFor(scope, CREATE) 返回 [NEVER_GRANTED, NEVER_GRANTED, ...]
+              → hasAnyAuthority("!!never_granted!!", ...) = false
+                  → ForbiddenException（第 1 层：权限层拒绝）
 
-即使 ReadonlyScoped 被绕开，Scoped 家族的父类 create 会调 assertAccess：
-  → checkPermission(scope, scopeId, CREATE, userAuth)
-      └─ triad.forScope(scope, CREATE) 返回 [NEVER_GRANTED, NEVER_GRANTED]
-          → hasAnyAuthority("!!never_granted!!", "!!never_granted!!") = false
-              → ForbiddenException（第 2 层：权限层拒绝）
+即使权限层被绕过（如子类 override checkPermission 恒返回 true）：
+  → AbstractManagerController 入口
+      └─ Mutability.READ_ONLY → 抛 ForbiddenException（第 2 层：业务层拒绝）
 
-若 super / system / tenantPem 权限位不使用 NEVER_GRANTED 而是填了真实读权限：
+若 CUD 权限位不使用 NEVER_GRANTED 而是填了真实读权限：
   → checkPermission 通过（持有读权限的用户碰到 CREATE 权限位配置为读权限）
-      → checkOwnership 也可能通过
-          → managerService.create(dto) 被真正调用   ← 灾难
+      → 但 Mutability.READ_ONLY 依然挡下   ← fail-safe 兜底
 ```
 
-这就是 `ScopedPermissionTriad.readonly(...)` 工厂强制 CRUD 位填 `NEVER_GRANTED` 的原因——它不是可选的美化，而是权限升级 bug 的兜底防线。
+这就是 `PermissionMatrix.readonly(...)` 工厂强制 CUD 位填 `NEVER_GRANTED` 的原因——它不是可选的美化，而是权限升级 bug 的兜底防线，加上 `Mutability.READ_ONLY` 组成两层独立防护。
 
 ## Delete DTO 复用基类
 
@@ -91,8 +81,8 @@ override suspend fun buildQueryResponse(
     userAuthentication: UserAuthentication,
 ): Any {
     val resolvedScope = resolveScope(dto.scope)
-    val triad = permissions ?: error(...)
-    val canReadAll = RbacUtils.hasAnyAuthority(*triad.forScope(resolvedScope, ScopedOperation.READ))
+    val matrix = permissions ?: error(...)
+    val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
     val effectiveDto = if (canReadAll) dto
                        else dto.copy(query = appendInitiatorCondition(dto.query, initiatorId))
@@ -115,11 +105,11 @@ override suspend fun buildQueryResponse(
 | | ReadonlyManagerController | ReadonlyScopedManagerController |
 |---|---|---|
 | 父类 | `StandardManagerController` | `StandardScopedManagerController` |
-| 权限声明 | `@ManagerPermissions`（类注解，5 个字段） | `ScopedPermissionTriad`（构造参数，12 位） |
+| 权限声明 | `PermissionMatrix.systemOnlyReadonly(...)` | `PermissionMatrix.readonly(...)`（16 位 CUD 填 `NEVER_GRANTED`） |
 | Scope 支持 | 无 | 强制 SYSTEM / TENANT 二选一 |
 | Entity 约束 | `BaseEntity` | `BaseScopedEntity` |
-| AOP 覆盖 | 有 | 无，方法内自校验 |
-| NEVER_GRANTED 兜底 | 无（不需要） | 有（关键） |
+| Mutability | `READ_ONLY`（父类挡 CUD） | 同左 |
+| NEVER_GRANTED 兜底 | 权限层已由 `systemOnlyReadonly` 覆盖 | 权限层已由 `readonly` 覆盖 |
 
 ## 现有真实使用位置
 

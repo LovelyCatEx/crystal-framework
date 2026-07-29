@@ -2,13 +2,13 @@
 
 ## Design intent
 
-`StandardTenantManagerController` is the tenant-resource base predating the Scoped family. It established the "system permission + tenant permission" dual-layer authorization model and uses `isXxxInScope` hooks to handle "not-directly-tenant" nested resources (e.g. department members).
+`StandardTenantManagerController` is the tenant-resource base predating the Scoped family. It established the dual-layer authorization model (originally "system permission + tenant permission"; under the unified `PermissionMatrix` these become `tenantAdmin` + `tenantPem`) and uses `isXxxInScope` hooks to handle "not-directly-tenant" nested resources (e.g. department members).
 
 Historical timeline:
 
 - v1.x early: all tenant resources used this Controller
 - Post-v1.10: extracted the generic `StandardScopedManagerController`, generalizing "cross-SYSTEM/TENANT dual scope"
-- Now: legacy tenant resources still live here; new "tenant-only" resources may pick this or Scoped (using it with scope locked to TENANT)
+- Now: legacy tenant resources still live here; permissions unified to `PermissionMatrix` (the 8-String constructor is `@Deprecated` and delegates to `PermissionMatrix.tenantOnly(...)`); new "tenant-only" resources may pick this or Scoped (using it with scope locked to TENANT)
 
 Do not extend this base with new abstractions — new capabilities belong on the Scoped family.
 
@@ -20,18 +20,34 @@ Do not extend this base with new abstractions — new capabilities belong on the
 @Validated
 abstract class StandardTenantManagerController<...>(
     protected val managerService: SERVICE,
-    protected val createPermission: String,        protected val scopedCreatePermission: String,
-    protected val readPermission: String,          protected val scopedReadPermission: String,
-    protected val updatePermission: String,        protected val scopedUpdatePermission: String,
-    protected val deletePermission: String,        protected val scopedDeletePermission: String,
+    protected val permissions: PermissionMatrix,   // primary constructor uses Matrix
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<Long> {
 
+    // Legacy 8-String constructor kept one release with @Deprecated; delegates to the primary
+    @Deprecated("Use the primary constructor with PermissionMatrix.tenantOnly(...) instead.")
+    constructor(
+        managerService, createPermission, scopedCreatePermission,
+        readPermission, scopedReadPermission,
+        updatePermission, scopedUpdatePermission,
+        deletePermission, scopedDeletePermission,
+    ) : this(
+        managerService,
+        permissions = PermissionMatrix.tenantOnly(
+            tenantAdminCreate = createPermission, tenantAdminRead = readPermission,
+            tenantAdminUpdate = updatePermission, tenantAdminDelete = deletePermission,
+            tenantPemCreate = scopedCreatePermission, tenantPemRead = scopedReadPermission,
+            tenantPemUpdate = scopedUpdatePermission, tenantPemDelete = scopedDeletePermission,
+        ),
+    )
+
     companion object {
-        const val DISABLED_SCOPED_PERMISSION: String = ""
+        @Deprecated("Use PermissionMatrix.NOT_APPLICABLE instead")
+        const val DISABLED_SCOPED_PERMISSION: String = PermissionMatrix.NOT_APPLICABLE
     }
 
     private suspend fun hasScopedAuthority(authority: String): Boolean {
-        if (authority.isBlank()) return false
+        // Both empty string (legacy DISABLED_SCOPED_PERMISSION) and NOT_APPLICABLE short-circuit
+        if (authority.isBlank() || authority == PermissionMatrix.NOT_APPLICABLE) return false
         return RbacUtils.hasAuthority(authority)
     }
 
@@ -74,42 +90,41 @@ abstract class StandardTenantManagerController<...>(
 
 ## Key design decisions
 
-### 8 Strings instead of a structured Triad
+### From 8 Strings to PermissionMatrix.tenantOnly
 
-The Tenant Controller uses 8 separate String parameters: `createPermission` / `scopedCreatePermission` / …. Compared with the Scoped family's `ScopedPermissionTriad` data class:
+The Tenant Controller originally used 8 separate String parameters (`createPermission` / `scopedCreatePermission` / …). Its short-comings:
 
-- No explicit `super` layer — cross-tenant admin relies on system permissions; permission-inheritance semantics get muddled
+- No explicit `super` layer — cross-tenant admin relied on system permissions, muddling inheritance semantics
 - Very long constructor signature — 8 String parameters are easy to reorder incorrectly
-- No convenient way to express a "read-only" variant — no factory like `Triad.readonly(...)`
+- No convenient way to express a "read-only" variant — no factory like `readonly(...)`
 
-Rewriting is expensive; the design lingers.
+`PermissionMatrix.tenantOnly(...)` is now the primary constructor and names the two layers directly: `tenantAdmin*` + `tenantPem*`. The legacy 8-String constructor is retained one release (`@Deprecated`) — it maps `createPermission` → `tenantAdminCreate`, `scopedCreatePermission` → `tenantPemCreate`, etc., and delegates to the primary constructor. Legacy protected properties like `createPermission` also expose compat getters (e.g. `get() = permissions.tenantAdminCreate`), so existing subclasses do not need changes.
 
-### Two-layer: system → scoped
+### Two-layer: tenantAdmin → tenantPem
 
 Authorization order:
 
 ```
-1. RbacUtils.hasAuthority(systemPermission) → true → allow immediately, skip in-scope
-2. hasScopedAuthority(scopedPermission) → true → run isXxxInScope → true then allow
+1. RbacUtils.hasAuthority(tenantAdminPermission) → true → allow immediately, skip in-scope
+2. hasScopedAuthority(tenantPemPermission) → true → run isXxxInScope → true then allow
 3. Neither → 403
 ```
 
-Skipping in-scope for system holders is deliberate — the system permission itself means "cross-tenant admin capability"; no need to further gate by tenantId. The scoped permission is "authorization within my own tenant" and must prove the resource lies within.
+Skipping in-scope for `tenantAdmin` holders is deliberate — the `tenantAdmin` permission itself means "cross-tenant admin capability"; no need to further gate by tenantId. The `tenantPem` permission is "authorization within my own tenant" and must prove the resource lies within. The super / system layers default to `NOT_APPLICABLE` here (Tenant resources have no SYSTEM scope concept).
 
-### `DISABLED_SCOPED_PERMISSION = ""`
+### `DISABLED_SCOPED_PERMISSION` and `NOT_APPLICABLE`
 
-Empty string disables the scoped layer:
+The legacy `DISABLED_SCOPED_PERMISSION = ""` (empty string) disables the scoped layer; `hasScopedAuthority` short-circuits on empty. `PermissionMatrix.NOT_APPLICABLE` (`"!!not_applicable!!"`) is now preferred — `hasScopedAuthority` short-circuits both, semantically equivalent but clearer:
 
 ```kotlin
 private suspend fun hasScopedAuthority(authority: String): Boolean {
-    if (authority.isBlank()) return false
+    // Both empty string (legacy DISABLED_SCOPED_PERMISSION) and NOT_APPLICABLE short-circuit
+    if (authority.isBlank() || authority == PermissionMatrix.NOT_APPLICABLE) return false
     return RbacUtils.hasAuthority(authority)
 }
 ```
 
-Empty string over nullable: in Kotlin, `""` as a constant is simpler than `null` (a `const val` accepts only non-null literals). Semantics: "empty string = scoped permission not configured".
-
-Contrast `ScopedPermissionTriad.NEVER_GRANTED` — a permission-looking string that never matches (`"!!never_granted!!"`); runs through `hasAuthority` and always returns false. Empty string here short-circuits before the check — different intent.
+Contrast `PermissionMatrix.NEVER_GRANTED` — a permission-looking string that never matches; runs through `hasAuthority` and always returns false. `NOT_APPLICABLE` / empty string short-circuit before the check — different intent.
 
 ### isUpdateInScope / isDeleteInScope use chain lookup
 

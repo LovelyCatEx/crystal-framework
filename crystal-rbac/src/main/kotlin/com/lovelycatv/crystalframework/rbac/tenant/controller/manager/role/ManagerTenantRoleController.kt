@@ -3,7 +3,9 @@ package com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.controller.tenantOnly
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.ManagerDeleteTenantRoleDTO
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.ManagerReadTenantRoleDTO
@@ -30,12 +32,14 @@ class ManagerTenantRoleController(
         ManagerDeleteTenantRoleDTO
 >(
     managerService,
-    createPermission = SystemPermission.ACTION_TENANT_ROLE_CREATE,
-    scopedCreatePermission = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
-    readPermission = SystemPermission.ACTION_TENANT_ROLE_READ,
-    scopedReadPermission = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
-    updatePermission = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
-    scopedUpdatePermission = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
-    deletePermission = SystemPermission.ACTION_TENANT_ROLE_DELETE,
-    scopedDeletePermission = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM
+    permissions = PermissionMatrix.tenantOnly(
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_ROLE_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_ROLE_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_ROLE_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_ROLE_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_ROLE_DELETE.name,
+    ),
 )

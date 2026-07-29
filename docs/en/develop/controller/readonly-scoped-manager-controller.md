@@ -25,15 +25,16 @@ Inherited from `StandardScopedManagerController`; mutations return 403 at the bu
 | POST | `/update` | 403 Forbidden |
 | POST | `/delete` | 403 Forbidden |
 
-## Use the `Triad.readonly(...)` factory
+## Use the `PermissionMatrix.readonly(...)` factory
 
-`ScopedPermissionTriad` has 12 slots; read-only cases only need 3 read slots. The `readonly` factory fills the other 9 CRUD slots with `NEVER_GRANTED` (a string that can never be granted), ensuring deny-by-default even if code accidentally bypasses ReadonlyScoped and looks up permissions directly:
+`PermissionMatrix` has 16 slots; read-only cases only need 4 read slots. The `readonly` factory fills the other 12 CRUD slots with `NEVER_GRANTED` (a sentinel that can never be granted), ensuring deny-by-default even if code accidentally bypasses ReadonlyScoped and looks up permissions directly:
 
 ```kotlin
-permissions = ScopedPermissionTriad.readonly(
-    superRead      = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    systemRead     = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    tenantPemRead  = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+permissions = PermissionMatrix.readonly(
+    superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+    systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
+    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+    tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
 )
 ```
 
@@ -104,10 +105,11 @@ class ManagerApprovalFlowInstanceController(
     BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = ScopedPermissionTriad.readonly(
-        superRead     = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        systemRead    = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    permissions = PermissionMatrix.readonly(
+        superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
+        systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
+        tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
     ),
 ) {
 
@@ -135,7 +137,7 @@ override suspend fun buildQueryResponse(
     dto: ManagerReadApprovalFlowInstanceDTO,
     userAuthentication: UserAuthentication,
 ): Any {
-    val canReadAll = RbacUtils.hasAnyAuthority(*permissions!!.forScope(scope, READ))
+    val canReadAll = RbacUtils.hasAnyAuthority(*permissions!!.layersFor(scope, READ))
     val effectiveDto = if (canReadAll) dto
                        else dto.copy(query = <append initiator_id filter>)
     return managerService.query(effectiveDto)
@@ -149,7 +151,7 @@ Key points:
 
 ## Notes
 
-- Always use the `readonly(...)` factory for the Triad — manually filling all 12 slots is error-prone
+- Always use the `PermissionMatrix.readonly(...)` factory — manually filling all 16 slots is error-prone
 - Custom mutation endpoints must handle their own permission checks — the parent's 403 only covers `/create` / `/update` / `/delete`; new endpoints like `/mark-as-seen` need `@PreAuthorize` or an inline `checkPermission`
-- `@ManagerPermissions` has no effect here (same as the Scoped family)
+- Declare permissions via `PermissionMatrix`; the legacy `ScopedPermissionTriad.readonly` / `ScopedPermissionMatrix.readonly` aliases are deprecated — see the [Permission Model Migration Guide](./permission-migration)
 - Delete DTO may reuse the base class (`BaseManagerDeleteDTO`) since the business layer returns 403 anyway — no extra fields needed

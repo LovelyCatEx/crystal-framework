@@ -82,7 +82,7 @@ class ReadinessController(
         )
     }
 
-    @PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_MAINTENANCE_UPDATE}')")
+    @PreAuthorize("hasAnyAuthority('system.maintenance.update')")
     @PostMapping("/maintenance")
     suspend fun setSystemMaintenance(
         @ModelAttribute

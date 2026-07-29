@@ -61,6 +61,7 @@ export const enThemeConfig: DefaultTheme.Config = {
             { text: 'ReadonlyScopedManagerController', link: '/en/develop/controller/readonly-scoped-manager-controller' },
             { text: 'StandardDerivedScopedManagerController', link: '/en/develop/controller/derived-scoped-manager-controller' },
             { text: 'StandardTenantManagerController', link: '/en/develop/controller/tenant-manager-controller' },
+            { text: 'URL Naming Convention', link: '/en/develop/controller/url-naming' },
           ]
         },
         { text: 'System Settings', link: '/en/develop/sdk/system-settings' },

@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
+import com.lovelycatv.crystalframework.sdk.common.settings.SettingsMaskConstants
 import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -270,7 +271,11 @@ class SystemSettingsServiceImpl(
     override suspend fun updateSystemSettings(settings: Map<String, String?>) {
         val declarationsByKey = systemSettingsRegistry.declarationMap()
 
-        settings.forEach { (key, value) ->
+        val effective = settings.filterNot { (key, value) ->
+            declarationsByKey[key]?.isSecret == true && value.isNullOrEmpty()
+        }
+
+        effective.forEach { (key, value) ->
             val declaration = declarationsByKey[key]
                 ?: throw BusinessException("setting key '$key' is not declared")
             if (value != null && !declaration.valueType.matches(value)) {
@@ -280,7 +285,7 @@ class SystemSettingsServiceImpl(
             }
         }
 
-        settings.forEach { (key, value) ->
+        effective.forEach { (key, value) ->
             this.setSettings(key, value)
         }
 
@@ -304,7 +309,7 @@ class SystemSettingsServiceImpl(
                 }
             ).awaitFirstOrNull()
 
-            logger.info("System settings $key updated to ${existing.configValue}")
+            logger.info("System settings $key updated to ${displayValue(key, value)}")
         } else {
             // insert
             this.getRepository().save(
@@ -315,8 +320,14 @@ class SystemSettingsServiceImpl(
                 ) newEntity true
             ).awaitFirstOrNull()
 
-            logger.info("System settings $key saved, value: $value")
+            logger.info("System settings $key saved, value: ${displayValue(key, value)}")
         }
+    }
+
+    private fun displayValue(key: String, value: String?): String? {
+        if (value.isNullOrBlank()) return value
+        val declaration = systemSettingsRegistry.settingDeclarations().firstOrNull { it.key == key }
+        return if (declaration?.isSecret == true) SettingsMaskConstants.SECRET_LOG_MASK else value
     }
 
     override suspend fun getSettings(

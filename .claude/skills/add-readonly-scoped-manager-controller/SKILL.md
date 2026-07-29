@@ -45,10 +45,10 @@ description: 为按 scope 区分且外部不允许写入的实体（如审批实
 
 ### 只读 Matrix Factory
 
-用 `ScopedPermissionMatrix.readonly(...)` 构造，只填 4 个 read 权限：
+用 `PermissionMatrix.readonly(...)` 构造，只填 4 个 read 权限：
 
 ```kotlin
-permissions = ScopedPermissionMatrix.readonly(
+permissions = PermissionMatrix.readonly(
     superRead = SystemPermission.ACTION_XXX_READ,
     systemRead = SystemPermission.ACTION_XXX_READ,        // SYSTEM 里读全部
     tenantAdminRead = SystemPermission.ACTION_TENANT_XXX_READ,
@@ -65,7 +65,7 @@ permissions = ScopedPermissionMatrix.readonly(
 ```kotlin
 class ManagerXxxController(managerService: XxxManagerService) : ReadonlyScopedManagerController<...>(
     managerService,
-    permissions = ScopedPermissionMatrix.readonly(...)
+    permissions = PermissionMatrix.readonly(...)
 )
 ```
 
@@ -187,7 +187,7 @@ if (dto.id != null) {
 | `permissions = null` 但没 override `checkPermission` | 默认 `checkPermission` 会 error；必须 override 或传 permissions |
 | 忘 override `buildQueryResponse` 就直接调 `managerService.query(dto)` | 结果集会不带用户过滤，admin 之外的用户看到全部；必须按模式 2/3 注入过滤 |
 | override `buildQueryResponse` 但没处理 `dto.id != null` 分支 | id 短路径可以绕过 —— 用户凭 id 拿别人的数据 |
-| `ScopedPermissionMatrix.readonly()` 里的 `systemRead` 复用 `super READ` 常量 | 语义不对：系统级 read 应该有独立的 `ACTION_SYSTEM_XXX_READ` 常量 |
+| `PermissionMatrix.readonly()` 里的 `systemRead` 复用 `super READ` 常量 | 语义不对：系统级 read 应该有独立的 `ACTION_SYSTEM_XXX_READ` 常量 |
 | 前端调 `/create` `/update` `/delete` 得到 403，怀疑是权限配错 | 是设计如此，Readonly controller 主动拒绝三个 mutating 端点 |
 | 加 `/my` 端点忘了强制 `dto.id = null` | id 短路径同样能绕过 initiator/assignee 过滤 |
 | 加 `/my` 端点但没在前端"我的"页面切过去 | 前端仍用 `/query`，admin 视角污染依然存在 |

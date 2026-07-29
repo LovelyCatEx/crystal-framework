@@ -35,14 +35,14 @@ class ApprovalFlowDefinitionManagerControllerClass extends BaseManagerController
     ManagerDeleteApprovalFlowDefinitionDTO
 > {
     constructor() {
-        super('/manager/approval-flow-definitions');
+        super('/manager/approval-flow-definition');
     }
 }
 
 export const ApprovalFlowDefinitionManagerController = new ApprovalFlowDefinitionManagerControllerClass();
 
 export async function getApprovalFlowDefinitionDetails(definitionId: string) {
-    return doGet<ApprovalFlowDefinitionDetailsVO>("/api/manager/approval-flow-definitions/detailsById", { definitionId: definitionId })
+    return doGet<ApprovalFlowDefinitionDetailsVO>("/api/manager/approval-flow-definition/details-by-id", { definitionId: definitionId })
 }
 
 export interface GraphNodeDTO {
@@ -67,5 +67,5 @@ export interface ManagerUpdateApprovalFlowGraphDTO {
 }
 
 export async function updateApprovalFlowGraph(dto: ManagerUpdateApprovalFlowGraphDTO) {
-    return doPost("/api/manager/approval-flow-definitions/updateGraph", dto, { 'Content-Type': 'application/json' })
+    return doPost("/api/manager/approval-flow-definition/update-graph", dto, { 'Content-Type': 'application/json' })
 }

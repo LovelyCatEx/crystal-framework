@@ -5,7 +5,7 @@ import tools.jackson.databind.JsonNode
 
 /**
  * Request body for the SMTP / message-channel test endpoints exposed under
- * `manager/settings`. [recipient] is kept as a raw [JsonNode] and converted by the controller into
+ * `manager/setting`. [recipient] is kept as a raw [JsonNode] and converted by the controller into
  * the concrete [com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRecipient]
  * subtype selected by [channelType] — addressing fields differ per channel:
  * ```json

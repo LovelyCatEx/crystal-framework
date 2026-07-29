@@ -5,7 +5,6 @@ import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistr
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -22,7 +21,7 @@ class TenantSettingsController(
     private val tenantSettingsService: TenantSettingsService,
     private val tenantSettingsRegistry: TenantSettingsRegistry,
 ) {
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_SETTINGS_READ_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.settings.read')")
     @GetMapping("/schema")
     suspend fun getTenantSettings(userAuthentication: UserAuthentication): ApiResponse<*> {
         val tenantId = userAuthentication.assertTenantIdNotNull()
@@ -32,7 +31,7 @@ class TenantSettingsController(
         return ApiResponse.success(data)
     }
 
-    @PreAuthorize("hasAnyAuthority('${TenantPermission.ACTION_TENANT_SETTINGS_UPDATE_PEM}')")
+    @PreAuthorize("hasAnyAuthority('i.tenant.settings.update')")
     @PostMapping("/update")
     suspend fun updateTenantSettings(
         userAuthentication: UserAuthentication,

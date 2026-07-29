@@ -14,7 +14,7 @@
 
 ## 端点
 
-继承自 `StandardManagerController`，写操作在业务层返回 403：
+继承自 `StandardManagerController`，写操作由 `Mutability.READ_ONLY` 挡下返回 403：
 
 | HTTP | 路径 | 行为 |
 |---|---|---|
@@ -44,16 +44,9 @@ Service 继承 `CachedBaseManagerService`（与 Standard 相同）。
 ### 5. Controller
 
 ```kotlin
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    create = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    update = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    delete = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-)
 @Validated
 @RestController
-@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-logs")
+@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-log")
 class ManagerMailSendLogController(
     managerService: MailSendLogManagerService
 ) : ReadonlyManagerController<
@@ -64,20 +57,24 @@ class ManagerMailSendLogController(
     ManagerReadMailSendLogDTO,
     ManagerUpdateMailSendLogDTO,
     ManagerDeleteMailSendLogDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnlyReadonly(
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ,
+    ),
+)
 ```
 
-`@ManagerPermissions` 中 5 个字段全部填同一个读权限。原因：
-
-- `read` / `readAll` 用读权限符合语义
-- `create` / `update` / `delete` 即使 AOP 校验通过（用户持有 `_READ`），业务层重写后仍返回 403——双重防护
+`PermissionMatrix.systemOnlyReadonly(...)` 只需填 `systemRead`（可选补 `superRead`）—— 工厂自动把 CUD 4 位填成 `NEVER_GRANTED`、tenant 层 8 位填成 `NOT_APPLICABLE`。
 
 ## 双重防护是刻意的
 
-即使把写操作权限配为真实存在的 `_CREATE` / `_UPDATE` / `_DELETE`，读操作通过、写操作被业务层挡下——但**不应**这样配置。此类的设计意图是"该资源永远不能被 API 修改"，因此：
+`Mutability.READ_ONLY` 在业务层直接封死 CUD 三个端点，`PermissionMatrix.systemOnlyReadonly(...)` 又在权限层用 `NEVER_GRANTED` 兜底 —— 两层独立防线：
 
-- `@ManagerPermissions` 中 5 个字段建议全部填读权限，语义清晰
-- 如需开放"给管理员改日志"的接口，应单独写非 Readonly 的 Controller，不要复用此类
+- 业务层：`Mutability.READ_ONLY` 让 CUD 端点抛 `ForbiddenException`
+- 权限层：即使有人绕开业务层直接查 `matrix.systemFor(CREATE)`，得到的是 `NEVER_GRANTED`，`hasAnyAuthority` 恒为 false
+
+不建议手工把 CUD 的权限填成真实的写权限 —— 此类的设计意图就是"该资源永远不能被 API 修改"。如需开放"给管理员改日志"的接口，应单独写非 Readonly 的 Controller，不要复用此类。
 
 ## 类型参数
 
@@ -85,10 +82,10 @@ class ManagerMailSendLogController(
 
 ## 添加自定义端点
 
-`create` / `update` / `delete` 被 override 为 403，但可添加自定义写操作（如"标记日志已读"）：
+`create` / `update` / `delete` 三个端点被 `Mutability.READ_ONLY` 挡下返回 403，但可添加自定义写操作（如"标记日志已读"）：
 
 ```kotlin
-@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_MAIL_SEND_LOG_READ}')")
+@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ}')")
 @PostMapping("/mark-as-seen")
 suspend fun markAsSeen(@RequestParam id: Long): ApiResponse<*> {
     managerService.markAsSeen(id)
@@ -101,5 +98,5 @@ suspend fun markAsSeen(@RequestParam id: Long): ApiResponse<*> {
 ## 注意事项
 
 - 4 个 DTO 必须全部提供，CREATE / UPDATE / DELETE 实际不使用，业务上写成最简即可
-- `@ManagerPermissions` 中 5 个字段必须全部填写。留空会被 AOP 打 warn 并放行
+- 权限声明必须使用 `PermissionMatrix.systemOnlyReadonly(...)`；老的 `@ManagerPermissions` 注解已弃用，见 [权限模型迁移指南](./permission-migration)
 - `ReadonlyManagerController` 只挡了 API 层——Service 层被内部定时任务等其他调用点触达时仍能修改。若需 DB 层保护要在 DDL 加约束

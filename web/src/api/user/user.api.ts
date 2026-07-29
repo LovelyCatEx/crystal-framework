@@ -49,3 +49,11 @@ export async function updateUserProfile(dto: UpdateUserProfileDTO) {
 export interface UpdateUserProfileDTO {
     nickname?: string | null;
 }
+
+export interface ManagerRefreshUserAuthoritiesDTO {
+    userIds: string[];
+}
+
+export async function refreshUserAuthorities(dto: ManagerRefreshUserAuthoritiesDTO) {
+    return doPost('/api/manager/user/refresh-authority', {...dto});
+}

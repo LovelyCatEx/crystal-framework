@@ -14,7 +14,7 @@ Other scenarios:
 
 ## Endpoints
 
-Inherited from `StandardManagerController`; mutations return 403 at the business layer:
+Inherited from `StandardManagerController`; mutations are blocked by `Mutability.READ_ONLY` and return 403:
 
 | HTTP | Path | Behavior |
 |---|---|---|
@@ -44,16 +44,9 @@ Service extends `CachedBaseManagerService` (same as Standard).
 ### 5. Controller
 
 ```kotlin
-@ManagerPermissions(
-    read = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    readAll = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    create = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    update = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-    delete = [SystemPermission.ACTION_MAIL_SEND_LOG_READ],
-)
 @Validated
 @RestController
-@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-logs")
+@RequestMapping("\${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/mail-send-log")
 class ManagerMailSendLogController(
     managerService: MailSendLogManagerService
 ) : ReadonlyManagerController<
@@ -64,20 +57,24 @@ class ManagerMailSendLogController(
     ManagerReadMailSendLogDTO,
     ManagerUpdateMailSendLogDTO,
     ManagerDeleteMailSendLogDTO
->(managerService)
+>(
+    managerService,
+    permissions = PermissionMatrix.systemOnlyReadonly(
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ,
+    ),
+)
 ```
 
-All 5 `@ManagerPermissions` fields use the same read permission. Reasons:
-
-- `read` / `readAll` naturally use the read permission
-- Even if AOP lets a mutation through (a user somehow holds `_READ`), the business-layer override still returns 403 — defense in depth
+`PermissionMatrix.systemOnlyReadonly(...)` just needs `systemRead` (optionally `superRead`) — the factory fills the 4 CUD slots with `NEVER_GRANTED` and the 8 tenant slots with `NOT_APPLICABLE`.
 
 ## Defense in depth is deliberate
 
-You could configure mutations with real `_CREATE` / `_UPDATE` / `_DELETE` permissions and still have the business layer block them. But you shouldn't — the design intent is "this resource is API-immutable", so:
+`Mutability.READ_ONLY` seals off CUD at the business layer; `PermissionMatrix.systemOnlyReadonly(...)` seals them again at the permission layer with `NEVER_GRANTED` — two independent lines of defense:
 
-- Set all 5 fields to the read permission for clearest semantics
-- If you later need "allow admins to edit logs", write a separate non-Readonly Controller — do not repurpose this class
+- Business layer: `Mutability.READ_ONLY` makes CUD endpoints throw `ForbiddenException`
+- Permission layer: even if someone bypasses the business layer and calls `matrix.systemFor(CREATE)`, the result is `NEVER_GRANTED` and `hasAnyAuthority` is always false
+
+Do not manually put real mutation permissions in the CUD slots — the intent is "this resource is never modifiable via API". If you later need "allow admins to edit logs", write a separate non-Readonly Controller — do not repurpose this class.
 
 ## Type parameters
 
@@ -85,10 +82,10 @@ Same 7 parameters as [StandardManagerController](./standard-manager-controller) 
 
 ## Adding custom endpoints
 
-`create` / `update` / `delete` are overridden to 403, but custom mutations can be added (e.g. "mark log as seen"):
+`create` / `update` / `delete` are blocked by `Mutability.READ_ONLY` and return 403, but custom mutations can be added (e.g. "mark log as seen"):
 
 ```kotlin
-@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_MAIL_SEND_LOG_READ}')")
+@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ}')")
 @PostMapping("/mark-as-seen")
 suspend fun markAsSeen(@RequestParam id: Long): ApiResponse<*> {
     managerService.markAsSeen(id)
@@ -101,5 +98,5 @@ Custom endpoints write their own `@PreAuthorize`; the parent's 403 does not appl
 ## Notes
 
 - All 4 DTOs are still required — CREATE / UPDATE / DELETE are unused in practice, so keep them minimal
-- All 5 `@ManagerPermissions` fields must be set; empty arrays make AOP log a warn and allow the call
+- Declare permissions via `PermissionMatrix.systemOnlyReadonly(...)`; the legacy `@ManagerPermissions` annotation is deprecated — see the [Permission Model Migration Guide](./permission-migration)
 - `ReadonlyManagerController` only blocks the API layer — the Service layer remains callable from internal jobs. For DB-level protection add DDL constraints

@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.schedule.api.TaskResult
 import com.lovelycatv.crystalframework.schedule.api.context.TaskExecutionContext
 import com.lovelycatv.crystalframework.schedule.registry.TaskRegistry
 import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
-import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRbacPermissionDeclaration
+import com.lovelycatv.crystalframework.shared.types.rbac.system.SystemRbacPermissionDeclaration
 import com.lovelycatv.crystalframework.sdk.rbac.system.types.SystemRoleDeclaration
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.TenantRbacRegistry
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionDeclaration

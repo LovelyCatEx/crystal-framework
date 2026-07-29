@@ -9,7 +9,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 import type {MailTemplateCategory, MailTemplateType} from "@/types/mail/mail.types.ts";
 import {useMailTemplateTypeTableColumns} from "@/components/columns/MailTemplateTypeEntityColumns.tsx";
 import {MailTemplateCategoryManagerController} from "@/api/mail/mail-template-category.api.ts";
-import {JsonEditor} from "@/components/JsonEditor.tsx";
+import {JsonEditor} from "@/components/editor/JsonEditor.tsx";
 import {useProtectedController} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {useTranslation} from "react-i18next";
 

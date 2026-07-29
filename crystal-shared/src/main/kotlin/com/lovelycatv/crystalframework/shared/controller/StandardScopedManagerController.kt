@@ -5,8 +5,8 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDT
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScopedDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
-import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseScopedManagerService
@@ -17,16 +17,13 @@ import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
-import jakarta.validation.Valid
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 
 /**
- * Base controller for scope-aware manager endpoints (create / query / list / update / delete).
+ * Base controller for scope-aware manager endpoints. Inherits `POST /create`, `POST /query`,
+ * `POST /update`, `POST /delete` from [AbstractManagerController] and adds a `GET /list` endpoint
+ * that requires an explicit `(scope, scopeId)` query pair.
  *
  * **This controller covers both directly scoped and derived-scoped resources** — the difference
  * lives at the Service layer via [ScopedRelationshipCheckService.resolveRootScope]:
@@ -38,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam
  *    scoped parent's Service. Deep chains compose recursively — the tenant side does the same
  *    thing via `checkIsRelatedToRootParent`.
  *
- * Authorization is driven by a four-layer [ScopedPermissionMatrix]:
+ * Authorisation is driven by a four-layer [PermissionMatrix]:
  *
  *  1. [checkPermission] verifies the caller holds any of the layers eligible for the current
  *     `(scope, operation)` — SYSTEM consults super + system; TENANT consults super + tenantAdmin
@@ -58,7 +55,6 @@ import org.springframework.web.bind.annotation.RequestParam
  * such as `typeId` instead) MUST override the two DTO-resolving hooks to look up the parent's
  * root scope via the parent's Service.
  */
-@Validated
 abstract class StandardScopedManagerController<
         SERVICE,
         REPOSITORY : BaseRepository<ENTITY>,
@@ -68,13 +64,17 @@ abstract class StandardScopedManagerController<
         UPDATE_DTO : BaseManagerUpdateDTO,
         DELETE_DTO : BaseManagerDeleteDTO
 >(
-    protected val managerService: SERVICE,
+    managerService: SERVICE,
     /**
      * Four-layer permission matrix (super / system / tenantAdmin / tenantPem). When non-null the
      * default [checkPermission] and [checkOwnership] use it; when null, subclasses MUST override
      * both hooks.
      */
-    protected val permissions: ScopedPermissionMatrix? = null,
+    protected val permissions: PermissionMatrix? = null,
+    mutability: Mutability = Mutability.READ_WRITE,
+) : AbstractManagerController<SERVICE, REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>(
+    managerService,
+    mutability,
 ) where SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO>,
         SERVICE : ScopedRelationshipCheckService {
 
@@ -91,7 +91,7 @@ abstract class StandardScopedManagerController<
         userAuthentication: UserAuthentication
     ): Boolean {
         val matrix = permissions
-            ?: error("StandardScopedManagerController#checkPermission must be overridden when no ScopedPermissionMatrix is supplied")
+            ?: error("StandardScopedManagerController#checkPermission must be overridden when no PermissionMatrix is supplied")
         return RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, operation))
     }
 
@@ -135,7 +135,7 @@ abstract class StandardScopedManagerController<
      */
     protected open suspend fun resolveScopeFromCreateDTO(dto: CREATE_DTO): Pair<ResourceScope, Long> {
         val scopedDto = dto as? BaseManagerCreateScopedDTO
-            ?: error("Default resolveScopeFromCreateDTO requires the DTO to implement BaseManagerCreateScopedDTO. Override it for derived-scope DTOs.")
+            ?: throw BusinessException("Default resolveScopeFromCreateDTO requires the DTO to implement BaseManagerCreateScopedDTO. Override it for derived-scope DTOs.")
         return resolveScope(scopedDto.scope) to scopedDto.scopeId
     }
 
@@ -145,7 +145,7 @@ abstract class StandardScopedManagerController<
      */
     protected open suspend fun resolveScopeFromReadDTO(dto: READ_DTO): Pair<ResourceScope, Long> {
         val scopedDto = dto as? BaseManagerReadScopedDTO
-            ?: error("Default resolveScopeFromReadDTO requires the DTO to implement BaseManagerReadScopedDTO. Override it for derived-scope DTOs.")
+            ?: throw BusinessException("Default resolveScopeFromReadDTO requires the DTO to implement BaseManagerReadScopedDTO. Override it for derived-scope DTOs.")
         return resolveScope(scopedDto.scope) to scopedDto.scopeId
     }
 
@@ -162,7 +162,7 @@ abstract class StandardScopedManagerController<
 
     // ─── Response shaping hooks ───
 
-    /** Shape the response body for [query]. Default returns paginated entities. */
+    /** Shape the response body for `POST /query`. Default returns paginated entities. */
     protected open suspend fun buildQueryResponse(
         dto: READ_DTO,
         userAuthentication: UserAuthentication,
@@ -184,10 +184,50 @@ abstract class StandardScopedManagerController<
         return (scopedService as BaseScopedManagerService<REPOSITORY, *, *, *, *, *>).findAllByScopeId(scopeId)
     }
 
+    // ─── AbstractManagerController hooks ───
+
+    override suspend fun buildReadResponse(
+        dto: READ_DTO,
+        userAuthentication: UserAuthentication,
+    ): Any = buildQueryResponse(dto, userAuthentication)
+
+    override suspend fun authorize(
+        action: ManagerAction,
+        userAuthentication: UserAuthentication,
+        createDto: CREATE_DTO?,
+        readDto: READ_DTO?,
+        updateDto: UPDATE_DTO?,
+        deleteDto: DELETE_DTO?,
+    ) {
+        when (action) {
+            ManagerAction.CREATE -> {
+                val (scope, scopeId) = resolveScopeFromCreateDTO(createDto!!)
+                assertAccess(scope, scopeId, ScopedOperation.CREATE, userAuthentication)
+            }
+            ManagerAction.READ -> {
+                val (scope, scopeId) = resolveScopeFromReadDTO(readDto!!)
+                assertAccess(scope, scopeId, ScopedOperation.READ, userAuthentication)
+            }
+            ManagerAction.UPDATE -> {
+                val entity = managerService.getByIdOrThrow(updateDto!!.id)
+                val (scope, scopeId) = resolveScopeFromEntity(entity)
+                assertAccess(scope, scopeId, ScopedOperation.UPDATE, userAuthentication)
+            }
+            ManagerAction.DELETE -> {
+                val entities = deleteDto!!.ids.map { managerService.getByIdOrThrow(it) }
+                val resolved = entities.map { resolveScopeFromEntity(it) }
+                resolved.toSet().forEach { (scope, scopeId) ->
+                    assertAccess(scope, scopeId, ScopedOperation.DELETE, userAuthentication)
+                }
+            }
+            ManagerAction.READ_ALL -> Unit
+        }
+    }
+
     // ─── Endpoints ───
 
     @GetMapping("/list", version = "1")
-    suspend fun readAll(
+    open suspend fun readAll(
         userAuthentication: UserAuthentication,
         @RequestParam scope: Int,
         @RequestParam scopeId: Long,
@@ -195,61 +235,6 @@ abstract class StandardScopedManagerController<
         val resolvedScope = resolveScope(scope)
         assertAccess(resolvedScope, scopeId, ScopedOperation.READ, userAuthentication)
         return ApiResponse.success(buildReadAllResponse(scopeId))
-    }
-
-    @PostMapping("/create", version = "1")
-    suspend fun create(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: CREATE_DTO
-    ): ApiResponse<*> {
-        val (scope, scopeId) = resolveScopeFromCreateDTO(dto)
-        assertAccess(scope, scopeId, ScopedOperation.CREATE, userAuthentication)
-        managerService.create(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PostMapping("/query", version = "1")
-    suspend fun query(
-        userAuthentication: UserAuthentication,
-        @RequestBody
-        @Valid
-        dto: READ_DTO
-    ): ApiResponse<*> {
-        val (scope, scopeId) = resolveScopeFromReadDTO(dto)
-        assertAccess(scope, scopeId, ScopedOperation.READ, userAuthentication)
-        return ApiResponse.success(buildQueryResponse(dto, userAuthentication))
-    }
-
-    @PostMapping("/update", version = "1")
-    suspend fun update(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: UPDATE_DTO
-    ): ApiResponse<*> {
-        val entity = managerService.getByIdOrThrow(dto.id)
-        val (scope, scopeId) = resolveScopeFromEntity(entity)
-        assertAccess(scope, scopeId, ScopedOperation.UPDATE, userAuthentication)
-        managerService.update(dto)
-        return ApiResponse.success(null)
-    }
-
-    @PostMapping("/delete", version = "1")
-    suspend fun delete(
-        userAuthentication: UserAuthentication,
-        @ModelAttribute
-        @Valid
-        dto: DELETE_DTO
-    ): ApiResponse<*> {
-        val entities = dto.ids.map { managerService.getByIdOrThrow(it) }
-        val resolved = entities.map { resolveScopeFromEntity(it) }
-        resolved.toSet().forEach { (scope, scopeId) ->
-            assertAccess(scope, scopeId, ScopedOperation.DELETE, userAuthentication)
-        }
-        managerService.deleteByDTO(dto)
-        return ApiResponse.success(null)
     }
 
     // ─── Internal ───
@@ -264,7 +249,7 @@ abstract class StandardScopedManagerController<
             throw ForbiddenException()
         }
         if (!checkOwnership(scope, scopeId, operation, userAuthentication)) {
-            throw UnauthorizedException()
+            throw ForbiddenException()
         }
     }
 }

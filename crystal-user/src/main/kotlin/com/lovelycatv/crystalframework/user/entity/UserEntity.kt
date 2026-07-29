@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.lovelycatv.crystalframework.shared.annotations.NotQueryable
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.types.tenant.entity.UserAuthenticatedTenantVO
 import org.springframework.data.annotation.Transient
@@ -18,6 +19,7 @@ class UserEntity(
     @Column(value = "username")
     private var username: String = "",
     @Column(value = "password")
+    @field:NotQueryable
     private var password: String = "",
     @Column(value = "email")
     var email: String? = null,
@@ -59,6 +61,7 @@ class UserEntity(
         return this.internalAuthorities
     }
 
+    @JsonIgnore
     override fun getPassword(): String {
         return if (!password.startsWith("{")) {
             "{bcrypt}$password"

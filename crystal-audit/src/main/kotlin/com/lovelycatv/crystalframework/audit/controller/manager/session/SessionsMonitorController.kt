@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.audit.controller.manager.session
 import com.lovelycatv.crystalframework.audit.controller.manager.session.dto.SessionSearchDTO
 import com.lovelycatv.crystalframework.audit.service.SessionMonitorService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class SessionsMonitorController(
     private val sessionMonitorService: SessionMonitorService
 ) {
-    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_MONITOR_SESSIONS_READ}')")
+    @PreAuthorize("hasAuthority('system.monitor.sessions.read')")
     @GetMapping("/online")
     suspend fun getSessions(@Valid dto: SessionSearchDTO): ApiResponse<*> {
         return ApiResponse.success(

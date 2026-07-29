@@ -23,19 +23,19 @@ export interface TestSendMessageResultVO {
 }
 
 export function getSystemSettingsSchema() {
-    return doGet<GetSystemSettingsSchemaData>('/api/manager/settings/schema')
+    return doGet<GetSystemSettingsSchemaData>('/api/manager/setting/schema')
 }
 
 export function updateSystemSettings(settings: Record<string, string | null>) {
-    return doPost('/api/manager/settings/update', settings, { 'Content-Type': 'application/json' })
+    return doPost('/api/manager/setting/update', settings, { 'Content-Type': 'application/json' })
 }
 
 export function testSendEmail(email: string) {
-    return doPost('/api/manager/settings/test-send-email', { email })
+    return doPost('/api/manager/setting/test-send-email', { email })
 }
 
 export function testSendMessage(dto: TestSendMessageDTO) {
-    return doPost<TestSendMessageResultVO>('/api/manager/settings/test-send-message', dto, { 'Content-Type': 'application/json' })
+    return doPost<TestSendMessageResultVO>('/api/manager/setting/test-send-message', dto, { 'Content-Type': 'application/json' })
 }
 
 export function getSystemMaintenanceMode() {

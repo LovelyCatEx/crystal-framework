@@ -3,7 +3,7 @@ import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {User} from "@/types/user/user.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
-import {AvatarResource} from "../AvatarResource.tsx";
+import {AvatarResource} from "../resource/AvatarResource.tsx";
 import {useTranslation} from "react-i18next";
 
 export function useUserTableColumns(): EntityTableColumns<User> {

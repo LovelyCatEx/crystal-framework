@@ -4,7 +4,47 @@
 
 ::: danger
 1. v1.5.* ~ v1.9.* 版本存在严重的安全漏洞，请勿使用，详见 v1.10.0 更新日志。
+2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
 :::
+
+## v1.13.0
+
+2026-07-29
+
+### 新功能
++ feat(shared): 新增分布式锁工具与安全响应头。
++ feat(shared): QueryNode 过滤器新增可查询字段白名单。
++ feat(rbac): 拆分租户生命周期字段至 ACTION_TENANT_LIFECYCLE_UPDATE 权限。
++ feat(user): 支持刷新用户 authorities 缓存。
+
+### Bug 修复
++ fix(security): 收紧 scope/ownership 校验，移除静默鉴权回退。
++ fix(security): 加固邮箱验证码，防止暴力破解。
++ fix(security): 用户密码在 JSON 序列化与日志中隐藏。
++ fix(security): 关键流程通过分布式锁串行化，避免竞态。
++ fix(rbac): 阻止越权分配角色与权限。
++ fix(rbac): 对租户角色权限与成员角色启用租户 scope 白名单校验。
++ fix(tenant): 部门成员创建/更新时校验成员 scope 归属。
++ fix(tenant): 拒绝已过期的租户邀请。
++ fix(message-channel): resolveConfig 中校验 scope 归属。
++ fix(mail): 模板占位符替换前进行 HTML 转义。
++ fix(resource): 校验解析后的路径必须在 baseDirectory 内。
++ fix(settings): 敏感设置值不再写入应用日志。
++ fix(settings): 保存时避免掩码值覆盖真实密文。
++ fix(sdk): 校验错误信息中屏蔽敏感设置值。
++ fix(shared): LoggerFilter debug 输出隐藏敏感请求头与请求体字段。
+
+### 其他
++ refactor(backend): 三套权限模型统一为 PermissionMatrix。
++ refactor(rbac): 权限命名统一为 4 层前缀模型，并硬性约束命名规范。
++ refactor(shared,starter): 修正跨租户 scope 不匹配的 HTTP 401→403 语义。
++ refactor(shared,audit): 抽取 AbstractManagerController 与 Mutability。
++ refactor(web,shared,approval,mail,auth,system): 统一 Manager URL 为单数 kebab-case。
++ refactor(audit): ManagerAuditLog DTO 迁移到 dto 子包。
++ refactor(web): 权益页面重命名、按类别归组根组件、抽取 TreeDetailLayout。
++ chore(starter): application.yaml 显式白名单 actuator 端点。
+
+---
 
 ## v1.12.0
 
