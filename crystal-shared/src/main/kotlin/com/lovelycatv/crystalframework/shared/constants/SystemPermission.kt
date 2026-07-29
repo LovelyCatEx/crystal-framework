@@ -73,6 +73,10 @@ object SystemPermission {
         name = "system.user.delete",
         description = "Delete users"
     )
+    val ACTION_SYSTEM_USER_REFRESH_AUTHORITY = SystemRbacPermissionDeclaration.action(
+        name = "system.user.refreshAuthority",
+        description = "Refresh (invalidate) users' authority cache"
+    )
     val MENU_SYSTEM_USER_MANAGER = SystemRbacPermissionDeclaration.menu(
         name = "system.user",
         path = "/manager/users",

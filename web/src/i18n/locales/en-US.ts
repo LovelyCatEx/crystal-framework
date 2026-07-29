@@ -566,6 +566,15 @@ export const enUS: I18nRules = {
         nicknamePlaceholder: 'Filter by nickname',
         id: 'User ID',
         idPlaceholder: 'Enter user ID',
+      },
+      action: {
+        refreshAuthority: 'Refresh Authority',
+        refreshAuthorityConfirm: 'Refresh this user\'s authority cache?\nTheir next request will re-fetch permissions.',
+        refreshAuthorityBatchConfirm: 'Refresh the authority cache of the selected users?\nTheir next request will re-fetch permissions.',
+      },
+      messages: {
+        refreshAuthoritySuccess: 'User authority cache refreshed',
+        refreshAuthorityFailed: 'Failed to refresh user authority cache',
       }
     },
     oauthAccountManager: {

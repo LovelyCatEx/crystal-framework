@@ -563,6 +563,15 @@ export const zhCN: I18nRules = {
         nicknamePlaceholder: '按昵称筛选',
         id: '用户ID',
         idPlaceholder: '输入用户 ID',
+      },
+      action: {
+        refreshAuthority: '刷新权限',
+        refreshAuthorityConfirm: '确定刷新该用户的权限缓存吗？\n下一次请求会重新拉取权限。',
+        refreshAuthorityBatchConfirm: '确定刷新已选用户的权限缓存吗？\n他们下一次请求会重新拉取权限。',
+      },
+      messages: {
+        refreshAuthoritySuccess: '用户权限缓存已刷新',
+        refreshAuthorityFailed: '刷新用户权限缓存失败',
       }
     },
     oauthAccountManager: {
