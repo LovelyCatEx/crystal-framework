@@ -4,7 +4,47 @@
 
 ::: danger
 1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
+2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
+
+## v1.13.0
+
+2026-07-29
+
+### Features
++ feat(shared): Add a distributed lock helper and security response headers.
++ feat(shared): Add a queryable-field allowlist for QueryNode-based filters.
++ feat(rbac): Split tenant lifecycle fields under ACTION_TENANT_LIFECYCLE_UPDATE.
++ feat(user): Refresh the user authorities cache.
+
+### Bug Fixes
++ fix(security): Close scope/ownership gaps and remove silent auth fallbacks.
++ fix(security): Harden email verification codes against brute force.
++ fix(security): Hide the user password from JSON serialization and log dumps.
++ fix(security): Serialize race-prone flows with distributed locks.
++ fix(rbac): Guard role and permission assignments against privilege escalation.
++ fix(rbac): Enforce tenant-scope allowlist on tenant role permissions and member roles.
++ fix(tenant): Verify member scope on department-member create and update.
++ fix(tenant): Reject expired invitations on accept.
++ fix(message-channel): Verify scope ownership in resolveConfig.
++ fix(mail): HTML-escape placeholder values before substitution.
++ fix(resource): Assert the resolved path stays within baseDirectory.
++ fix(settings): Stop writing sensitive setting values to application logs.
++ fix(settings): Stop mask values from overwriting real secrets on save.
++ fix(sdk): Mask secret setting values in validation error messages.
++ fix(shared): Redact sensitive headers and body fields in LoggerFilter debug output.
+
+### Others
++ refactor(backend): Unify three permission models into PermissionMatrix.
++ refactor(rbac): Unify permission naming to a 4-layer prefix model with hard-enforced conventions.
++ refactor(shared,starter): Fix HTTP 401→403 semantics for cross-tenant scope mismatch.
++ refactor(shared,audit): Extract AbstractManagerController and Mutability.
++ refactor(web,shared,approval,mail,auth,system): Unify manager URL naming to singular kebab-case.
++ refactor(audit): Move ManagerAuditLog DTOs into the dto sub-package.
++ refactor(web): Rename benefit pages, group root components by category, extract TreeDetailLayout.
++ chore(starter): Whitelist actuator endpoints explicitly in application.yaml.
+
+---
 
 ## v1.12.0
 
