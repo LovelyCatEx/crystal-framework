@@ -40,10 +40,10 @@ class ManagerApprovalFlowInstanceControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.readonly(
-        superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
+        systemRead = PermissionMatrix.NOT_APPLICABLE,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
+        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
     )
 
     private fun systemReadDto() = ManagerReadApprovalFlowInstanceDTO(

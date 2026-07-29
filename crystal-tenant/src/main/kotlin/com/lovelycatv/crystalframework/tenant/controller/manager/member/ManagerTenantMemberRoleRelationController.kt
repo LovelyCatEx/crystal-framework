@@ -34,9 +34,9 @@ class ManagerTenantMemberRoleRelationController(
         userAuthentication: UserAuthentication,
         @RequestParam memberId: Long
     ): ApiResponse<*> {
-        return if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ)) {
+        return if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ.name)) {
             ApiResponse.success(tenantMemberRoleRelationService.getMemberRoles(memberId))
-        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_MEMBER_ROLE_READ_PEM)) {
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_MEMBER_ROLE_READ.name)) {
             userAuthentication.assertTenantIdNotNull()
             if (tenantMemberManagerService.checkIsRelatedToRootParent(memberId, userAuthentication.tenantId!!)) {
                 ApiResponse.success(tenantMemberRoleRelationService.getMemberRoles(memberId))
@@ -55,9 +55,9 @@ class ManagerTenantMemberRoleRelationController(
         @Valid
         dto: SetMemberRolesDTO
     ): ApiResponse<*> {
-        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE)) {
+        if (RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE.name)) {
             tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
-        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_MEMBER_ROLE_UPDATE_PEM)) {
+        } else if (RbacUtils.hasAuthority(TenantPermission.ACTION_MEMBER_ROLE_UPDATE.name)) {
             userAuthentication.assertTenantIdNotNull()
             val tenantId = userAuthentication.tenantId!!
             if (tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, tenantId)) {

@@ -32,13 +32,9 @@ class AnnouncementManagerController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_ANNOUNCEMENT_CREATE,
-        superRead = SystemPermission.ACTION_ANNOUNCEMENT_READ,
-        superUpdate = SystemPermission.ACTION_ANNOUNCEMENT_UPDATE,
-        superDelete = SystemPermission.ACTION_ANNOUNCEMENT_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_DELETE.name,
     ),
 )

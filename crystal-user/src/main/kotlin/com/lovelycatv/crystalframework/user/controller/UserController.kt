@@ -110,7 +110,7 @@ class UserController(
             userService.getUserProfileVO(
                 userId = targetUserId,
                 fullAccess = targetUserId == userAuthentication?.userId
-                        || RbacUtils.hasAuthority(SystemPermission.ACTION_USER_READ)
+                        || RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_USER_READ.name)
             )
         )
     }

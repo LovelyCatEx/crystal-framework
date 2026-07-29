@@ -31,17 +31,10 @@ class ManagerTenantController(
         ManagerDeleteTenantDTO
 >(
     managerService,
-    // ACTION_TENANT_* constants use the "tenant." prefix; placing them in the super layer
-    // preserves current aspect OR-check behaviour. Prefix warnings are expected since neither
-    // super nor system layer perfectly fits these legacy tenant-scoped Standard resources.
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_TENANT_CREATE,
-        superRead = SystemPermission.ACTION_TENANT_READ,
-        superUpdate = SystemPermission.ACTION_TENANT_UPDATE,
-        superDelete = SystemPermission.ACTION_TENANT_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_TENANT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_TENANT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_TENANT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_TENANT_DELETE.name,
     ),
 )

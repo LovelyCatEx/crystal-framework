@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.system.controller
 
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.entity.AnnouncementEntity
 import com.lovelycatv.crystalframework.system.service.AnnouncementService
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class AnnouncementController(
     private val announcementService: AnnouncementService,
 ) {
-    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_ANNOUNCEMENT_LIST}')")
+    @PreAuthorize("hasAuthority('system.announcement.list')")
     @GetMapping("/list")
     suspend fun list(): ApiResponse<List<AnnouncementEntity>> {
         val list = announcementService.getPublished().collectList().awaitFirst()

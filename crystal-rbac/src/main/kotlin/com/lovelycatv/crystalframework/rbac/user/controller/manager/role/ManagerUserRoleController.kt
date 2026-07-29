@@ -32,13 +32,9 @@ class ManagerUserRoleController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_ROLE_CREATE,
-        superRead = SystemPermission.ACTION_ROLE_READ,
-        superUpdate = SystemPermission.ACTION_ROLE_UPDATE,
-        superDelete = SystemPermission.ACTION_ROLE_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_ROLE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_ROLE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_ROLE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_ROLE_DELETE.name,
     ),
 )

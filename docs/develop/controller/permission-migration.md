@@ -1,20 +1,23 @@
-# 权限模型迁移指南（PermissionMatrix）
+# 权限模型迁移指南（PermissionMatrix + 命名重构）
 
-`crystal-shared` 的 Manager Controller 家族过去存在三套并行的权限声明方式：
+本项目的权限模型经历了两轮统一：
 
-- `@ManagerPermissions` 类注解 + AOP（Standard / Readonly）
-- `ScopedPermissionTriad`（Scoped / DerivedScoped / ReadonlyScoped）
-- 8 个 String 构造参数（Tenant）
+1. **模型统一**：`crystal-shared` 的 Manager Controller 家族过去存在三套并行的权限声明方式：
+   - `@ManagerPermissions` 类注解 + AOP（Standard / Readonly）
+   - `ScopedPermissionTriad`（Scoped / DerivedScoped / ReadonlyScoped）
+   - 8 个 String 构造参数（Tenant）
 
-统一后的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`）以 4 层 × 4 操作 = 16 个 authority 字段取代上述三种模型。所有 Manager Controller 都通过构造参数 `permissions = ...` 接收同一份数据类。
+   统一后的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`）以 4 层 × 4 操作 = 16 个 authority 字段取代上述三种模型。所有 Manager Controller 都通过构造参数 `permissions = ...` 接收同一份数据类。
 
-本指南对照旧代码给出迁移写法，并列出常见坑。
+2. **命名重构**（2026-07-29）：权限常量从 `const val String` 升级为 `val Declaration`，`_PEM` 双写彻底消灭；4 层前缀（`x.` / `system.` / `tenant.` / `i.tenant.`）严格强制。
+
+本指南覆盖两轮迁移的写法与常见坑。
 
 ## 4 层权限速查
 
 | 层             | authority 前缀       | 常量来源                | 语义                                                    |
 |---------------|-------------------|---------------------|-------------------------------------------------------|
-| `super`       | 无前缀               | `SystemPermission`  | 跨 SYSTEM + TENANT 的超级管理员，任意 scope 均放行                  |
+| `super`       | `x.`             | `SystemPermission`  | 跨 SYSTEM + TENANT 的超级管理员，任意 scope 均放行                  |
 | `system`      | `system.`         | `SystemPermission`  | 仅 SYSTEM scope                                        |
 | `tenantAdmin` | `tenant.`         | `SystemPermission`  | TENANT scope 且跨租户 —— 无 tenantId 匹配（"运维管理员"）           |
 | `tenantPem`   | `i.tenant.`       | `TenantPermission`  | TENANT scope 且严格匹配 tenantId                            |
@@ -46,6 +49,39 @@
 | `PermissionMatrix.tenantOnly(...)`    | 仅 TENANT 资源（Tenant）      | super + system 全部 `NOT_APPLICABLE` |
 | `PermissionMatrix.systemOnlyReadonly(...)` | SYSTEM-only + 只读        | tenant 全部 `NOT_APPLICABLE`，SYSTEM CUD 全部 `NEVER_GRANTED` |
 | `PermissionMatrix.readonly(...)`      | Scoped 家族的只读             | 全部 CUD `NEVER_GRANTED`，只填 4 个 read |
+
+## 命名重构：从 String 常量迁到 Declaration
+
+2026-07-29 的命名重构做了以下改动：
+
+- `SystemPermission` 里的 `const val String` **全部**升级为 `val SystemRbacPermissionDeclaration`，通过 `.action(...)` / `.menu(...)` / `.component(...)` 三个工厂构造，`description` 内嵌 Declaration。老的 `DESCRIPTIONS: Map<String, String>` 彻底删除
+- `TenantPermission` 里的 `const val ACTION_XXX_PEM = "i.tenant.xxx"` + `val ACTION_XXX = TenantPermissionDeclaration(name = ACTION_XXX_PEM, ...)` **双写**彻底消灭：只保留 `val Declaration`，`_PEM` 后缀去掉，常量名不再带 `TENANT` 段
+- `SystemRbacPermissionDeclaration` 类型从 `crystal-sdk` 迁到 `crystal-shared-types`（包路径 `com.lovelycatv.crystalframework.shared.types.rbac.system`）
+- 老 SYSTEM-only 权限**批量**加 `system.` 前缀（旧的 `user.create` / `role.create` / `tenant.create` 等全部违反前缀规则，是 hard-error 的直接触发源）
+- 跨 scope 权限**批量**加 `x.` 前缀（`x.dict.type.create` / `x.message.channel.create` / `x.approval.flow.definition.create`）
+- MENU / COMPONENT 权限**批量**加层前缀（老的无前缀 `permission:/manager/user-permissions` 全部改成 `system.permission:/manager/user-permissions`）
+- `PermissionMatrix.init` 从 `logger.warn` 升级为 `throw IllegalStateException`——前缀违规立刻启动失败
+- 引用方式：`SystemPermission.ACTION_SYSTEM_USER_READ`（返回 Declaration 对象）；需要字符串一律 `.name`
+- 校验测试：`PermissionNameConventionTest`（扫描 `allPermissions()` 每条 name 的前缀 + 常量名段一致性）；`PreAuthorizeCoverageTest`（扫描全项目 `@PreAuthorize` 字面量必须能在 `allPermissions()` 的 `.name` 集合中找到）
+- Flyway 迁移：`V20260729.01__reset_permissions_for_naming_redesign.sql` hard-delete 老 `user_permissions` / `tenant_permissions` 和角色-权限绑定；重启后 Configurer 按新常量重新注册全量权限并按 `SystemRolePermissionRelation` / `TenantRolePermissionRelation` 恢复内置绑定
+
+用户自定义的角色-权限绑定会全部丢失，是"抛弃"的代价，用户已明确接受。设计与决策记录详见 `.claude/research/permission-naming-redesign.md`。
+
+### 旧 → 新命名对照
+
+| 场景 | 旧命名 | 新命名 | 层 |
+|---|---|---|---|
+| 用户 CRUD | `user.create` | `system.user.create` | system |
+| 角色 CRUD | `role.create` | `system.role.create` | system |
+| 系统权限 CRUD | `permission.create` | `system.permission.create` | system |
+| 管理租户列表 | `tenant.create`（歧义） | `system.tenant.create` | system |
+| 管理租户档位 | `tenant.tire.type.create`（歧义） | `system.tenant.tire.type.create` | system |
+| 系统菜单（老） | `permission:/manager/user-permissions` | `system.permission:/manager/user-permissions` | system |
+| 跨 scope 管字典 | `dict.type.create`（无前缀） | `x.dict.type.create` | super |
+| 跨租户管字典 | `tenant.dict.type.create` | `tenant.dict.type.create`（保持） | tenantAdmin |
+| 租户内字典 | `i.tenant.dict.type.create` | `i.tenant.dict.type.create`（保持） | tenantPem |
+
+Tenant 侧常量名同步简化：`ACTION_TENANT_ROLE_CREATE_PEM` → `ACTION_ROLE_CREATE`（去 `TENANT` 段、去 `_PEM` 后缀）。
 
 ## 迁移前后对照
 
@@ -80,10 +116,10 @@ class ManagerStorageProviderController(
 ) : StandardManagerController<...>(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE,
-        systemRead   = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE,
-        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE.name,
+        systemRead   = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE.name,
     ),
 )
 ```
@@ -91,7 +127,8 @@ class ManagerStorageProviderController(
 要点：
 - 移除类顶部的 `@ManagerPermissions` 注解
 - `permissions` 通过构造参数传入
-- `system<op>` authority 必须带 `system.` 前缀，前缀违规会 emit warn 日志
+- `SystemPermission.ACTION_SYSTEM_XXX` 现在是 `SystemRbacPermissionDeclaration` 对象，`PermissionMatrix` 要的是字符串，所以要 `.name`
+- `system<op>` authority 必须带 `system.` 前缀，前缀违规会直接 `throw IllegalStateException` 阻断启动
 - 需要跨 scope 超级管理员时，`systemOnly` 还接受 `superCreate = ..., superRead = ..., ...` 4 个可选参数（默认 `NOT_APPLICABLE`）
 
 ### 样本 2：Scoped（ScopedPermissionTriad → PermissionMatrix.of DSL）
@@ -125,28 +162,28 @@ class ManagerStorageProviderController(
     managerService,
     permissions = PermissionMatrix.of {
         `super` {
-            create = SystemPermission.ACTION_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_DICT_TYPE_READ
-            update = SystemPermission.ACTION_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_X_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_X_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_X_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_X_DICT_TYPE_DELETE.name
         }
         system {
-            create = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ
-            update = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE.name
         }
         tenantAdmin {
-            create = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_TENANT_DICT_TYPE_READ
-            update = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_TENANT_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE.name
         }
         tenantPem {
-            create = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM
-            read   = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM
-            update = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM
-            delete = TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM
+            create = TenantPermission.ACTION_DICT_TYPE_CREATE.name
+            read   = TenantPermission.ACTION_DICT_TYPE_READ.name
+            update = TenantPermission.ACTION_DICT_TYPE_UPDATE.name
+            delete = TenantPermission.ACTION_DICT_TYPE_DELETE.name
         }
     },
 )
@@ -156,7 +193,8 @@ class ManagerStorageProviderController(
 - 从 12 权限升级为 16 权限（新增 `tenantAdmin` 层）—— 旧的 Triad 没有跨租户运维层，导致 SYSTEM 管理员必须持有 `super*` 才能改租户数据；新的 `tenantAdmin` 层用 `tenant.` 前缀专司此责
 - **`` `super` `` 是 Kotlin 关键字，DSL 里必须反引号包裹**
 - 未打开的 layer 默认为全部 `NOT_APPLICABLE`（不参与决策），无需显式声明
-- 前缀约定：`super*` 不能带 `system.` / `tenant.` / `i.tenant.` 前缀；`system*` 必须以 `system.` 开头；`tenantAdmin*` 必须以 `tenant.` 开头；`tenantPem*` 必须以 `i.tenant.` 开头
+- 前缀约定：`super*` 必须以 `x.` 开头；`system*` 必须以 `system.` 开头；`tenantAdmin*` 必须以 `tenant.` 开头；`tenantPem*` 必须以 `i.tenant.` 开头
+- `TenantPermission` 常量名去掉了 `TENANT` 段和 `_PEM` 后缀
 
 ### 样本 3：Tenant（8 String → tenantOnly）
 
@@ -182,14 +220,14 @@ class ManagerStorageProviderController(
 ) : StandardTenantManagerController<...>(
     managerService,
     permissions = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
-        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
-        tenantPemCreate   = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
-        tenantPemRead     = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
-        tenantPemUpdate   = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
-        tenantPemDelete   = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE.name,
+        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE.name,
+        tenantPemCreate   = TenantPermission.ACTION_ROLE_CREATE.name,
+        tenantPemRead     = TenantPermission.ACTION_ROLE_READ.name,
+        tenantPemUpdate   = TenantPermission.ACTION_ROLE_UPDATE.name,
+        tenantPemDelete   = TenantPermission.ACTION_ROLE_DELETE.name,
     ),
 )
 ```
@@ -223,7 +261,7 @@ class ManagerMailSendLogController(
 ) : ReadonlyManagerController<...>(
     managerService,
     permissions = PermissionMatrix.systemOnlyReadonly(
-        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ.name,
     ),
 )
 ```
@@ -248,16 +286,17 @@ permissions = ScopedPermissionTriad.readonly(
 
 ```kotlin
 permissions = PermissionMatrix.readonly(
-    superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
-    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-    tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    superRead       = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
+    systemRead      = PermissionMatrix.NOT_APPLICABLE,
+    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
+    tenantPemRead   = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
 )
 ```
 
 要点：
 - 新工厂多了 `tenantAdminRead`（跨租户读）
 - 12 个 CUD 位自动填 `NEVER_GRANTED`
+- 若某层对本资源不适用（如审批实例无 SYSTEM scope），显式填 `PermissionMatrix.NOT_APPLICABLE`
 
 ## 迁移步骤
 
@@ -265,9 +304,9 @@ permissions = PermissionMatrix.readonly(
 2. **搜索类型引用** `ScopedPermissionTriad` / `ScopedPermissionMatrix` —— 直接替换为 `PermissionMatrix`；`ScopedPermissionMatrix` 是 typealias，编译期已重定向但会 emit `@Deprecated` 警告
 3. **搜索工厂调用** `ScopedPermissionTriad.readonly(...)` —— 替换为 `PermissionMatrix.readonly(...)`，并补上 `tenantAdminRead` 参数
 4. **搜索构造参数** `createPermission = ...` / `scopedCreatePermission = ...` —— 替换为 `PermissionMatrix.tenantOnly(...)`，将旧 `xxxPermission` 映射到 `tenantAdmin*`、`scopedXxxPermission` 映射到 `tenantPem*`
-5. **补上新增的 `tenantAdmin` 层权限常量** —— 见 `add-system-permission` skill 或对应模块的 `Permission` 常量类，命名一般为 `ACTION_TENANT_<RES>_<OP>`（`tenant.` 前缀）
-6. **补上前缀** —— `system*` 加 `system.`、`tenantAdmin*` 加 `tenant.`、`tenantPem*` 加 `i.tenant.`、`super*` 无前缀
-7. **启动验证** —— 若前缀违规，`PermissionMatrix.init` 会 emit `PermissionMatrix: super* permission '...' violates prefix convention` 之类的 warn 日志（当前是软约束，未来会升级为 hard error）
+5. **补上前缀** —— `super*` 加 `x.`、`system*` 加 `system.`、`tenantAdmin*` 加 `tenant.`、`tenantPem*` 加 `i.tenant.`
+6. **常量引用改 Declaration** —— `SystemPermission.ACTION_XXX` 现在是 Declaration，`PermissionMatrix` 要字符串，全部加 `.name`；`TenantPermission` 的 `_PEM` 后缀 + `TENANT` 段全部去掉
+7. **启动验证** —— 若前缀违规，`PermissionMatrix.init` 直接 `throw IllegalStateException`，启动失败并列出所有违规
 
 ## 常见坑
 
@@ -277,8 +316,8 @@ Kotlin 中 `super` 是保留字，DSL builder 用反引号声明方法名 `` `su
 
 ```kotlin
 PermissionMatrix.of {
-    `super` { create = "..."; ... }  // ✅ 正确
-    // super { ... }                  // ❌ 语法错误
+    `super` { create = "..."; ... }  // 正确
+    // super { ... }                  // 语法错误
 }
 ```
 
@@ -304,9 +343,9 @@ PermissionMatrix.of {
 
 新的 `StandardManagerController.authorize` 优先使用 `permissions` 字段；只有 `permissions == null` 时才回退到旧的 `@ManagerPermissions` + AOP 路径（该路径已带 `@Deprecated` 警告）。新代码只用 `permissions`。
 
-### 5. 前缀违规是软警告，别忽略
+### 5. 前缀违规现在是 hard error
 
-`PermissionMatrix.init` 遇到前缀违规会 emit `logger.warn`，不会阻断启动。忽略掉的话未来升级为 hard error 时会集中爆雷。任何 `PermissionMatrix: ... violates prefix convention` 都应视作待修的技术债。
+`PermissionMatrix.init` 遇到前缀违规会直接 `throw IllegalStateException("PermissionMatrix prefix violations: ...")`，启动失败。老代码里所有 `permission.create` / `user.create` / `tenant.create` 等无前缀名都不再合法，必须改成 `system.permission.create` / `system.user.create` / `system.tenant.create`。
 
 ## FAQ
 

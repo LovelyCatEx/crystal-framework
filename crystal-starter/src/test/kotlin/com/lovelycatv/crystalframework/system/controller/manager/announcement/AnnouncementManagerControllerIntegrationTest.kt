@@ -25,14 +25,10 @@ class AnnouncementManagerControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_ANNOUNCEMENT_CREATE,
-        superRead = SystemPermission.ACTION_ANNOUNCEMENT_READ,
-        superUpdate = SystemPermission.ACTION_ANNOUNCEMENT_UPDATE,
-        superDelete = SystemPermission.ACTION_ANNOUNCEMENT_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_ANNOUNCEMENT_DELETE.name,
     )
 
     private fun readDto() = ManagerReadAnnouncementDTO(page = 1, pageSize = 20)
@@ -49,7 +45,7 @@ class AnnouncementManagerControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("announcement-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -57,7 +53,7 @@ class AnnouncementManagerControllerIntegrationTest(
                 caught = runCatching { announcementManagerController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "read")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "read")
             }
         }
@@ -65,7 +61,7 @@ class AnnouncementManagerControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("announcement-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -73,7 +69,7 @@ class AnnouncementManagerControllerIntegrationTest(
                 caught = runCatching { announcementManagerController.readAll(user.authentication) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "readAll")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
             }
         }
@@ -87,7 +83,7 @@ class AnnouncementManagerControllerIntegrationTest(
             withAuthenticatedUser(user) {
                 caught = runCatching { announcementManagerController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
-            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SUPER, "read (unauthenticated fixture)")
+            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SYSTEM, "read (unauthenticated fixture)")
         }
     }
 }

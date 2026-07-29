@@ -32,13 +32,9 @@ class ManagerTenantTireBenefitFeatureController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_CREATE,
-        superRead = SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ,
-        superUpdate = SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_UPDATE,
-        superDelete = SystemPermission.ACTION_TENANT_TIRE_BENEFIT_FEATURE_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_DELETE.name,
     ),
 )

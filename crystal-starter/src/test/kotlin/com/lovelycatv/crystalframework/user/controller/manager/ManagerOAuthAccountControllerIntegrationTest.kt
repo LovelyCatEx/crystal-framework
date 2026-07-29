@@ -24,10 +24,10 @@ import kotlin.test.assertTrue
  * detects the non-null `permissions` field and delegates to
  * `StandardManagerController.authorize`).
  *
- * The controller is configured with [PermissionMatrix.Companion.systemOnly]: only the `super`
- * layer carries real authorities (`oauth.account.*`), the `system` / `tenantAdmin` / `tenantPem`
- * slots are [PermissionMatrix.NOT_APPLICABLE]. Therefore the parametrised layer-matrix tests
- * expect `SUPER` to be allowed and the other three layers to be denied.
+ * The controller is configured with [PermissionMatrix.Companion.systemOnly]: only the `system`
+ * layer carries real authorities (`system.oauth.account.*`), the `super` / `tenantAdmin` /
+ * `tenantPem` slots are [PermissionMatrix.NOT_APPLICABLE]. Therefore the parametrised layer-matrix
+ * tests expect `SYSTEM` to be allowed and the other three layers to be denied.
  *
  * The `read` and `readAll` (`GET /list`) endpoints are both covered because their permission
  * paths differ: `read` is inherited from [com.lovelycatv.crystalframework.shared.controller.AbstractManagerController]
@@ -41,14 +41,10 @@ class ManagerOAuthAccountControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_OAUTH_ACCOUNT_CREATE,
-        superRead = SystemPermission.ACTION_OAUTH_ACCOUNT_READ,
-        superUpdate = SystemPermission.ACTION_OAUTH_ACCOUNT_UPDATE,
-        superDelete = SystemPermission.ACTION_OAUTH_ACCOUNT_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_OAUTH_ACCOUNT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_OAUTH_ACCOUNT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_OAUTH_ACCOUNT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_OAUTH_ACCOUNT_DELETE.name,
     )
 
     private fun readDto() = ManagerReadOAuthAccountDTO(page = 1, pageSize = 20)
@@ -80,13 +76,13 @@ class ManagerOAuthAccountControllerIntegrationTest(
     }
 
     /**
-     * Only the `super` layer holds `oauth.account.read` in this controller's matrix; the other
+     * Only the `system` layer holds `system.oauth.account.read` in this controller's matrix; the other
      * three layers carry [PermissionMatrix.NOT_APPLICABLE] which the base class translates to an
      * empty authority set. Reading with an empty authority set must be denied.
      */
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("oauth-account-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
 
@@ -98,9 +94,9 @@ class ManagerOAuthAccountControllerIntegrationTest(
             }
 
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertNull(
+                PermissionMatrix.Layer.SYSTEM -> assertNull(
                     caught,
-                    "SUPER layer holds oauth.account.read and must be allowed, got: $caught",
+                    "SYSTEM layer holds system.oauth.account.read and must be allowed, got: $caught",
                 )
                 else -> {
                     assertNotNull(caught, "Layer $layer must be denied (NOT_APPLICABLE slot)")
@@ -114,14 +110,14 @@ class ManagerOAuthAccountControllerIntegrationTest(
     }
 
     /**
-     * Same coverage as [readEndpointAuthorizesOnlySuperLayer] but for the sibling `readAll`
+     * Same coverage as [readEndpointAuthorizesOnlySystemLayer] but for the sibling `readAll`
      * (`GET /list`) endpoint declared on [com.lovelycatv.crystalframework.shared.controller.StandardManagerController].
      * That method invokes `authorize` inline (no `preflight` / `mutability` chain), so this test
      * catches any drift between the two authorisation paths.
      */
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("oauth-account-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
 
@@ -133,9 +129,9 @@ class ManagerOAuthAccountControllerIntegrationTest(
             }
 
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertNull(
+                PermissionMatrix.Layer.SYSTEM -> assertNull(
                     caught,
-                    "SUPER layer holds oauth.account.read and must be allowed, got: $caught",
+                    "SYSTEM layer holds system.oauth.account.read and must be allowed, got: $caught",
                 )
                 else -> {
                     assertNotNull(caught, "Layer $layer must be denied (NOT_APPLICABLE slot)")

@@ -34,7 +34,6 @@ class ManagerUserLoginLogController(
     // Legacy annotation incorrectly bound CUD to the READ constant; systemOnlyReadonly fills every
     // CUD slot with PermissionMatrix.NEVER_GRANTED which the Mutability.READ_ONLY guard also blocks.
     permissions = PermissionMatrix.systemOnlyReadonly(
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        superRead = SystemPermission.ACTION_USER_LOGIN_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_USER_LOGIN_LOG_READ.name,
     ),
 )

@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.benefit
 
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.dto.ManagerReadTenantTireBenefitOverviewDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.ManagerReadTenantTireBenefitOverviewGroupVO
@@ -26,7 +25,7 @@ class ManagerTenantTireBenefitOverviewController(
     private val featureManagerService: TenantTireBenefitFeatureManagerService,
     private val benefitValueRepository: TenantTireBenefitValueRepository,
 ) {
-    @PreAuthorize("hasAuthority('${SystemPermission.ACTION_TENANT_TIRE_BENEFIT_VALUE_READ}')")
+    @PreAuthorize("hasAuthority('system.tenant.tire.benefit.value.read')")
     @PostMapping("/query")
     suspend fun queryOverview(
         @RequestBody

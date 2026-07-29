@@ -32,29 +32,18 @@ class ManagerTenantPermissionController(
         ManagerDeleteTenantPermissionDTO
 >(
     managerService,
-    // Mixed-layer resource: legacy annotation allowed read/readAll to be satisfied by either
-    // ACTION_TENANT_PERMISSION_READ (tenant.* — tenantAdmin semantics) OR
-    // ACTION_TENANT_ROLE_PERMISSION_READ_PEM (i.tenant.* — tenantPem semantics).
-    //
-    // StandardManagerController.authorize consults layersFor(SYSTEM, op) = super + system, so
-    // both permissions are placed into those two slots to keep OR-check parity. CUD keeps the
-    // single ACTION_TENANT_PERMISSION_* constant in super (system = NOT_APPLICABLE).
-    //
-    // Prefix warnings are expected: super forbids `tenant.` / `i.tenant.` prefixes and system
-    // requires `system.`; neither prefix convention matches these legacy tenant-scoped constants.
-    // The warnings do not affect runtime behaviour (see PermissionMatrix.init).
     permissions = PermissionMatrix.of {
-        `super` {
-            create = SystemPermission.ACTION_TENANT_PERMISSION_CREATE
-            read = TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM
-            update = SystemPermission.ACTION_TENANT_PERMISSION_UPDATE
-            delete = SystemPermission.ACTION_TENANT_PERMISSION_DELETE
+        tenantAdmin {
+            create = SystemPermission.ACTION_TENANT_PERMISSION_CREATE.name
+            read = SystemPermission.ACTION_TENANT_PERMISSION_READ.name
+            update = SystemPermission.ACTION_TENANT_PERMISSION_UPDATE.name
+            delete = SystemPermission.ACTION_TENANT_PERMISSION_DELETE.name
         }
-        system {
-            create = PermissionMatrix.NOT_APPLICABLE
-            read = SystemPermission.ACTION_TENANT_PERMISSION_READ
-            update = PermissionMatrix.NOT_APPLICABLE
-            delete = PermissionMatrix.NOT_APPLICABLE
+        tenantPem {
+            create = PermissionMatrix.NEVER_GRANTED
+            read = TenantPermission.ACTION_ROLE_PERMISSION_READ.name
+            update = PermissionMatrix.NEVER_GRANTED
+            delete = PermissionMatrix.NEVER_GRANTED
         }
     },
 )

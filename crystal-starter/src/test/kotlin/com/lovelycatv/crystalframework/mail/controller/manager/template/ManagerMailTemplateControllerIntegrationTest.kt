@@ -24,14 +24,10 @@ class ManagerMailTemplateControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_MAIL_TEMPLATE_CREATE,
-        superRead = SystemPermission.ACTION_MAIL_TEMPLATE_READ,
-        superUpdate = SystemPermission.ACTION_MAIL_TEMPLATE_UPDATE,
-        superDelete = SystemPermission.ACTION_MAIL_TEMPLATE_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_DELETE.name,
     )
 
     private fun readDto() = ManagerReadMailTemplateDTO(page = 1, pageSize = 20)
@@ -48,7 +44,7 @@ class ManagerMailTemplateControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("mail-template-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -56,7 +52,7 @@ class ManagerMailTemplateControllerIntegrationTest(
                 caught = runCatching { managerMailTemplateController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "read")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "read")
             }
         }
@@ -64,7 +60,7 @@ class ManagerMailTemplateControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("mail-template-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -72,7 +68,7 @@ class ManagerMailTemplateControllerIntegrationTest(
                 caught = runCatching { managerMailTemplateController.readAll(user.authentication) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "readAll")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
             }
         }
@@ -86,7 +82,7 @@ class ManagerMailTemplateControllerIntegrationTest(
             withAuthenticatedUser(user) {
                 caught = runCatching { managerMailTemplateController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
-            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SUPER, "read (unauthenticated fixture)")
+            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SYSTEM, "read (unauthenticated fixture)")
         }
     }
 }

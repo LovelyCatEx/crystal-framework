@@ -32,7 +32,6 @@ class ManagerAuditLogController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnlyReadonly(
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        superRead = SystemPermission.ACTION_AUDIT_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_AUDIT_LOG_READ.name,
     ),
 )

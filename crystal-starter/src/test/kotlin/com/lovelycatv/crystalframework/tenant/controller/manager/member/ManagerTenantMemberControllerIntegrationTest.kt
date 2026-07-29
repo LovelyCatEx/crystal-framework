@@ -24,14 +24,14 @@ class ManagerTenantMemberControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_MEMBER_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_MEMBER_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_MEMBER_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_MEMBER_DELETE,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_MEMBER_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_MEMBER_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_MEMBER_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_MEMBER_DELETE.name,
         tenantPemCreate = PermissionMatrix.NEVER_GRANTED,
-        tenantPemRead = TenantPermission.ACTION_TENANT_MEMBER_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_MEMBER_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_MEMBER_DELETE_PEM,
+        tenantPemRead = TenantPermission.ACTION_MEMBER_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_MEMBER_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_MEMBER_DELETE.name,
     )
 
     private fun readDto(tenantId: Long) = ManagerReadTenantMemberDTO(page = 1, pageSize = 20, tenantId = tenantId)

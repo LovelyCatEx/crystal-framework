@@ -38,8 +38,7 @@ class ManagerAuditLogControllerIntegrationTest(
      * built on a CUD operation lands with an empty authority set (matching production RBAC).
      */
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnlyReadonly(
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        superRead = SystemPermission.ACTION_AUDIT_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_AUDIT_LOG_READ.name,
     )
 
     private fun readDto() = ManagerReadAuditLogDTO(page = 1, pageSize = 20)
@@ -56,7 +55,7 @@ class ManagerAuditLogControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("audit-log-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -64,7 +63,7 @@ class ManagerAuditLogControllerIntegrationTest(
                 caught = runCatching { managerAuditLogController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "read")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "read")
             }
         }
@@ -72,7 +71,7 @@ class ManagerAuditLogControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("audit-log-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -80,7 +79,7 @@ class ManagerAuditLogControllerIntegrationTest(
                 caught = runCatching { managerAuditLogController.readAll(user.authentication) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "readAll")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
             }
         }
@@ -88,10 +87,10 @@ class ManagerAuditLogControllerIntegrationTest(
 
     /**
      * Ensures [com.lovelycatv.crystalframework.shared.controller.Mutability.READ_ONLY] fires before
-     * `authorize` — a SUPER fixture would otherwise pass the authorize step (its create authority
-     * is [PermissionMatrix.NEVER_GRANTED], which the OR-check rejects, but we still need to prove
-     * the mutability guard blocks first and returns [com.lovelycatv.crystalframework.shared.exception.ForbiddenException]
-     * rather than [org.springframework.security.authorization.AuthorizationDeniedException]).
+     * `authorize`. The create authority slot is [PermissionMatrix.NEVER_GRANTED] which the OR-check
+     * would reject anyway; this test proves the mutability guard blocks first and returns
+     * [com.lovelycatv.crystalframework.shared.exception.ForbiddenException] rather than
+     * [org.springframework.security.authorization.AuthorizationDeniedException].
      */
     @Test
     fun createEndpointDeniedByReadonlyMutability() {

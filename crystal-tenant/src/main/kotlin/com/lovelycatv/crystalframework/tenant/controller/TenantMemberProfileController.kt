@@ -43,7 +43,7 @@ class TenantMemberProfileController(
         }
 
         val fullAccess = targetMemberId == userAuthentication.tenantMemberId
-                || RbacUtils.hasAuthority(TenantPermission.ACTION_TENANT_MEMBER_READ_PEM)
+                || RbacUtils.hasAuthority(TenantPermission.ACTION_MEMBER_READ.name)
 
         val tenantId = userAuthentication.assertTenantIdNotNull()
         val profile = tenantMemberProfileService.getByTenantIdAndTenantMemberId(tenantId, targetMemberId)

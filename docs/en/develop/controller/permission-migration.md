@@ -1,20 +1,23 @@
-# Permission Model Migration Guide (PermissionMatrix)
+# Permission Model Migration Guide (PermissionMatrix + Naming Redesign)
 
-The Manager Controller family in `crystal-shared` used to carry three parallel permission-declaration styles:
+The project's permission model went through two unification passes:
 
-- `@ManagerPermissions` class annotation + AOP (Standard / Readonly)
-- `ScopedPermissionTriad` (Scoped / DerivedScoped / ReadonlyScoped)
-- 8 String constructor parameters (Tenant)
+1. **Model unification**: the Manager Controller family in `crystal-shared` used to carry three parallel permission-declaration styles:
+   - `@ManagerPermissions` class annotation + AOP (Standard / Readonly)
+   - `ScopedPermissionTriad` (Scoped / DerivedScoped / ReadonlyScoped)
+   - 8 String constructor parameters (Tenant)
 
-The unified `PermissionMatrix` (`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`) replaces all three with 4 layers × 4 operations = 16 authority fields. Every Manager Controller now receives the same data class via `permissions = ...`.
+   The unified `PermissionMatrix` (`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`) replaces all three with 4 layers × 4 operations = 16 authority fields. Every Manager Controller now receives the same data class via `permissions = ...`.
 
-This guide gives side-by-side rewrites against legacy code and lists common pitfalls.
+2. **Naming redesign** (2026-07-29): permission constants were upgraded from `const val String` to `val Declaration`, `_PEM` doubling was eliminated, and the 4-layer prefix convention (`x.` / `system.` / `tenant.` / `i.tenant.`) is now strictly enforced.
+
+This guide covers both migrations with rewrites and common pitfalls.
 
 ## Four-layer quick reference
 
 | Layer          | authority prefix   | Constant source     | Semantics                                                             |
 |----------------|--------------------|---------------------|-----------------------------------------------------------------------|
-| `super`        | none               | `SystemPermission`  | Cross-scope super admin — always allowed regardless of scope           |
+| `super`        | `x.`               | `SystemPermission`  | Cross-scope super admin — always allowed regardless of scope           |
 | `system`       | `system.`          | `SystemPermission`  | SYSTEM scope only                                                     |
 | `tenantAdmin`  | `tenant.`          | `SystemPermission`  | TENANT scope, cross-tenant — no tenantId match (ops admin)             |
 | `tenantPem`    | `i.tenant.`        | `TenantPermission`  | TENANT scope, strict tenantId match                                    |
@@ -46,6 +49,39 @@ Rule of thumb: **"the layer shouldn't exist" → `NOT_APPLICABLE`; "the layer ex
 | `PermissionMatrix.tenantOnly(...)`        | TENANT-only resources (Tenant) | super + system layers all `NOT_APPLICABLE` |
 | `PermissionMatrix.systemOnlyReadonly(...)` | SYSTEM-only + read-only  | Tenant layers `NOT_APPLICABLE`, SYSTEM CUD `NEVER_GRANTED` |
 | `PermissionMatrix.readonly(...)`          | Read-only variant of Scoped | All CUD `NEVER_GRANTED`, only 4 reads populated |
+
+## Naming redesign: from String constants to Declarations
+
+The 2026-07-29 naming redesign made the following changes:
+
+- Every `const val String` in `SystemPermission` was upgraded to `val SystemRbacPermissionDeclaration`, constructed via one of three factories (`.action(...)` / `.menu(...)` / `.component(...)`) with `description` embedded in the Declaration. The old `DESCRIPTIONS: Map<String, String>` was deleted
+- `TenantPermission`'s `const val ACTION_XXX_PEM = "i.tenant.xxx"` + `val ACTION_XXX = TenantPermissionDeclaration(name = ACTION_XXX_PEM, ...)` **doubling was eliminated**: only `val Declaration` remains, the `_PEM` suffix is dropped, and constant names no longer carry a `TENANT` segment
+- `SystemRbacPermissionDeclaration` moved from `crystal-sdk` to `crystal-shared-types` (package `com.lovelycatv.crystalframework.shared.types.rbac.system`)
+- Legacy SYSTEM-only permissions were **bulk-prefixed** with `system.` (old names like `user.create` / `role.create` / `tenant.create` all violated the prefix rule and directly triggered hard-errors)
+- Cross-scope permissions were **bulk-prefixed** with `x.` (`x.dict.type.create` / `x.message.channel.create` / `x.approval.flow.definition.create`)
+- MENU / COMPONENT permissions were **bulk-prefixed** with their layer prefix (the old prefix-less `permission:/manager/user-permissions` becomes `system.permission:/manager/user-permissions`)
+- `PermissionMatrix.init` was upgraded from `logger.warn` to `throw IllegalStateException` — a prefix violation now fails startup immediately
+- Reference style: `SystemPermission.ACTION_SYSTEM_USER_READ` (returns the Declaration object); use `.name` wherever a string is needed
+- Verification tests: `PermissionNameConventionTest` (scans every name in `allPermissions()` for prefix + constant-segment consistency); `PreAuthorizeCoverageTest` (scans every `@PreAuthorize` literal in the project against the `.name` set from `allPermissions()`)
+- Flyway migration `V20260729.01__reset_permissions_for_naming_redesign.sql` hard-deletes legacy `user_permissions` / `tenant_permissions` rows and their role-permission bindings; on restart the Configurers re-register the full catalog and restore built-in bindings from `SystemRolePermissionRelation` / `TenantRolePermissionRelation`
+
+User-defined role-permission bindings are lost — this is the cost of the reset and was explicitly accepted. Full design record is in `.claude/research/permission-naming-redesign.md`.
+
+### Old → new naming table
+
+| Case | Old name | New name | Layer |
+|---|---|---|---|
+| User CRUD | `user.create` | `system.user.create` | system |
+| Role CRUD | `role.create` | `system.role.create` | system |
+| System permission CRUD | `permission.create` | `system.permission.create` | system |
+| Manage tenant list | `tenant.create` (ambiguous) | `system.tenant.create` | system |
+| Manage tenant tires | `tenant.tire.type.create` (ambiguous) | `system.tenant.tire.type.create` | system |
+| System menu (legacy) | `permission:/manager/user-permissions` | `system.permission:/manager/user-permissions` | system |
+| Cross-scope dict admin | `dict.type.create` (prefix-less) | `x.dict.type.create` | super |
+| Cross-tenant dict admin | `tenant.dict.type.create` | `tenant.dict.type.create` (unchanged) | tenantAdmin |
+| Own-tenant dict | `i.tenant.dict.type.create` | `i.tenant.dict.type.create` (unchanged) | tenantPem |
+
+Tenant-side constant names are also simplified: `ACTION_TENANT_ROLE_CREATE_PEM` → `ACTION_ROLE_CREATE` (drop `TENANT` segment, drop `_PEM` suffix).
 
 ## Before / after samples
 
@@ -80,10 +116,10 @@ class ManagerStorageProviderController(
 ) : StandardManagerController<...>(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE,
-        systemRead   = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE,
-        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE.name,
+        systemRead   = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE.name,
     ),
 )
 ```
@@ -91,7 +127,8 @@ class ManagerStorageProviderController(
 Notes:
 - Drop the class-level `@ManagerPermissions` annotation
 - Pass `permissions` via the constructor
-- `system<op>` authorities must carry the `system.` prefix; violations emit a warn log
+- `SystemPermission.ACTION_SYSTEM_XXX` is now a `SystemRbacPermissionDeclaration` object; `PermissionMatrix` wants a string, so append `.name`
+- `system<op>` authorities must carry the `system.` prefix; violations `throw IllegalStateException` and block startup
 - Need a cross-scope super admin as well? `systemOnly` also accepts `superCreate = ..., superRead = ..., ...` (4 optional params, default `NOT_APPLICABLE`)
 
 ### Sample 2: Scoped (ScopedPermissionTriad → PermissionMatrix.of DSL)
@@ -125,28 +162,28 @@ Notes:
     managerService,
     permissions = PermissionMatrix.of {
         `super` {
-            create = SystemPermission.ACTION_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_DICT_TYPE_READ
-            update = SystemPermission.ACTION_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_X_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_X_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_X_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_X_DICT_TYPE_DELETE.name
         }
         system {
-            create = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ
-            update = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_SYSTEM_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_SYSTEM_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_SYSTEM_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_SYSTEM_DICT_TYPE_DELETE.name
         }
         tenantAdmin {
-            create = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE
-            read   = SystemPermission.ACTION_TENANT_DICT_TYPE_READ
-            update = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE
-            delete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE
+            create = SystemPermission.ACTION_TENANT_DICT_TYPE_CREATE.name
+            read   = SystemPermission.ACTION_TENANT_DICT_TYPE_READ.name
+            update = SystemPermission.ACTION_TENANT_DICT_TYPE_UPDATE.name
+            delete = SystemPermission.ACTION_TENANT_DICT_TYPE_DELETE.name
         }
         tenantPem {
-            create = TenantPermission.ACTION_TENANT_DICT_TYPE_CREATE_PEM
-            read   = TenantPermission.ACTION_TENANT_DICT_TYPE_READ_PEM
-            update = TenantPermission.ACTION_TENANT_DICT_TYPE_UPDATE_PEM
-            delete = TenantPermission.ACTION_TENANT_DICT_TYPE_DELETE_PEM
+            create = TenantPermission.ACTION_DICT_TYPE_CREATE.name
+            read   = TenantPermission.ACTION_DICT_TYPE_READ.name
+            update = TenantPermission.ACTION_DICT_TYPE_UPDATE.name
+            delete = TenantPermission.ACTION_DICT_TYPE_DELETE.name
         }
     },
 )
@@ -156,7 +193,8 @@ Notes:
 - Upgrade from 12 permissions to 16 (new `tenantAdmin` layer) — the old Triad lacked a cross-tenant ops layer, forcing SYSTEM admins to hold `super*` to edit tenant data; the new `tenantAdmin` layer (with `tenant.` prefix) covers exactly this role
 - **`` `super` `` is a Kotlin reserved word; the DSL uses backticks**
 - Unopened layers default entirely to `NOT_APPLICABLE` (excluded from decisions); no need to declare them
-- Prefix convention: `super*` may not carry `system.` / `tenant.` / `i.tenant.`; `system*` must start with `system.`; `tenantAdmin*` must start with `tenant.`; `tenantPem*` must start with `i.tenant.`
+- Prefix convention: `super*` must start with `x.`; `system*` must start with `system.`; `tenantAdmin*` must start with `tenant.`; `tenantPem*` must start with `i.tenant.`
+- `TenantPermission` constant names dropped their `TENANT` segment and `_PEM` suffix
 
 ### Sample 3: Tenant (8 String → tenantOnly)
 
@@ -182,14 +220,14 @@ Notes:
 ) : StandardTenantManagerController<...>(
     managerService,
     permissions = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE,
-        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE,
-        tenantPemCreate   = TenantPermission.ACTION_TENANT_ROLE_CREATE_PEM,
-        tenantPemRead     = TenantPermission.ACTION_TENANT_ROLE_READ_PEM,
-        tenantPemUpdate   = TenantPermission.ACTION_TENANT_ROLE_UPDATE_PEM,
-        tenantPemDelete   = TenantPermission.ACTION_TENANT_ROLE_DELETE_PEM,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_ROLE_CREATE.name,
+        tenantAdminRead   = SystemPermission.ACTION_TENANT_ROLE_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_ROLE_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_ROLE_DELETE.name,
+        tenantPemCreate   = TenantPermission.ACTION_ROLE_CREATE.name,
+        tenantPemRead     = TenantPermission.ACTION_ROLE_READ.name,
+        tenantPemUpdate   = TenantPermission.ACTION_ROLE_UPDATE.name,
+        tenantPemDelete   = TenantPermission.ACTION_ROLE_DELETE.name,
     ),
 )
 ```
@@ -223,7 +261,7 @@ class ManagerMailSendLogController(
 ) : ReadonlyManagerController<...>(
     managerService,
     permissions = PermissionMatrix.systemOnlyReadonly(
-        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ.name,
     ),
 )
 ```
@@ -248,16 +286,17 @@ permissions = ScopedPermissionTriad.readonly(
 
 ```kotlin
 permissions = PermissionMatrix.readonly(
-    superRead       = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-    systemRead      = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ,
-    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-    tenantPemRead   = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+    superRead       = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
+    systemRead      = PermissionMatrix.NOT_APPLICABLE,
+    tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
+    tenantPemRead   = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
 )
 ```
 
 Notes:
 - The new factory adds `tenantAdminRead` (cross-tenant read)
 - All 12 CUD slots auto-filled with `NEVER_GRANTED`
+- If a layer does not apply to this resource (e.g. approval instance has no SYSTEM scope), pass `PermissionMatrix.NOT_APPLICABLE` explicitly
 
 ## Migration steps
 
@@ -265,9 +304,9 @@ Notes:
 2. **Grep for type references** `ScopedPermissionTriad` / `ScopedPermissionMatrix` — replace with `PermissionMatrix`; `ScopedPermissionMatrix` is a typealias that compiles fine but emits `@Deprecated`
 3. **Grep for factory calls** `ScopedPermissionTriad.readonly(...)` — replace with `PermissionMatrix.readonly(...)` and add the `tenantAdminRead` argument
 4. **Grep for constructor args** `createPermission = ...` / `scopedCreatePermission = ...` — replace with `PermissionMatrix.tenantOnly(...)`, mapping old `xxxPermission` → `tenantAdmin*` and `scopedXxxPermission` → `tenantPem*`
-5. **Add the new `tenantAdmin` layer's permission constants** — see the `add-system-permission` skill or the module's `Permission` constants class; naming is generally `ACTION_TENANT_<RES>_<OP>` (`tenant.` prefix)
-6. **Fix prefixes** — `system*` needs `system.`, `tenantAdmin*` needs `tenant.`, `tenantPem*` needs `i.tenant.`, `super*` no prefix
-7. **Verify at startup** — prefix violations cause `PermissionMatrix.init` to emit `PermissionMatrix: super* permission '...' violates prefix convention` warn logs (currently a soft constraint; will become a hard error in the future)
+5. **Fix prefixes** — `super*` needs `x.`, `system*` needs `system.`, `tenantAdmin*` needs `tenant.`, `tenantPem*` needs `i.tenant.`
+6. **Switch references to Declarations** — `SystemPermission.ACTION_XXX` is now a Declaration; `PermissionMatrix` wants strings, so append `.name`. On `TenantPermission`, drop the `_PEM` suffix and `TENANT` segment from all constant names
+7. **Verify at startup** — a prefix violation now `throw IllegalStateException` from `PermissionMatrix.init`, failing startup and listing every violation
 
 ## Common pitfalls
 
@@ -304,9 +343,9 @@ The new `tenantAdmin` layer is easily misread as "a subclass of super". Actually
 
 The new `StandardManagerController.authorize` prefers the `permissions` field; only when `permissions == null` does it fall back to the legacy `@ManagerPermissions` + AOP path (which now carries `@Deprecated`). New code uses `permissions` exclusively.
 
-### 5. Prefix violations are soft warnings — don't ignore them
+### 5. Prefix violations are now hard errors
 
-`PermissionMatrix.init` emits `logger.warn` on prefix violations; it does not block startup. Ignoring them means they'll all fire at once when the check is promoted to a hard error. Treat every `PermissionMatrix: ... violates prefix convention` as tech debt to pay down.
+`PermissionMatrix.init` now `throw IllegalStateException("PermissionMatrix prefix violations: ...")` on violation, failing startup. All legacy prefix-less names (`permission.create` / `user.create` / `tenant.create` and friends) are no longer valid and must be rewritten as `system.permission.create` / `system.user.create` / `system.tenant.create`.
 
 ## FAQ
 

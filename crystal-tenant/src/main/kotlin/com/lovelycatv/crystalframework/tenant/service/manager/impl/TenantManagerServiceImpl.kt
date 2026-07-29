@@ -81,8 +81,8 @@ class TenantManagerServiceImpl(
                 || dto.expiresTime != null
                 || dto.status != null
                 || dto.settings != null
-        if (touchesLifecycle && !RbacUtils.hasAuthority(SystemPermission.ACTION_TENANT_LIFECYCLE_UPDATE)) {
-            throw ForbiddenException("Lifecycle fields require ${SystemPermission.ACTION_TENANT_LIFECYCLE_UPDATE}")
+        if (touchesLifecycle && !RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name)) {
+            throw ForbiddenException("Lifecycle fields require ${SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name}")
         }
 
         if (dto.ownerUserId != null) {

@@ -32,13 +32,9 @@ class ManagerFileResourceController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_FILE_RESOURCE_CREATE,
-        superRead = SystemPermission.ACTION_FILE_RESOURCE_READ,
-        superUpdate = SystemPermission.ACTION_FILE_RESOURCE_UPDATE,
-        superDelete = SystemPermission.ACTION_FILE_RESOURCE_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_DELETE.name,
     ),
 )

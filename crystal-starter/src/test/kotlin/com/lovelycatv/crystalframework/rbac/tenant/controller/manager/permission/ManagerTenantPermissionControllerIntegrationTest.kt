@@ -39,14 +39,14 @@ class ManagerTenantPermissionControllerIntegrationTest(
 
     private val matrix: PermissionMatrix = PermissionMatrix.of {
         `super` {
-            create = SystemPermission.ACTION_TENANT_PERMISSION_CREATE
-            read = TenantPermission.ACTION_TENANT_ROLE_PERMISSION_READ_PEM
-            update = SystemPermission.ACTION_TENANT_PERMISSION_UPDATE
-            delete = SystemPermission.ACTION_TENANT_PERMISSION_DELETE
+            create = SystemPermission.ACTION_TENANT_PERMISSION_CREATE.name
+            read = TenantPermission.ACTION_ROLE_PERMISSION_READ.name
+            update = SystemPermission.ACTION_TENANT_PERMISSION_UPDATE.name
+            delete = SystemPermission.ACTION_TENANT_PERMISSION_DELETE.name
         }
         system {
             create = PermissionMatrix.NOT_APPLICABLE
-            read = SystemPermission.ACTION_TENANT_PERMISSION_READ
+            read = SystemPermission.ACTION_TENANT_PERMISSION_READ.name
             update = PermissionMatrix.NOT_APPLICABLE
             delete = PermissionMatrix.NOT_APPLICABLE
         }

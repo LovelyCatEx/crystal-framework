@@ -51,7 +51,13 @@ data class PermissionMatrix(
     val tenantPemDelete: String,
 ) {
     init {
-        collectPrefixViolations(this).forEach { logger.warn("PermissionMatrix: $it. This will become a hard error in a future release.") }
+        val violations = collectPrefixViolations(this)
+        if (violations.isNotEmpty()) {
+            throw IllegalStateException(
+                "PermissionMatrix prefix violations:\n" +
+                    violations.joinToString("\n") { " - $it" }
+            )
+        }
     }
 
     enum class Layer { SUPER, SYSTEM, TENANT_ADMIN, TENANT_PEM }
@@ -117,7 +123,7 @@ data class PermissionMatrix(
     companion object {
         private val logger = logger()
 
-        private val SUPER_FORBIDDEN_PREFIXES = listOf("system.", "tenant.", "i.tenant.")
+        private val SUPER_REQUIRED_PREFIXES = listOf("x.")
         private val SYSTEM_REQUIRED_PREFIXES = listOf("system.")
         private val TENANT_ADMIN_REQUIRED_PREFIXES = listOf("tenant.")
         private val TENANT_PEM_REQUIRED_PREFIXES = listOf("i.tenant.")
@@ -186,7 +192,7 @@ data class PermissionMatrix(
                 }
             }
             with(matrix) {
-                check("super*", SUPER_FORBIDDEN_PREFIXES, requireOne = false,
+                check("super*", SUPER_REQUIRED_PREFIXES, requireOne = true,
                     superCreate, superRead, superUpdate, superDelete)
                 check("system*", SYSTEM_REQUIRED_PREFIXES, requireOne = true,
                     systemCreate, systemRead, systemUpdate, systemDelete)

@@ -57,10 +57,10 @@ class ManagerApprovalFlowInstanceController(
 >(
     managerService,
     permissions = PermissionMatrix.readonly(
-        superRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        systemRead = SystemPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ,
-        tenantPemRead = TenantPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ_PEM,
+        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
+        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
     ),
 ) {
 

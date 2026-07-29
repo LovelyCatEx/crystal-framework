@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 /**
- * Integration test for [ManagerTenantController] — Standard SYSTEM-only. The legacy `tenant.*`
- * constants live in the super slots (documented as a known prefix-warning case). Only SUPER passes
+ * Integration test for [ManagerTenantController] — Standard SYSTEM-only. The `system.tenant.*`
+ * constants live in the system slots (matching the production controller). Only SYSTEM passes
  * the OR-check.
  */
 class ManagerTenantControllerIntegrationTest(
@@ -26,14 +26,10 @@ class ManagerTenantControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_TENANT_CREATE,
-        superRead = SystemPermission.ACTION_TENANT_READ,
-        superUpdate = SystemPermission.ACTION_TENANT_UPDATE,
-        superDelete = SystemPermission.ACTION_TENANT_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_TENANT_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_TENANT_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_TENANT_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_TENANT_DELETE.name,
     )
 
     private fun readDto() = ManagerReadTenantDTO(page = 1, pageSize = 20)
@@ -50,7 +46,7 @@ class ManagerTenantControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("tenant-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -58,7 +54,7 @@ class ManagerTenantControllerIntegrationTest(
                 caught = runCatching { managerTenantController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "read")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "read")
             }
         }
@@ -74,7 +70,7 @@ class ManagerTenantControllerIntegrationTest(
                 caught = runCatching { managerTenantController.readAll(user.authentication) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "readAll")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
             }
         }
@@ -88,7 +84,7 @@ class ManagerTenantControllerIntegrationTest(
             withAuthenticatedUser(user) {
                 caught = runCatching { managerTenantController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
-            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SUPER, "read (unauthenticated fixture)")
+            assertLayerDeniedByAuthorization(caught, PermissionMatrix.Layer.SYSTEM, "read (unauthenticated fixture)")
         }
     }
 }

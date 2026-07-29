@@ -41,14 +41,14 @@ class ManagerTenantDepartmentMemberControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_DEPARTMENT_MEMBER_DELETE_PEM,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_DEPARTMENT_MEMBER_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_DEPARTMENT_MEMBER_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_DEPARTMENT_MEMBER_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_DEPARTMENT_MEMBER_DELETE.name,
     )
 
     private fun readDto() = ManagerReadTenantDepartmentMemberDTO(

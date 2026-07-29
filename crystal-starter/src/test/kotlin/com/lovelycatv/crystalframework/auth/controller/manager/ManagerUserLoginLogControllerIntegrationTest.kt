@@ -30,8 +30,7 @@ class ManagerUserLoginLogControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.systemOnlyReadonly(
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        superRead = SystemPermission.ACTION_USER_LOGIN_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_USER_LOGIN_LOG_READ.name,
     )
 
     private fun readDto() = ManagerReadUserLoginLogDTO(page = 1, pageSize = 20)
@@ -48,7 +47,7 @@ class ManagerUserLoginLogControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("user-login-log-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -56,7 +55,7 @@ class ManagerUserLoginLogControllerIntegrationTest(
                 caught = runCatching { managerUserLoginLogController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "read")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "read")
             }
         }
@@ -64,7 +63,7 @@ class ManagerUserLoginLogControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesOnlySuperLayer(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointAuthorizesOnlySystemLayer(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("user-login-log-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
@@ -72,7 +71,7 @@ class ManagerUserLoginLogControllerIntegrationTest(
                 caught = runCatching { managerUserLoginLogController.readAll(user.authentication) }.exceptionOrNull()
             }
             when (layer) {
-                PermissionMatrix.Layer.SUPER -> assertLayerAllowed(caught, layer, "readAll")
+                PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
                 else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
             }
         }

@@ -41,14 +41,14 @@ class ManagerTenantInvitationController(
 >(
     tenantInvitationManagerService,
     permissions = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_INVITATION_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_INVITATION_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_INVITATION_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_INVITATION_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_INVITATION_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_INVITATION_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_INVITATION_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_INVITATION_DELETE_PEM,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_INVITATION_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_INVITATION_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_INVITATION_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_INVITATION_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_INVITATION_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_INVITATION_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_INVITATION_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_INVITATION_DELETE.name,
     ),
 ) {
     override suspend fun customCreate(

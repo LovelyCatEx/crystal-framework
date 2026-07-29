@@ -32,13 +32,9 @@ class ManagerStorageProviderController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_STORAGE_PROVIDER_CREATE,
-        superRead = SystemPermission.ACTION_STORAGE_PROVIDER_READ,
-        superUpdate = SystemPermission.ACTION_STORAGE_PROVIDER_UPDATE,
-        superDelete = SystemPermission.ACTION_STORAGE_PROVIDER_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_DELETE.name,
     ),
 )

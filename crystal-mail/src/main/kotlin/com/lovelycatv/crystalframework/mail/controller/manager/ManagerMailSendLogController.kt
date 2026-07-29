@@ -34,7 +34,6 @@ class ManagerMailSendLogController(
     // Legacy annotation incorrectly bound CUD to the READ constant; systemOnlyReadonly fills every
     // CUD slot with PermissionMatrix.NEVER_GRANTED which the Mutability.READ_ONLY guard also blocks.
     permissions = PermissionMatrix.systemOnlyReadonly(
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        superRead = SystemPermission.ACTION_MAIL_SEND_LOG_READ,
+        systemRead = SystemPermission.ACTION_SYSTEM_MAIL_SEND_LOG_READ.name,
     ),
 )

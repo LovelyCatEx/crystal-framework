@@ -209,7 +209,7 @@ class TenantInvitationServiceImpl(
         val reviewers = tenantService
             .getMembersHasAnyPermission(
                 tenant.id,
-                TenantPermission.ACTION_TENANT_MEMBER_JOIN_REVIEW_EMAIL_PEM
+                TenantPermission.ACTION_MEMBER_JOIN_REVIEW_EMAIL.name
             )
             .mapNotNull {
                 tenantMemberService.getByIdOrNull(it.id)?.let { member ->

@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.sdk.rbac.system.types
+package com.lovelycatv.crystalframework.shared.types.rbac.system
 
 data class SystemRbacPermissionDeclaration(
     val name: String,

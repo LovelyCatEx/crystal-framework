@@ -32,13 +32,9 @@ class ManagerUserController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = PermissionMatrix.NOT_APPLICABLE,
-        systemRead = PermissionMatrix.NOT_APPLICABLE,
-        systemUpdate = PermissionMatrix.NOT_APPLICABLE,
-        systemDelete = PermissionMatrix.NOT_APPLICABLE,
-        superCreate = SystemPermission.ACTION_USER_CREATE,
-        superRead = SystemPermission.ACTION_USER_READ,
-        superUpdate = SystemPermission.ACTION_USER_UPDATE,
-        superDelete = SystemPermission.ACTION_USER_DELETE,
+        systemCreate = SystemPermission.ACTION_SYSTEM_USER_CREATE.name,
+        systemRead = SystemPermission.ACTION_SYSTEM_USER_READ.name,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_USER_UPDATE.name,
+        systemDelete = SystemPermission.ACTION_SYSTEM_USER_DELETE.name,
     ),
 )

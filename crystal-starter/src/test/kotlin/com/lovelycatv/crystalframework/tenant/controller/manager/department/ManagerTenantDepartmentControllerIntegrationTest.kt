@@ -24,14 +24,14 @@ class ManagerTenantDepartmentControllerIntegrationTest(
 ) : PermissionMatrixIntegrationTestBase(applicationContext) {
 
     private val matrix: PermissionMatrix = PermissionMatrix.tenantOnly(
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_CREATE,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_READ,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_UPDATE,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_DELETE,
-        tenantPemCreate = TenantPermission.ACTION_TENANT_DEPARTMENT_CREATE_PEM,
-        tenantPemRead = TenantPermission.ACTION_TENANT_DEPARTMENT_READ_PEM,
-        tenantPemUpdate = TenantPermission.ACTION_TENANT_DEPARTMENT_UPDATE_PEM,
-        tenantPemDelete = TenantPermission.ACTION_TENANT_DEPARTMENT_DELETE_PEM,
+        tenantAdminCreate = SystemPermission.ACTION_TENANT_DEPARTMENT_CREATE.name,
+        tenantAdminRead = SystemPermission.ACTION_TENANT_DEPARTMENT_READ.name,
+        tenantAdminUpdate = SystemPermission.ACTION_TENANT_DEPARTMENT_UPDATE.name,
+        tenantAdminDelete = SystemPermission.ACTION_TENANT_DEPARTMENT_DELETE.name,
+        tenantPemCreate = TenantPermission.ACTION_DEPARTMENT_CREATE.name,
+        tenantPemRead = TenantPermission.ACTION_DEPARTMENT_READ.name,
+        tenantPemUpdate = TenantPermission.ACTION_DEPARTMENT_UPDATE.name,
+        tenantPemDelete = TenantPermission.ACTION_DEPARTMENT_DELETE.name,
     )
 
     private fun readDto(tenantId: Long) = ManagerReadTenantDepartmentDTO(page = 1, pageSize = 20, tenantId = tenantId)

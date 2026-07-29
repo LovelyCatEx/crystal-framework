@@ -1,525 +1,997 @@
 package com.lovelycatv.crystalframework.shared.constants
 
+import com.lovelycatv.crystalframework.shared.types.rbac.system.SystemRbacPermissionDeclaration
+import com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils
+
 object SystemPermission {
-    const val MENU_PERMISSION_MANAGER = "permission:/manager/user-permissions"
-    const val MENU_ROLE_MANAGER = "role:/manager/user-roles"
-    const val MENU_USER_MANAGER = "user:/manager/users"
-    const val MENU_USER_ROLE_MANAGER = "user.role:/manager/user-roles-relation"
-    const val MENU_SYSTEM_SETTINGS = "settings:/manager/settings"
-    const val MENU_OAUTH_ACCOUNT_MANAGER = "oauth.account:/manager/oauth-accounts"
-
-    const val ACTION_PERMISSION_CREATE = "permission.create"
-    const val ACTION_PERMISSION_READ = "permission.read"
-    const val ACTION_PERMISSION_UPDATE = "permission.update"
-    const val ACTION_PERMISSION_DELETE = "permission.delete"
-
-    const val ACTION_ROLE_CREATE = "role.create"
-    const val ACTION_ROLE_READ = "role.read"
-    const val ACTION_ROLE_UPDATE = "role.update"
-    const val ACTION_ROLE_DELETE = "role.delete"
-
-    const val ACTION_USER_CREATE = "user.create"
-    const val ACTION_USER_READ = "user.read"
-    const val ACTION_USER_UPDATE = "user.update"
-    const val ACTION_USER_DELETE = "user.delete"
-
-    const val ACTION_ROLE_PERMISSION_READ = "role.permission.read"
-    const val ACTION_ROLE_PERMISSION_UPDATE = "role.permission.update"
-
-    const val ACTION_USER_ROLE_READ = "user.role.read"
-    const val ACTION_USER_ROLE_UPDATE = "user.role.update"
-
-    const val ACTION_SYSTEM_SETTINGS_READ = "settings.read"
-    const val ACTION_SYSTEM_SETTINGS_UPDATE = "settings.update"
-    const val ACTION_SYSTEM_SETTINGS_TEST_SEND_EMAIL = "settings.test.sendEmail"
-    const val ACTION_SYSTEM_SETTINGS_TEST_SEND_MESSAGE = "settings.test.sendMessage"
-
-    const val ACTION_SYSTEM_MAINTENANCE_ACCESS = "maintenance.access"
-    const val ACTION_SYSTEM_MAINTENANCE_UPDATE = "maintenance.update"
-
-    const val ACTION_OAUTH_ACCOUNT_CREATE = "oauth.account.create"
-    const val ACTION_OAUTH_ACCOUNT_READ = "oauth.account.read"
-    const val ACTION_OAUTH_ACCOUNT_UPDATE = "oauth.account.update"
-    const val ACTION_OAUTH_ACCOUNT_DELETE = "oauth.account.delete"
-
-    const val MENU_FILE_RESOURCE_MANAGER = "file.resource:/manager/file-resources"
-
-    const val ACTION_FILE_RESOURCE_CREATE = "file.resource.create"
-    const val ACTION_FILE_RESOURCE_READ = "file.resource.read"
-    const val ACTION_FILE_RESOURCE_UPDATE = "file.resource.update"
-    const val ACTION_FILE_RESOURCE_DELETE = "file.resource.delete"
-
-    const val MENU_STORAGE_PROVIDER_MANAGER = "storage.provider:/manager/storage-providers"
-
-    const val ACTION_STORAGE_PROVIDER_CREATE = "storage.provider.create"
-    const val ACTION_STORAGE_PROVIDER_READ = "storage.provider.read"
-    const val ACTION_STORAGE_PROVIDER_UPDATE = "storage.provider.update"
-    const val ACTION_STORAGE_PROVIDER_DELETE = "storage.provider.delete"
-
-    const val MENU_MAIL_TEMPLATE_CATEGORY_MANAGER = "mail.template.category:/manager/mail-template-categories"
-
-    const val ACTION_MAIL_TEMPLATE_CATEGORY_CREATE = "mail.template.category.create"
-    const val ACTION_MAIL_TEMPLATE_CATEGORY_READ = "mail.template.category.read"
-    const val ACTION_MAIL_TEMPLATE_CATEGORY_UPDATE = "mail.template.category.update"
-    const val ACTION_MAIL_TEMPLATE_CATEGORY_DELETE = "mail.template.category.delete"
-
-    const val MENU_MAIL_TEMPLATE_TYPE_MANAGER = "mail.template.type:/manager/mail-template-types"
-
-    const val ACTION_MAIL_TEMPLATE_TYPE_CREATE = "mail.template.type.create"
-    const val ACTION_MAIL_TEMPLATE_TYPE_READ = "mail.template.type.read"
-    const val ACTION_MAIL_TEMPLATE_TYPE_UPDATE = "mail.template.type.update"
-    const val ACTION_MAIL_TEMPLATE_TYPE_DELETE = "mail.template.type.delete"
-
-    const val MENU_MAIL_TEMPLATE_MANAGER = "mail.template:/manager/mail-templates"
-
-    const val ACTION_MAIL_TEMPLATE_CREATE = "mail.template.create"
-    const val ACTION_MAIL_TEMPLATE_READ = "mail.template.read"
-    const val ACTION_MAIL_TEMPLATE_UPDATE = "mail.template.update"
-    const val ACTION_MAIL_TEMPLATE_DELETE = "mail.template.delete"
-
-    const val MENU_TENANT_MANAGER = "tenant:/manager/tenants"
-
-    const val ACTION_TENANT_CREATE = "tenant.create"
-    const val ACTION_TENANT_READ = "tenant.read"
-    const val ACTION_TENANT_UPDATE = "tenant.update"
-    const val ACTION_TENANT_DELETE = "tenant.delete"
-    const val ACTION_TENANT_LIFECYCLE_UPDATE = "tenant.lifecycle.update"
-
-    const val MENU_TENANT_TIRE_TYPE_MANAGER = "tenant.tire.type:/manager/tenant-tire-types"
-
-    const val ACTION_TENANT_TIRE_TYPE_CREATE = "tenant.tire.type.create"
-    const val ACTION_TENANT_TIRE_TYPE_READ = "tenant.tire.type.read"
-    const val ACTION_TENANT_TIRE_TYPE_UPDATE = "tenant.tire.type.update"
-    const val ACTION_TENANT_TIRE_TYPE_DELETE = "tenant.tire.type.delete"
-
-    // Tenant Tire Benefit
-    const val MENU_TENANT_TIRE_BENEFIT_FEATURE_MANAGER = "tenant.tire.benefit.feature:/manager/tenant-tire-benefit-features"
-
-    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_CREATE = "tenant.tire.benefit.feature.create"
-    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_READ = "tenant.tire.benefit.feature.read"
-    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_UPDATE = "tenant.tire.benefit.feature.update"
-    const val ACTION_TENANT_TIRE_BENEFIT_FEATURE_DELETE = "tenant.tire.benefit.feature.delete"
-
-    const val MENU_TENANT_TIRE_BENEFIT_VALUE_MANAGER = "tenant.tire.benefit.value:/manager/tenant-tire-benefit-values"
-
-    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_CREATE = "tenant.tire.benefit.value.create"
-    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_READ = "tenant.tire.benefit.value.read"
-    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_UPDATE = "tenant.tire.benefit.value.update"
-    const val ACTION_TENANT_TIRE_BENEFIT_VALUE_DELETE = "tenant.tire.benefit.value.delete"
-
-    const val MENU_TENANT_DEPARTMENT_MANAGER = "tenant.department:/manager/tenant-departments"
-
-    const val ACTION_TENANT_DEPARTMENT_CREATE = "tenant.department.create"
-    const val ACTION_TENANT_DEPARTMENT_READ = "tenant.department.read"
-    const val ACTION_TENANT_DEPARTMENT_UPDATE = "tenant.department.update"
-    const val ACTION_TENANT_DEPARTMENT_DELETE = "tenant.department.delete"
-
-    const val MENU_TENANT_ROLE_MANAGER = "tenant.role:/manager/tenant-roles"
-
-    const val ACTION_TENANT_ROLE_CREATE = "tenant.role.create"
-    const val ACTION_TENANT_ROLE_READ = "tenant.role.read"
-    const val ACTION_TENANT_ROLE_UPDATE = "tenant.role.update"
-    const val ACTION_TENANT_ROLE_DELETE = "tenant.role.delete"
-
-    const val MENU_TENANT_PERMISSION_MANAGER = "tenant.permission:/manager/tenant-permissions"
-
-    const val ACTION_TENANT_PERMISSION_CREATE = "tenant.permission.create"
-    const val ACTION_TENANT_PERMISSION_READ = "tenant.permission.read"
-    const val ACTION_TENANT_PERMISSION_UPDATE = "tenant.permission.update"
-    const val ACTION_TENANT_PERMISSION_DELETE = "tenant.permission.delete"
-
-    const val MENU_TENANT_MEMBER_MANAGER = "tenant.member:/manager/tenant-members"
-
-    const val ACTION_TENANT_MEMBER_CREATE = "tenant.member.create"
-    const val ACTION_TENANT_MEMBER_READ = "tenant.member.read"
-    const val ACTION_TENANT_MEMBER_UPDATE = "tenant.member.update"
-    const val ACTION_TENANT_MEMBER_DELETE = "tenant.member.delete"
-
-
-    const val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = "tenant.department.member:/manager/tenant-department-members"
-
-    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE = "tenant.department.member.create"
-    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ = "tenant.department.member.read"
-    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE = "tenant.department.member.update"
-    const val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE = "tenant.department.member.delete"
-
-    const val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = "tenant.member.role:/manager/tenant-member-roles"
-
-    const val ACTION_TENANT_MEMBER_ROLE_RELATION_READ = "tenant.member.role.read"
-    const val ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE = "tenant.member.role.update"
-
-    const val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = "tenant.role.permission:/manager/tenant-role-permissions"
-
-    const val ACTION_TENANT_ROLE_PERMISSION_RELATION_READ = "tenant.role.permission.read"
-    const val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = "tenant.role.permission.update"
-
-    const val MENU_TENANT_INVITATION_MANAGER = "tenant.invitation:/manager/tenant-invitations"
-
-    const val ACTION_TENANT_INVITATION_CREATE = "tenant.invitation.create"
-    const val ACTION_TENANT_INVITATION_READ = "tenant.invitation.read"
-    const val ACTION_TENANT_INVITATION_UPDATE = "tenant.invitation.update"
-    const val ACTION_TENANT_INVITATION_DELETE = "tenant.invitation.delete"
-
-    // Tenant-level Message Channel (tenant-admin layer: cross-tenant admin, TENANT scope only)
-    const val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = "tenant.message.channel:/manager/tenant-message-channels"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = "tenant.message.channel.create"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_READ = "tenant.message.channel.read"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = "tenant.message.channel.update"
-    const val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = "tenant.message.channel.delete"
-
-    // System-level Message Channel
-    const val MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER = "system.message.channel:/manager/system-message-channels"
-
-    const val ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE = "system.message.channel.create"
-    const val ACTION_SYSTEM_MESSAGE_CHANNEL_READ = "system.message.channel.read"
-    const val ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE = "system.message.channel.update"
-    const val ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE = "system.message.channel.delete"
-
-    // Cross-scope (super) Message Channel permissions — holders may operate in any scope.
-    // Only granted to root and admin.
-    const val ACTION_MESSAGE_CHANNEL_CREATE = "message.channel.create"
-    const val ACTION_MESSAGE_CHANNEL_READ = "message.channel.read"
-    const val ACTION_MESSAGE_CHANNEL_UPDATE = "message.channel.update"
-    const val ACTION_MESSAGE_CHANNEL_DELETE = "message.channel.delete"
-
-    const val MENU_AUDIT_LOG_MANAGER = "audit.log:/manager/audit-logs"
-
-    const val ACTION_AUDIT_LOG_CREATE = "audit.log.create"
-    const val ACTION_AUDIT_LOG_READ = "audit.log.read"
-    const val ACTION_AUDIT_LOG_UPDATE = "audit.log.update"
-    const val ACTION_AUDIT_LOG_DELETE = "audit.log.delete"
-
-    const val MENU_MAIL_SEND_LOG_MANAGER = "mail.send.log:/manager/mail-send-logs"
-
-    const val ACTION_MAIL_SEND_LOG_READ = "mail.send.log.read"
-
-    const val MENU_USER_LOGIN_LOG_MANAGER = "user.login.log:/manager/user-login-logs"
-
-    const val ACTION_USER_LOGIN_LOG_READ = "user.login.log.read"
-
-    const val COMPONENT_DASHBOARD_BUSINESS_STATISTICS = "dashboard.business.statistics@dashboard.business.statistics"
-    const val COMPONENT_DASHBOARD_SYSTEM_METRICS = "dashboard.system.metrics@dashboard.system.metrics"
-    const val COMPONENT_DASHBOARD_MY_TENANTS = "dashboard.tenant.joined@dashboard.tenant.joined"
-    const val COMPONENT_DASHBOARD_ANNOUNCEMENTS = "dashboard.announcements@dashboard.announcements"
-
-    const val ACTION_DASHBOARD_BUSINESS_STATISTICS_READ = "dashboard.business.statistics.read"
-    const val ACTION_DASHBOARD_SYSTEM_METRICS_READ = "dashboard.system.metrics.read"
-
-    const val MENU_MONITOR_SESSIONS = "monitor.sessions:/manager/sessions"
-    const val ACTION_MONITOR_SESSIONS_READ = "monitor.sessions.read"
-
-    const val MENU_ANNOUNCEMENT_MANAGER = "announcement:/manager/announcements"
-    const val ACTION_ANNOUNCEMENT_CREATE = "announcement.create"
-    const val ACTION_ANNOUNCEMENT_READ = "announcement.read"
-    const val ACTION_ANNOUNCEMENT_UPDATE = "announcement.update"
-    const val ACTION_ANNOUNCEMENT_DELETE = "announcement.delete"
-    const val ACTION_ANNOUNCEMENT_LIST = "announcement.list"
-
-    // Approval Flow Definition (system scope)
-    const val MENU_APPROVAL_FLOW_DEFINITION_MANAGER = "approval.flow.definition:/manager/approval-flow-definitions"
-
-    // Cross-scope (super) Approval Flow Definition permissions — admin/root only.
-    const val ACTION_APPROVAL_FLOW_DEFINITION_CREATE = "approval.flow.definition.create"
-    const val ACTION_APPROVAL_FLOW_DEFINITION_READ = "approval.flow.definition.read"
-    const val ACTION_APPROVAL_FLOW_DEFINITION_UPDATE = "approval.flow.definition.update"
-    const val ACTION_APPROVAL_FLOW_DEFINITION_DELETE = "approval.flow.definition.delete"
-
-    // System-scope only Approval Flow Definition permissions.
-    const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE = "system.approval.flow.definition.create"
-    const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ = "system.approval.flow.definition.read"
-    const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE = "system.approval.flow.definition.update"
-    const val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE = "system.approval.flow.definition.delete"
-
-    // Approval Flow Definition (tenant-admin layer: cross-tenant admin, TENANT scope only)
-    const val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = "tenant.approval.flow.definition:/manager/tenant-approval-flow-definitions"
-    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = "tenant.approval.flow.definition.create"
-    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = "tenant.approval.flow.definition.read"
-    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = "tenant.approval.flow.definition.update"
-    const val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = "tenant.approval.flow.definition.delete"
-
-    // Approval Flow Instance (system scope) - read-all permission for system admins
-    const val MENU_APPROVAL_FLOW_INSTANCE_MANAGER = "approval.flow.instance:/manager/approval-flow-instances"
-    const val ACTION_APPROVAL_FLOW_INSTANCE_READ = "approval.flow.instance.read"
-
-    // Approval Flow Instance (tenant-admin layer: cross-tenant admin, TENANT scope only)
-    const val MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER = "tenant.approval.flow.instance:/manager/tenant-approval-flow-instances"
-    const val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = "tenant.approval.flow.instance.read"
-
-    // System-level Dictionary (tenantId = 0)
-    const val MENU_SYSTEM_DICT_TYPE_MANAGER = "system.dict.type:/manager/system-dict-types"
-    const val ACTION_SYSTEM_DICT_TYPE_CREATE = "system.dict.type.create"
-    const val ACTION_SYSTEM_DICT_TYPE_READ = "system.dict.type.read"
-    const val ACTION_SYSTEM_DICT_TYPE_UPDATE = "system.dict.type.update"
-    const val ACTION_SYSTEM_DICT_TYPE_DELETE = "system.dict.type.delete"
-
-    const val MENU_SYSTEM_DICT_ITEM_MANAGER = "system.dict.item:/manager/system-dict-items"
-    const val ACTION_SYSTEM_DICT_ITEM_CREATE = "system.dict.item.create"
-    const val ACTION_SYSTEM_DICT_ITEM_READ = "system.dict.item.read"
-    const val ACTION_SYSTEM_DICT_ITEM_UPDATE = "system.dict.item.update"
-    const val ACTION_SYSTEM_DICT_ITEM_DELETE = "system.dict.item.delete"
-
-    // Tenant-level Dictionary (tenant-admin layer: cross-tenant admin, TENANT scope only)
-    const val MENU_TENANT_DICT_TYPE_MANAGER = "tenant.dict.type:/manager/tenant-dict-types"
-    const val ACTION_TENANT_DICT_TYPE_CREATE = "tenant.dict.type.create"
-    const val ACTION_TENANT_DICT_TYPE_READ = "tenant.dict.type.read"
-    const val ACTION_TENANT_DICT_TYPE_UPDATE = "tenant.dict.type.update"
-    const val ACTION_TENANT_DICT_TYPE_DELETE = "tenant.dict.type.delete"
-
-    const val MENU_TENANT_DICT_ITEM_MANAGER = "tenant.dict.item:/manager/tenant-dict-items"
-    const val ACTION_TENANT_DICT_ITEM_CREATE = "tenant.dict.item.create"
-    const val ACTION_TENANT_DICT_ITEM_READ = "tenant.dict.item.read"
-    const val ACTION_TENANT_DICT_ITEM_UPDATE = "tenant.dict.item.update"
-    const val ACTION_TENANT_DICT_ITEM_DELETE = "tenant.dict.item.delete"
-
-    // Cross-scope (super) Dictionary permissions — holders may operate in any scope.
-    // Only granted to root and admin.
-    const val ACTION_DICT_TYPE_CREATE = "dict.type.create"
-    const val ACTION_DICT_TYPE_READ = "dict.type.read"
-    const val ACTION_DICT_TYPE_UPDATE = "dict.type.update"
-    const val ACTION_DICT_TYPE_DELETE = "dict.type.delete"
-
-    const val ACTION_DICT_ITEM_CREATE = "dict.item.create"
-    const val ACTION_DICT_ITEM_READ = "dict.item.read"
-    const val ACTION_DICT_ITEM_UPDATE = "dict.item.update"
-    const val ACTION_DICT_ITEM_DELETE = "dict.item.delete"
-
-    /**
-     * Short English description for every system permission, keyed by the stripped permission name
-     * (i.e. the part before `:` for menus or `@` for components, and the full string for actions).
-     *
-     * The i18n layer on the frontend maps `name` → localized label; this map is the DB-side
-     * default used when the frontend switch is toggled to "DB" or when no i18n key is registered.
-     */
-    val DESCRIPTIONS: Map<String, String> = mapOf(
-        // Menus
-        "permission" to "Manage user permissions menu",
-        "role" to "Manage user roles menu",
-        "user" to "Manage users menu",
-        "user.role" to "Manage user-role assignments menu",
-        "settings" to "Access system settings menu",
-        "oauth.account" to "Manage OAuth accounts menu",
-        "file.resource" to "Manage file resources menu",
-        "storage.provider" to "Manage storage providers menu",
-        "mail.template.category" to "Manage mail template categories menu",
-        "mail.template.type" to "Manage mail template types menu",
-        "mail.template" to "Manage mail templates menu",
-        "tenant" to "Manage tenants menu",
-        "tenant.tire.type" to "Manage tenant tire types menu",
-        "tenant.tire.benefit.feature" to "Manage tenant tire benefit features menu",
-        "tenant.tire.benefit.value" to "Manage tenant tire benefit values menu",
-        "tenant.department" to "Manage tenant departments menu",
-        "tenant.role" to "Manage tenant roles menu",
-        "tenant.permission" to "Manage tenant permissions menu",
-        "tenant.member" to "Manage tenant members menu",
-        "tenant.department.member" to "Manage tenant department members menu",
-        "tenant.member.role" to "Manage tenant member roles menu",
-        "tenant.role.permission" to "Manage tenant role permissions menu",
-        "tenant.invitation" to "Manage tenant invitations menu",
-        "tenant.message.channel" to "Manage tenant message channels menu",
-        "system.message.channel" to "Manage system message channels menu",
-        "audit.log" to "Manage audit logs menu",
-        "mail.send.log" to "Manage mail send logs menu",
-        "user.login.log" to "Manage user login logs menu",
-        "monitor.sessions" to "Manage active sessions menu",
-        "announcement" to "Manage announcements menu",
-        "approval.flow.definition" to "Manage approval flow definitions menu",
-        "tenant.approval.flow.definition" to "Manage tenant approval flow definitions menu",
-        "approval.flow.instance" to "Manage approval flow instances menu",
-        "tenant.approval.flow.instance" to "Manage tenant approval flow instances menu",
-        "system.dict.type" to "Manage system dictionary types menu",
-        "system.dict.item" to "Manage system dictionary items menu",
-        "tenant.dict.type" to "Manage tenant dictionary types menu",
-        "tenant.dict.item" to "Manage tenant dictionary items menu",
-
-        // Components
-        "dashboard.business.statistics" to "Dashboard business statistics widget",
-        "dashboard.system.metrics" to "Dashboard system metrics widget",
-        "dashboard.tenant.joined" to "Dashboard joined tenants widget",
-        "dashboard.announcements" to "Dashboard announcements widget",
-
-        // Actions - user permission / role / user
-        "permission.create" to "Create user permissions",
-        "permission.read" to "Read user permissions",
-        "permission.update" to "Update user permissions",
-        "permission.delete" to "Delete user permissions",
-        "role.create" to "Create user roles",
-        "role.read" to "Read user roles",
-        "role.update" to "Update user roles",
-        "role.delete" to "Delete user roles",
-        "user.create" to "Create users",
-        "user.read" to "Read users",
-        "user.update" to "Update users",
-        "user.delete" to "Delete users",
-        "role.permission.read" to "Read role permission assignments",
-        "role.permission.update" to "Update role permission assignments",
-        "user.role.read" to "Read user role assignments",
-        "user.role.update" to "Update user role assignments",
-
-        // Actions - system settings / maintenance
-        "settings.read" to "Read system settings",
-        "settings.update" to "Update system settings",
-        "settings.test.sendEmail" to "Send test email via system settings",
-        "settings.test.sendMessage" to "Send test message via system settings",
-        "maintenance.access" to "Access maintenance operations",
-        "maintenance.update" to "Update maintenance operations",
-
-        // Actions - oauth account
-        "oauth.account.create" to "Create OAuth accounts",
-        "oauth.account.read" to "Read OAuth accounts",
-        "oauth.account.update" to "Update OAuth accounts",
-        "oauth.account.delete" to "Delete OAuth accounts",
-
-        // Actions - file resource / storage provider
-        "file.resource.create" to "Create file resources",
-        "file.resource.read" to "Read file resources",
-        "file.resource.update" to "Update file resources",
-        "file.resource.delete" to "Delete file resources",
-        "storage.provider.create" to "Create storage providers",
-        "storage.provider.read" to "Read storage providers",
-        "storage.provider.update" to "Update storage providers",
-        "storage.provider.delete" to "Delete storage providers",
-
-        // Actions - mail template
-        "mail.template.category.create" to "Create mail template categories",
-        "mail.template.category.read" to "Read mail template categories",
-        "mail.template.category.update" to "Update mail template categories",
-        "mail.template.category.delete" to "Delete mail template categories",
-        "mail.template.type.create" to "Create mail template types",
-        "mail.template.type.read" to "Read mail template types",
-        "mail.template.type.update" to "Update mail template types",
-        "mail.template.type.delete" to "Delete mail template types",
-        "mail.template.create" to "Create mail templates",
-        "mail.template.read" to "Read mail templates",
-        "mail.template.update" to "Update mail templates",
-        "mail.template.delete" to "Delete mail templates",
-
-        // Actions - tenant (top-level)
-        "tenant.create" to "Create tenants",
-        "tenant.read" to "Read tenants",
-        "tenant.update" to "Update tenants",
-        "tenant.delete" to "Delete tenants",
-        "tenant.lifecycle.update" to "Update tenant ownership, tire, subscription window, status, or settings",
-
-        // Actions - tenant tire type / benefit
-        "tenant.tire.type.create" to "Create tenant tire types",
-        "tenant.tire.type.read" to "Read tenant tire types",
-        "tenant.tire.type.update" to "Update tenant tire types",
-        "tenant.tire.type.delete" to "Delete tenant tire types",
-        "tenant.tire.benefit.feature.create" to "Create tenant tire benefit features",
-        "tenant.tire.benefit.feature.read" to "Read tenant tire benefit features",
-        "tenant.tire.benefit.feature.update" to "Update tenant tire benefit features",
-        "tenant.tire.benefit.feature.delete" to "Delete tenant tire benefit features",
-        "tenant.tire.benefit.value.create" to "Create tenant tire benefit values",
-        "tenant.tire.benefit.value.read" to "Read tenant tire benefit values",
-        "tenant.tire.benefit.value.update" to "Update tenant tire benefit values",
-        "tenant.tire.benefit.value.delete" to "Delete tenant tire benefit values",
-
-        // Actions - tenant admin scope (cross-tenant management)
-        "tenant.department.create" to "Create tenant departments across tenants",
-        "tenant.department.read" to "Read tenant departments across tenants",
-        "tenant.department.update" to "Update tenant departments across tenants",
-        "tenant.department.delete" to "Delete tenant departments across tenants",
-        "tenant.role.create" to "Create tenant roles across tenants",
-        "tenant.role.read" to "Read tenant roles across tenants",
-        "tenant.role.update" to "Update tenant roles across tenants",
-        "tenant.role.delete" to "Delete tenant roles across tenants",
-        "tenant.permission.create" to "Create tenant permissions across tenants",
-        "tenant.permission.read" to "Read tenant permissions across tenants",
-        "tenant.permission.update" to "Update tenant permissions across tenants",
-        "tenant.permission.delete" to "Delete tenant permissions across tenants",
-        "tenant.member.create" to "Create tenant members across tenants",
-        "tenant.member.read" to "Read tenant members across tenants",
-        "tenant.member.update" to "Update tenant members across tenants",
-        "tenant.member.delete" to "Delete tenant members across tenants",
-        "tenant.department.member.create" to "Assign tenant department members across tenants",
-        "tenant.department.member.read" to "Read tenant department members across tenants",
-        "tenant.department.member.update" to "Update tenant department members across tenants",
-        "tenant.department.member.delete" to "Remove tenant department members across tenants",
-        "tenant.member.role.read" to "Read tenant member role assignments across tenants",
-        "tenant.member.role.update" to "Update tenant member role assignments across tenants",
-        "tenant.role.permission.read" to "Read tenant role permission assignments across tenants",
-        "tenant.role.permission.update" to "Update tenant role permission assignments across tenants",
-        "tenant.invitation.create" to "Create tenant invitations across tenants",
-        "tenant.invitation.read" to "Read tenant invitations across tenants",
-        "tenant.invitation.update" to "Update tenant invitations across tenants",
-        "tenant.invitation.delete" to "Delete tenant invitations across tenants",
-
-        // Actions - message channel (tenant-admin scope / system scope / super)
-        "tenant.message.channel.create" to "Create tenant-scope message channels across tenants",
-        "tenant.message.channel.read" to "Read tenant-scope message channels across tenants",
-        "tenant.message.channel.update" to "Update tenant-scope message channels across tenants",
-        "tenant.message.channel.delete" to "Delete tenant-scope message channels across tenants",
-        "system.message.channel.create" to "Create system-scope message channels",
-        "system.message.channel.read" to "Read system-scope message channels",
-        "system.message.channel.update" to "Update system-scope message channels",
-        "system.message.channel.delete" to "Delete system-scope message channels",
-        "message.channel.create" to "Create message channels in any scope",
-        "message.channel.read" to "Read message channels in any scope",
-        "message.channel.update" to "Update message channels in any scope",
-        "message.channel.delete" to "Delete message channels in any scope",
-
-        // Actions - logs
-        "audit.log.create" to "Create audit logs",
-        "audit.log.read" to "Read audit logs",
-        "audit.log.update" to "Update audit logs",
-        "audit.log.delete" to "Delete audit logs",
-        "mail.send.log.read" to "Read mail send logs",
-        "user.login.log.read" to "Read user login logs",
-
-        // Actions - dashboard / monitor
-        "dashboard.business.statistics.read" to "Read dashboard business statistics",
-        "dashboard.system.metrics.read" to "Read dashboard system metrics",
-        "monitor.sessions.read" to "Read active session monitor data",
-
-        // Actions - announcement
-        "announcement.create" to "Create announcements",
-        "announcement.read" to "Read announcements",
-        "announcement.update" to "Update announcements",
-        "announcement.delete" to "Delete announcements",
-        "announcement.list" to "List published announcements",
-
-        // Actions - approval flow definition
-        "approval.flow.definition.create" to "Create approval flow definitions in any scope",
-        "approval.flow.definition.read" to "Read approval flow definitions in any scope",
-        "approval.flow.definition.update" to "Update approval flow definitions in any scope",
-        "approval.flow.definition.delete" to "Delete approval flow definitions in any scope",
-        "system.approval.flow.definition.create" to "Create system-scope approval flow definitions",
-        "system.approval.flow.definition.read" to "Read system-scope approval flow definitions",
-        "system.approval.flow.definition.update" to "Update system-scope approval flow definitions",
-        "system.approval.flow.definition.delete" to "Delete system-scope approval flow definitions",
-        "tenant.approval.flow.definition.create" to "Create tenant-scope approval flow definitions across tenants",
-        "tenant.approval.flow.definition.read" to "Read tenant-scope approval flow definitions across tenants",
-        "tenant.approval.flow.definition.update" to "Update tenant-scope approval flow definitions across tenants",
-        "tenant.approval.flow.definition.delete" to "Delete tenant-scope approval flow definitions across tenants",
-
-        // Actions - approval flow instance
-        "approval.flow.instance.read" to "Read approval flow instances in any scope",
-        "tenant.approval.flow.instance.read" to "Read tenant-scope approval flow instances across tenants",
-
-        // Actions - dictionary (system / tenant-admin / super)
-        "system.dict.type.create" to "Create system-scope dictionary types",
-        "system.dict.type.read" to "Read system-scope dictionary types",
-        "system.dict.type.update" to "Update system-scope dictionary types",
-        "system.dict.type.delete" to "Delete system-scope dictionary types",
-        "system.dict.item.create" to "Create system-scope dictionary items",
-        "system.dict.item.read" to "Read system-scope dictionary items",
-        "system.dict.item.update" to "Update system-scope dictionary items",
-        "system.dict.item.delete" to "Delete system-scope dictionary items",
-        "tenant.dict.type.create" to "Create tenant-scope dictionary types across tenants",
-        "tenant.dict.type.read" to "Read tenant-scope dictionary types across tenants",
-        "tenant.dict.type.update" to "Update tenant-scope dictionary types across tenants",
-        "tenant.dict.type.delete" to "Delete tenant-scope dictionary types across tenants",
-        "tenant.dict.item.create" to "Create tenant-scope dictionary items across tenants",
-        "tenant.dict.item.read" to "Read tenant-scope dictionary items across tenants",
-        "tenant.dict.item.update" to "Update tenant-scope dictionary items across tenants",
-        "tenant.dict.item.delete" to "Delete tenant-scope dictionary items across tenants",
-        "dict.type.create" to "Create dictionary types in any scope",
-        "dict.type.read" to "Read dictionary types in any scope",
-        "dict.type.update" to "Update dictionary types in any scope",
-        "dict.type.delete" to "Delete dictionary types in any scope",
-        "dict.item.create" to "Create dictionary items in any scope",
-        "dict.item.read" to "Read dictionary items in any scope",
-        "dict.item.update" to "Update dictionary items in any scope",
-        "dict.item.delete" to "Delete dictionary items in any scope",
+    // ============================================================
+    //   Permission  (system)
+    // ============================================================
+    val ACTION_SYSTEM_PERMISSION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.permission.create",
+        description = "Create user permissions"
     )
+    val ACTION_SYSTEM_PERMISSION_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.permission.read",
+        description = "Read user permissions"
+    )
+    val ACTION_SYSTEM_PERMISSION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.permission.update",
+        description = "Update user permissions"
+    )
+    val ACTION_SYSTEM_PERMISSION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.permission.delete",
+        description = "Delete user permissions"
+    )
+    val MENU_SYSTEM_PERMISSION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.permission",
+        path = "/manager/user-permissions",
+        description = "Manage user permissions menu"
+    )
+
+    // ============================================================
+    //   Role  (system)
+    // ============================================================
+    val ACTION_SYSTEM_ROLE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.role.create",
+        description = "Create user roles"
+    )
+    val ACTION_SYSTEM_ROLE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.role.read",
+        description = "Read user roles"
+    )
+    val ACTION_SYSTEM_ROLE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.role.update",
+        description = "Update user roles"
+    )
+    val ACTION_SYSTEM_ROLE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.role.delete",
+        description = "Delete user roles"
+    )
+    val MENU_SYSTEM_ROLE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.role",
+        path = "/manager/user-roles",
+        description = "Manage user roles menu"
+    )
+
+    // ============================================================
+    //   User  (system)
+    // ============================================================
+    val ACTION_SYSTEM_USER_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.user.create",
+        description = "Create users"
+    )
+    val ACTION_SYSTEM_USER_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.user.read",
+        description = "Read users"
+    )
+    val ACTION_SYSTEM_USER_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.user.update",
+        description = "Update users"
+    )
+    val ACTION_SYSTEM_USER_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.user.delete",
+        description = "Delete users"
+    )
+    val MENU_SYSTEM_USER_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.user",
+        path = "/manager/users",
+        description = "Manage users menu"
+    )
+
+    // ============================================================
+    //   Role-Permission Relation  (system)
+    // ============================================================
+    val ACTION_SYSTEM_ROLE_PERMISSION_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.role.permission.read",
+        description = "Read role permission assignments"
+    )
+    val ACTION_SYSTEM_ROLE_PERMISSION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.role.permission.update",
+        description = "Update role permission assignments"
+    )
+
+    // ============================================================
+    //   User-Role Relation  (system)
+    // ============================================================
+    val ACTION_SYSTEM_USER_ROLE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.user.role.read",
+        description = "Read user role assignments"
+    )
+    val ACTION_SYSTEM_USER_ROLE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.user.role.update",
+        description = "Update user role assignments"
+    )
+    val MENU_SYSTEM_USER_ROLE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.user.role",
+        path = "/manager/user-roles-relation",
+        description = "Manage user-role assignments menu"
+    )
+
+    // ============================================================
+    //   System Settings  (system)
+    // ============================================================
+    val ACTION_SYSTEM_SETTINGS_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.settings.read",
+        description = "Read system settings"
+    )
+    val ACTION_SYSTEM_SETTINGS_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.settings.update",
+        description = "Update system settings"
+    )
+    val ACTION_SYSTEM_SETTINGS_TEST_SEND_EMAIL = SystemRbacPermissionDeclaration.action(
+        name = "system.settings.test.sendEmail",
+        description = "Send test email via system settings"
+    )
+    val ACTION_SYSTEM_SETTINGS_TEST_SEND_MESSAGE = SystemRbacPermissionDeclaration.action(
+        name = "system.settings.test.sendMessage",
+        description = "Send test message via system settings"
+    )
+    val MENU_SYSTEM_SETTINGS = SystemRbacPermissionDeclaration.menu(
+        name = "system.settings",
+        path = "/manager/settings",
+        description = "Access system settings menu"
+    )
+
+    // ============================================================
+    //   Maintenance  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MAINTENANCE_ACCESS = SystemRbacPermissionDeclaration.action(
+        name = "system.maintenance.access",
+        description = "Access maintenance operations"
+    )
+    val ACTION_SYSTEM_MAINTENANCE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.maintenance.update",
+        description = "Update maintenance operations"
+    )
+
+    // ============================================================
+    //   OAuth Account  (system)
+    // ============================================================
+    val ACTION_SYSTEM_OAUTH_ACCOUNT_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.oauth.account.create",
+        description = "Create OAuth accounts"
+    )
+    val ACTION_SYSTEM_OAUTH_ACCOUNT_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.oauth.account.read",
+        description = "Read OAuth accounts"
+    )
+    val ACTION_SYSTEM_OAUTH_ACCOUNT_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.oauth.account.update",
+        description = "Update OAuth accounts"
+    )
+    val ACTION_SYSTEM_OAUTH_ACCOUNT_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.oauth.account.delete",
+        description = "Delete OAuth accounts"
+    )
+    val MENU_SYSTEM_OAUTH_ACCOUNT_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.oauth.account",
+        path = "/manager/oauth-accounts",
+        description = "Manage OAuth accounts menu"
+    )
+
+    // ============================================================
+    //   File Resource  (system)
+    // ============================================================
+    val ACTION_SYSTEM_FILE_RESOURCE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.file.resource.create",
+        description = "Create file resources"
+    )
+    val ACTION_SYSTEM_FILE_RESOURCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.file.resource.read",
+        description = "Read file resources"
+    )
+    val ACTION_SYSTEM_FILE_RESOURCE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.file.resource.update",
+        description = "Update file resources"
+    )
+    val ACTION_SYSTEM_FILE_RESOURCE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.file.resource.delete",
+        description = "Delete file resources"
+    )
+    val MENU_SYSTEM_FILE_RESOURCE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.file.resource",
+        path = "/manager/file-resources",
+        description = "Manage file resources menu"
+    )
+
+    // ============================================================
+    //   Storage Provider  (system)
+    // ============================================================
+    val ACTION_SYSTEM_STORAGE_PROVIDER_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.create",
+        description = "Create storage providers"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.read",
+        description = "Read storage providers"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.update",
+        description = "Update storage providers"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.delete",
+        description = "Delete storage providers"
+    )
+    val MENU_SYSTEM_STORAGE_PROVIDER_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.storage.provider",
+        path = "/manager/storage-providers",
+        description = "Manage storage providers menu"
+    )
+
+    // ============================================================
+    //   Mail Template Category  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.category.create",
+        description = "Create mail template categories"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.category.read",
+        description = "Read mail template categories"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.category.update",
+        description = "Update mail template categories"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.category.delete",
+        description = "Delete mail template categories"
+    )
+    val MENU_SYSTEM_MAIL_TEMPLATE_CATEGORY_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.mail.template.category",
+        path = "/manager/mail-template-categories",
+        description = "Manage mail template categories menu"
+    )
+
+    // ============================================================
+    //   Mail Template Type  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.type.create",
+        description = "Create mail template types"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.type.read",
+        description = "Read mail template types"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.type.update",
+        description = "Update mail template types"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_TYPE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.type.delete",
+        description = "Delete mail template types"
+    )
+    val MENU_SYSTEM_MAIL_TEMPLATE_TYPE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.mail.template.type",
+        path = "/manager/mail-template-types",
+        description = "Manage mail template types menu"
+    )
+
+    // ============================================================
+    //   Mail Template  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MAIL_TEMPLATE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.create",
+        description = "Create mail templates"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.read",
+        description = "Read mail templates"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.update",
+        description = "Update mail templates"
+    )
+    val ACTION_SYSTEM_MAIL_TEMPLATE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.template.delete",
+        description = "Delete mail templates"
+    )
+    val MENU_SYSTEM_MAIL_TEMPLATE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.mail.template",
+        path = "/manager/mail-templates",
+        description = "Manage mail templates menu"
+    )
+
+    // ============================================================
+    //   Tenant  (system)
+    // ============================================================
+    val ACTION_SYSTEM_TENANT_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.create",
+        description = "Create tenants"
+    )
+    val ACTION_SYSTEM_TENANT_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.read",
+        description = "Read tenants"
+    )
+    val ACTION_SYSTEM_TENANT_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.update",
+        description = "Update tenants"
+    )
+    val ACTION_SYSTEM_TENANT_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.delete",
+        description = "Delete tenants"
+    )
+    val ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.lifecycle.update",
+        description = "Update tenant ownership, tire, subscription window, status, or settings"
+    )
+    val MENU_SYSTEM_TENANT_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.tenant",
+        path = "/manager/tenants",
+        description = "Manage tenants menu"
+    )
+
+    // ============================================================
+    //   Tenant Tire Type  (system)
+    // ============================================================
+    val ACTION_SYSTEM_TENANT_TIRE_TYPE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.type.create",
+        description = "Create tenant tire types"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_TYPE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.type.read",
+        description = "Read tenant tire types"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_TYPE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.type.update",
+        description = "Update tenant tire types"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_TYPE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.type.delete",
+        description = "Delete tenant tire types"
+    )
+    val MENU_SYSTEM_TENANT_TIRE_TYPE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.tenant.tire.type",
+        path = "/manager/tenant-tire-types",
+        description = "Manage tenant tire types menu"
+    )
+
+    // ============================================================
+    //   Tenant Tire Benefit Feature  (system)
+    // ============================================================
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.feature.create",
+        description = "Create tenant tire benefit features"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.feature.read",
+        description = "Read tenant tire benefit features"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.feature.update",
+        description = "Update tenant tire benefit features"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.feature.delete",
+        description = "Delete tenant tire benefit features"
+    )
+    val MENU_SYSTEM_TENANT_TIRE_BENEFIT_FEATURE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.tenant.tire.benefit.feature",
+        path = "/manager/tenant-tire-benefit-features",
+        description = "Manage tenant tire benefit features menu"
+    )
+
+    // ============================================================
+    //   Tenant Tire Benefit Value  (system)
+    // ============================================================
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_VALUE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.value.create",
+        description = "Create tenant tire benefit values"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_VALUE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.value.read",
+        description = "Read tenant tire benefit values"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_VALUE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.value.update",
+        description = "Update tenant tire benefit values"
+    )
+    val ACTION_SYSTEM_TENANT_TIRE_BENEFIT_VALUE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.tenant.tire.benefit.value.delete",
+        description = "Delete tenant tire benefit values"
+    )
+    val MENU_SYSTEM_TENANT_TIRE_BENEFIT_VALUE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.tenant.tire.benefit.value",
+        path = "/manager/tenant-tire-benefit-values",
+        description = "Manage tenant tire benefit values menu"
+    )
+
+    // ============================================================
+    //   Tenant Department  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_DEPARTMENT_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.create",
+        description = "Create tenant departments across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.read",
+        description = "Read tenant departments across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.update",
+        description = "Update tenant departments across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.delete",
+        description = "Delete tenant departments across tenants"
+    )
+    val MENU_TENANT_DEPARTMENT_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.department",
+        path = "/manager/tenant-departments",
+        description = "Manage tenant departments menu"
+    )
+
+    // ============================================================
+    //   Tenant Role  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_ROLE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.create",
+        description = "Create tenant roles across tenants"
+    )
+    val ACTION_TENANT_ROLE_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.read",
+        description = "Read tenant roles across tenants"
+    )
+    val ACTION_TENANT_ROLE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.update",
+        description = "Update tenant roles across tenants"
+    )
+    val ACTION_TENANT_ROLE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.delete",
+        description = "Delete tenant roles across tenants"
+    )
+    val MENU_TENANT_ROLE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.role",
+        path = "/manager/tenant-roles",
+        description = "Manage tenant roles menu"
+    )
+
+    // ============================================================
+    //   Tenant Permission  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_PERMISSION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.permission.create",
+        description = "Create tenant permissions across tenants"
+    )
+    val ACTION_TENANT_PERMISSION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.permission.read",
+        description = "Read tenant permissions across tenants"
+    )
+    val ACTION_TENANT_PERMISSION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.permission.update",
+        description = "Update tenant permissions across tenants"
+    )
+    val ACTION_TENANT_PERMISSION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.permission.delete",
+        description = "Delete tenant permissions across tenants"
+    )
+    val MENU_TENANT_PERMISSION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.permission",
+        path = "/manager/tenant-permissions",
+        description = "Manage tenant permissions menu"
+    )
+
+    // ============================================================
+    //   Tenant Member  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_MEMBER_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.create",
+        description = "Create tenant members across tenants"
+    )
+    val ACTION_TENANT_MEMBER_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.read",
+        description = "Read tenant members across tenants"
+    )
+    val ACTION_TENANT_MEMBER_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.update",
+        description = "Update tenant members across tenants"
+    )
+    val ACTION_TENANT_MEMBER_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.delete",
+        description = "Delete tenant members across tenants"
+    )
+    val MENU_TENANT_MEMBER_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.member",
+        path = "/manager/tenant-members",
+        description = "Manage tenant members menu"
+    )
+
+    // ============================================================
+    //   Tenant Department-Member Relation  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.member.create",
+        description = "Assign tenant department members across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.member.read",
+        description = "Read tenant department members across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.member.update",
+        description = "Update tenant department members across tenants"
+    )
+    val ACTION_TENANT_DEPARTMENT_MEMBER_RELATION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.department.member.delete",
+        description = "Remove tenant department members across tenants"
+    )
+    val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.department.member",
+        path = "/manager/tenant-department-members",
+        description = "Manage tenant department members menu"
+    )
+
+    // ============================================================
+    //   Tenant Member-Role Relation  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_MEMBER_ROLE_RELATION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.role.read",
+        description = "Read tenant member role assignments across tenants"
+    )
+    val ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.member.role.update",
+        description = "Update tenant member role assignments across tenants"
+    )
+    val MENU_TENANT_MEMBER_ROLE_RELATION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.member.role",
+        path = "/manager/tenant-member-roles",
+        description = "Manage tenant member roles menu"
+    )
+
+    // ============================================================
+    //   Tenant Role-Permission Relation  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_ROLE_PERMISSION_RELATION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.permission.read",
+        description = "Read tenant role permission assignments across tenants"
+    )
+    val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.role.permission.update",
+        description = "Update tenant role permission assignments across tenants"
+    )
+    val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.role.permission",
+        path = "/manager/tenant-role-permissions",
+        description = "Manage tenant role permissions menu"
+    )
+
+    // ============================================================
+    //   Tenant Invitation  (tenantAdmin)
+    // ============================================================
+    val ACTION_TENANT_INVITATION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.invitation.create",
+        description = "Create tenant invitations across tenants"
+    )
+    val ACTION_TENANT_INVITATION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.invitation.read",
+        description = "Read tenant invitations across tenants"
+    )
+    val ACTION_TENANT_INVITATION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.invitation.update",
+        description = "Update tenant invitations across tenants"
+    )
+    val ACTION_TENANT_INVITATION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.invitation.delete",
+        description = "Delete tenant invitations across tenants"
+    )
+    val MENU_TENANT_INVITATION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.invitation",
+        path = "/manager/tenant-invitations",
+        description = "Manage tenant invitations menu"
+    )
+
+    // ============================================================
+    //   Message Channel  (x + system + tenantAdmin)
+    // ============================================================
+    val ACTION_X_MESSAGE_CHANNEL_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.message.channel.create",
+        description = "Create message channels in any scope"
+    )
+    val ACTION_X_MESSAGE_CHANNEL_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.message.channel.read",
+        description = "Read message channels in any scope"
+    )
+    val ACTION_X_MESSAGE_CHANNEL_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.message.channel.update",
+        description = "Update message channels in any scope"
+    )
+    val ACTION_X_MESSAGE_CHANNEL_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.message.channel.delete",
+        description = "Delete message channels in any scope"
+    )
+
+    val ACTION_SYSTEM_MESSAGE_CHANNEL_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.message.channel.create",
+        description = "Create system-scope message channels"
+    )
+    val ACTION_SYSTEM_MESSAGE_CHANNEL_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.message.channel.read",
+        description = "Read system-scope message channels"
+    )
+    val ACTION_SYSTEM_MESSAGE_CHANNEL_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.message.channel.update",
+        description = "Update system-scope message channels"
+    )
+    val ACTION_SYSTEM_MESSAGE_CHANNEL_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.message.channel.delete",
+        description = "Delete system-scope message channels"
+    )
+    val MENU_SYSTEM_MESSAGE_CHANNEL_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.message.channel",
+        path = "/manager/system-message-channels",
+        description = "Manage system message channels menu"
+    )
+
+    val ACTION_TENANT_MESSAGE_CHANNEL_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.message.channel.create",
+        description = "Create tenant-scope message channels across tenants"
+    )
+    val ACTION_TENANT_MESSAGE_CHANNEL_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.message.channel.read",
+        description = "Read tenant-scope message channels across tenants"
+    )
+    val ACTION_TENANT_MESSAGE_CHANNEL_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.message.channel.update",
+        description = "Update tenant-scope message channels across tenants"
+    )
+    val ACTION_TENANT_MESSAGE_CHANNEL_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.message.channel.delete",
+        description = "Delete tenant-scope message channels across tenants"
+    )
+    val MENU_TENANT_MESSAGE_CHANNEL_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.message.channel",
+        path = "/manager/tenant-message-channels",
+        description = "Manage tenant message channels menu"
+    )
+
+    // ============================================================
+    //   Audit Log  (system)
+    // ============================================================
+    val ACTION_SYSTEM_AUDIT_LOG_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.audit.log.create",
+        description = "Create audit logs"
+    )
+    val ACTION_SYSTEM_AUDIT_LOG_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.audit.log.read",
+        description = "Read audit logs"
+    )
+    val ACTION_SYSTEM_AUDIT_LOG_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.audit.log.update",
+        description = "Update audit logs"
+    )
+    val ACTION_SYSTEM_AUDIT_LOG_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.audit.log.delete",
+        description = "Delete audit logs"
+    )
+    val MENU_SYSTEM_AUDIT_LOG_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.audit.log",
+        path = "/manager/audit-logs",
+        description = "Manage audit logs menu"
+    )
+
+    // ============================================================
+    //   Mail Send Log  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MAIL_SEND_LOG_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.mail.send.log.read",
+        description = "Read mail send logs"
+    )
+    val MENU_SYSTEM_MAIL_SEND_LOG_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.mail.send.log",
+        path = "/manager/mail-send-logs",
+        description = "Manage mail send logs menu"
+    )
+
+    // ============================================================
+    //   User Login Log  (system)
+    // ============================================================
+    val ACTION_SYSTEM_USER_LOGIN_LOG_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.user.login.log.read",
+        description = "Read user login logs"
+    )
+    val MENU_SYSTEM_USER_LOGIN_LOG_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.user.login.log",
+        path = "/manager/user-login-logs",
+        description = "Manage user login logs menu"
+    )
+
+    // ============================================================
+    //   Monitor Sessions  (system)
+    // ============================================================
+    val ACTION_SYSTEM_MONITOR_SESSIONS_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.monitor.sessions.read",
+        description = "Read active session monitor data"
+    )
+    val MENU_SYSTEM_MONITOR_SESSIONS = SystemRbacPermissionDeclaration.menu(
+        name = "system.monitor.sessions",
+        path = "/manager/sessions",
+        description = "Manage active sessions menu"
+    )
+
+    // ============================================================
+    //   Announcement  (system)
+    // ============================================================
+    val ACTION_SYSTEM_ANNOUNCEMENT_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.announcement.create",
+        description = "Create announcements"
+    )
+    val ACTION_SYSTEM_ANNOUNCEMENT_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.announcement.read",
+        description = "Read announcements"
+    )
+    val ACTION_SYSTEM_ANNOUNCEMENT_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.announcement.update",
+        description = "Update announcements"
+    )
+    val ACTION_SYSTEM_ANNOUNCEMENT_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.announcement.delete",
+        description = "Delete announcements"
+    )
+    val ACTION_SYSTEM_ANNOUNCEMENT_LIST = SystemRbacPermissionDeclaration.action(
+        name = "system.announcement.list",
+        description = "List published announcements"
+    )
+    val MENU_SYSTEM_ANNOUNCEMENT_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.announcement",
+        path = "/manager/announcements",
+        description = "Manage announcements menu"
+    )
+
+    // ============================================================
+    //   Dashboard  (system)
+    // ============================================================
+    val ACTION_SYSTEM_DASHBOARD_BUSINESS_STATISTICS_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.dashboard.business.statistics.read",
+        description = "Read dashboard business statistics"
+    )
+    val ACTION_SYSTEM_DASHBOARD_SYSTEM_METRICS_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.dashboard.system.metrics.read",
+        description = "Read dashboard system metrics"
+    )
+    val COMPONENT_SYSTEM_DASHBOARD_BUSINESS_STATISTICS = SystemRbacPermissionDeclaration.component(
+        name = "system.dashboard.business.statistics",
+        path = "dashboard.business.statistics",
+        description = "Dashboard business statistics widget"
+    )
+    val COMPONENT_SYSTEM_DASHBOARD_SYSTEM_METRICS = SystemRbacPermissionDeclaration.component(
+        name = "system.dashboard.system.metrics",
+        path = "dashboard.system.metrics",
+        description = "Dashboard system metrics widget"
+    )
+    val COMPONENT_SYSTEM_DASHBOARD_MY_TENANTS = SystemRbacPermissionDeclaration.component(
+        name = "system.dashboard.tenant.joined",
+        path = "dashboard.tenant.joined",
+        description = "Dashboard joined tenants widget"
+    )
+    val COMPONENT_SYSTEM_DASHBOARD_ANNOUNCEMENTS = SystemRbacPermissionDeclaration.component(
+        name = "system.dashboard.announcements",
+        path = "dashboard.announcements",
+        description = "Dashboard announcements widget"
+    )
+
+    // ============================================================
+    //   Approval Flow Definition  (x + system + tenantAdmin)
+    // ============================================================
+    val ACTION_X_APPROVAL_FLOW_DEFINITION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.approval.flow.definition.create",
+        description = "Create approval flow definitions in any scope"
+    )
+    val ACTION_X_APPROVAL_FLOW_DEFINITION_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.approval.flow.definition.read",
+        description = "Read approval flow definitions in any scope"
+    )
+    val ACTION_X_APPROVAL_FLOW_DEFINITION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.approval.flow.definition.update",
+        description = "Update approval flow definitions in any scope"
+    )
+    val ACTION_X_APPROVAL_FLOW_DEFINITION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.approval.flow.definition.delete",
+        description = "Delete approval flow definitions in any scope"
+    )
+
+    val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.approval.flow.definition.create",
+        description = "Create system-scope approval flow definitions"
+    )
+    val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.approval.flow.definition.read",
+        description = "Read system-scope approval flow definitions"
+    )
+    val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.approval.flow.definition.update",
+        description = "Update system-scope approval flow definitions"
+    )
+    val ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.approval.flow.definition.delete",
+        description = "Delete system-scope approval flow definitions"
+    )
+    val MENU_SYSTEM_APPROVAL_FLOW_DEFINITION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.approval.flow.definition",
+        path = "/manager/approval-flow-definitions",
+        description = "Manage approval flow definitions menu"
+    )
+
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.approval.flow.definition.create",
+        description = "Create tenant-scope approval flow definitions across tenants"
+    )
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.approval.flow.definition.read",
+        description = "Read tenant-scope approval flow definitions across tenants"
+    )
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.approval.flow.definition.update",
+        description = "Update tenant-scope approval flow definitions across tenants"
+    )
+    val ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.approval.flow.definition.delete",
+        description = "Delete tenant-scope approval flow definitions across tenants"
+    )
+    val MENU_TENANT_APPROVAL_FLOW_DEFINITION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.approval.flow.definition",
+        path = "/manager/tenant-approval-flow-definitions",
+        description = "Manage tenant approval flow definitions menu"
+    )
+
+    // ============================================================
+    //   Approval Flow Instance  (x + system + tenantAdmin)
+    // ============================================================
+    val ACTION_X_APPROVAL_FLOW_INSTANCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.approval.flow.instance.read",
+        description = "Read approval flow instances in any scope"
+    )
+    val MENU_X_APPROVAL_FLOW_INSTANCE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "x.approval.flow.instance",
+        path = "/manager/approval-flow-instances",
+        description = "Manage approval flow instances menu"
+    )
+
+    val ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.approval.flow.instance.read",
+        description = "Read system-scope approval flow instances"
+    )
+
+    val ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.approval.flow.instance.read",
+        description = "Read tenant-scope approval flow instances across tenants"
+    )
+    val MENU_TENANT_APPROVAL_FLOW_INSTANCE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.approval.flow.instance",
+        path = "/manager/tenant-approval-flow-instances",
+        description = "Manage tenant approval flow instances menu"
+    )
+
+    // ============================================================
+    //   Dictionary Type  (x + system + tenantAdmin)
+    // ============================================================
+    val ACTION_X_DICT_TYPE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.type.create",
+        description = "Create dictionary types in any scope"
+    )
+    val ACTION_X_DICT_TYPE_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.type.read",
+        description = "Read dictionary types in any scope"
+    )
+    val ACTION_X_DICT_TYPE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.type.update",
+        description = "Update dictionary types in any scope"
+    )
+    val ACTION_X_DICT_TYPE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.type.delete",
+        description = "Delete dictionary types in any scope"
+    )
+
+    val ACTION_SYSTEM_DICT_TYPE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.type.create",
+        description = "Create system-scope dictionary types"
+    )
+    val ACTION_SYSTEM_DICT_TYPE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.type.read",
+        description = "Read system-scope dictionary types"
+    )
+    val ACTION_SYSTEM_DICT_TYPE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.type.update",
+        description = "Update system-scope dictionary types"
+    )
+    val ACTION_SYSTEM_DICT_TYPE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.type.delete",
+        description = "Delete system-scope dictionary types"
+    )
+    val MENU_SYSTEM_DICT_TYPE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.dict.type",
+        path = "/manager/system-dict-types",
+        description = "Manage system dictionary types menu"
+    )
+
+    val ACTION_TENANT_DICT_TYPE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.type.create",
+        description = "Create tenant-scope dictionary types across tenants"
+    )
+    val ACTION_TENANT_DICT_TYPE_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.type.read",
+        description = "Read tenant-scope dictionary types across tenants"
+    )
+    val ACTION_TENANT_DICT_TYPE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.type.update",
+        description = "Update tenant-scope dictionary types across tenants"
+    )
+    val ACTION_TENANT_DICT_TYPE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.type.delete",
+        description = "Delete tenant-scope dictionary types across tenants"
+    )
+    val MENU_TENANT_DICT_TYPE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.dict.type",
+        path = "/manager/tenant-dict-types",
+        description = "Manage tenant dictionary types menu"
+    )
+
+    // ============================================================
+    //   Dictionary Item  (x + system + tenantAdmin)
+    // ============================================================
+    val ACTION_X_DICT_ITEM_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.item.create",
+        description = "Create dictionary items in any scope"
+    )
+    val ACTION_X_DICT_ITEM_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.item.read",
+        description = "Read dictionary items in any scope"
+    )
+    val ACTION_X_DICT_ITEM_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.item.update",
+        description = "Update dictionary items in any scope"
+    )
+    val ACTION_X_DICT_ITEM_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.dict.item.delete",
+        description = "Delete dictionary items in any scope"
+    )
+
+    val ACTION_SYSTEM_DICT_ITEM_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.item.create",
+        description = "Create system-scope dictionary items"
+    )
+    val ACTION_SYSTEM_DICT_ITEM_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.item.read",
+        description = "Read system-scope dictionary items"
+    )
+    val ACTION_SYSTEM_DICT_ITEM_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.item.update",
+        description = "Update system-scope dictionary items"
+    )
+    val ACTION_SYSTEM_DICT_ITEM_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.dict.item.delete",
+        description = "Delete system-scope dictionary items"
+    )
+    val MENU_SYSTEM_DICT_ITEM_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.dict.item",
+        path = "/manager/system-dict-items",
+        description = "Manage system dictionary items menu"
+    )
+
+    val ACTION_TENANT_DICT_ITEM_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.item.create",
+        description = "Create tenant-scope dictionary items across tenants"
+    )
+    val ACTION_TENANT_DICT_ITEM_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.item.read",
+        description = "Read tenant-scope dictionary items across tenants"
+    )
+    val ACTION_TENANT_DICT_ITEM_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.item.update",
+        description = "Update tenant-scope dictionary items across tenants"
+    )
+    val ACTION_TENANT_DICT_ITEM_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.dict.item.delete",
+        description = "Delete tenant-scope dictionary items across tenants"
+    )
+    val MENU_TENANT_DICT_ITEM_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "tenant.dict.item",
+        path = "/manager/tenant-dict-items",
+        description = "Manage tenant dictionary items menu"
+    )
+
+    fun allPermissions(): List<SystemRbacPermissionDeclaration> =
+        KotlinObjectClassUtils.extractAllValProperties(SystemPermission, false)
 }
