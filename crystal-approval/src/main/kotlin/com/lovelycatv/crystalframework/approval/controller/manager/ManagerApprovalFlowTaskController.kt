@@ -4,8 +4,12 @@ import com.lovelycatv.crystalframework.approval.controller.manager.dto.HandleApp
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowTaskDTO
+import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalFlowTaskFormViewVO
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowTaskEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowTaskRepository
+import com.lovelycatv.crystalframework.approval.service.ApprovalFlowDefinitionService
+import com.lovelycatv.crystalframework.approval.service.ApprovalFlowInstanceService
+import com.lovelycatv.crystalframework.approval.service.ApprovalFlowNodeService
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowTaskManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
@@ -24,9 +28,11 @@ import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Validated
@@ -35,6 +41,9 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerApprovalFlowTaskController(
     managerService: ApprovalFlowTaskManagerService,
     private val approvalFlowEngine: ApprovalFlowEngine,
+    private val instanceService: ApprovalFlowInstanceService,
+    private val nodeService: ApprovalFlowNodeService,
+    private val definitionService: ApprovalFlowDefinitionService,
 ) : ReadonlyScopedManagerController<
         ApprovalFlowTaskManagerService,
         ApprovalFlowTaskRepository,
@@ -135,6 +144,44 @@ class ManagerApprovalFlowTaskController(
             formData = dto.formData,
         )
         return ApiResponse.success(null)
+    }
+
+    /**
+     * Assemble the raw form-view payload for the task handle page: the definition-level schema,
+     * the node-level overlay, and the current instance formData baseline. Ownership is enforced
+     * the same way as [handle] — only the task's assignee may read this. Merging schema/overlay
+     * into the render-ready structure is done client-side (see frontend `mergeFieldOverrides`).
+     */
+    @GetMapping("/form-view", version = "1")
+    suspend fun formView(
+        userAuthentication: UserAuthentication,
+        @RequestParam("taskId") taskId: Long,
+    ): ApiResponse<*> {
+        val task = managerService.getByIdOrThrow(taskId)
+        val resolvedScope = resolveScope(task.scope)
+        val operatorId = resolveAssigneeId(resolvedScope, userAuthentication)
+        if (task.assigneeId != operatorId) {
+            throw ForbiddenException("This task is not assigned to the current user")
+        }
+
+        val instance = instanceService.getByIdOrThrow(task.instanceId)
+        val node = nodeService.getByIdOrThrow(task.nodeId)
+        // Schema comes from the instance-level snapshot (option C): once a flow is initiated,
+        // its form UX / validation is frozen against the snapshot taken at startFlow time, so
+        // later edits to the definition don't retro-change what approvers see.
+
+        return ApiResponse.success(
+            ApprovalFlowTaskFormViewVO(
+                taskId = task.id,
+                instanceId = instance.id,
+                nodeId = node.id,
+                nodeType = node.type,
+                definitionId = instance.definitionId,
+                formSchemaSnapshot = instance.formSchemaSnapshot,
+                nodeFormSchema = node.formSchema,
+                instanceFormData = instance.formData,
+            )
+        )
     }
 
     private fun resolveAssigneeId(scope: ResourceScope, userAuthentication: UserAuthentication): Long {

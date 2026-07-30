@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.parseObject
+import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
@@ -43,6 +44,14 @@ class ApprovalFlowEngineImpl(
             throw BusinessException("Flow definition is not published")
         }
 
+        // Decision 5: server-side revalidation before persisting instance.formData. The
+        // frontend's antd validation is a UX shortcut only — anyone can craft a raw HTTP
+        // request, so the engine is the last line of defense.
+        val formDataErrors = ApprovalFormSchemaValidator.validateFormData(definition.formSchema, formData)
+        if (formDataErrors.isNotEmpty()) {
+            throw BusinessException("Invalid initiate form data: ${formDataErrors.joinToString("; ")}")
+        }
+
         val version = definition.currentVersion
         val nodes = nodeService.findByDefinitionVersion(definitionId, version).toList()
         val startNode = nodes.firstOrNull { it.getRealType() == ApprovalFlowNodeType.START }
@@ -61,6 +70,11 @@ class ApprovalFlowEngineImpl(
             initiatorId = initiatorId,
             status = ApprovalFlowInstanceStatus.IN_PROGRESS.typeId,
             formData = formData,
+            // Snapshot the definition's form schema so later edits to the definition don't
+            // retro-alter what this instance's form/UI/validation looks like — see option C
+            // in the design record. Blank source stored as null for consistency with the
+            // "empty schema" tolerance elsewhere.
+            formSchemaSnapshot = definition.formSchema?.takeIf { it.isNotBlank() },
             latestNodeId = firstTargetNodeId
         ).apply { newEntity() }
 
@@ -114,6 +128,26 @@ class ApprovalFlowEngineImpl(
                 throw BusinessException("Approval instance is not in progress")
             }
 
+            // Decision 5: revalidate the diff against the schema + node overlay BEFORE
+            // persisting. This blocks operators from mutating fields that are readonly at
+            // this node or from writing values that violate schema constraints. Skipped when
+            // the caller didn't send a diff. Schema comes from the instance snapshot (option C):
+            // handlers of an old instance are still bound by the schema in force when the
+            // flow was initiated, even if the definition has been edited since.
+            if (!formData.isNullOrBlank()) {
+                val node = nodeService.getByIdOrThrow(task.nodeId)
+                val diffErrors = ApprovalFormSchemaValidator.validateTaskDiff(
+                    schemaJson = instance.formSchemaSnapshot,
+                    nodeOverlayJson = node.formSchema,
+                    diffJson = formData,
+                    isCcNode = node.getRealType() == ApprovalFlowNodeType.CC,
+                    isApprovalNode = node.getRealType() == ApprovalFlowNodeType.APPROVAL,
+                )
+                if (diffErrors.isNotEmpty()) {
+                    throw BusinessException("Invalid task form diff: ${diffErrors.joinToString("; ")}")
+                }
+            }
+
             task.status = if (approved) ApprovalFlowTaskStatus.APPROVED.typeId else ApprovalFlowTaskStatus.REJECTED.typeId
             task.comment = comment
             task.formData = formData
@@ -121,6 +155,11 @@ class ApprovalFlowEngineImpl(
                 task.onUpdate()
                 taskService.getRepository().save(task).awaitFirst()
             }
+
+            // Merge the per-task formData diff back onto the instance so downstream nodes and
+            // the CONDITION router see the latest values. Shallow merge is intentional: field
+            // keys are flat by contract (see ApprovalFieldSchema.key on the frontend).
+            mergeInstanceFormData(instance, formData)
 
             val token = tokenService.getByIdOrThrow(task.tokenId)
 
@@ -374,6 +413,25 @@ class ApprovalFlowEngineImpl(
                     taskService.getRepository().save(task newEntity false).awaitFirst()
                 }
             }
+    }
+
+    /**
+     * Merge the task-level formData diff onto the instance-level formData. A missing/blank diff
+     * is a no-op — approvers who don't touch the form leave the instance untouched.
+     */
+    private suspend fun mergeInstanceFormData(instance: ApprovalFlowInstanceEntity, diffJson: String?) {
+        if (diffJson.isNullOrBlank()) return
+        val diff = diffJson.parseObject<Map<String, Any?>>()
+        if (diff.isEmpty()) return
+        val current = instance.formData?.takeIf { it.isNotBlank() }
+            ?.parseObject<Map<String, Any?>>()
+            ?: emptyMap()
+        val merged = current.toMutableMap().apply { putAll(diff) }
+        instance.formData = merged.toJSONString()
+        instanceService.withUpdateEntityContext(instance) {
+            instance.onUpdate()
+            instanceService.getRepository().save(instance).awaitFirst()
+        }
     }
 
     private suspend fun updateLatestNodeId(instance: ApprovalFlowInstanceEntity, nodeId: Long) {

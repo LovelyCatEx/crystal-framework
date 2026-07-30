@@ -7,6 +7,22 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.13.1
+
+2026-07-30
+
+### Features
++ feat(approval): Add approval-flow form module with field definitions, groups, validation rules and node-level visibility overrides.
++ feat(approval): Add approval instance viewer and per-instance form schema snapshot.
+
+### Bug Fixes
++ fix(shared): Fix numeric strings not being coerced to Long during QueryNode → Criteria conversion.
+
+### Others
++ refactor(approval): Polish the editor right panel and form designer UX.
+
+---
+
 ## v1.13.0
 
 2026-07-29

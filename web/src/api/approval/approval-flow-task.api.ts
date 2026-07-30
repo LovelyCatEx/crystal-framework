@@ -4,8 +4,8 @@ import type {
     BaseManagerReadScopedDTO,
     BaseManagerUpdateDTO
 } from "@/types/api.types.ts";
-import {doPost} from "@/api/system-request.ts";
-import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.ts";
+import {doGet, doPost} from "@/api/system-request.ts";
+import type {ApprovalFlowTask, ApprovalFlowTaskFormViewVO} from "@/types/approval/approval-flow-task.types.ts";
 
 export interface ManagerCreateApprovalFlowTaskDTO {
     scope: number;
@@ -64,5 +64,12 @@ export async function queryMyApprovalFlowTasks(dto: ManagerReadApprovalFlowTaskD
         '/api/manager/approval-flow-task/my',
         dto,
         {'Content-Type': 'application/json'},
+    );
+}
+
+export async function getApprovalFlowTaskFormView(taskId: string) {
+    return doGet<ApprovalFlowTaskFormViewVO>(
+        '/api/manager/approval-flow-task/form-view',
+        {taskId},
     );
 }

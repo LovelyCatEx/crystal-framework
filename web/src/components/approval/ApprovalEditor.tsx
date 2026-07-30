@@ -1,9 +1,20 @@
 import {useSWRState} from "@/compositions/use-swr.ts";
 import type {ManagerUpdateApprovalFlowGraphDTO} from "@/api/approval/approval-flow-definition.api.ts";
 import {
+    ApprovalFlowDefinitionManagerController,
     getApprovalFlowDefinitionDetails,
-    updateApprovalFlowGraph
+    updateApprovalFlowGraph,
 } from "@/api/approval/approval-flow-definition.api.ts";
+import {ApprovalFormDesigner} from "@/components/approval/form/designer/ApprovalFormDesigner.tsx";
+import {NodeFormOverlayPanel} from "@/components/approval/form/designer/NodeFormOverlayPanel.tsx";
+import {ConditionNodeInspector} from "@/components/approval/form/designer/ConditionNodeInspector.tsx";
+import {ApprovalFormRenderer} from "@/components/approval/form/ApprovalFormRenderer.tsx";
+import type {ApprovalFormSchema} from "@/types/approval/approval-form-schema.types.ts";
+import {
+    mergeFieldOverrides,
+    parseFormSchema,
+    stringifyFormSchema,
+} from "@/utils/approval-form-utils.ts";
 import {useCreateReteBaseGraphEditor} from "@/rete/rete-editor.tsx";
 import {useRete} from "rete-react-plugin";
 import {
@@ -27,6 +38,7 @@ import {
     message,
     Modal,
     Select,
+    Tabs,
     Tag,
     theme,
     Tooltip,
@@ -126,6 +138,20 @@ export default function ApprovalEditor(props: {
     // unsaved node into one.
     const [selectedReteNodeId, setSelectedReteNodeId] = useState<string | null>(null);
 
+    // Form designer state. Owned by ApprovalEditor so switching to the Designer tab and
+    // then away doesn't lose in-progress edits. Persisted separately from the graph via
+    // ApprovalFlowDefinitionManagerController.update() (decision 3: definition-level schema
+    // does NOT go through update-graph).
+    const [formSchema, setFormSchema] = useState<ApprovalFormSchema | null>(null);
+    const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
+    const [savingFormSchema, setSavingFormSchema] = useState(false);
+    const [rightPanelTab, setRightPanelTab] = useState<string>('node');
+
+    useEffect(() => {
+        setFormSchema(parseFormSchema(definitionDetails?.definition.formSchema ?? null));
+        setSelectedFieldKey(null);
+    }, [definitionDetails?.definition.id, definitionDetails?.definition.formSchema]);
+
     const contextValueRef = useRef<ApprovalEditorContextValue>({
         scope: ResourceScope.SYSTEM,
         scopeId: '',
@@ -135,7 +161,7 @@ export default function ApprovalEditor(props: {
         scopeId: definitionDetails?.definition.scopeId ?? '',
     };
 
-    const {width: panelWidth, handleResizeStart} = useResizablePanel(25);
+    const {width: panelWidth, handleResizeStart} = useResizablePanel(28);
 
     const [ref, baseCtx] = useRete(
         useCreateReteBaseGraphEditor<
@@ -307,6 +333,76 @@ export default function ApprovalEditor(props: {
 
     const {mousePos, zoom} = useGraphViewport(baseCtx, ref);
 
+    const performSaveFormSchema = async () => {
+        if (!definitionDetails) return;
+        if (!formSchema) {
+            // Nothing configured yet — treat as clearing the schema (send empty).
+            setSavingFormSchema(true);
+            try {
+                await ApprovalFlowDefinitionManagerController.update({
+                    id: definitionDetails.definition.id,
+                    formSchema: '',
+                });
+                message.success(t('components.approvalFormDesigner.save.success'));
+                await mutateDefinitionDetails();
+            } catch {
+                message.error(t('components.approvalFormDesigner.save.failed'));
+            } finally {
+                setSavingFormSchema(false);
+            }
+            return;
+        }
+        // Refuse to save when any field has an invalid / duplicate key — mirrors the
+        // per-field guards in ApprovalFieldPropertyPanel so the user gets a single, clear
+        // error at the save boundary rather than silently persisting invalid schema.
+        const keys = new Set<string>();
+        for (const f of formSchema.fields) {
+            if (!f.key.trim() || keys.has(f.key)) {
+                message.error(t('components.approvalFormDesigner.save.hasInvalidFields'));
+                return;
+            }
+            keys.add(f.key);
+        }
+        setSavingFormSchema(true);
+        try {
+            await ApprovalFlowDefinitionManagerController.update({
+                id: definitionDetails.definition.id,
+                formSchema: stringifyFormSchema(formSchema),
+            });
+            message.success(t('components.approvalFormDesigner.save.success'));
+            await mutateDefinitionDetails();
+        } catch {
+            message.error(t('components.approvalFormDesigner.save.failed'));
+        } finally {
+            setSavingFormSchema(false);
+        }
+    };
+
+    /**
+     * User-facing save entry: guards the actual update behind an explicit confirm so the user
+     * understands the semantics (see design record option C: changes take effect for newly
+     * initiated instances only; in-flight instances keep their snapshot). No confirm when the
+     * definition currently has no schema at all — that's a first-time setup, not an edit.
+     */
+    const confirmAndSaveFormSchema = () => {
+        const hasExistingSchema = !!definitionDetails?.definition.formSchema;
+        if (!hasExistingSchema) {
+            void performSaveFormSchema();
+            return;
+        }
+        Modal.confirm({
+            title: t('components.approvalFormDesigner.save.confirmTitle'),
+            content: t('components.approvalFormDesigner.save.confirmContent'),
+            okText: t('components.approvalFormDesigner.save.confirmOk'),
+            cancelText: t('components.approvalFormDesigner.save.confirmCancel'),
+            onOk: () => performSaveFormSchema(),
+        });
+    };
+
+    const previewFields = formSchema
+        ? mergeFieldOverrides(formSchema, null, {nodeType: ApprovalFlowNodeType.START})
+        : [];
+
     return (
         <div className="w-full h-[100vh] flex flex-col">
             {/* Header */}
@@ -400,7 +496,7 @@ export default function ApprovalEditor(props: {
                     </div>
                 </div>
 
-                {/* Right Panel: Node Inspector (resizable) */}
+                {/* Right Panel: Tabs (Node / Form Designer / Preview), resizable */}
                 <div
                     className="relative border-l flex flex-row"
                     style={{ width: `${panelWidth}%`, minWidth: '20%', borderColor: token.colorBorder }}
@@ -410,21 +506,85 @@ export default function ApprovalEditor(props: {
                         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500/50 active:bg-blue-500/70 z-10"
                         onMouseDown={handleResizeStart}
                     />
-                    <div className="flex-1 p-4 overflow-y-auto">
-                    <NodeInspectorPanel
-                        key={selectedReteNodeId ?? ''}
-                        node={selectedNode}
-                        scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
-                        scopeId={definitionDetails?.definition.scopeId ?? ''}
-                        onNodeChange={(field, value) => {
-                            if (!ctx || !selectedReteNodeId) return;
-                            const reteNode = ctx.rete.editor.getNode(selectedReteNodeId);
-                            if (reteNode) {
-                                (reteNode.node as unknown as Record<string, unknown>)[field] = value;
-                                setSelectedNode({ ...reteNode.node });
-                            }
-                        }}
-                    />
+                    {/*
+                      * Split Tabs into "tab bar as selector" + "external scrollable container":
+                      * antd Tabs' `items[].children` renders inside `.ant-tabs-content-holder`
+                      * which does NOT participate in the outer flex column, so any inner
+                      * `overflow-y-auto` never receives a bounded height and can't scroll.
+                      * We render the tab bar only (items with `children: null`, and hide the
+                      * default holder via a tailwind arbitrary variant) and drive the content
+                      * area ourselves in the sibling flex-1 div below.
+                      */}
+                    <div className="flex-1 flex flex-col overflow-hidden pl-2 pr-2">
+                        <Tabs
+                            activeKey={rightPanelTab}
+                            onChange={setRightPanelTab}
+                            className="!px-3 !pt-2 !mb-0 [&_.ant-tabs-content-holder]:hidden"
+                            items={[
+                                {key: 'node', label: t('components.approvalFormDesigner.tabs.node'), children: null},
+                                {key: 'designer', label: t('components.approvalFormDesigner.tabs.designer'), children: null},
+                                {key: 'preview', label: t('components.approvalFormDesigner.tabs.preview'), children: null},
+                            ]}
+                        />
+                        <div className="flex-1 overflow-y-auto p-3">
+                            {rightPanelTab === 'node' && (
+                                <NodeInspectorPanel
+                                    key={selectedReteNodeId ?? ''}
+                                    node={selectedNode}
+                                    scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
+                                    scopeId={definitionDetails?.definition.scopeId ?? ''}
+                                    definitionFormSchema={formSchema}
+                                    graphNodes={ctx ? ctx.rete.editor.getNodes().map(n => n.node) : []}
+                                    onNodeChange={(field, value) => {
+                                        if (!ctx || !selectedReteNodeId) return;
+                                        const reteNode = ctx.rete.editor.getNode(selectedReteNodeId);
+                                        if (reteNode) {
+                                            (reteNode.node as unknown as Record<string, unknown>)[field] = value;
+                                            setSelectedNode({ ...reteNode.node });
+                                        }
+                                    }}
+                                />
+                            )}
+                            {rightPanelTab === 'designer' && (
+                                <ApprovalFormDesigner
+                                    schema={formSchema}
+                                    selectedKey={selectedFieldKey}
+                                    onSelectedKeyChange={setSelectedFieldKey}
+                                    onSchemaChange={setFormSchema}
+                                    headerRight={(
+                                        <Button
+                                            type="primary"
+                                            icon={<SaveOutlined/>}
+                                            loading={savingFormSchema}
+                                            onClick={confirmAndSaveFormSchema}
+                                        >
+                                            {t('components.approvalFormDesigner.save.button')}
+                                        </Button>
+                                    )}
+                                />
+                            )}
+                            {rightPanelTab === 'preview' && (
+                                <>
+                                    <Typography.Title level={5} className="!mb-0">
+                                        {t('components.approvalFormDesigner.preview.title')}
+                                    </Typography.Title>
+                                    <Typography.Text type="secondary" className="text-xs">
+                                        {t('components.approvalFormDesigner.preview.subtitle')}
+                                    </Typography.Text>
+                                    <div className="mt-3">
+                                        {previewFields.length === 0 ? (
+                                            <Empty description={t('components.approvalFormDesigner.preview.empty')}/>
+                                        ) : (
+                                            <ApprovalFormRenderer
+                                                fields={previewFields}
+                                                groups={formSchema?.groups}
+                                                readonly
+                                            />
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -432,10 +592,12 @@ export default function ApprovalEditor(props: {
     );
 }
 
-function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
+function NodeInspectorPanel({ node, scope, scopeId, definitionFormSchema, graphNodes, onNodeChange }: {
     node: ApprovalFlowNode | null;
     scope: number;
     scopeId: string;
+    definitionFormSchema: ApprovalFormSchema | null;
+    graphNodes: ApprovalFlowNode[];
     onNodeChange: (field: keyof ApprovalFlowNode, value: unknown) => void;
 }) {
     const { t } = useTranslation();
@@ -465,15 +627,12 @@ function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
                 {t('components.approvalEditor.inspector.title')}
             </Typography.Title>
 
-            <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('components.approvalEditor.inspector.id')}>
-                    <Typography.Text copyable className="font-mono text-xs">
+            <Form layout="vertical" className="!mb-0">
+                <Form.Item label={t('components.approvalEditor.inspector.id')}>
+                    <Typography.Text copyable className="font-mono">
                         {node.id || t('components.approvalEditor.inspector.newNode')}
                     </Typography.Text>
-                </Descriptions.Item>
-            </Descriptions>
-
-            <Form layout="vertical" className="!mb-0">
+                </Form.Item>
                 <Form.Item label={t('components.approvalEditor.inspector.nodeKey')}>
                     <Input
                         value={node.nodeKey}
@@ -491,8 +650,8 @@ function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
                 <Form.Item label={t('components.approvalEditor.inspector.type')}>
                     <Select
                         value={node.type}
+                        disabled
                         options={nodeTypeOptions}
-                        onChange={(value) => onNodeChange('type', value)}
                     />
                 </Form.Item>
 
@@ -506,6 +665,30 @@ function NodeInspectorPanel({ node, scope, scopeId, onNodeChange }: {
                     />
                 )}
             </Form>
+
+            {/* Form-field overlay: only meaningful for APPROVAL / CC nodes (the two node types
+                that render a form to their operator). Changes are pushed to node.formSchema via
+                onNodeChange and persisted along with the graph on Save. */}
+            {(node.type === ApprovalFlowNodeType.APPROVAL || node.type === ApprovalFlowNodeType.CC) && (
+                <NodeFormOverlayPanel
+                    nodeType={node.type}
+                    definitionFormSchema={definitionFormSchema}
+                    nodeFormSchemaRaw={node.formSchema}
+                    onOverlayChange={(nextRaw) => onNodeChange('formSchema', nextRaw || null)}
+                />
+            )}
+
+            {/* CONDITION inspector: edits `node.config` (routes + condition tree). Target dropdown
+                lists all saved nodes; unsaved nodes surface as a warning banner so the user knows
+                to Save the graph before pointing a route at them. */}
+            {node.type === ApprovalFlowNodeType.CONDITION && (
+                <ConditionNodeInspector
+                    node={node}
+                    definitionFormSchema={definitionFormSchema}
+                    graphNodes={graphNodes}
+                    onConfigChange={(nextConfigJson) => onNodeChange('config', nextConfigJson)}
+                />
+            )}
 
             <Collapse
                 items={[

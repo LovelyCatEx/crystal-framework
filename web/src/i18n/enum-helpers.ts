@@ -112,3 +112,7 @@ export function getApprovalFlowTaskStatus(status: number): string {
 export function getApprovalFlowRecordAction(action: number): string {
     return translateEnum('approvalFlowRecordAction', action);
 }
+
+export function getApprovalFieldType(type: string): string {
+    return translateEnum('approvalFieldType', type);
+}

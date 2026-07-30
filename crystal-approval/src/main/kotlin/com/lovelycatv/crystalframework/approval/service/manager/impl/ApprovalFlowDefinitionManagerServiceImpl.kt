@@ -10,6 +10,7 @@ import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowDefinitio
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowEdgeRepository
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowNodeRepository
 import com.lovelycatv.crystalframework.approval.service.ApprovalFlowGraphValidator
+import com.lovelycatv.crystalframework.approval.service.ApprovalFormSchemaValidator
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -44,6 +45,7 @@ class ApprovalFlowDefinitionManagerServiceImpl(
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateApprovalFlowDefinitionDTO): ApprovalFlowDefinitionEntity {
+        validateFormSchemaOrThrow(dto.formSchema)
         return getRepository().save(
             ApprovalFlowDefinitionEntity(
                 id = snowIdGenerator.nextId(),
@@ -60,23 +62,38 @@ class ApprovalFlowDefinitionManagerServiceImpl(
         dto: ManagerUpdateApprovalFlowDefinitionDTO,
         original: ApprovalFlowDefinitionEntity
     ): ApprovalFlowDefinitionEntity {
+        // Empty string is treated as "clear schema" — normalize before the validator sees it so
+        // "clear" and "leave alone" don't both surface as validation-worthy inputs.
+        if (dto.formSchema != null) {
+            val normalized = if (dto.formSchema!!.isBlank()) null else dto.formSchema
+            validateFormSchemaOrThrow(normalized)
+        }
         return original.apply {
             if (dto.name != null) this.name = dto.name!!
             if (dto.description != null) this.description = dto.description
             if (dto.status != null) this.status = dto.status!!
-            if (dto.formSchema != null) this.formSchema = dto.formSchema
+            if (dto.formSchema != null) this.formSchema = if (dto.formSchema!!.isBlank()) null else dto.formSchema
+        }
+    }
+
+    private fun validateFormSchemaOrThrow(schemaJson: String?) {
+        val errors = ApprovalFormSchemaValidator.validateSchema(schemaJson)
+        if (errors.isNotEmpty()) {
+            throw BusinessException("Invalid form schema: ${errors.joinToString("; ")}")
         }
     }
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> {
-        val validationErrors = ApprovalFlowGraphValidator.validate(dto)
+        // Fetch definition first so we can feed its formSchema into rules 37-40. If it doesn't
+        // exist we surface that as a definitional error rather than mixing it with graph rules.
+        val definition = getByIdOrNull(dto.definitionId)
+            ?: throw BusinessException("Definition not found")
+
+        val validationErrors = ApprovalFlowGraphValidator.validate(dto, definition.formSchema)
         if (validationErrors.isNotEmpty()) {
             return validationErrors
         }
-
-        val definition = getByIdOrNull(dto.definitionId)
-            ?: throw BusinessException("Definition not found")
 
         val newVersion = definition.currentVersion + 1
 

@@ -108,6 +108,7 @@ class ApprovalFlowInstanceManagerServiceImpl(
             edges = edges,
             nodeStates = nodeStates,
             records = records,
+            tasks = tasks,
         )
     }
 

@@ -9,6 +9,8 @@ import {ApprovalFlowInstanceStatus, ResourceScope} from "@/types/approval/approv
 import {getApprovalFlowInstanceStatus} from "@/i18n/enum-helpers.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
+import {ApprovalFlowViewerButton} from "@/components/approval/viewer/ApprovalFlowViewerOverlay.tsx";
+import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
 
 const STATUS_FILTER_ALL = '-1';
 
@@ -72,10 +74,12 @@ export default function MyTenantApprovalFlowInstanceManagerPage() {
                 subtitle=""
                 showActionBar={false}
                 readonlyMode
-                showRowActions={false}
                 columns={columns}
                 queryParamsSync={syncToUrl}
                 initialQueryValues={initialQueryValues}
+                tableRowActionsRender={(record: ApprovalFlowInstance) => (
+                    <ApprovalFlowViewerButton instanceId={record.id}/>
+                )}
                 filterableFields={[
                     {
                         field: 'status',

@@ -5,15 +5,27 @@ import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowTaskTableColumns} from "@/components/columns/ApprovalFlowTaskEntityColumns.tsx";
 import {
+    getApprovalFlowTaskFormView,
     handleApprovalFlowTask,
     queryMyApprovalFlowTasks,
 } from "@/api/approval/approval-flow-task.api.ts";
 import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.ts";
-import {ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
+import {ApprovalFlowNodeType, ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowTaskStatus} from "@/i18n/enum-helpers.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import {ApprovalFlowViewerButton} from "@/components/approval/viewer/ApprovalFlowViewerOverlay.tsx";
+import {
+    ApprovalFormRenderer,
+    type ApprovalFormRendererRef,
+} from "@/components/approval/form/ApprovalFormRenderer.tsx";
+import {
+    diffFormData,
+    mergeFieldOverrides,
+    parseFormSchema,
+    parseNodeOverlay,
+} from "@/utils/approval-form-utils.ts";
+import type {MergedFieldSchema} from "@/types/approval/approval-form-schema.types.ts";
 
 const SYSTEM_SCOPE_ID = '0';
 const STATUS_FILTER_ALL = '-1';
@@ -45,9 +57,57 @@ export default function ApprovalTaskHandlePage() {
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    const [formLoading, setFormLoading] = useState(false);
+    const [formLoadFailed, setFormLoadFailed] = useState(false);
+    const [mergedFields, setMergedFields] = useState<MergedFieldSchema[] | null>(null);
+    const [formGroups, setFormGroups] = useState<Array<{key: string; label: string}> | undefined>(undefined);
+    const [baselineFormData, setBaselineFormData] = useState<Record<string, unknown>>({});
+    const formRef = useRef<ApprovalFormRendererRef | null>(null);
+
     useEffect(() => {
         pageRef.current?.refreshData({resetPage: true});
     }, [activeScope, statusFilter, tenantId]);
+
+    useEffect(() => {
+        if (!handlingTask) {
+            setMergedFields(null);
+            setFormGroups(undefined);
+            setBaselineFormData({});
+            setFormLoadFailed(false);
+            return;
+        }
+        setFormLoading(true);
+        setFormLoadFailed(false);
+        (async () => {
+            try {
+                const resp = await getApprovalFlowTaskFormView(handlingTask.id);
+                const view = resp.data;
+                const schema = parseFormSchema(view?.formSchemaSnapshot ?? null);
+                const overlay = parseNodeOverlay(view?.nodeFormSchema ?? null);
+                const nodeType = (view?.nodeType ?? ApprovalFlowNodeType.APPROVAL) as ApprovalFlowNodeType;
+                if (!schema || schema.fields.length === 0) {
+                    setMergedFields(null);
+                    setFormGroups(undefined);
+                    setBaselineFormData({});
+                    return;
+                }
+                const merged = mergeFieldOverrides(schema, overlay, {nodeType});
+                setMergedFields(merged);
+                setFormGroups(schema.groups);
+                const parsedBaseline: Record<string, unknown> = view?.instanceFormData
+                    ? JSON.parse(view.instanceFormData) as Record<string, unknown>
+                    : {};
+                setBaselineFormData(parsedBaseline);
+            } catch {
+                setFormLoadFailed(true);
+                setMergedFields(null);
+                setFormGroups(undefined);
+                setBaselineFormData({});
+            } finally {
+                setFormLoading(false);
+            }
+        })();
+    }, [handlingTask]);
 
     const tabItems = useMemo(
         () => [
@@ -88,10 +148,19 @@ export default function ApprovalTaskHandlePage() {
         if (!handlingTask) return;
         setSubmitting(true);
         try {
+            let formDataPayload: string | undefined;
+            if (mergedFields && mergedFields.length > 0 && formRef.current) {
+                const values = await formRef.current.validate();
+                const diff = diffFormData(baselineFormData, values);
+                if (Object.keys(diff).length > 0) {
+                    formDataPayload = JSON.stringify(diff);
+                }
+            }
             await handleApprovalFlowTask({
                 taskId: handlingTask.id,
                 approved,
                 comment: comment.trim() || undefined,
+                formData: formDataPayload,
             });
             void message.success(t('pages.approvalTaskHandle.modal.success'));
             setHandlingTask(null);
@@ -193,8 +262,23 @@ export default function ApprovalTaskHandlePage() {
                 confirmLoading={submitting}
                 onCancel={() => setHandlingTask(null)}
                 destroyOnHidden
+                width={mergedFields && mergedFields.length > 0 ? 640 : undefined}
             >
                 <div className="flex flex-col gap-3 py-2">
+                    {formLoading ? (
+                        <div className="flex justify-center items-center py-8">
+                            <Spin/>
+                        </div>
+                    ) : formLoadFailed ? (
+                        <Empty description={t('pages.approvalTaskHandle.modal.formLoadFailed')}/>
+                    ) : mergedFields && mergedFields.length > 0 ? (
+                        <ApprovalFormRenderer
+                            ref={formRef}
+                            fields={mergedFields}
+                            groups={formGroups}
+                            initialValues={baselineFormData}
+                        />
+                    ) : null}
                     <span>{t('pages.approvalTaskHandle.modal.comment')}</span>
                     <Input.TextArea
                         rows={3}
