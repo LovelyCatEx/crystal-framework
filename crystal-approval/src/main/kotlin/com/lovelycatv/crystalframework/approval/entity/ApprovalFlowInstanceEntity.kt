@@ -25,6 +25,15 @@ class ApprovalFlowInstanceEntity(
     var status: Int = ApprovalFlowInstanceStatus.IN_PROGRESS.typeId,
     @Column("form_data")
     var formData: String? = null,
+    /**
+     * A per-instance snapshot of `ApprovalFlowDefinitionEntity.formSchema` taken at [startFlow]
+     * time. This is the authoritative source for the instance's form UI, task validation, and
+     * viewer rendering — decoupled from live edits made to the definition after the instance
+     * started. See `.claude/research/approval-form-design-decisions.md` (option C) for the
+     * decision behind self-contained snapshots vs shared-mutable schema.
+     */
+    @Column("form_schema_snapshot")
+    var formSchemaSnapshot: String? = null,
     @Column("latest_node_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
     var latestNodeId: Long = 0,

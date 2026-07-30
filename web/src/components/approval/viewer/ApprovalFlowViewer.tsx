@@ -57,6 +57,7 @@ export default function ApprovalFlowViewer(props: {
 
     const [ctx, setCtx] = useState<ApprovalFlowGraphEditorContext | null>(null);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+    const [rightPanelTab, setRightPanelTab] = useState<string>('records');
 
     // Editor context (scope / scopeId) — ref-updated so rete internals don't stale-read
     const editorContextRef = useRef<ApprovalEditorContextValue>({
@@ -223,35 +224,37 @@ export default function ApprovalFlowViewer(props: {
                         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500/50 active:bg-blue-500/70 z-10"
                         onMouseDown={handleResizeStart}
                     />
+                    {/*
+                      * Same pattern as ApprovalEditor: antd Tabs' internal content pane doesn't
+                      * participate in the outer flex column, so an inner `overflow-y-auto` never
+                      * gets a bounded height. Render the tab bar as a pure selector and drive the
+                      * content area ourselves in the sibling flex-1 div below.
+                      */}
                     {details ? (
-                        <Tabs
-                            className="flex-1 !px-3 !pt-2 overflow-hidden"
-                            items={[
-                                {
-                                    key: 'records',
-                                    label: t('components.approvalFlowViewer.tabs.records'),
-                                    children: (
-                                        <div className="p-1 overflow-y-auto">
-                                            <ApprovalNodeRecordsPanel
-                                                records={details.records}
-                                                selectedNodeId={selectedNodeId}
-                                                nodes={details.nodes}
-                                                scope={details.instance.scope}
-                                            />
-                                        </div>
-                                    ),
-                                },
-                                {
-                                    key: 'form',
-                                    label: t('components.approvalFlowViewer.tabs.form'),
-                                    children: (
-                                        <div className="p-1 overflow-y-auto">
-                                            <ApprovalFlowFormPanel details={details}/>
-                                        </div>
-                                    ),
-                                },
-                            ]}
-                        />
+                        <>
+                            <Tabs
+                                activeKey={rightPanelTab}
+                                onChange={setRightPanelTab}
+                                className="!px-3 !pt-2 !mb-0 [&_.ant-tabs-content-holder]:hidden"
+                                items={[
+                                    {key: 'records', label: t('components.approvalFlowViewer.tabs.records'), children: null},
+                                    {key: 'form', label: t('components.approvalFlowViewer.tabs.form'), children: null},
+                                ]}
+                            />
+                            <div className="flex-1 overflow-y-auto p-4">
+                                {rightPanelTab === 'records' && (
+                                    <ApprovalNodeRecordsPanel
+                                        records={details.records}
+                                        selectedNodeId={selectedNodeId}
+                                        nodes={details.nodes}
+                                        scope={details.instance.scope}
+                                    />
+                                )}
+                                {rightPanelTab === 'form' && (
+                                    <ApprovalFlowFormPanel details={details}/>
+                                )}
+                            </div>
+                        </>
                     ) : (
                         <div className="flex-1 p-4 overflow-y-auto">
                             <Empty description={t('components.approvalFlowViewer.records.empty')}/>

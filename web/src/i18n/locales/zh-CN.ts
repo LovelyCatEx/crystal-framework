@@ -2829,7 +2829,11 @@ export const zhCN: I18nRules = {
         button: '保存表单结构',
         success: '表单结构保存成功',
         failed: '保存失败',
-        hasInvalidFields: '存在无效字段 Key，无法保存'
+        hasInvalidFields: '存在无效字段 Key，无法保存',
+        confirmTitle: '确认保存表单结构？',
+        confirmContent: '保存后的表单仅对新发起的审批生效。已发起的审批保留发起时的表单结构，不受影响。',
+        confirmOk: '保存',
+        confirmCancel: '取消'
       }
     },
     addressPicker: {

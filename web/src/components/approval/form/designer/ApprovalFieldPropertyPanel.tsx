@@ -304,15 +304,15 @@ function OptionsEditor({options, onChange, title, addLabel, deleteLabel}: Option
                 <div key={i} className="flex items-center gap-1">
                     <Input
                         size="small"
-                        placeholder="value"
-                        value={opt.value}
-                        onChange={(e) => patchAt(i, {value: e.target.value})}
-                    />
-                    <Input
-                        size="small"
                         placeholder="label"
                         value={opt.label}
                         onChange={(e) => patchAt(i, {label: e.target.value})}
+                    />
+                    <Input
+                        size="small"
+                        placeholder="value"
+                        value={opt.value}
+                        onChange={(e) => patchAt(i, {value: e.target.value})}
                     />
                     <Button
                         type="text"

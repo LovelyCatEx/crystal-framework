@@ -333,7 +333,7 @@ export default function ApprovalEditor(props: {
 
     const {mousePos, zoom} = useGraphViewport(baseCtx, ref);
 
-    const saveFormSchema = async () => {
+    const performSaveFormSchema = async () => {
         if (!definitionDetails) return;
         if (!formSchema) {
             // Nothing configured yet — treat as clearing the schema (send empty).
@@ -376,6 +376,27 @@ export default function ApprovalEditor(props: {
         } finally {
             setSavingFormSchema(false);
         }
+    };
+
+    /**
+     * User-facing save entry: guards the actual update behind an explicit confirm so the user
+     * understands the semantics (see design record option C: changes take effect for newly
+     * initiated instances only; in-flight instances keep their snapshot). No confirm when the
+     * definition currently has no schema at all — that's a first-time setup, not an edit.
+     */
+    const confirmAndSaveFormSchema = () => {
+        const hasExistingSchema = !!definitionDetails?.definition.formSchema;
+        if (!hasExistingSchema) {
+            void performSaveFormSchema();
+            return;
+        }
+        Modal.confirm({
+            title: t('components.approvalFormDesigner.save.confirmTitle'),
+            content: t('components.approvalFormDesigner.save.confirmContent'),
+            okText: t('components.approvalFormDesigner.save.confirmOk'),
+            cancelText: t('components.approvalFormDesigner.save.confirmCancel'),
+            onOk: () => performSaveFormSchema(),
+        });
     };
 
     const previewFields = formSchema
@@ -485,87 +506,85 @@ export default function ApprovalEditor(props: {
                         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500/50 active:bg-blue-500/70 z-10"
                         onMouseDown={handleResizeStart}
                     />
+                    {/*
+                      * Split Tabs into "tab bar as selector" + "external scrollable container":
+                      * antd Tabs' `items[].children` renders inside `.ant-tabs-content-holder`
+                      * which does NOT participate in the outer flex column, so any inner
+                      * `overflow-y-auto` never receives a bounded height and can't scroll.
+                      * We render the tab bar only (items with `children: null`, and hide the
+                      * default holder via a tailwind arbitrary variant) and drive the content
+                      * area ourselves in the sibling flex-1 div below.
+                      */}
                     <div className="flex-1 flex flex-col overflow-hidden">
                         <Tabs
                             activeKey={rightPanelTab}
                             onChange={setRightPanelTab}
-                            className="!px-3 !pt-2"
+                            className="!px-3 !pt-2 !mb-0 [&_.ant-tabs-content-holder]:hidden"
                             items={[
-                                {
-                                    key: 'node',
-                                    label: t('components.approvalFormDesigner.tabs.node'),
-                                    children: (
-                                        <div className="p-1 overflow-y-auto">
-                                            <NodeInspectorPanel
-                                                key={selectedReteNodeId ?? ''}
-                                                node={selectedNode}
-                                                scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
-                                                scopeId={definitionDetails?.definition.scopeId ?? ''}
-                                                definitionFormSchema={formSchema}
-                                                graphNodes={ctx ? ctx.rete.editor.getNodes().map(n => n.node) : []}
-                                                onNodeChange={(field, value) => {
-                                                    if (!ctx || !selectedReteNodeId) return;
-                                                    const reteNode = ctx.rete.editor.getNode(selectedReteNodeId);
-                                                    if (reteNode) {
-                                                        (reteNode.node as unknown as Record<string, unknown>)[field] = value;
-                                                        setSelectedNode({ ...reteNode.node });
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    ),
-                                },
-                                {
-                                    key: 'designer',
-                                    label: t('components.approvalFormDesigner.tabs.designer'),
-                                    children: (
-                                        <div className="p-1 overflow-y-auto">
-                                            <div className="flex justify-end mb-3">
-                                                <Button
-                                                    type="primary"
-                                                    icon={<SaveOutlined/>}
-                                                    loading={savingFormSchema}
-                                                    onClick={saveFormSchema}
-                                                >
-                                                    {t('components.approvalFormDesigner.save.button')}
-                                                </Button>
-                                            </div>
-                                            <ApprovalFormDesigner
-                                                schema={formSchema}
-                                                selectedKey={selectedFieldKey}
-                                                onSelectedKeyChange={setSelectedFieldKey}
-                                                onSchemaChange={setFormSchema}
-                                            />
-                                        </div>
-                                    ),
-                                },
-                                {
-                                    key: 'preview',
-                                    label: t('components.approvalFormDesigner.tabs.preview'),
-                                    children: (
-                                        <div className="p-1 overflow-y-auto">
-                                            <Typography.Title level={5} className="!mb-0">
-                                                {t('components.approvalFormDesigner.preview.title')}
-                                            </Typography.Title>
-                                            <Typography.Text type="secondary" className="text-xs">
-                                                {t('components.approvalFormDesigner.preview.subtitle')}
-                                            </Typography.Text>
-                                            <div className="mt-3">
-                                                {previewFields.length === 0 ? (
-                                                    <Empty description={t('components.approvalFormDesigner.preview.empty')}/>
-                                                ) : (
-                                                    <ApprovalFormRenderer
-                                                        fields={previewFields}
-                                                        groups={formSchema?.groups}
-                                                        readonly
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    ),
-                                },
+                                {key: 'node', label: t('components.approvalFormDesigner.tabs.node'), children: null},
+                                {key: 'designer', label: t('components.approvalFormDesigner.tabs.designer'), children: null},
+                                {key: 'preview', label: t('components.approvalFormDesigner.tabs.preview'), children: null},
                             ]}
                         />
+                        <div className="flex-1 overflow-y-auto p-3">
+                            {rightPanelTab === 'node' && (
+                                <NodeInspectorPanel
+                                    key={selectedReteNodeId ?? ''}
+                                    node={selectedNode}
+                                    scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
+                                    scopeId={definitionDetails?.definition.scopeId ?? ''}
+                                    definitionFormSchema={formSchema}
+                                    graphNodes={ctx ? ctx.rete.editor.getNodes().map(n => n.node) : []}
+                                    onNodeChange={(field, value) => {
+                                        if (!ctx || !selectedReteNodeId) return;
+                                        const reteNode = ctx.rete.editor.getNode(selectedReteNodeId);
+                                        if (reteNode) {
+                                            (reteNode.node as unknown as Record<string, unknown>)[field] = value;
+                                            setSelectedNode({ ...reteNode.node });
+                                        }
+                                    }}
+                                />
+                            )}
+                            {rightPanelTab === 'designer' && (
+                                <ApprovalFormDesigner
+                                    schema={formSchema}
+                                    selectedKey={selectedFieldKey}
+                                    onSelectedKeyChange={setSelectedFieldKey}
+                                    onSchemaChange={setFormSchema}
+                                    headerRight={(
+                                        <Button
+                                            type="primary"
+                                            icon={<SaveOutlined/>}
+                                            loading={savingFormSchema}
+                                            onClick={confirmAndSaveFormSchema}
+                                        >
+                                            {t('components.approvalFormDesigner.save.button')}
+                                        </Button>
+                                    )}
+                                />
+                            )}
+                            {rightPanelTab === 'preview' && (
+                                <>
+                                    <Typography.Title level={5} className="!mb-0">
+                                        {t('components.approvalFormDesigner.preview.title')}
+                                    </Typography.Title>
+                                    <Typography.Text type="secondary" className="text-xs">
+                                        {t('components.approvalFormDesigner.preview.subtitle')}
+                                    </Typography.Text>
+                                    <div className="mt-3">
+                                        {previewFields.length === 0 ? (
+                                            <Empty description={t('components.approvalFormDesigner.preview.empty')}/>
+                                        ) : (
+                                            <ApprovalFormRenderer
+                                                fields={previewFields}
+                                                groups={formSchema?.groups}
+                                                readonly
+                                            />
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

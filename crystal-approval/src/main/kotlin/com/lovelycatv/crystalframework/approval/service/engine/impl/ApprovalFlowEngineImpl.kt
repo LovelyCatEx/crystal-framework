@@ -70,6 +70,11 @@ class ApprovalFlowEngineImpl(
             initiatorId = initiatorId,
             status = ApprovalFlowInstanceStatus.IN_PROGRESS.typeId,
             formData = formData,
+            // Snapshot the definition's form schema so later edits to the definition don't
+            // retro-alter what this instance's form/UI/validation looks like — see option C
+            // in the design record. Blank source stored as null for consistency with the
+            // "empty schema" tolerance elsewhere.
+            formSchemaSnapshot = definition.formSchema?.takeIf { it.isNotBlank() },
             latestNodeId = firstTargetNodeId
         ).apply { newEntity() }
 
@@ -126,11 +131,13 @@ class ApprovalFlowEngineImpl(
             // Decision 5: revalidate the diff against the schema + node overlay BEFORE
             // persisting. This blocks operators from mutating fields that are readonly at
             // this node or from writing values that violate schema constraints. Skipped when
-            // the caller didn't send a diff.
+            // the caller didn't send a diff. Schema comes from the instance snapshot (option C):
+            // handlers of an old instance are still bound by the schema in force when the
+            // flow was initiated, even if the definition has been edited since.
             if (!formData.isNullOrBlank()) {
                 val node = nodeService.getByIdOrThrow(task.nodeId)
                 val diffErrors = ApprovalFormSchemaValidator.validateTaskDiff(
-                    schemaJson = definitionService.getByIdOrThrow(instance.definitionId).formSchema,
+                    schemaJson = instance.formSchemaSnapshot,
                     nodeOverlayJson = node.formSchema,
                     diffJson = formData,
                     isCcNode = node.getRealType() == ApprovalFlowNodeType.CC,

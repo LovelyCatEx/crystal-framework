@@ -36,11 +36,14 @@ export function ApprovalFlowFormPanel({details}: ApprovalFlowFormPanelProps) {
     const {t} = useTranslation();
     const {instance, records, tasks} = details;
 
-    // Definition-level schema drives snapshot rendering. Node overlays deliberately do NOT
-    // apply here — the viewer shows the instance's data with its authoring shape, not the
-    // reader's per-node view of it. Definition.formSchema is used verbatim; the "not pinned
-    // to instance.definitionVersion" caveat carries over from M4's form-view endpoint.
-    const schema = useMemo(() => parseFormSchema(details.definition.formSchema), [details.definition]);
+    // Instance-level snapshot drives snapshot rendering (design record option C). Falls back
+    // to the current definition schema only for legacy instances persisted before the snapshot
+    // column existed. Node overlays deliberately do NOT apply here — the viewer shows the
+    // instance's data with its authoring shape, not the reader's per-node view of it.
+    const schema = useMemo(
+        () => parseFormSchema(instance.formSchemaSnapshot ?? details.definition.formSchema),
+        [instance.formSchemaSnapshot, details.definition],
+    );
 
     const snapshotFields = useMemo<MergedFieldSchema[]>(() => {
         if (!schema) return [];

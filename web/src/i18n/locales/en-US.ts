@@ -2832,7 +2832,11 @@ export const enUS: I18nRules = {
         button: 'Save Form Schema',
         success: 'Form schema saved',
         failed: 'Failed to save form schema',
-        hasInvalidFields: 'Cannot save: some fields have invalid keys.'
+        hasInvalidFields: 'Cannot save: some fields have invalid keys.',
+        confirmTitle: 'Save form schema?',
+        confirmContent: 'The updated schema takes effect for newly initiated flows. In-flight approvals keep the schema they were initiated with and are not affected.',
+        confirmOk: 'Save',
+        confirmCancel: 'Cancel'
       }
     },
     addressPicker: {

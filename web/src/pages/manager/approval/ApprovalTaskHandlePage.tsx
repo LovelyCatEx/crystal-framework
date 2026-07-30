@@ -82,7 +82,7 @@ export default function ApprovalTaskHandlePage() {
             try {
                 const resp = await getApprovalFlowTaskFormView(handlingTask.id);
                 const view = resp.data;
-                const schema = parseFormSchema(view?.definitionFormSchema ?? null);
+                const schema = parseFormSchema(view?.formSchemaSnapshot ?? null);
                 const overlay = parseNodeOverlay(view?.nodeFormSchema ?? null);
                 const nodeType = (view?.nodeType ?? ApprovalFlowNodeType.APPROVAL) as ApprovalFlowNodeType;
                 if (!schema || schema.fields.length === 0) {

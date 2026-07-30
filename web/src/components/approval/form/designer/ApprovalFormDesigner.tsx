@@ -25,6 +25,11 @@ export interface ApprovalFormDesignerProps {
      * `ApprovalFlowDefinitionManagerController.update({ id, formSchema })` (decision 3).
      */
     onSchemaChange: (schema: ApprovalFormSchema) => void;
+    /**
+     * Optional right-hand-side content in the header row (e.g. a Save button). Placed inline
+     * with the title/subtitle so parents don't need a separate row for their action affordance.
+     */
+    headerRight?: React.ReactNode;
 }
 
 const DEFAULT_KEY_PREFIX = 'field';
@@ -57,7 +62,7 @@ function computeInvalidKeys(fields: ApprovalFieldSchema[]): Set<string> {
 }
 
 export function ApprovalFormDesigner(props: ApprovalFormDesignerProps) {
-    const {schema, selectedKey, onSelectedKeyChange, onSchemaChange} = props;
+    const {schema, selectedKey, onSelectedKeyChange, onSchemaChange, headerRight} = props;
     const {t} = useTranslation();
 
     const effectiveSchema: ApprovalFormSchema = schema ?? {
@@ -117,13 +122,16 @@ export function ApprovalFormDesigner(props: ApprovalFormDesignerProps) {
 
     return (
         <div className="flex flex-col gap-3">
-            <div>
-                <Typography.Title level={5} className="!mb-0">
-                    {t('components.approvalFormDesigner.title')}
-                </Typography.Title>
-                <Typography.Text type="secondary" className="text-xs">
-                    {t('components.approvalFormDesigner.subtitle')}
-                </Typography.Text>
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <Typography.Title level={5} className="!mb-0">
+                        {t('components.approvalFormDesigner.title')}
+                    </Typography.Title>
+                    <Typography.Text type="secondary" className="text-xs">
+                        {t('components.approvalFormDesigner.subtitle')}
+                    </Typography.Text>
+                </div>
+                {headerRight && <div className="shrink-0">{headerRight}</div>}
             </div>
 
             <ApprovalFormFieldList

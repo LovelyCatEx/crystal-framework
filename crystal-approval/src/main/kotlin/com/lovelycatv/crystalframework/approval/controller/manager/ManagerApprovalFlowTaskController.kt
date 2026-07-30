@@ -166,10 +166,9 @@ class ManagerApprovalFlowTaskController(
 
         val instance = instanceService.getByIdOrThrow(task.instanceId)
         val node = nodeService.getByIdOrThrow(task.nodeId)
-        // definition.formSchema is NOT pinned to instance.definitionVersion (unlike nodes/edges,
-        // which are copied per version). Serving the current definition-level schema mirrors the
-        // initiator's read path in the frontend initiate page and is documented as a known limit.
-        val definition = definitionService.getByIdOrThrow(instance.definitionId)
+        // Schema comes from the instance-level snapshot (option C): once a flow is initiated,
+        // its form UX / validation is frozen against the snapshot taken at startFlow time, so
+        // later edits to the definition don't retro-change what approvers see.
 
         return ApiResponse.success(
             ApprovalFlowTaskFormViewVO(
@@ -178,7 +177,7 @@ class ManagerApprovalFlowTaskController(
                 nodeId = node.id,
                 nodeType = node.type,
                 definitionId = instance.definitionId,
-                definitionFormSchema = definition.formSchema,
+                formSchemaSnapshot = instance.formSchemaSnapshot,
                 nodeFormSchema = node.formSchema,
                 instanceFormData = instance.formData,
             )
