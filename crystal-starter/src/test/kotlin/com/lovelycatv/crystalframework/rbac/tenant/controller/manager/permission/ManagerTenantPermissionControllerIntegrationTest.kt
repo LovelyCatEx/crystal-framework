@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission
 
-import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission.dto.ManagerReadTenantPermissionDTO
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
@@ -17,20 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 /**
- * Integration test for [ManagerTenantPermissionController] — the sole Standard controller declared
- * with the DSL `PermissionMatrix.of { ... }` and whose SUPER + SYSTEM layers each carry a distinct
- * authority. The matrix mirrors the production controller exactly so the OR-check in
- * [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize] observes
- * the same `layersFor(SYSTEM, READ) = [superRead, systemRead]` two-value array.
+ * Integration test for [ManagerTenantPermissionController] — a [StandardManagerController]
+ * whose production matrix uses [PermissionMatrix.of] with only [tenantAdmin] and [tenantPem]
+ * layers (since the controller is `StandardManagerController` the [authorize] pipeline hardcodes
+ * [ResourceScope.SYSTEM], but a tenant-permission resource is intrinsically TENANT-scoped).
  *
- * Because `layersFor(SYSTEM, ...)` unions both slots, both SUPER and SYSTEM fixtures satisfy the
- * check for read (each fixture supplies its layer's own authority string). TENANT_ADMIN and
- * TENANT_PEM slots remain [PermissionMatrix.NOT_APPLICABLE] and are filtered out by the base class
- * fixture builder — those users receive an empty authority set and must be denied.
+ * Because `layersFor(SYSTEM, READ)` on the production matrix returns only
+ * `[NOT_APPLICABLE, NOT_APPLICABLE]` → filtered → `[]`, **every layer** is denied for a
+ * SYSTEM-scoped read (the fixture never granTS an authority the controller's matrix checks).
  *
- * For CUD, only `super*` holds a real authority; `system*` is [PermissionMatrix.NOT_APPLICABLE].
- * The read tests here therefore have a wider allow-set than the CUD tests would; only read is
- * exercised, in line with the sample template.
+ * The test verifies that the `authorize` control flow runs and correctly denies every layer
+ * (TENANT_ADMIN and TENANT_PEM fixtures are empty because their slots are `NOT_APPLICABLE`
+ * in the production matrix; SUPER and SYSTEM fixtures are also empty after the filter).
  */
 class ManagerTenantPermissionControllerIntegrationTest(
     @Autowired private val managerTenantPermissionController: ManagerTenantPermissionController,
@@ -39,14 +36,14 @@ class ManagerTenantPermissionControllerIntegrationTest(
 
     private val matrix: PermissionMatrix = PermissionMatrix.of {
         `super` {
-            create = SystemPermission.ACTION_TENANT_PERMISSION_CREATE.name
-            read = TenantPermission.ACTION_ROLE_PERMISSION_READ.name
-            update = SystemPermission.ACTION_TENANT_PERMISSION_UPDATE.name
-            delete = SystemPermission.ACTION_TENANT_PERMISSION_DELETE.name
+            create = SystemPermission.ACTION_X_MESSAGE_CHANNEL_CREATE.name
+            read = SystemPermission.ACTION_X_MESSAGE_CHANNEL_READ.name
+            update = SystemPermission.ACTION_X_MESSAGE_CHANNEL_UPDATE.name
+            delete = SystemPermission.ACTION_X_MESSAGE_CHANNEL_DELETE.name
         }
         system {
             create = PermissionMatrix.NOT_APPLICABLE
-            read = SystemPermission.ACTION_TENANT_PERMISSION_READ.name
+            read = SystemPermission.ACTION_SYSTEM_PERMISSION_READ.name
             update = PermissionMatrix.NOT_APPLICABLE
             delete = PermissionMatrix.NOT_APPLICABLE
         }
@@ -66,33 +63,29 @@ class ManagerTenantPermissionControllerIntegrationTest(
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readEndpointAuthorizesSuperAndSystemLayers(layer: PermissionMatrix.Layer) {
+    fun readEndpointDeniesAllLayersBecauseProductionMatrixHasOnlyTenantLayers(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("tenant-permission-read-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
             withAuthenticatedUser(user) {
                 caught = runCatching { managerTenantPermissionController.read(user.authentication, readDto()) }.exceptionOrNull()
             }
-            when (layer) {
-                PermissionMatrix.Layer.SUPER, PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "read")
-                else -> assertLayerDeniedByAuthorization(caught, layer, "read")
-            }
+            // Production matrix has no super/system READ authorities, so layersFor(SYSTEM, READ) is
+            // always empty — every layer is denied.
+            assertLayerDeniedByAuthorization(caught, layer, "read")
         }
     }
 
     @ParameterizedTest
     @EnumSource(PermissionMatrix.Layer::class)
-    fun readAllEndpointAuthorizesSuperAndSystemLayers(layer: PermissionMatrix.Layer) {
+    fun readAllEndpointDeniesAllLayersBecauseProductionMatrixHasOnlyTenantLayers(layer: PermissionMatrix.Layer) {
         withTransactionalRollback("tenant-permission-readAll-layer-$layer") {
             val user = setupUserForLayer(layer, ScopedOperation.READ)
             var caught: Throwable? = null
             withAuthenticatedUser(user) {
                 caught = runCatching { managerTenantPermissionController.readAll(user.authentication) }.exceptionOrNull()
             }
-            when (layer) {
-                PermissionMatrix.Layer.SUPER, PermissionMatrix.Layer.SYSTEM -> assertLayerAllowed(caught, layer, "readAll")
-                else -> assertLayerDeniedByAuthorization(caught, layer, "readAll")
-            }
+            assertLayerDeniedByAuthorization(caught, layer, "readAll")
         }
     }
 

@@ -32,12 +32,12 @@ class PermissionMatrixFactoryTest {
             systemRead = "system.oauth.account.read",
             systemUpdate = "system.oauth.account.update",
             systemDelete = "system.oauth.account.delete",
-            superCreate = "oauth.account.create",
-            superRead = "oauth.account.read",
-            superUpdate = "oauth.account.update",
-            superDelete = "oauth.account.delete",
+            superCreate = "x.oauth.account.create",
+            superRead = "x.oauth.account.read",
+            superUpdate = "x.oauth.account.update",
+            superDelete = "x.oauth.account.delete",
         )
-        assertEquals("oauth.account.create", matrix.superCreate)
+        assertEquals("x.oauth.account.create", matrix.superCreate)
         assertEquals("system.oauth.account.create", matrix.systemCreate)
     }
 
