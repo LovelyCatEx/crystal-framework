@@ -2611,7 +2611,9 @@ export const zhCN: I18nRules = {
         reject: '拒绝',
         cancel: '取消',
         success: '处理成功',
-        failed: '处理失败'
+        failed: '处理失败',
+        formPlaceholder: '当前节点未配置表单',
+        formLoadFailed: '加载表单失败'
       }
     },
     myTenantApprovalFlowInstanceManager: {
@@ -2718,8 +2720,129 @@ export const zhCN: I18nRules = {
         time: '时间',
         node: '节点'
       },
+      tabs: {
+        records: '审批记录',
+        form: '表单数据'
+      },
+      form: {
+        snapshotTitle: '当前表单快照',
+        snapshotSubtitle: '该审批实例的当前表单数据（只读）',
+        timelineTitle: '变更时间线',
+        timelineSubtitle: '每行展示对应操作人在该步骤填写（发起）或修改（审批）的内容',
+        emptyTimeline: '暂无变更记录',
+        noSchema: '该流程未配置表单',
+        initiateFields: '初始填写',
+        changedFields: '本次修改'
+      },
       error: {
         loadFailed: '加载审批实例失败'
+      }
+    },
+    approvalFormRenderer: {
+      empty: '该流程未配置表单字段',
+      error: {
+        required: '该字段为必填项',
+        maxLength: '内容超过长度限制',
+        pattern: '格式不正确',
+        min: '数值低于最小值',
+        max: '数值高于最大值',
+        minCount: '请至少选择规定数量的选项',
+        maxCount: '选择项数量超过上限'
+      }
+    },
+    conditionNodeInspector: {
+      title: '条件路由',
+      subtitle: '根据表单字段值将流程路由到不同的下游节点',
+      noSchemaHint: '当前流程未配置表单，请先前往「表单设计器」定义字段后再添加条件',
+      unsavedNodesWarning: '存在未保存的节点，请先保存流程图再将其设为目标节点',
+      emptyRoutes: '尚未配置路由，点击「新增路由」创建',
+      emptyLeaves: '该路由暂无条件',
+      routeTitle: '路由 #{{n}}',
+      addRoute: '新增路由',
+      deleteRoute: '删除',
+      addLeaf: '新增条件',
+      deleteLeaf: '删除条件',
+      target: '目标节点',
+      selectTarget: '选择下游节点',
+      logic: '组合方式'
+    },
+    nodeFormOverlay: {
+      title: '字段可见性覆盖',
+      subtitle: '为该节点单独覆盖每个字段的展示方式，未调整的开关沿用定义级设置',
+      empty: '尚未定义任何字段，请先前往「表单设计器」新增字段',
+      ccInfo: '抄送节点不会修改表单数据，「只读」已强制打开',
+      approvalInfo: '审批节点默认所有字段只读，如需允许当前审批人编辑，请将「只读」关闭',
+      ccLockedTooltip: '抄送节点始终为只读，不可修改',
+      column: {
+        field: '字段',
+        visible: '可见',
+        readonly: '只读',
+        required: '必填'
+      }
+    },
+    approvalFormDesigner: {
+      title: '表单设计器',
+      subtitle: '设计发起时使用的表单。审批节点可在此基础上做可见性覆盖。',
+      tabs: {
+        node: '节点属性',
+        designer: '表单设计器',
+        preview: '预览'
+      },
+      fieldList: {
+        title: '字段列表',
+        addField: '新增字段',
+        deleteField: '删除字段',
+        empty: '暂无字段，点击"新增字段"添加'
+      },
+      property: {
+        title: '字段属性',
+        empty: '请从上方选择一个字段进行编辑',
+        key: '字段 Key',
+        keyHint: 'camelCase 命名，只允许字母和数字，且在当前 schema 中唯一',
+        label: '标题',
+        type: '类型',
+        description: '描述',
+        placeholder: '占位提示',
+        required: '必填',
+        visible: '可见',
+        readonly: '只读',
+        groupKey: '所属分组',
+        noGroup: '（不分组）',
+        validationTitle: '校验规则',
+        multiple: '多选',
+        maxLength: '最大长度',
+        pattern: '正则模式',
+        min: '最小值',
+        max: '最大值',
+        precision: '小数精度',
+        minCount: '最少选择',
+        maxCount: '最多选择',
+        minDate: '最早日期',
+        maxDate: '最晚日期',
+        options: '选项',
+        addOption: '新增选项',
+        deleteOption: '删除选项',
+        patternHint: 'JavaScript 正则表达式源字符串',
+        error: {
+          keyEmpty: 'Key 不能为空',
+          keyPattern: 'Key 必须为 camelCase（仅允许字母数字，首字母小写）',
+          keyDuplicated: 'Key 已存在，请修改'
+        }
+      },
+      preview: {
+        title: '预览',
+        subtitle: '这是发起人看到的表单效果。已被标记为不可见的字段不会显示',
+        empty: '暂无字段可预览'
+      },
+      save: {
+        button: '保存表单结构',
+        success: '表单结构保存成功',
+        failed: '保存失败',
+        hasInvalidFields: '存在无效字段 Key，无法保存',
+        confirmTitle: '确认保存表单结构？',
+        confirmContent: '保存后的表单仅对新发起的审批生效。已发起的审批保留发起时的表单结构，不受影响。',
+        confirmOk: '保存',
+        confirmCancel: '取消'
       }
     },
     addressPicker: {
@@ -3608,6 +3731,17 @@ export const zhCN: I18nRules = {
       1: '通过',
       2: '拒绝',
       3: '系统转办'
+    },
+    approvalFieldType: {
+      text: '单行文本',
+      textarea: '多行文本',
+      number: '数字',
+      boolean: '布尔',
+      select: '下拉选择',
+      radio: '单选',
+      checkbox: '多选',
+      date: '日期',
+      datetime: '日期时间'
     }
   },
 

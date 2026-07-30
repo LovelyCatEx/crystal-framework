@@ -35,11 +35,11 @@ private fun buildLeafCriteria(node: ConditionNode): Criteria {
     val col = node.field
     return when (node.operator) {
         QueryOperator.EQ -> {
-            val v = requireNotNull(node.value) { "EQ requires a value for field '${node.field}'" }
+            val v = coerceNumericString(requireNotNull(node.value) { "EQ requires a value for field '${node.field}'" })
             Criteria.where(col).`is`(v)
         }
         QueryOperator.NE -> {
-            val v = requireNotNull(node.value) { "NE requires a value for field '${node.field}'" }
+            val v = coerceNumericString(requireNotNull(node.value) { "NE requires a value for field '${node.field}'" })
             Criteria.where(col).not(v)
         }
         QueryOperator.LIKE -> {
@@ -51,28 +51,45 @@ private fun buildLeafCriteria(node: ConditionNode): Criteria {
             Criteria.where(col).like("%${v}%")
         }
         QueryOperator.GT -> {
-            val v = requireNotNull(node.value) { "GT requires a value for field '${node.field}'" } as Comparable<Any>
+            val v = coerceNumericString(requireNotNull(node.value) { "GT requires a value for field '${node.field}'" }) as Comparable<Any>
             Criteria.where(col).greaterThan(v)
         }
         QueryOperator.GTE -> {
-            val v = requireNotNull(node.value) { "GTE requires a value for field '${node.field}'" } as Comparable<Any>
+            val v = coerceNumericString(requireNotNull(node.value) { "GTE requires a value for field '${node.field}'" }) as Comparable<Any>
             Criteria.where(col).greaterThanOrEquals(v)
         }
         QueryOperator.LT -> {
-            val v = requireNotNull(node.value) { "LT requires a value for field '${node.field}'" } as Comparable<Any>
+            val v = coerceNumericString(requireNotNull(node.value) { "LT requires a value for field '${node.field}'" }) as Comparable<Any>
             Criteria.where(col).lessThan(v)
         }
         QueryOperator.LTE -> {
-            val v = requireNotNull(node.value) { "LTE requires a value for field '${node.field}'" } as Comparable<Any>
+            val v = coerceNumericString(requireNotNull(node.value) { "LTE requires a value for field '${node.field}'" }) as Comparable<Any>
             Criteria.where(col).lessThanOrEquals(v)
         }
         QueryOperator.IN -> {
             val vs = requireNotNull(node.values) { "IN requires a values list for field '${node.field}'" }
+                .map { coerceNumericString(it) }
             Criteria.where(col).`in`(vs)
         }
         QueryOperator.IS_NULL -> Criteria.where(col).isNull()
         QueryOperator.IS_NOT_NULL -> Criteria.where(col).isNotNull()
     }
+}
+
+private val NUMERIC_STRING_REGEX = Regex("^-?\\d+$")
+
+/**
+ * Coerce a stringified integer to [Long] so that comparison operators bind the parameter
+ * as `BIGINT` instead of `VARCHAR`. Necessary because JSON transport carries snowflake ids
+ * (and other 64-bit integers) as strings to avoid JavaScript precision loss, but PostgreSQL
+ * has no implicit `bigint = varchar` coercion.
+ *
+ * Only applied to EQ/NE/GT/GTE/LT/LTE/IN, not LIKE/CONTAINS where string semantics are intended.
+ */
+private fun coerceNumericString(value: Any): Any {
+    if (value !is String) return value
+    if (!NUMERIC_STRING_REGEX.matches(value)) return value
+    return value.toLongOrNull() ?: value
 }
 
 private fun buildGroupCriteria(group: GroupNode): Criteria {

@@ -63,8 +63,22 @@ object ApprovalFlowGraphValidator {
      * 34. APPROVAL node must have exactly 1 outgoing edge
      * 35. CC node must have exactly 1 outgoing edge
      * 36. APPROVAL/CC/CONDITION nodes must have at least 1 incoming edge
+     *
+     * --- Form schema linkage (M7) ---
+     * 37. Node overlays must be parseable [NodeFormOverlay] JSON when non-blank.
+     * 38. Overlay fieldOverrides may only reference fields declared in the definition-level schema.
+     * 39. CONDITION [ConditionLeaf.field] values must reference declared schema field keys.
+     * 40. CONDITION [ConditionLeaf.operator] must be allowed for the referenced field's [ApprovalFieldType].
      */
-    fun validate(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> {
+    fun validate(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> = validate(dto, definitionFormSchemaJson = null)
+
+    /**
+     * Overload with the definition-level form schema in hand. Callers on the write path
+     * ([com.lovelycatv.crystalframework.approval.service.manager.impl.ApprovalFlowDefinitionManagerServiceImpl.updateGraph])
+     * pass `definition.formSchema`; regression tests may pass `null` to skip the M7 rules and
+     * exercise only the original 36.
+     */
+    fun validate(dto: ManagerUpdateApprovalFlowGraphDTO, definitionFormSchemaJson: String?): List<String> {
         val errors = mutableListOf<String>()
         val nodes = dto.nodes
         val edges = dto.edges
@@ -76,8 +90,103 @@ object ApprovalFlowGraphValidator {
         errors += validateForkJoinStructure(nodes, edges)
         errors += validateConditionRoutes(nodes, edges)
         errors += validateNodeDegrees(nodes, edges)
+        errors += validateFormSchemaLinkage(nodes, definitionFormSchemaJson)
 
         return errors
+    }
+
+    /**
+     * Rules 37-40: cross-check node overlays and CONDITION routes against the definition-level
+     * form schema. Skipped entirely when no schema is present — a definition without a form
+     * simply has no fields to link against, and CONDITION nodes there fall back to the strict
+     * "no-op" behavior enforced by the original validator (rule 12: non-empty condition tree).
+     */
+    private fun validateFormSchemaLinkage(
+        nodes: List<GraphNodeDTO>,
+        definitionFormSchemaJson: String?,
+    ): List<String> {
+        val errors = mutableListOf<String>()
+        val definitionSchema = runCatching {
+            if (definitionFormSchemaJson.isNullOrBlank()) null
+            else definitionFormSchemaJson.parseObject<ApprovalFormSchema>()
+        }.getOrNull()
+        val declaredFields: Map<String, ApprovalFieldSchema> =
+            definitionSchema?.fields?.associateBy { it.key } ?: emptyMap()
+
+        for (node in nodes) {
+            errors += validateNodeOverlay(node, declaredFields)
+            if (node.type == ApprovalFlowNodeType.CONDITION.typeId) {
+                errors += validateConditionFieldsAndOperators(node, declaredFields)
+            }
+        }
+        return errors
+    }
+
+    private fun validateNodeOverlay(
+        node: GraphNodeDTO,
+        declaredFields: Map<String, ApprovalFieldSchema>,
+    ): List<String> {
+        val raw = node.formSchema
+        if (raw.isNullOrBlank()) return emptyList()
+
+        // Rule 37: overlay must parse cleanly.
+        val overlay = runCatching { raw.parseObject<NodeFormOverlay>() }.getOrNull()
+            ?: return listOf("Node '${node.nodeKey}' has malformed formSchema overlay JSON")
+
+        if (declaredFields.isEmpty()) {
+            // No definition-level schema means every overlay key is dangling.
+            return if (overlay.fieldOverrides.isEmpty()) emptyList()
+            else listOf("Node '${node.nodeKey}' overlay references fields but the definition has no form schema")
+        }
+
+        val errors = mutableListOf<String>()
+        // Rule 38: overlay keys must exist on the definition schema.
+        for (overrideKey in overlay.fieldOverrides.keys) {
+            if (overrideKey !in declaredFields) {
+                errors += "Node '${node.nodeKey}' overlay references unknown field '$overrideKey'"
+            }
+        }
+        return errors
+    }
+
+    private fun validateConditionFieldsAndOperators(
+        node: GraphNodeDTO,
+        declaredFields: Map<String, ApprovalFieldSchema>,
+    ): List<String> {
+        val config = runCatching { node.config?.parseObject<ConditionNodeConfig>() }.getOrNull()
+            ?: return emptyList() // structural errors already surface via rule 9
+        val errors = mutableListOf<String>()
+        for ((routeIndex, route) in config.routes.withIndex()) {
+            errors += walkConditionLeaves(route.condition, node.nodeKey, routeIndex, declaredFields)
+        }
+        return errors
+    }
+
+    private fun walkConditionLeaves(
+        node: ConditionNode,
+        nodeKey: String,
+        routeIndex: Int,
+        declaredFields: Map<String, ApprovalFieldSchema>,
+    ): List<String> {
+        return when (node) {
+            is ConditionLeaf -> {
+                val errors = mutableListOf<String>()
+                val field = declaredFields[node.field]
+                if (field == null) {
+                    // Rule 39: leaf field must exist on the definition schema.
+                    errors += "CONDITION '$nodeKey' route[$routeIndex] references unknown field '${node.field}'"
+                } else {
+                    val allowed = ApprovalFieldType.ALLOWED_OPERATORS[field.type] ?: emptySet()
+                    if (node.operator !in allowed) {
+                        // Rule 40: operator must be allowed for the field's type.
+                        errors += "CONDITION '$nodeKey' route[$routeIndex] uses operator '${node.operator.value}' " +
+                                "which is not allowed for ${field.type.value} field '${node.field}'"
+                    }
+                }
+                errors
+            }
+            is ConditionGroup -> node.children.flatMap { walkConditionLeaves(it, nodeKey, routeIndex, declaredFields) }
+        }
     }
 
     private fun validateNodeBasics(nodes: List<GraphNodeDTO>): List<String> {

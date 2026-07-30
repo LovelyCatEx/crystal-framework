@@ -2614,7 +2614,9 @@ export const enUS: I18nRules = {
         reject: 'Reject',
         cancel: 'Cancel',
         success: 'Task handled successfully',
-        failed: 'Failed to handle task'
+        failed: 'Failed to handle task',
+        formPlaceholder: 'No form is configured for this step.',
+        formLoadFailed: 'Failed to load the form for this task.'
       }
     },
     myTenantApprovalFlowInstanceManager: {
@@ -2721,8 +2723,129 @@ export const enUS: I18nRules = {
         time: 'Time',
         node: 'Node'
       },
+      tabs: {
+        records: 'Records',
+        form: 'Form'
+      },
+      form: {
+        snapshotTitle: 'Current form snapshot',
+        snapshotSubtitle: 'The instance\'s current form data, rendered read-only.',
+        timelineTitle: 'Change timeline',
+        timelineSubtitle: 'Each row shows what the operator set at that step (initiate) or changed (approve/reject).',
+        emptyTimeline: 'No timeline entries yet.',
+        noSchema: 'This flow has no form schema.',
+        initiateFields: 'Initial values',
+        changedFields: 'Changed fields'
+      },
       error: {
         loadFailed: 'Failed to load instance details'
+      }
+    },
+    approvalFormRenderer: {
+      empty: 'This flow has no form fields',
+      error: {
+        required: 'This field is required',
+        maxLength: 'Length exceeds limit',
+        pattern: 'Format is invalid',
+        min: 'Value is below minimum',
+        max: 'Value is above maximum',
+        minCount: 'Please select at least the minimum number of options',
+        maxCount: 'Cannot exceed the maximum number of options'
+      }
+    },
+    conditionNodeInspector: {
+      title: 'Condition Routes',
+      subtitle: 'Route the flow to different downstream nodes based on form field values.',
+      noSchemaHint: 'This flow has no form schema — configure fields on the Form Designer tab before adding conditions.',
+      unsavedNodesWarning: 'Some nodes have not been saved yet. Save the graph before selecting them as targets.',
+      emptyRoutes: 'No conditions yet. Click "Add Route" to create one.',
+      emptyLeaves: 'This route has no conditions.',
+      routeTitle: 'Route #{{n}}',
+      addRoute: 'Add Route',
+      deleteRoute: 'Delete',
+      addLeaf: 'Add Condition',
+      deleteLeaf: 'Delete condition',
+      target: 'Target',
+      selectTarget: 'Select downstream node',
+      logic: 'Combine with'
+    },
+    nodeFormOverlay: {
+      title: 'Field Visibility Overlay',
+      subtitle: 'Override how this node exposes each form field. Untouched switches follow the definition.',
+      empty: 'No definition-level fields to override. Add fields on the Form Designer tab first.',
+      ccInfo: 'CC nodes never mutate form data — Readonly is locked ON.',
+      approvalInfo: 'Approval nodes default fields to readonly. Flip Readonly OFF to let this approver edit the field.',
+      ccLockedTooltip: 'CC nodes are always readonly and cannot be changed.',
+      column: {
+        field: 'Field',
+        visible: 'Visible',
+        readonly: 'Readonly',
+        required: 'Required'
+      }
+    },
+    approvalFormDesigner: {
+      title: 'Form Designer',
+      subtitle: 'Design the initiate form. Approval nodes can override visibility later.',
+      tabs: {
+        node: 'Node',
+        designer: 'Form Designer',
+        preview: 'Preview'
+      },
+      fieldList: {
+        title: 'Fields',
+        addField: 'Add Field',
+        deleteField: 'Delete field',
+        empty: 'No fields yet. Click "Add Field" to create one.'
+      },
+      property: {
+        title: 'Field Properties',
+        empty: 'Select a field above to edit its properties.',
+        key: 'Key',
+        keyHint: 'camelCase, letters and digits only, must be unique in this schema.',
+        label: 'Label',
+        type: 'Type',
+        description: 'Description',
+        placeholder: 'Placeholder',
+        required: 'Required',
+        visible: 'Visible',
+        readonly: 'Readonly',
+        groupKey: 'Group',
+        noGroup: '(No group)',
+        validationTitle: 'Validation',
+        multiple: 'Multiple',
+        maxLength: 'Max Length',
+        pattern: 'Pattern',
+        min: 'Min',
+        max: 'Max',
+        precision: 'Precision',
+        minCount: 'Min Count',
+        maxCount: 'Max Count',
+        minDate: 'Min Date',
+        maxDate: 'Max Date',
+        options: 'Options',
+        addOption: 'Add Option',
+        deleteOption: 'Delete option',
+        patternHint: 'JavaScript regular expression source.',
+        error: {
+          keyEmpty: 'Key is required',
+          keyPattern: 'Key must be camelCase (letters and digits only, starting with a lowercase letter)',
+          keyDuplicated: 'Key must be unique within the schema'
+        }
+      },
+      preview: {
+        title: 'Preview',
+        subtitle: 'This is how the form will render for initiators. Fields marked invisible are hidden.',
+        empty: 'No fields to preview yet.'
+      },
+      save: {
+        button: 'Save Form Schema',
+        success: 'Form schema saved',
+        failed: 'Failed to save form schema',
+        hasInvalidFields: 'Cannot save: some fields have invalid keys.',
+        confirmTitle: 'Save form schema?',
+        confirmContent: 'The updated schema takes effect for newly initiated flows. In-flight approvals keep the schema they were initiated with and are not affected.',
+        confirmOk: 'Save',
+        confirmCancel: 'Cancel'
       }
     },
     addressPicker: {
@@ -3610,6 +3733,17 @@ export const enUS: I18nRules = {
       1: 'Approved',
       2: 'Rejected',
       3: 'System forwarded'
+    },
+    approvalFieldType: {
+      text: 'Text',
+      textarea: 'Multi-line Text',
+      number: 'Number',
+      boolean: 'Boolean',
+      select: 'Select',
+      radio: 'Radio',
+      checkbox: 'Checkbox',
+      date: 'Date',
+      datetime: 'Date Time'
     }
   },
 
