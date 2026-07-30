@@ -172,6 +172,7 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
             align: 'center',
             render: (_, row) => (
                 <Switch
+                    size="small"
                     checked={resolvedFor(row, 'visible')}
                     onChange={(v) => handleToggle(row, 'visible', v)}
                 />
@@ -186,6 +187,7 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
                 const disabled = isCcNode;
                 const switchEl = (
                     <Switch
+                        size="small"
                         checked={resolvedFor(row, 'readonly')}
                         disabled={disabled}
                         onChange={(v) => handleToggle(row, 'readonly', v)}
@@ -203,6 +205,7 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
             align: 'center',
             render: (_, row) => (
                 <Switch
+                    size="small"
                     checked={resolvedFor(row, 'required')}
                     onChange={(v) => handleToggle(row, 'required', v)}
                 />

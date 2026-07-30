@@ -161,7 +161,7 @@ export default function ApprovalEditor(props: {
         scopeId: definitionDetails?.definition.scopeId ?? '',
     };
 
-    const {width: panelWidth, handleResizeStart} = useResizablePanel(25);
+    const {width: panelWidth, handleResizeStart} = useResizablePanel(28);
 
     const [ref, baseCtx] = useRete(
         useCreateReteBaseGraphEditor<
@@ -515,7 +515,7 @@ export default function ApprovalEditor(props: {
                       * default holder via a tailwind arbitrary variant) and drive the content
                       * area ourselves in the sibling flex-1 div below.
                       */}
-                    <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="flex-1 flex flex-col overflow-hidden pl-2 pr-2">
                         <Tabs
                             activeKey={rightPanelTab}
                             onChange={setRightPanelTab}
@@ -627,15 +627,12 @@ function NodeInspectorPanel({ node, scope, scopeId, definitionFormSchema, graphN
                 {t('components.approvalEditor.inspector.title')}
             </Typography.Title>
 
-            <Descriptions column={1} bordered>
-                <Descriptions.Item label={t('components.approvalEditor.inspector.id')}>
-                    <Typography.Text copyable className="font-mono text-xs">
+            <Form layout="vertical" className="!mb-0">
+                <Form.Item label={t('components.approvalEditor.inspector.id')}>
+                    <Typography.Text copyable className="font-mono">
                         {node.id || t('components.approvalEditor.inspector.newNode')}
                     </Typography.Text>
-                </Descriptions.Item>
-            </Descriptions>
-
-            <Form layout="vertical" className="!mb-0">
+                </Form.Item>
                 <Form.Item label={t('components.approvalEditor.inspector.nodeKey')}>
                     <Input
                         value={node.nodeKey}
@@ -653,8 +650,8 @@ function NodeInspectorPanel({ node, scope, scopeId, definitionFormSchema, graphN
                 <Form.Item label={t('components.approvalEditor.inspector.type')}>
                     <Select
                         value={node.type}
+                        disabled
                         options={nodeTypeOptions}
-                        onChange={(value) => onNodeChange('type', value)}
                     />
                 </Form.Item>
 

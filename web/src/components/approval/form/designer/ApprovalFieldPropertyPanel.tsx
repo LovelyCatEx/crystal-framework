@@ -81,7 +81,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                 {t('components.approvalFormDesigner.property.title')}
             </Typography.Title>
 
-            <Form layout="vertical" size="small">
+            <Form layout="vertical">
                 <Form.Item
                     label={t('components.approvalFormDesigner.property.key')}
                     validateStatus={keyError ? 'error' : ''}
@@ -167,7 +167,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             {t('components.approvalFormDesigner.property.validationTitle')}
                         </Typography.Text>
                         {validationSlots.includes('maxLength') && (
-                            <Form.Item label="maxLength">
+                            <Form.Item label={t('components.approvalFormDesigner.property.maxLength')}>
                                 <InputNumber
                                     className="w-full"
                                     min={0}
@@ -178,7 +178,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                         )}
                         {validationSlots.includes('pattern') && (
                             <Form.Item
-                                label="pattern"
+                                label={t('components.approvalFormDesigner.property.pattern')}
                                 help={t('components.approvalFormDesigner.property.patternHint')}
                             >
                                 <Input
@@ -188,7 +188,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('min') && (
-                            <Form.Item label="min">
+                            <Form.Item label={t('components.approvalFormDesigner.property.min')}>
                                 <InputNumber
                                     className="w-full"
                                     value={field.validation?.min}
@@ -197,7 +197,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('max') && (
-                            <Form.Item label="max">
+                            <Form.Item label={t('components.approvalFormDesigner.property.max')}>
                                 <InputNumber
                                     className="w-full"
                                     value={field.validation?.max}
@@ -206,7 +206,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('precision') && (
-                            <Form.Item label="precision">
+                            <Form.Item label={t('components.approvalFormDesigner.property.precision')}>
                                 <InputNumber
                                     className="w-full"
                                     min={0}
@@ -216,7 +216,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('minCount') && (
-                            <Form.Item label="minCount">
+                            <Form.Item label={t('components.approvalFormDesigner.property.minCount')}>
                                 <InputNumber
                                     className="w-full"
                                     min={0}
@@ -226,7 +226,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('maxCount') && (
-                            <Form.Item label="maxCount">
+                            <Form.Item label={t('components.approvalFormDesigner.property.maxCount')}>
                                 <InputNumber
                                     className="w-full"
                                     min={0}
@@ -236,7 +236,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('minDate') && (
-                            <Form.Item label="minDate (ISO)">
+                            <Form.Item label={t('components.approvalFormDesigner.property.minDate')}>
                                 <Input
                                     value={field.validation?.minDate ?? ''}
                                     onChange={(e) => patchValidation({minDate: e.target.value || undefined})}
@@ -244,7 +244,7 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                             </Form.Item>
                         )}
                         {validationSlots.includes('maxDate') && (
-                            <Form.Item label="maxDate (ISO)">
+                            <Form.Item label={t('components.approvalFormDesigner.property.maxDate')}>
                                 <Input
                                     value={field.validation?.maxDate ?? ''}
                                     onChange={(e) => patchValidation({maxDate: e.target.value || undefined})}
@@ -296,27 +296,24 @@ function OptionsEditor({options, onChange, title, addLabel, deleteLabel}: Option
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
                 <Typography.Text strong>{title}</Typography.Text>
-                <Button type="dashed" size="small" icon={<PlusOutlined/>} onClick={addOption}>
+                <Button type="dashed" icon={<PlusOutlined/>} onClick={addOption}>
                     {addLabel}
                 </Button>
             </div>
             {options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-1">
                     <Input
-                        size="small"
                         placeholder="label"
                         value={opt.label}
                         onChange={(e) => patchAt(i, {label: e.target.value})}
                     />
                     <Input
-                        size="small"
                         placeholder="value"
                         value={opt.value}
                         onChange={(e) => patchAt(i, {value: e.target.value})}
                     />
                     <Button
                         type="text"
-                        size="small"
                         danger
                         icon={<DeleteOutlined/>}
                         onClick={() => removeAt(i)}

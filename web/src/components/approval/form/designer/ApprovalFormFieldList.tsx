@@ -1,11 +1,26 @@
-import {Button, Empty, Tag, Typography} from "antd";
+import {Button, Empty, Tag, theme, Tooltip, Typography} from "antd";
 import {DeleteOutlined, HolderOutlined, PlusOutlined} from "@ant-design/icons";
 import {DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import {SortableContext, arrayMove, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
+import {AlignLeft, Calendar, CalendarClock, CircleDot, Hash, List, SquareCheck, ToggleLeft, Type} from "lucide-react";
+import type {ComponentType} from "react";
 import {useTranslation} from "react-i18next";
 import type {ApprovalFieldSchema} from "@/types/approval/approval-form-schema.types.ts";
+import {ApprovalFieldType} from "@/types/approval/approval-enums.ts";
 import {getApprovalFieldType} from "@/i18n/enum-helpers.ts";
+
+const FIELD_TYPE_ICON: Record<ApprovalFieldType, ComponentType<{size?: number; className?: string}>> = {
+    [ApprovalFieldType.TEXT]: Type,
+    [ApprovalFieldType.TEXTAREA]: AlignLeft,
+    [ApprovalFieldType.NUMBER]: Hash,
+    [ApprovalFieldType.BOOLEAN]: ToggleLeft,
+    [ApprovalFieldType.SELECT]: List,
+    [ApprovalFieldType.RADIO]: CircleDot,
+    [ApprovalFieldType.CHECKBOX]: SquareCheck,
+    [ApprovalFieldType.DATE]: Calendar,
+    [ApprovalFieldType.DATETIME]: CalendarClock,
+};
 
 export interface ApprovalFormFieldListProps {
     fields: ApprovalFieldSchema[];
@@ -29,11 +44,20 @@ interface SortableFieldItemProps {
 
 function SortableFieldItem({field, isSelected, isInvalid, onSelect, onDelete, deleteAriaLabel}: SortableFieldItemProps) {
     const {attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging} = useSortable({id: field.key});
+    const {token} = theme.useToken();
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.4 : 1,
+        borderColor: isInvalid
+            ? token.colorError
+            : isSelected
+                ? token.colorPrimary
+                : token.colorBorder,
+        background: isSelected ? token.colorPrimaryBg : undefined,
     };
+
+    const TypeIcon = FIELD_TYPE_ICON[field.type];
 
     return (
         <div
@@ -41,8 +65,7 @@ function SortableFieldItem({field, isSelected, isInvalid, onSelect, onDelete, de
             style={style}
             className={[
                 "flex items-center gap-2 px-2 py-2 rounded border cursor-pointer transition",
-                isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-400",
-                isInvalid ? "!border-red-500" : "",
+                isSelected ? "" : "hover:border-gray-400",
             ].join(" ")}
             onClick={onSelect}
             {...attributes}
@@ -55,7 +78,10 @@ function SortableFieldItem({field, isSelected, isInvalid, onSelect, onDelete, de
             >
                 <HolderOutlined/>
             </span>
-            <div className="flex-1 flex flex-col min-w-0">
+            <Tooltip title={getApprovalFieldType(field.type)}>
+                <TypeIcon size={16} className="text-gray-500 shrink-0"/>
+            </Tooltip>
+            <div className="flex-1 flex flex-col min-w-0 ml-2">
                 <Typography.Text ellipsis className="!m-0 !text-sm">
                     {field.label || field.key}
                 </Typography.Text>
@@ -63,7 +89,6 @@ function SortableFieldItem({field, isSelected, isInvalid, onSelect, onDelete, de
                     <Typography.Text type="secondary" className="!text-xs font-mono">
                         {field.key}
                     </Typography.Text>
-                    <Tag color="blue" className="!m-0 !text-[10px]">{getApprovalFieldType(field.type)}</Tag>
                     {field.required && <Tag color="red" className="!m-0 !text-[10px]">*</Tag>}
                 </div>
             </div>
