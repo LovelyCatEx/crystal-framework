@@ -3,7 +3,6 @@ import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";
 import {useMemo} from "react";
 import {useTranslation} from "react-i18next";
 import type {
-    ConditionGroup,
     ConditionLeaf,
     ConditionNode,
     ConditionNodeConfig,
@@ -47,7 +46,13 @@ export interface ConditionNodeInspectorProps {
  * asking the user to hand-build nested trees. If nested groups are ever needed, this file
  * grows a recursive renderer — the persisted JSON shape already supports it.
  */
-function ensureGroupShape(condition: ConditionNode | undefined): ConditionGroup {
+interface FlatConditionGroup {
+    type: 'group';
+    logic: ConditionLogic;
+    children: ConditionLeaf[];
+}
+
+function ensureGroupShape(condition: ConditionNode | undefined): FlatConditionGroup {
     if (condition && condition.type === 'group') {
         return {
             type: 'group',
