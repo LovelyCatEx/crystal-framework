@@ -8,3 +8,14 @@ export interface ApprovalFlowTask extends BaseScopedEntity {
     comment: string | null;
     formData: string | null;
 }
+
+export interface ApprovalFlowTaskFormViewVO {
+    taskId: string;
+    instanceId: string;
+    nodeId: string;
+    nodeType: number;
+    definitionId: string;
+    definitionFormSchema: string | null;
+    nodeFormSchema: string | null;
+    instanceFormData: string | null;
+}

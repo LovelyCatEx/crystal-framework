@@ -63,3 +63,46 @@ export enum ApprovalFlowTaskStatus {
     REJECTED = 2,
     SKIPPED = 3,
 }
+
+/**
+ * Backend `ConditionOperator` (see crystal-approval/types/ConditionOperator.kt). Persisted
+ * inside CONDITION node config as a lowercase string — must stay in strict sync with the
+ * `APPROVAL_FIELD_OPERATORS` mapping in `approval-form-schema.types.ts`.
+ */
+export enum ConditionOperator {
+    EQ = 'eq',
+    NE = 'ne',
+    GT = 'gt',
+    GTE = 'gte',
+    LT = 'lt',
+    LTE = 'lte',
+    CONTAINS = 'contains',
+    IN = 'in',
+}
+
+/**
+ * Backend `ConditionLogic`. Values match the `@JsonValue` on the Kotlin enum.
+ */
+export enum ConditionLogic {
+    AND = 'and',
+    OR = 'or',
+}
+
+/**
+ * Approval form field type.
+ *
+ * String-valued for readability inside persisted JSON schemas (definition.formSchema,
+ * node.formSchema) and to stay symmetric with the backend ConditionOperator enum which
+ * is also serialized as a lowercase string.
+ */
+export enum ApprovalFieldType {
+    TEXT = 'text',
+    TEXTAREA = 'textarea',
+    NUMBER = 'number',
+    BOOLEAN = 'boolean',
+    SELECT = 'select',
+    RADIO = 'radio',
+    CHECKBOX = 'checkbox',
+    DATE = 'date',
+    DATETIME = 'datetime',
+}

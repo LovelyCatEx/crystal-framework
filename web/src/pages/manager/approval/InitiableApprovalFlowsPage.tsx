@@ -4,13 +4,38 @@ import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowDefinitionTableColumns} from "@/components/columns/ApprovalFlowDefinitionEntityColumns.tsx";
-import {ApprovalFlowDefinitionManagerController} from "@/api/approval/approval-flow-definition.api.ts";
+import {
+    ApprovalFlowDefinitionManagerController,
+    getApprovalFlowDefinitionDetails,
+} from "@/api/approval/approval-flow-definition.api.ts";
 import {startApprovalFlow} from "@/api/approval/approval-flow-instance.api.ts";
 import {ApprovalFlowDefinitionStatus, ResourceScope} from "@/types/approval/approval-flow-definition.types.ts";
 import type {ApprovalFlowDefinition} from "@/types/approval/approval-flow-definition.types.ts";
+import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";
+import {ApprovalFlowNodeType} from "@/types/approval/approval-enums.ts";
+import type {MergedFieldSchema} from "@/types/approval/approval-form-schema.types.ts";
+import {mergeFieldOverrides, parseFormSchema, parseNodeOverlay} from "@/utils/approval-form-utils.ts";
+import {
+    ApprovalFormRenderer,
+    type ApprovalFormRendererRef,
+} from "@/components/approval/form/ApprovalFormRenderer.tsx";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 
 const SYSTEM_SCOPE_ID = '0';
+
+/**
+ * Resolve the "initiate" node — the single node the START node points to. START itself
+ * carries no form overlay (see `ApprovalFlowGraphValidator` rule 17: START has exactly
+ * one outgoing edge), so the initiator's field visibility is dictated by that successor.
+ * Returns null if the graph is malformed or START has no successor found in the node list.
+ */
+function resolveInitiateNode(nodes: ApprovalFlowNode[], edges: Array<{sourceNodeId: string; targetNodeId: string}>): ApprovalFlowNode | null {
+    const startNode = nodes.find(n => n.type === ApprovalFlowNodeType.START);
+    if (!startNode) return null;
+    const outEdge = edges.find(e => e.sourceNodeId === startNode.id);
+    if (!outEdge) return null;
+    return nodes.find(n => n.id === outEdge.targetNodeId) ?? null;
+}
 
 export default function InitiableApprovalFlowsPage() {
     const {t} = useTranslation();
@@ -30,6 +55,43 @@ export default function InitiableApprovalFlowsPage() {
 
     const [initiatingDefinition, setInitiatingDefinition] = useState<ApprovalFlowDefinition | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const [mergedFields, setMergedFields] = useState<MergedFieldSchema[] | null>(null);
+    const [formGroups, setFormGroups] = useState<Array<{key: string; label: string}> | undefined>(undefined);
+    const formRef = useRef<ApprovalFormRendererRef | null>(null);
+
+    useEffect(() => {
+        if (!initiatingDefinition) {
+            setMergedFields(null);
+            setFormGroups(undefined);
+            return;
+        }
+        const schema = parseFormSchema(initiatingDefinition.formSchema);
+        if (!schema || schema.fields.length === 0) {
+            setMergedFields(null);
+            setFormGroups(undefined);
+            return;
+        }
+        setDetailsLoading(true);
+        (async () => {
+            try {
+                const resp = await getApprovalFlowDefinitionDetails(initiatingDefinition.id);
+                const details = resp.data;
+                const initiateNode: ApprovalFlowNode | null = resolveInitiateNode(details?.nodes ?? [], details?.edges ?? []);
+                const overlay = parseNodeOverlay(initiateNode?.formSchema ?? null);
+                const merged = mergeFieldOverrides(schema, overlay, {
+                    nodeType: initiateNode?.type ?? ApprovalFlowNodeType.START,
+                });
+                setMergedFields(merged);
+                setFormGroups(schema.groups);
+            } catch {
+                setMergedFields(mergeFieldOverrides(schema, null, {nodeType: ApprovalFlowNodeType.START}));
+                setFormGroups(schema.groups);
+            } finally {
+                setDetailsLoading(false);
+            }
+        })();
+    }, [initiatingDefinition]);
 
     useEffect(() => {
         pageRef.current?.refreshData({resetPage: true});
@@ -64,9 +126,18 @@ export default function InitiableApprovalFlowsPage() {
 
     const handleInitiate = async () => {
         if (!initiatingDefinition) return;
+        let formData = '{}';
+        if (mergedFields && mergedFields.length > 0 && formRef.current) {
+            try {
+                const values = await formRef.current.validate();
+                formData = JSON.stringify(values ?? {});
+            } catch {
+                return;
+            }
+        }
         setSubmitting(true);
         try {
-            await startApprovalFlow({definitionId: initiatingDefinition.id});
+            await startApprovalFlow({definitionId: initiatingDefinition.id, formData});
             void message.success(t('pages.initiableApprovalFlows.modal.success'));
             setInitiatingDefinition(null);
         } catch {
@@ -151,8 +222,21 @@ export default function InitiableApprovalFlowsPage() {
                 onOk={handleInitiate}
                 onCancel={() => setInitiatingDefinition(null)}
                 destroyOnHidden
+                width={mergedFields && mergedFields.length > 0 ? 640 : undefined}
             >
-                <Empty description={t('pages.initiableApprovalFlows.modal.formPlaceholder')}/>
+                {detailsLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                        <Spin/>
+                    </div>
+                ) : mergedFields && mergedFields.length > 0 ? (
+                    <ApprovalFormRenderer
+                        ref={formRef}
+                        fields={mergedFields}
+                        groups={formGroups}
+                    />
+                ) : (
+                    <Empty description={t('pages.initiableApprovalFlows.modal.formPlaceholder')}/>
+                )}
             </Modal>
         </>
     );

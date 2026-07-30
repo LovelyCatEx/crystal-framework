@@ -12,13 +12,14 @@ import {
 } from "../rete-typs.ts";
 import {type ReactNode, useEffect, useMemo, useRef, useState} from "react";
 import {applyApprovalFlowEditorAreaBackground} from "@/components/approval/background.ts";
-import {Empty, Spin, Tag, theme, Typography} from "antd";
+import {Empty, Spin, Tabs, Tag, theme, Typography} from "antd";
 import {ApprovalEditorContext, type ApprovalEditorContextValue} from "../ApprovalEditorContext.tsx";
 import {
     ApprovalNodeStatusProvider,
     type ApprovalNodeStatusContextValue
 } from "./ApprovalNodeStatusContext.tsx";
 import {ApprovalNodeRecordsPanel} from "./ApprovalNodeRecordsPanel.tsx";
+import {ApprovalFlowFormPanel} from "./ApprovalFlowFormPanel.tsx";
 import {ApprovalFlowInstanceStatus} from "@/types/approval/approval-enums.ts";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {getApprovalFlowInstanceStatus} from "@/i18n/enum-helpers.ts";
@@ -207,9 +208,9 @@ export default function ApprovalFlowViewer(props: {
                     </div>
                 </div>
 
-                {/* Right Panel: Records */}
+                {/* Right Panel: Tabs [Records] [Form] */}
                 <div
-                    className="relative border-l flex flex-row"
+                    className="relative border-l flex flex-col"
                     style={{
                         width: `${panelWidth}%`,
                         minWidth: 360,
@@ -222,18 +223,40 @@ export default function ApprovalFlowViewer(props: {
                         className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500/50 active:bg-blue-500/70 z-10"
                         onMouseDown={handleResizeStart}
                     />
-                    <div className="flex-1 p-4 overflow-y-auto">
-                        {details ? (
-                            <ApprovalNodeRecordsPanel
-                                records={details.records}
-                                selectedNodeId={selectedNodeId}
-                                nodes={details.nodes}
-                                scope={details.instance.scope}
-                            />
-                        ) : (
+                    {details ? (
+                        <Tabs
+                            className="flex-1 !px-3 !pt-2 overflow-hidden"
+                            items={[
+                                {
+                                    key: 'records',
+                                    label: t('components.approvalFlowViewer.tabs.records'),
+                                    children: (
+                                        <div className="p-1 overflow-y-auto">
+                                            <ApprovalNodeRecordsPanel
+                                                records={details.records}
+                                                selectedNodeId={selectedNodeId}
+                                                nodes={details.nodes}
+                                                scope={details.instance.scope}
+                                            />
+                                        </div>
+                                    ),
+                                },
+                                {
+                                    key: 'form',
+                                    label: t('components.approvalFlowViewer.tabs.form'),
+                                    children: (
+                                        <div className="p-1 overflow-y-auto">
+                                            <ApprovalFlowFormPanel details={details}/>
+                                        </div>
+                                    ),
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <div className="flex-1 p-4 overflow-y-auto">
                             <Empty description={t('components.approvalFlowViewer.records.empty')}/>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
