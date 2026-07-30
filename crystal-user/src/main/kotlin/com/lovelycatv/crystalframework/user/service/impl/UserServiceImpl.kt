@@ -3,9 +3,11 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
+import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
+import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -224,8 +226,14 @@ class UserServiceImpl(
         val (_, extension) = file.filename().split(".")
         val targetFileName = UUID.randomUUID().toString() + "." + extension
 
-        val service = fileResourceServiceManager
-            .getService(userId, ResourceFileType.USER_AVATAR, targetFileName)
+        val service = fileResourceServiceManager.getService(
+            RoutingContext.of(
+                userId = userId,
+                fileType = ResourceFileType.USER_AVATAR,
+                fileName = targetFileName,
+                fileContentType = file.getContentType(),
+            )
+        )
 
         val result = service.uploadFile(
             userId,

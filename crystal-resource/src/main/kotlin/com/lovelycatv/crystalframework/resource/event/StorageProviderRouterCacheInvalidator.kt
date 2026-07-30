@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.resource.event
 
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
+import com.lovelycatv.crystalframework.resource.entity.StorageProviderRoutingRuleEntity
 import com.lovelycatv.crystalframework.resource.interfaces.StorageProviderRouter
 import com.lovelycatv.crystalframework.shared.event.SingleEntityCacheEvent
 import com.lovelycatv.vertex.log.logger
@@ -19,7 +20,7 @@ class StorageProviderRouterCacheInvalidator(
     @Async
     @EventListener
     fun handleEntityCacheEvent(event: SingleEntityCacheEvent) {
-        if (event.entityClass == StorageProviderEntity::class) {
+        if (event.entityClass == StorageProviderEntity::class || event.entityClass == StorageProviderRoutingRuleEntity::class) {
             applicationContext
                 .getBeansOfType<StorageProviderRouter>()
                 .values

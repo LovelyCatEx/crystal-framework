@@ -1,10 +1,12 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
+import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
@@ -141,8 +143,14 @@ class TenantServiceImpl(
         val (_, extension) = file.filename().split(".")
         val targetFileName = UUID.randomUUID().toString() + "." + extension
 
-        val service = fileResourceServiceManager
-            .getService(tenantId, ResourceFileType.TENANT_ICON, targetFileName)
+        val service = fileResourceServiceManager.getService(
+            RoutingContext.of(
+                userId = userId,
+                fileType = ResourceFileType.TENANT_ICON,
+                fileName = targetFileName,
+                fileContentType = file.getContentType(),
+            )
+        )
 
         val result = service.uploadFile(
             userId,

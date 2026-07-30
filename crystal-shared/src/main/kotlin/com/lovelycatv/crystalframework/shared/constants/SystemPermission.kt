@@ -225,6 +225,31 @@ object SystemPermission {
     )
 
     // ============================================================
+    //   Storage Provider Routing Rule  (system)
+    // ============================================================
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.create",
+        description = "Create storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.read",
+        description = "Read storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.update",
+        description = "Update storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.delete",
+        description = "Delete storage provider routing rules"
+    )
+    val MENU_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.storage.provider.routing.rule",
+        path = "/manager/storage-provider-routing-rules",
+        description = "Manage storage provider routing rules menu"
+    )
+
+    // ============================================================
     //   Mail Template Category  (system)
     // ============================================================
     val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_CREATE = SystemRbacPermissionDeclaration.action(

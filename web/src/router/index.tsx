@@ -34,6 +34,7 @@ const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfileP
 const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
 const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
 const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
+const StorageProviderRoutingRuleManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderRoutingRuleManagerPage.tsx"));
 const MailTemplateCategoryManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateCategoryManagerPage.tsx"));
 const MailTemplateTypeManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateTypeManagerPage.tsx"));
 const MailTemplateManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateManagerPage.tsx"));
@@ -513,6 +514,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <DatabaseOutlined />,
             label: t('menu.admin.storageProviders'),
             page: <StorageProviderManagerPage />,
+            group: 'system_storage'
+        },
+        {
+            key: '/manager/storage-provider-routing-rules',
+            path: '/manager/storage-provider-routing-rules',
+            icon: <DatabaseOutlined />,
+            label: t('menu.admin.storageProviderRoutingRules'),
+            page: <StorageProviderRoutingRuleManagerPage />,
             group: 'system_storage'
         },
         {

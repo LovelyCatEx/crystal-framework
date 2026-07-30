@@ -1763,6 +1763,32 @@ export const enUS: I18nRules = {
         statusUpdateFailed: 'Failed to update status'
       }
     },
+    storageProviderRoutingRuleManager: {
+      title: 'Routing Rules',
+      subtitle: 'Top-to-bottom priority matching — first matching rule wins',
+      modal: {
+        name: { label: 'Rule Name', required: 'Please enter rule name', placeholder: 'Rule name' },
+        conditionTree: { label: 'Conditions', description: 'Leave empty to match all uploads (fallback rule)' },
+        targetProviders: { label: 'Target Providers', required: 'Please select at least one provider' },
+        distributionType: { label: 'Distribution' },
+        enabled: { label: 'Enabled' },
+      },
+      columns: { enabled: 'Enabled', conditionTree: 'Conditions' },
+      reorderModal: {
+        title: 'Drag to Reorder',
+        description: 'Rules are matched top-down; drag to change priority.',
+        matchAll: '(match all — fallback)',
+        save: 'Save Order',
+        cancel: 'Cancel',
+      },
+      messages: {
+        reorderSuccess: 'Priority saved',
+        reorderFailed: 'Failed to save priority',
+        enabledToggleSuccess: 'Status updated',
+        enabledToggleFailed: 'Failed to update status',
+      },
+      action: { reorder: 'Priority Order' },
+    },
     fileResourceManager: {
       title: 'File Resource Management',
       subtitle: 'Manage system file resources',
@@ -3108,6 +3134,14 @@ export const enUS: I18nRules = {
         baseUrl: 'Base URL',
         config: 'Config'
       },
+      storageProviderRoutingRule: {
+        name: 'Rule Name',
+        priority: 'Priority',
+        targetProviders: 'Target Providers',
+        distributionType: 'Distribution',
+        enabled: 'Enabled',
+        unknownProvider: 'Unknown Provider'
+      },
       userPermission: {
         permission: 'Permission',
         type: 'Type',
@@ -3640,6 +3674,11 @@ export const enUS: I18nRules = {
       2: 'Tencent COS'
     },
 
+    ruleDistributionType: {
+      0: 'First Available',
+      1: 'Random'
+    },
+
     oAuthPlatform: {
       0: 'GitHub',
       1: 'Google',
@@ -3765,6 +3804,7 @@ export const enUS: I18nRules = {
     tenantTireBenefitValue: 'Tier Benefit Value',
     fileResource: 'File Resource',
     storageProvider: 'Storage Provider',
+    storageProviderRoutingRule: 'Routing Rule',
     mailTemplate: 'Mail Template',
     mailTemplateType: 'Mail Template Type',
     mailTemplateCategory: 'Mail Template Category',
@@ -3830,6 +3870,7 @@ export const enUS: I18nRules = {
       tenantTireBenefitValues: 'Tier Benefit Management',
       fileResources: 'File Resource Management',
       storageProviders: 'Storage Provider Management',
+      storageProviderRoutingRules: 'Storage Routing Rules',
       mailTemplates: 'Mail Template Management',
       mailTemplateTypes: 'Mail Template Types',
       mailTemplateCategories: 'Mail Template Categories',

@@ -53,6 +53,10 @@ export function getStorageProviderType(type: number): string {
     return translateEnum('storageProviderType', type);
 }
 
+export function getRuleDistributionType(type: number): string {
+    return translateEnum('ruleDistributionType', type);
+}
+
 export function getTenantBenefitType(type: number): string {
     return translateEnum('tenantBenefitType', type);
 }

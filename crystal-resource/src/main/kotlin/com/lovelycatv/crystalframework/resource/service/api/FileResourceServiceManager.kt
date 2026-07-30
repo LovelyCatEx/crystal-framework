@@ -1,9 +1,9 @@
 package com.lovelycatv.crystalframework.resource.service.api
 
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
+import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.interfaces.StorageProviderRouter
 import com.lovelycatv.crystalframework.resource.service.api.factory.FileResourceServiceFactory
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
@@ -16,17 +16,13 @@ class FileResourceServiceManager(
 ) {
     private val cacheMap = mutableMapOf<Long, AbstractFileResourceService>()
 
-    suspend fun getService(
-        userId: Long,
-        fileType: ResourceFileType,
-        fileName: String
-    ): AbstractFileResourceService {
+    suspend fun getService(context: RoutingContext): AbstractFileResourceService {
         val routers = applicationContext
             .getBeansOfType<StorageProviderRouter>()
             .values
 
         val storageProvider = routers.minWithOrNull(OrderComparator.INSTANCE)
-            ?.get(userId, fileType, fileName)
+            ?.get(context)
             ?: throw BusinessException("No route found for file resource service")
 
         return this.getService(storageProvider)

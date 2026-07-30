@@ -21,6 +21,8 @@ object SystemRolePermissionRelation {
             // Storage
             SystemPermission.MENU_SYSTEM_STORAGE_PROVIDER_MANAGER,
             SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
+            SystemPermission.MENU_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_MANAGER,
+            SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_READ,
             SystemPermission.MENU_SYSTEM_FILE_RESOURCE_MANAGER,
             SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_READ,
             // Mail template

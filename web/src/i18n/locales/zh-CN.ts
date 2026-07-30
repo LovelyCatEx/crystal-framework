@@ -1760,6 +1760,32 @@ export const zhCN: I18nRules = {
         statusUpdateFailed: '状态更新失败'
       }
     },
+    storageProviderRoutingRuleManager: {
+      title: '路由规则',
+      subtitle: '从上往下优先匹配，第一条命中的规则生效',
+      modal: {
+        name: { label: '规则名称', required: '请输入规则名称', placeholder: '规则名称' },
+        conditionTree: { label: '匹配条件', description: '不配置条件则匹配所有上传（兜底规则）' },
+        targetProviders: { label: '目标存储', required: '请至少选择一个存储提供商' },
+        distributionType: { label: '分发方式' },
+        enabled: { label: '启用' },
+      },
+      columns: { enabled: '启用状态', conditionTree: '匹配条件' },
+      reorderModal: {
+        title: '拖拽排序',
+        description: '规则从上往下优先匹配，拖动调整优先级。',
+        matchAll: '（匹配所有 — 兜底）',
+        save: '保存顺序',
+        cancel: '取消',
+      },
+      messages: {
+        reorderSuccess: '优先级已保存',
+        reorderFailed: '优先级保存失败',
+        enabledToggleSuccess: '状态已更新',
+        enabledToggleFailed: '状态更新失败',
+      },
+      action: { reorder: '优先级排序' },
+    },
     fileResourceManager: {
       title: '文件资源管理',
       subtitle: '管理系统文件资源',
@@ -3106,6 +3132,14 @@ export const zhCN: I18nRules = {
         baseUrl: '基础URL',
         config: '配置'
       },
+      storageProviderRoutingRule: {
+        name: '规则名称',
+        priority: '优先级',
+        targetProviders: '目标存储',
+        distributionType: '分发方式',
+        enabled: '启用状态',
+        unknownProvider: '未知存储'
+      },
       userPermission: {
         permission: '权限',
         type: '类型',
@@ -3638,6 +3672,11 @@ export const zhCN: I18nRules = {
       2: '腾讯云 COS'
     },
 
+    ruleDistributionType: {
+      0: '优先第一个',
+      1: '随机'
+    },
+
     oAuthPlatform: {
       0: 'GitHub',
       1: 'Google',
@@ -3763,6 +3802,7 @@ export const zhCN: I18nRules = {
     tenantTireBenefitValue: '套餐权益取值',
     fileResource: '文件资源',
     storageProvider: '存储提供商',
+    storageProviderRoutingRule: '路由规则',
     mailTemplate: '邮件模板',
     mailTemplateType: '邮件模板类型',
     mailTemplateCategory: '邮件模板分类',
@@ -3828,6 +3868,7 @@ export const zhCN: I18nRules = {
       tenantTireBenefitValues: '套餐权益管理',
       fileResources: '文件资源管理',
       storageProviders: '存储提供商管理',
+      storageProviderRoutingRules: '存储路由规则',
       mailTemplates: '邮件模板管理',
       mailTemplateTypes: '邮件模板类型',
       mailTemplateCategories: '邮件模板分类',
