@@ -131,7 +131,7 @@ class ManagerControllerAuditAspect(
                 if (rawType != null && AbstractManagerController::class.java.isAssignableFrom(rawType)) {
                     // ENTITY is the 3rd type argument (index 2) — the shape is preserved across
                     // AbstractManagerController and every concrete main line beneath it.
-                    val entityType = genericSuper.actualTypeArguments[2]
+                    val entityType = genericSuper.actualTypeArguments[AbstractManagerController.PARAMETERIZED_ENTITY_INDEX]
                     return entityType as? Class<*>
                 }
             }

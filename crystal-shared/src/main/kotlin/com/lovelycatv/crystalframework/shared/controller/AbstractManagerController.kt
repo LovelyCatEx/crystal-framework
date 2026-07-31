@@ -56,6 +56,10 @@ abstract class AbstractManagerController<
     protected val managerService: SERVICE,
     protected val mutability: Mutability = Mutability.READ_WRITE,
 ) where SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO> {
+    companion object {
+        // ENTITY is the 3rd type argument (index 2) — the shape is preserved across
+        val PARAMETERIZED_ENTITY_INDEX = 2
+    }
 
     /**
      * Short-circuit hook invoked at the very start of every endpoint (before [mutability],
