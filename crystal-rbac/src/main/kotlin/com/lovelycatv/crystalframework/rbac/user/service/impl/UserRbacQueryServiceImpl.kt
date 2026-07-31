@@ -9,6 +9,8 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRolePermissionR
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserRbacQueryResult
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserTenantRbacQueryResult
+import com.lovelycatv.crystalframework.shared.constants.RbacConstants
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
@@ -40,7 +42,7 @@ class UserRbacQueryServiceImpl(
         return UserTenantRbacQueryResult(
             memberId = tenantMemberId,
             tenantId = tenantId,
-            roles = emptySet(),
+            roles = roles,
             permissions = tenantRolePermissionRelationService
                 .getRolePermissions(roles.map { it.id })
                 .distinctBy { it.id }
@@ -62,22 +64,36 @@ class UserRbacQueryServiceImpl(
         return if (!refreshCache && cache != null) {
             cache.map { GrantedAuthority { it } }.toSet()
         } else {
-            val rbacPermissions = this
-                .getUserRbacAccessInfo(userId)
-                .actions
+            val rbac = this.getUserRbacAccessInfo(userId)
+
+            val rbacPermissions = rbac
+                .rawPermissions
                 .map { it.name }
 
-            val tenantRbacPermissions = if (tenantId != null && tenantMemberId != null) {
-                this
-                    .getTenantMemberRbacAccessInfo(tenantMemberId, tenantId)
+            val rbacRoles = rbac
+                .roles
+                .map { it.name }
+
+            val (tenantRbacPermissions, tenantRbacRoles) = if (tenantId != null && tenantMemberId != null) {
+                val tenantRbac = this.getTenantMemberRbacAccessInfo(tenantMemberId, tenantId)
+
+                val tenantRbacPermissions = tenantRbac
                     .permissions
-                    .filter { it.type == TenantPermissionType.ACTION.typeId }
                     .map { it.name }
+
+                val tenantRbacRoles = tenantRbac
+                    .roles
+                    .map { it.name }
+
+                tenantRbacPermissions to tenantRbacRoles
             } else {
-                emptySet()
+                emptyList<String>() to emptyList<String>()
             }
 
-            val permissions = rbacPermissions + tenantRbacPermissions
+            val permissions = rbacPermissions +
+                    tenantRbacPermissions +
+                    rbacRoles.map { RbacConstants.ROLE_PREFIX + it } +
+                    tenantRbacRoles.map { RbacConstants.TENANT_ROLE_PREFIX + it }
 
             redisService.set(
                 redisKey,

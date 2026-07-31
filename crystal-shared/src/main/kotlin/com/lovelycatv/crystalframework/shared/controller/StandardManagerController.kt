@@ -3,16 +3,17 @@ package com.lovelycatv.crystalframework.shared.controller
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
-import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.bind.annotation.GetMapping
 
 /**
@@ -64,9 +65,16 @@ abstract class StandardManagerController<
             ManagerAction.UPDATE -> ScopedOperation.UPDATE
             ManagerAction.DELETE -> ScopedOperation.DELETE
         }
-        val required = matrix.layersFor(ResourceScope.SYSTEM, op)
+        val required = matrix.layersFor(resourceScope, op)
         if (!RbacUtils.hasAnyAuthority(*required)) {
-            throw AuthorizationDeniedException("Access denied: required any of ${required.toList()}")
+            throw ForbiddenException(
+                "Access denied: required any of ${required.toList()}",
+                context = ForbiddenContext(
+                    reason = ForbiddenReason.MISSING_PERMISSION,
+                    requiredPermissions = required.filter { it != PermissionMatrix.NEVER_GRANTED }.toList(),
+                    scope = resourceScope,
+                ),
+            )
         }
     }
 

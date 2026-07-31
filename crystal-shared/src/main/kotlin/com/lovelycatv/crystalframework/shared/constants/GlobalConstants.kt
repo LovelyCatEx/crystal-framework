@@ -26,6 +26,11 @@ object GlobalConstants {
     object AspectPriority {
         const val MANAGER_CONTROLLER_AUDIT = 0
 
+        // Runs before MANAGER_CONTROLLER_PERMISSION_CHECK so that @RequiresAuthority denials fire
+        // before the Manager Controller safety-net aspect proceeds; both are ForbiddenException
+        // producers and the earlier one wins.
+        const val REQUIRES_AUTHORITY_CHECK = 900
+
         const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
 
         const val MAIL_SEND_LOG_RECORDER = 100

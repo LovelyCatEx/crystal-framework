@@ -24,7 +24,9 @@ import com.lovelycatv.crystalframework.shared.database.QueryLogic
 import com.lovelycatv.crystalframework.shared.database.QueryNode
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -93,7 +95,8 @@ class ManagerApprovalFlowTaskController(
             val task = managerService.getByIdOrNull(dto.id!!)
                 ?: return managerService.query(dto)
             if (task.assigneeId != assigneeId) {
-                throw ForbiddenException("Task not assigned to the current user")
+                throw ForbiddenException("Task not assigned to the current user",
+                    context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
             }
         }
         return managerService.query(dto.copy(query = appendAssigneeCondition(dto.query, assigneeId)))
@@ -145,7 +148,8 @@ class ManagerApprovalFlowTaskController(
         val resolvedScope = resolveScope(task.scope)
         val operatorId = resolveAssigneeId(resolvedScope, userAuthentication)
         if (task.assigneeId != operatorId) {
-            throw ForbiddenException("This task is not assigned to the current user")
+            throw ForbiddenException("This task is not assigned to the current user",
+                context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
         }
 
         approvalFlowEngine.handleTask(
@@ -178,7 +182,8 @@ class ManagerApprovalFlowTaskController(
         val resolvedScope = resolveScope(task.scope)
         val operatorId = resolveAssigneeId(resolvedScope, userAuthentication)
         if (task.assigneeId != operatorId) {
-            throw ForbiddenException("This task is not assigned to the current user")
+            throw ForbiddenException("This task is not assigned to the current user",
+                context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
         }
 
         val instance = instanceService.getByIdOrThrow(task.instanceId)
@@ -205,7 +210,8 @@ class ManagerApprovalFlowTaskController(
         return when (scope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                ?: throw ForbiddenException("Current user is not a member of this tenant")
+                ?: throw ForbiddenException("Current user is not a member of this tenant",
+                    context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = scope))
         }
     }
 

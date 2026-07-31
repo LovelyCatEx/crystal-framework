@@ -20,7 +20,9 @@ import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -86,7 +88,12 @@ class ManagerApprovalFlowDefinitionController(
             ?: throw BusinessException("Definition not found")
         val resolvedScope = resolveScope(definition.scope)
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.UPDATE)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
             throw UnauthorizedException()
@@ -110,7 +117,12 @@ class ManagerApprovalFlowDefinitionController(
             ?: throw BusinessException("Definition not found")
         val resolvedScope = resolveScope(definition.scope)
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.READ)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
             throw UnauthorizedException()

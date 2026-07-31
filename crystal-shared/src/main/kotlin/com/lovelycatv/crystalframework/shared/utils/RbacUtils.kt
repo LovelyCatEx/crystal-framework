@@ -1,12 +1,11 @@
 package com.lovelycatv.crystalframework.shared.utils
 
+import com.lovelycatv.crystalframework.shared.constants.RbacConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 
 object RbacUtils {
-    private const val SPRING_ROLE_PREFIX = "ROLE_"
-
     suspend fun getCurrentAuthorities(): List<String> {
         return ReactiveSecurityContextHolder.getContext()
             .mapNotNull { it.authentication }
@@ -54,7 +53,6 @@ object RbacUtils {
      */
     suspend fun isRoot(): Boolean {
         val authorities = getCurrentAuthorities()
-        return SystemRole.ROLE_ROOT in authorities ||
-            "$SPRING_ROLE_PREFIX${SystemRole.ROLE_ROOT.uppercase()}" in authorities
+        return "${RbacConstants.ROLE_PREFIX}${SystemRole.ROLE_ROOT}" in authorities
     }
 }

@@ -120,3 +120,11 @@ export function getApprovalFlowRecordAction(action: number): string {
 export function getApprovalFieldType(type: string): string {
     return translateEnum('approvalFieldType', type);
 }
+
+export function getForbiddenReason(reason: string): string {
+    return translateEnum('forbiddenReason', reason);
+}
+
+export function getForbiddenScope(scope: string): string {
+    return translateEnum('forbiddenScope', scope);
+}

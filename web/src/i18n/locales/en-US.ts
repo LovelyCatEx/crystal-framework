@@ -3594,7 +3594,15 @@ export const enUS: I18nRules = {
   api: {
     sessionExpired: 'Your session has expired',
     forbidden: 'You do not have permission to access this resource',
-    unknownError: 'Unknown error'
+    unknownError: 'Unknown error',
+    forbiddenModal: {
+      title: 'Access denied',
+      reasonLabel: 'Reason',
+      scopeLabel: 'Scope',
+      requiredPermissionsLabel: 'Required permissions',
+      noPermissionsRequired: 'No specific permissions declared',
+      messageLabel: 'Server message'
+    }
   },
 
   enums: {
@@ -3830,6 +3838,18 @@ export const enUS: I18nRules = {
       checkbox: 'Checkbox',
       date: 'Date',
       datetime: 'Date Time'
+    },
+    forbiddenReason: {
+      MISSING_PERMISSION: 'Missing permission',
+      SCOPE_MISMATCH: 'Resource does not belong to your scope',
+      PROTECTED_RESOURCE: 'This resource is protected',
+      NOT_TENANT_MEMBER: 'Not a member of this tenant',
+      ROLE_PROTECTED: 'Role is protected from this operation',
+      PERMISSION_ESCALATION: 'Operation would escalate privileges'
+    },
+    forbiddenScope: {
+      SYSTEM: 'System',
+      TENANT: 'Tenant'
     }
   },
 

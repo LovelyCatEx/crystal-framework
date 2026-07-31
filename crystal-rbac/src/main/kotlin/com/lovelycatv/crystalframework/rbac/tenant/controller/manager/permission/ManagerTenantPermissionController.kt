@@ -13,9 +13,11 @@ import com.lovelycatv.crystalframework.shared.controller.ManagerAction
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import com.lovelycatv.crystalframework.shared.controller.of
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
-import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -61,7 +63,14 @@ class ManagerTenantPermissionController(
                 SystemPermission.ACTION_TENANT_PERMISSION_READ.name,
             )
             if (!RbacUtils.hasAnyAuthority(*required)) {
-                throw AuthorizationDeniedException("Access denied: required any of ${required.toList()}")
+                throw ForbiddenException(
+                    "Access denied: required any of ${required.toList()}",
+                    context = ForbiddenContext(
+                        reason = ForbiddenReason.MISSING_PERMISSION,
+                        requiredPermissions = required.filter { it != PermissionMatrix.NEVER_GRANTED }.toList(),
+                        scope = resourceScope,
+                    ),
+                )
             }
             return
         }

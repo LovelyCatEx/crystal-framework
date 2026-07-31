@@ -2,16 +2,17 @@ package com.lovelycatv.crystalframework.auth.controller
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.auth.controller.dto.BindTenantOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.dto.UnbindTenantOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.vo.TenantOAuthAccountVO
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import jakarta.validation.Valid
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 class TenantOAuthAccountController(
     private val oAuthAccountService: OAuthAccountService,
 ) {
-    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.read')")
+    @RequiresAuthority(anyOf = ["i.tenant.personal.profile.oauth.read"], scope = ResourceScope.TENANT)
     @GetMapping("/accounts")
     suspend fun getTenantOAuthAccounts(
         userAuthentication: UserAuthentication,
@@ -58,7 +59,7 @@ class TenantOAuthAccountController(
         resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
         resourceIds = "#dto.oauthAccountId",
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.bind')")
+    @RequiresAuthority(anyOf = ["i.tenant.personal.profile.oauth.bind"], scope = ResourceScope.TENANT)
     @PostMapping("/bind")
     suspend fun bindTenantOAuthAccount(
         userAuthentication: UserAuthentication,
@@ -91,7 +92,7 @@ class TenantOAuthAccountController(
         resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
         resourceIds = "#dto.oauthAccountId",
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.unbind')")
+    @RequiresAuthority(anyOf = ["i.tenant.personal.profile.oauth.unbind"], scope = ResourceScope.TENANT)
     @PostMapping("/unbind")
     suspend fun unbindTenantOAuthAccount(
         userAuthentication: UserAuthentication,

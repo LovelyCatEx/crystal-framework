@@ -53,9 +53,10 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
     fun handleForbiddenException(e: ForbiddenException): ApiResponse<*> {
         logger.debug("An forbidden exception occurred", e)
 
-        return ApiResponse.forbidden<Nothing>(
-            e.localizedMessage ?: e.message ?: "you cannot access this resource")
-
+        return ApiResponse.forbidden(
+            e.localizedMessage ?: e.message ?: "you cannot access this resource",
+            e.context,
+        )
     }
 
     @ExceptionHandler(UnauthorizedException::class)

@@ -7,7 +7,10 @@ import com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleService
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.rbac.UserAuthoritiesInvalidationEvent
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
@@ -56,7 +59,8 @@ class UserRoleRelationServiceImpl(
             .toSet()
         val touchesProtected = (targetRoleNames intersect SystemRole.PROTECTED_ROLE_NAMES).isNotEmpty()
         if (touchesProtected && !RbacUtils.isSystemContext() && !RbacUtils.isRoot()) {
-            throw ForbiddenException("Cannot assign protected system roles")
+            throw ForbiddenException("Cannot assign protected system roles",
+                context = ForbiddenContext(reason = ForbiddenReason.ROLE_PROTECTED, scope = ResourceScope.SYSTEM))
         }
 
         // Delete existing relations
@@ -86,7 +90,8 @@ class UserRoleRelationServiceImpl(
         // Guard (H3): prevent granting protected system roles from a non-root user context.
         val touchesProtected = (roleNames.toSet() intersect SystemRole.PROTECTED_ROLE_NAMES).isNotEmpty()
         if (touchesProtected && !RbacUtils.isSystemContext() && !RbacUtils.isRoot()) {
-            throw ForbiddenException("Cannot assign protected system roles")
+            throw ForbiddenException("Cannot assign protected system roles",
+                context = ForbiddenContext(reason = ForbiddenReason.ROLE_PROTECTED, scope = ResourceScope.SYSTEM))
         }
 
         val roleIds = userRoleService

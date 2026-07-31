@@ -5,7 +5,10 @@ import com.lovelycatv.crystalframework.rbac.user.entity.UserRolePermissionRelati
 import com.lovelycatv.crystalframework.rbac.user.repository.UserPermissionRepository
 import com.lovelycatv.crystalframework.rbac.user.repository.UserRolePermissionRelationRepository
 import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -57,7 +60,8 @@ class UserRolePermissionRelationServiceImpl(
             !RbacUtils.isRoot() &&
             !RbacUtils.hasAllAuthorities(targetPermissionNames)
         ) {
-            throw ForbiddenException("Cannot grant permissions you do not hold")
+            throw ForbiddenException("Cannot grant permissions you do not hold",
+                context = ForbiddenContext(reason = ForbiddenReason.PERMISSION_ESCALATION, scope = ResourceScope.SYSTEM))
         }
 
         // Delete existing relations

@@ -6,7 +6,9 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadScopedDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseScopedManagerService
@@ -246,10 +248,19 @@ abstract class StandardScopedManagerController<
         userAuthentication: UserAuthentication
     ) {
         if (!checkPermission(scope, scopeId, operation, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(scope, operation)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }
+                    ?.toList() ?: emptyList(),
+                scope = scope,
+            ))
         }
         if (!checkOwnership(scope, scopeId, operation, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scope,
+            ))
         }
     }
 }

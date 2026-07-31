@@ -48,6 +48,7 @@ class TenantRolePermissionRelationServiceImpl(
         val relationIds = this.getRepository()
             .findAllByRoleIdIn(roleIds)
             .awaitListWithTimeout()
+            .distinctBy { it.permissionId }
 
         return tenantPermissionRepository
             .findAllById(relationIds.map { it.permissionId })

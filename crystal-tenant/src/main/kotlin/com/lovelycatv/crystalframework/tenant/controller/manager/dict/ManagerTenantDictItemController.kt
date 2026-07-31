@@ -9,7 +9,9 @@ import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -96,10 +98,18 @@ class ManagerTenantDictItemController(
         val (scope, scopeId) = managerService.resolveRootScopeFromTypeId(typeId)
             ?: throw BusinessException("Dict type $typeId not found")
         if (!RbacUtils.hasAnyAuthority(*permissions!!.layersFor(scope, ScopedOperation.READ))) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions!!.layersFor(scope, ScopedOperation.READ)
+                    .filter { it != PermissionMatrix.NEVER_GRANTED }.toList(),
+                scope = scope,
+            ))
         }
         if (!checkOwnership(scope, scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scope,
+            ))
         }
         return ApiResponse.success(managerService.getTreeByTypeId(typeId))
     }

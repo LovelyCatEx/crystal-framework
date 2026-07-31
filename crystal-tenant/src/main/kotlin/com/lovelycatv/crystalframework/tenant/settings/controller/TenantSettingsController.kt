@@ -4,12 +4,13 @@ import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,7 +29,7 @@ class TenantSettingsController(
         action = AuditAction.READ,
         resourceType = TableConstants.TABLE_TENANT_SETTINGS,
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.settings.read')")
+    @RequiresAuthority(anyOf = ["i.tenant.settings.read"], scope = ResourceScope.TENANT)
     @GetMapping("/schema")
     suspend fun getTenantSettings(userAuthentication: UserAuthentication): ApiResponse<*> {
         val tenantId = userAuthentication.assertTenantIdNotNull()
@@ -42,7 +43,7 @@ class TenantSettingsController(
         action = AuditAction.UPDATE,
         resourceType = TableConstants.TABLE_TENANT_SETTINGS,
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.settings.update')")
+    @RequiresAuthority(anyOf = ["i.tenant.settings.update"], scope = ResourceScope.TENANT)
     @PostMapping("/update")
     suspend fun updateTenantSettings(
         userAuthentication: UserAuthentication,

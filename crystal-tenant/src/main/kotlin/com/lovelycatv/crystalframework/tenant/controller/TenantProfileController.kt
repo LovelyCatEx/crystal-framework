@@ -13,9 +13,10 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import jakarta.validation.Valid
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -68,7 +69,7 @@ class TenantProfileController(
         resourceType = TableConstants.TABLE_TENANTS,
         resourceIds = "#userAuthentication.tenantId",
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
+    @RequiresAuthority(anyOf = ["i.tenant.profile.update"], scope = ResourceScope.TENANT)
     @PostMapping("/update")
     suspend fun updateTenantProfile(
         userAuthentication: UserAuthentication,
@@ -86,7 +87,7 @@ class TenantProfileController(
         resourceType = TableConstants.TABLE_TENANTS,
         resourceIds = "#userAuthentication.tenantId",
     )
-    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
+    @RequiresAuthority(anyOf = ["i.tenant.profile.update"], scope = ResourceScope.TENANT)
     @PostMapping("/uploadIcon")
     suspend fun uploadTenantIcon(
         userAuthentication: UserAuthentication,

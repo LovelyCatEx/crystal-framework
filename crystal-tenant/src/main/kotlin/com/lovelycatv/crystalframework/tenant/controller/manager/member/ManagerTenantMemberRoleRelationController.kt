@@ -9,7 +9,10 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleMan
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -52,7 +55,14 @@ class ManagerTenantMemberRoleRelationController(
                 throw UnauthorizedException()
             }
         } else {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = listOf(
+                    SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ.name,
+                    TenantPermission.ACTION_MEMBER_ROLE_READ.name,
+                ),
+                scope = ResourceScope.TENANT,
+            ))
         }
     }
 
@@ -75,14 +85,22 @@ class ManagerTenantMemberRoleRelationController(
             val tenantId = userAuthentication.tenantId!!
             if (tenantMemberManagerService.checkIsRelatedToRootParent(dto.memberId, tenantId)) {
                 if (!tenantRoleManagerService.checkIsRelatedToRootParent(dto.roleIds, tenantId)) {
-                    throw ForbiddenException("Roles do not belong to your tenant")
+                    throw ForbiddenException("Roles do not belong to your tenant",
+                        context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.TENANT))
                 }
                 tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
             } else {
                 throw UnauthorizedException()
             }
         } else {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = listOf(
+                    SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_UPDATE.name,
+                    TenantPermission.ACTION_MEMBER_ROLE_UPDATE.name,
+                ),
+                scope = ResourceScope.TENANT,
+            ))
         }
         return ApiResponse.success(null)
     }

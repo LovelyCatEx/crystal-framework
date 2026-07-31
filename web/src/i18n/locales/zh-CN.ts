@@ -3592,7 +3592,15 @@ export const zhCN: I18nRules = {
   api: {
     sessionExpired: '验证信息已过期',
     forbidden: '你无权访问当前资源',
-    unknownError: '未知错误'
+    unknownError: '未知错误',
+    forbiddenModal: {
+      title: '拒绝访问',
+      reasonLabel: '原因',
+      scopeLabel: '资源域',
+      requiredPermissionsLabel: '需要权限',
+      noPermissionsRequired: '未声明具体权限',
+      messageLabel: '服务端提示'
+    }
   },
 
   enums: {
@@ -3828,6 +3836,18 @@ export const zhCN: I18nRules = {
       checkbox: '多选',
       date: '日期',
       datetime: '日期时间'
+    },
+    forbiddenReason: {
+      MISSING_PERMISSION: '缺少所需权限',
+      SCOPE_MISMATCH: '资源不属于当前范围',
+      PROTECTED_RESOURCE: '该资源受保护',
+      NOT_TENANT_MEMBER: '你不是该租户的成员',
+      ROLE_PROTECTED: '该角色受保护，禁止执行此操作',
+      PERMISSION_ESCALATION: '该操作会导致权限提升'
+    },
+    forbiddenScope: {
+      SYSTEM: '系统',
+      TENANT: '租户'
     }
   },
 

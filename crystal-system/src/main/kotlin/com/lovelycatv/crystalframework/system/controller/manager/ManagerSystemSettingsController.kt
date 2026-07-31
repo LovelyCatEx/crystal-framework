@@ -13,17 +13,18 @@ import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRec
 import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendEmailDTO
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendMessageDTO
 import com.lovelycatv.crystalframework.system.controller.manager.vo.ManagerTestSendMessageResultVO
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import jakarta.validation.Valid
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import tools.jackson.databind.JsonNode
@@ -42,7 +43,7 @@ class ManagerSystemSettingsController(
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
 ) {
     @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
-    @PreAuthorize("hasAnyAuthority('system.settings.read')")
+    @RequiresAuthority(anyOf = ["system.settings.read"], scope = ResourceScope.SYSTEM)
     @GetMapping("/schema")
     suspend fun getSystemSettings(
         userAuthentication: UserAuthentication,
@@ -54,7 +55,7 @@ class ManagerSystemSettingsController(
     }
 
     @Audit(action = AuditAction.UPDATE, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
-    @PreAuthorize("hasAnyAuthority('system.settings.update')")
+    @RequiresAuthority(anyOf = ["system.settings.update"], scope = ResourceScope.SYSTEM)
     @PostMapping("/update")
     suspend fun updateSystemSettings(
         userAuthentication: UserAuthentication,
@@ -66,7 +67,7 @@ class ManagerSystemSettingsController(
     }
 
     @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
-    @PreAuthorize("hasAnyAuthority('system.settings.test.sendEmail')")
+    @RequiresAuthority(anyOf = ["system.settings.test.sendEmail"], scope = ResourceScope.SYSTEM)
     @PostMapping("/test-send-email")
     suspend fun testSendEmail(
         userAuthentication: UserAuthentication,
@@ -83,7 +84,7 @@ class ManagerSystemSettingsController(
     }
 
     @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
-    @PreAuthorize("hasAnyAuthority('system.settings.test.sendMessage')")
+    @RequiresAuthority(anyOf = ["system.settings.test.sendMessage"], scope = ResourceScope.SYSTEM)
     @PostMapping("/test-send-message")
     suspend fun testSendMessage(
         userAuthentication: UserAuthentication,
