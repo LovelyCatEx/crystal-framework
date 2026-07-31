@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -10,9 +13,10 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import jakarta.validation.Valid
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -23,6 +27,10 @@ class TenantProfileController(
     private val tenantService: TenantService,
     private val fileResourceService: FileResourceService
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANTS,
+    )
     @GetMapping
     suspend fun getTenantProfile(
         userAuthentication: UserAuthentication,
@@ -56,7 +64,12 @@ class TenantProfileController(
         })
     }
 
-    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANTS,
+        resourceIds = "#userAuthentication.tenantId",
+    )
+    @RequiresAuthority(anyOf = ["i.tenant.profile.update"], scope = ResourceScope.TENANT)
     @PostMapping("/update")
     suspend fun updateTenantProfile(
         userAuthentication: UserAuthentication,
@@ -69,7 +82,12 @@ class TenantProfileController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANTS,
+        resourceIds = "#userAuthentication.tenantId",
+    )
+    @RequiresAuthority(anyOf = ["i.tenant.profile.update"], scope = ResourceScope.TENANT)
     @PostMapping("/uploadIcon")
     suspend fun uploadTenantIcon(
         userAuthentication: UserAuthentication,

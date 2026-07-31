@@ -121,16 +121,17 @@ class ManagerControllerPermissionAspect {
 
 ### ManagerControllerAuditAspect (in crystal-audit)
 
-Same pointcut, `@Order` runs after the permission aspect. Execution order: permission check (Matrix or legacy AOP) → audit log → business method.
+The pointcut covers every subclass of `AbstractManagerController`. The audit aspect has `@Order = 0` and wraps the permission safety-net aspect (`@Order = 1000`); it observes the `Mono` returned by permission checks and the business method, then writes one audit log asynchronously when the `Mono` completes successfully or emits an error.
 
 The audit aspect records:
 
-- Operator (`userAuthentication.userId`), timestamp
-- Operation type (`create` / `update` / `delete`)
-- Request parameters, response result (post-redaction)
-- Resource identifier (entity id)
+- Operator (`userId`, `username`, and `tenantId`) and operation time
+- Operation type (`create` / `read` / `update` / `delete`, with `readAll` mapped to `read`)
+- Resource type (the Entity's `@Table` name) and resource IDs that can be extracted from the DTO
+- Request information (`requestId`, HTTP method, path, client IP, and User-Agent)
+- Whether execution succeeded and the error message
 
-The audit aspect also only covers the `StandardManagerController` family. Scoped-family audit needs manual instrumentation or a separate aspect.
+The audit aspect only recognises the five standard methods `create`, `read`, `readAll`, `update`, and `delete`. Extra custom endpoints declared in a Manager Controller and ordinary Controllers are not recorded automatically; they require explicit instrumentation or an additional aspect. The current implementation does not record complete request parameters or response results.
 
 ## Generic constraint chain
 

@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.shared.constants
 import org.springframework.core.Ordered
 
 object GlobalConstants {
-    const val APP_VERSION = "1.13.1"
+    const val APP_VERSION = "1.13.2"
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
 
@@ -25,6 +25,11 @@ object GlobalConstants {
 
     object AspectPriority {
         const val MANAGER_CONTROLLER_AUDIT = 0
+
+        // Runs before MANAGER_CONTROLLER_PERMISSION_CHECK so that @RequiresAuthority denials fire
+        // before the Manager Controller safety-net aspect proceeds; both are ForbiddenException
+        // producers and the earlier one wins.
+        const val REQUIRES_AUTHORITY_CHECK = 900
 
         const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
 

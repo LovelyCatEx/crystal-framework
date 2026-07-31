@@ -2,7 +2,10 @@ package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthBindingScope
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
@@ -114,7 +117,8 @@ class OAuthAccountServiceImpl(
         withUpdateEntityContext(accountId) {
             val result = withUpdateById(accountId) {
                 if (this.userId != userId) {
-                    throw ForbiddenException("You are not allowed to unbind this account")
+                    throw ForbiddenException("You are not allowed to unbind this account",
+                        context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.SYSTEM))
                 }
 
                 this.userId = null
@@ -180,7 +184,8 @@ class OAuthAccountServiceImpl(
                 entity.tenantId != tenantId ||
                 entity.userId != userId
             ) {
-                throw ForbiddenException("You are not allowed to unbind this account")
+                throw ForbiddenException("You are not allowed to unbind this account",
+                    context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.TENANT))
             }
 
             getRepository().delete(entity).awaitFirstOrNull()

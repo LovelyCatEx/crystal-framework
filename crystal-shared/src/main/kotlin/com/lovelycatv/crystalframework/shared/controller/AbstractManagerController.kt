@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
@@ -56,6 +57,11 @@ abstract class AbstractManagerController<
     protected val managerService: SERVICE,
     protected val mutability: Mutability = Mutability.READ_WRITE,
 ) where SERVICE : CachedBaseManagerService<REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO> {
+    companion object {
+        val PARAMETERIZED_ENTITY_INDEX = 2
+    }
+
+    protected open val resourceScope: ResourceScope = ResourceScope.SYSTEM
 
     /**
      * Short-circuit hook invoked at the very start of every endpoint (before [mutability],
@@ -112,7 +118,7 @@ abstract class AbstractManagerController<
         dto: CREATE_DTO,
     ): ApiResponse<*> {
         preflight(ManagerAction.CREATE, userAuthentication, createDto = dto)?.let { return it }
-        mutability.assertCreateAllowed()
+        mutability.assertCreateAllowed(resourceScope)
         authorize(ManagerAction.CREATE, userAuthentication, createDto = dto)
         managerService.create(dto)
         return ApiResponse.success(null)
@@ -138,7 +144,7 @@ abstract class AbstractManagerController<
         dto: UPDATE_DTO,
     ): ApiResponse<*> {
         preflight(ManagerAction.UPDATE, userAuthentication, updateDto = dto)?.let { return it }
-        mutability.assertUpdateAllowed()
+        mutability.assertUpdateAllowed(resourceScope)
         authorize(ManagerAction.UPDATE, userAuthentication, updateDto = dto)
         managerService.update(dto)
         return ApiResponse.success(null)
@@ -152,7 +158,7 @@ abstract class AbstractManagerController<
         dto: DELETE_DTO,
     ): ApiResponse<*> {
         preflight(ManagerAction.DELETE, userAuthentication, deleteDto = dto)?.let { return it }
-        mutability.assertDeleteAllowed()
+        mutability.assertDeleteAllowed(resourceScope)
         authorize(ManagerAction.DELETE, userAuthentication, deleteDto = dto)
         managerService.deleteByDTO(dto)
         return ApiResponse.success(null)

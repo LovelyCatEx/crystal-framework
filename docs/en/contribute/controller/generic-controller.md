@@ -13,9 +13,32 @@ Generic Controllers and Manager Controllers are complementary, not substitutes:
 | Purpose | Business API | Admin CRUD |
 | Path prefix | Free (`/api/{version}/ext/...` / `/api/{version}/oauth/...`) | Mandatory `/api/{version}/manager/...` |
 | Permission mechanism | `@PreAuthorize` + Spring Security SpEL | `PermissionMatrix` (constructor arg, inline authorize check) |
-| Audit aspect | Not covered | `ManagerControllerAuditAspect` records automatically |
+| Audit aspect | Recorded explicitly with `@Audit` | The 5 standard methods are recorded automatically by `ManagerControllerAuditAspect`; custom methods use `@Audit` |
 | Argument injection | `UserAuthentication` supported | `UserAuthentication` supported |
 | Endpoints | Fully custom | 5 standard endpoints (overridable, extendable) |
+
+## Audit log
+
+Generic Controllers and custom methods in Manager Controllers must declare audit information explicitly with `@Audit`:
+
+```kotlin
+@Audit(
+    action = AuditAction.READ,
+    resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES,
+)
+@PostMapping("/simulate")
+suspend fun simulate(
+    userAuthentication: UserAuthentication,
+    @Valid @RequestBody dto: SimulateStorageProviderRoutingRuleDTO,
+): ApiResponse<SimulationResultVO> {
+    authorize(ManagerAction.READ, userAuthentication)
+    return ApiResponse.success(managerService.simulate(dto))
+}
+```
+
+`action` and `resourceType` are required; `resourceIds` is optional. `resourceIds` is a SpEL expression based on method parameter names, and its result must be a `Long` or `Collection<Long>`; leave it empty when no resource ID is needed. The method parameters must include `UserAuthentication`; otherwise the aspect skips recording.
+
+The aspect reuses the request context and the shared `AuditLogService`, automatically recording the operator, request information, success state, and error message. The Manager Controller methods `create`, `read`, `readAll`, `update`, and `delete` are already recorded by `ManagerControllerAuditAspect`; do not add `@Audit` to them. Only extra custom methods need the explicit annotation.
 
 ## Permission check implementation
 

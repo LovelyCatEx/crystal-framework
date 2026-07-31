@@ -890,6 +890,10 @@ export const zhCN: I18nRules = {
     tenantPermissionManager: {
       title: '租户权限管理',
       subtitle: '管理系统租户权限',
+      switch: {
+        overview: '树形概览',
+        management: '权限管理'
+      },
       action: {
         addNew: '新增权限'
       },
@@ -1096,6 +1100,8 @@ export const zhCN: I18nRules = {
         'system.dashboard.business.statistics.read': '读取仪表盘业务统计',
         'system.dashboard.system.metrics.read': '读取仪表盘系统指标',
         'system.monitor.sessions.read': '读取活跃会话监控数据',
+        'system.monitor': '系统性能监控菜单',
+        'system.monitor.read': '查看系统性能指标数据',
         // Announcement (system layer)
         'system.announcement.create': '创建公告',
         'system.announcement.read': '读取公告',
@@ -1760,6 +1766,78 @@ export const zhCN: I18nRules = {
         statusUpdateFailed: '状态更新失败'
       }
     },
+    storageProviderRoutingRuleManager: {
+      title: '路由规则',
+      subtitle: '从上往下优先匹配，第一条命中的规则生效',
+      modal: {
+        name: { label: '规则名称', required: '请输入规则名称', placeholder: '规则名称' },
+        conditionTree: {
+          label: '匹配条件',
+          description: '不配置条件则匹配所有上传（兜底规则）',
+          fields: {
+            fileType: '文件类型',
+            fileName: '文件名',
+            fileExtension: '扩展名',
+            fileContentType: '内容类型',
+            fileSize: '文件大小（字节）',
+            userId: '用户 ID',
+            hourOfDay: '小时（0-23）',
+            dayOfWeek: '星期（1-7）',
+          },
+        },
+        targetProviders: { label: '目标存储', required: '请至少选择一个存储提供商' },
+        distributionType: { label: '分发方式' },
+        enabled: { label: '启用' },
+      },
+      columns: { enabled: '启用状态', conditionTree: '匹配条件' },
+      reorderModal: {
+        title: '拖拽排序',
+        description: '规则从上往下优先匹配，拖动调整优先级。',
+        matchAll: '（匹配所有 — 兜底）',
+        save: '保存顺序',
+        cancel: '取消',
+      },
+      messages: {
+        reorderSuccess: '优先级已保存',
+        reorderFailed: '优先级保存失败',
+        enabledToggleSuccess: '状态已更新',
+        enabledToggleFailed: '状态更新失败',
+      },
+      simulate: {
+        button: '测试路由',
+        modalTitle: '模拟文件路由',
+        description: '填入一个假设的上传上下文，查看会命中哪条规则以及最终会选中哪个提供商。不会持久化任何数据。',
+        form: {
+          userId: '用户（可选）',
+          fileType: '文件类型',
+          fileTypeRequired: '请选择文件类型',
+          fileName: '文件名（可选）',
+          fileNamePlaceholder: '例如：avatar.png',
+          fileNameExtra: '扩展名会从文件名自动派生。',
+          fileContentType: 'Content Type（可选）',
+          fileContentTypePlaceholder: '例如：image/png',
+          fileSize: '文件大小 字节（可选）',
+          fileSizePlaceholder: '例如：102400',
+          uploadTimestamp: '上传时间（可选）',
+        },
+        result: {
+          header: '模拟结果',
+          selectedProvider: '选中的提供商',
+          noRuleMatched: '未命中任何规则 — 不会选出提供商',
+          matchedNoProvider: '规则命中但未选中任何提供商',
+          matched: '命中',
+          notMatched: '未命中',
+          matchAll: '匹配所有（无条件）',
+          actualLabel: '实际值',
+          selectedProviderIds: '选中的提供商 ID',
+          priority: '优先级',
+        },
+        actions: { run: '模拟', close: '关闭' },
+        errors: { simulateFailed: '模拟失败' },
+      },
+      action: { reorder: '优先级排序' },
+      filter: { actions: '操作' },
+    },
     fileResourceManager: {
       title: '文件资源管理',
       subtitle: '管理系统文件资源',
@@ -1883,6 +1961,10 @@ export const zhCN: I18nRules = {
     userPermissionManager: {
       title: '用户权限管理',
       subtitle: '管理系统用户权限',
+      switch: {
+        overview: '树形概览',
+        management: '权限管理'
+      },
       filter: {
         type: '类型',
         all: '全部',
@@ -3106,11 +3188,22 @@ export const zhCN: I18nRules = {
         baseUrl: '基础URL',
         config: '配置'
       },
+      storageProviderRoutingRule: {
+        name: '规则名称',
+        priority: '优先级',
+        targetProviders: '目标存储',
+        distributionType: '分发方式',
+        enabled: '启用状态',
+        unknownProvider: '未知存储'
+      },
       userPermission: {
         permission: '权限',
         type: '类型',
         description: '描述',
         path: '资源路径'
+      },
+      permissionTree: {
+        actions: '操作'
       },
       userRole: {
         role: '角色',
@@ -3506,13 +3599,53 @@ export const zhCN: I18nRules = {
     },
     scopedUserDisplay: {
       unknown: '用户不存在'
+    },
+    permissionTree: {
+      scopes: {
+        system: '系统',
+        x: '跨域',
+        tenant: '跨租户',
+        iTenant: '本租户'
+      },
+      modules: {
+        permission: '权限',
+        role: '角色',
+        user: '用户',
+        settings: '设置',
+        oauth: 'OAuth',
+        file: '文件',
+        storage: '存储',
+        mail: '邮件',
+        tenant: '租户',
+        message: '消息',
+        audit: '审计',
+        monitor: '监控',
+        announcement: '公告',
+        approval: '审批流',
+        dict: '字典',
+        dashboard: '仪表盘',
+        maintenance: '维护',
+        department: '部门',
+        member: '成员',
+        invitation: '邀请',
+        profile: '资料',
+        personal: '个人'
+      }
     }
   },
 
   api: {
     sessionExpired: '验证信息已过期',
     forbidden: '你无权访问当前资源',
-    unknownError: '未知错误'
+    unknownError: '未知错误',
+    forbiddenModal: {
+      title: '拒绝访问',
+      reasonLabel: '原因',
+      scopeLabel: '资源域',
+      requiredPermissionsLabel: '需要权限',
+      noPermissionsRequired: '未声明具体权限',
+      messageLabel: '服务端提示'
+    }
   },
 
   enums: {
@@ -3535,7 +3668,8 @@ export const zhCN: I18nRules = {
     },
     resourceFileType: {
       0: '用户头像',
-      1: '租户图标'
+      1: '租户图标',
+      2: '租户成员头像'
     },
     departmentMemberRoleType: {
       0: '普通成员',
@@ -3636,6 +3770,11 @@ export const zhCN: I18nRules = {
       0: '本地文件系统',
       1: '阿里云 OSS',
       2: '腾讯云 COS'
+    },
+
+    ruleDistributionType: {
+      0: '优先第一个',
+      1: '随机'
     },
 
     oAuthPlatform: {
@@ -3742,6 +3881,18 @@ export const zhCN: I18nRules = {
       checkbox: '多选',
       date: '日期',
       datetime: '日期时间'
+    },
+    forbiddenReason: {
+      MISSING_PERMISSION: '缺少所需权限',
+      SCOPE_MISMATCH: '资源不属于当前范围',
+      PROTECTED_RESOURCE: '该资源受保护',
+      NOT_TENANT_MEMBER: '你不是该租户的成员',
+      ROLE_PROTECTED: '该角色受保护，禁止执行此操作',
+      PERMISSION_ESCALATION: '该操作会导致权限提升'
+    },
+    forbiddenScope: {
+      SYSTEM: '系统',
+      TENANT: '租户'
     }
   },
 
@@ -3763,6 +3914,7 @@ export const zhCN: I18nRules = {
     tenantTireBenefitValue: '套餐权益取值',
     fileResource: '文件资源',
     storageProvider: '存储提供商',
+    storageProviderRoutingRule: '路由规则',
     mailTemplate: '邮件模板',
     mailTemplateType: '邮件模板类型',
     mailTemplateCategory: '邮件模板分类',
@@ -3828,6 +3980,7 @@ export const zhCN: I18nRules = {
       tenantTireBenefitValues: '套餐权益管理',
       fileResources: '文件资源管理',
       storageProviders: '存储提供商管理',
+      storageProviderRoutingRules: '存储路由规则',
       mailTemplates: '邮件模板管理',
       mailTemplateTypes: '邮件模板类型',
       mailTemplateCategories: '邮件模板分类',

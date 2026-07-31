@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowInstanceDTO
@@ -14,6 +16,7 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
@@ -23,7 +26,9 @@ import com.lovelycatv.crystalframework.shared.database.QueryLogic
 import com.lovelycatv.crystalframework.shared.database.QueryNode
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -102,7 +107,13 @@ class ManagerApprovalFlowInstanceController(
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
 
         if (dto.id != null && !canReadAll) {
-            throw ForbiddenException("Id lookup on /query requires read-all authority for scope $resolvedScope")
+            throw ForbiddenException("Id lookup on /query requires read-all authority for scope $resolvedScope",
+                context = ForbiddenContext(
+                    reason = ForbiddenReason.MISSING_PERMISSION,
+                    requiredPermissions = matrix.layersFor(resolvedScope, ScopedOperation.READ)
+                        .filter { it != PermissionMatrix.NEVER_GRANTED }.toList(),
+                    scope = resolvedScope,
+                ))
         }
 
         val effectiveDto = if (canReadAll) {
@@ -111,7 +122,8 @@ class ManagerApprovalFlowInstanceController(
             val initiatorId = when (resolvedScope) {
                 ResourceScope.SYSTEM -> userAuthentication.userId
                 ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                    ?: throw ForbiddenException("Current user is not a member of this tenant")
+                    ?: throw ForbiddenException("Current user is not a member of this tenant",
+                        context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = ResourceScope.TENANT))
             }
             dto.copy(query = appendInitiatorCondition(dto.query, initiatorId))
         }
@@ -130,6 +142,10 @@ class ManagerApprovalFlowInstanceController(
      * who need id lookup with cross-user visibility should go through `/query` with read-all
      * authority.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+    )
     @PostMapping("/my", version = "1")
     suspend fun queryMyInstances(
         userAuthentication: UserAuthentication,
@@ -139,7 +155,8 @@ class ManagerApprovalFlowInstanceController(
         val initiatorId = when (resolvedScope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                ?: throw ForbiddenException("Current user is not a member of this tenant")
+                ?: throw ForbiddenException("Current user is not a member of this tenant",
+                    context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = ResourceScope.TENANT))
         }
         val forcedDto = dto.copy(
             id = null,
@@ -154,6 +171,10 @@ class ManagerApprovalFlowInstanceController(
      * is allowed to initiate. The initiator id stored on the new instance is scope-specific
      * (userId for SYSTEM, tenantMemberId for TENANT) — see [ApprovalFlowEngine.startFlow].
      */
+    @Audit(
+        action = AuditAction.CREATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+    )
     @PostMapping("/start", version = "1")
     suspend fun start(
         userAuthentication: UserAuthentication,
@@ -166,16 +187,25 @@ class ManagerApprovalFlowInstanceController(
         val resolvedScope = resolveScope(definition.scope)
 
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.READ)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = resolvedScope,
+            ))
         }
 
         val initiatorId = when (resolvedScope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                ?: throw ForbiddenException("Current user is not a member of this tenant")
+                ?: throw ForbiddenException("Current user is not a member of this tenant",
+                    context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = ResourceScope.TENANT))
         }
         val approvalScope = ApprovalFlowScope.getById(definition.scope)
             ?: throw BusinessException("Unknown approval flow scope ${definition.scope}")
@@ -203,6 +233,11 @@ class ManagerApprovalFlowInstanceController(
      *
      * Ownership (tenant isolation) is still enforced afterwards.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+        resourceIds = "#instanceId",
+    )
     @GetMapping("/details-by-id", version = "1")
     suspend fun detailsById(
         userAuthentication: UserAuthentication,
@@ -215,7 +250,8 @@ class ManagerApprovalFlowInstanceController(
         val callerScopedId = when (resolvedScope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                ?: throw ForbiddenException("Current user is not a member of this tenant")
+                ?: throw ForbiddenException("Current user is not a member of this tenant",
+                    context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = ResourceScope.TENANT))
         }
 
         val matrix = permissions
@@ -225,7 +261,10 @@ class ManagerApprovalFlowInstanceController(
         val isParticipant = !canReadAll && !isInitiator
             && managerService.isAssigneeOfInstance(instance.id, callerScopedId)
         if (!(canReadAll || isInitiator || isParticipant)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, instance.scopeId, ScopedOperation.READ, userAuthentication)) {
             throw UnauthorizedException()

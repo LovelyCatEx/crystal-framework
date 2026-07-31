@@ -121,16 +121,17 @@ class ManagerControllerPermissionAspect {
 
 ### ManagerControllerAuditAspect（在 crystal-audit）
 
-同一切入点，`@Order` 排在权限切面之后。执行顺序：权限检查（Matrix 或 AOP 兼容路径）→ 审计日志 → 业务方法。
+切点覆盖 `AbstractManagerController` 的所有子类。审计切面的 `@Order` 为 `0`，位于权限安全网切面（`@Order = 1000`）外层；它观察权限检查和业务方法返回的 `Mono`，并在成功完成或产生错误时异步写入一条审计日志。
 
 审计切面记录：
 
-- 操作人（`userAuthentication.userId`）、操作时间
-- 操作类型（`create` / `update` / `delete`）
-- 请求参数、响应结果（脱敏后）
-- 资源标识（entity id）
+- 操作人（`userId`、`username`、`tenantId`）和操作时间
+- 操作类型（`create` / `read` / `update` / `delete`，其中 `readAll` 归为 `read`）
+- 资源类型（Entity 的 `@Table` 表名）以及可从 DTO 提取的资源 ID
+- 请求信息（`requestId`、HTTP Method、Path、客户端 IP、User-Agent）
+- 执行是否成功以及错误消息
 
-审计切面同样只覆盖 `StandardManagerController` 家族。Scoped 家族的审计需要手动打点或另写 aspect。
+审计切面只识别 `create`、`read`、`readAll`、`update`、`delete` 五个标准方法。Manager Controller 中额外定义的自定义端点以及普通 Controller 不会被自动记录，需要显式打点或另行扩展切面。当前实现不记录完整请求参数或响应结果。
 
 ## 类型参数约束链
 

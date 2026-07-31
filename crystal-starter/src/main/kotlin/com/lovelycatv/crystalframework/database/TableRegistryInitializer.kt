@@ -57,6 +57,7 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_INSTANCE)
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_TASK)
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_RECORD)
+        registry.register(TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES)
 
         configurers.forEach { it.configure(registry) }
 

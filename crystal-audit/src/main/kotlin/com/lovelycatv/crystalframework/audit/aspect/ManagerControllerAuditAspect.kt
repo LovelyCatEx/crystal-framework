@@ -1,8 +1,7 @@
 package com.lovelycatv.crystalframework.audit.aspect
 
 import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
-import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
-import com.lovelycatv.crystalframework.audit.service.AuditLogService
+import com.lovelycatv.crystalframework.audit.service.AuditLogRecorder
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.controller.AbstractManagerController
@@ -12,9 +11,6 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -30,10 +26,9 @@ import java.lang.reflect.ParameterizedType
 @Component
 @Order(GlobalConstants.AspectPriority.MANAGER_CONTROLLER_AUDIT)
 class ManagerControllerAuditAspect(
-    private val auditLogService: AuditLogService
+    private val auditLogRecorder: AuditLogRecorder,
 ) {
     private val logger = logger()
-    private val auditScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * Cache: controller class -> resource type (table name from @Table on ENTITY)
@@ -70,41 +65,15 @@ class ManagerControllerAuditAspect(
         @Suppress("UNCHECKED_CAST")
         val result = joinPoint.proceed() as Mono<Any>
 
-        return result
-            .doOnEach { signal ->
-                if (signal.isOnNext || signal.isOnComplete) {
-                    val auditRequestInfo = AuditRequestContext.from(signal.contextView)
-                    fireAudit(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, true, null)
-                } else if (signal.isOnError) {
-                    val auditRequestInfo = AuditRequestContext.from(signal.contextView)
-                    fireAudit(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, false, signal.throwable?.message)
+        return Mono.deferContextual { context ->
+            val auditRequestInfo = AuditRequestContext.from(context)
+            result
+                .doOnSuccess {
+                    auditLogRecorder.record(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, true, null)
                 }
-            }
-    }
-
-    private fun fireAudit(
-        userAuthentication: UserAuthentication,
-        auditRequestInfo: AuditRequestInfo?,
-        action: AuditAction,
-        resourceType: String,
-        resourceIds: List<Long>?,
-        success: Boolean,
-        errorMessage: String?
-    ) {
-        auditScope.launch {
-            try {
-                auditLogService.record(
-                    userAuthentication = userAuthentication,
-                    auditRequestInfo = auditRequestInfo,
-                    action = action,
-                    resourceType = resourceType,
-                    resourceIds = resourceIds,
-                    success = success,
-                    errorMessage = errorMessage
-                )
-            } catch (e: Exception) {
-                logger.error("Failed to record audit log: ${e.message}", e)
-            }
+                .doOnError { error ->
+                    auditLogRecorder.record(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, false, error.message)
+                }
         }
     }
 
@@ -131,7 +100,7 @@ class ManagerControllerAuditAspect(
                 if (rawType != null && AbstractManagerController::class.java.isAssignableFrom(rawType)) {
                     // ENTITY is the 3rd type argument (index 2) — the shape is preserved across
                     // AbstractManagerController and every concrete main line beneath it.
-                    val entityType = genericSuper.actualTypeArguments[2]
+                    val entityType = genericSuper.actualTypeArguments[AbstractManagerController.PARAMETERIZED_ENTITY_INDEX]
                     return entityType as? Class<*>
                 }
             }

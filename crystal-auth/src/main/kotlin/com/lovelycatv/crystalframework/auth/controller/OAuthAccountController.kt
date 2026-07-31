@@ -1,8 +1,11 @@
 package com.lovelycatv.crystalframework.auth.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -27,6 +30,11 @@ class OAuthAccountController(
     private val userAuthorizationService: UserAuthorizationService,
     private val oAuthAccountService: OAuthAccountService,
 ) {
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
+        resourceIds = "#dto.oauthAccountId",
+    )
     @Unauthorized
     @PostMapping("/bindOAuthAccount")
     suspend fun bindOAuthAccount(
@@ -65,6 +73,11 @@ class OAuthAccountController(
         )
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
+        resourceIds = "#dto.oauthAccountId",
+    )
     @PostMapping("/unbind")
     suspend fun unbindOAuthAccount(
         userAuthentication: UserAuthentication,
@@ -119,6 +132,11 @@ class OAuthAccountController(
      * at the given scope (SYSTEM or TENANT). The OAuth account must already exist (created by
      * the login/code-exchange flow via loginByOAuth2Code).
      */
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
+        resourceIds = "#dto.oauthAccountId",
+    )
     @PostMapping("/bindByAccountId")
     suspend fun bindOAuthByAccountId(
         userAuthentication: UserAuthentication,

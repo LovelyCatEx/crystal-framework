@@ -3,7 +3,10 @@ package com.lovelycatv.crystalframework.tenant.controller.manager.invitation
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -85,7 +88,12 @@ class ManagerTenantInvitationController(
                 throw UnauthorizedException()
             }
         } else {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = listOf(permissions.tenantAdminCreate, permissions.tenantPemCreate)
+                    .filter { it != PermissionMatrix.NOT_APPLICABLE && it != PermissionMatrix.NEVER_GRANTED },
+                scope = ResourceScope.TENANT,
+            ))
         }
 
         return ApiResponse.success(null)
@@ -108,7 +116,12 @@ class ManagerTenantInvitationController(
                 throw UnauthorizedException()
             }
         } else {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = listOf(permissions.tenantAdminUpdate, permissions.tenantPemUpdate)
+                    .filter { it != PermissionMatrix.NOT_APPLICABLE && it != PermissionMatrix.NEVER_GRANTED },
+                scope = ResourceScope.TENANT,
+            ))
         }
 
         return ApiResponse.success(null)
