@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -23,6 +26,10 @@ class TenantProfileController(
     private val tenantService: TenantService,
     private val fileResourceService: FileResourceService
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANTS,
+    )
     @GetMapping
     suspend fun getTenantProfile(
         userAuthentication: UserAuthentication,
@@ -56,6 +63,11 @@ class TenantProfileController(
         })
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANTS,
+        resourceIds = "#userAuthentication.tenantId",
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
     @PostMapping("/update")
     suspend fun updateTenantProfile(
@@ -69,6 +81,11 @@ class TenantProfileController(
         return ApiResponse.success(null)
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANTS,
+        resourceIds = "#userAuthentication.tenantId",
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.profile.update')")
     @PostMapping("/uploadIcon")
     suspend fun uploadTenantIcon(

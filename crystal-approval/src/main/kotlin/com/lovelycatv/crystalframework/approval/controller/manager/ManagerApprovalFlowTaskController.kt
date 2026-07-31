@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.HandleApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowTaskDTO
@@ -13,6 +15,7 @@ import com.lovelycatv.crystalframework.approval.service.ApprovalFlowNodeService
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowTaskManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
@@ -102,6 +105,10 @@ class ManagerApprovalFlowTaskController(
      * id short-circuit cannot bypass the assignee filter — callers who need id lookup should go
      * through `/query`, which still requires `task.assigneeId == self`.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+    )
     @PostMapping("/my", version = "1")
     suspend fun queryMyTasks(
         userAuthentication: UserAuthentication,
@@ -121,6 +128,11 @@ class ManagerApprovalFlowTaskController(
      * task's scope-specific assignee id against the caller; the actual state transition (records,
      * token/instance advancement) is delegated to [ApprovalFlowEngine.handleTask].
      */
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+        resourceIds = "#dto.taskId",
+    )
     @PostMapping("/handle", version = "1")
     suspend fun handle(
         userAuthentication: UserAuthentication,
@@ -152,6 +164,11 @@ class ManagerApprovalFlowTaskController(
      * the same way as [handle] — only the task's assignee may read this. Merging schema/overlay
      * into the render-ready structure is done client-side (see frontend `mergeFieldOverrides`).
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+        resourceIds = "#taskId",
+    )
     @GetMapping("/form-view", version = "1")
     suspend fun formView(
         userAuthentication: UserAuthentication,

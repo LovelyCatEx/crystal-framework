@@ -57,6 +57,10 @@ description: 为需要按 scope（SYSTEM/TENANT）区分数据可见性的实体
 
 跟标准 Manager 一致：`/list` `/create` `/query` `/update` `/delete`。区别只在授权路径。
 
+### 审计日志（自动，无需 @Audit）
+
+跟 `StandardManagerController` 一样，5 个标准 CRUD 端点被 `ManagerControllerAuditAspect` 自动审计（要求方法参数含 `UserAuthentication` + ENTITY 有 `@Table`）。**禁止**再手动加 `@Audit`。自定义额外端点需要审计的按 `add-audit-annotation` skill 处理。
+
 ### Service 继承要求
 
 **直接 scoped**：

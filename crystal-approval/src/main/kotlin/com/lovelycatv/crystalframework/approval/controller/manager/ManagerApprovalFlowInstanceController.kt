@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowInstanceDTO
@@ -14,6 +16,7 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
@@ -130,6 +133,10 @@ class ManagerApprovalFlowInstanceController(
      * who need id lookup with cross-user visibility should go through `/query` with read-all
      * authority.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+    )
     @PostMapping("/my", version = "1")
     suspend fun queryMyInstances(
         userAuthentication: UserAuthentication,
@@ -154,6 +161,10 @@ class ManagerApprovalFlowInstanceController(
      * is allowed to initiate. The initiator id stored on the new instance is scope-specific
      * (userId for SYSTEM, tenantMemberId for TENANT) — see [ApprovalFlowEngine.startFlow].
      */
+    @Audit(
+        action = AuditAction.CREATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+    )
     @PostMapping("/start", version = "1")
     suspend fun start(
         userAuthentication: UserAuthentication,
@@ -203,6 +214,11 @@ class ManagerApprovalFlowInstanceController(
      *
      * Ownership (tenant isolation) is still enforced afterwards.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_INSTANCE,
+        resourceIds = "#instanceId",
+    )
     @GetMapping("/details-by-id", version = "1")
     suspend fun detailsById(
         userAuthentication: UserAuthentication,

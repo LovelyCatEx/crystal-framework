@@ -138,6 +138,23 @@ DTO / VO / entity 里所有 `Long` 字段（`id` / `xxxId` / `xxxTime`）序列�
 - DTO / VO 是 data class 无需额外注解，全局 Jackson module 会处理
 - 前端 TypeScript 定义用 `id: string`
 
+### 审计日志(手动 @Audit)
+
+Generic Controller 的端点**不会**被自动审计(不继承 `AbstractManagerController`)。若端点涉及资源变更、绑定 / 解绑、敏感读取或触发型动作,按 `add-audit-annotation` skill 手动加:
+
+```kotlin
+@Audit(action = AuditAction.UPDATE, resourceType = TableConstants.TABLE_XXX, resourceIds = "#dto.xxxId")
+@PostMapping("/xxx")
+suspend fun xxx(
+    userAuthentication: UserAuthentication,
+    @ModelAttribute dto: XxxDTO,
+): ApiResponse<*> { ... }
+```
+
+关键约束:方法参数**必须**含 `UserAuthentication`,否则切面静默跳过;`resourceType` 走 `TableConstants.TABLE_XXX`;`resourceIds` 是 SpEL 表达式,变量以方法参数名进上下文(`#dto.xxxId` `#id` `#userAuthentication.tenantId`),结果必须是 `Long` 或 `Collection<Long>`。模块 pom 必须显式声明 `crystal-audit` 依赖。
+
+**不加**的场景:`@Unauthorized` 匿名端点、只读探针(readiness / liveness)、无副作用列表查询、找不到合适 `TableConstants` 的运行时状态。
+
 ### Aspect / Filter 若涉及
 
 如果这个 Controller 上要挂新的 aspect / filter：

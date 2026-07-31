@@ -72,6 +72,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-tenant</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-audit</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

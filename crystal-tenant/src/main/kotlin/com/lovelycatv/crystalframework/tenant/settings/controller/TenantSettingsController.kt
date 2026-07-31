@@ -1,8 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.settings.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.tenant.settings.TenantSettingsRegistry
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.settings.service.TenantSettingsService
@@ -21,6 +24,10 @@ class TenantSettingsController(
     private val tenantSettingsService: TenantSettingsService,
     private val tenantSettingsRegistry: TenantSettingsRegistry,
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_SETTINGS,
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.settings.read')")
     @GetMapping("/schema")
     suspend fun getTenantSettings(userAuthentication: UserAuthentication): ApiResponse<*> {
@@ -31,6 +38,10 @@ class TenantSettingsController(
         return ApiResponse.success(data)
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANT_SETTINGS,
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.settings.update')")
     @PostMapping("/update")
     suspend fun updateTenantSettings(

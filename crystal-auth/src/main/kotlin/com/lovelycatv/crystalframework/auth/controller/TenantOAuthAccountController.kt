@@ -1,6 +1,9 @@
 package com.lovelycatv.crystalframework.auth.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.auth.controller.dto.BindTenantOAuthAccountDTO
@@ -50,6 +53,11 @@ class TenantOAuthAccountController(
         )
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
+        resourceIds = "#dto.oauthAccountId",
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.bind')")
     @PostMapping("/bind")
     suspend fun bindTenantOAuthAccount(
@@ -78,6 +86,11 @@ class TenantOAuthAccountController(
         )
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
+        resourceIds = "#dto.oauthAccountId",
+    )
     @PreAuthorize("hasAnyAuthority('i.tenant.personal.profile.oauth.unbind')")
     @PostMapping("/unbind")
     suspend fun unbindTenantOAuthAccount(

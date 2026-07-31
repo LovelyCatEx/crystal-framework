@@ -51,6 +51,11 @@ class ManagerStorageProviderRoutingRuleController(
     ),
 ) {
     /** Drag-and-drop priority reorder: writes `priority` = index within [dto.orderedIds]. */
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES,
+        resourceIds = "#dto.orderedIds",
+    )
     @PostMapping("/reorder")
     suspend fun reorder(
         userAuthentication: UserAuthentication,

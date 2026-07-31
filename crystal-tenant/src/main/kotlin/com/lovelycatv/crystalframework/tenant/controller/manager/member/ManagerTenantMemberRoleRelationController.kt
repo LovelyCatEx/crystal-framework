@@ -1,11 +1,14 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.member
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.SetMemberRolesDTO
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -29,6 +32,11 @@ class ManagerTenantMemberRoleRelationController(
     private val tenantMemberManagerService: TenantMemberManagerService,
     private val tenantRoleManagerService: TenantRoleManagerService
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_MEMBER_ROLE_RELATIONS,
+        resourceIds = "#memberId",
+    )
     @GetMapping("/get", version = "1")
     suspend fun getMemberRoles(
         userAuthentication: UserAuthentication,
@@ -48,6 +56,11 @@ class ManagerTenantMemberRoleRelationController(
         }
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANT_MEMBER_ROLE_RELATIONS,
+        resourceIds = "#dto.memberId",
+    )
     @PostMapping("/set", version = "1")
     suspend fun setMemberRoles(
         userAuthentication: UserAuthentication,

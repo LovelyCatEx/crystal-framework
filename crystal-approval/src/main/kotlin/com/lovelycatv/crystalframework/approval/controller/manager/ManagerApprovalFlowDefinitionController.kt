@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerDeleteApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowDefinitionDTO
@@ -14,6 +16,7 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -67,6 +70,11 @@ class ManagerApprovalFlowDefinitionController(
         tenantPemDelete = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE.name,
     ),
 ) {
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_DEFINITION,
+        resourceIds = "#dto.definitionId",
+    )
     @PostMapping("/update-graph")
     suspend fun updateGraph(
         userAuthentication: UserAuthentication,
@@ -87,6 +95,11 @@ class ManagerApprovalFlowDefinitionController(
         return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
 
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_DEFINITION,
+        resourceIds = "#definitionId",
+    )
     @GetMapping("/details-by-id")
     suspend fun getApprovalFlowDefinitionDetails(
         userAuthentication: UserAuthentication,

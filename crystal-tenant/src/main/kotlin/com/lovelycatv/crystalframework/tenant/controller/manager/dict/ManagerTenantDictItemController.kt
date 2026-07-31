@@ -1,8 +1,11 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -81,6 +84,10 @@ class ManagerTenantDictItemController(
      * Tree view of dict items under a given type. Authorization mirrors the standard READ
      * pipeline: consult [PermissionMatrix.layersFor] then run [checkOwnership].
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_DICT_ITEMS,
+    )
     @GetMapping("/tree")
     suspend fun tree(
         userAuthentication: UserAuthentication,

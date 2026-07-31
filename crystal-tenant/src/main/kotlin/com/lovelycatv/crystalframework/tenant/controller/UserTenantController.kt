@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -21,6 +24,10 @@ class UserTenantController(
     private val fileResourceService: FileResourceService,
     private val tenantMemberRepository: TenantMemberRepository
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANTS,
+    )
     @GetMapping("/joined")
     suspend fun getUserTenants(
         userAuthentication: UserAuthentication

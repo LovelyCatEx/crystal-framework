@@ -1,8 +1,11 @@
 package com.lovelycatv.crystalframework.rbac.user.controller.manager.role
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.user.controller.manager.role.dto.SetUserRolesDTO
 import com.lovelycatv.crystalframework.rbac.user.service.impl.UserRoleRelationServiceImpl
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import jakarta.validation.Valid
@@ -22,6 +25,11 @@ class ManagerUserRoleRelationController(
     private val userRoleRelationService: UserRoleRelationServiceImpl
 ) {
     @PreAuthorize("hasAnyAuthority('system.user.role.read')")
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_USER_ROLE_RELATIONS,
+        resourceIds = "#userId",
+    )
     @GetMapping("/get", version = "1")
     suspend fun getUserRoles(
         userAuthentication: UserAuthentication,
@@ -31,6 +39,11 @@ class ManagerUserRoleRelationController(
     }
 
     @PreAuthorize("hasAnyAuthority('system.user.role.update')")
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USER_ROLE_RELATIONS,
+        resourceIds = "#dto.userId",
+    )
     @PostMapping("/set", version = "1")
     suspend fun setUserRoles(
         userAuthentication: UserAuthentication,

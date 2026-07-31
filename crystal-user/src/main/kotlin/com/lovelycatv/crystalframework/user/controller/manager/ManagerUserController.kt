@@ -1,8 +1,11 @@
 package com.lovelycatv.crystalframework.user.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
 import com.lovelycatv.crystalframework.shared.controller.systemOnly
@@ -49,6 +52,11 @@ class ManagerUserController(
     ),
 ) {
     @Suppress("UNUSED_PARAMETER")
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USERS,
+        resourceIds = "#dto.userIds",
+    )
     @PostMapping("/refresh-authority")
     suspend fun refreshAuthority(
         userAuthentication: UserAuthentication,

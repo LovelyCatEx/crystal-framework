@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission.dto.SetRolePermissionsDTO
 import com.lovelycatv.crystalframework.rbac.tenant.repository.TenantPermissionRepository
@@ -7,6 +9,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRolePermissionR
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -25,6 +28,11 @@ class ManagerTenantRolePermissionRelationController(
     private val tenantRoleManagerService: TenantRoleManagerService,
     private val tenantPermissionRepository: TenantPermissionRepository
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_ROLE_PERMISSION_RELATIONS,
+        resourceIds = "#roleId",
+    )
     @GetMapping("/get", version = "1")
     suspend fun getRolePermissions(
         userAuthentication: UserAuthentication,
@@ -44,6 +52,11 @@ class ManagerTenantRolePermissionRelationController(
         }
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANT_ROLE_PERMISSION_RELATIONS,
+        resourceIds = "#dto.roleId",
+    )
     @PostMapping("/set", version = "1")
     suspend fun setRolePermissions(
         userAuthentication: UserAuthentication,

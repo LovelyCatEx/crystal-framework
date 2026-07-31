@@ -1,6 +1,9 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.controller.dto.AcceptTenantInvitationDTO
@@ -18,6 +21,10 @@ class TenantInvitationController(
     private val tenantInvitationService: TenantInvitationService,
     private val tenantDepartmentService: TenantDepartmentService,
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_INVITATIONS,
+    )
     @GetMapping("/query")
     suspend fun queryTenantInvitation(
         userAuthentication: UserAuthentication,
@@ -39,6 +46,10 @@ class TenantInvitationController(
         )
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANT_INVITATION_RECORDS,
+    )
     @PostMapping("/accept")
     suspend fun acceptTenantInvitation(
         userAuthentication: UserAuthentication,
