@@ -1,6 +1,10 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
 import {doPost} from "@/api/system-request.ts";
-import type {RuleDistributionType, StorageProviderRoutingRule} from "@/types/resource/storage-provider-routing-rule.types.ts";
+import type {
+    RuleDistributionType,
+    SimulationResultVO,
+    StorageProviderRoutingRule
+} from "@/types/resource/storage-provider-routing-rule.types.ts";
 import type {BaseManagerDeleteDTO, BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 
 export const StorageProviderRoutingRuleManagerController = new BaseManagerController<
@@ -33,4 +37,22 @@ export interface ManagerReadStorageProviderRoutingRuleDTO extends BaseManagerRea
 
 export async function reorderStorageProviderRoutingRules(orderedIds: string[]) {
     return doPost("/api/manager/storage-provider-routing-rule/reorder", {orderedIds}, {'Content-Type': 'application/json'});
+}
+
+export interface SimulateStorageProviderRoutingRuleDTO {
+    userId?: string | null;
+    fileType: number;
+    fileName?: string | null;
+    fileExtension?: string | null;
+    fileContentType?: string | null;
+    fileSize?: string | null;
+    uploadTimestamp?: string | null;
+}
+
+export async function simulateStorageProviderRouting(dto: SimulateStorageProviderRoutingRuleDTO) {
+    return doPost<SimulationResultVO>(
+        "/api/manager/storage-provider-routing-rule/simulate",
+        dto,
+        {'Content-Type': 'application/json'}
+    );
 }

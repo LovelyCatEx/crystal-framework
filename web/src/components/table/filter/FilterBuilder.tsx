@@ -13,19 +13,29 @@ import {
 } from './filter-builder.types.ts';
 import {FilterGroup} from './FilterGroup.tsx';
 
-export interface FilterBuilderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'> {
+export interface FilterBuilderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange' | 'value'> {
   fields: FilterableField[];
+  /** Controlled external value. When it changes (e.g. Ant Form.setFieldsValue in a reused modal), the internal editor state is re-synced. */
+  value?: GroupNode | null;
+  /** Uncontrolled initial value, only read on first mount. Ignored when `value` is provided. */
   defaultValue?: GroupNode | null;
   onChange: (node: GroupNode | null) => void;
 }
 
-export function FilterBuilder({fields, defaultValue, onChange, className, style, ...divProps}: FilterBuilderProps) {
+export function FilterBuilder({fields, value, defaultValue, onChange, className, style, ...divProps}: FilterBuilderProps) {
   const {t} = useTranslation();
   const [open, setOpen] = useState(false);
-  const [root, setRoot] = useState(() =>
-    defaultValue ? fromGroupNode(defaultValue) : createEmptyGroup('and'),
-  );
+  const isControlled = value !== undefined;
+  const [root, setRoot] = useState(() => {
+    const initial = isControlled ? value : defaultValue;
+    return initial ? fromGroupNode(initial) : createEmptyGroup('and');
+  });
+  const [lastSyncedValue, setLastSyncedValue] = useState<GroupNode | null | undefined>(value);
   const prevActiveRef = useRef(false);
+  if (isControlled && !open && value !== lastSyncedValue) {
+    setLastSyncedValue(value);
+    setRoot(value ? fromGroupNode(value) : createEmptyGroup('and'));
+  }
 
   // Notify parent when root state changes (only when popover is closed — user clicked Apply)
   const applyFilters = useCallback(() => {

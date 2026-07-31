@@ -19,7 +19,7 @@ class StorageProviderRouterConfiguration {
     fun storageProviderRouter(
         storageProviderRoutingRuleService: StorageProviderRoutingRuleService,
         storageProviderService: StorageProviderService
-    ): StorageProviderRouter {
+    ): RuleBasedStorageProviderRouter {
         return RuleBasedStorageProviderRouter(storageProviderRoutingRuleService, storageProviderService)
     }
 }

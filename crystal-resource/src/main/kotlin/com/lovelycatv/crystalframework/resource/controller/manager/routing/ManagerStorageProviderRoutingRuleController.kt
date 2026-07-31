@@ -5,6 +5,8 @@ import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.M
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerReadStorageProviderRoutingRuleDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerReorderStorageProviderRoutingRuleDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerUpdateStorageProviderRoutingRuleDTO
+import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.SimulateStorageProviderRoutingRuleDTO
+import com.lovelycatv.crystalframework.resource.controller.manager.routing.vo.SimulationResultVO
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderRoutingRuleEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRoutingRuleRepository
 import com.lovelycatv.crystalframework.resource.service.manager.StorageProviderRoutingRuleManagerService
@@ -56,5 +58,19 @@ class ManagerStorageProviderRoutingRuleController(
         authorize(ManagerAction.UPDATE, userAuthentication)
         managerService.reorder(dto.orderedIds)
         return ApiResponse.success(null)
+    }
+
+    /** Dry-run route resolution: given a synthetic upload context, return every rule's trace and
+     *  the provider that would have been selected. Does not persist anything. */
+    @PostMapping("/simulate")
+    suspend fun simulate(
+        userAuthentication: UserAuthentication,
+        @Valid
+        @RequestBody
+        dto: SimulateStorageProviderRoutingRuleDTO
+    ): ApiResponse<SimulationResultVO> {
+        authorize(ManagerAction.READ, userAuthentication)
+        val result = managerService.simulate(dto)
+        return ApiResponse.success(result)
     }
 }

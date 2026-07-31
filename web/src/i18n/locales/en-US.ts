@@ -1768,7 +1768,20 @@ export const enUS: I18nRules = {
       subtitle: 'Top-to-bottom priority matching — first matching rule wins',
       modal: {
         name: { label: 'Rule Name', required: 'Please enter rule name', placeholder: 'Rule name' },
-        conditionTree: { label: 'Conditions', description: 'Leave empty to match all uploads (fallback rule)' },
+        conditionTree: {
+          label: 'Conditions',
+          description: 'Leave empty to match all uploads (fallback rule)',
+          fields: {
+            fileType: 'File Type',
+            fileName: 'File Name',
+            fileExtension: 'File Extension',
+            fileContentType: 'Content Type',
+            fileSize: 'File Size (bytes)',
+            userId: 'User ID',
+            hourOfDay: 'Hour of Day (0-23)',
+            dayOfWeek: 'Day of Week (1-7)',
+          },
+        },
         targetProviders: { label: 'Target Providers', required: 'Please select at least one provider' },
         distributionType: { label: 'Distribution' },
         enabled: { label: 'Enabled' },
@@ -1787,7 +1800,40 @@ export const enUS: I18nRules = {
         enabledToggleSuccess: 'Status updated',
         enabledToggleFailed: 'Failed to update status',
       },
+      simulate: {
+        button: 'Test Route',
+        modalTitle: 'Simulate File Routing',
+        description: 'Fill in a synthetic upload context to see which rule would match and which provider would be selected. Nothing is persisted.',
+        form: {
+          userId: 'User (optional)',
+          fileType: 'File Type',
+          fileTypeRequired: 'Please select file type',
+          fileName: 'File Name (optional)',
+          fileNamePlaceholder: 'e.g. avatar.png',
+          fileNameExtra: 'Extension is derived automatically from the file name.',
+          fileContentType: 'Content Type (optional)',
+          fileContentTypePlaceholder: 'e.g. image/png',
+          fileSize: 'File Size in Bytes (optional)',
+          fileSizePlaceholder: 'e.g. 102400',
+          uploadTimestamp: 'Upload Time (optional)',
+        },
+        result: {
+          header: 'Simulation Result',
+          selectedProvider: 'Selected provider',
+          noRuleMatched: 'No rule matched — no provider would be selected',
+          matchedNoProvider: 'A rule matched but no provider was selected',
+          matched: 'MATCHED',
+          notMatched: 'no match',
+          matchAll: 'match all (no conditions)',
+          actualLabel: 'actual',
+          selectedProviderIds: 'Selected provider ids',
+          priority: 'Priority',
+        },
+        actions: { run: 'Simulate', close: 'Close' },
+        errors: { simulateFailed: 'Simulation failed' },
+      },
       action: { reorder: 'Priority Order' },
+      filter: { actions: 'Actions' },
     },
     fileResourceManager: {
       title: 'File Resource Management',
@@ -3571,7 +3617,8 @@ export const enUS: I18nRules = {
     },
     resourceFileType: {
       0: 'User Avatar',
-      1: 'Tenant Icon'
+      1: 'Tenant Icon',
+      2: 'Tenant Member Avatar'
     },
     departmentMemberRoleType: {
       0: 'Member',

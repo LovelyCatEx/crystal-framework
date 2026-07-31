@@ -16,11 +16,36 @@ object QueryNodeEvaluator {
         }
     }
 
+    /**
+     * Mirrors [evaluate] but returns an [EvaluationNodeTrace] tree annotated with each node's
+     * outcome. Behavior for individual comparisons matches [evaluate] exactly (delegates to the
+     * same private helpers), so trace results are guaranteed consistent with actual routing.
+     */
+    fun evaluateWithTrace(node: QueryNode, context: Map<String, Any?>): EvaluationNodeTrace {
+        return when (node) {
+            is ConditionNode -> evaluateConditionWithTrace(node, context)
+            is GroupNode -> evaluateGroupWithTrace(node, context)
+        }
+    }
+
     private fun evaluateGroup(group: GroupNode, context: Map<String, Any?>): Boolean {
         return when (group.logic) {
             QueryLogic.AND -> group.children.all { evaluate(it, context) }
             QueryLogic.OR -> group.children.any { evaluate(it, context) }
         }
+    }
+
+    private fun evaluateGroupWithTrace(group: GroupNode, context: Map<String, Any?>): EvaluationGroupTrace {
+        val childTraces = group.children.map { evaluateWithTrace(it, context) }
+        val matched = when (group.logic) {
+            QueryLogic.AND -> childTraces.all { it.matched }
+            QueryLogic.OR -> childTraces.any { it.matched }
+        }
+        return EvaluationGroupTrace(
+            logic = group.logic.name,
+            children = childTraces,
+            matched = matched,
+        )
     }
 
     private fun evaluateCondition(node: ConditionNode, context: Map<String, Any?>): Boolean {
@@ -38,6 +63,23 @@ object QueryNodeEvaluator {
             QueryOperator.IS_NULL -> actual == null
             QueryOperator.IS_NOT_NULL -> actual != null
         }
+    }
+
+    private fun evaluateConditionWithTrace(node: ConditionNode, context: Map<String, Any?>): EvaluationLeafTrace {
+        val actual = context[node.field]
+        val matched = evaluateCondition(node, context)
+        val expectedRepr = when (node.operator) {
+            QueryOperator.IN -> node.values?.joinToString(",") ?: ""
+            QueryOperator.IS_NULL, QueryOperator.IS_NOT_NULL -> null
+            else -> node.value?.toString()
+        }
+        return EvaluationLeafTrace(
+            field = node.field,
+            operator = node.operator.name,
+            expectedValue = expectedRepr,
+            actualValue = actual?.toString(),
+            matched = matched,
+        )
     }
 
     /** Equality that treats numerically-equal values as equal regardless of Int/Long/String representation. */

@@ -1765,7 +1765,20 @@ export const zhCN: I18nRules = {
       subtitle: '从上往下优先匹配，第一条命中的规则生效',
       modal: {
         name: { label: '规则名称', required: '请输入规则名称', placeholder: '规则名称' },
-        conditionTree: { label: '匹配条件', description: '不配置条件则匹配所有上传（兜底规则）' },
+        conditionTree: {
+          label: '匹配条件',
+          description: '不配置条件则匹配所有上传（兜底规则）',
+          fields: {
+            fileType: '文件类型',
+            fileName: '文件名',
+            fileExtension: '扩展名',
+            fileContentType: '内容类型',
+            fileSize: '文件大小（字节）',
+            userId: '用户 ID',
+            hourOfDay: '小时（0-23）',
+            dayOfWeek: '星期（1-7）',
+          },
+        },
         targetProviders: { label: '目标存储', required: '请至少选择一个存储提供商' },
         distributionType: { label: '分发方式' },
         enabled: { label: '启用' },
@@ -1784,7 +1797,40 @@ export const zhCN: I18nRules = {
         enabledToggleSuccess: '状态已更新',
         enabledToggleFailed: '状态更新失败',
       },
+      simulate: {
+        button: '测试路由',
+        modalTitle: '模拟文件路由',
+        description: '填入一个假设的上传上下文，查看会命中哪条规则以及最终会选中哪个提供商。不会持久化任何数据。',
+        form: {
+          userId: '用户（可选）',
+          fileType: '文件类型',
+          fileTypeRequired: '请选择文件类型',
+          fileName: '文件名（可选）',
+          fileNamePlaceholder: '例如：avatar.png',
+          fileNameExtra: '扩展名会从文件名自动派生。',
+          fileContentType: 'Content Type（可选）',
+          fileContentTypePlaceholder: '例如：image/png',
+          fileSize: '文件大小 字节（可选）',
+          fileSizePlaceholder: '例如：102400',
+          uploadTimestamp: '上传时间（可选）',
+        },
+        result: {
+          header: '模拟结果',
+          selectedProvider: '选中的提供商',
+          noRuleMatched: '未命中任何规则 — 不会选出提供商',
+          matchedNoProvider: '规则命中但未选中任何提供商',
+          matched: '命中',
+          notMatched: '未命中',
+          matchAll: '匹配所有（无条件）',
+          actualLabel: '实际值',
+          selectedProviderIds: '选中的提供商 ID',
+          priority: '优先级',
+        },
+        actions: { run: '模拟', close: '关闭' },
+        errors: { simulateFailed: '模拟失败' },
+      },
       action: { reorder: '优先级排序' },
+      filter: { actions: '操作' },
     },
     fileResourceManager: {
       title: '文件资源管理',
@@ -3569,7 +3615,8 @@ export const zhCN: I18nRules = {
     },
     resourceFileType: {
       0: '用户头像',
-      1: '租户图标'
+      1: '租户图标',
+      2: '租户成员头像'
     },
     departmentMemberRoleType: {
       0: '普通成员',

@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.shared.database
 
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class QueryNodeEvaluatorTest {
@@ -111,5 +112,66 @@ class QueryNodeEvaluatorTest {
         assertTrue(eval(nested, mapOf("fileType" to 0, "hourOfDay" to 23)))
         assertFalse(eval(nested, mapOf("fileType" to 0, "hourOfDay" to 12)))
         assertFalse(eval(nested, mapOf("fileType" to 1, "hourOfDay" to 23)))
+    }
+
+    @Test
+    fun `evaluateWithTrace on a Leaf records field operator expected actual and matched`() {
+        val node = ConditionNode("fileSize", QueryOperator.GT, 1000L)
+        val trace = QueryNodeEvaluator.evaluateWithTrace(node, mapOf("fileSize" to 2000L))
+        assertTrue(trace is EvaluationLeafTrace)
+        trace as EvaluationLeafTrace
+        assertTrue(trace.matched)
+        assertEquals("fileSize", trace.field)
+        assertEquals("GT", trace.operator)
+        assertEquals("1000", trace.expectedValue)
+        assertEquals("2000", trace.actualValue)
+    }
+
+    @Test
+    fun `evaluateWithTrace on a Group AND aggregates children matched`() {
+        val group = GroupNode(
+            QueryLogic.AND,
+            listOf(
+                ConditionNode("fileType", QueryOperator.EQ, 0),
+                ConditionNode("fileSize", QueryOperator.LT, 1000L),
+            )
+        )
+        val hit = QueryNodeEvaluator.evaluateWithTrace(group, mapOf("fileType" to 0, "fileSize" to 500L))
+        assertTrue(hit is EvaluationGroupTrace)
+        hit as EvaluationGroupTrace
+        assertTrue(hit.matched)
+        assertEquals("AND", hit.logic)
+        assertEquals(2, hit.children.size)
+        assertTrue(hit.children.all { it.matched })
+
+        val miss = QueryNodeEvaluator.evaluateWithTrace(group, mapOf("fileType" to 0, "fileSize" to 5000L))
+        miss as EvaluationGroupTrace
+        assertFalse(miss.matched)
+        assertTrue(miss.children[0].matched)
+        assertFalse(miss.children[1].matched)
+    }
+
+    @Test
+    fun `evaluateWithTrace on a Group OR short-circuits by any child match`() {
+        val group = GroupNode(
+            QueryLogic.OR,
+            listOf(
+                ConditionNode("fileExtension", QueryOperator.EQ, "png"),
+                ConditionNode("fileExtension", QueryOperator.EQ, "jpg"),
+            )
+        )
+        val hit = QueryNodeEvaluator.evaluateWithTrace(group, mapOf("fileExtension" to "jpg"))
+        hit as EvaluationGroupTrace
+        assertTrue(hit.matched)
+        assertEquals("OR", hit.logic)
+    }
+
+    @Test
+    fun `evaluateWithTrace records null actualValue when the field is missing`() {
+        val node = ConditionNode("missingField", QueryOperator.IS_NULL)
+        val trace = QueryNodeEvaluator.evaluateWithTrace(node, emptyMap())
+        trace as EvaluationLeafTrace
+        assertTrue(trace.matched)
+        assertEquals(null, trace.actualValue)
     }
 }

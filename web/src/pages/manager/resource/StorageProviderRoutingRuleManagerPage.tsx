@@ -1,4 +1,4 @@
-import {Col, Form, Input, message, Modal, Row, Select, Spin, Switch, Tag} from "antd";
+import {Button, Col, Form, Input, message, Modal, Row, Select, Space, Spin, Switch, Tag} from "antd";
 import {DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import {SortableContext, arrayMove, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
@@ -9,14 +9,17 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {StorageProviderRoutingRuleManagerController, reorderStorageProviderRoutingRules, type ManagerCreateStorageProviderRoutingRuleDTO, type ManagerReadStorageProviderRoutingRuleDTO,} from "@/api/resource/storage-provider-routing-rule.api.ts";
 import type {StorageProviderRoutingRule} from "@/types/resource/storage-provider-routing-rule.types.ts";
 import {RuleDistributionType} from "@/types/resource/storage-provider-routing-rule.types.ts";
+import {ResourceFileType} from "@/types/resource/file-resource.types.ts";
+import {getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {type StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
 import {useStorageProviderRoutingRuleTableColumns} from "@/components/columns/StorageProviderRoutingRuleEntityColumns.tsx";
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
 import {FilterBuilder} from "@/components/table/filter/index.ts";
-import type {GroupNode} from "@/components/table/filter/filter-builder.types.ts";
+import type {FilterableField, GroupNode} from "@/components/table/filter/filter-builder.types.ts";
 import {getRuleDistributionType} from "@/i18n/enum-helpers.ts";
 import {EntityIdsSelector} from "@/components/selector/EntityIdsSelector.tsx";
+import {SimulateRoutingButton} from "@/components/SimulateRoutingButton.tsx";
 
 // ─── Drag-sortable row for the reorder modal ─────────────────────────────────
 interface SortableRuleItemProps { rule: StorageProviderRoutingRule }
@@ -41,29 +44,33 @@ function SortableRuleItem({rule}: SortableRuleItemProps) {
     );
 }
 
-// ─── Condition tree fields available in the FilterBuilder popover ───────────
-const ROUTING_FIELDS = [
-    {field: 'fileType', label: 'fileType', type: 'number' as const},
-    {field: 'fileName', label: 'fileName', type: 'text' as const},
-    {field: 'fileExtension', label: 'fileExtension', type: 'text' as const},
-    {field: 'fileContentType', label: 'fileContentType', type: 'text' as const},
-    {field: 'fileSize', label: 'fileSize', type: 'number' as const},
-    {field: 'userId', label: 'userId', type: 'text' as const},
-    {field: 'hourOfDay', label: 'hourOfDay', type: 'number' as const},
-    {field: 'dayOfWeek', label: 'dayOfWeek', type: 'number' as const},
-];
-
 // ─── Form.Item wrapper: serializes GroupNode | null <-> JSON string ─────────
 interface ConditionTreeFieldProps { value?: string | null; onChange?: (value: string | null) => void }
 
 function ConditionTreeField({value, onChange}: ConditionTreeFieldProps) {
+    const {t} = useTranslation();
+    const fileTypeOptions = [
+        ResourceFileType.USER_AVATAR,
+        ResourceFileType.TENANT_ICON,
+        ResourceFileType.TENANT_MEMBER_AVATAR,
+    ].map((v) => ({value: v, label: getResourceFileType(v)}));
+    const fields: FilterableField[] = [
+        {field: 'fileType', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileType'), type: 'select', options: fileTypeOptions},
+        {field: 'fileName', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileName'), type: 'text'},
+        {field: 'fileExtension', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileExtension'), type: 'text'},
+        {field: 'fileContentType', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileContentType'), type: 'text'},
+        {field: 'fileSize', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileSize'), type: 'number'},
+        {field: 'userId', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.userId'), type: 'text'},
+        {field: 'hourOfDay', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.hourOfDay'), type: 'number'},
+        {field: 'dayOfWeek', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.dayOfWeek'), type: 'number'},
+    ];
     let parsed: GroupNode | null = null;
     try {
         parsed = value ? (JSON.parse(value) as GroupNode) : null;
     } catch {
         parsed = null;
     }
-    return <FilterBuilder fields={ROUTING_FIELDS} defaultValue={parsed} onChange={(node) => onChange?.(node ? JSON.stringify(node) : null)} />;
+    return <FilterBuilder fields={fields} value={parsed} onChange={(node) => onChange?.(node ? JSON.stringify(node) : null)} />;
 }
 
 // ─── Form.Item wrapper: serializes string[] <-> JSON array string ───────────
@@ -171,15 +178,17 @@ export default function StorageProviderRoutingRuleManagerPage() {
                 subtitle={t('pages.storageProviderRoutingRuleManager.subtitle')}
                 columns={columns}
                 searchKeywords={['name']}
-                titleActions={
-                    <Select
-                        className="rounded-xl"
-                        style={{minWidth: 160}}
-                        value="reorder"
-                        onSelect={openReorderModal}
-                        options={[{value: 'reorder', label: t('pages.storageProviderRoutingRuleManager.action.reorder')}]}
-                    />
-                }
+                tableSuffixActions={[
+                    {
+                        label: <span>{t('pages.storageProviderRoutingRuleManager.filter.actions')}</span>,
+                        children: <Space>
+                            <SimulateRoutingButton/>
+                            <Button onClick={openReorderModal}>
+                                {t('pages.storageProviderRoutingRuleManager.action.reorder')}
+                            </Button>
+                        </Space>,
+                    },
+                ]}
                 query={async (props: ManagerReadStorageProviderRoutingRuleDTO) => {
                     return (await StorageProviderRoutingRuleManagerController.query(props)).data!;
                 }}
