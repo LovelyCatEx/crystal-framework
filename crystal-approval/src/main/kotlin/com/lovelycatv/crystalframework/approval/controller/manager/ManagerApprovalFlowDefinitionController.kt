@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerDeleteApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowDefinitionDTO
@@ -14,10 +16,13 @@ import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNode
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -67,6 +72,11 @@ class ManagerApprovalFlowDefinitionController(
         tenantPemDelete = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE.name,
     ),
 ) {
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_DEFINITION,
+        resourceIds = "#dto.definitionId",
+    )
     @PostMapping("/update-graph")
     suspend fun updateGraph(
         userAuthentication: UserAuthentication,
@@ -78,7 +88,12 @@ class ManagerApprovalFlowDefinitionController(
             ?: throw BusinessException("Definition not found")
         val resolvedScope = resolveScope(definition.scope)
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.UPDATE)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
             throw UnauthorizedException()
@@ -87,6 +102,11 @@ class ManagerApprovalFlowDefinitionController(
         return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
 
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_DEFINITION,
+        resourceIds = "#definitionId",
+    )
     @GetMapping("/details-by-id")
     suspend fun getApprovalFlowDefinitionDetails(
         userAuthentication: UserAuthentication,
@@ -97,7 +117,12 @@ class ManagerApprovalFlowDefinitionController(
             ?: throw BusinessException("Definition not found")
         val resolvedScope = resolveScope(definition.scope)
         if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.READ)
+                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
+                scope = resolvedScope,
+            ))
         }
         if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
             throw UnauthorizedException()

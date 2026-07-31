@@ -13,9 +13,32 @@
 | 定位 | 业务 API | 管理后台 CRUD |
 | 路由前缀 | 自由（`/api/{version}/ext/...` / `/api/{version}/oauth/...`） | 强制 `/api/{version}/manager/...` |
 | 权限机制 | `@PreAuthorize` + Spring Security SpEL | `PermissionMatrix`（构造参数，authorize 内联校验） |
-| 审计切面 | 不覆盖 | `ManagerControllerAuditAspect` 自动记录 |
+| 审计切面 | 通过 `@Audit` 显式记录 | 5 个标准方法由 `ManagerControllerAuditAspect` 自动记录，自定义方法使用 `@Audit` |
 | 参数注入 | 支持 `UserAuthentication` | 支持 `UserAuthentication` |
 | 端点数 | 完全自定义 | 5 个标准端点（可 override，可加自定义） |
+
+## 审计日志
+
+普通 Controller 和 Manager Controller 的自定义方法需要使用 `@Audit` 显式声明审计信息：
+
+```kotlin
+@Audit(
+    action = AuditAction.READ,
+    resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES,
+)
+@PostMapping("/simulate")
+suspend fun simulate(
+    userAuthentication: UserAuthentication,
+    @Valid @RequestBody dto: SimulateStorageProviderRoutingRuleDTO,
+): ApiResponse<SimulationResultVO> {
+    authorize(ManagerAction.READ, userAuthentication)
+    return ApiResponse.success(managerService.simulate(dto))
+}
+```
+
+`action` 和 `resourceType` 必填，`resourceIds` 可选。`resourceIds` 是基于方法参数名的 SpEL 表达式，结果必须是 `Long` 或 `Collection<Long>`；不需要记录资源 ID 时留空。方法参数中必须包含 `UserAuthentication`，否则切面直接跳过记录。
+
+切面复用请求上下文和统一的 `AuditLogService`，自动记录操作者、请求信息、成功状态和错误消息。Manager Controller 的 `create`、`read`、`readAll`、`update`、`delete` 已由 `ManagerControllerAuditAspect` 自动记录，不要重复添加 `@Audit`；只有额外定义的自定义方法需要显式标注。
 
 ## 权限校验实现
 

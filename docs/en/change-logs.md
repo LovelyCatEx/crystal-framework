@@ -7,6 +7,25 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.13.2
+
+2026-08-01
+
+### Features
++ feat(rbac): Add permission tree view and consolidate Monitor permission declaration.
++ feat(rbac): Render structured 403 responses in a modal.
++ feat(audit): Add custom @Audit annotation and apply it to existing audit aspects.
++ feat(resource): Add rule-based storage provider routing engine with a simulate endpoint.
+
+### Bug Fixes
++ fix(rbac): Correct tenant permission authorization layers.
+
+### Others
++ chore: Remove superpower plugin.
++ chore(audit): Fix audit documentation errors.
+
+---
+
 ## v1.13.1
 
 2026-07-30

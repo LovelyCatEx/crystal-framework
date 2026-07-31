@@ -225,6 +225,31 @@ object SystemPermission {
     )
 
     // ============================================================
+    //   Storage Provider Routing Rule  (system)
+    // ============================================================
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.create",
+        description = "Create storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.read",
+        description = "Read storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.update",
+        description = "Update storage provider routing rules"
+    )
+    val ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "system.storage.provider.routing.rule.delete",
+        description = "Delete storage provider routing rules"
+    )
+    val MENU_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "system.storage.provider.routing.rule",
+        path = "/manager/storage-provider-routing-rules",
+        description = "Manage storage provider routing rules menu"
+    )
+
+    // ============================================================
     //   Mail Template Category  (system)
     // ============================================================
     val ACTION_SYSTEM_MAIL_TEMPLATE_CATEGORY_CREATE = SystemRbacPermissionDeclaration.action(
@@ -454,28 +479,32 @@ object SystemPermission {
     )
 
     // ============================================================
-    //   Tenant Permission  (tenantAdmin)
+    //   Tenant Permission  (super / tenantAdmin readonly)
     // ============================================================
-    val ACTION_TENANT_PERMISSION_CREATE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.permission.create",
-        description = "Create tenant permissions across tenants"
+    val ACTION_X_TENANT_PERMISSION_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.tenant.permission.create",
+        description = "Create tenant permissions"
+    )
+    val ACTION_X_TENANT_PERMISSION_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.tenant.permission.read",
+        description = "Read tenant permissions"
+    )
+    val ACTION_X_TENANT_PERMISSION_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.tenant.permission.update",
+        description = "Update tenant permissions"
+    )
+    val ACTION_X_TENANT_PERMISSION_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.tenant.permission.delete",
+        description = "Delete tenant permissions"
+    )
+    val MENU_X_TENANT_PERMISSION_MANAGER = SystemRbacPermissionDeclaration.menu(
+        name = "x.tenant.permission",
+        path = "/manager/tenant-permissions",
+        description = "Manage tenant permissions menu"
     )
     val ACTION_TENANT_PERMISSION_READ = SystemRbacPermissionDeclaration.action(
         name = "tenant.permission.read",
         description = "Read tenant permissions across tenants"
-    )
-    val ACTION_TENANT_PERMISSION_UPDATE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.permission.update",
-        description = "Update tenant permissions across tenants"
-    )
-    val ACTION_TENANT_PERMISSION_DELETE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.permission.delete",
-        description = "Delete tenant permissions across tenants"
-    )
-    val MENU_TENANT_PERMISSION_MANAGER = SystemRbacPermissionDeclaration.menu(
-        name = "tenant.permission",
-        path = "/manager/tenant-permissions",
-        description = "Manage tenant permissions menu"
     )
 
     // ============================================================
@@ -703,8 +732,17 @@ object SystemPermission {
     )
 
     // ============================================================
-    //   Monitor Sessions  (system)
+    //   Monitor  (system)
     // ============================================================
+    val ACTION_SYSTEM_MONITOR_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.monitor.read",
+        description = "Read system metrics data"
+    )
+    val MENU_SYSTEM_MONITOR = SystemRbacPermissionDeclaration.menu(
+        name = "system.monitor",
+        path = "/manager/monitor/system-metrics",
+        description = "Manage system metrics monitor menu"
+    )
     val ACTION_SYSTEM_MONITOR_SESSIONS_READ = SystemRbacPermissionDeclaration.action(
         name = "system.monitor.sessions.read",
         description = "Read active session monitor data"

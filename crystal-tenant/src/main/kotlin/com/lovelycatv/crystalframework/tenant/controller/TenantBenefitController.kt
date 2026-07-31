@@ -1,6 +1,9 @@
 package com.lovelycatv.crystalframework.tenant.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
@@ -17,6 +20,10 @@ class TenantBenefitController(
     private val tenantBenefitService: TenantBenefitService,
     private val tenantService: TenantService,
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_TIRE_BENEFIT_VALUES,
+    )
     @GetMapping
     suspend fun getMyBenefits(authentication: UserAuthentication): ApiResponse<Map<String, String>> {
         val tenantId = authentication.assertTenantIdNotNull()

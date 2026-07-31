@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test
 class PermissionMatrixTest {
 
     private fun compliantMatrix(): PermissionMatrix = PermissionMatrix(
-        superCreate = "role.create",
-        superRead = "role.read",
-        superUpdate = "role.update",
-        superDelete = "role.delete",
+        superCreate = "x.role.create",
+        superRead = "x.role.read",
+        superUpdate = "x.role.update",
+        superDelete = "x.role.delete",
         systemCreate = "system.role.create",
         systemRead = "system.role.read",
         systemUpdate = "system.role.update",
@@ -32,7 +32,7 @@ class PermissionMatrixTest {
     @Test
     fun `layersFor SYSTEM CREATE returns super and system authorities`() {
         val result = compliantMatrix().layersFor(ResourceScope.SYSTEM, ScopedOperation.CREATE)
-        assertEquals(listOf("role.create", "system.role.create"), result.toList())
+        assertEquals(listOf("x.role.create", "system.role.create"), result.toList())
     }
 
     @Test
@@ -56,7 +56,7 @@ class PermissionMatrixTest {
     @Test
     fun `layersFor TENANT CREATE returns super tenantAdmin and tenantPem authorities`() {
         val result = compliantMatrix().layersFor(ResourceScope.TENANT, ScopedOperation.CREATE)
-        assertEquals(listOf("role.create", "tenant.role.create", "i.tenant.role.create"), result.toList())
+        assertEquals(listOf("x.role.create", "tenant.role.create", "i.tenant.role.create"), result.toList())
     }
 
     @Test
@@ -76,7 +76,7 @@ class PermissionMatrixTest {
     @Test
     fun `crossTenantLayersFor returns super and tenantAdmin authorities`() {
         val result = compliantMatrix().crossTenantLayersFor(ScopedOperation.CREATE)
-        assertEquals(listOf("role.create", "tenant.role.create"), result.toList())
+        assertEquals(listOf("x.role.create", "tenant.role.create"), result.toList())
     }
 
     @Test
@@ -93,7 +93,7 @@ class PermissionMatrixTest {
     @Test
     fun `readonly factory fills all CUD slots with NEVER_GRANTED`() {
         val matrix = PermissionMatrix.readonly(
-            superRead = "audit.log.read",
+            superRead = "x.audit.log.read",
             systemRead = "system.audit.log.read",
             tenantAdminRead = "tenant.audit.log.read",
             tenantPemRead = "i.tenant.audit.log.read",
@@ -104,14 +104,14 @@ class PermissionMatrixTest {
         assertEquals(PermissionMatrix.NEVER_GRANTED, matrix.systemCreate)
         assertEquals(PermissionMatrix.NEVER_GRANTED, matrix.tenantAdminUpdate)
         assertEquals(PermissionMatrix.NEVER_GRANTED, matrix.tenantPemDelete)
-        assertEquals("audit.log.read", matrix.superRead)
+        assertEquals("x.audit.log.read", matrix.superRead)
         assertEquals("i.tenant.audit.log.read", matrix.tenantPemRead)
     }
 
     @Test
     fun `readonly factory layersFor CREATE returns only NEVER_GRANTED placeholders`() {
         val matrix = PermissionMatrix.readonly(
-            superRead = "audit.log.read",
+            superRead = "x.audit.log.read",
             systemRead = "system.audit.log.read",
             tenantAdminRead = "tenant.audit.log.read",
             tenantPemRead = "i.tenant.audit.log.read",
@@ -132,34 +132,34 @@ class PermissionMatrixTest {
 
     @Test
     fun `collectPrefixViolations flags super slot with system prefix`() {
-        val matrix = compliantMatrix().copy(superCreate = "system.role.create")
-        val violations = PermissionMatrix.collectPrefixViolations(matrix)
-        assertEquals(1, violations.size)
-        assertTrue(violations.first().startsWith("super*"), "expected super* violation but got: ${violations.first()}")
+        val ex = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException::class.java) {
+            compliantMatrix().copy(superCreate = "system.role.create")
+        }
+        assertTrue(ex.message!!.contains("super*"), "expected super* violation but got: ${ex.message}")
     }
 
     @Test
     fun `collectPrefixViolations flags system slot without system prefix`() {
-        val matrix = compliantMatrix().copy(systemCreate = "role.create")
-        val violations = PermissionMatrix.collectPrefixViolations(matrix)
-        assertEquals(1, violations.size)
-        assertTrue(violations.first().startsWith("system*"))
+        val ex = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException::class.java) {
+            compliantMatrix().copy(systemCreate = "role.create")
+        }
+        assertTrue(ex.message!!.contains("system*"))
     }
 
     @Test
     fun `collectPrefixViolations flags tenantAdmin slot without tenant prefix`() {
-        val matrix = compliantMatrix().copy(tenantAdminCreate = "system.role.create")
-        val violations = PermissionMatrix.collectPrefixViolations(matrix)
-        assertEquals(1, violations.size)
-        assertTrue(violations.first().startsWith("tenantAdmin*"))
+        val ex = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException::class.java) {
+            compliantMatrix().copy(tenantAdminCreate = "system.role.create")
+        }
+        assertTrue(ex.message!!.contains("tenantAdmin*"))
     }
 
     @Test
     fun `collectPrefixViolations flags tenantPem slot without i_tenant prefix`() {
-        val matrix = compliantMatrix().copy(tenantPemCreate = "tenant.role.create")
-        val violations = PermissionMatrix.collectPrefixViolations(matrix)
-        assertEquals(1, violations.size)
-        assertTrue(violations.first().startsWith("tenantPem*"))
+        val ex = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException::class.java) {
+            compliantMatrix().copy(tenantPemCreate = "tenant.role.create")
+        }
+        assertTrue(ex.message!!.contains("tenantPem*"))
     }
 
     @Test
@@ -189,7 +189,7 @@ class PermissionMatrixTest {
     @Test
     fun `of Layer routes to correct slot`() {
         val matrix = compliantMatrix()
-        assertEquals("role.create", matrix.of(PermissionMatrix.Layer.SUPER, ScopedOperation.CREATE))
+        assertEquals("x.role.create", matrix.of(PermissionMatrix.Layer.SUPER, ScopedOperation.CREATE))
         assertEquals("system.role.read", matrix.of(PermissionMatrix.Layer.SYSTEM, ScopedOperation.READ))
         assertEquals("tenant.role.update", matrix.of(PermissionMatrix.Layer.TENANT_ADMIN, ScopedOperation.UPDATE))
         assertEquals("i.tenant.role.delete", matrix.of(PermissionMatrix.Layer.TENANT_PEM, ScopedOperation.DELETE))

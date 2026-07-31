@@ -1,9 +1,12 @@
 package com.lovelycatv.crystalframework.auth.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.auth.controller.dto.UserSwitchAuthenticationDTO
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.impl.CustomUserDetailsService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -28,6 +31,10 @@ class UserAuthController(
 ) {
     private val logger = logger()
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_TENANT_MEMBERS,
+    )
     @PostMapping("/switchTenant")
     suspend fun switchAuthentication(
         userAuthentication: UserAuthentication,

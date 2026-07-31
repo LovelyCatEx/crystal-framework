@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.system.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.messagechannel.constants.ChannelType
 import com.lovelycatv.crystalframework.messagechannel.service.MessageChannelService
@@ -11,15 +13,18 @@ import com.lovelycatv.crystalframework.messagechannel.types.recipient.MessageRec
 import com.lovelycatv.crystalframework.messagechannel.utils.SystemChannelConfigProvider
 import com.lovelycatv.crystalframework.sdk.common.settings.buildSettingsSchemaResponse
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendEmailDTO
 import com.lovelycatv.crystalframework.system.controller.manager.dto.ManagerTestSendMessageDTO
 import com.lovelycatv.crystalframework.system.controller.manager.vo.ManagerTestSendMessageResultVO
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
 import jakarta.validation.Valid
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import tools.jackson.databind.JsonNode
@@ -37,29 +42,36 @@ class ManagerSystemSettingsController(
     private val jsonMapper: JsonMapper,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
 ) {
-    @PreAuthorize("hasAnyAuthority('system.settings.read')")
+    @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
+    @RequiresAuthority(anyOf = ["system.settings.read"], scope = ResourceScope.SYSTEM)
     @GetMapping("/schema")
-    suspend fun getSystemSettings(): ApiResponse<*> {
+    suspend fun getSystemSettings(
+        userAuthentication: UserAuthentication,
+    ): ApiResponse<*> {
         val data = buildSettingsSchemaResponse(systemSettingsRegistry.settingDeclarations()) { key ->
             systemSettingsService.getSettings(key)?.configValue
         }
         return ApiResponse.success(data)
     }
 
-    @PreAuthorize("hasAnyAuthority('system.settings.update')")
+    @Audit(action = AuditAction.UPDATE, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
+    @RequiresAuthority(anyOf = ["system.settings.update"], scope = ResourceScope.SYSTEM)
     @PostMapping("/update")
     suspend fun updateSystemSettings(
-        @RequestBody dto: Map<String, String?>
+        userAuthentication: UserAuthentication,
+        @RequestBody dto: Map<String, String?>,
     ): ApiResponse<*> {
         systemSettingsService.updateSystemSettings(dto)
 
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('system.settings.test.sendEmail')")
+    @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
+    @RequiresAuthority(anyOf = ["system.settings.test.sendEmail"], scope = ResourceScope.SYSTEM)
     @PostMapping("/test-send-email")
     suspend fun testSendEmail(
-        @ModelAttribute @Valid dto: ManagerTestSendEmailDTO
+        userAuthentication: UserAuthentication,
+        @ModelAttribute @Valid dto: ManagerTestSendEmailDTO,
     ): ApiResponse<*> {
         val testSmtp = crystalFrameworkConfiguration.test.smtp
         mailService.sendMail(
@@ -71,9 +83,11 @@ class ManagerSystemSettingsController(
         return ApiResponse.success(null)
     }
 
-    @PreAuthorize("hasAnyAuthority('system.settings.test.sendMessage')")
+    @Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS)
+    @RequiresAuthority(anyOf = ["system.settings.test.sendMessage"], scope = ResourceScope.SYSTEM)
     @PostMapping("/test-send-message")
     suspend fun testSendMessage(
+        userAuthentication: UserAuthentication,
         @RequestBody @Valid dto: ManagerTestSendMessageDTO,
     ): ApiResponse<ManagerTestSendMessageResultVO> {
         val channelType = ChannelType.fromTypeId(dto.channelType!!)

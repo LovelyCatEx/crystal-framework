@@ -8,9 +8,10 @@ import com.lovelycatv.crystalframework.tenant.controller.manager.benefit.vo.Mana
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitValueRepository
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitFeatureManagerService
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantTireBenefitValueManagerService
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import jakarta.validation.Valid
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -25,7 +26,7 @@ class ManagerTenantTireBenefitOverviewController(
     private val featureManagerService: TenantTireBenefitFeatureManagerService,
     private val benefitValueRepository: TenantTireBenefitValueRepository,
 ) {
-    @PreAuthorize("hasAuthority('system.tenant.tire.benefit.value.read')")
+    @RequiresAuthority(anyOf = ["system.tenant.tire.benefit.value.read"], scope = ResourceScope.SYSTEM)
     @PostMapping("/query")
     suspend fun queryOverview(
         @RequestBody

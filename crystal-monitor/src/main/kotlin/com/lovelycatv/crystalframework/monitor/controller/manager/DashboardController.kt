@@ -4,10 +4,11 @@ import com.lovelycatv.crystalframework.monitor.controller.vo.BusinessStatsVO
 import com.lovelycatv.crystalframework.monitor.controller.vo.DashboardStatsVO
 import com.lovelycatv.crystalframework.monitor.controller.vo.SystemMetricsVO
 import com.lovelycatv.crystalframework.monitor.service.DashboardService
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
-import org.springframework.security.access.prepost.PreAuthorize
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,9 +21,12 @@ import org.springframework.web.bind.annotation.RestController
 class DashboardController(
     private val dashboardService: DashboardService
 ) {
-    @PreAuthorize(
-        "hasAuthority('system.dashboard.business.statistics.read') " +
-            "and hasAuthority('system.dashboard.system.metrics.read')"
+    @RequiresAuthority(
+        allOf = [
+            "system.dashboard.business.statistics.read",
+            "system.dashboard.system.metrics.read",
+        ],
+        scope = ResourceScope.SYSTEM,
     )
     @GetMapping("/stats")
     suspend fun getDashboardStats(
@@ -32,7 +36,7 @@ class DashboardController(
         return ApiResponse.success(stats)
     }
 
-    @PreAuthorize("hasAnyAuthority('system.dashboard.business.statistics.read')")
+    @RequiresAuthority(anyOf = ["system.dashboard.business.statistics.read"], scope = ResourceScope.SYSTEM)
     @GetMapping("/business-stats")
     suspend fun getBusinessStats(
         @RequestParam(name = "timeRange", defaultValue = "1m") timeRange: String
@@ -41,7 +45,7 @@ class DashboardController(
         return ApiResponse.success(stats)
     }
 
-    @PreAuthorize("hasAnyAuthority('system.dashboard.system.metrics.read')")
+    @RequiresAuthority(anyOf = ["system.dashboard.system.metrics.read"], scope = ResourceScope.SYSTEM)
     @GetMapping("/system-metrics")
     suspend fun getSystemMetrics(): ApiResponse<SystemMetricsVO> {
         val metrics = dashboardService.getSystemMetrics()

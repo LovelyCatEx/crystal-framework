@@ -3,9 +3,10 @@ package com.lovelycatv.crystalframework.system.controller
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.entity.AnnouncementEntity
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.system.service.AnnouncementService
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class AnnouncementController(
     private val announcementService: AnnouncementService,
 ) {
-    @PreAuthorize("hasAuthority('system.announcement.list')")
+    @RequiresAuthority(anyOf = ["system.announcement.list"], scope = ResourceScope.SYSTEM)
     @GetMapping("/list")
     suspend fun list(): ApiResponse<List<AnnouncementEntity>> {
         val list = announcementService.getPublished().collectList().awaitFirst()

@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.resource.controller.manager.file
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import org.springframework.validation.annotation.Validated
@@ -16,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController
 class FileResourceController(
     private val fileResourceService: FileResourceService
 ) {
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_FILE_RESOURCES,
+        resourceIds = "#id",
+    )
     @GetMapping("/downloadUrl", version = "1")
     suspend fun getFileDownloadUrl(
         userAuthentication: UserAuthentication,

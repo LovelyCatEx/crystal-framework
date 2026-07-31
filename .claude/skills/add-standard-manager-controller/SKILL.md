@@ -93,6 +93,12 @@ Service 必须：
 - 位于 `service/manager/` 包，impl 在 `service/manager/impl/`
 - **禁止直接在 Controller 层注入 Repository**，只注入 Service
 
+### 审计日志(自动,无需 @Audit)
+
+标准 CRUD 5 端点被 `ManagerControllerAuditAspect` 自动切入,方法签名含 `UserAuthentication` + ENTITY 上有 `@Table("xxx")` 即会记录审计日志。resourceType 从 `@Table` 值取,resourceIds 从 DTO 的 `id` / `ids` 字段取。
+
+**禁止**在这 5 个方法上再手动加 `@Audit`(重复触发)。若在此 Controller 里添加**非标准 CRUD 的自定义端点**(如 `/reorder` `/tree`),这些自定义端点需要审计时按 `add-audit-annotation` skill 显式加 `@Audit`。
+
 ### Controller 类顶部注解
 
 必须严格是：

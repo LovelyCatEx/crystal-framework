@@ -43,6 +43,10 @@ description: 为按 scope 区分且外部不允许写入的实体（如审批实
 
 所有 scope 解析 / 权限校验 / 溯源逻辑 **完全一样**。
 
+### 审计日志（自动，无需 @Audit）
+
+`readAll` / `read` 端点被 `ManagerControllerAuditAspect` 自动审计（要求方法参数含 `UserAuthentication` + ENTITY 有 `@Table`），create / update / delete 虽然被 override 成 403 也会被切面命中并记录一条失败审计。**禁止**手动加 `@Audit`。自定义 `/handle` `/start` 之类触发型端点走 `add-audit-annotation` skill。
+
 ### 只读 Matrix Factory
 
 用 `PermissionMatrix.readonly(...)` 构造，只填 4 个 read 权限：

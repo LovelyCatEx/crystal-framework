@@ -4,12 +4,15 @@ import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.controller.StandardTenantManagerController
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.springframework.aop.support.AopUtils
 import org.springframework.core.annotation.Order
-import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Component
 
 /**
@@ -49,10 +52,38 @@ class ManagerControllerPermissionAspect {
         }
 
         // Deny by default — no PermissionMatrix means the subclass has no configured authorisation.
-        throw AuthorizationDeniedException(
+        // Emit as a structured ForbiddenException so the frontend renders the ForbiddenModal; the
+        // message still points ops at the underlying misconfiguration.
+        throw ForbiddenException(
             "No authorization configured for ${targetClass.simpleName}. " +
-                "Inject permissions: PermissionMatrix into the constructor."
+                "Inject permissions: PermissionMatrix into the constructor.",
+            context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = emptyList(),
+                scope = readResourceScope(controller, targetClass),
+            ),
         )
+    }
+
+    /**
+     * Reflectively read the controller's `resourceScope: ResourceScope` (declared open on
+     * [com.lovelycatv.crystalframework.shared.controller.AbstractManagerController]). Falls back to
+     * [ResourceScope.SYSTEM] if the field is missing or unreadable, which is safe: this aspect only
+     * fires on the misconfiguration path and callers still see a 403.
+     */
+    private fun readResourceScope(controller: Any, targetClass: Class<*>): ResourceScope {
+        var cls: Class<*>? = targetClass
+        while (cls != null && cls != Any::class.java) {
+            val field = cls.declaredFields.firstOrNull {
+                it.name == "resourceScope" && ResourceScope::class.java.isAssignableFrom(it.type)
+            }
+            if (field != null) {
+                field.isAccessible = true
+                return field.get(controller) as? ResourceScope ?: ResourceScope.SYSTEM
+            }
+            cls = cls.superclass
+        }
+        return ResourceScope.SYSTEM
     }
 
     /**

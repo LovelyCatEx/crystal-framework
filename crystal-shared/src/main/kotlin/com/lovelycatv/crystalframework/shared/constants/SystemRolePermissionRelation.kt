@@ -21,6 +21,8 @@ object SystemRolePermissionRelation {
             // Storage
             SystemPermission.MENU_SYSTEM_STORAGE_PROVIDER_MANAGER,
             SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
+            SystemPermission.MENU_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_MANAGER,
+            SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_READ,
             SystemPermission.MENU_SYSTEM_FILE_RESOURCE_MANAGER,
             SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_READ,
             // Mail template
@@ -43,6 +45,8 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_EMAIL,
             SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_MESSAGE,
             // Monitor
+            SystemPermission.MENU_SYSTEM_MONITOR,
+            SystemPermission.ACTION_SYSTEM_MONITOR_READ,
             SystemPermission.MENU_SYSTEM_MONITOR_SESSIONS,
             SystemPermission.ACTION_SYSTEM_MONITOR_SESSIONS_READ,
             // Announcement

@@ -4,7 +4,10 @@ import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateTe
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerReadTenantResourceDTO
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.service.BaseTenantResourceManagerService
@@ -65,6 +68,8 @@ abstract class StandardTenantManagerController<
     managerService,
     mutability,
 ) where ENTITY : BaseEntity, ENTITY : ScopedEntity<Long> {
+
+    override val resourceScope: ResourceScope = ResourceScope.TENANT
 
     companion object {
         private const val DEFAULT_SCOPE_CHECK_REQUIRES_TENANT_DTO =
@@ -219,43 +224,53 @@ abstract class StandardTenantManagerController<
         }
     }
 
+    private val tenantScopeMismatch
+        get() = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.TENANT)
+
+    private fun tenantMissingPermission(admin: String, pem: String) = ForbiddenContext(
+        reason = ForbiddenReason.MISSING_PERMISSION,
+        requiredPermissions = listOf(admin, pem)
+            .filter { it != PermissionMatrix.NOT_APPLICABLE && it != PermissionMatrix.NEVER_GRANTED },
+        scope = ResourceScope.TENANT,
+    )
+
     private suspend fun authorizeCreate(auth: UserAuthentication, dto: CREATE_DTO) {
         if (RbacUtils.hasAuthority(permissions.tenantAdminCreate)) return
         if (hasScopedAuthority(permissions.tenantPemCreate)) {
             auth.assertTenantIdNotNull()
-            if (!isCreateInScope(dto, auth)) throw ForbiddenException()
+            if (!isCreateInScope(dto, auth)) throw ForbiddenException(context = tenantScopeMismatch)
             return
         }
-        throw ForbiddenException()
+        throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminCreate, permissions.tenantPemCreate))
     }
 
     private suspend fun authorizeRead(auth: UserAuthentication, dto: READ_DTO) {
         if (RbacUtils.hasAuthority(permissions.tenantAdminRead)) return
         if (hasScopedAuthority(permissions.tenantPemRead)) {
-            if (!isQueryInScope(dto, auth)) throw ForbiddenException()
+            if (!isQueryInScope(dto, auth)) throw ForbiddenException(context = tenantScopeMismatch)
             return
         }
-        throw ForbiddenException()
+        throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminRead, permissions.tenantPemRead))
     }
 
     private suspend fun authorizeUpdate(auth: UserAuthentication, dto: UPDATE_DTO) {
         if (RbacUtils.hasAuthority(permissions.tenantAdminUpdate)) return
         if (hasScopedAuthority(permissions.tenantPemUpdate)) {
             auth.assertTenantIdNotNull()
-            if (!isUpdateInScope(dto, auth)) throw ForbiddenException()
+            if (!isUpdateInScope(dto, auth)) throw ForbiddenException(context = tenantScopeMismatch)
             return
         }
-        throw ForbiddenException()
+        throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminUpdate, permissions.tenantPemUpdate))
     }
 
     private suspend fun authorizeDelete(auth: UserAuthentication, dto: DELETE_DTO) {
         if (RbacUtils.hasAuthority(permissions.tenantAdminDelete)) return
         if (hasScopedAuthority(permissions.tenantPemDelete)) {
             auth.assertTenantIdNotNull()
-            if (!isDeleteInScope(dto, auth)) throw ForbiddenException()
+            if (!isDeleteInScope(dto, auth)) throw ForbiddenException(context = tenantScopeMismatch)
             return
         }
-        throw ForbiddenException()
+        throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminDelete, permissions.tenantPemDelete))
     }
 
     // ─── Preflight routing (customXxx short-circuit lives here, not on endpoint overrides) ───
@@ -295,10 +310,10 @@ abstract class StandardTenantManagerController<
             if (isReadAllInScope(tenantId, userAuthentication)) {
                 ApiResponse.success(buildReadAllResponse(tenantId))
             } else {
-                throw ForbiddenException()
+                throw ForbiddenException(context = tenantScopeMismatch)
             }
         } else {
-            throw ForbiddenException()
+            throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminRead, permissions.tenantPemRead))
         }
     }
 }

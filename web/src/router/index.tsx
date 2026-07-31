@@ -25,7 +25,7 @@ import {
 import { lazy } from 'react';
 
 const DashboardPage = lazy(() => import("../pages/manager/dashboard/DashboardPage.tsx"));
-const UserPermissionManagerPage = lazy(() => import("../pages/manager/rbac/UserPermissionManagerPage.tsx"));
+const UserPermissionContainer = lazy(() => import("../pages/manager/rbac/UserPermissionContainer.tsx"));
 const UserRoleManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleManagerPage.tsx"));
 const UserManagerPage = lazy(() => import("../pages/manager/user/UserManagerPage.tsx"));
 const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
@@ -34,6 +34,7 @@ const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfileP
 const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
 const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
 const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
+const StorageProviderRoutingRuleManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderRoutingRuleManagerPage.tsx"));
 const MailTemplateCategoryManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateCategoryManagerPage.tsx"));
 const MailTemplateTypeManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateTypeManagerPage.tsx"));
 const MailTemplateManagerPage = lazy(() => import("../pages/manager/mail/MailTemplateManagerPage.tsx"));
@@ -42,7 +43,7 @@ const TenantTireTypeManagerPage = lazy(() => import("../pages/manager/tenant/Ten
 const TenantTireBenefitFeatureManagerPage = lazy(() => import("../pages/manager/tenant/TenantTireBenefitFeatureManagerPage.tsx"));
 const TenantTireBenefitValueContainer = lazy(() => import("../pages/manager/tenant/benefit/TenantTireBenefitValueContainer.tsx"));
 const TenantMemberManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberManagerPage.tsx"));
-const TenantPermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantPermissionManagerPage.tsx"));
+const TenantPermissionContainer = lazy(() => import("../pages/manager/tenant/TenantPermissionContainer.tsx"));
 const TenantRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantRoleManagerPage.tsx"));
 const TenantRolePermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantRolePermissionManagerPage.tsx"));
 const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberRoleManagerPage.tsx"));
@@ -345,7 +346,7 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             label: t('menu.admin.userPermissions'),
             page: (
                 <ProtectedControllerWarningWrapper controller={UserPermissionManagerController}>
-                    <UserPermissionManagerPage />
+                    <UserPermissionContainer />
                 </ProtectedControllerWarningWrapper>
             ),
             group: 'rbac'
@@ -389,7 +390,7 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             label: t('menu.admin.tenantPermissions'),
             page: (
                 <ProtectedControllerWarningWrapper controller={TenantPermissionManagerController}>
-                    <TenantPermissionManagerPage />
+                    <TenantPermissionContainer />
                 </ProtectedControllerWarningWrapper>
             ),
             group: 'tenant'
@@ -513,6 +514,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <DatabaseOutlined />,
             label: t('menu.admin.storageProviders'),
             page: <StorageProviderManagerPage />,
+            group: 'system_storage'
+        },
+        {
+            key: '/manager/storage-provider-routing-rules',
+            path: '/manager/storage-provider-routing-rules',
+            icon: <DatabaseOutlined />,
+            label: t('menu.admin.storageProviderRoutingRules'),
+            page: <StorageProviderRoutingRuleManagerPage />,
             group: 'system_storage'
         },
         {

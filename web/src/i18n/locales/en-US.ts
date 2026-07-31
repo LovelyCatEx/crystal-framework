@@ -893,6 +893,10 @@ export const enUS: I18nRules = {
     tenantPermissionManager: {
       title: 'Tenant Permission Management',
       subtitle: 'Manage system tenant permissions',
+      switch: {
+        overview: 'Tree Overview',
+        management: 'Management'
+      },
       action: {
         addNew: 'Add New Permission'
       },
@@ -1098,6 +1102,8 @@ export const enUS: I18nRules = {
         // Dashboard / monitor (system layer)
         'system.dashboard.business.statistics.read': 'Read dashboard business statistics',
         'system.dashboard.system.metrics.read': 'Read dashboard system metrics',
+        'system.monitor': 'Manage system metrics monitor menu',
+        'system.monitor.read': 'Read system metrics data',
         'system.monitor.sessions.read': 'Read active session monitor data',
         // Announcement (system layer)
         'system.announcement.create': 'Create announcements',
@@ -1763,6 +1769,78 @@ export const enUS: I18nRules = {
         statusUpdateFailed: 'Failed to update status'
       }
     },
+    storageProviderRoutingRuleManager: {
+      title: 'Routing Rules',
+      subtitle: 'Top-to-bottom priority matching — first matching rule wins',
+      modal: {
+        name: { label: 'Rule Name', required: 'Please enter rule name', placeholder: 'Rule name' },
+        conditionTree: {
+          label: 'Conditions',
+          description: 'Leave empty to match all uploads (fallback rule)',
+          fields: {
+            fileType: 'File Type',
+            fileName: 'File Name',
+            fileExtension: 'File Extension',
+            fileContentType: 'Content Type',
+            fileSize: 'File Size (bytes)',
+            userId: 'User ID',
+            hourOfDay: 'Hour of Day (0-23)',
+            dayOfWeek: 'Day of Week (1-7)',
+          },
+        },
+        targetProviders: { label: 'Target Providers', required: 'Please select at least one provider' },
+        distributionType: { label: 'Distribution' },
+        enabled: { label: 'Enabled' },
+      },
+      columns: { enabled: 'Enabled', conditionTree: 'Conditions' },
+      reorderModal: {
+        title: 'Drag to Reorder',
+        description: 'Rules are matched top-down; drag to change priority.',
+        matchAll: '(match all — fallback)',
+        save: 'Save Order',
+        cancel: 'Cancel',
+      },
+      messages: {
+        reorderSuccess: 'Priority saved',
+        reorderFailed: 'Failed to save priority',
+        enabledToggleSuccess: 'Status updated',
+        enabledToggleFailed: 'Failed to update status',
+      },
+      simulate: {
+        button: 'Test Route',
+        modalTitle: 'Simulate File Routing',
+        description: 'Fill in a synthetic upload context to see which rule would match and which provider would be selected. Nothing is persisted.',
+        form: {
+          userId: 'User (optional)',
+          fileType: 'File Type',
+          fileTypeRequired: 'Please select file type',
+          fileName: 'File Name (optional)',
+          fileNamePlaceholder: 'e.g. avatar.png',
+          fileNameExtra: 'Extension is derived automatically from the file name.',
+          fileContentType: 'Content Type (optional)',
+          fileContentTypePlaceholder: 'e.g. image/png',
+          fileSize: 'File Size in Bytes (optional)',
+          fileSizePlaceholder: 'e.g. 102400',
+          uploadTimestamp: 'Upload Time (optional)',
+        },
+        result: {
+          header: 'Simulation Result',
+          selectedProvider: 'Selected provider',
+          noRuleMatched: 'No rule matched — no provider would be selected',
+          matchedNoProvider: 'A rule matched but no provider was selected',
+          matched: 'MATCHED',
+          notMatched: 'no match',
+          matchAll: 'match all (no conditions)',
+          actualLabel: 'actual',
+          selectedProviderIds: 'Selected provider ids',
+          priority: 'Priority',
+        },
+        actions: { run: 'Simulate', close: 'Close' },
+        errors: { simulateFailed: 'Simulation failed' },
+      },
+      action: { reorder: 'Priority Order' },
+      filter: { actions: 'Actions' },
+    },
     fileResourceManager: {
       title: 'File Resource Management',
       subtitle: 'Manage system file resources',
@@ -1886,6 +1964,10 @@ export const enUS: I18nRules = {
     userPermissionManager: {
       title: 'User Permission Management',
       subtitle: 'Manage system user permissions',
+      switch: {
+        overview: 'Tree Overview',
+        management: 'Management'
+      },
       filter: {
         type: 'Type',
         all: 'All',
@@ -3108,11 +3190,22 @@ export const enUS: I18nRules = {
         baseUrl: 'Base URL',
         config: 'Config'
       },
+      storageProviderRoutingRule: {
+        name: 'Rule Name',
+        priority: 'Priority',
+        targetProviders: 'Target Providers',
+        distributionType: 'Distribution',
+        enabled: 'Enabled',
+        unknownProvider: 'Unknown Provider'
+      },
       userPermission: {
         permission: 'Permission',
         type: 'Type',
         description: 'Description',
         path: 'Resource Path'
+      },
+      permissionTree: {
+        actions: 'Actions'
       },
       userRole: {
         role: 'Role',
@@ -3508,13 +3601,53 @@ export const enUS: I18nRules = {
     },
     scopedUserDisplay: {
       unknown: 'User not found'
+    },
+    permissionTree: {
+      scopes: {
+        system: 'System',
+        x: 'Cross-scope',
+        tenant: 'Tenant Admin',
+        iTenant: 'Own Tenant'
+      },
+      modules: {
+        permission: 'Permissions',
+        role: 'Roles',
+        user: 'Users',
+        settings: 'Settings',
+        oauth: 'OAuth',
+        file: 'Files',
+        storage: 'Storage',
+        mail: 'Mail',
+        tenant: 'Tenants',
+        message: 'Messaging',
+        audit: 'Audit',
+        monitor: 'Monitor',
+        announcement: 'Announcements',
+        approval: 'Approval Flows',
+        dict: 'Dictionaries',
+        dashboard: 'Dashboard',
+        maintenance: 'Maintenance',
+        department: 'Departments',
+        member: 'Members',
+        invitation: 'Invitations',
+        profile: 'Profile',
+        personal: 'Personal'
+      }
     }
   },
 
   api: {
     sessionExpired: 'Your session has expired',
     forbidden: 'You do not have permission to access this resource',
-    unknownError: 'Unknown error'
+    unknownError: 'Unknown error',
+    forbiddenModal: {
+      title: 'Access denied',
+      reasonLabel: 'Reason',
+      scopeLabel: 'Scope',
+      requiredPermissionsLabel: 'Required permissions',
+      noPermissionsRequired: 'No specific permissions declared',
+      messageLabel: 'Server message'
+    }
   },
 
   enums: {
@@ -3537,7 +3670,8 @@ export const enUS: I18nRules = {
     },
     resourceFileType: {
       0: 'User Avatar',
-      1: 'Tenant Icon'
+      1: 'Tenant Icon',
+      2: 'Tenant Member Avatar'
     },
     departmentMemberRoleType: {
       0: 'Member',
@@ -3638,6 +3772,11 @@ export const enUS: I18nRules = {
       0: 'Local File System',
       1: 'Aliyun OSS',
       2: 'Tencent COS'
+    },
+
+    ruleDistributionType: {
+      0: 'First Available',
+      1: 'Random'
     },
 
     oAuthPlatform: {
@@ -3744,6 +3883,18 @@ export const enUS: I18nRules = {
       checkbox: 'Checkbox',
       date: 'Date',
       datetime: 'Date Time'
+    },
+    forbiddenReason: {
+      MISSING_PERMISSION: 'Missing permission',
+      SCOPE_MISMATCH: 'Resource does not belong to your scope',
+      PROTECTED_RESOURCE: 'This resource is protected',
+      NOT_TENANT_MEMBER: 'Not a member of this tenant',
+      ROLE_PROTECTED: 'Role is protected from this operation',
+      PERMISSION_ESCALATION: 'Operation would escalate privileges'
+    },
+    forbiddenScope: {
+      SYSTEM: 'System',
+      TENANT: 'Tenant'
     }
   },
 
@@ -3765,6 +3916,7 @@ export const enUS: I18nRules = {
     tenantTireBenefitValue: 'Tier Benefit Value',
     fileResource: 'File Resource',
     storageProvider: 'Storage Provider',
+    storageProviderRoutingRule: 'Routing Rule',
     mailTemplate: 'Mail Template',
     mailTemplateType: 'Mail Template Type',
     mailTemplateCategory: 'Mail Template Category',
@@ -3830,6 +3982,7 @@ export const enUS: I18nRules = {
       tenantTireBenefitValues: 'Tier Benefit Management',
       fileResources: 'File Resource Management',
       storageProviders: 'Storage Provider Management',
+      storageProviderRoutingRules: 'Storage Routing Rules',
       mailTemplates: 'Mail Template Management',
       mailTemplateTypes: 'Mail Template Types',
       mailTemplateCategories: 'Mail Template Categories',

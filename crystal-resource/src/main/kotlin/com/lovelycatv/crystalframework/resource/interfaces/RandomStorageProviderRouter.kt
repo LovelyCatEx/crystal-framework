@@ -2,7 +2,6 @@ package com.lovelycatv.crystalframework.resource.interfaces
 
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import kotlinx.coroutines.runBlocking
@@ -14,11 +13,7 @@ class RandomStorageProviderRouter(
         const val CACHE_KEY_IDENTIFIER = "active-storage-providers"
     }
 
-    override suspend fun get(
-        userId: Long,
-        fileType: ResourceFileType,
-        fileName: String
-    ): StorageProviderEntity {
+    override suspend fun get(context: RoutingContext): StorageProviderEntity {
         val providers = storageProviderService.getListCache(CACHE_KEY_IDENTIFIER)
             ?: refreshCache()
 

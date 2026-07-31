@@ -1,12 +1,17 @@
 package com.lovelycatv.crystalframework.tenant.controller.manager.dict
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -81,6 +86,10 @@ class ManagerTenantDictItemController(
      * Tree view of dict items under a given type. Authorization mirrors the standard READ
      * pipeline: consult [PermissionMatrix.layersFor] then run [checkOwnership].
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_TENANT_DICT_ITEMS,
+    )
     @GetMapping("/tree")
     suspend fun tree(
         userAuthentication: UserAuthentication,
@@ -89,10 +98,18 @@ class ManagerTenantDictItemController(
         val (scope, scopeId) = managerService.resolveRootScopeFromTypeId(typeId)
             ?: throw BusinessException("Dict type $typeId not found")
         if (!RbacUtils.hasAnyAuthority(*permissions!!.layersFor(scope, ScopedOperation.READ))) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = permissions!!.layersFor(scope, ScopedOperation.READ)
+                    .filter { it != PermissionMatrix.NEVER_GRANTED }.toList(),
+                scope = scope,
+            ))
         }
         if (!checkOwnership(scope, scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException()
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scope,
+            ))
         }
         return ApiResponse.success(managerService.getTreeByTypeId(typeId))
     }

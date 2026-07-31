@@ -45,10 +45,10 @@ class ManagerApprovalFlowTaskControllerIntegrationTest(
      * mutation authority by accident.
      */
     private val fixtureMatrix: PermissionMatrix = PermissionMatrix.readonly(
-        superRead = FIXTURE_PLACEHOLDER_AUTHORITY,
-        systemRead = FIXTURE_PLACEHOLDER_AUTHORITY,
-        tenantAdminRead = FIXTURE_PLACEHOLDER_AUTHORITY,
-        tenantPemRead = FIXTURE_PLACEHOLDER_AUTHORITY,
+        superRead = FIXTURE_SUPER_AUTHORITY,
+        systemRead = FIXTURE_SYSTEM_AUTHORITY,
+        tenantAdminRead = FIXTURE_TENANT_ADMIN_AUTHORITY,
+        tenantPemRead = FIXTURE_TENANT_PEM_AUTHORITY,
     )
 
     private fun systemReadDto() = ManagerReadApprovalFlowTaskDTO(
@@ -135,10 +135,12 @@ class ManagerApprovalFlowTaskControllerIntegrationTest(
     }
 
     companion object {
-        // Sentinel string placed in every fixture slot; never intersects any real production
-        // authority because it does not follow any registered naming convention and no role
-        // seeds it into RBAC.
-        private const val FIXTURE_PLACEHOLDER_AUTHORITY = "test.fixture.placeholder"
+        // Per-layer fixture strings, each matching its layer's required prefix convention.
+        // None of these values are seeded into RBAC so they never intersect a real authority check.
+        private const val FIXTURE_SUPER_AUTHORITY = "x.fixture.read"
+        private const val FIXTURE_SYSTEM_AUTHORITY = "system.fixture.read"
+        private const val FIXTURE_TENANT_ADMIN_AUTHORITY = "tenant.fixture.read"
+        private const val FIXTURE_TENANT_PEM_AUTHORITY = "i.tenant.fixture.read"
         private const val OWN_TENANT_ID: Long = 1L
         private const val OWN_TENANT_MEMBER_ID: Long = 100L
         private const val SYSTEM_SCOPE_ID: Long = 0L

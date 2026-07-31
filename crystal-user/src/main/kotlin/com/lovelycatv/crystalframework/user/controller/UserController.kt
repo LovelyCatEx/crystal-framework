@@ -1,9 +1,12 @@
 package com.lovelycatv.crystalframework.user.controller
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -69,6 +72,11 @@ class UserController(
         return ApiResponse.success(null)
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USERS,
+        resourceIds = "#userAuthentication.userId",
+    )
     @PostMapping("/resetEmail")
     suspend fun resetEmail(
         userAuthentication: UserAuthentication,
@@ -115,6 +123,11 @@ class UserController(
         )
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USERS,
+        resourceIds = "#userAuthentication.userId",
+    )
     @PostMapping("/profile")
     suspend fun updateUserProfile(
         userAuthentication: UserAuthentication,
@@ -127,6 +140,11 @@ class UserController(
         return ApiResponse.success(null)
     }
 
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USERS,
+        resourceIds = "#userAuthentication.userId",
+    )
     @PostMapping("/uploadAvatar")
     suspend fun uploadAvatar(
         userAuthentication: UserAuthentication,

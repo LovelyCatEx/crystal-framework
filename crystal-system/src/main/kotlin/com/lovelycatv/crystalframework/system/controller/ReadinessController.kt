@@ -1,11 +1,13 @@
 package com.lovelycatv.crystalframework.system.controller
 
+import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.system.controller.dto.SwitchSystemMaintenanceModeDTO
 import com.lovelycatv.crystalframework.system.controller.vo.MaintenanceInfoVO
@@ -21,7 +23,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -82,7 +83,7 @@ class ReadinessController(
         )
     }
 
-    @PreAuthorize("hasAnyAuthority('system.maintenance.update')")
+    @RequiresAuthority(anyOf = ["system.maintenance.update"], scope = ResourceScope.SYSTEM)
     @PostMapping("/maintenance")
     suspend fun setSystemMaintenance(
         @ModelAttribute

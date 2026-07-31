@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -82,7 +85,12 @@ class TenantManagerServiceImpl(
                 || dto.status != null
                 || dto.settings != null
         if (touchesLifecycle && !RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name)) {
-            throw ForbiddenException("Lifecycle fields require ${SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name}")
+            throw ForbiddenException("Lifecycle fields require ${SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name}",
+                context = ForbiddenContext(
+                    reason = ForbiddenReason.MISSING_PERMISSION,
+                    requiredPermissions = listOf(SystemPermission.ACTION_SYSTEM_TENANT_LIFECYCLE_UPDATE.name),
+                    scope = ResourceScope.SYSTEM,
+                ))
         }
 
         if (dto.ownerUserId != null) {

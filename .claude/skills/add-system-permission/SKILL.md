@@ -1,6 +1,6 @@
 ---
 name: add-system-permission
-description: 为系统添加新的系统级权限（action/menu/component），包括常量定义、角色绑定和注册。
+description: 为系统添加新的系统级权限（action/menu/component），包括常量定义、角色绑定、注册和前端 i18n 同步。
 ---
 
 # 添加系统权限
@@ -22,7 +22,7 @@ description: 为系统添加新的系统级权限（action/menu/component），�
 3. 权限类型（action / menu / component）
 4. 如果是 menu 或 component，还需要提供 path
 5. 需要绑定到哪些角色（root 自动拥有所有权限，无需手动绑定）
-6. 所属模块（主项目 or 某个子模块如 crystal-monitor）
+6. 所属模块（主项目 or 某个子模块如 crystal-schedule）
 
 ## 前提信息
 
@@ -109,7 +109,7 @@ SystemRole.ROLE_ADMIN to listOf(
 
 `ROLE_ROOT` 通过 `SystemPermission.allPermissions()` 自动获得**全部** SystemPermission，无需手动补。同理 `SystemSystemRbacConfigurer` 会在启动时扫描并注册全部 Declaration，无需其他操作。
 
-#### 路径 B：子模块 / 插件权限
+#### 路径 B：子模块权限
 
 **推荐做法（新模块）：** 直接使用 `SystemRbacPermissionDeclaration` 工厂，跟 `SystemPermission` 保持结构一致。
 
@@ -128,16 +128,6 @@ object MyModulePermission {
 }
 ```
 
-**遗留做法（兼容存量模块，如 `crystal-monitor`）：** `const val` 字符串 + 在 Configurer 里用工厂重新包一层。仅在存量代码里保留，新模块不推荐。
-
-```kotlin
-// crystal-monitor/.../constants/MonitorPermission.kt（遗留）
-object MonitorPermission {
-    const val MENU_SYSTEM_MONITOR = "system.monitor:/manager/monitor/system-metrics"
-    const val ACTION_SYSTEM_MONITOR_READ = "system.monitor.read"
-}
-```
-
 **注册**：实现 `SystemRbacConfigurer`
 
 ```kotlin
@@ -152,8 +142,6 @@ class MyModulePermissionConfigurer : SystemRbacConfigurer {
     }
 }
 ```
-
-若模块用的是遗留 `const val` 字符串常量，Configurer 里必须手动 `SystemRbacPermissionDeclaration.menu(name = ..., path = ...)` 包一层（见 `MonitorPermissionConfigurer`）——但这样比 Declaration 方式多一次映射，容易漏字段。
 
 ### 冲突检测
 
@@ -170,7 +158,7 @@ class ManagerCleanupController(...) : StandardManagerController<...>(
     ...,
     permissions = PermissionMatrix.systemOnly(
         systemCreate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
-        systemRead = SystemPermission.ACTION_SYSTEM_CLEANUP_READ.name,
+        systemRead   = SystemPermission.ACTION_SYSTEM_CLEANUP_READ.name,
         systemUpdate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
         systemDelete = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
     ),
@@ -179,17 +167,19 @@ class ManagerCleanupController(...) : StandardManagerController<...>(
 
 `PermissionMatrix.init` 会在构造时对每个槽做前缀校验，前缀跟层不匹配直接 `throw IllegalStateException` 导致启动失败——没有 warn 兜底。
 
-#### 用 `@PreAuthorize`（少量非 CRUD 端点）
+#### 用 `@RequiresAuthority`（少量非 CRUD 端点）
 
-Spring Security 的 `@PreAuthorize` 只接受编译期字符串常量，`SystemPermission.ACTION_XXX` 是 `val`（Declaration 对象）不是 `const val String`，**无法插值**。必须**手写字面量**：
+非 Manager Controller 家族的端点用 `@RequiresAuthority`。该注解只接受编译期字符串常量，`SystemPermission.ACTION_XXX` 是 `val`（Declaration 对象）不是 `const val String`，**无法插值**，必须**手写字面量**：
 
 ```kotlin
-@PreAuthorize("hasAuthority('system.cleanup.read')")
-@GetMapping("/status")
-suspend fun getStatus(): ApiResponse<...> { ... }
+@GetMapping("/query/batch")
+@RequiresAuthority(anyOf = ["system.cleanup.read"], scope = ResourceScope.SYSTEM)
+fun batchQuery(...): Mono<ApiResponse<...>> { ... }
 ```
 
-`PreAuthorizeCoverageTest` 会扫描项目里所有 `@PreAuthorize("hasAuthority('xxx')")` 字面量，`xxx` 必须能在 `SystemPermission.allPermissions()` 或 `TenantPermission.allPermissions()` 里找到匹配的 `.name`——**打错字直接测试失败**。
+`RequiresAuthorityCoverageTest` 会扫描项目里所有 `@RequiresAuthority` 的 `anyOf`/`allOf` 字面量，必须能在 `SystemPermission.allPermissions()` 或 `TenantPermission.allPermissions()` 里找到匹配——**打错字直接测试失败**。
+
+**⚠️ `@PreAuthorize` 已被 `SpringSecurityAnnotationBanBeanFactoryPostProcessor` 在启动时硬禁用，禁止新代码使用。**
 
 menu / component 权限由前端路由守卫和菜单渲染自动校验，不需要在 controller 上标注。
 
@@ -202,6 +192,39 @@ menu / component 权限由前端路由守卫和菜单渲染自动校验，不需
 | `user` | 普通用户，通常只绑定少量前端组件权限 |
 | 租户内置角色 | 参见 `TenantRolePermissionRelation` |
 
+### 前端 i18n 同步
+
+每新增一个权限，**必须**同步在前端两个 locale 文件的 `pages.permissionCatalog.byName` 对象里添加对应的中英文描述：
+
+```
+web/src/i18n/locales/en-US.ts
+web/src/i18n/locales/zh-CN.ts
+```
+
+key 就是权限的 `name` 字符串，value 是面向用户的简短描述（非技术术语）：
+
+```typescript
+// en-US.ts — pages.permissionCatalog.byName
+'system.cleanup':        'Cleanup management menu',
+'system.cleanup.read':   'Read cleanup status',
+'system.cleanup.update': 'Trigger system cleanup',
+```
+
+```typescript
+// zh-CN.ts — pages.permissionCatalog.byName
+'system.cleanup':        '清理管理菜单',
+'system.cleanup.read':   '查看清理状态',
+'system.cleanup.update': '触发系统清理',
+```
+
+规则：
+- key 与后端 Declaration 的 `name` 完全一致（一字不差）
+- 两个 locale 文件条目数量必须一一对应，禁止一边多一边少
+- 描述用人类可读语言，不要重复技术名词（如避免 `"system.cleanup.read"` → `"System cleanup read"`）
+- 将新条目插入到同业务域的相邻行，保持文件可读性
+
+这些翻译会被 `pages.permissionCatalog.byName` 的权限树（`PermissionTreeTable`）和权限描述切换（i18n/DB）使用。
+
 ## 执行步骤
 
 ### 路径 A（主项目 SystemPermission / TenantPermission）
@@ -212,28 +235,29 @@ menu / component 权限由前端路由守卫和菜单渲染自动校验，不需
 4. 添加 Declaration val：常量名段（`X` / `SYSTEM` / `TENANT` / 无）必须跟 name 前缀严格对应
 5. 用工厂方法 `SystemRbacPermissionDeclaration.action(...)` / `.menu(...)` / `.component(...)`（或 `TenantPermissionDeclaration(...)`），description 内嵌到 Declaration 里，禁止外部维护 DESCRIPTIONS map
 6. 在 `SystemRolePermissionRelation.kt` / `TenantRolePermissionRelation.kt` 对应角色列表中添加绑定（引用 Declaration val 本体，不是字符串）
-7. 若涉及 Controller，`PermissionMatrix` 槽用 `SystemPermission.XXX.name` 传入
-8. 若涉及 `@PreAuthorize`，手写字面量必须跟 Declaration.name 完全一致
+7. 若涉及 Controller，`PermissionMatrix` 槽用 `SystemPermission.XXX.name` 传入；非 CRUD 端点用 `@RequiresAuthority(anyOf = ["<literal>"], scope = ...)`
+8. **在 `web/src/i18n/locales/en-US.ts` 和 `zh-CN.ts` 的 `pages.permissionCatalog.byName` 中添加对应翻译**（en/zh 必须同步）
 
 ### 路径 B（子模块 Configurer）
 
 1. 确认模块内是否已有 `XxxPermission` 常量文件；有则追加，无则新建
-2. **新模块**：直接用 `SystemRbacPermissionDeclaration` 工厂声明（跟 `SystemPermission` 结构一致，常量名段必须跟 name 前缀对应）
-3. **存量模块（如 `crystal-monitor`）**：可继续用 `const val String`，但需要在 Configurer 里手动 `SystemRbacPermissionDeclaration.menu/action(name = ..., path = ...)` 包一层
-4. 确认模块内是否已有 `SystemRbacConfigurer` 实现（`@Component` 标注）；有则追加，无则新建
-5. 在 Configurer 中 `registry.permission(...)` 注册每一个权限，`registry.grantAll(SystemRole.ROLE_XXX)` 绑定角色
-6. Controller / `@PreAuthorize` 使用规则同路径 A
+2. 直接用 `SystemRbacPermissionDeclaration` 工厂声明（跟 `SystemPermission` 结构一致，常量名段必须跟 name 前缀对应）
+3. 确认模块内是否已有 `SystemRbacConfigurer` 实现（`@Component` 标注）；有则追加，无则新建
+4. 在 Configurer 中 `registry.permission(...)` 注册每一个权限，`registry.grantAll(SystemRole.ROLE_XXX)` 绑定角色
+5. Controller / `@RequiresAuthority` 使用规则同路径 A
+6. **在 `web/src/i18n/locales/en-US.ts` 和 `zh-CN.ts` 的 `pages.permissionCatalog.byName` 中添加对应翻译**（en/zh 必须同步）
 
-## 校验清单（4 道保险）
+## 校验清单（5 道保险）
 
 添加/修改权限后，必须同时通过以下所有校验：
 
 1. **`PermissionMatrix.init` hard error**：任一 Controller 的 `PermissionMatrix` 槽中的 name 前缀跟其所属层不匹配（如 `system` 槽塞了 `x.` 前缀的常量），**应用启动直接 `throw IllegalStateException` 崩溃**
-2. **`PermissionNameConventionTest`**：`SystemPermission` name 必须以 `x.` / `system.` / `tenant.` 之一开头；`TenantPermission` name 必须以 `i.tenant.` 开头；Kotlin 常量名的层段（`ACTION_X_` / `ACTION_SYSTEM_` / `ACTION_TENANT_` / 无）必须跟 name 前缀严格对应；MENU / COMPONENT 必须带 path，ACTION 不能带 path；name 全局唯一
-3. **`PreAuthorizeCoverageTest`**：项目里所有 `@PreAuthorize("hasAuthority('xxx')")` 的 `xxx` 必须能在 `SystemPermission` / `TenantPermission` / 模块 `XxxPermission` 的 `.name` 集合里找到匹配
+2. **`PermissionNameConventionTest`**：`SystemPermission` name 必须以 `x.` / `system.` / `tenant.` 之一开头；`TenantPermission` name 必须以 `i.tenant.` 开头；Kotlin 常量名的层段必须跟 name 前缀严格对应；MENU / COMPONENT 必须带 path，ACTION 不能带 path；name 全局唯一
+3. **`RequiresAuthorityCoverageTest`**：项目里所有 `@RequiresAuthority(anyOf = ["xxx"])` 的字面量必须能在 `SystemPermission.allPermissions()` 或 `TenantPermission.allPermissions()` 里找到匹配的 `.name`
 4. **`SystemRbacRegistry` 冲突检测**：启动时若发现重复 name，抛 `IllegalStateException` 拒绝启动
+5. **前端 i18n 完整性**：`en-US.ts` 和 `zh-CN.ts` 的 `pages.permissionCatalog.byName` 新增条目数量一一对应，`tsc --noEmit` 编译通过（i18n-rules 类型校验）
 
-**违反前缀规则将同时触发校验 1 和 2；打错 `@PreAuthorize` 字面量将触发校验 3；name 冲突将触发校验 4。任意一条不通过都无法上线。**
+**违反前缀规则将同时触发校验 1 和 2；打错 `@RequiresAuthority` 字面量将触发校验 3；name 冲突将触发校验 4；i18n 条目不对称将触发校验 5。任意一条不通过都无法上线。**
 
 ## 输出格式
 
@@ -241,6 +265,6 @@ menu / component 权限由前端路由守卫和菜单渲染自动校验，不需
 
 1. 新增/修改的权限列表（Kotlin 常量名、字符串 name、类型、path、所属层）
 2. 绑定到哪些角色（哪个文件的哪个列表）
-3. 修改/新建的文件路径
-4. 若是 action 权限，给出对应的 `PermissionMatrix` 或 `@PreAuthorize` 使用示例
-5. 逐条确认已通过 4 道校验（`PermissionMatrix.init` / `PermissionNameConventionTest` / `PreAuthorizeCoverageTest` / `SystemRbacRegistry` 冲突检测）
+3. 修改/新建的文件路径（含前端 i18n 文件）
+4. 若是 action 权限，给出对应的 `PermissionMatrix` 或 `@RequiresAuthority` 使用示例
+5. 逐条确认已通过 5 道校验

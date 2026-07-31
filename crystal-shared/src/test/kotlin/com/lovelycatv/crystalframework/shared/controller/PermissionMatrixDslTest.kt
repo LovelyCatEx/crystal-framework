@@ -9,10 +9,10 @@ class PermissionMatrixDslTest {
     fun `dsl produces matrix equivalent to hand-written constructor`() {
         val fromDsl = PermissionMatrix.of {
             `super` {
-                create = "role.create"
-                read = "role.read"
-                update = "role.update"
-                delete = "role.delete"
+                create = "x.role.create"
+                read = "x.role.read"
+                update = "x.role.update"
+                delete = "x.role.delete"
             }
             system {
                 create = "system.role.create"
@@ -35,10 +35,10 @@ class PermissionMatrixDslTest {
         }
 
         val handWritten = PermissionMatrix(
-            superCreate = "role.create",
-            superRead = "role.read",
-            superUpdate = "role.update",
-            superDelete = "role.delete",
+            superCreate = "x.role.create",
+            superRead = "x.role.read",
+            superUpdate = "x.role.update",
+            superDelete = "x.role.delete",
             systemCreate = "system.role.create",
             systemRead = "system.role.read",
             systemUpdate = "system.role.update",

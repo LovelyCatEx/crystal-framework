@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.approval.controller.manager
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.HandleApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowTaskDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowTaskDTO
@@ -13,6 +15,7 @@ import com.lovelycatv.crystalframework.approval.service.ApprovalFlowNodeService
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowTaskManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.ReadonlyScopedManagerController
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
 import com.lovelycatv.crystalframework.shared.database.ConditionNode
@@ -21,7 +24,9 @@ import com.lovelycatv.crystalframework.shared.database.QueryLogic
 import com.lovelycatv.crystalframework.shared.database.QueryNode
 import com.lovelycatv.crystalframework.shared.database.QueryOperator
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -90,7 +95,8 @@ class ManagerApprovalFlowTaskController(
             val task = managerService.getByIdOrNull(dto.id!!)
                 ?: return managerService.query(dto)
             if (task.assigneeId != assigneeId) {
-                throw ForbiddenException("Task not assigned to the current user")
+                throw ForbiddenException("Task not assigned to the current user",
+                    context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
             }
         }
         return managerService.query(dto.copy(query = appendAssigneeCondition(dto.query, assigneeId)))
@@ -102,6 +108,10 @@ class ManagerApprovalFlowTaskController(
      * id short-circuit cannot bypass the assignee filter — callers who need id lookup should go
      * through `/query`, which still requires `task.assigneeId == self`.
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+    )
     @PostMapping("/my", version = "1")
     suspend fun queryMyTasks(
         userAuthentication: UserAuthentication,
@@ -121,6 +131,11 @@ class ManagerApprovalFlowTaskController(
      * task's scope-specific assignee id against the caller; the actual state transition (records,
      * token/instance advancement) is delegated to [ApprovalFlowEngine.handleTask].
      */
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+        resourceIds = "#dto.taskId",
+    )
     @PostMapping("/handle", version = "1")
     suspend fun handle(
         userAuthentication: UserAuthentication,
@@ -133,7 +148,8 @@ class ManagerApprovalFlowTaskController(
         val resolvedScope = resolveScope(task.scope)
         val operatorId = resolveAssigneeId(resolvedScope, userAuthentication)
         if (task.assigneeId != operatorId) {
-            throw ForbiddenException("This task is not assigned to the current user")
+            throw ForbiddenException("This task is not assigned to the current user",
+                context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
         }
 
         approvalFlowEngine.handleTask(
@@ -152,6 +168,11 @@ class ManagerApprovalFlowTaskController(
      * the same way as [handle] — only the task's assignee may read this. Merging schema/overlay
      * into the render-ready structure is done client-side (see frontend `mergeFieldOverrides`).
      */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_APPROVAL_FLOW_TASK,
+        resourceIds = "#taskId",
+    )
     @GetMapping("/form-view", version = "1")
     suspend fun formView(
         userAuthentication: UserAuthentication,
@@ -161,7 +182,8 @@ class ManagerApprovalFlowTaskController(
         val resolvedScope = resolveScope(task.scope)
         val operatorId = resolveAssigneeId(resolvedScope, userAuthentication)
         if (task.assigneeId != operatorId) {
-            throw ForbiddenException("This task is not assigned to the current user")
+            throw ForbiddenException("This task is not assigned to the current user",
+                context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = resolvedScope))
         }
 
         val instance = instanceService.getByIdOrThrow(task.instanceId)
@@ -188,7 +210,8 @@ class ManagerApprovalFlowTaskController(
         return when (scope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
-                ?: throw ForbiddenException("Current user is not a member of this tenant")
+                ?: throw ForbiddenException("Current user is not a member of this tenant",
+                    context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = scope))
         }
     }
 
