@@ -893,6 +893,10 @@ export const enUS: I18nRules = {
     tenantPermissionManager: {
       title: 'Tenant Permission Management',
       subtitle: 'Manage system tenant permissions',
+      switch: {
+        overview: 'Tree Overview',
+        management: 'Management'
+      },
       action: {
         addNew: 'Add New Permission'
       },
@@ -1098,6 +1102,8 @@ export const enUS: I18nRules = {
         // Dashboard / monitor (system layer)
         'system.dashboard.business.statistics.read': 'Read dashboard business statistics',
         'system.dashboard.system.metrics.read': 'Read dashboard system metrics',
+        'system.monitor': 'Manage system metrics monitor menu',
+        'system.monitor.read': 'Read system metrics data',
         'system.monitor.sessions.read': 'Read active session monitor data',
         // Announcement (system layer)
         'system.announcement.create': 'Create announcements',
@@ -1958,6 +1964,10 @@ export const enUS: I18nRules = {
     userPermissionManager: {
       title: 'User Permission Management',
       subtitle: 'Manage system user permissions',
+      switch: {
+        overview: 'Tree Overview',
+        management: 'Management'
+      },
       filter: {
         type: 'Type',
         all: 'All',
@@ -3194,6 +3204,9 @@ export const enUS: I18nRules = {
         description: 'Description',
         path: 'Resource Path'
       },
+      permissionTree: {
+        actions: 'Actions'
+      },
       userRole: {
         role: 'Role',
         description: 'Description'
@@ -3588,6 +3601,38 @@ export const enUS: I18nRules = {
     },
     scopedUserDisplay: {
       unknown: 'User not found'
+    },
+    permissionTree: {
+      scopes: {
+        system: 'System',
+        x: 'Cross-scope',
+        tenant: 'Tenant Admin',
+        iTenant: 'Own Tenant'
+      },
+      modules: {
+        permission: 'Permissions',
+        role: 'Roles',
+        user: 'Users',
+        settings: 'Settings',
+        oauth: 'OAuth',
+        file: 'Files',
+        storage: 'Storage',
+        mail: 'Mail',
+        tenant: 'Tenants',
+        message: 'Messaging',
+        audit: 'Audit',
+        monitor: 'Monitor',
+        announcement: 'Announcements',
+        approval: 'Approval Flows',
+        dict: 'Dictionaries',
+        dashboard: 'Dashboard',
+        maintenance: 'Maintenance',
+        department: 'Departments',
+        member: 'Members',
+        invitation: 'Invitations',
+        profile: 'Profile',
+        personal: 'Personal'
+      }
     }
   },
 

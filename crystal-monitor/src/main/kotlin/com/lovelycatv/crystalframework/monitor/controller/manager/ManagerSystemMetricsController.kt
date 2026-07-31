@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.monitor.controller.manager
 
-import com.lovelycatv.crystalframework.monitor.constants.MonitorPermission
 import com.lovelycatv.crystalframework.monitor.service.MonitorMetricService
 import com.lovelycatv.crystalframework.monitor.types.MetricQueryResponse
 import com.lovelycatv.crystalframework.monitor.types.MetricType
@@ -19,7 +18,7 @@ class ManagerSystemMetricsController(
     private val monitorMetricService: MonitorMetricService,
 ) {
     @GetMapping("/query/batch")
-    @RequiresAuthority(anyOf = [MonitorPermission.ACTION_SYSTEM_MONITOR_READ], scope = ResourceScope.SYSTEM)
+    @RequiresAuthority(anyOf = ["system.monitor.read"], scope = ResourceScope.SYSTEM)
     fun batchQuery(
         @RequestParam types: List<MetricType>,
         @RequestParam(defaultValue = "1h") duration: String,

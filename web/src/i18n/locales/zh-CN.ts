@@ -890,6 +890,10 @@ export const zhCN: I18nRules = {
     tenantPermissionManager: {
       title: '租户权限管理',
       subtitle: '管理系统租户权限',
+      switch: {
+        overview: '树形概览',
+        management: '权限管理'
+      },
       action: {
         addNew: '新增权限'
       },
@@ -1096,6 +1100,8 @@ export const zhCN: I18nRules = {
         'system.dashboard.business.statistics.read': '读取仪表盘业务统计',
         'system.dashboard.system.metrics.read': '读取仪表盘系统指标',
         'system.monitor.sessions.read': '读取活跃会话监控数据',
+        'system.monitor': '系统性能监控菜单',
+        'system.monitor.read': '查看系统性能指标数据',
         // Announcement (system layer)
         'system.announcement.create': '创建公告',
         'system.announcement.read': '读取公告',
@@ -1955,6 +1961,10 @@ export const zhCN: I18nRules = {
     userPermissionManager: {
       title: '用户权限管理',
       subtitle: '管理系统用户权限',
+      switch: {
+        overview: '树形概览',
+        management: '权限管理'
+      },
       filter: {
         type: '类型',
         all: '全部',
@@ -3192,6 +3202,9 @@ export const zhCN: I18nRules = {
         description: '描述',
         path: '资源路径'
       },
+      permissionTree: {
+        actions: '操作'
+      },
       userRole: {
         role: '角色',
         description: '描述'
@@ -3586,6 +3599,38 @@ export const zhCN: I18nRules = {
     },
     scopedUserDisplay: {
       unknown: '用户不存在'
+    },
+    permissionTree: {
+      scopes: {
+        system: '系统',
+        x: '跨域',
+        tenant: '跨租户',
+        iTenant: '本租户'
+      },
+      modules: {
+        permission: '权限',
+        role: '角色',
+        user: '用户',
+        settings: '设置',
+        oauth: 'OAuth',
+        file: '文件',
+        storage: '存储',
+        mail: '邮件',
+        tenant: '租户',
+        message: '消息',
+        audit: '审计',
+        monitor: '监控',
+        announcement: '公告',
+        approval: '审批流',
+        dict: '字典',
+        dashboard: '仪表盘',
+        maintenance: '维护',
+        department: '部门',
+        member: '成员',
+        invitation: '邀请',
+        profile: '资料',
+        personal: '个人'
+      }
     }
   },
 

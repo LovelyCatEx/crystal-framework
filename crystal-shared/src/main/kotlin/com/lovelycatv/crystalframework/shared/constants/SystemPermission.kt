@@ -732,8 +732,17 @@ object SystemPermission {
     )
 
     // ============================================================
-    //   Monitor Sessions  (system)
+    //   Monitor  (system)
     // ============================================================
+    val ACTION_SYSTEM_MONITOR_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.monitor.read",
+        description = "Read system metrics data"
+    )
+    val MENU_SYSTEM_MONITOR = SystemRbacPermissionDeclaration.menu(
+        name = "system.monitor",
+        path = "/manager/monitor/system-metrics",
+        description = "Manage system metrics monitor menu"
+    )
     val ACTION_SYSTEM_MONITOR_SESSIONS_READ = SystemRbacPermissionDeclaration.action(
         name = "system.monitor.sessions.read",
         description = "Read active session monitor data"

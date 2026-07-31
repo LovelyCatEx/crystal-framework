@@ -112,8 +112,6 @@ class RequiresAuthorityCoverageTest(
     }
 
     companion object {
-        private val SUBORDINATE_PERMISSION_CLASSES = listOf(
-            "com.lovelycatv.crystalframework.monitor.constants.MonitorPermission",
-        )
+        private val SUBORDINATE_PERMISSION_CLASSES = emptyList<String>()
     }
 }

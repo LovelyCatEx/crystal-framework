@@ -45,6 +45,8 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_EMAIL,
             SystemPermission.ACTION_SYSTEM_SETTINGS_TEST_SEND_MESSAGE,
             // Monitor
+            SystemPermission.MENU_SYSTEM_MONITOR,
+            SystemPermission.ACTION_SYSTEM_MONITOR_READ,
             SystemPermission.MENU_SYSTEM_MONITOR_SESSIONS,
             SystemPermission.ACTION_SYSTEM_MONITOR_SESSIONS_READ,
             // Announcement
