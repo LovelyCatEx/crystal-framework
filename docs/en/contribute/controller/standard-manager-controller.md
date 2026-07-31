@@ -121,7 +121,7 @@ class ManagerControllerPermissionAspect {
 
 ### ManagerControllerAuditAspect (in crystal-audit)
 
-The pointcut covers every subclass of `AbstractManagerController`. The audit aspect has `@Order = 0` and wraps the permission safety-net aspect (`@Order = 1000`); it observes the `Mono` returned by permission checks and the business method, then writes the audit log asynchronously when it receives an `onNext`, `onComplete`, or `onError` signal.
+The pointcut covers every subclass of `AbstractManagerController`. The audit aspect has `@Order = 0` and wraps the permission safety-net aspect (`@Order = 1000`); it observes the `Mono` returned by permission checks and the business method, then writes one audit log asynchronously when the `Mono` completes successfully or emits an error.
 
 The audit aspect records:
 

@@ -121,7 +121,7 @@ class ManagerControllerPermissionAspect {
 
 ### ManagerControllerAuditAspect（在 crystal-audit）
 
-切点覆盖 `AbstractManagerController` 的所有子类。审计切面的 `@Order` 为 `0`，位于权限安全网切面（`@Order = 1000`）外层；它观察权限检查和业务方法返回的 `Mono`，并在收到 `onNext`、`onComplete` 或 `onError` 信号时异步写入审计日志。
+切点覆盖 `AbstractManagerController` 的所有子类。审计切面的 `@Order` 为 `0`，位于权限安全网切面（`@Order = 1000`）外层；它观察权限检查和业务方法返回的 `Mono`，并在成功完成或产生错误时异步写入一条审计日志。
 
 审计切面记录：
 

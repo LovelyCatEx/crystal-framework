@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.resource.controller.manager.routing
 
+import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerCreateStorageProviderRoutingRuleDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerDeleteStorageProviderRoutingRuleDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.routing.dto.ManagerReadStorageProviderRoutingRuleDTO
@@ -12,6 +14,7 @@ import com.lovelycatv.crystalframework.resource.repository.StorageProviderRoutin
 import com.lovelycatv.crystalframework.resource.service.manager.StorageProviderRoutingRuleManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.controller.ManagerAction
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardManagerController
@@ -62,6 +65,10 @@ class ManagerStorageProviderRoutingRuleController(
 
     /** Dry-run route resolution: given a synthetic upload context, return every rule's trace and
      *  the provider that would have been selected. Does not persist anything. */
+    @Audit(
+        action = AuditAction.READ,
+        resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES,
+    )
     @PostMapping("/simulate")
     suspend fun simulate(
         userAuthentication: UserAuthentication,
