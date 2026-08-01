@@ -3469,6 +3469,7 @@ export const enUS: I18nRules = {
       },
       approvalFlowDefinition: {
         name: 'Name',
+        definitionId: 'Flow ID',
         description: 'Description',
         currentVersion: 'Version',
         status: 'Status'

@@ -3467,6 +3467,7 @@ export const zhCN: I18nRules = {
       },
       approvalFlowDefinition: {
         name: '名称',
+        definitionId: '流程ID',
         description: '描述',
         currentVersion: '版本',
         status: '状态'
