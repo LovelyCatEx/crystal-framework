@@ -1,7 +1,8 @@
 import {Button, Col, Form, Input, message, Popconfirm, Row, Tooltip} from "antd";
-import {ReloadOutlined} from "@ant-design/icons";
+import {LogoutOutlined, ReloadOutlined} from "@ant-design/icons";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
+    forceLogoutUsers,
     type ManagerCreateUserDTO,
     type ManagerReadUserDTO,
     refreshUserAuthorities,
@@ -47,6 +48,15 @@ export default function UserManagerPage() {
         }
     };
 
+    const handleForceLogoutSingle = async (userId: string) => {
+        try {
+            await forceLogoutUsers({ userIds: [userId] });
+            void message.success(t('pages.userManager.messages.forceLogoutSuccess'));
+        } catch {
+            void message.error(t('pages.userManager.messages.forceLogoutFailed'));
+        }
+    };
+
     return (
         <ManagerPageContainer
             ref={pageRef}
@@ -64,17 +74,30 @@ export default function UserManagerPage() {
                 { field: 'nickname', value: filters.nickname },
             ]}
             tableRowActionsRender={(record: User) => (
-                <Popconfirm
-                    title={t('pages.userManager.action.refreshAuthority')}
-                    description={<span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.refreshAuthorityConfirm')}</span>}
-                    onConfirm={() => handleRefreshSingleAuthority(record.id)}
-                    okText={t('components.managerPageContainer.confirm')}
-                    cancelText={t('components.managerPageContainer.cancel')}
-                >
-                    <Tooltip title={t('pages.userManager.action.refreshAuthority')}>
-                        <Button type="text" size="small" icon={<ReloadOutlined />} />
-                    </Tooltip>
-                </Popconfirm>
+                <>
+                    <Popconfirm
+                        title={t('pages.userManager.action.refreshAuthority')}
+                        description={<span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.refreshAuthorityConfirm')}</span>}
+                        onConfirm={() => handleRefreshSingleAuthority(record.id)}
+                        okText={t('components.managerPageContainer.confirm')}
+                        cancelText={t('components.managerPageContainer.cancel')}
+                    >
+                        <Tooltip title={t('pages.userManager.action.refreshAuthority')}>
+                            <Button type="text" size="small" icon={<ReloadOutlined />} />
+                        </Tooltip>
+                    </Popconfirm>
+                    <Popconfirm
+                        title={t('pages.userManager.action.forceLogout')}
+                        description={<span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.forceLogoutConfirm')}</span>}
+                        onConfirm={() => handleForceLogoutSingle(record.id)}
+                        okText={t('components.managerPageContainer.confirm')}
+                        cancelText={t('components.managerPageContainer.cancel')}
+                    >
+                        <Tooltip title={t('pages.userManager.action.forceLogout')}>
+                            <Button type="text" size="small" danger icon={<LogoutOutlined />} />
+                        </Tooltip>
+                    </Popconfirm>
+                </>
             )}
             extraBatchActions={[
                 {
@@ -85,6 +108,15 @@ export default function UserManagerPage() {
                     successMessage: t('pages.userManager.messages.refreshAuthoritySuccess'),
                     failedMessage: t('pages.userManager.messages.refreshAuthorityFailed'),
                     handler: (entities) => refreshUserAuthorities({ userIds: entities.map((it) => it.id) }),
+                },
+                {
+                    key: 'forceLogout',
+                    label: t('pages.userManager.action.forceLogout'),
+                    confirmTitle: t('pages.userManager.action.forceLogout'),
+                    confirmContent: <span style={{whiteSpace: 'pre-line'}}>{t('pages.userManager.action.forceLogoutBatchConfirm')}</span>,
+                    successMessage: t('pages.userManager.messages.forceLogoutSuccess'),
+                    failedMessage: t('pages.userManager.messages.forceLogoutFailed'),
+                    handler: (entities) => forceLogoutUsers({ userIds: entities.map((it) => it.id) }),
                 },
             ]}
             tableActions={[

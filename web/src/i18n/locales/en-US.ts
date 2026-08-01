@@ -571,10 +571,15 @@ export const enUS: I18nRules = {
         refreshAuthority: 'Refresh Authority',
         refreshAuthorityConfirm: 'Refresh this user\'s authority cache?\nTheir next request will re-fetch permissions.',
         refreshAuthorityBatchConfirm: 'Refresh the authority cache of the selected users?\nTheir next request will re-fetch permissions.',
+        forceLogout: 'Force Logout',
+        forceLogoutConfirm: 'Force this user to log out?\nTheir existing tokens will be rejected and they must log in again.',
+        forceLogoutBatchConfirm: 'Force the selected users to log out?\nTheir existing tokens will be rejected and they must log in again.',
       },
       messages: {
         refreshAuthoritySuccess: 'User authority cache refreshed',
         refreshAuthorityFailed: 'Failed to refresh user authority cache',
+        forceLogoutSuccess: 'Users forced to log out',
+        forceLogoutFailed: 'Failed to force users to log out',
       }
     },
     oauthAccountManager: {
@@ -993,6 +998,8 @@ export const enUS: I18nRules = {
         'system.user.read': 'Read users',
         'system.user.update': 'Update users',
         'system.user.delete': 'Delete users',
+        'system.user.refreshAuthority': 'Refresh users\' authority cache',
+        'system.user.forceLogout': 'Force users to log out',
         'system.role.permission.read': 'Read role permission assignments',
         'system.role.permission.update': 'Update role permission assignments',
         'system.user.role.read': 'Read user role assignments',

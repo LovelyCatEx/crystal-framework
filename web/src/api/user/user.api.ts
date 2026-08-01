@@ -57,3 +57,11 @@ export interface ManagerRefreshUserAuthoritiesDTO {
 export async function refreshUserAuthorities(dto: ManagerRefreshUserAuthoritiesDTO) {
     return doPost('/api/manager/user/refresh-authority', {...dto});
 }
+
+export interface ManagerForceLogoutUsersDTO {
+    userIds: string[];
+}
+
+export async function forceLogoutUsers(dto: ManagerForceLogoutUsersDTO) {
+    return doPost('/api/manager/user/force-logout', {...dto});
+}

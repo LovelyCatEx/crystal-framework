@@ -77,6 +77,10 @@ object SystemPermission {
         name = "system.user.refreshAuthority",
         description = "Refresh (invalidate) users' authority cache"
     )
+    val ACTION_SYSTEM_USER_FORCE_LOGOUT = SystemRbacPermissionDeclaration.action(
+        name = "system.user.forceLogout",
+        description = "Force users to log out (invalidate existing tokens)"
+    )
     val MENU_SYSTEM_USER_MANAGER = SystemRbacPermissionDeclaration.menu(
         name = "system.user",
         path = "/manager/users",

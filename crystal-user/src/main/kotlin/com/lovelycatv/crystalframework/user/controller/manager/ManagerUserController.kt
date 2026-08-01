@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.user.controller.manager
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
+import com.lovelycatv.crystalframework.rbac.user.service.UserForceLogoutService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
@@ -18,6 +19,7 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerCreateUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerDeleteUserDTO
+import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerForceLogoutUsersDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerReadUserDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerRefreshUserAuthoritiesDTO
 import com.lovelycatv.crystalframework.user.controller.manager.dto.ManagerUpdateUserDTO
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerUserController(
     managerService: UserManagerService,
     private val userRbacQueryService: UserRbacQueryService,
+    private val userForceLogoutService: UserForceLogoutService,
 ) : StandardManagerController<
         UserManagerService,
         UserRepository,
@@ -76,5 +79,29 @@ class ManagerUserController(
         }
         dto.userIds.forEach { userRbacQueryService.clearUserAuthoritiesCache(it) }
         return ApiResponse.success(mapOf("refreshed" to dto.userIds.size))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    @Audit(
+        action = AuditAction.UPDATE,
+        resourceType = TableConstants.TABLE_USERS,
+        resourceIds = "#dto.userIds",
+    )
+    @PostMapping("/force-logout")
+    suspend fun forceLogout(
+        userAuthentication: UserAuthentication,
+        @ModelAttribute
+        @Valid
+        dto: ManagerForceLogoutUsersDTO,
+    ): ApiResponse<*> {
+        if (!RbacUtils.hasAnyAuthority(SystemPermission.ACTION_SYSTEM_USER_FORCE_LOGOUT.name)) {
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = listOf(SystemPermission.ACTION_SYSTEM_USER_FORCE_LOGOUT.name),
+                scope = ResourceScope.SYSTEM,
+            ))
+        }
+        dto.userIds.forEach { userForceLogoutService.markForceLogout(it) }
+        return ApiResponse.success(mapOf("forced" to dto.userIds.size))
     }
 }

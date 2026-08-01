@@ -568,10 +568,15 @@ export const zhCN: I18nRules = {
         refreshAuthority: '刷新权限',
         refreshAuthorityConfirm: '确定刷新该用户的权限缓存吗？\n下一次请求会重新拉取权限。',
         refreshAuthorityBatchConfirm: '确定刷新已选用户的权限缓存吗？\n他们下一次请求会重新拉取权限。',
+        forceLogout: '强制下线',
+        forceLogoutConfirm: '确定强制该用户下线吗？\n其已签发的令牌将立即失效，需重新登录。',
+        forceLogoutBatchConfirm: '确定强制已选用户下线吗？\n他们已签发的令牌将立即失效，需重新登录。',
       },
       messages: {
         refreshAuthoritySuccess: '用户权限缓存已刷新',
         refreshAuthorityFailed: '刷新用户权限缓存失败',
+        forceLogoutSuccess: '已强制用户下线',
+        forceLogoutFailed: '强制用户下线失败',
       }
     },
     oauthAccountManager: {
@@ -990,6 +995,8 @@ export const zhCN: I18nRules = {
         'system.user.read': '读取用户',
         'system.user.update': '更新用户',
         'system.user.delete': '删除用户',
+        'system.user.refreshAuthority': '刷新用户的权限缓存',
+        'system.user.forceLogout': '强制用户下线',
         'system.role.permission.read': '读取角色的权限分配',
         'system.role.permission.update': '更新角色的权限分配',
         'system.user.role.read': '读取用户的角色分配',
