@@ -17,6 +17,7 @@ import {
     SafetyOutlined,
     SettingOutlined,
     ShopOutlined,
+    StopOutlined,
     TagsOutlined,
     TeamOutlined,
     UserOutlined,
@@ -28,6 +29,7 @@ const DashboardPage = lazy(() => import("../pages/manager/dashboard/DashboardPag
 const UserPermissionContainer = lazy(() => import("../pages/manager/rbac/UserPermissionContainer.tsx"));
 const UserRoleManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleManagerPage.tsx"));
 const UserManagerPage = lazy(() => import("../pages/manager/user/UserManagerPage.tsx"));
+const UserBanRecordManagerPage = lazy(() => import("../pages/manager/user/UserBanRecordManagerPage.tsx"));
 const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
 const SystemSettingsManagerPage = lazy(() => import("../pages/manager/settings/SystemSettingsManagerPage.tsx"));
 const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfilePage.tsx"));
@@ -102,6 +104,11 @@ export type RouteItem = MenuItem & MenuItemType;
 
 export function getMenuGroups(t: TFunction): MenuGroup[] {
     return [
+        {
+            name: 'system_user',
+            icon: <TeamOutlined />,
+            label: t('menu.groups.system_user'),
+        },
         {
             name: 'rbac',
             icon: <KeyOutlined />,
@@ -321,14 +328,24 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             path: '/manager/users',
             icon: <UserOutlined />,
             label: t('menu.admin.users'),
-            page: <UserManagerPage />
+            page: <UserManagerPage />,
+            group: 'system_user'
+        },
+        {
+            key: '/manager/user-ban-record',
+            path: '/manager/user-ban-record',
+            icon: <StopOutlined />,
+            label: t('menu.admin.userBanRecords'),
+            page: <UserBanRecordManagerPage />,
+            group: 'system_user'
         },
         {
             key: '/manager/oauth-accounts',
             path: '/manager/oauth-accounts',
             icon: <CloudOutlined />,
             label: t('menu.admin.oauthAccounts'),
-            page: <OAuthAccountManagerPage />
+            page: <OAuthAccountManagerPage />,
+            group: 'system_user'
         },
         {
             key: '/manager/user-roles',

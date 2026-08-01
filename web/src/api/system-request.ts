@@ -14,8 +14,10 @@ import {
 import {RSAUtils} from "@/utils/rsa-utils.ts";
 import {AESUtils} from "@/utils/aes-utils.ts";
 import type {AxiosResponse} from "axios";
-import {isForbiddenContext} from "@/types/common/forbidden.types.ts";
+import {isBanContext, isDisabledContext, isForbiddenContext} from "@/types/common/forbidden.types.ts";
 import {showForbiddenModal} from "@/components/ForbiddenModal.tsx";
+import {showBanModal} from "@/components/BanModal.tsx";
+import {showDisabledModal} from "@/components/DisabledModal.tsx";
 
 export interface ApiResponse<T> {
     code: number;
@@ -88,7 +90,11 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
         }, 500);
         throw response;
     } else if (response.code === 403) {
-        if (isForbiddenContext(response.data)) {
+        if (isBanContext(response.data)) {
+            showBanModal(response.data);
+        } else if (isDisabledContext(response.data)) {
+            showDisabledModal(response.message);
+        } else if (isForbiddenContext(response.data)) {
             showForbiddenModal(response.data, response.message);
         } else {
             void message.warning(response.message || i18n.t('api.forbidden'));

@@ -3,7 +3,9 @@ package com.lovelycatv.crystalframework.auth.filter
 import com.lovelycatv.crystalframework.auth.event.LoginMethod
 import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
+import com.lovelycatv.crystalframework.shared.exception.AccountBannedException
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.DisabledContext
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -14,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter
@@ -114,11 +117,19 @@ class CustomLoginFilter(
                 )
             )
 
+            val response = when (exception) {
+                is AccountBannedException ->
+                    ApiResponse.forbidden(exception.localizedMessage ?: "banned", exception.context)
+                is DisabledException ->
+                    ApiResponse.forbidden(exception.localizedMessage ?: "account disabled", DisabledContext())
+                else ->
+                    ApiResponse.unauthorized<Nothing>(exception.localizedMessage)
+            }
+
             exchange.exchange.response.statusCode = HttpStatus.OK
             exchange.exchange.response.writeWith(
                 exchange.exchange.response.bufferFactory().wrap(
-                    ApiResponse
-                        .unauthorized<Nothing>(exception.localizedMessage)
+                    response
                         .toJSONString()
                         .toByteArray()
                 ).toMono()

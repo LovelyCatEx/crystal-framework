@@ -555,6 +555,12 @@ export const enUS: I18nRules = {
         password: {
           label: 'Password',
           required: 'Please enter password'
+        },
+        enabled: {
+          label: 'Account status',
+          hint: 'When disabled, the user is logged out and blocked from logging in.',
+          on: 'Enabled',
+          off: 'Disabled'
         }
       },
       filter: {
@@ -574,12 +580,40 @@ export const enUS: I18nRules = {
         forceLogout: 'Force Logout',
         forceLogoutConfirm: 'Force this user to log out?\nTheir existing tokens will be rejected and they must log in again.',
         forceLogoutBatchConfirm: 'Force the selected users to log out?\nTheir existing tokens will be rejected and they must log in again.',
+        ban: 'Ban',
+        unban: 'Unban',
+        unbanConfirm: 'Lift the ban on this user?\nThey will be able to log in again immediately.',
+      },
+      ban: {
+        title: 'Ban User',
+        reasonLabel: 'Ban reason',
+        reasonRequired: 'Please enter a ban reason',
+        reasonPlaceholder: 'Reason shown to the user when they are blocked',
+        banUntilLabel: 'Ban until',
+        banUntilPlaceholder: 'Select an expiry time',
+        banUntilHint: 'Leave empty for a permanent ban',
       },
       messages: {
         refreshAuthoritySuccess: 'User authority cache refreshed',
         refreshAuthorityFailed: 'Failed to refresh user authority cache',
         forceLogoutSuccess: 'Users forced to log out',
         forceLogoutFailed: 'Failed to force users to log out',
+        banSuccess: 'User banned',
+        banFailed: 'Failed to ban user',
+        unbanSuccess: 'User unbanned',
+        unbanFailed: 'Failed to unban user',
+      }
+    },
+    userBanRecordManager: {
+      title: 'User Ban Records',
+      subtitle: 'Review historical and active user login bans',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        operatorUserId: 'Operator ID',
+        operatorUserIdPlaceholder: 'Enter operator user ID',
       }
     },
     oauthAccountManager: {
@@ -1000,6 +1034,11 @@ export const enUS: I18nRules = {
         'system.user.delete': 'Delete users',
         'system.user.refreshAuthority': 'Refresh users\' authority cache',
         'system.user.forceLogout': 'Force users to log out',
+        'system.user.ban': 'Ban users from logging in',
+        'system.user.unban': 'Lift user login bans',
+        'system.user.setEnabled': 'Enable or disable user accounts',
+        'system.user.banRecord': 'User ban records menu',
+        'system.user.banRecord.read': 'Read user ban records',
         'system.role.permission.read': 'Read role permission assignments',
         'system.role.permission.update': 'Update role permission assignments',
         'system.user.role.read': 'Read user role assignments',
@@ -3195,7 +3234,25 @@ export const enUS: I18nRules = {
       user: {
         userInfo: 'User Info',
         nickname: 'Nickname',
-        email: 'Email'
+        email: 'Email',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        banned: 'Banned'
+      },
+      userBanRecord: {
+        user: 'User',
+        reason: 'Reason',
+        banUntil: 'Ban Until',
+        permanent: 'Permanent',
+        operator: 'Operator',
+        unknownUser: 'Unknown user',
+        status: {
+          label: 'Status',
+          active: 'Active',
+          lifted: 'Lifted',
+          expired: 'Expired'
+        }
       },
       tenant: {
         tenantName: 'Tenant Name',
@@ -3628,6 +3685,18 @@ export const enUS: I18nRules = {
       requiredPermissionsLabel: 'Required permissions',
       noPermissionsRequired: 'No specific permissions declared',
       messageLabel: 'Server message'
+    },
+    banModal: {
+      title: 'Account banned',
+      reasonLabel: 'Ban reason',
+      noReason: 'No reason provided',
+      bannedAtLabel: 'Banned at',
+      banUntilLabel: 'Ban until',
+      permanent: 'Permanent'
+    },
+    disabledModal: {
+      title: 'Account disabled',
+      description: 'Your account has been disabled by an administrator and cannot log in. Please contact the administrator.'
     }
   },
 
@@ -3881,6 +3950,7 @@ export const enUS: I18nRules = {
 
   entityNames: {
     user: 'User',
+    userBanRecord: 'User Ban Record',
     oauthAccount: 'OAuth Account',
     userRole: 'User Role',
     userPermission: 'User Permission',
@@ -3944,6 +4014,7 @@ export const enUS: I18nRules = {
     // Admin menus
     admin: {
       users: 'User Management',
+      userBanRecords: 'User Ban Records',
       oauthAccounts: 'OAuth Account Management',
       userRoles: 'User Role Management',
       userPermissions: 'User Permission Management',
@@ -3985,6 +4056,7 @@ export const enUS: I18nRules = {
 
     // Menu groups
     groups: {
+      system_user: 'System User Management',
       rbac: 'User Permissions',
       system_storage: 'System Storage',
       mail_template: 'Mail Templates',

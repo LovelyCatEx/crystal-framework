@@ -81,10 +81,31 @@ object SystemPermission {
         name = "system.user.forceLogout",
         description = "Force users to log out (invalidate existing tokens)"
     )
+    val ACTION_SYSTEM_USER_BAN = SystemRbacPermissionDeclaration.action(
+        name = "system.user.ban",
+        description = "Ban a user for a period"
+    )
+    val ACTION_SYSTEM_USER_UNBAN = SystemRbacPermissionDeclaration.action(
+        name = "system.user.unban",
+        description = "Lift a user's ban"
+    )
+    val ACTION_SYSTEM_USER_SET_ENABLED = SystemRbacPermissionDeclaration.action(
+        name = "system.user.setEnabled",
+        description = "Enable or disable a user account"
+    )
+    val ACTION_SYSTEM_USER_BAN_RECORD_READ = SystemRbacPermissionDeclaration.action(
+        name = "system.user.banRecord.read",
+        description = "Read user ban records"
+    )
     val MENU_SYSTEM_USER_MANAGER = SystemRbacPermissionDeclaration.menu(
         name = "system.user",
         path = "/manager/users",
         description = "Manage users menu"
+    )
+    val MENU_SYSTEM_USER_BAN_RECORD = SystemRbacPermissionDeclaration.menu(
+        name = "system.user.banRecord",
+        path = "/manager/user-ban-record",
+        description = "User ban record menu"
     )
 
     // ============================================================

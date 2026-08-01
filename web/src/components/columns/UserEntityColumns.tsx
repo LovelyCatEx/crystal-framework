@@ -52,6 +52,22 @@ export function useUserTableColumns(): EntityTableColumns<User> {
                     </CopyableToolTip>
                 </Space>
             }
+        },
+        {
+            title: t('components.columns.user.status'),
+            dataIndex: "enabledFlag",
+            key: "enabledFlag",
+            width: 120,
+            render: function (_: unknown, row: User): React.ReactNode | JSX.Element {
+                return (
+                    <Space size={[4, 4]} wrap>
+                        {row.enabledFlag
+                            ? <Tag color="green" className="m-0">{t('components.columns.user.enabled')}</Tag>
+                            : <Tag color="red" className="m-0">{t('components.columns.user.disabled')}</Tag>}
+                        {row.banned && <Tag color="volcano" className="m-0">{t('components.columns.user.banned')}</Tag>}
+                    </Space>
+                )
+            }
         }
     ];
 }
