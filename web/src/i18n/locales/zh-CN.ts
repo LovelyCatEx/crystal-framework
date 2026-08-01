@@ -3513,6 +3513,9 @@ export const zhCN: I18nRules = {
         button: '列筛选',
         title: '显示列',
         selectAll: '全选',
+        reset: '重置',
+        dragHint: '拖拽调整列顺序',
+        dragHandle: '拖拽排序',
       }
     },
     filterBuilder: {

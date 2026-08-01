@@ -3515,6 +3515,9 @@ export const enUS: I18nRules = {
         button: 'Filter Columns',
         title: 'Display Columns',
         selectAll: 'Select All',
+        reset: 'Reset',
+        dragHint: 'Drag to reorder columns',
+        dragHandle: 'Drag to reorder',
       }
     },
     filterBuilder: {
