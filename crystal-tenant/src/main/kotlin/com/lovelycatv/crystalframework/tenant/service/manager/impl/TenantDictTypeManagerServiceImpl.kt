@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictTypeDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerUpdateTenantDictTypeDTO
@@ -60,5 +61,9 @@ class TenantDictTypeManagerServiceImpl(
 
     override suspend fun findAllByScopeId(scopeId: Long): List<TenantDictTypeEntity> {
         return tenantDictTypeRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
+    }
+
+    override suspend fun findByScopeAndCode(scope: ResourceScope, scopeId: Long, code: String): TenantDictTypeEntity? {
+        return tenantDictTypeRepository.findByScopeAndScopeIdAndCode(scope.typeId, scopeId, code).awaitFirstOrNull()
     }
 }

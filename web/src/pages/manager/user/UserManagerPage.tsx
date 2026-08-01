@@ -6,6 +6,7 @@ import {
     forceLogoutUsers,
     type ManagerCreateUserDTO,
     type ManagerReadUserDTO,
+    type ManagerUpdateUserDTO,
     refreshUserAuthorities,
     setUserEnabled,
     unbanUser,

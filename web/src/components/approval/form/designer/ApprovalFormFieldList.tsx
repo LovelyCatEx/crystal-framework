@@ -3,7 +3,7 @@ import {DeleteOutlined, HolderOutlined, PlusOutlined} from "@ant-design/icons";
 import {DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
 import {SortableContext, arrayMove, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
-import {AlignLeft, Calendar, CalendarClock, CircleDot, Hash, List, SquareCheck, ToggleLeft, Type} from "lucide-react";
+import {AlignLeft, Calendar, CalendarClock, CircleDot, Hash, Library, List, SquareCheck, ToggleLeft, Type} from "lucide-react";
 import type {ComponentType} from "react";
 import {useTranslation} from "react-i18next";
 import type {ApprovalFieldSchema} from "@/types/approval/approval-form-schema.types.ts";
@@ -20,6 +20,7 @@ const FIELD_TYPE_ICON: Record<ApprovalFieldType, ComponentType<{size?: number; c
     [ApprovalFieldType.CHECKBOX]: SquareCheck,
     [ApprovalFieldType.DATE]: Calendar,
     [ApprovalFieldType.DATETIME]: CalendarClock,
+    [ApprovalFieldType.DICT]: Library,
 };
 
 export interface ApprovalFormFieldListProps {

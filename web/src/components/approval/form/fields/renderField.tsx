@@ -9,11 +9,14 @@ import {SelectFieldRenderer} from "./SelectFieldRenderer.tsx";
 import {RadioFieldRenderer} from "./RadioFieldRenderer.tsx";
 import {CheckboxFieldRenderer} from "./CheckboxFieldRenderer.tsx";
 import {DateFieldRenderer} from "./DateFieldRenderer.tsx";
+import {DictFieldRenderer, type DictOptionsLoader} from "./DictFieldRenderer.tsx";
 
 export interface RenderFieldProps {
     field: MergedFieldSchema;
     value?: unknown;
     onChange?: (value: unknown) => void;
+    /** Loader for DICT field options; only consulted for DICT fields. */
+    loadDictOptions?: DictOptionsLoader;
 }
 
 /**
@@ -26,7 +29,7 @@ export interface RenderFieldProps {
  * mismatch never crashes the form; the field just degrades to a text input.
  */
 export function renderField(props: RenderFieldProps): ReactNode {
-    const {field, value, onChange} = props;
+    const {field, value, onChange, loadDictOptions} = props;
     switch (field.type) {
         case ApprovalFieldType.TEXT:
             return <TextFieldRenderer field={field} value={value as string} onChange={onChange as (v: string) => void}/>;
@@ -46,6 +49,8 @@ export function renderField(props: RenderFieldProps): ReactNode {
             return <DateFieldRenderer field={field} value={value as string | null} onChange={onChange as (v: string | null) => void}/>;
         case ApprovalFieldType.DATETIME:
             return <DateFieldRenderer field={field} value={value as string | null} onChange={onChange as (v: string | null) => void} withTime/>;
+        case ApprovalFieldType.DICT:
+            return <DictFieldRenderer field={field} value={value as string | string[]} onChange={onChange as (v: string | string[] | undefined) => void} loadDictOptions={loadDictOptions}/>;
         default:
             return <TextFieldRenderer field={field} value={value as string} onChange={onChange as (v: string) => void}/>;
     }

@@ -2928,6 +2928,13 @@ export const enUS: I18nRules = {
         addOption: 'Add Option',
         deleteOption: 'Delete option',
         patternHint: 'JavaScript regular expression source.',
+        dictScope: 'Dictionary Scope',
+        dictScopeHint: 'Inherits the flow scope by default. A SYSTEM flow may only reference system dictionaries; a TENANT flow may reference system or its own tenant dictionaries.',
+        dictScopeInherit: 'Inherit flow scope',
+        dictScopeSystem: 'System dictionary',
+        dictScopeTenant: 'Tenant dictionary',
+        dictCode: 'Dictionary Type',
+        dictCodeHint: 'Pick a dictionary type; its items become this field\'s selectable options.',
         error: {
           keyEmpty: 'Key is required',
           keyPattern: 'Key must be camelCase (letters and digits only, starting with a lowercase letter)',
@@ -3067,6 +3074,9 @@ export const enUS: I18nRules = {
       entityIdSelector: {
         placeholder: 'Select',
         clear: 'Clear'
+      },
+      dictTypeCodeSelector: {
+        placeholder: 'Select dictionary type'
       }
     },
 
@@ -3932,7 +3942,8 @@ export const enUS: I18nRules = {
       radio: 'Radio',
       checkbox: 'Checkbox',
       date: 'Date',
-      datetime: 'Date Time'
+      datetime: 'Date Time',
+      dict: 'Dictionary'
     },
     forbiddenReason: {
       MISSING_PERMISSION: 'Missing permission',

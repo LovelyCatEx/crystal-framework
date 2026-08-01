@@ -27,6 +27,13 @@ interface TenantDictItemManagerService : BaseTenantResourceManagerService<
     suspend fun getTreeByTypeId(typeId: Long): List<TenantDictItemTreeVO>
 
     /**
+     * Flat list of ENABLED items under a dict type, sorted by `sortOrder`. Read-only; used by
+     * cross-module callers that need the current selectable options of a dict (e.g. approval DICT
+     * form field resolution / validation).
+     */
+    suspend fun findEnabledByTypeId(typeId: Long): List<TenantDictItemEntity>
+
+    /**
      * Resolve the root `(scope, scopeId)` from a dict type id — used by the controller in
      * create / query flows where the item does not yet exist (so [resolveRootScope] cannot be
      * called on an item id). Impl delegates to the parent DictType Service's resolver.

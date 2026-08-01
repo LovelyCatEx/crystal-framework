@@ -2925,6 +2925,13 @@ export const zhCN: I18nRules = {
         addOption: '新增选项',
         deleteOption: '删除选项',
         patternHint: 'JavaScript 正则表达式源字符串',
+        dictScope: '字典范围',
+        dictScopeHint: '默认继承流程范围。系统流程只能引用系统字典；租户流程可引用系统或本租户字典。',
+        dictScopeInherit: '继承流程范围',
+        dictScopeSystem: '系统字典',
+        dictScopeTenant: '租户字典',
+        dictCode: '字典类型',
+        dictCodeHint: '选择字典类型，其可选项将作为该字段的候选值。',
         error: {
           keyEmpty: 'Key 不能为空',
           keyPattern: 'Key 必须为 camelCase（仅允许字母数字，首字母小写）',
@@ -3065,6 +3072,9 @@ export const zhCN: I18nRules = {
       entityIdSelector: {
         placeholder: '选择',
         clear: '清除'
+      },
+      dictTypeCodeSelector: {
+        placeholder: '选择字典类型'
       }
     },
 
@@ -3930,7 +3940,8 @@ export const zhCN: I18nRules = {
       radio: '单选',
       checkbox: '多选',
       date: '日期',
-      datetime: '日期时间'
+      datetime: '日期时间',
+      dict: '字典'
     },
     forbiddenReason: {
       MISSING_PERMISSION: '缺少所需权限',

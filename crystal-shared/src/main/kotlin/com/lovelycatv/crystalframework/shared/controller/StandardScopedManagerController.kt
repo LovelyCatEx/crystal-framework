@@ -241,7 +241,13 @@ abstract class StandardScopedManagerController<
 
     // ─── Internal ───
 
-    private suspend fun assertAccess(
+    /**
+     * Run the standard two-step scoped authorisation (permission then ownership) for an arbitrary
+     * `(scope, scopeId, operation)`. Exposed as `protected` so custom endpoints on subclasses can
+     * reuse the exact same decision + exception shape as the built-in CRUD endpoints, instead of
+     * re-implementing `checkPermission` / `checkOwnership` by hand.
+     */
+    protected open suspend fun assertAccess(
         scope: ResourceScope,
         scopeId: Long?,
         operation: ScopedOperation,
