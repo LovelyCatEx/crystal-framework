@@ -45,7 +45,6 @@ const TenantTireBenefitValueContainer = lazy(() => import("../pages/manager/tena
 const TenantMemberManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberManagerPage.tsx"));
 const TenantPermissionContainer = lazy(() => import("../pages/manager/tenant/TenantPermissionContainer.tsx"));
 const TenantRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantRoleManagerPage.tsx"));
-const TenantRolePermissionManagerPage = lazy(() => import("../pages/manager/tenant/TenantRolePermissionManagerPage.tsx"));
 const TenantMemberRoleManagerPage = lazy(() => import("../pages/manager/tenant/TenantMemberRoleManagerPage.tsx"));
 const TenantDepartmentManagerPage = lazy(() => import("@/pages/manager/tenant/TenantDepartmentManagerPage.tsx"));
 const TenantInvitationManagerPage = lazy(() => import("@/pages/manager/tenant/TenantInvitationManagerPage.tsx"));
@@ -393,14 +392,6 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
                     <TenantPermissionContainer />
                 </ProtectedControllerWarningWrapper>
             ),
-            group: 'tenant'
-        },
-        {
-            key: '/manager/tenant-role-permissions',
-            path: '/manager/tenant-role-permissions',
-            icon: <KeyOutlined />,
-            label: t('menu.admin.tenantRolePermissions'),
-            page: <TenantRolePermissionManagerPage />,
             group: 'tenant'
         },
         {

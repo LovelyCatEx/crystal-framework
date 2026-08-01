@@ -1444,32 +1444,6 @@ export const enUS: I18nRules = {
         updateRoleFailed: 'Failed to update role'
       }
     },
-    tenantRolePermissionManager: {
-      title: 'Tenant Role Permission Management',
-      subtitle: 'Assign permissions to tenant roles',
-      columns: {
-        role: 'Role',
-        description: 'Description',
-        action: 'Action'
-      },
-      action: {
-        assignPermission: 'Assign Permissions'
-      },
-      permissionModal: {
-        title: 'Assign permissions to role "{{name}}"',
-        titles: {
-          available: 'Available Permissions',
-          assigned: 'Assigned Permissions'
-        }
-      },
-      messages: {
-        fetchRolesFailed: 'Failed to fetch role list',
-        fetchPermissionsFailed: 'Failed to fetch permission list',
-        fetchRolePermissionsFailed: 'Failed to fetch role permissions',
-        assignSuccess: 'Permissions assigned successfully',
-        assignFailed: 'Failed to assign permissions'
-      }
-    },
     tenantMemberRoleManager: {
       title: 'Tenant Member Role Management',
       subtitle: 'Assign roles to tenant members',
@@ -3971,7 +3945,6 @@ export const enUS: I18nRules = {
       tenantMembers: 'Member Management',
       tenantRoles: 'Role Management',
       tenantPermissions: 'Permission Management',
-      tenantRolePermissions: 'Role Permission Management',
       tenantMemberRoles: 'Member Role Management',
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',

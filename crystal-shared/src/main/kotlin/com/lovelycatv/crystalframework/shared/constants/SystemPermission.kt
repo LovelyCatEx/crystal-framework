@@ -551,11 +551,6 @@ object SystemPermission {
         name = "tenant.department.member.delete",
         description = "Remove tenant department members across tenants"
     )
-    val MENU_TENANT_DEPARTMENT_MEMBER_RELATION_MANAGER = SystemRbacPermissionDeclaration.menu(
-        name = "tenant.department.member",
-        path = "/manager/tenant-department-members",
-        description = "Manage tenant department members menu"
-    )
 
     // ============================================================
     //   Tenant Member-Role Relation  (tenantAdmin)
@@ -584,11 +579,6 @@ object SystemPermission {
     val ACTION_TENANT_ROLE_PERMISSION_RELATION_UPDATE = SystemRbacPermissionDeclaration.action(
         name = "tenant.role.permission.update",
         description = "Update tenant role permission assignments across tenants"
-    )
-    val MENU_TENANT_ROLE_PERMISSION_RELATION_MANAGER = SystemRbacPermissionDeclaration.menu(
-        name = "tenant.role.permission",
-        path = "/manager/tenant-role-permissions",
-        description = "Manage tenant role permissions menu"
     )
 
     // ============================================================

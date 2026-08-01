@@ -1441,32 +1441,6 @@ export const zhCN: I18nRules = {
         updateRoleFailed: '更新角色失败'
       }
     },
-    tenantRolePermissionManager: {
-      title: '租户角色权限管理',
-      subtitle: '为租户角色分配权限',
-      columns: {
-        role: '角色',
-        description: '描述',
-        action: '操作'
-      },
-      action: {
-        assignPermission: '分配权限'
-      },
-      permissionModal: {
-        title: '为角色 "{{name}}" 分配权限',
-        titles: {
-          available: '可用权限',
-          assigned: '已分配权限'
-        }
-      },
-      messages: {
-        fetchRolesFailed: '无法获取角色列表',
-        fetchPermissionsFailed: '无法获取权限列表',
-        fetchRolePermissionsFailed: '无法获取角色权限',
-        assignSuccess: '权限分配成功',
-        assignFailed: '权限分配失败'
-      }
-    },
     tenantMemberRoleManager: {
       title: '租户成员角色管理',
       subtitle: '为租户成员分配角色',
@@ -3969,7 +3943,6 @@ export const zhCN: I18nRules = {
       tenantMembers: '成员管理',
       tenantRoles: '角色管理',
       tenantPermissions: '权限管理',
-      tenantRolePermissions: '角色权限管理',
       tenantMemberRoles: '成员角色管理',
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
