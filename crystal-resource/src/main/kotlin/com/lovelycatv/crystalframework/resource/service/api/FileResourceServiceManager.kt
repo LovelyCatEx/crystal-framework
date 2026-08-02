@@ -8,6 +8,7 @@ import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadRes
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
 import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
@@ -41,6 +42,8 @@ class FileResourceServiceManager(
      */
     suspend fun uploadFile(
         userId: Long,
+        scope: ResourceScope,
+        scopeId: Long,
         fileType: ResourceFileType,
         file: FilePart,
         targetFileName: String,
@@ -61,7 +64,7 @@ class FileResourceServiceManager(
         )
 
         return service.uploadFile(
-            userId, fileType, targetFileName,
+            userId, scope, scopeId, fileType, targetFileName,
             fileSize, detectedMimeType,
             ByteArrayInputStream(fileBytes),
             progressReporter

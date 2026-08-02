@@ -65,6 +65,8 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+    signing-key: ${CRYSTAL_RESOURCE_SIGNING_KEY:zR7yq2N4bK8vXf1sJ0pWmC3hLd6tGuAe5oQnBiYxUkE=}
+    signed-url-ttl-seconds: 300
   monitor:
     flush-interval-ms: 30000
   sharding:

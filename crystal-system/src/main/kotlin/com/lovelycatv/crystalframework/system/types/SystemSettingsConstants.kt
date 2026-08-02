@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.system.types
 
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 
 object SystemSettingsConstants {
     object Basic {
@@ -454,5 +455,35 @@ object SystemSettingsConstants {
             defaultValue = true.toString(),
             sort = 1
         )
+    }
+
+    object Resource {
+        object Visibility {
+            private val VISIBILITY_ENUM_VALUES = ResourceVisibility.entries.map { it.name }
+
+            val USER_AVATAR = SettingsItemDeclaration(
+                key = "resource.visibility.userAvatar",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.AUTHENTICATED.name,
+                sort = 0,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+
+            val TENANT_ICON = SettingsItemDeclaration(
+                key = "resource.visibility.tenantIcon",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.PUBLIC.name,
+                sort = 1,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+
+            val TENANT_MEMBER_AVATAR = SettingsItemDeclaration(
+                key = "resource.visibility.tenantMemberAvatar",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.SCOPE_MEMBER.name,
+                sort = 2,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+        }
     }
 }

@@ -6,9 +6,9 @@ import com.lovelycatv.crystalframework.resource.controller.manager.file.dto.Mana
 import com.lovelycatv.crystalframework.resource.controller.manager.file.dto.ManagerUpdateFileResourceDTO
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
-import com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService
+import com.lovelycatv.crystalframework.shared.service.BaseScopedManagerService
 
-interface FileResourceManagerService : CachedBaseManagerService<
+interface FileResourceManagerService : BaseScopedManagerService<
         FileResourceRepository,
         FileResourceEntity,
         ManagerCreateFileResourceDTO,

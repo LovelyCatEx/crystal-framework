@@ -39,7 +39,7 @@ class UserTenantController(
                 UserTenantVO(
                     tenantId = it.id,
                     tenantName = it.name,
-                    tenantAvatar = fileResourceService.getFileDownloadUrl(it.icon),
+                    tenantAvatar = fileResourceService.getFileDownloadUrl(it.icon, userAuthentication),
                     memberStatus = tenantMemberRepository
                         .findByTenantIdAndMemberUserId(it.id, userAuthentication.userId)
                         .awaitFirstOrNull()

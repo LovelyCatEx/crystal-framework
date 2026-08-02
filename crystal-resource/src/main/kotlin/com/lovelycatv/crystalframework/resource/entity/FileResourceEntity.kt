@@ -2,7 +2,8 @@ package com.lovelycatv.crystalframework.resource.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
-import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -12,6 +13,8 @@ import tools.jackson.databind.ser.std.ToStringSerializer
 @Table("file_resources")
 class FileResourceEntity(
     id: Long = 0,
+    scope: Int = ResourceScope.SYSTEM.typeId,
+    scopeId: Long = 0,
     @Column(value = "user_id")
     @get:JsonSerialize(using = ToStringSerializer::class)
     var userId: Long = 0,
@@ -33,10 +36,16 @@ class FileResourceEntity(
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
-) : BaseEntity(id, createdTime, modifiedTime, deletedTime) {
+) : BaseScopedEntity(id, scope, scopeId, createdTime, modifiedTime, deletedTime) {
     @JsonIgnore
     fun getRealResourceFileType(): ResourceFileType {
         return ResourceFileType.getByTypeId(this.type)
             ?: throw BusinessException("resource file type ${this.type} not found")
+    }
+
+    @JsonIgnore
+    fun getRealScope(): ResourceScope {
+        return ResourceScope.getById(this.scope)
+            ?: throw BusinessException("resource scope ${this.scope} not found")
     }
 }

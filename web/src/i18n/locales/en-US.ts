@@ -2306,6 +2306,9 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'resource.visibility.userAvatar': 'User Avatar Visibility',
+        'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
+        'resource.visibility.tenantMemberAvatar': 'Tenant Member Avatar Visibility',
       },
       groups: {
         'basic': 'Basic Settings',
@@ -2321,6 +2324,7 @@ export const enUS: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'resource.visibility': 'Resource Access',
       },
       tabs: {
         'basic': 'Basic',
@@ -2330,6 +2334,7 @@ export const enUS: I18nRules = {
         'security': 'Security',
         'oauth': 'OAuth',
         'module': 'Modules',
+        'resource': 'Resource',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -2341,7 +2346,28 @@ export const enUS: I18nRules = {
           'SYSTEM_NAME': 'System Name',
           'USER_NAME': 'User Name',
           'CUSTOM': 'Custom',
-        }
+        },
+        'resource.visibility.userAvatar': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
+        'resource.visibility.tenantIcon': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
+        'resource.visibility.tenantMemberAvatar': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
       }
     },
     tenantPersonalProfile: {

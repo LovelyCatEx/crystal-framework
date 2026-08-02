@@ -88,6 +88,9 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
         ['module.tenant.enabled', t('pages.systemSettingsManager.keys.module.tenant.enabled')],
         ['module.approval.enabled', t('pages.systemSettingsManager.keys.module.approval.enabled')],
+        ['resource.visibility.userAvatar', t('pages.systemSettingsManager.keys.resource.visibility.userAvatar')],
+        ['resource.visibility.tenantIcon', t('pages.systemSettingsManager.keys.resource.visibility.tenantIcon')],
+        ['resource.visibility.tenantMemberAvatar', t('pages.systemSettingsManager.keys.resource.visibility.tenantMemberAvatar')],
     ]);
 
     for (const key of pluginKeys) {
@@ -117,6 +120,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
         ['module.tenant', { label: t('pages.systemSettingsManager.groups.module.tenant'), icon: <AppstoreOutlined /> }],
         ['module.approval', { label: t('pages.systemSettingsManager.groups.module.approval'), icon: <AppstoreOutlined /> }],
+        ['resource.visibility', { label: t('pages.systemSettingsManager.groups.resource.visibility'), icon: <LockOutlined /> }],
     ]);
 
     for (const group of pluginGroups) {
@@ -140,6 +144,7 @@ export function useSettingsTabToTranslationMap(): Map<string, string> {
         ['security', t('pages.systemSettingsManager.tabs.security')],
         ['oauth', t('pages.systemSettingsManager.tabs.oauth')],
         ['module', t('pages.systemSettingsManager.tabs.module')],
+        ['resource', t('pages.systemSettingsManager.tabs.resource')],
     ]);
 
     for (const tab of pluginTabs) {

@@ -2303,6 +2303,9 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'resource.visibility.userAvatar': '用户头像可见性',
+        'resource.visibility.tenantIcon': '租户图标可见性',
+        'resource.visibility.tenantMemberAvatar': '租户成员头像可见性',
       },
       groups: {
         'basic': '基本设置',
@@ -2318,6 +2321,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'resource.visibility': '资源访问权限',
       },
       tabs: {
         'basic': '基本',
@@ -2327,6 +2331,7 @@ export const zhCN: I18nRules = {
         'security': '安全',
         'oauth': 'OAuth',
         'module': '功能模块',
+        'resource': '资源',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -2338,7 +2343,28 @@ export const zhCN: I18nRules = {
           'SYSTEM_NAME': '系统名称',
           'USER_NAME': '用户名称',
           'CUSTOM': '自定义',
-        }
+        },
+        'resource.visibility.userAvatar': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
+        'resource.visibility.tenantIcon': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
+        'resource.visibility.tenantMemberAvatar': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
       }
     },
     tenantPersonalProfile: {

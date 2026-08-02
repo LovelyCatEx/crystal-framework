@@ -5,12 +5,14 @@ import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.user.constants.CredentialAuthConstants
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
@@ -199,13 +201,13 @@ class UserServiceImpl(
         }
     }
 
-    override suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO {
+    override suspend fun getUserProfileVO(userId: Long, viewer: UserAuthentication?, fullAccess: Boolean): UserProfileVO {
         val user = getByIdOrThrow(userId, BusinessException("User $userId not found"))
 
         return UserProfileVO(
             id = user.id,
             nickname = user.nickname,
-            avatar = fileResourceService.getFileDownloadUrl(user.avatar),
+            avatar = fileResourceService.getFileDownloadUrl(user.avatar, viewer),
             username = if (fullAccess) user.username else null,
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,
@@ -239,6 +241,8 @@ class UserServiceImpl(
 
         val result = fileResourceServiceManager.uploadFile(
             userId,
+            ResourceScope.SYSTEM,
+            0,
             ResourceFileType.USER_AVATAR,
             file,
             targetFileName

@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.types.system
 
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 
 data class SystemSettings(
@@ -10,7 +11,18 @@ data class SystemSettings(
     val security: Security,
     val oauth: OAuth,
     val module: Module,
+    val resource: Resource,
 ) {
+    data class Resource(
+        val visibility: Visibility,
+    ) {
+        data class Visibility(
+            val userAvatar: ResourceVisibility,
+            val tenantIcon: ResourceVisibility,
+            val tenantMemberAvatar: ResourceVisibility,
+        )
+    }
+
     data class Basic(
         val baseUrl: String,
         val frontendBaseUrl: String,

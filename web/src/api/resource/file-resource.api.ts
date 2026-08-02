@@ -1,6 +1,6 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
 import type {FileResource} from "@/types/resource/file-resource.types.ts";
-import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
+import type {BaseManagerReadScopedDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import {doGet} from "../system-request.ts";
 
 export const FileResourceManagerController = new BaseManagerController<
@@ -11,6 +11,8 @@ export const FileResourceManagerController = new BaseManagerController<
 >('/manager/file-resource');
 
 export interface ManagerCreateFileResourceDTO {
+    scope: number;
+    scopeId: string;
     userId: string;
     type: number;
     fileName: string;
@@ -32,7 +34,7 @@ export interface ManagerUpdateFileResourceDTO extends BaseManagerUpdateDTO {
     objectKey?: string | null;
 }
 
-export interface ManagerReadFileResourceDTO extends BaseManagerReadDTO {
+export interface ManagerReadFileResourceDTO extends BaseManagerReadScopedDTO {
     type?: number | null;
 }
 

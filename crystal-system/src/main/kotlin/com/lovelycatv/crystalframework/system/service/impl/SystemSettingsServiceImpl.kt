@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -100,6 +101,7 @@ class SystemSettingsServiceImpl(
             security = getSystemSecuritySettings(),
             oauth = getSystemOAuthSettings(),
             module = getSystemModuleSettings(),
+            resource = getSystemResourceSettings(),
         ).also {
             this.cachedSystemSettings = it
             this.syncToCacheAsync()
@@ -183,6 +185,22 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Module(
             tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
             approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,
+        )
+    }
+
+    override suspend fun getSystemResourceSettings(): SystemSettings.Resource {
+        return SystemSettings.Resource(
+            visibility = SystemSettings.Resource.Visibility(
+                userAvatar = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.USER_AVATAR)!!
+                ),
+                tenantIcon = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_ICON)!!
+                ),
+                tenantMemberAvatar = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR)!!
+                ),
+            )
         )
     }
 
@@ -292,6 +310,10 @@ class SystemSettingsServiceImpl(
 
         setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
         setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
+
+        setSettings(SystemSettingsConstants.Resource.Visibility.USER_AVATAR, settings.resource.visibility.userAvatar.name)
+        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_ICON, settings.resource.visibility.tenantIcon.name)
+        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR, settings.resource.visibility.tenantMemberAvatar.name)
 
         this.refreshSystemSettings()
     }

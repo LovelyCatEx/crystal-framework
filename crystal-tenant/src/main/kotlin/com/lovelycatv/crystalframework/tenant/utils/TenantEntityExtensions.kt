@@ -1,18 +1,22 @@
 package com.lovelycatv.crystalframework.tenant.utils
 
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 
 class TenantEntityExtensions private constructor()
 
-suspend fun TenantEntity.toProfileVO(fileResourceService: FileResourceService): TenantProfileVO {
+suspend fun TenantEntity.toProfileVO(
+    fileResourceService: FileResourceService,
+    viewer: UserAuthentication?,
+): TenantProfileVO {
     return TenantProfileVO(
         tenantId = this.id,
         ownerUserId = this.ownerUserId,
         name = this.name,
         description = this.description,
-        icon = this.icon?.let { fileResourceService.getFileDownloadUrl(it) },
+        icon = this.icon?.let { fileResourceService.getFileDownloadUrl(it, viewer) },
         status = this.status,
         tireTypeId = this.tireTypeId,
         subscribedTime = this.subscribedTime,

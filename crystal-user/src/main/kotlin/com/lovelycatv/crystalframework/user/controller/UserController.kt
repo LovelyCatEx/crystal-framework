@@ -122,6 +122,7 @@ class UserController(
         return ApiResponse.success(
             userService.getUserProfileVO(
                 userId = targetUserId,
+                viewer = userAuthentication,
                 fullAccess = targetUserId == userAuthentication?.userId
                         || RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_USER_READ.name)
             )
