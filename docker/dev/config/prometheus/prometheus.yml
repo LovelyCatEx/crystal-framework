@@ -8,10 +8,12 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   - job_name: 'crystalframework'
-    metrics_path: '/api/v1/actuator/prometheus'
+    # Scrape the internal-only actuator management port over the shared container network.
+    # This port is never published to the host, so it is unreachable from outside the network.
+    metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['crystalframework-backend:9100']
         labels:
           application: 'crystalframework'
           environment: 'production'

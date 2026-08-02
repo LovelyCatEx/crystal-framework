@@ -15,7 +15,7 @@ class EncryptionExclusionBuiltinConfigurer : EncryptionExclusionConfigurer {
         registry.registers(
             listOf(
                 EncryptionExclusionDeclaration(
-                    pathPattern = "${GlobalConstants.REQUEST_MAPPING_PREFIX}/actuator/**",
+                    pathPattern = "/actuator/**",
                     description = "Spring Boot Actuator endpoints",
                 ),
             )

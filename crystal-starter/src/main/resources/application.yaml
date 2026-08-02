@@ -89,6 +89,11 @@ crystalframework:
     encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
 
 management:
+  # Actuator runs on a dedicated management port that is NOT published outside the container network,
+  # so metrics/health are only reachable by in-cluster scrapers (e.g. Prometheus) and never anonymously
+  # from the public internet. This is why the main SecurityFilterChain no longer needs an actuator permitAll.
+  server:
+    port: ${MANAGEMENT_PORT:9100}
   endpoints:
     web:
       exposure:

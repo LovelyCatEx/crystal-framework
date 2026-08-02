@@ -18,6 +18,7 @@ import com.lovelycatv.vertex.log.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
@@ -45,7 +46,26 @@ class SecurityConfig(
     private val logger = logger()
     private val pathPatternParser = PathPatternParser()
 
+    /**
+     * Dedicated security chain for the actuator management port. Spring Boot's management child
+     * context inherits the parent's SecurityWebFilterChain beans, so without this chain the
+     * CustomAuthFilter would intercept actuator requests on port 9100 and return 401.
+     *
+     * This chain matches first (Order 1) and permits all actuator paths unconditionally.
+     * Network-level access control (port 9100 not published to the host) is the real guard.
+     */
     @Bean
+    @Order(1)
+    fun managementSecurityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        return http
+            .securityMatcher(org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher("/actuator/**"))
+            .csrf { it.disable() }
+            .authorizeExchange { it.anyExchange().permitAll() }
+            .build()
+    }
+
+    @Bean
+    @Order(2)
     fun securityWebFilterChain(
         http: ServerHttpSecurity,
         userAuthorizationService: UserAuthorizationService,
@@ -194,8 +214,7 @@ class SecurityConfig(
                     )
                 } +
                 listOf(
-                    pathPatternParser.parse("/login"),
-                    pathPatternParser.parse("/api/*/actuator/**")
+                    pathPatternParser.parse("/login")
                 )
 
         // custom authentications

@@ -96,13 +96,13 @@ services:
       - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
+      - crystalframework_prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.enable-lifecycle'
     networks:
-      - crystalframework-dev-network
+      - crystalframework_network
 
   grafana:
     image: grafana/grafana:latest
@@ -110,11 +110,11 @@ services:
     ports:
       - "${GRAFANA_PORT}:3000"
     volumes:
-      - grafana-data:/var/lib/grafana
+      - crystalframework_grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
-      - crystalframework-dev-network
+      - crystalframework_network
 
   backend:
     container_name: crystalframework-backend
@@ -140,6 +140,7 @@ services:
       - OAUTH_OICQ_CLIENT_SECRET=${OAUTH_OICQ_CLIENT_SECRET}
       - OAUTH_OICQ_REDIRECT_URL=${OAUTH_OICQ_REDIRECT_URL}
       - BACKEND_PORT=${BACKEND_PORT}
+      - MANAGEMENT_PORT=${MANAGEMENT_PORT}
       - COOKIE_DOMAIN=${COOKIE_DOMAIN}
       - SNOWFLAKE_DATA_CENTER_ID=${SNOWFLAKE_DATA_CENTER_ID:-0}
       - SNOWFLAKE_WORKER_ID=${SNOWFLAKE_WORKER_ID:-0}
@@ -176,6 +177,8 @@ volumes:
   crystalframework_pgadmin_data:
   crystalframework_redis_data:
   crystalframework_backend_data:
+  crystalframework_prometheus_data:
+  crystalframework_grafana_data:
 
 networks:
   crystalframework_network:
