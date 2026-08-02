@@ -7,6 +7,28 @@
 2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
 :::
 
+## v1.13.3
+
+2026-08-02
+
+### 新功能
++ feat(user): 新增账号封禁与启用/禁用管理。
++ feat(auth): 支持基于 issuedAt 的强制登出使 token 失效。
++ feat(rbac): 角色权限分配以 PermissionTreeTable 替代 Transfer，支持多种选择模式与重新设计的布局。
++ feat(approval): 新增绑定系统/租户字典的 DICT 表单字段类型。
++ feat(table): 列设置支持拖拽排序并可重置。
+
+### Bug 修复
++ fix(auth): 封禁/禁用检查收敛至 buildLoginSuccessResponse，封堵 OAuth 绕过。
++ fix(security): 通过 BaseManagerService.query 的 id 短路封堵跨租户 IDOR。
++ fix(shared): 敏感列标记 @NotQueryable，阻止盲探。
++ fix(tenant): 创建租户成员时确保其必有 profile。
+
+### 其他
++ style(approval): 实例 id 标签宽度自适应，定义列表新增 id 标签。
+
+---
+
 ## v1.13.2
 
 2026-08-01

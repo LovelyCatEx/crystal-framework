@@ -552,6 +552,12 @@ export const zhCN: I18nRules = {
         password: {
           label: '密码',
           required: '请输入密码'
+        },
+        enabled: {
+          label: '账号状态',
+          hint: '禁用后用户将被强制下线且无法登录。',
+          on: '已启用',
+          off: '已禁用'
         }
       },
       filter: {
@@ -568,10 +574,43 @@ export const zhCN: I18nRules = {
         refreshAuthority: '刷新权限',
         refreshAuthorityConfirm: '确定刷新该用户的权限缓存吗？\n下一次请求会重新拉取权限。',
         refreshAuthorityBatchConfirm: '确定刷新已选用户的权限缓存吗？\n他们下一次请求会重新拉取权限。',
+        forceLogout: '强制下线',
+        forceLogoutConfirm: '确定强制该用户下线吗？\n其已签发的令牌将立即失效，需重新登录。',
+        forceLogoutBatchConfirm: '确定强制已选用户下线吗？\n他们已签发的令牌将立即失效，需重新登录。',
+        ban: '封禁',
+        unban: '解封',
+        unbanConfirm: '确定解除该用户的封禁吗？\n解除后其可立即重新登录。',
+      },
+      ban: {
+        title: '封禁用户',
+        reasonLabel: '封禁原因',
+        reasonRequired: '请输入封禁原因',
+        reasonPlaceholder: '被封禁时向用户展示的原因',
+        banUntilLabel: '封禁至',
+        banUntilPlaceholder: '选择到期时间',
+        banUntilHint: '留空表示永久封禁',
       },
       messages: {
         refreshAuthoritySuccess: '用户权限缓存已刷新',
         refreshAuthorityFailed: '刷新用户权限缓存失败',
+        forceLogoutSuccess: '已强制用户下线',
+        forceLogoutFailed: '强制用户下线失败',
+        banSuccess: '已封禁用户',
+        banFailed: '封禁用户失败',
+        unbanSuccess: '已解封用户',
+        unbanFailed: '解封用户失败',
+      }
+    },
+    userBanRecordManager: {
+      title: '用户封禁记录',
+      subtitle: '查看历史与生效中的用户登录封禁',
+      filter: {
+        id: '记录ID',
+        idPlaceholder: '输入记录 ID',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户 ID',
+        operatorUserId: '操作人ID',
+        operatorUserIdPlaceholder: '输入操作人用户 ID',
       }
     },
     oauthAccountManager: {
@@ -990,6 +1029,13 @@ export const zhCN: I18nRules = {
         'system.user.read': '读取用户',
         'system.user.update': '更新用户',
         'system.user.delete': '删除用户',
+        'system.user.refreshAuthority': '刷新用户的权限缓存',
+        'system.user.forceLogout': '强制用户下线',
+        'system.user.ban': '封禁用户登录',
+        'system.user.unban': '解除用户登录封禁',
+        'system.user.setEnabled': '启用或禁用用户账号',
+        'system.user.banRecord': '用户封禁记录菜单',
+        'system.user.banRecord.read': '读取用户封禁记录',
         'system.role.permission.read': '读取角色的权限分配',
         'system.role.permission.update': '更新角色的权限分配',
         'system.user.role.read': '读取用户的角色分配',
@@ -1439,32 +1485,6 @@ export const zhCN: I18nRules = {
         removeMemberFailed: '移除成员失败',
         updateRoleSuccess: '更新角色成功',
         updateRoleFailed: '更新角色失败'
-      }
-    },
-    tenantRolePermissionManager: {
-      title: '租户角色权限管理',
-      subtitle: '为租户角色分配权限',
-      columns: {
-        role: '角色',
-        description: '描述',
-        action: '操作'
-      },
-      action: {
-        assignPermission: '分配权限'
-      },
-      permissionModal: {
-        title: '为角色 "{{name}}" 分配权限',
-        titles: {
-          available: '可用权限',
-          assigned: '已分配权限'
-        }
-      },
-      messages: {
-        fetchRolesFailed: '无法获取角色列表',
-        fetchPermissionsFailed: '无法获取权限列表',
-        fetchRolePermissionsFailed: '无法获取角色权限',
-        assignSuccess: '权限分配成功',
-        assignFailed: '权限分配失败'
       }
     },
     tenantMemberRoleManager: {
@@ -2905,6 +2925,13 @@ export const zhCN: I18nRules = {
         addOption: '新增选项',
         deleteOption: '删除选项',
         patternHint: 'JavaScript 正则表达式源字符串',
+        dictScope: '字典范围',
+        dictScopeHint: '默认继承流程范围。系统流程只能引用系统字典；租户流程可引用系统或本租户字典。',
+        dictScopeInherit: '继承流程范围',
+        dictScopeSystem: '系统字典',
+        dictScopeTenant: '租户字典',
+        dictCode: '字典类型',
+        dictCodeHint: '选择字典类型，其可选项将作为该字段的候选值。',
         error: {
           keyEmpty: 'Key 不能为空',
           keyPattern: 'Key 必须为 camelCase（仅允许字母数字，首字母小写）',
@@ -3045,6 +3072,9 @@ export const zhCN: I18nRules = {
       entityIdSelector: {
         placeholder: '选择',
         clear: '清除'
+      },
+      dictTypeCodeSelector: {
+        placeholder: '选择字典类型'
       }
     },
 
@@ -3212,7 +3242,25 @@ export const zhCN: I18nRules = {
       user: {
         userInfo: '用户信息',
         nickname: '昵称',
-        email: '邮箱'
+        email: '邮箱',
+        status: '状态',
+        enabled: '已启用',
+        disabled: '已禁用',
+        banned: '已封禁'
+      },
+      userBanRecord: {
+        user: '用户',
+        reason: '原因',
+        banUntil: '封禁至',
+        permanent: '永久封禁',
+        operator: '操作人',
+        unknownUser: '未知用户',
+        status: {
+          label: '状态',
+          active: '生效中',
+          lifted: '已解除',
+          expired: '已过期'
+        }
       },
       tenant: {
         tenantName: '租户名称',
@@ -3419,6 +3467,7 @@ export const zhCN: I18nRules = {
       },
       approvalFlowDefinition: {
         name: '名称',
+        definitionId: '流程ID',
         description: '描述',
         currentVersion: '版本',
         status: '状态'
@@ -3464,6 +3513,9 @@ export const zhCN: I18nRules = {
         button: '列筛选',
         title: '显示列',
         selectAll: '全选',
+        reset: '重置',
+        dragHint: '拖拽调整列顺序',
+        dragHandle: '拖拽排序',
       }
     },
     filterBuilder: {
@@ -3645,6 +3697,18 @@ export const zhCN: I18nRules = {
       requiredPermissionsLabel: '需要权限',
       noPermissionsRequired: '未声明具体权限',
       messageLabel: '服务端提示'
+    },
+    banModal: {
+      title: '账号已被封禁',
+      reasonLabel: '封禁原因',
+      noReason: '未提供原因',
+      bannedAtLabel: '封禁时间',
+      banUntilLabel: '封禁至',
+      permanent: '永久封禁'
+    },
+    disabledModal: {
+      title: '账号已被禁用',
+      description: '你的账号已被管理员禁用，无法登录。如有疑问请联系管理员。'
     }
   },
 
@@ -3880,7 +3944,8 @@ export const zhCN: I18nRules = {
       radio: '单选',
       checkbox: '多选',
       date: '日期',
-      datetime: '日期时间'
+      datetime: '日期时间',
+      dict: '字典'
     },
     forbiddenReason: {
       MISSING_PERMISSION: '缺少所需权限',
@@ -3898,6 +3963,7 @@ export const zhCN: I18nRules = {
 
   entityNames: {
     user: '用户',
+    userBanRecord: '用户封禁记录',
     oauthAccount: 'OAuth账号',
     userRole: '用户角色',
     userPermission: '用户权限',
@@ -3961,6 +4027,7 @@ export const zhCN: I18nRules = {
     // 管理员菜单
     admin: {
       users: '用户管理',
+      userBanRecords: '用户封禁记录',
       oauthAccounts: 'OAuth账号管理',
       userRoles: '用户角色管理',
       userPermissions: '用户权限管理',
@@ -3969,7 +4036,6 @@ export const zhCN: I18nRules = {
       tenantMembers: '成员管理',
       tenantRoles: '角色管理',
       tenantPermissions: '权限管理',
-      tenantRolePermissions: '角色权限管理',
       tenantMemberRoles: '成员角色管理',
       tenantDepartments: '部门管理',
       tenantInvitations: '邀请码管理',
@@ -4003,6 +4069,7 @@ export const zhCN: I18nRules = {
 
     // 菜单分组
     groups: {
+      system_user: '系统用户管理',
       rbac: '用户权限',
       system_storage: '系统储存',
       mail_template: '邮件模板',

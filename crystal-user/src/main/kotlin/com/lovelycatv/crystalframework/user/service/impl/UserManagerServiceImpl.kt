@@ -69,4 +69,16 @@ class UserManagerServiceImpl(
         super.batchDelete(ids)
         userRoleRelationService.deleteByUserIdIn(ids)
     }
+
+    override suspend fun setEnabled(userId: Long, enabled: Boolean) {
+        this.withUpdateEntityContext(userId) {
+            val user = this.getByIdOrThrow(userId, BusinessException("User $userId not found"))
+            userRepository.save(
+                user.apply {
+                    setEnabledFlag(enabled)
+                    onUpdate()
+                } newEntity false
+            ).awaitFirstOrNull() ?: throw BusinessException("Could not update user $userId")
+        }
+    }
 }

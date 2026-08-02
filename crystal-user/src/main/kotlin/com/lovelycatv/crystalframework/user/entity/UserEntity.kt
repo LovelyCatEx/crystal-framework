@@ -28,6 +28,8 @@ class UserEntity(
     @Column("avatar")
     @get:JsonSerialize(using = ToStringSerializer::class)
     var avatar: Long? = null,
+    @Column(value = "enabled")
+    private var enabled: Boolean = true,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
@@ -40,12 +42,28 @@ class UserEntity(
     @JsonIgnore
     private var authenticatedTenant: UserAuthenticatedTenantVO? = null
 
+    @Transient
+    private var banned: Boolean = false
+
     fun getAuthenticatedTenant(): UserAuthenticatedTenantVO? {
         return this.authenticatedTenant
     }
 
     fun setAuthenticatedTenant(authenticatedTenant: UserAuthenticatedTenantVO) {
         this.authenticatedTenant = authenticatedTenant
+    }
+
+    /**
+     * Derived, non-persistent flag telling the manager UI whether this user currently has an
+     * effective ban. Populated by [com.lovelycatv.crystalframework.user.controller.manager.ManagerUserController]
+     * when building the user list response; defaults to false everywhere else.
+     */
+    fun getBanned(): Boolean {
+        return this.banned
+    }
+
+    fun setBanned(banned: Boolean) {
+        this.banned = banned
     }
 
     fun setInternalRawAuthorities(authorities: Iterable<String>) {
@@ -95,6 +113,14 @@ class UserEntity(
 
     @JsonIgnore
     override fun isEnabled(): Boolean {
-        return super.isEnabled()
+        return this.enabled
+    }
+
+    fun getEnabledFlag(): Boolean {
+        return this.enabled
+    }
+
+    fun setEnabledFlag(enabled: Boolean) {
+        this.enabled = enabled
     }
 }

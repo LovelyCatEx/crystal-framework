@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.tenant.constants.TenantBenefit
@@ -43,6 +44,8 @@ class TenantMemberManagerServiceImpl(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantDepartmentMemberRelationService: TenantDepartmentMemberRelationService,
     private val tenantMemberService: TenantMemberService,
+    @Lazy
+    private val tenantMemberProfileService: TenantMemberProfileService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantMemberManagerService {
     override val cacheStore: ReactiveExpiringKVStore<String, TenantMemberEntity>
@@ -102,6 +105,14 @@ class TenantMemberManagerServiceImpl(
                 listOf(defaultMemberRoleId)
             )
         }
+
+        // Persist tenant-scoped profile in the same transaction so every member always has a profile.
+        // `name` is resolved inside upsertProfile from the system user (nickname -> username) as fallback.
+        tenantMemberProfileService.upsertProfile(
+            tenantId = savedMember.tenantId,
+            tenantMemberId = savedMember.id,
+            memberUserId = savedMember.memberUserId,
+        )
 
         return savedMember
     }

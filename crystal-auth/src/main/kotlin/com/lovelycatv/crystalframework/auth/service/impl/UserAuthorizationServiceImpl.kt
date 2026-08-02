@@ -5,13 +5,17 @@ import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.auth.types.ProcessOAuth2AuthenticationSuccessResult
+import com.lovelycatv.crystalframework.shared.exception.AccountBannedException
+import com.lovelycatv.crystalframework.shared.exception.BanContext
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.user.service.UserService
+import com.lovelycatv.crystalframework.user.service.manager.UserBanRecordManagerService
 import kotlinx.coroutines.reactor.mono
+import org.springframework.security.authentication.DisabledException
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.stereotype.Service
@@ -25,12 +29,32 @@ class UserAuthorizationServiceImpl(
     private val jwtSignKeyStore: JWTSignKeyStore,
     private val userRbacQueryService: UserRbacQueryService,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
+    private val userBanRecordManagerService: UserBanRecordManagerService,
 ) : UserAuthorizationService {
     override suspend fun clearUserAuthorityCache(userId: Long) {
         userRbacQueryService.clearUserAuthoritiesCache(userId)
     }
 
-    override fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
+    override suspend fun assertLoginable(userEntity: UserEntity) {
+        userBanRecordManagerService.getActiveBan(userEntity.id)?.let { banRecord ->
+            throw AccountBannedException(
+                banRecord.reason,
+                BanContext(
+                    reason = banRecord.reason,
+                    bannedAt = banRecord.createdTime,
+                    banUntil = banRecord.banUntil,
+                ),
+            )
+        }
+
+        if (!userEntity.isEnabled) {
+            throw DisabledException("account has been disabled")
+        }
+    }
+
+    override suspend fun buildLoginSuccessResponse(userEntity: UserEntity): LoginSuccessResponseData {
+        assertLoginable(userEntity)
+
         return LoginSuccessResponseData().apply {
             val expiration = crystalFrameworkConfiguration.auth.jwt.expiration.toMillis()
 
@@ -71,21 +95,23 @@ class UserAuthorizationServiceImpl(
                         userService.getRepository().findById(it)
                     }
 
-                    userEntity?.map { userEntity ->
-                        val loginResponse = buildLoginSuccessResponse(userEntity)
-                        ProcessOAuth2AuthenticationSuccessResult(
-                            user = userEntity,
-                            oauth2Account = it,
-                            response = ApiResponse.success(mapOf(
-                                "token" to loginResponse.token,
-                                "expiresIn" to loginResponse.expiresIn,
-                                "oauthAccountId" to it.id.toString(),
-                                "platform" to it.getRealPlatform().name,
-                                "identifier" to it.identifier,
-                                "nickname" to it.nickname,
-                                "avatar" to it.avatar
-                            ))
-                        )
+                    userEntity?.flatMap { userEntity ->
+                        mono {
+                            val loginResponse = buildLoginSuccessResponse(userEntity)
+                            ProcessOAuth2AuthenticationSuccessResult(
+                                user = userEntity,
+                                oauth2Account = it,
+                                response = ApiResponse.success(mapOf(
+                                    "token" to loginResponse.token,
+                                    "expiresIn" to loginResponse.expiresIn,
+                                    "oauthAccountId" to it.id.toString(),
+                                    "platform" to it.getRealPlatform().name,
+                                    "identifier" to it.identifier,
+                                    "nickname" to it.nickname,
+                                    "avatar" to it.avatar
+                                ))
+                            )
+                        }
                     } ?: ProcessOAuth2AuthenticationSuccessResult(
                         user = null,
                         oauth2Account = it,

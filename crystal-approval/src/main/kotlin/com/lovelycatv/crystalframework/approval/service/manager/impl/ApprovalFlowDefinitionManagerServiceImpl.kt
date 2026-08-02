@@ -9,10 +9,14 @@ import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowNodeEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowDefinitionRepository
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowEdgeRepository
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowNodeRepository
+import com.lovelycatv.crystalframework.approval.service.ApprovalDictResolver
 import com.lovelycatv.crystalframework.approval.service.ApprovalFlowGraphValidator
 import com.lovelycatv.crystalframework.approval.service.ApprovalFormSchemaValidator
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
+import com.lovelycatv.crystalframework.approval.types.ApprovalFormSchema
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -33,6 +37,7 @@ class ApprovalFlowDefinitionManagerServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
+    private val approvalDictResolver: ApprovalDictResolver,
 ) : ApprovalFlowDefinitionManagerService {
     override val cacheStore: ReactiveExpiringKVStore<String, ApprovalFlowDefinitionEntity>
         get() = reactiveRedisService.asReactiveKVStore()
@@ -45,7 +50,7 @@ class ApprovalFlowDefinitionManagerServiceImpl(
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
     override suspend fun create(dto: ManagerCreateApprovalFlowDefinitionDTO): ApprovalFlowDefinitionEntity {
-        validateFormSchemaOrThrow(dto.formSchema)
+        validateFormSchemaOrThrow(dto.formSchema, resolveScopeOrThrow(dto.scope), dto.scopeId)
         return getRepository().save(
             ApprovalFlowDefinitionEntity(
                 id = snowIdGenerator.nextId(),
@@ -66,7 +71,9 @@ class ApprovalFlowDefinitionManagerServiceImpl(
         // "clear" and "leave alone" don't both surface as validation-worthy inputs.
         if (dto.formSchema != null) {
             val normalized = if (dto.formSchema!!.isBlank()) null else dto.formSchema
-            validateFormSchemaOrThrow(normalized)
+            // DICT scope legality binds to the definition's own scope — read from the persisted
+            // original, since update DTOs do not resend scope (scope is immutable post-create).
+            validateFormSchemaOrThrow(normalized, resolveScopeOrThrow(original.scope), original.scopeId)
         }
         return original.apply {
             if (dto.name != null) this.name = dto.name!!
@@ -76,12 +83,25 @@ class ApprovalFlowDefinitionManagerServiceImpl(
         }
     }
 
-    private fun validateFormSchemaOrThrow(schemaJson: String?) {
-        val errors = ApprovalFormSchemaValidator.validateSchema(schemaJson)
+    private suspend fun validateFormSchemaOrThrow(schemaJson: String?, scope: ResourceScope, scopeId: Long) {
+        val errors = ApprovalFormSchemaValidator.validateSchema(schemaJson).toMutableList()
+        // DICT cross-scope legality + dict-type existence needs DB access, so it lives in the
+        // resolver rather than the pure validator. Only run it once the schema is structurally sane
+        // and actually parseable.
+        if (errors.isEmpty() && !schemaJson.isNullOrBlank()) {
+            val schema = runCatching { schemaJson.parseObject<ApprovalFormSchema>() }.getOrNull()
+            if (schema != null) {
+                errors += approvalDictResolver.validateDictBindings(schema, scope, scopeId)
+            }
+        }
         if (errors.isNotEmpty()) {
             throw BusinessException("Invalid form schema: ${errors.joinToString("; ")}")
         }
     }
+
+    private fun resolveScopeOrThrow(scopeTypeId: Int): ResourceScope =
+        ResourceScope.getById(scopeTypeId)
+            ?: throw BusinessException("Unknown scope type: $scopeTypeId")
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> {

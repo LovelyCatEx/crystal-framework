@@ -555,6 +555,12 @@ export const enUS: I18nRules = {
         password: {
           label: 'Password',
           required: 'Please enter password'
+        },
+        enabled: {
+          label: 'Account status',
+          hint: 'When disabled, the user is logged out and blocked from logging in.',
+          on: 'Enabled',
+          off: 'Disabled'
         }
       },
       filter: {
@@ -571,10 +577,43 @@ export const enUS: I18nRules = {
         refreshAuthority: 'Refresh Authority',
         refreshAuthorityConfirm: 'Refresh this user\'s authority cache?\nTheir next request will re-fetch permissions.',
         refreshAuthorityBatchConfirm: 'Refresh the authority cache of the selected users?\nTheir next request will re-fetch permissions.',
+        forceLogout: 'Force Logout',
+        forceLogoutConfirm: 'Force this user to log out?\nTheir existing tokens will be rejected and they must log in again.',
+        forceLogoutBatchConfirm: 'Force the selected users to log out?\nTheir existing tokens will be rejected and they must log in again.',
+        ban: 'Ban',
+        unban: 'Unban',
+        unbanConfirm: 'Lift the ban on this user?\nThey will be able to log in again immediately.',
+      },
+      ban: {
+        title: 'Ban User',
+        reasonLabel: 'Ban reason',
+        reasonRequired: 'Please enter a ban reason',
+        reasonPlaceholder: 'Reason shown to the user when they are blocked',
+        banUntilLabel: 'Ban until',
+        banUntilPlaceholder: 'Select an expiry time',
+        banUntilHint: 'Leave empty for a permanent ban',
       },
       messages: {
         refreshAuthoritySuccess: 'User authority cache refreshed',
         refreshAuthorityFailed: 'Failed to refresh user authority cache',
+        forceLogoutSuccess: 'Users forced to log out',
+        forceLogoutFailed: 'Failed to force users to log out',
+        banSuccess: 'User banned',
+        banFailed: 'Failed to ban user',
+        unbanSuccess: 'User unbanned',
+        unbanFailed: 'Failed to unban user',
+      }
+    },
+    userBanRecordManager: {
+      title: 'User Ban Records',
+      subtitle: 'Review historical and active user login bans',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        operatorUserId: 'Operator ID',
+        operatorUserIdPlaceholder: 'Enter operator user ID',
       }
     },
     oauthAccountManager: {
@@ -993,6 +1032,13 @@ export const enUS: I18nRules = {
         'system.user.read': 'Read users',
         'system.user.update': 'Update users',
         'system.user.delete': 'Delete users',
+        'system.user.refreshAuthority': 'Refresh users\' authority cache',
+        'system.user.forceLogout': 'Force users to log out',
+        'system.user.ban': 'Ban users from logging in',
+        'system.user.unban': 'Lift user login bans',
+        'system.user.setEnabled': 'Enable or disable user accounts',
+        'system.user.banRecord': 'User ban records menu',
+        'system.user.banRecord.read': 'Read user ban records',
         'system.role.permission.read': 'Read role permission assignments',
         'system.role.permission.update': 'Update role permission assignments',
         'system.user.role.read': 'Read user role assignments',
@@ -1442,32 +1488,6 @@ export const enUS: I18nRules = {
         removeMemberFailed: 'Failed to remove member',
         updateRoleSuccess: 'Role updated successfully',
         updateRoleFailed: 'Failed to update role'
-      }
-    },
-    tenantRolePermissionManager: {
-      title: 'Tenant Role Permission Management',
-      subtitle: 'Assign permissions to tenant roles',
-      columns: {
-        role: 'Role',
-        description: 'Description',
-        action: 'Action'
-      },
-      action: {
-        assignPermission: 'Assign Permissions'
-      },
-      permissionModal: {
-        title: 'Assign permissions to role "{{name}}"',
-        titles: {
-          available: 'Available Permissions',
-          assigned: 'Assigned Permissions'
-        }
-      },
-      messages: {
-        fetchRolesFailed: 'Failed to fetch role list',
-        fetchPermissionsFailed: 'Failed to fetch permission list',
-        fetchRolePermissionsFailed: 'Failed to fetch role permissions',
-        assignSuccess: 'Permissions assigned successfully',
-        assignFailed: 'Failed to assign permissions'
       }
     },
     tenantMemberRoleManager: {
@@ -2908,6 +2928,13 @@ export const enUS: I18nRules = {
         addOption: 'Add Option',
         deleteOption: 'Delete option',
         patternHint: 'JavaScript regular expression source.',
+        dictScope: 'Dictionary Scope',
+        dictScopeHint: 'Inherits the flow scope by default. A SYSTEM flow may only reference system dictionaries; a TENANT flow may reference system or its own tenant dictionaries.',
+        dictScopeInherit: 'Inherit flow scope',
+        dictScopeSystem: 'System dictionary',
+        dictScopeTenant: 'Tenant dictionary',
+        dictCode: 'Dictionary Type',
+        dictCodeHint: 'Pick a dictionary type; its items become this field\'s selectable options.',
         error: {
           keyEmpty: 'Key is required',
           keyPattern: 'Key must be camelCase (letters and digits only, starting with a lowercase letter)',
@@ -3047,6 +3074,9 @@ export const enUS: I18nRules = {
       entityIdSelector: {
         placeholder: 'Select',
         clear: 'Clear'
+      },
+      dictTypeCodeSelector: {
+        placeholder: 'Select dictionary type'
       }
     },
 
@@ -3214,7 +3244,25 @@ export const enUS: I18nRules = {
       user: {
         userInfo: 'User Info',
         nickname: 'Nickname',
-        email: 'Email'
+        email: 'Email',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        banned: 'Banned'
+      },
+      userBanRecord: {
+        user: 'User',
+        reason: 'Reason',
+        banUntil: 'Ban Until',
+        permanent: 'Permanent',
+        operator: 'Operator',
+        unknownUser: 'Unknown user',
+        status: {
+          label: 'Status',
+          active: 'Active',
+          lifted: 'Lifted',
+          expired: 'Expired'
+        }
       },
       tenant: {
         tenantName: 'Tenant Name',
@@ -3421,6 +3469,7 @@ export const enUS: I18nRules = {
       },
       approvalFlowDefinition: {
         name: 'Name',
+        definitionId: 'Flow ID',
         description: 'Description',
         currentVersion: 'Version',
         status: 'Status'
@@ -3466,6 +3515,9 @@ export const enUS: I18nRules = {
         button: 'Filter Columns',
         title: 'Display Columns',
         selectAll: 'Select All',
+        reset: 'Reset',
+        dragHint: 'Drag to reorder columns',
+        dragHandle: 'Drag to reorder',
       }
     },
     filterBuilder: {
@@ -3647,6 +3699,18 @@ export const enUS: I18nRules = {
       requiredPermissionsLabel: 'Required permissions',
       noPermissionsRequired: 'No specific permissions declared',
       messageLabel: 'Server message'
+    },
+    banModal: {
+      title: 'Account banned',
+      reasonLabel: 'Ban reason',
+      noReason: 'No reason provided',
+      bannedAtLabel: 'Banned at',
+      banUntilLabel: 'Ban until',
+      permanent: 'Permanent'
+    },
+    disabledModal: {
+      title: 'Account disabled',
+      description: 'Your account has been disabled by an administrator and cannot log in. Please contact the administrator.'
     }
   },
 
@@ -3882,7 +3946,8 @@ export const enUS: I18nRules = {
       radio: 'Radio',
       checkbox: 'Checkbox',
       date: 'Date',
-      datetime: 'Date Time'
+      datetime: 'Date Time',
+      dict: 'Dictionary'
     },
     forbiddenReason: {
       MISSING_PERMISSION: 'Missing permission',
@@ -3900,6 +3965,7 @@ export const enUS: I18nRules = {
 
   entityNames: {
     user: 'User',
+    userBanRecord: 'User Ban Record',
     oauthAccount: 'OAuth Account',
     userRole: 'User Role',
     userPermission: 'User Permission',
@@ -3963,6 +4029,7 @@ export const enUS: I18nRules = {
     // Admin menus
     admin: {
       users: 'User Management',
+      userBanRecords: 'User Ban Records',
       oauthAccounts: 'OAuth Account Management',
       userRoles: 'User Role Management',
       userPermissions: 'User Permission Management',
@@ -3971,7 +4038,6 @@ export const enUS: I18nRules = {
       tenantMembers: 'Member Management',
       tenantRoles: 'Role Management',
       tenantPermissions: 'Permission Management',
-      tenantRolePermissions: 'Role Permission Management',
       tenantMemberRoles: 'Member Role Management',
       tenantDepartments: 'Department Management',
       tenantInvitations: 'Invitation Code Management',
@@ -4005,6 +4071,7 @@ export const enUS: I18nRules = {
 
     // Menu groups
     groups: {
+      system_user: 'System User Management',
       rbac: 'User Permissions',
       system_storage: 'System Storage',
       mail_template: 'Mail Templates',

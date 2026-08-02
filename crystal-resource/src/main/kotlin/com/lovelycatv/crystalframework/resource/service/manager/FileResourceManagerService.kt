@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.resource.service
+package com.lovelycatv.crystalframework.resource.service.manager
 
 import com.lovelycatv.crystalframework.resource.controller.manager.file.dto.ManagerCreateFileResourceDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.file.dto.ManagerDeleteFileResourceDTO
@@ -15,4 +15,4 @@ interface FileResourceManagerService : CachedBaseManagerService<
         ManagerReadFileResourceDTO,
         ManagerUpdateFileResourceDTO,
         ManagerDeleteFileResourceDTO
->
+        >

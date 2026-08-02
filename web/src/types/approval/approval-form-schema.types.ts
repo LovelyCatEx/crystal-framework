@@ -66,6 +66,18 @@ export interface ApprovalFieldSchema {
     options?: ApprovalFieldOption[] | null;
     /** Optional group membership; must reference `ApprovalFormSchema.groups[].key` if set. */
     groupKey?: string | null;
+    /**
+     * DICT only — stable business `code` of the referenced dict type. The concrete dict type is
+     * resolved server-side against a `(scope, scopeId)` derived from the owning flow, so the same
+     * schema works for both a SYSTEM-scope and a TENANT-scope flow. Required for DICT fields.
+     */
+    dictCode?: string | null;
+    /**
+     * DICT only — optional scope override (`ResourceScope` typeId). `null` inherits the flow's own
+     * scope; a concrete value pins the lookup (e.g. a TENANT flow referencing a shared SYSTEM dict).
+     * A SYSTEM flow may not reference a TENANT dict (enforced server-side).
+     */
+    dictScope?: number | null;
 }
 
 /** Optional one-level grouping for layout. Nested groups are intentionally not allowed. */
@@ -128,4 +140,6 @@ export const APPROVAL_FIELD_OPERATORS: Record<ApprovalFieldType, readonly string
     [ApprovalFieldType.CHECKBOX]: ['contains', 'in'],
     [ApprovalFieldType.DATE]:     ['eq', 'ne', 'gt', 'gte', 'lt', 'lte'],
     [ApprovalFieldType.DATETIME]: ['eq', 'ne', 'gt', 'gte', 'lt', 'lte'],
+    // DICT covers single (eq/ne/in) and multi (contains/in) selection, switched by validation.multiple.
+    [ApprovalFieldType.DICT]:     ['eq', 'ne', 'in', 'contains'],
 } as const;

@@ -1,5 +1,4 @@
-import {Button, Col, Form, Input, message, Modal, Row, Tag, Transfer} from "antd";
-import type {Key} from "react";
+import {Button, Col, Form, Input, message, Modal, Row} from "antd";
 import {useEffect, useRef, useState} from "react";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {type ManagerCreateRoleDTO, UserRoleManagerController} from "@/api/user/rbac/user-role.api.ts";
@@ -12,22 +11,16 @@ import type {UserRole} from "@/types/user/rbac/user-role.types.ts";
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 import {getPermissionType} from "@/i18n/enum-helpers.ts";
-
-interface TransferItem {
-    key: string;
-    title: string;
-    description: string;
-    type: number;
-    path?: string | null;
-}
+import {PermissionTreeTable} from "@/components/PermissionTreeTable.tsx";
 
 export default function UserRoleManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
     const [allPermissions, setAllPermissions] = useState<UserPermission[]>([]);
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-    const [selectedPermissionIds, setSelectedPermissionIds] = useState<Key[]>([]);
+    const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>([]);
     const [isPermissionModalVisible, setIsPermissionModalVisible] = useState(false);
+    const [permissionModalLoading, setPermissionModalLoading] = useState(false);
     const [savingPermissions, setSavingPermissions] = useState(false);
     const {t} = useTranslation();
     const columns = useUserRoleTableColumns();
@@ -44,6 +37,7 @@ export default function UserRoleManagerPage() {
     const openAssignPermissionModal = async (role: UserRole) => {
         setSelectedRole(role);
         setIsPermissionModalVisible(true);
+        setPermissionModalLoading(true);
         try {
             const res = await getRolePermissions(role.id);
             const ids = res.data?.map(p => String(p.id)) || [];
@@ -51,15 +45,16 @@ export default function UserRoleManagerPage() {
         } catch {
             void message.error(t('pages.userRoleManager.messages.fetchRolePermissionsFailed'));
             setSelectedPermissionIds([]);
+        } finally {
+            setPermissionModalLoading(false);
         }
     };
 
     const handleSavePermissions = async () => {
         if (!selectedRole) return;
-        const ids = selectedPermissionIds.map(String);
         setSavingPermissions(true);
         try {
-            await setRolePermissions(selectedRole.id, ids);
+            await setRolePermissions(selectedRole.id, selectedPermissionIds);
             void message.success(t('pages.userRoleManager.messages.assignSuccess'));
             setIsPermissionModalVisible(false);
         } catch {
@@ -68,18 +63,6 @@ export default function UserRoleManagerPage() {
             setSavingPermissions(false);
         }
     };
-
-    const handleTransferChange = (targetKeys: Key[]) => {
-        setSelectedPermissionIds(targetKeys);
-    };
-
-    const transferData: TransferItem[] = allPermissions.map(p => ({
-        key: String(p.id),
-        title: p.name,
-        description: p.description || '',
-        type: p.type,
-        path: p.path
-    }));
 
     useEffect(() => {
         void fetchAllPermissions();
@@ -159,29 +142,15 @@ export default function UserRoleManagerPage() {
                 confirmLoading={savingPermissions}
                 okButtonProps={{ className: "rounded-lg h-10 px-6" }}
                 cancelButtonProps={{ className: "rounded-lg h-10 px-6" }}
+                styles={{ body: { maxHeight: '65vh', overflowY: 'auto' } }}
             >
-                <Transfer
-                    dataSource={transferData}
-                    titles={[t('pages.userRoleManager.permissionModal.titles.available'), t('pages.userRoleManager.permissionModal.titles.assigned')]}
-                    targetKeys={selectedPermissionIds}
-                    onChange={handleTransferChange}
-                    render={item => {
-                        const typeColors: Record<number, string> = {
-                            0: 'blue',
-                            1: 'green',
-                            2: 'purple'
-                        };
-                        return <span>
-                            <Tag color={typeColors[item.type] || 'default'}>{getPermissionType(item.type)}</Tag>
-                            &nbsp;{item.title}
-                            &nbsp;{item.path ? <Tag>{item.path}</Tag> : <span className="text-gray-500">({item.description})</span>}
-                        </span>
-
-                    }}
-                    listStyle={{
-                        width: 550,
-                        height: 500,
-                    }}
+                <PermissionTreeTable
+                    permissions={allPermissions}
+                    loading={permissionModalLoading}
+                    typeLabel={getPermissionType}
+                    mode="checkbox"
+                    selectedIds={selectedPermissionIds}
+                    onChange={setSelectedPermissionIds}
                 />
             </Modal>
         </>

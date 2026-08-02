@@ -1,6 +1,7 @@
 import {Divider, Empty, Tag, Timeline, Typography} from "antd";
-import {useMemo} from "react";
+import {useCallback, useMemo} from "react";
 import {useTranslation} from "react-i18next";
+import {getApprovalInstanceDictOptions} from "@/api/approval/approval-flow-instance.api.ts";
 import type {
     ApprovalFlowInstanceDetailsVO,
     ApprovalFlowRecordVO,
@@ -50,6 +51,10 @@ export function ApprovalFlowFormPanel({details}: ApprovalFlowFormPanelProps) {
         return mergeFieldOverrides(schema, null, {nodeType: ApprovalFlowNodeType.START});
     }, [schema]);
 
+    const loadDictOptions = useCallback(async (fieldKey: string) => {
+        return (await getApprovalInstanceDictOptions(instance.id, fieldKey)).data ?? [];
+    }, [instance.id]);
+
     const snapshotValues = useMemo<Record<string, unknown>>(() => {
         if (!instance.formData) return {};
         try {
@@ -97,6 +102,7 @@ export function ApprovalFlowFormPanel({details}: ApprovalFlowFormPanelProps) {
                             groups={schema.groups}
                             initialValues={snapshotValues}
                             readonly
+                            loadDictOptions={loadDictOptions}
                         />
                     )}
                 </div>

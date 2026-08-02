@@ -1,5 +1,5 @@
 import {Modal} from "antd";
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {EntityTable, type EntityTableProps, type EntityTableRef} from "../table/EntityTable.tsx";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
@@ -39,6 +39,17 @@ export function EntitySelectorModal<ENTITY extends BaseEntity>(props: EntitySele
     } = props;
 
     const entityTableRef = useRef<EntityTableRef | null>(null);
+
+    // The modal is mounted once and toggled via `visible`, so the inner EntityTable only fetches on
+    // mount and never re-runs when `query` changes (e.g. a caller swaps scope while the modal is
+    // closed). Re-fetch on every closed→open edge so the table always reflects the current query.
+    const prevVisibleRef = useRef(visible);
+    useEffect(() => {
+        if (visible && !prevVisibleRef.current) {
+            entityTableRef.current?.refreshData({resetPage: true});
+        }
+        prevVisibleRef.current = visible;
+    }, [visible]);
 
     const [selectedEntities, setSelectedEntities] = useState<ENTITY[]>([]);
 

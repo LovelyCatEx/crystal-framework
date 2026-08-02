@@ -21,4 +21,20 @@ data class ApprovalFieldSchema(
     val validation: ApprovalFieldValidation? = null,
     val options: List<ApprovalFieldOption>? = null,
     val groupKey: String? = null,
+    /**
+     * DICT only — the stable business `code` of the referenced dict type (see
+     * `TenantDictTypeEntity.code`). The concrete dict type is resolved at render/validate time
+     * against a `(scope, scopeId)` derived from the owning flow definition, so the same schema
+     * naturally works for a SYSTEM-scope flow and a TENANT-scope flow. Required for DICT fields,
+     * ignored otherwise.
+     */
+    val dictCode: String? = null,
+    /**
+     * DICT only — optional scope override ([com.lovelycatv.crystalframework.shared.types.common.ResourceScope]
+     * typeId). `null` inherits the flow definition's own scope; a concrete value pins the lookup
+     * to that scope (e.g. a TENANT flow referencing a shared SYSTEM dict). Cross-scope validity is
+     * enforced by `ApprovalDictResolver` / `ApprovalFormSchemaValidator` — a SYSTEM flow may not
+     * reference a TENANT dict.
+     */
+    val dictScope: Int? = null,
 )

@@ -6,9 +6,12 @@ import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCr
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowInstanceDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.StartApprovalFlowDTO
+import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalDictOptionVO
 import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalFlowInstanceDetailsVO
+import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowDefinitionEntity
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowInstanceEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowInstanceRepository
+import com.lovelycatv.crystalframework.approval.service.ApprovalDictResolver
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowInstanceManagerService
@@ -51,6 +54,7 @@ class ManagerApprovalFlowInstanceController(
     managerService: ApprovalFlowInstanceManagerService,
     private val approvalFlowDefinitionManagerService: ApprovalFlowDefinitionManagerService,
     private val approvalFlowEngine: ApprovalFlowEngine,
+    private val approvalDictResolver: ApprovalDictResolver,
 ) : ReadonlyScopedManagerController<
         ApprovalFlowInstanceManagerService,
         ApprovalFlowInstanceRepository,
@@ -61,12 +65,7 @@ class ManagerApprovalFlowInstanceController(
         BaseManagerDeleteDTO
 >(
     managerService,
-    permissions = PermissionMatrix.readonly(
-        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_INSTANCE_READ.name,
-        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_INSTANCE_READ.name,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_INSTANCE_READ.name,
-        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_INSTANCE_READ.name,
-    ),
+    permissions = ApprovalManagerPermissionMatrices.INSTANCE,
 ) {
 
     /**
@@ -184,22 +183,8 @@ class ManagerApprovalFlowInstanceController(
             ?: throw BusinessException("definitionId is required")
         val definition = approvalFlowDefinitionManagerService.getByIdOrNull(definitionId)
             ?: throw BusinessException("Definition not found")
+        assertDefinitionReadable(definition, userAuthentication)
         val resolvedScope = resolveScope(definition.scope)
-
-        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException(context = ForbiddenContext(
-                reason = ForbiddenReason.MISSING_PERMISSION,
-                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.READ)
-                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
-                scope = resolvedScope,
-            ))
-        }
-        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException(context = ForbiddenContext(
-                reason = ForbiddenReason.SCOPE_MISMATCH,
-                scope = resolvedScope,
-            ))
-        }
 
         val initiatorId = when (resolvedScope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
@@ -245,15 +230,62 @@ class ManagerApprovalFlowInstanceController(
     ): ApiResponse<ApprovalFlowInstanceDetailsVO> {
         val instance = managerService.getByIdOrNull(instanceId)
             ?: throw BusinessException("Instance not found")
-        val resolvedScope = resolveScope(instance.scope)
+        assertInstanceViewAccess(instance, userAuthentication)
+        return ApiResponse.success(managerService.getInstanceDetails(instance))
+    }
 
+    /**
+     * Assert the caller may READ the given flow definition, using the DEFINITION permission matrix
+     * (permission layer + tenant ownership), with the same decision + exception shape as the base
+     * [assertAccess]. The base primitives cannot be reused here: they are bound to this controller's
+     * INSTANCE matrix, and this controller further overrides [checkPermission] to allow READ
+     * unconditionally — so a definition-scoped decision must consult the DEFINITION matrix directly.
+     */
+    private suspend fun assertDefinitionReadable(
+        definition: ApprovalFlowDefinitionEntity,
+        userAuthentication: UserAuthentication,
+    ) {
+        val scope = resolveScope(definition.scope)
+        val matrix = ApprovalManagerPermissionMatrices.DEFINITION
+        if (!RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, ScopedOperation.READ))) {
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.MISSING_PERMISSION,
+                requiredPermissions = matrix.layersFor(scope, ScopedOperation.READ)
+                    .filter { it != PermissionMatrix.NEVER_GRANTED },
+                scope = scope,
+            ))
+        }
+        val owned = when (scope) {
+            ResourceScope.SYSTEM -> true
+            ResourceScope.TENANT ->
+                RbacUtils.hasAnyAuthority(*matrix.crossTenantLayersFor(ScopedOperation.READ))
+                    || definition.scopeId == userAuthentication.tenantId
+        }
+        if (!owned) {
+            throw ForbiddenException(context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scope,
+            ))
+        }
+    }
+
+    /**
+     * View authorization for a single instance: the READ authority layer (read-all admin) OR the
+     * initiator OR a participating assignee passes, then tenant ownership is enforced. This is the
+     * instance-specific fallback the base [assertAccess] cannot express (it only knows
+     * permission + ownership), so it lives here and is shared by [detailsById] and [dictOptions].
+     */
+    private suspend fun assertInstanceViewAccess(
+        instance: ApprovalFlowInstanceEntity,
+        userAuthentication: UserAuthentication,
+    ) {
+        val resolvedScope = resolveScope(instance.scope)
         val callerScopedId = when (resolvedScope) {
             ResourceScope.SYSTEM -> userAuthentication.userId
             ResourceScope.TENANT -> userAuthentication.tenantMemberId
                 ?: throw ForbiddenException("Current user is not a member of this tenant",
                     context = ForbiddenContext(reason = ForbiddenReason.NOT_TENANT_MEMBER, scope = ResourceScope.TENANT))
         }
-
         val matrix = permissions
             ?: error("ManagerApprovalFlowInstanceController requires a PermissionMatrix")
         val canReadAll = RbacUtils.hasAnyAuthority(*matrix.layersFor(resolvedScope, ScopedOperation.READ))
@@ -269,8 +301,29 @@ class ManagerApprovalFlowInstanceController(
         if (!checkOwnership(resolvedScope, instance.scopeId, ScopedOperation.READ, userAuthentication)) {
             throw UnauthorizedException()
         }
+    }
 
-        return ApiResponse.success(managerService.getInstanceDetails(instance))
+    /**
+     * Real-time selectable options for DICT form fields of a running / historical instance, used by
+     * the handling form and the read-only viewer. Resolution is based on the instance's snapshot
+     * schema (for binding) and the instance's own scope; the client-supplied scope is never used.
+     * Authorization reuses [assertInstanceViewAccess] (read-all admin / initiator / participating
+     * assignee, any one passes).
+     */
+    @GetMapping("/dict-options", version = "1")
+    suspend fun dictOptions(
+        userAuthentication: UserAuthentication,
+        @RequestParam instanceId: Long,
+        @RequestParam fieldKey: String,
+    ): ApiResponse<List<ApprovalDictOptionVO>> {
+        val instance = managerService.getByIdOrNull(instanceId)
+            ?: throw BusinessException("Instance not found")
+        assertInstanceViewAccess(instance, userAuthentication)
+        val resolvedScope = resolveScope(instance.scope)
+        val options = approvalDictResolver
+            .resolveItemsForField(instance.formSchemaSnapshot, fieldKey, resolvedScope, instance.scopeId)
+            .map { ApprovalDictOptionVO(value = it.value, label = it.label) }
+        return ApiResponse.success(options)
     }
 
     private fun appendInitiatorCondition(existing: QueryNode?, initiatorId: Long): QueryNode {

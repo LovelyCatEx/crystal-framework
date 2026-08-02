@@ -11,12 +11,18 @@ import type {
 } from "@/types/approval/approval-form-schema.types.ts";
 import {APPROVAL_FIELD_KEY_PATTERN} from "@/types/approval/approval-form-schema.types.ts";
 import {getApprovalFieldType} from "@/i18n/enum-helpers.ts";
+import {ResourceScope} from "@/types/BaseScopedEntity.ts";
+import {DictTypeCodeSelector} from "@/components/selector/DictTypeCodeSelector.tsx";
 
 export interface ApprovalFieldPropertyPanelProps {
     field: ApprovalFieldSchema;
     /** All fields in the schema — needed to detect key collisions. */
     allFields: ApprovalFieldSchema[];
     groups: ApprovalFormSchema['groups'];
+    /** Owning flow definition scope (`ResourceScope` typeId) — drives the DICT dict-type picker. */
+    scope: number;
+    /** Owning flow definition scopeId (tenantId for TENANT scope). */
+    scopeId: string;
     onChange: (updated: ApprovalFieldSchema) => void;
 }
 
@@ -31,6 +37,7 @@ const VALIDATION_SLOTS: Record<ApprovalFieldType, Array<keyof ApprovalFieldValid
     [ApprovalFieldType.CHECKBOX]: ['minCount', 'maxCount'],
     [ApprovalFieldType.DATE]: ['minDate', 'maxDate'],
     [ApprovalFieldType.DATETIME]: ['minDate', 'maxDate'],
+    [ApprovalFieldType.DICT]: ['multiple', 'minCount', 'maxCount'],
 };
 
 const OPTION_TYPES: readonly ApprovalFieldType[] = [
@@ -44,8 +51,20 @@ function usesOptions(type: ApprovalFieldType): boolean {
 }
 
 export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProps) {
-    const {field, allFields, groups, onChange} = props;
+    const {field, allFields, groups, scope, scopeId, onChange} = props;
     const {t} = useTranslation();
+
+    // DICT scope override: null inherits the flow scope, otherwise a concrete ResourceScope. A
+    // SYSTEM flow cannot reference a TENANT dict (enforced server-side), so that override is hidden.
+    const effectiveDictScope = field.dictScope ?? scope;
+    const dictScopeId = effectiveDictScope === ResourceScope.SYSTEM ? '0' : scopeId;
+    const dictScopeOptions = [
+        {value: 'inherit', label: t('components.approvalFormDesigner.property.dictScopeInherit')},
+        {value: String(ResourceScope.SYSTEM), label: t('components.approvalFormDesigner.property.dictScopeSystem')},
+        ...(scope === ResourceScope.TENANT
+            ? [{value: String(ResourceScope.TENANT), label: t('components.approvalFormDesigner.property.dictScopeTenant')}]
+            : []),
+    ];
 
     const patch = (partial: Partial<ApprovalFieldSchema>) => onChange({...field, ...partial});
     const patchValidation = (partial: Partial<ApprovalFieldValidation>) =>
@@ -272,6 +291,36 @@ export function ApprovalFieldPropertyPanel(props: ApprovalFieldPropertyPanelProp
                         deleteLabel={t('components.approvalFormDesigner.property.deleteOption')}
                         title={t('components.approvalFormDesigner.property.options')}
                     />
+                )}
+
+                {field.type === ApprovalFieldType.DICT && (
+                    <>
+                        <Form.Item
+                            label={t('components.approvalFormDesigner.property.dictScope')}
+                            help={t('components.approvalFormDesigner.property.dictScopeHint')}
+                        >
+                            <Select
+                                value={field.dictScope == null ? 'inherit' : String(field.dictScope)}
+                                options={dictScopeOptions}
+                                onChange={(v) => patch({
+                                    dictScope: v === 'inherit' ? null : Number(v),
+                                    dictCode: null, // reset code — it belongs to the previous scope's dict set
+                                })}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label={t('components.approvalFormDesigner.property.dictCode')}
+                            help={t('components.approvalFormDesigner.property.dictCodeHint')}
+                            required
+                        >
+                            <DictTypeCodeSelector
+                                value={field.dictCode ?? null}
+                                onChange={(code) => patch({dictCode: code})}
+                                scope={effectiveDictScope}
+                                scopeId={dictScopeId}
+                            />
+                        </Form.Item>
+                    </>
                 )}
             </Form>
         </div>

@@ -36,9 +36,11 @@ object JwtUtil {
 
         customClaims?.invoke(builder)
 
+        val now = System.currentTimeMillis()
         return builder
             .subject(subject)
-            .expiration(Date(System.currentTimeMillis() + expiration))
+            .issuedAt(Date(now))
+            .expiration(Date(now + expiration))
             .signWith(deriveSecretKey(signKey), Jwts.SIG.HS512)
             .compact()
     }

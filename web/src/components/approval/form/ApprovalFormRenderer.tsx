@@ -4,6 +4,7 @@ import {forwardRef, useEffect, useImperativeHandle, useMemo} from "react";
 import {useTranslation} from "react-i18next";
 import type {MergedFieldSchema} from "@/types/approval/approval-form-schema.types.ts";
 import {renderField} from "./fields/renderField.tsx";
+import type {DictOptionsLoader} from "./fields/DictFieldRenderer.tsx";
 import {ApprovalFieldType} from "@/types/approval/approval-enums.ts";
 
 export interface ApprovalFormRendererProps {
@@ -23,6 +24,11 @@ export interface ApprovalFormRendererProps {
      * the viewer's form snapshot tab (M8).
      */
     readonly?: boolean;
+    /**
+     * Loader for DICT field options. Consumers supply a definition- or instance-scoped loader;
+     * scope is resolved server-side. Omitted in contexts with no DICT fields (options stay empty).
+     */
+    loadDictOptions?: DictOptionsLoader;
 }
 
 export interface ApprovalFormRendererRef {
@@ -102,7 +108,7 @@ function ApprovalFormRendererInner(
     props: ApprovalFormRendererProps,
     ref: React.Ref<ApprovalFormRendererRef>,
 ) {
-    const {fields, groups, initialValues, onValuesChange, readonly} = props;
+    const {fields, groups, initialValues, onValuesChange, readonly, loadDictOptions} = props;
     const {t} = useTranslation();
     const [form] = Form.useForm();
 
@@ -159,7 +165,7 @@ function ApprovalFormRendererInner(
             rules={buildRules(field, t)}
             valuePropName={field.type === ApprovalFieldType.BOOLEAN ? 'checked' : 'value'}
         >
-            {renderField({field})}
+            {renderField({field, loadDictOptions})}
         </Form.Item>
     );
 

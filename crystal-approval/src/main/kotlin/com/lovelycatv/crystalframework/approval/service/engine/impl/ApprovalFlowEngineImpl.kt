@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngin
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
@@ -26,6 +27,7 @@ class ApprovalFlowEngineImpl(
     private val recordService: ApprovalFlowRecordService,
     private val tokenService: ApprovalFlowTokenService,
     private val ccNotifier: ApprovalCcNotifier,
+    private val dictResolver: ApprovalDictResolver,
     private val snowIdGenerator: SnowIdGenerator,
     private val reactiveRedisService: ReactiveRedisService
 ) : ApprovalFlowEngine {
@@ -47,7 +49,8 @@ class ApprovalFlowEngineImpl(
         // Decision 5: server-side revalidation before persisting instance.formData. The
         // frontend's antd validation is a UX shortcut only — anyone can craft a raw HTTP
         // request, so the engine is the last line of defense.
-        val formDataErrors = ApprovalFormSchemaValidator.validateFormData(definition.formSchema, formData)
+        val dictAllowedCodes = resolveDictAllowedCodes(definition.formSchema, scope, scopeId)
+        val formDataErrors = ApprovalFormSchemaValidator.validateFormData(definition.formSchema, formData, dictAllowedCodes)
         if (formDataErrors.isNotEmpty()) {
             throw BusinessException("Invalid initiate form data: ${formDataErrors.joinToString("; ")}")
         }
@@ -136,12 +139,21 @@ class ApprovalFlowEngineImpl(
             // flow was initiated, even if the definition has been edited since.
             if (!formData.isNullOrBlank()) {
                 val node = nodeService.getByIdOrThrow(task.nodeId)
+                // Resolve against the instance's own scope; the snapshot schema is the binding one.
+                val instanceScope = ApprovalFlowScope.getById(instance.scope)
+                    ?: throw BusinessException("Unknown approval flow scope ${instance.scope}")
+                val dictAllowedCodes = resolveDictAllowedCodes(
+                    instance.formSchemaSnapshot,
+                    instanceScope,
+                    instance.scopeId,
+                )
                 val diffErrors = ApprovalFormSchemaValidator.validateTaskDiff(
                     schemaJson = instance.formSchemaSnapshot,
                     nodeOverlayJson = node.formSchema,
                     diffJson = formData,
                     isCcNode = node.getRealType() == ApprovalFlowNodeType.CC,
                     isApprovalNode = node.getRealType() == ApprovalFlowNodeType.APPROVAL,
+                    dictAllowedCodes = dictAllowedCodes,
                 )
                 if (diffErrors.isNotEmpty()) {
                     throw BusinessException("Invalid task form diff: ${diffErrors.joinToString("; ")}")
@@ -487,4 +499,23 @@ class ApprovalFlowEngineImpl(
             a.toString().compareTo(b.toString())
         }
     }
+
+    /**
+     * Resolve the live allowed dict codes for every DICT field, so the (pure) form validator can
+     * check selections against the current dictionary. Empty when the schema is blank / unparseable
+     * (the pure validator already tolerates those).
+     */
+    private suspend fun resolveDictAllowedCodes(
+        schemaJson: String?,
+        scope: ApprovalFlowScope,
+        scopeId: Long,
+    ): Map<String, Set<String>> {
+        if (schemaJson.isNullOrBlank()) return emptyMap()
+        val schema = runCatching { schemaJson.parseObject<ApprovalFormSchema>() }.getOrNull() ?: return emptyMap()
+        return dictResolver.resolveAllowedCodes(schema, scope.toResourceScope(), scopeId)
+    }
+
+    private fun ApprovalFlowScope.toResourceScope(): ResourceScope =
+        ResourceScope.getById(this.typeId)
+            ?: throw BusinessException("Approval flow scope ${this.typeId} has no matching ResourceScope")
 }

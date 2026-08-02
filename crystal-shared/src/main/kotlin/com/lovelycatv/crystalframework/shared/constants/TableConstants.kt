@@ -42,4 +42,5 @@ object TableConstants {
     const val TABLE_APPROVAL_FLOW_TASK = "approval_flow_task"
     const val TABLE_APPROVAL_FLOW_RECORD = "approval_flow_record"
     const val TABLE_STORAGE_PROVIDER_ROUTING_RULES = "storage_provider_routing_rules"
+    const val TABLE_USER_BAN_RECORDS = "user_ban_records"
 }

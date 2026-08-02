@@ -21,6 +21,12 @@ abstract class BaseEntity(
     @Column(value = "deleted_time")
     open var deletedTime: Long? = null
 ) : Persistable<Long> {
+    companion object {
+        const val COLUMN_ID = "id"
+        const val CREATED_TIME = "created_time"
+        const val MODIFIED_TIME = "modified_time"
+    }
+
     @Transient
     private var isNew = false
 

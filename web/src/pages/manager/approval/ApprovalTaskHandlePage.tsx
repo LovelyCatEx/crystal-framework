@@ -1,5 +1,5 @@
 import {Button, Empty, Input, message, Modal, Select, Spin, Tabs} from "antd";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
@@ -9,6 +9,7 @@ import {
     handleApprovalFlowTask,
     queryMyApprovalFlowTasks,
 } from "@/api/approval/approval-flow-task.api.ts";
+import {getApprovalInstanceDictOptions} from "@/api/approval/approval-flow-instance.api.ts";
 import type {ApprovalFlowTask} from "@/types/approval/approval-flow-task.types.ts";
 import {ApprovalFlowNodeType, ApprovalFlowTaskStatus, ResourceScope} from "@/types/approval/approval-enums.ts";
 import {getApprovalFlowTaskStatus} from "@/i18n/enum-helpers.ts";
@@ -63,6 +64,12 @@ export default function ApprovalTaskHandlePage() {
     const [formGroups, setFormGroups] = useState<Array<{key: string; label: string}> | undefined>(undefined);
     const [baselineFormData, setBaselineFormData] = useState<Record<string, unknown>>({});
     const formRef = useRef<ApprovalFormRendererRef | null>(null);
+
+    const handlingInstanceId = handlingTask?.instanceId;
+    const loadDictOptions = useCallback(async (fieldKey: string) => {
+        if (!handlingInstanceId) return [];
+        return (await getApprovalInstanceDictOptions(handlingInstanceId, fieldKey)).data ?? [];
+    }, [handlingInstanceId]);
 
     useEffect(() => {
         pageRef.current?.refreshData({resetPage: true});
@@ -277,6 +284,7 @@ export default function ApprovalTaskHandlePage() {
                             fields={mergedFields}
                             groups={formGroups}
                             initialValues={baselineFormData}
+                            loadDictOptions={loadDictOptions}
                         />
                     ) : null}
                     <span>{t('pages.approvalTaskHandle.modal.comment')}</span>
