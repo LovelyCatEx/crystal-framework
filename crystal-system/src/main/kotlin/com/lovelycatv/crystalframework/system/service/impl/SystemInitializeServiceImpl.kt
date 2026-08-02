@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemInitializeService
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.crystalframework.user.repository.UserRepository
 import com.lovelycatv.vertex.log.logger

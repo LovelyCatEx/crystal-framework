@@ -14,7 +14,7 @@ import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct

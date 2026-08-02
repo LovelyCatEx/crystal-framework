@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.system.config
 
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.sdk.system.settings.config.SystemSettingsConfigurer
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

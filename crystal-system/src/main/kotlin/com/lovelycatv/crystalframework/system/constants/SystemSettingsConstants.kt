@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.system.types
+package com.lovelycatv.crystalframework.system.constants
 
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
@@ -330,14 +330,14 @@ object SystemSettingsConstants {
             object Encrypt {
                 val ENABLE = SettingsItemDeclaration(
                     key = "security.api.encrypt.enabled",
-                    valueType =  SettingsItemValueType.BOOLEAN,
+                    valueType = SettingsItemValueType.BOOLEAN,
                     defaultValue = true.toString(),
                     sort = 1
                 )
 
                 val SCOPE = SettingsItemDeclaration(
                     key = "security.api.encrypt.scope",
-                    valueType =  SettingsItemValueType.ENUM_SINGLE,
+                    valueType = SettingsItemValueType.ENUM_SINGLE,
                     defaultValue = "ALL",
                     sort = 2,
                     enumValues = listOf("ALL", "ALL_ANNOTATED", "BY_ANNOTATED_LEVEL")
@@ -464,7 +464,7 @@ object SystemSettingsConstants {
             val USER_AVATAR = SettingsItemDeclaration(
                 key = "resource.visibility.userAvatar",
                 valueType = SettingsItemValueType.ENUM_SINGLE,
-                defaultValue = ResourceVisibility.AUTHENTICATED.name,
+                defaultValue = ResourceVisibility.PUBLIC.name,
                 sort = 0,
                 enumValues = VISIBILITY_ENUM_VALUES
             )
