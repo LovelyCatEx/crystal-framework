@@ -94,9 +94,11 @@ class UserServiceImpl(
         logger.info("User ${user.username} registered successfully, id=${user.id}, email=${user.email}")
     }
 
-    override suspend fun requestRegisterEmailConfirmationCode(email: String) {
+    override suspend fun requestRegisterEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService ->
             mailService.sendMailByType(
                 email,
@@ -135,9 +137,11 @@ class UserServiceImpl(
         logger.info("Password of user ${existingUser.username} / ${existingUser.email} has been reset")
     }
 
-    override suspend fun requestResetPasswordEmailConfirmationCode(email: String) {
+    override suspend fun requestResetPasswordEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService ->
             mailService.sendMail(
                 email,
@@ -174,9 +178,11 @@ class UserServiceImpl(
         logger.info("Email of user ${user.username} / ${user.email} has been reset from $oldEmail to $newEmail")
     }
 
-    override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String) {
+    override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService  ->
             mailService.sendMail(
                 email,

@@ -401,6 +401,43 @@ object SystemSettingsConstants {
                 sort = 7
             )
         }
+
+        object EmailCodeRateLimit {
+            val ENABLED = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1
+            )
+
+            val WINDOW_SECONDS = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.windowSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 3600.toString(),
+                sort = 2
+            )
+
+            val MAX_PER_IP = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxPerIp",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 10.toString(),
+                sort = 3
+            )
+
+            val MAX_PER_EMAIL = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxPerEmail",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 5.toString(),
+                sort = 4
+            )
+
+            val MAX_GLOBAL = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxGlobal",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 500.toString(),
+                sort = 5
+            )
+        }
     }
 
     object Module {

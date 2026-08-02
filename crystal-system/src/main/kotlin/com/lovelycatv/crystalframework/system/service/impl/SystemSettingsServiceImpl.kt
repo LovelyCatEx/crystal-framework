@@ -168,6 +168,13 @@ class SystemSettingsServiceImpl(
                 lockThreshold = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD)!!.toInt(),
                 lockBaseSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS)!!.toInt(),
                 lockMaxSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS)!!.toInt(),
+            ),
+            emailCodeRateLimit = SystemSettings.Security.EmailCodeRateLimit(
+                enabled = getSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED)!!,
+                windowSeconds = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS)!!.toInt(),
+                maxPerIp = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP)!!.toInt(),
+                maxPerEmail = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt(),
+                maxGlobal = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL)!!.toInt(),
             )
         )
     }
@@ -248,6 +255,11 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD, settings.security.loginRateLimit.lockThreshold.toString())
         setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS, settings.security.loginRateLimit.lockBaseSeconds.toString())
         setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS, settings.security.loginRateLimit.lockMaxSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED, settings.security.emailCodeRateLimit.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS, settings.security.emailCodeRateLimit.windowSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP, settings.security.emailCodeRateLimit.maxPerIp.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL, settings.security.emailCodeRateLimit.maxPerEmail.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL, settings.security.emailCodeRateLimit.maxGlobal.toString())
 
         setSettings(SystemSettingsConstants.OAuth.Github.ENABLED, settings.oauth.github.enabled.toString())
         setSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT, settings.oauth.github.useDefault?.toString())

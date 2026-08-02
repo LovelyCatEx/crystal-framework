@@ -6,16 +6,18 @@ import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.RateLimitContext
 import com.lovelycatv.crystalframework.shared.exception.TooManyRequestsException
+import com.lovelycatv.crystalframework.shared.service.ratelimit.RateLimitDimension
+import com.lovelycatv.crystalframework.shared.service.ratelimit.SlidingWindowRateLimiter
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class LoginRateLimitServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
+    private val slidingWindowRateLimiter: SlidingWindowRateLimiter,
     private val systemModuleClient: SystemModuleClient,
 ) : LoginRateLimitService {
     private val logger = logger()
@@ -23,39 +25,40 @@ class LoginRateLimitServiceImpl(
     override suspend fun checkAllowed(ip: String, account: String) {
         val config = resolveConfig() ?: return
 
-        val nowMs = System.currentTimeMillis()
-        val windowMs = config.windowSeconds.toLong() * 1000L
+        // Layer 1: exponential-backoff lockout (login-specific, driven by consecutive failures).
+        checkLockout(account)
 
-        val reply = try {
-            reactiveRedisService.executeScript(
-                script = LoginRateLimitConstants.CHECK_SCRIPT,
-                keys = listOf(
-                    RedisConstants.getLoginLockUntilKey(account),
-                    RedisConstants.getLoginRateLimitIpKey(ip),
-                    RedisConstants.getLoginRateLimitAccountKey(account),
-                ),
-                args = listOf(
-                    nowMs.toString(),
-                    windowMs.toString(),
-                    config.maxAttemptsPerIp.toString(),
-                    config.maxAttemptsPerAccount.toString(),
-                    UUID.randomUUID().toString(),
-                ),
-            ).awaitFirstOrNull()
+        // Layer 2: per-IP and per-account sliding windows via the shared limiter.
+        slidingWindowRateLimiter.checkAllowed(
+            windowSeconds = config.windowSeconds,
+            dimensions = listOf(
+                RateLimitDimension(RedisConstants.getLoginRateLimitIpKey(ip), config.maxAttemptsPerIp),
+                RateLimitDimension(RedisConstants.getLoginRateLimitAccountKey(account), config.maxAttemptsPerAccount),
+            ),
+            message = LoginRateLimitConstants.MESSAGE_TOO_MANY_ATTEMPTS,
+        )
+    }
+
+    /**
+     * Rejects the request while an active exponential-backoff lockout is in effect for [account].
+     * Fails open when the lockout marker cannot be read.
+     */
+    private suspend fun checkLockout(account: String) {
+        val lockUntilMs = try {
+            reactiveRedisService
+                .get<String>(RedisConstants.getLoginLockUntilKey(account))
+                .awaitFirstOrNull()
+                ?.toLongOrNull()
         } catch (e: Exception) {
-            // Fail open: never block logins because the limiter infrastructure is unavailable.
-            logger.warn("Login rate limit check failed, allowing request", e)
+            logger.warn("Login lockout check failed, allowing request", e)
             return
         } ?: return
 
-        val (status, retryAfterSeconds) = parseReply(reply)
-        when (status) {
-            LoginRateLimitConstants.STATUS_LOCKED -> throw TooManyRequestsException(
+        val nowMs = System.currentTimeMillis()
+        if (lockUntilMs > nowMs) {
+            val retryAfterSeconds = (lockUntilMs - nowMs + 999L) / 1000L
+            throw TooManyRequestsException(
                 LoginRateLimitConstants.MESSAGE_ACCOUNT_LOCKED,
-                RateLimitContext(retryAfterSeconds),
-            )
-            LoginRateLimitConstants.STATUS_WINDOW_EXCEEDED -> throw TooManyRequestsException(
-                LoginRateLimitConstants.MESSAGE_TOO_MANY_ATTEMPTS,
                 RateLimitContext(retryAfterSeconds),
             )
         }
@@ -107,12 +110,5 @@ class LoginRateLimitServiceImpl(
     private fun resolveConfig(): SystemSettings.Security.LoginRateLimit? {
         val loginRateLimit = systemModuleClient.getSystemSettings()?.security?.loginRateLimit ?: return null
         return if (loginRateLimit.enabled) loginRateLimit else null
-    }
-
-    private fun parseReply(reply: String): Pair<Int, Long> {
-        val parts = reply.split(":")
-        val status = parts.getOrNull(0)?.toIntOrNull() ?: LoginRateLimitConstants.STATUS_ALLOWED
-        val retryAfterSeconds = parts.getOrNull(1)?.toLongOrNull() ?: 0L
-        return status to retryAfterSeconds
     }
 }

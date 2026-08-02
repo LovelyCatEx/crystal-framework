@@ -10,6 +10,8 @@ interface EmailCodeAuthService {
 
     suspend fun withSendEmailCode(
         redisKey: String,
+        ip: String,
+        email: String,
         validMinutes: Long = 5,
         action: suspend (code: String, mailService: MailService) -> Unit
     )

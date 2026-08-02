@@ -54,4 +54,17 @@ object RedisConstants {
     fun getLoginLockFailureKey(account: String) = "$LOGIN_LOCK_FAILURE_PREFIX$account"
 
     fun getLoginLockUntilKey(account: String) = "$LOGIN_LOCK_UNTIL_PREFIX$account"
+
+    /** Sliding-window counter of email-code sends keyed by client IP. */
+    const val MAIL_CODE_RATE_LIMIT_IP_PREFIX = "mail:rl:ip:"
+
+    /** Sliding-window counter of email-code sends keyed by target email address. */
+    const val MAIL_CODE_RATE_LIMIT_EMAIL_PREFIX = "mail:rl:email:"
+
+    /** Single sliding-window counter of all email-code sends, guarding against spread-out mail bombing. */
+    const val MAIL_CODE_RATE_LIMIT_GLOBAL_KEY = "mail:rl:global"
+
+    fun getMailCodeRateLimitIpKey(ip: String) = "$MAIL_CODE_RATE_LIMIT_IP_PREFIX$ip"
+
+    fun getMailCodeRateLimitEmailKey(email: String) = "$MAIL_CODE_RATE_LIMIT_EMAIL_PREFIX$email"
 }

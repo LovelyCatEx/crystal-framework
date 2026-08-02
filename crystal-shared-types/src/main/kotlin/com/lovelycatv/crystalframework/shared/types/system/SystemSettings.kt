@@ -64,6 +64,7 @@ data class SystemSettings(
     data class Security(
         val api: Api,
         val loginRateLimit: LoginRateLimit,
+        val emailCodeRateLimit: EmailCodeRateLimit,
     ) {
         data class Api(
             val encrypt: Encrypt
@@ -83,6 +84,14 @@ data class SystemSettings(
             val lockThreshold: Int,
             val lockBaseSeconds: Int,
             val lockMaxSeconds: Int,
+        )
+
+        data class EmailCodeRateLimit(
+            val enabled: Boolean,
+            val windowSeconds: Int,
+            val maxPerIp: Int,
+            val maxPerEmail: Int,
+            val maxGlobal: Int,
         )
     }
 

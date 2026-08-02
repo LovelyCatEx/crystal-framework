@@ -17,17 +17,17 @@ interface UserService : CachedBaseService<UserRepository, UserEntity> {
         emailConfirmationCode: String
     )
 
-    suspend fun requestRegisterEmailConfirmationCode(email: String)
+    suspend fun requestRegisterEmailConfirmationCode(email: String, ip: String)
 
     @Transactional(rollbackFor = [Exception::class])
     suspend fun resetPassword(email: String, emailCode: String, newPassword: String)
 
-    suspend fun requestResetPasswordEmailConfirmationCode(email: String)
+    suspend fun requestResetPasswordEmailConfirmationCode(email: String, ip: String)
 
     @Transactional(rollbackFor = [Exception::class])
     suspend fun resetEmailAddress(userId: Long, emailCode: String, newEmail: String)
 
-    suspend fun requestResetEmailAddressEmailConfirmationCode(email: String)
+    suspend fun requestResetEmailAddressEmailConfirmationCode(email: String, ip: String)
 
     suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
 
