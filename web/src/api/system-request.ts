@@ -148,7 +148,7 @@ function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', he
 }
 
 export async function doGet<T>(url: string, query: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
-    console.log(`[G] <== ${url}`, query);
+    if (import.meta.env.DEV) console.log(`[G] <== ${url}`, query);
     const rawResult = await get<ApiResponse<T>>(
         url,
         query,
@@ -156,19 +156,19 @@ export async function doGet<T>(url: string, query: object = {}, headers: object 
     );
     await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
-    console.log(`[G] ==> ${url}`, rawResult.data);
+    if (import.meta.env.DEV) console.log(`[G] ==> ${url}`, rawResult.data);
     return await handleApiResponse(result);
 }
 
 export async function doPost<T>(url: string, body: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
-    console.log(`[P] <== ${url}`, body);
+    if (import.meta.env.DEV) console.log(`[P] <== ${url}`, body);
     const rawResult = await post<ApiResponse<T>>(
         url,
         body,
         preProcessHeaders('POST', headers)
     );
     await extractAesKeyFromResponse(rawResult);
-    console.log(`[P] ==> ${url}`, rawResult.data);
+    if (import.meta.env.DEV) console.log(`[P] ==> ${url}`, rawResult.data);
     const result = rawResult.data;
     return await handleApiResponse(result);
 }
