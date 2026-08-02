@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.user.constants.CredentialAuthConstants
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
@@ -272,10 +273,17 @@ class UserServiceImpl(
         val user = this.getRepository()
             .findByUsernameOrEmail(username, username)
             .awaitFirstOrNull()
-            ?: throw BusinessException("user $username not found")
+
+        // Never let the response reveal whether the account exists: the absent-account branch burns an
+        // equivalent bcrypt comparison, and both failure branches throw the SAME message. This blocks
+        // username enumeration and credential probing against this unauthenticated endpoint.
+        if (user == null) {
+            passwordEncoder.matches(password, CredentialAuthConstants.DUMMY_PASSWORD_HASH)
+            throw BusinessException(CredentialAuthConstants.MESSAGE_INVALID_CREDENTIALS)
+        }
 
         if (!passwordEncoder.matches(password, user.password)) {
-            throw BusinessException("incorrect password")
+            throw BusinessException(CredentialAuthConstants.MESSAGE_INVALID_CREDENTIALS)
         }
 
         oAuthAccountService.bindUser(oauthAccountId, user.id)
