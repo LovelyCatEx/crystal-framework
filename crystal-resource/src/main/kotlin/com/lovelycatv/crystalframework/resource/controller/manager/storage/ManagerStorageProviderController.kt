@@ -6,7 +6,7 @@ import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.M
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerUpdateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.repository.StorageProviderRepository
-import com.lovelycatv.crystalframework.resource.service.StorageProviderManagerService
+import com.lovelycatv.crystalframework.resource.service.manager.StorageProviderManagerService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix

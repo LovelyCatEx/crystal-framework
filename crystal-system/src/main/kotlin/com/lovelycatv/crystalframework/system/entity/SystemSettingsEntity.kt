@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.system.entity
 
+import com.lovelycatv.crystalframework.shared.annotations.NotQueryable
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -10,6 +11,7 @@ class SystemSettingsEntity(
     @Column(value = "config_key")
     var configKey: String = "",
     @Column(value = "config_value")
+    @field:NotQueryable
     var configValue: String? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),

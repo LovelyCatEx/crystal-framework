@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.mail.entity
 
+import com.lovelycatv.crystalframework.shared.annotations.NotQueryable
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -14,6 +15,7 @@ class MailSendLogEntity(
     @Column("subject")
     val subject: String = "",
     @Column("content")
+    @field:NotQueryable
     val content: String = "",
     @Column("success")
     val success: Boolean = true,

@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.tenant.entity
 
+import com.lovelycatv.crystalframework.shared.annotations.NotQueryable
 import com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -17,6 +18,7 @@ class TenantInvitationEntity(
     @get:JsonSerialize(using = ToStringSerializer::class)
     var departmentId: Long? = null,
     @Column(value = "invitation_code")
+    @field:NotQueryable
     var invitationCode: String = "",
     @Column(value = "invitation_count")
     var invitationCount: Int = 0,
