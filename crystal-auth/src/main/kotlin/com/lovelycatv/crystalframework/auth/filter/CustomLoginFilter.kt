@@ -13,6 +13,7 @@ import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactor.mono
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -60,40 +61,42 @@ class CustomLoginFilter(
         setAuthenticationSuccessHandler { exchange, authentication ->
             val loggedUser = authentication.principal as UserEntity
 
-            val data = userAuthorizationService.buildLoginSuccessResponse(loggedUser)
+            mono {
+                userAuthorizationService.buildLoginSuccessResponse(loggedUser)
+            }.flatMap { data ->
+                logger.info("User ${loggedUser.username}#${loggedUser.id} is logged in with password")
 
-            logger.info("User ${loggedUser.username}#${loggedUser.id} is logged in with password")
+                coroutineScope.launch {
+                    userAuthorizationService.clearUserAuthorityCache(loggedUser.id)
+                }
 
-            coroutineScope.launch {
-                userAuthorizationService.clearUserAuthorityCache(loggedUser.id)
-            }
+                val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
+                val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
 
-            val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
-            val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
-
-            eventPublisher.publishEvent(
-                UserLoginEvent(
-                    source = this,
-                    userId = loggedUser.id,
-                    username = loggedUser.username,
-                    tenantId = loggedUser.getAuthenticatedTenant()?.id,
-                    loginMethod = LoginMethod.PASSWORD.code,
-                    oauth2Type = null,
-                    oauth2Username = null,
-                    oauth2AccountId = null,
-                    success = true,
-                    errorMessage = null,
-                    remoteIp = remoteIp,
-                    userAgent = userAgent
+                eventPublisher.publishEvent(
+                    UserLoginEvent(
+                        source = this,
+                        userId = loggedUser.id,
+                        username = loggedUser.username,
+                        tenantId = loggedUser.getAuthenticatedTenant()?.id,
+                        loginMethod = LoginMethod.PASSWORD.code,
+                        oauth2Type = null,
+                        oauth2Username = null,
+                        oauth2AccountId = null,
+                        success = true,
+                        errorMessage = null,
+                        remoteIp = remoteIp,
+                        userAgent = userAgent
+                    )
                 )
-            )
 
-            exchange.exchange.response.statusCode = HttpStatus.OK
-            exchange.exchange.response.writeWith(
-                exchange.exchange.response.bufferFactory().wrap(
-                    ApiResponse.success(data).toJSONString().toByteArray()
-                ).toMono()
-            )
+                exchange.exchange.response.statusCode = HttpStatus.OK
+                exchange.exchange.response.writeWith(
+                    exchange.exchange.response.bufferFactory().wrap(
+                        ApiResponse.success(data).toJSONString().toByteArray()
+                    ).toMono()
+                )
+            }
         }
 
         setAuthenticationFailureHandler { exchange, exception ->
