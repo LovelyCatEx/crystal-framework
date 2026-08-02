@@ -37,7 +37,10 @@ interface BaseManagerService<
     /**
      * Unified query method. All filtering is done via [QueryNode] criteria.
      *
-     * - If [dto.id] is set → exact match on id (single result).
+     * - If [dto.id] is set → exact match on id, **AND-ed with** the isolation criteria produced by
+     *   [buildQueryCriteria] (tenant / scope filters). This closes the cross-tenant IDOR where an
+     *   id lookup would otherwise bypass [buildQueryCriteria] entirely and return any entity by id
+     *   regardless of the caller's tenant / scope.
      * - If [dto.query] is set → build criteria from the query tree.
      * - Otherwise → no filter, simple pagination.
      */
@@ -46,20 +49,14 @@ interface BaseManagerService<
         val offset = (dto.page - 1) * dto.pageSize
         val template = getEntityTemplate()
 
-        if (dto.id != null) {
-            // Exact id match — use cached getByIdOrNull
-            val e = this.getByIdOrNull(dto.id!!)
-            return PaginatedResponseData(
-                page = dto.page,
-                pageSize = dto.pageSize,
-                total = if (e != null) 1 else 0,
-                totalPages = if (e != null) 1 else 0,
-                records = if (e != null) listOf(e) else emptyList()
-            )
+        // Always apply the isolation criteria (tenant / scope) from buildQueryCriteria. When an id
+        // is supplied, AND it onto that criteria so the id lookup stays scoped to the caller's
+        // tenant / scope instead of short-circuiting past the filter.
+        val criteria: Criteria = buildQueryCriteria(dto).let { isolation ->
+            val id = dto.id ?: return@let isolation
+            val idCriteria = Criteria.where(BaseEntity.COLUMN_ID).`is`(id)
+            if (isolation.isEmpty) idCriteria else isolation.and(idCriteria)
         }
-
-        // Build criteria
-        val criteria: Criteria = buildQueryCriteria(dto)
 
         val baseQuery = Query.query(criteria)
             .sort(Sort.by(Sort.Direction.DESC, "created_time"))

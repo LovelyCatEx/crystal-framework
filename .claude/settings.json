@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "WebSearch",
+      "WebFetch",
       "Bash(pnpm build *)",
       "Bash(mkdir *)",
       "Bash(npx tsc *)",
