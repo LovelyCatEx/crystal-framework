@@ -168,6 +168,11 @@ class UserServiceImpl(
             emailCode
         )
 
+        val existingOwner = this.getRepository().findByEmail(newEmail).awaitFirstOrNull()
+        if (existingOwner != null && existingOwner.id != userId) {
+            throw BusinessException("Email address is already in use")
+        }
+
         withUpdateEntityContext(user) {
             this.getRepository()
                 .save(user.apply { email = newEmail })
