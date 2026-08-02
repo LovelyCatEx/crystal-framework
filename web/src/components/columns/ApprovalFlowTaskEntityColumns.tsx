@@ -41,7 +41,7 @@ const FlowDisplay: React.FC<{ instanceId: string }> = ({instanceId}) => {
     }
 
     return (
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col items-start gap-0.5">
             <span>{name ?? t('components.columns.approvalFlowTask.unknownFlow')}</span>
             <CopyableToolTip title={instanceId}>
                 <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">

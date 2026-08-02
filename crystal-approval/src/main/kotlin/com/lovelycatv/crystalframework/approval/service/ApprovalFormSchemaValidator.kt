@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.approval.types.ApprovalFieldSchema
 import com.lovelycatv.crystalframework.approval.types.ApprovalFieldType
 import com.lovelycatv.crystalframework.approval.types.ApprovalFormSchema
 import com.lovelycatv.crystalframework.approval.types.NodeFormOverlay
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 
 /**
@@ -61,6 +62,7 @@ object ApprovalFormSchemaValidator {
                 errors += "Field '${field.key}' has blank label"
             }
             errors += validateFieldOptions(field)
+            errors += validateDictBinding(field)
             errors += validateFieldValidation(field)
             if (field.groupKey != null && field.groupKey !in groupKeys) {
                 errors += "Field '${field.key}' references unknown group '${field.groupKey}'"
@@ -75,7 +77,11 @@ object ApprovalFormSchemaValidator {
      * formData is treated as `{}` — an entirely-empty payload is legal iff every required
      * visible field is either optional or has a default.
      */
-    fun validateFormData(schemaJson: String?, formDataJson: String?): List<String> {
+    fun validateFormData(
+        schemaJson: String?,
+        formDataJson: String?,
+        dictAllowedCodes: Map<String, Set<String>> = emptyMap(),
+    ): List<String> {
         val schema = parseSchemaOrNull(schemaJson) ?: return emptyList()
         val data = parseDataOrEmpty(formDataJson)
 
@@ -96,7 +102,7 @@ object ApprovalFormSchemaValidator {
                 continue
             }
             if (value != null) {
-                errors += validateValueAgainstField(field, value)
+                errors += validateValueAgainstField(field, value, dictAllowedCodes[field.key].orEmpty())
             }
         }
 
@@ -120,6 +126,7 @@ object ApprovalFormSchemaValidator {
         diffJson: String?,
         isCcNode: Boolean,
         isApprovalNode: Boolean,
+        dictAllowedCodes: Map<String, Set<String>> = emptyMap(),
     ): List<String> {
         if (diffJson.isNullOrBlank()) return emptyList()
 
@@ -154,7 +161,7 @@ object ApprovalFormSchemaValidator {
                 continue
             }
             if (value != null) {
-                errors += validateValueAgainstField(field, value)
+                errors += validateValueAgainstField(field, value, dictAllowedCodes[key].orEmpty())
             }
         }
 
@@ -220,6 +227,27 @@ object ApprovalFormSchemaValidator {
         return errors
     }
 
+    /**
+     * Structural check for DICT fields (the cross-scope legality + dict-existence check that needs
+     * the database lives in [com.lovelycatv.crystalframework.approval.service.ApprovalDictResolver]).
+     * A DICT field must declare a `dictCode` and must NOT carry static `options` — its candidate
+     * values come from the dictionary, not the schema.
+     */
+    private fun validateDictBinding(field: ApprovalFieldSchema): List<String> {
+        if (field.type != ApprovalFieldType.DICT) return emptyList()
+        val errors = mutableListOf<String>()
+        if (field.dictCode.isNullOrBlank()) {
+            errors += "Field '${field.key}' (dict) must declare a non-blank dictCode"
+        }
+        if (!field.options.isNullOrEmpty()) {
+            errors += "Field '${field.key}' (dict) must not declare static options; candidates come from the dictionary"
+        }
+        if (field.dictScope != null && ResourceScope.getById(field.dictScope) == null) {
+            errors += "Field '${field.key}' (dict) has invalid dictScope: ${field.dictScope}"
+        }
+        return errors
+    }
+
     private fun validateFieldValidation(field: ApprovalFieldSchema): List<String> {
         val v = field.validation ?: return emptyList()
         val errors = mutableListOf<String>()
@@ -248,7 +276,11 @@ object ApprovalFormSchemaValidator {
      * arrive as `Int` after deserialization, string dates may come as `String`, etc). The
      * strict guarantee is: no wildly-typed value slips through to the engine or downstream nodes.
      */
-    private fun validateValueAgainstField(field: ApprovalFieldSchema, value: Any): List<String> {
+    private fun validateValueAgainstField(
+        field: ApprovalFieldSchema,
+        value: Any,
+        dictAllowedCodes: Set<String> = emptySet(),
+    ): List<String> {
         val errors = mutableListOf<String>()
         when (field.type) {
             ApprovalFieldType.TEXT, ApprovalFieldType.TEXTAREA -> {
@@ -316,6 +348,31 @@ object ApprovalFormSchemaValidator {
             }
             ApprovalFieldType.DATE, ApprovalFieldType.DATETIME -> {
                 if (value !is String) errors += "Field '${field.key}' expects ISO date string but got ${value::class.simpleName}"
+            }
+            ApprovalFieldType.DICT -> {
+                // Candidate codes are the caller-injected live dictionary items (kept out of the
+                // pure validator). validation.multiple switches single value vs array, mirroring
+                // SELECT / CHECKBOX; minCount / maxCount reused for the multiple case.
+                val multiple = field.validation?.multiple == true
+                if (multiple) {
+                    val list = value as? List<*>
+                    if (list == null) {
+                        errors += "Field '${field.key}' (dict, multiple) expects array"
+                    } else {
+                        for (item in list) {
+                            if (item !is String || item !in dictAllowedCodes) {
+                                errors += "Field '${field.key}' has invalid dict selection: '$item'"
+                            }
+                        }
+                        val v = field.validation
+                        if (v?.minCount != null && list.size < v.minCount) errors += "Field '${field.key}' has too few selections"
+                        if (v?.maxCount != null && list.size > v.maxCount) errors += "Field '${field.key}' has too many selections"
+                    }
+                } else {
+                    if (value !is String || value !in dictAllowedCodes) {
+                        errors += "Field '${field.key}' has invalid dict selection: '$value'"
+                    }
+                }
             }
         }
         return errors

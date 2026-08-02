@@ -7,6 +7,7 @@ import type {
 import {doGet, doPost} from "@/api/system-request.ts";
 import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
 import type {ApprovalFlowInstanceDetailsVO} from "@/types/approval/approval-flow-instance-details.types.ts";
+import type {ApprovalFieldOption} from "@/types/approval/approval-form-schema.types.ts";
 
 export interface ManagerCreateApprovalFlowInstanceDTO {
     scope: number;
@@ -78,6 +79,19 @@ export async function getApprovalFlowInstanceDetails(instanceId: string) {
     return doGet<ApprovalFlowInstanceDetailsVO>(
         '/api/manager/approval-flow-instance/details-by-id',
         {instanceId},
+    );
+}
+
+/**
+ * Live selectable options of a DICT form field for an in-flight / historical instance, resolved
+ * against the instance's snapshot schema + own scope. Used by the handle form and read-only viewer.
+ * Backend: `ManagerApprovalFlowInstanceController.dictOptions` (GET, @RequestParam instanceId +
+ * fieldKey), returns `List<ApprovalDictOptionVO>` ({value,label}).
+ */
+export async function getApprovalInstanceDictOptions(instanceId: string, fieldKey: string) {
+    return doGet<ApprovalFieldOption[]>(
+        '/api/manager/approval-flow-instance/dict-options',
+        {instanceId, fieldKey},
     );
 }
 

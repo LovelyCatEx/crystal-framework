@@ -4,6 +4,7 @@ import type {
     ApprovalFlowDefinition,
     ApprovalFlowDefinitionDetailsVO
 } from "@/types/approval/approval-flow-definition.types.ts";
+import type {ApprovalFieldOption} from "@/types/approval/approval-form-schema.types.ts";
 import {doGet, doPost} from "@/api/system-request.ts";
 
 export interface ManagerCreateApprovalFlowDefinitionDTO {
@@ -43,6 +44,18 @@ export const ApprovalFlowDefinitionManagerController = new ApprovalFlowDefinitio
 
 export async function getApprovalFlowDefinitionDetails(definitionId: string) {
     return doGet<ApprovalFlowDefinitionDetailsVO>("/api/manager/approval-flow-definition/details-by-id", { definitionId: definitionId })
+}
+
+/**
+ * Live selectable options of a DICT form field, resolved from the definition's own scope + schema.
+ * Used by the initiate form renderer. Backend: `ManagerApprovalFlowDefinitionController.dictOptions`
+ * (GET, @RequestParam definitionId + fieldKey), returns `List<ApprovalDictOptionVO>` ({value,label}).
+ */
+export async function getApprovalDefinitionDictOptions(definitionId: string, fieldKey: string) {
+    return doGet<ApprovalFieldOption[]>(
+        "/api/manager/approval-flow-definition/dict-options",
+        {definitionId, fieldKey},
+    );
 }
 
 export interface GraphNodeDTO {

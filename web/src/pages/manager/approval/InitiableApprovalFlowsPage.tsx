@@ -1,11 +1,12 @@
 import {Empty, message, Modal, Spin, Tabs} from "antd";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {useApprovalFlowDefinitionTableColumns} from "@/components/columns/ApprovalFlowDefinitionEntityColumns.tsx";
 import {
     ApprovalFlowDefinitionManagerController,
+    getApprovalDefinitionDictOptions,
     getApprovalFlowDefinitionDetails,
 } from "@/api/approval/approval-flow-definition.api.ts";
 import {startApprovalFlow} from "@/api/approval/approval-flow-instance.api.ts";
@@ -29,12 +30,11 @@ const SYSTEM_SCOPE_ID = '0';
  * one outgoing edge), so the initiator's field visibility is dictated by that successor.
  * Returns null if the graph is malformed or START has no successor found in the node list.
  */
-function resolveInitiateNode(nodes: ApprovalFlowNode[], edges: Array<{sourceNodeId: string; targetNodeId: string}>): ApprovalFlowNode | null {
-    const startNode = nodes.find(n => n.type === ApprovalFlowNodeType.START);
-    if (!startNode) return null;
-    const outEdge = edges.find(e => e.sourceNodeId === startNode.id);
-    if (!outEdge) return null;
-    return nodes.find(n => n.id === outEdge.targetNodeId) ?? null;
+function resolveInitiateNode(nodes: ApprovalFlowNode[]): ApprovalFlowNode | null {
+    // The initiate form belongs to the applicant, so it is driven by the START node's own overlay —
+    // never by whatever node the START happens to connect to (a downstream APPROVAL node would
+    // otherwise lock every field via the approval-node readonly default).
+    return nodes.find(n => n.type === ApprovalFlowNodeType.START) ?? null;
 }
 
 export default function InitiableApprovalFlowsPage() {
@@ -60,6 +60,11 @@ export default function InitiableApprovalFlowsPage() {
     const [formGroups, setFormGroups] = useState<Array<{key: string; label: string}> | undefined>(undefined);
     const formRef = useRef<ApprovalFormRendererRef | null>(null);
 
+    const loadDictOptions = useCallback(async (fieldKey: string) => {
+        if (!initiatingDefinition) return [];
+        return (await getApprovalDefinitionDictOptions(initiatingDefinition.id, fieldKey)).data ?? [];
+    }, [initiatingDefinition]);
+
     useEffect(() => {
         if (!initiatingDefinition) {
             setMergedFields(null);
@@ -77,7 +82,7 @@ export default function InitiableApprovalFlowsPage() {
             try {
                 const resp = await getApprovalFlowDefinitionDetails(initiatingDefinition.id);
                 const details = resp.data;
-                const initiateNode: ApprovalFlowNode | null = resolveInitiateNode(details?.nodes ?? [], details?.edges ?? []);
+                const initiateNode: ApprovalFlowNode | null = resolveInitiateNode(details?.nodes ?? []);
                 const overlay = parseNodeOverlay(initiateNode?.formSchema ?? null);
                 const merged = mergeFieldOverrides(schema, overlay, {
                     nodeType: initiateNode?.type ?? ApprovalFlowNodeType.START,
@@ -233,6 +238,7 @@ export default function InitiableApprovalFlowsPage() {
                         ref={formRef}
                         fields={mergedFields}
                         groups={formGroups}
+                        loadDictOptions={loadDictOptions}
                     />
                 ) : (
                     <Empty description={t('pages.initiableApprovalFlows.modal.formPlaceholder')}/>

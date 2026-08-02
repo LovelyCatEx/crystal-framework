@@ -20,6 +20,12 @@ class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
     val getUserAuthorities: suspend (userId: Long, tenantId: Long?, tenantMemberId: Long?) -> Collection<GrantedAuthority>,
     val getJWTSignKey: () -> String,
+    /**
+     * Throws [UnauthorizedException] when the token (identified by [userId] and its [tokenIssuedAt]
+     * epoch-millis) has been force-logged-out. Invoked before authorities are resolved so a revoked
+     * token never reaches the RBAC layer.
+     */
+    val assertNotForceLoggedOut: suspend (userId: Long, tokenIssuedAt: Long?) -> Unit,
 ) : WebFilter {
     private val logger = logger()
 
@@ -91,7 +97,10 @@ class CustomAuthFilter(
                 session.attributes[SessionConstants.AUDIT_TENANT_ID] = tenantId ?: 0L
                 session.attributes[SessionConstants.AUDIT_TENANT_MEMBER_ID] = tenantMemberId ?: 0L
 
+                val tokenIssuedAt = claims.issuedAt?.time
+
                 mono {
+                    assertNotForceLoggedOut.invoke(userId, tokenIssuedAt)
                     getUserAuthorities.invoke(userId, tenantId, tenantMemberId)
                 }.flatMap {
                     val token = UsernamePasswordAuthenticationToken(

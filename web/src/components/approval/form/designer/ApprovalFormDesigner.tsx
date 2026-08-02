@@ -25,6 +25,10 @@ export interface ApprovalFormDesignerProps {
      * `ApprovalFlowDefinitionManagerController.update({ id, formSchema })` (decision 3).
      */
     onSchemaChange: (schema: ApprovalFormSchema) => void;
+    /** Owning flow definition scope (`ResourceScope` typeId) — drives the DICT dict-type picker. */
+    scope: number;
+    /** Owning flow definition scopeId (tenantId for TENANT scope). */
+    scopeId: string;
     /**
      * Optional right-hand-side content in the header row (e.g. a Save button). Placed inline
      * with the title/subtitle so parents don't need a separate row for their action affordance.
@@ -62,7 +66,7 @@ function computeInvalidKeys(fields: ApprovalFieldSchema[]): Set<string> {
 }
 
 export function ApprovalFormDesigner(props: ApprovalFormDesignerProps) {
-    const {schema, selectedKey, onSelectedKeyChange, onSchemaChange, headerRight} = props;
+    const {schema, selectedKey, onSelectedKeyChange, onSchemaChange, scope, scopeId, headerRight} = props;
     const {t} = useTranslation();
 
     const effectiveSchema: ApprovalFormSchema = schema ?? {
@@ -152,6 +156,8 @@ export function ApprovalFormDesigner(props: ApprovalFormDesignerProps) {
                     field={selectedField}
                     allFields={effectiveSchema.fields}
                     groups={effectiveSchema.groups}
+                    scope={scope}
+                    scopeId={scopeId}
                     onChange={(updated) => handleFieldChange(updated, selectedField.key)}
                 />
             ) : (

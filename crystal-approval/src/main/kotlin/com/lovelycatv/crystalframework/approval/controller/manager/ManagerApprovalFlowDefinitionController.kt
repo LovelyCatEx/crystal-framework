@@ -7,23 +7,18 @@ import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerDe
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerReadApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowGraphDTO
+import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalDictOptionVO
 import com.lovelycatv.crystalframework.approval.controller.manager.vo.ApprovalFlowDefinitionDetailsVO
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowDefinitionEntity
 import com.lovelycatv.crystalframework.approval.repository.ApprovalFlowDefinitionRepository
+import com.lovelycatv.crystalframework.approval.service.ApprovalDictResolver
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowEdgeManagerService
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowNodeManagerService
-import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
-import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
-import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
-import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
-import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
-import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
@@ -43,6 +38,7 @@ class ManagerApprovalFlowDefinitionController(
     managerService: ApprovalFlowDefinitionManagerService,
     private val approvalFlowNodeManagerService: ApprovalFlowNodeManagerService,
     private val approvalFlowEdgeManagerService: ApprovalFlowEdgeManagerService,
+    private val approvalDictResolver: ApprovalDictResolver,
 ) : StandardScopedManagerController<
         ApprovalFlowDefinitionManagerService,
         ApprovalFlowDefinitionRepository,
@@ -53,24 +49,7 @@ class ManagerApprovalFlowDefinitionController(
         ManagerDeleteApprovalFlowDefinitionDTO
 >(
     managerService,
-    permissions = PermissionMatrix(
-        superCreate = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_CREATE.name,
-        superRead = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_READ.name,
-        superUpdate = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_UPDATE.name,
-        superDelete = SystemPermission.ACTION_X_APPROVAL_FLOW_DEFINITION_DELETE.name,
-        systemCreate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_CREATE.name,
-        systemRead = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_READ.name,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_UPDATE.name,
-        systemDelete = SystemPermission.ACTION_SYSTEM_APPROVAL_FLOW_DEFINITION_DELETE.name,
-        tenantAdminCreate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_CREATE.name,
-        tenantAdminRead = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_READ.name,
-        tenantAdminUpdate = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_UPDATE.name,
-        tenantAdminDelete = SystemPermission.ACTION_TENANT_APPROVAL_FLOW_DEFINITION_DELETE.name,
-        tenantPemCreate = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_CREATE.name,
-        tenantPemRead = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_READ.name,
-        tenantPemUpdate = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_UPDATE.name,
-        tenantPemDelete = TenantPermission.ACTION_APPROVAL_FLOW_DEFINITION_DELETE.name,
-    ),
+    permissions = ApprovalManagerPermissionMatrices.DEFINITION,
 ) {
     @Audit(
         action = AuditAction.UPDATE,
@@ -86,18 +65,7 @@ class ManagerApprovalFlowDefinitionController(
     ): ApiResponse<*> {
         val definition = managerService.getByIdOrNull(dto.definitionId)
             ?: throw BusinessException("Definition not found")
-        val resolvedScope = resolveScope(definition.scope)
-        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
-            throw ForbiddenException(context = ForbiddenContext(
-                reason = ForbiddenReason.MISSING_PERMISSION,
-                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.UPDATE)
-                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
-                scope = resolvedScope,
-            ))
-        }
-        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.UPDATE, userAuthentication)) {
-            throw UnauthorizedException()
-        }
+        assertAccess(resolveScope(definition.scope), definition.scopeId, ScopedOperation.UPDATE, userAuthentication)
         val errors = managerService.updateGraph(dto)
         return ApiResponse.success(mapOf("success" to errors.isEmpty(), "errors" to errors))
     }
@@ -115,18 +83,7 @@ class ManagerApprovalFlowDefinitionController(
     ): ApiResponse<*> {
         val definition = managerService.getByIdOrNull(definitionId)
             ?: throw BusinessException("Definition not found")
-        val resolvedScope = resolveScope(definition.scope)
-        if (!checkPermission(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw ForbiddenException(context = ForbiddenContext(
-                reason = ForbiddenReason.MISSING_PERMISSION,
-                requiredPermissions = permissions?.layersFor(resolvedScope, ScopedOperation.READ)
-                    ?.filter { it != PermissionMatrix.NEVER_GRANTED }?.toList() ?: emptyList(),
-                scope = resolvedScope,
-            ))
-        }
-        if (!checkOwnership(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)) {
-            throw UnauthorizedException()
-        }
+        assertAccess(resolveScope(definition.scope), definition.scopeId, ScopedOperation.READ, userAuthentication)
 
         return ApiResponse.success(
             ApprovalFlowDefinitionDetailsVO(
@@ -135,5 +92,27 @@ class ManagerApprovalFlowDefinitionController(
                 edges = approvalFlowEdgeManagerService.getEdgesByDefinitionsIdAndVersion(definition.id, definition.currentVersion)
             )
         )
+    }
+
+    /**
+     * Real-time selectable options for a DICT form field, used by the initiate-form renderer. The
+     * scope is always taken from the server-side definition entity (never from the client), so it
+     * cannot be tricked into reading another tenant's dictionary. Authorization reuses the base
+     * controller's [assertAccess] with the definition's own resolved scope and READ operation.
+     */
+    @GetMapping("/dict-options")
+    suspend fun dictOptions(
+        userAuthentication: UserAuthentication,
+        @RequestParam definitionId: Long,
+        @RequestParam fieldKey: String,
+    ): ApiResponse<List<ApprovalDictOptionVO>> {
+        val definition = managerService.getByIdOrNull(definitionId)
+            ?: throw BusinessException("Definition not found")
+        val resolvedScope = resolveScope(definition.scope)
+        assertAccess(resolvedScope, definition.scopeId, ScopedOperation.READ, userAuthentication)
+        val options = approvalDictResolver
+            .resolveItemsForField(definition.formSchema, fieldKey, resolvedScope, definition.scopeId)
+            .map { ApprovalDictOptionVO(value = it.value, label = it.label) }
+        return ApiResponse.success(options)
     }
 }

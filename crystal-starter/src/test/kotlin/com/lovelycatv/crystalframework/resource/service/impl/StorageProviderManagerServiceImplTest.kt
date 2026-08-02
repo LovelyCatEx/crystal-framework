@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.CrystalFrameworkApplicationTests
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerCreateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerUpdateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
-import com.lovelycatv.crystalframework.resource.service.StorageProviderManagerService
+import com.lovelycatv.crystalframework.resource.service.manager.StorageProviderManagerService
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.utils.toPrettierJSONString
 import kotlin.test.assertNotNull

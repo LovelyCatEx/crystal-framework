@@ -1,5 +1,6 @@
 import {Tag} from "antd";
 import {useTranslation} from "react-i18next";
+import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 import {getApprovalFlowDefinitionStatus} from "@/i18n/enum-helpers.ts";
 import {ApprovalFlowDefinitionStatus} from "@/types/approval/approval-flow-definition.types.ts";
 import type {ApprovalFlowDefinition} from "@/types/approval/approval-flow-definition.types.ts";
@@ -13,7 +14,16 @@ export function useApprovalFlowDefinitionTableColumns(): EntityTableColumns<Appr
             title: t('components.columns.approvalFlowDefinition.name'),
             dataIndex: "name",
             key: "name",
-            render: (_: unknown, row: ApprovalFlowDefinition) => row.name
+            render: (_: unknown, row: ApprovalFlowDefinition) => (
+                <div className="flex flex-col items-start gap-0.5">
+                    <span>{row.name}</span>
+                    <CopyableToolTip title={row.id}>
+                        <Tag color="purple" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">
+                            {t('components.columns.approvalFlowDefinition.definitionId')}: {row.id}
+                        </Tag>
+                    </CopyableToolTip>
+                </div>
+            )
         },
         {
             title: t('components.columns.approvalFlowDefinition.description'),

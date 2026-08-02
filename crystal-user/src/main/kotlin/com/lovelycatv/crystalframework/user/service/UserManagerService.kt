@@ -15,4 +15,9 @@ interface UserManagerService : CachedBaseManagerService<
         ManagerReadUserDTO,
         ManagerUpdateUserDTO,
         ManagerDeleteUserDTO
->
+> {
+    /**
+     * Enable or disable a user account by flipping [UserEntity.getEnabledFlag].
+     */
+    suspend fun setEnabled(userId: Long, enabled: Boolean)
+}

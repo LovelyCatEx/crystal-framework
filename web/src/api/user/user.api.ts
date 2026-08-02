@@ -57,3 +57,42 @@ export interface ManagerRefreshUserAuthoritiesDTO {
 export async function refreshUserAuthorities(dto: ManagerRefreshUserAuthoritiesDTO) {
     return doPost('/api/manager/user/refresh-authority', {...dto});
 }
+
+export interface ManagerForceLogoutUsersDTO {
+    userIds: string[];
+}
+
+export async function forceLogoutUsers(dto: ManagerForceLogoutUsersDTO) {
+    return doPost('/api/manager/user/force-logout', {...dto});
+}
+
+// Backend: ManagerUserController#ban, @ModelAttribute ManagerBanUserDTO
+export interface ManagerBanUserDTO {
+    userId: string;
+    reason: string;
+    /** Epoch millisecond string; omit / null for a permanent ban. */
+    banUntil?: string | null;
+}
+
+export async function banUser(dto: ManagerBanUserDTO) {
+    return doPost('/api/manager/user/ban', {...dto});
+}
+
+// Backend: ManagerUserController#unban, @ModelAttribute ManagerUnbanUserDTO
+export interface ManagerUnbanUserDTO {
+    userId: string;
+}
+
+export async function unbanUser(dto: ManagerUnbanUserDTO) {
+    return doPost('/api/manager/user/unban', {...dto});
+}
+
+// Backend: ManagerUserController#setEnabled, @ModelAttribute ManagerSetUserEnabledDTO
+export interface ManagerSetUserEnabledDTO {
+    userId: string;
+    enabled: boolean;
+}
+
+export async function setUserEnabled(dto: ManagerSetUserEnabledDTO) {
+    return doPost('/api/manager/user/set-enabled', {...dto});
+}

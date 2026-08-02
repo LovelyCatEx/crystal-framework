@@ -58,6 +58,7 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_TASK)
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_RECORD)
         registry.register(TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES)
+        registry.register(TableConstants.TABLE_USER_BAN_RECORDS)
 
         configurers.forEach { it.configure(registry) }
 

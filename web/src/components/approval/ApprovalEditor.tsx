@@ -551,6 +551,8 @@ export default function ApprovalEditor(props: {
                                     selectedKey={selectedFieldKey}
                                     onSelectedKeyChange={setSelectedFieldKey}
                                     onSchemaChange={setFormSchema}
+                                    scope={definitionDetails?.definition.scope ?? ResourceScope.SYSTEM}
+                                    scopeId={definitionDetails?.definition.scopeId ?? ''}
                                     headerRight={(
                                         <Button
                                             type="primary"

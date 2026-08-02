@@ -7,6 +7,28 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.13.3
+
+2026-08-02
+
+### Features
++ feat(user): Add account ban and enable/disable management.
++ feat(auth): Support force-logout via issuedAt-based token invalidation.
++ feat(rbac): Replace Transfer with PermissionTreeTable for role permission assignment, with selection modes and a redesigned layout.
++ feat(approval): Add DICT form field type bound to system/tenant dictionaries.
++ feat(table): Support drag-to-reorder columns with reset in column settings.
+
+### Bug Fixes
++ fix(auth): Converge ban/disabled checks into buildLoginSuccessResponse to block the OAuth bypass.
++ fix(security): Close cross-tenant IDOR via id short-circuit in BaseManagerService.query.
++ fix(shared): Mark sensitive columns @NotQueryable to block blind-probing.
++ fix(tenant): Ensure every tenant member has a profile on creation.
+
+### Others
++ style(approval): Make the instance id tag width-adaptive and add id tags to definition columns.
+
+---
+
 ## v1.13.2
 
 2026-08-01

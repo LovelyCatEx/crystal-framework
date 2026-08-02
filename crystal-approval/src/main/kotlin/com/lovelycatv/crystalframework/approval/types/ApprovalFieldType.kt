@@ -18,7 +18,8 @@ enum class ApprovalFieldType(@JsonValue val value: String) {
     RADIO("radio"),
     CHECKBOX("checkbox"),
     DATE("date"),
-    DATETIME("datetime");
+    DATETIME("datetime"),
+    DICT("dict");
 
     companion object {
         @JsonCreator
@@ -53,6 +54,12 @@ enum class ApprovalFieldType(@JsonValue val value: String) {
                 ConditionOperator.EQ, ConditionOperator.NE,
                 ConditionOperator.GT, ConditionOperator.GTE,
                 ConditionOperator.LT, ConditionOperator.LTE,
+            ),
+            // DICT covers both single (like SELECT/RADIO) and multi (like CHECKBOX) selection,
+            // switched by validation.multiple — so its operator set is the union of both.
+            DICT to setOf(
+                ConditionOperator.EQ, ConditionOperator.NE,
+                ConditionOperator.IN, ConditionOperator.CONTAINS,
             ),
         )
     }

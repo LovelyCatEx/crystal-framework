@@ -1,10 +1,12 @@
-import React, {useMemo} from "react";
-import {Button, Popconfirm, Space, Spin, Table, Tag} from "antd";
-import type {ColumnsType} from "antd/es/table";
+import {useMemo, useState} from "react";
+import type {Key} from "react";
+import {Button, Popconfirm, Space, Spin, Switch, Table, Tag} from "antd";
+import type {ColumnsType, TableRowSelection} from "antd/es/table/interface";
 import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import {useTranslation} from "react-i18next";
 import type {BaseEntity} from "@/types/BaseEntity.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import {usePermissionTranslator} from "@/i18n/permission-translations.tsx";
 
 export interface PermissionTreeItem extends BaseEntity {
     name: string;
@@ -28,6 +30,8 @@ const SCOPE_ORDER: Record<PermissionScope, number> = {
     tenant: 2,
     "i.tenant": 3,
 };
+
+const TYPE_COLORS: Record<number, string> = {0: "green", 1: "gold", 2: "geekblue"};
 
 // i18n keys cannot contain dots (i18next treats them as nested-key separators),
 // so `i.tenant` maps to the safe key `iTenant`.
@@ -87,19 +91,50 @@ type LeafRow<T extends PermissionTreeItem> = {
 
 type TableRow<T extends PermissionTreeItem> = ModuleRow<T> | ScopeRow<T> | LeafRow<T>;
 
+export type PermissionTreeTableMode = "readonly" | "checkbox" | "radio";
+
+const LEAF_KEY_PREFIX = "perm_";
+
+const toLeafKey = (id: string): string => `${LEAF_KEY_PREFIX}${id}`;
+const isLeafKey = (key: Key): boolean => String(key).startsWith(LEAF_KEY_PREFIX);
+const fromLeafKey = (key: Key): string => String(key).slice(LEAF_KEY_PREFIX.length);
+
 export interface PermissionTreeTableProps<T extends PermissionTreeItem> {
     permissions: T[];
     loading?: boolean;
     typeLabel: (type: number) => string;
-    descriptionRender?: (row: T) => React.ReactNode;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
     entityName?: string;
+    /**
+     * Selection mode. `readonly` (default) renders a plain catalog table;
+     * `checkbox` enables multi-select with parent-row cascading;
+     * `radio` enables single-select restricted to leaf permission rows.
+     */
+    mode?: PermissionTreeTableMode;
+    /** Selected permission ids. For `radio` mode, pass an array of 0 or 1 element. */
+    selectedIds?: string[];
+    /** Fires with the selected permission ids (leaf ids only, never group keys). */
+    onChange?: (selectedIds: string[]) => void;
+    /** Permission ids whose selection checkbox/radio should be disabled. */
+    disabledIds?: string[];
 }
 
 export function PermissionTreeTable<T extends PermissionTreeItem>(props: PermissionTreeTableProps<T>) {
     const {t, i18n} = useTranslation();
-    const {permissions, loading, typeLabel, descriptionRender, onEdit, onDelete, entityName} = props;
+    const translatePermission = usePermissionTranslator();
+    const [useI18nDescription, setUseI18nDescription] = useState(true);
+    const {
+        permissions, loading, typeLabel, onEdit, onDelete, entityName,
+        mode = "readonly", selectedIds, onChange, disabledIds,
+    } = props;
+
+    const resolveDescription = (row: T): string => {
+        if (useI18nDescription) {
+            return translatePermission(row.name) ?? (row.description || "-");
+        }
+        return row.description || "-";
+    };
 
     const groupedData = useMemo<ModuleRow<T>[]>(() => {
         const moduleBuckets = new Map<string, Map<PermissionScope, LeafRow<T>[]>>();
@@ -169,7 +204,6 @@ export function PermissionTreeTable<T extends PermissionTreeItem>(props: Permiss
             {
                 title: t("components.columns.userPermission.permission"),
                 key: "name",
-                width: 460,
                 render: (_, row) => {
                     if (row.kind === "module") {
                         const label = resolveModuleLabel(row.moduleKey);
@@ -199,29 +233,18 @@ export function PermissionTreeTable<T extends PermissionTreeItem>(props: Permiss
                         );
                     }
                     return (
-                        <CopyableToolTip title={row.data.name}>
-                            <span className="font-mono text-sm">{row.data.name}</span>
-                        </CopyableToolTip>
+                        <div className="flex items-center gap-2">
+                            <Tag color={TYPE_COLORS[row.data.type] ?? "default"} className="shrink-0">
+                                {typeLabel(row.data.type)}
+                            </Tag>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm">{resolveDescription(row.data)}</span>
+                                <CopyableToolTip title={row.data.name}>
+                                    <span className="font-mono text-xs text-gray-400">{row.data.name}</span>
+                                </CopyableToolTip>
+                            </div>
+                        </div>
                     );
-                },
-            },
-            {
-                title: t("components.columns.userPermission.type"),
-                key: "type",
-                width: 120,
-                render: (_, row) => {
-                    if (row.kind !== "leaf") return null;
-                    const TYPE_COLORS: Record<number, string> = {0: "green", 1: "gold", 2: "geekblue"};
-                    return <Tag color={TYPE_COLORS[row.data.type] ?? "default"}>{typeLabel(row.data.type)}</Tag>;
-                },
-            },
-            {
-                title: t("components.columns.userPermission.description"),
-                key: "description",
-                render: (_, row) => {
-                    if (row.kind !== "leaf") return null;
-                    if (descriptionRender) return descriptionRender(row.data);
-                    return row.data.description || "-";
                 },
             },
             {
@@ -276,15 +299,65 @@ export function PermissionTreeTable<T extends PermissionTreeItem>(props: Permiss
             });
         }
         return cols;
-    }, [t, i18n, typeLabel, descriptionRender, onEdit, onDelete, showActions, entityName]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [t, i18n, typeLabel, useI18nDescription, translatePermission, onEdit, onDelete, showActions, entityName]);
+
+    const rowSelection = useMemo<TableRowSelection<TableRow<T>> | undefined>(() => {
+        if (mode === "readonly") return undefined;
+
+        const disabledLeafKeys = new Set((disabledIds ?? []).map(toLeafKey));
+        const selectedLeafKeys = (selectedIds ?? []).map(toLeafKey);
+
+        if (mode === "radio") {
+            return {
+                type: "radio",
+                selectedRowKeys: selectedLeafKeys,
+                // Non-leaf rows (module/scope groups) are not selectable in radio mode.
+                renderCell: (_checked, row, _index, originNode) =>
+                    row.kind === "leaf" ? originNode : null,
+                getCheckboxProps: (row) => ({
+                    disabled: row.kind !== "leaf" || disabledLeafKeys.has(row.rowKey),
+                }),
+                onChange: (_keys, rows) => {
+                    const ids = rows.filter((r) => r.kind === "leaf").map((r) => r.data.id);
+                    onChange?.(ids);
+                },
+            };
+        }
+
+        // checkbox: parent rows cascade selection onto their leaf children.
+        return {
+            type: "checkbox",
+            checkStrictly: false,
+            selectedRowKeys: selectedLeafKeys,
+            getCheckboxProps: (row) => ({
+                disabled: row.kind === "leaf" && disabledLeafKeys.has(row.rowKey),
+            }),
+            onChange: (keys) => {
+                onChange?.(keys.filter(isLeafKey).map(fromLeafKey));
+            },
+        };
+    }, [mode, selectedIds, disabledIds, onChange]);
 
     return (
         <Spin spinning={!!loading}>
+            <div className="mb-3">
+                <Space size={8}>
+                    <span>{t("pages.permissionCatalog.source.label")}</span>
+                    <Switch
+                        checked={useI18nDescription}
+                        checkedChildren={t("pages.permissionCatalog.source.i18n")}
+                        unCheckedChildren={t("pages.permissionCatalog.source.db")}
+                        onChange={setUseI18nDescription}
+                    />
+                </Space>
+            </div>
             <Table<TableRow<T>>
                 key={defaultExpandedRowKeys.join(",")}
                 rowKey="rowKey"
                 dataSource={groupedData}
                 columns={columns}
+                rowSelection={rowSelection}
                 expandable={{
                     defaultExpandedRowKeys,
                     rowExpandable: (row) => row.kind !== "leaf",

@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.types.tenant.DictItemStatus
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerCreateTenantDictItemDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.dict.dto.ManagerUpdateTenantDictItemDTO
@@ -68,6 +69,12 @@ class TenantDictItemManagerServiceImpl(
     override suspend fun getTreeByTypeId(typeId: Long): List<TenantDictItemTreeVO> {
         val allItems = tenantDictItemRepository.findAllByTypeId(typeId).awaitListWithTimeout()
         return buildTree(allItems, null)
+    }
+
+    override suspend fun findEnabledByTypeId(typeId: Long): List<TenantDictItemEntity> {
+        return tenantDictItemRepository.findAllByTypeId(typeId).awaitListWithTimeout()
+            .filter { it.getRealStatus() == DictItemStatus.ENABLED }
+            .sortedBy { it.sortOrder }
     }
 
     private fun buildTree(allItems: List<TenantDictItemEntity>, parentId: Long?): List<TenantDictItemTreeVO> {

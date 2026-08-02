@@ -1,4 +1,4 @@
-package com.lovelycatv.crystalframework.resource.service
+package com.lovelycatv.crystalframework.resource.service.manager
 
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerCreateStorageProviderDTO
 import com.lovelycatv.crystalframework.resource.controller.manager.storage.dto.ManagerDeleteStorageProviderDTO
@@ -15,4 +15,4 @@ interface StorageProviderManagerService : CachedBaseManagerService<
         ManagerReadStorageProviderDTO,
         ManagerUpdateStorageProviderDTO,
         ManagerDeleteStorageProviderDTO
->
+        >

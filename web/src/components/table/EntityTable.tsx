@@ -27,8 +27,11 @@ import {
     type TimeRangePickerProps
 } from 'antd';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
+import {DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent} from "@dnd-kit/core";
+import {SortableContext, arrayMove, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
-import {InfoCircleOutlined, SearchOutlined, SettingOutlined} from "@ant-design/icons";
+import {HolderOutlined, InfoCircleOutlined, SearchOutlined, SettingOutlined} from "@ant-design/icons";
 import type {EntityTableColumn, EntityTableColumns} from "./entity-table.types.ts";
 import type {BaseManagerReadDTO, PaginatedResponseData} from "@/types/api.types.ts";
 import type {RowSelectionType} from "antd/es/table/interface";
@@ -150,15 +153,26 @@ function EntityTableInner<ENTITY extends BaseEntity>(
     // Selection
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+    // Default column keys in natural order (props.columns + auto-appended record time / action).
+    // Single source of truth for both initial state and the "reset to default" action.
+    const computeDefaultColumnKeys = useCallback((): string[] => {
+        const keys = props.columns.map(col => col.key);
+        keys.push('createdTime');
+        if (props.tableRowActionsRender) keys.push('action');
+        return keys;
+    }, [props.columns, props.tableRowActionsRender]);
+
     // Column visibility
-    const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
-        const allKeys = new Set<string>();
-        props.columns.forEach(col => allKeys.add(col.key));
-        allKeys.add('createdTime');
-        if (props.tableRowActionsRender) allKeys.add('action');
-        return allKeys;
-    });
+    const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => new Set(computeDefaultColumnKeys()));
     const [columnFilterOpen, setColumnFilterOpen] = useState(false);
+
+    // Column order (user-draggable). Holds the natural key order; new/removed columns are reconciled in allColumns.
+    const [columnOrder, setColumnOrder] = useState<string[]>(() => computeDefaultColumnKeys());
+
+    const columnSensors = useSensors(
+        useSensor(PointerSensor, {activationConstraint: {distance: 4}}),
+        useSensor(KeyboardSensor),
+    );
 
     const skipNextPageEffectRef = useRef(false);
 
@@ -365,7 +379,7 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
     // ── Columns ──────────────────────────────────────────────────────────────
 
-    const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
+    const naturalColumns: EntityTableColumn<ENTITY, unknown>[] = [
         ...props.columns,
         ...(!props.hideRecordTimeColumn ? [{
             title: t('components.entityTable.recordTime'),
@@ -386,6 +400,14 @@ function EntityTableInner<ENTITY extends BaseEntity>(
             width: 120,
             render: (_: unknown, record: ENTITY) => props.tableRowActionsRender!(record),
         }] : []),
+    ];
+
+    // Reconcile the user-defined order with the current column set: ordered keys first,
+    // then any columns not yet present in columnOrder (newly added) appended in natural order.
+    const columnByKey = new Map(naturalColumns.map(col => [col.key, col]));
+    const allColumns: EntityTableColumn<ENTITY, unknown>[] = [
+        ...columnOrder.map(key => columnByKey.get(key)).filter((col): col is EntityTableColumn<ENTITY, unknown> => col !== undefined),
+        ...naturalColumns.filter(col => !columnOrder.includes(col.key)),
     ];
 
     // ── Time range presets ───────────────────────────────────────────────────
@@ -534,33 +556,62 @@ function EntityTableInner<ENTITY extends BaseEntity>(
         });
     };
 
+    const handleColumnReorder = (event: DragEndEvent) => {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+        const orderedKeys = allColumns.map(col => col.key);
+        const oldIndex = orderedKeys.indexOf(active.id as string);
+        const newIndex = orderedKeys.indexOf(over.id as string);
+        if (oldIndex < 0 || newIndex < 0) return;
+        setColumnOrder(arrayMove(orderedKeys, oldIndex, newIndex));
+    };
+
     const columnFilterContent = (
         <div className="w-64">
             <div className="mb-2 flex justify-between items-center">
                 <span className="font-medium">{t('components.entityTable.columnFilter.title')}</span>
-                <Button
-                    type="link"
-                    size="small"
-                    onClick={() => {
-                        const allKeys = new Set<string>();
-                        allColumns.forEach(col => allKeys.add(col.key));
-                        setVisibleColumns(allKeys);
-                    }}
-                >
-                    {t('components.entityTable.columnFilter.selectAll')}
-                </Button>
-            </div>
-            <Space orientation="vertical" className="w-full">
-                {allColumns.map(col => (
-                    <Checkbox
-                        key={col.key}
-                        checked={visibleColumns.has(col.key)}
-                        onChange={(e) => handleColumnToggle(col.key, e.target.checked)}
+                <Space size={0}>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            const defaultKeys = computeDefaultColumnKeys();
+                            setColumnOrder(defaultKeys);
+                            setVisibleColumns(new Set(defaultKeys));
+                        }}
                     >
-                        {col.title}
-                    </Checkbox>
-                ))}
-            </Space>
+                        {t('components.entityTable.columnFilter.reset')}
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            const allKeys = new Set<string>();
+                            allColumns.forEach(col => allKeys.add(col.key));
+                            setVisibleColumns(allKeys);
+                        }}
+                    >
+                        {t('components.entityTable.columnFilter.selectAll')}
+                    </Button>
+                </Space>
+            </div>
+            <div className="mb-2 text-xs text-gray-400">{t('components.entityTable.columnFilter.dragHint')}</div>
+            <DndContext sensors={columnSensors} collisionDetection={closestCenter} onDragEnd={handleColumnReorder}>
+                <SortableContext items={allColumns.map(col => col.key)} strategy={verticalListSortingStrategy}>
+                    <div className="flex flex-col gap-1">
+                        {allColumns.map(col => (
+                            <SortableColumnItem
+                                key={col.key}
+                                columnKey={col.key}
+                                title={col.title}
+                                checked={visibleColumns.has(col.key)}
+                                dragHandleLabel={t('components.entityTable.columnFilter.dragHandle')}
+                                onToggle={handleColumnToggle}
+                            />
+                        ))}
+                    </div>
+                </SortableContext>
+            </DndContext>
         </div>
     );
 
@@ -660,5 +711,40 @@ function EntityTableInner<ENTITY extends BaseEntity>(
 
             {props.children}
         </>
+    );
+}
+
+interface SortableColumnItemProps {
+    columnKey: string;
+    title: ReactNode;
+    checked: boolean;
+    dragHandleLabel: string;
+    onToggle: (columnKey: string, checked: boolean) => void;
+}
+
+function SortableColumnItem({columnKey, title, checked, dragHandleLabel, onToggle}: SortableColumnItemProps) {
+    const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id: columnKey});
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.6 : 1,
+    };
+    return (
+        <div ref={setNodeRef} style={style} className="flex items-center gap-2 py-0.5">
+            <span
+                {...attributes}
+                {...listeners}
+                aria-label={dragHandleLabel}
+                className="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing touch-none"
+            >
+                <HolderOutlined/>
+            </span>
+            <Checkbox
+                checked={checked}
+                onChange={(e) => onToggle(columnKey, e.target.checked)}
+            >
+                {title}
+            </Checkbox>
+        </div>
     );
 }

@@ -10,7 +10,9 @@ import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform
+import com.lovelycatv.crystalframework.rbac.user.service.UserForceLogoutService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
+import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.vertex.log.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
@@ -47,7 +49,8 @@ class SecurityConfig(
         http: ServerHttpSecurity,
         userAuthorizationService: UserAuthorizationService,
         jwtSignKeyStore: JWTSignKeyStore,
-        userRbacQueryService: UserRbacQueryService
+        userRbacQueryService: UserRbacQueryService,
+        userForceLogoutService: UserForceLogoutService,
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -230,6 +233,12 @@ class SecurityConfig(
                 },
                 getJWTSignKey = {
                     jwtSignKeyStore.getSignKey()
+                },
+                assertNotForceLoggedOut = { userId, tokenIssuedAt ->
+                    val forceLogoutAt = userForceLogoutService.getForceLogoutAt(userId)
+                    if (forceLogoutAt != null && (tokenIssuedAt == null || tokenIssuedAt < forceLogoutAt)) {
+                        throw UnauthorizedException("session has been terminated by an administrator")
+                    }
                 }
             ),
             SecurityWebFiltersOrder.AUTHENTICATION

@@ -16,6 +16,11 @@ object SystemRolePermissionRelation {
             // User
             SystemPermission.MENU_SYSTEM_USER_MANAGER,
             SystemPermission.ACTION_SYSTEM_USER_READ,
+            SystemPermission.ACTION_SYSTEM_USER_BAN,
+            SystemPermission.ACTION_SYSTEM_USER_UNBAN,
+            SystemPermission.ACTION_SYSTEM_USER_SET_ENABLED,
+            SystemPermission.ACTION_SYSTEM_USER_BAN_RECORD_READ,
+            SystemPermission.MENU_SYSTEM_USER_BAN_RECORD,
             SystemPermission.MENU_SYSTEM_OAUTH_ACCOUNT_MANAGER,
             SystemPermission.ACTION_SYSTEM_OAUTH_ACCOUNT_READ,
             // Storage

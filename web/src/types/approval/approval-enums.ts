@@ -105,4 +105,5 @@ export enum ApprovalFieldType {
     CHECKBOX = 'checkbox',
     DATE = 'date',
     DATETIME = 'datetime',
+    DICT = 'dict',
 }

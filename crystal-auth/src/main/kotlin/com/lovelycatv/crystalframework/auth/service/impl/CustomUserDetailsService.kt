@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.auth.service.impl
 
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
+import com.lovelycatv.crystalframework.shared.exception.AccountBannedException
+import com.lovelycatv.crystalframework.shared.exception.BanContext
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.user.service.manager.UserBanRecordManagerService
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberRelationService
@@ -36,7 +39,8 @@ class CustomUserDetailsService(
     private val userRepository: UserRepository,
     private val userRoleRelationService: UserRoleRelationService,
     private val tenantService: TenantService,
-    private val tenantMemberRelationService: TenantMemberRelationService
+    private val tenantMemberRelationService: TenantMemberRelationService,
+    private val userBanRecordManagerService: UserBanRecordManagerService
 ) : ReactiveUserDetailsService {
 
     /**
@@ -69,6 +73,19 @@ class CustomUserDetailsService(
                                 .map { it.name }
                         }
                     )
+
+                    runBlocking(Dispatchers.IO) {
+                        userBanRecordManagerService.getActiveBan(userEntity.id)
+                    }?.let { banRecord ->
+                        throw AccountBannedException(
+                            banRecord.reason,
+                            BanContext(
+                                reason = banRecord.reason,
+                                bannedAt = banRecord.createdTime,
+                                banUntil = banRecord.banUntil,
+                            ),
+                        )
+                    }
                 }
             }
             .flatMap { userEntity ->
