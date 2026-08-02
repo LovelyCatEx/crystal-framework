@@ -31,6 +31,10 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
                 this.handleBusinessException(e)
             }
 
+            is TooManyRequestsException -> {
+                this.handleTooManyRequestsException(e)
+            }
+
             is MissingRequestValueException -> {
                 this.handleMissingRequestValueException(e)
             }
@@ -73,6 +77,16 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         logger.debug("An business exception occurred", e)
 
         return ApiResponse.badRequest<Nothing>(e.localizedMessage ?: e.message ?: "bad request")
+    }
+
+    @ExceptionHandler(TooManyRequestsException::class)
+    fun handleTooManyRequestsException(e: TooManyRequestsException): ApiResponse<*> {
+        logger.debug("A rate limit exception occurred", e)
+
+        return ApiResponse.tooManyRequests(
+            e.localizedMessage ?: e.message ?: "too many requests",
+            e.context,
+        )
     }
 
     @ExceptionHandler(MissingRequestValueException::class)

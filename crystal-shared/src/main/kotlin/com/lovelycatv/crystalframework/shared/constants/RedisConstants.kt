@@ -34,4 +34,24 @@ object RedisConstants {
     const val LOCK_OAUTH_BIND_PREFIX = "lock:oauth:bind:"
 
     const val LOCK_APPROVAL_TASK_PREFIX = "lock:approval:task:"
+
+    /** Sliding-window counter of authentication attempts keyed by client IP. */
+    const val LOGIN_RATE_LIMIT_IP_PREFIX = "auth:rl:ip:"
+
+    /** Sliding-window counter of authentication attempts keyed by account (username:tenantId). */
+    const val LOGIN_RATE_LIMIT_ACCOUNT_PREFIX = "auth:rl:acc:"
+
+    /** Consecutive-failure counter per account, used to drive exponential-backoff lockout. */
+    const val LOGIN_LOCK_FAILURE_PREFIX = "auth:lock:fail:"
+
+    /** Lockout marker per account; value is the epoch-millis the lockout expires at. */
+    const val LOGIN_LOCK_UNTIL_PREFIX = "auth:lock:until:"
+
+    fun getLoginRateLimitIpKey(ip: String) = "$LOGIN_RATE_LIMIT_IP_PREFIX$ip"
+
+    fun getLoginRateLimitAccountKey(account: String) = "$LOGIN_RATE_LIMIT_ACCOUNT_PREFIX$account"
+
+    fun getLoginLockFailureKey(account: String) = "$LOGIN_LOCK_FAILURE_PREFIX$account"
+
+    fun getLoginLockUntilKey(account: String) = "$LOGIN_LOCK_UNTIL_PREFIX$account"
 }

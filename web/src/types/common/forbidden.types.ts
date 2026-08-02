@@ -97,3 +97,27 @@ export function isDisabledContext(value: unknown): value is DisabledContext {
     const obj = value as Record<string, unknown>;
     return obj.disabled === true;
 }
+
+/**
+ * Corresponds to backend `RateLimitContext` data class. Attached to the 429
+ * ApiResponse.data when the login rate limiter rejects a request.
+ *
+ * retryAfterSeconds is the number of seconds to wait before retrying — the
+ * remaining sliding-window horizon or exponential-backoff lockout. The backend
+ * Long is serialized as a string via ToStringSerializer on the WebFlux codec
+ * path, but the login filter path uses the plain toJSONString() mapper and may
+ * emit a raw number, so both are accepted here (mirrors BanContext.bannedAt).
+ */
+export interface RateLimitContext {
+    retryAfterSeconds: string | number;
+}
+
+/**
+ * Type guard distinguishing a structured rate-limit rejection from a flat 429.
+ * Keyed on the numeric-or-string `retryAfterSeconds` field.
+ */
+export function isRateLimitContext(value: unknown): value is RateLimitContext {
+    if (typeof value !== "object" || value === null) return false;
+    const obj = value as Record<string, unknown>;
+    return typeof obj.retryAfterSeconds === "number" || typeof obj.retryAfterSeconds === "string";
+}

@@ -9,9 +9,10 @@ The framework's `GlobalExceptionHandler` catches every exception thrown by Contr
 | `BusinessException(message)` | 400 | Business validation failed; `message` propagates to the frontend |
 | `UnauthorizedException(message)` | 401 | Not logged in / token expired |
 | `ForbiddenException(message)` | 403 | Authenticated but lacks permission |
+| `TooManyRequestsException(message, context)` | 429 | Rate limit / lockout triggered; `context` carries `RateLimitContext.retryAfterSeconds` |
 | `@Valid` failure | 400 | No manual throw needed; framework auto-handles |
 
-All three custom exceptions live in `com.lovelycatv.crystalframework.shared.exception` and extend `RuntimeException`.
+All four custom exceptions live in `com.lovelycatv.crystalframework.shared.exception` and extend `RuntimeException`.
 
 ## Examples
 

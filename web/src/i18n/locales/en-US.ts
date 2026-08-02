@@ -2266,6 +2266,13 @@ export const enUS: I18nRules = {
         'security.api.encrypt.enabled': 'Enabled',
         'security.api.encrypt.scope': 'Scope',
         'security.api.encrypt.securityLevel': 'Security Level',
+        'security.loginRateLimit.enabled': 'Enabled',
+        'security.loginRateLimit.windowSeconds': 'Sliding Window (seconds)',
+        'security.loginRateLimit.maxAttemptsPerIp': 'Max Attempts Per IP (per window)',
+        'security.loginRateLimit.maxAttemptsPerAccount': 'Max Attempts Per Account (per window)',
+        'security.loginRateLimit.lockThreshold': 'Consecutive Failures Before Lockout',
+        'security.loginRateLimit.lockBaseSeconds': 'Base Lockout Duration (seconds)',
+        'security.loginRateLimit.lockMaxSeconds': 'Max Lockout Duration (seconds)',
         'oauth.github.enabled': 'Enabled',
         'oauth.github.useDefault': 'Use System Default',
         'oauth.github.authorizationUri': 'Authorization URI',
@@ -2302,6 +2309,7 @@ export const enUS: I18nRules = {
         'mail.smtp': 'SMTP Mail Service',
         'messageChannel.lark': 'Lark',
         'security.api.encrypt': 'Api Security',
+        'security.loginRateLimit': 'Login Rate Limit & Lockout',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
@@ -3691,6 +3699,7 @@ export const enUS: I18nRules = {
   api: {
     sessionExpired: 'Your session has expired',
     forbidden: 'You do not have permission to access this resource',
+    tooManyRequests: 'Too many requests, please try again later',
     unknownError: 'Unknown error',
     forbiddenModal: {
       title: 'Access denied',
@@ -3711,6 +3720,10 @@ export const enUS: I18nRules = {
     disabledModal: {
       title: 'Account disabled',
       description: 'Your account has been disabled by an administrator and cannot log in. Please contact the administrator.'
+    },
+    rateLimitModal: {
+      title: 'Too many attempts',
+      retryAfter: 'Too many attempts. Please try again in {{seconds}} seconds.'
     }
   },
 

@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.auth.event.LoginMethod
 import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
 import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
+import com.lovelycatv.crystalframework.auth.service.LoginRateLimitService
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -51,6 +52,7 @@ class SecurityConfig(
         jwtSignKeyStore: JWTSignKeyStore,
         userRbacQueryService: UserRbacQueryService,
         userForceLogoutService: UserForceLogoutService,
+        loginRateLimitService: LoginRateLimitService,
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -219,7 +221,8 @@ class SecurityConfig(
                 "/api/v1/user/login",
                 reactiveAuthenticationManager,
                 userAuthorizationService,
-                eventPublisher
+                eventPublisher,
+                loginRateLimitService
             ),
             SecurityWebFiltersOrder.AUTHENTICATION
         )

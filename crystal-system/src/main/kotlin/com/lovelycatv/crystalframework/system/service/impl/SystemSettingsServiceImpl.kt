@@ -159,6 +159,15 @@ class SystemSettingsServiceImpl(
                     ),
                     securityLevel = getSettings<Long>(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt(),
                 )
+            ),
+            loginRateLimit = SystemSettings.Security.LoginRateLimit(
+                enabled = getSettings(SystemSettingsConstants.Security.LoginRateLimit.ENABLED)!!,
+                windowSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS)!!.toInt(),
+                maxAttemptsPerIp = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt(),
+                maxAttemptsPerAccount = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt(),
+                lockThreshold = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD)!!.toInt(),
+                lockBaseSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS)!!.toInt(),
+                lockMaxSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS)!!.toInt(),
             )
         )
     }
@@ -232,6 +241,13 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.ENABLED, settings.security.loginRateLimit.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS, settings.security.loginRateLimit.windowSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP, settings.security.loginRateLimit.maxAttemptsPerIp.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT, settings.security.loginRateLimit.maxAttemptsPerAccount.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD, settings.security.loginRateLimit.lockThreshold.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS, settings.security.loginRateLimit.lockBaseSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS, settings.security.loginRateLimit.lockMaxSeconds.toString())
 
         setSettings(SystemSettingsConstants.OAuth.Github.ENABLED, settings.oauth.github.enabled.toString())
         setSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT, settings.oauth.github.useDefault?.toString())

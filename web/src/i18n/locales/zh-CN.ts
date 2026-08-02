@@ -2263,6 +2263,13 @@ export const zhCN: I18nRules = {
         'security.api.encrypt.enabled': '是否启用',
         'security.api.encrypt.scope': '作用域',
         'security.api.encrypt.securityLevel': '安全等级',
+        'security.loginRateLimit.enabled': '是否启用',
+        'security.loginRateLimit.windowSeconds': '滑动窗口时长（秒）',
+        'security.loginRateLimit.maxAttemptsPerIp': '单 IP 窗口内最大尝试次数',
+        'security.loginRateLimit.maxAttemptsPerAccount': '单账号窗口内最大尝试次数',
+        'security.loginRateLimit.lockThreshold': '触发锁定的连续失败次数',
+        'security.loginRateLimit.lockBaseSeconds': '锁定基础时长（秒）',
+        'security.loginRateLimit.lockMaxSeconds': '锁定最大时长（秒）',
         'oauth.github.enabled': '启用',
         'oauth.github.useDefault': '使用系统默认配置',
         'oauth.github.authorizationUri': '授权端点',
@@ -2299,6 +2306,7 @@ export const zhCN: I18nRules = {
         'mail.smtp': 'SMTP 邮件服务',
         'messageChannel.lark': '飞书',
         'security.api.encrypt': 'Api 安全设置',
+        'security.loginRateLimit': '登录限流与锁定',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
@@ -3689,6 +3697,7 @@ export const zhCN: I18nRules = {
   api: {
     sessionExpired: '验证信息已过期',
     forbidden: '你无权访问当前资源',
+    tooManyRequests: '操作过于频繁，请稍后再试',
     unknownError: '未知错误',
     forbiddenModal: {
       title: '拒绝访问',
@@ -3709,6 +3718,10 @@ export const zhCN: I18nRules = {
     disabledModal: {
       title: '账号已被禁用',
       description: '你的账号已被管理员禁用，无法登录。如有疑问请联系管理员。'
+    },
+    rateLimitModal: {
+      title: '操作过于频繁',
+      retryAfter: '操作过于频繁，请在 {{seconds}} 秒后重试。'
     }
   },
 

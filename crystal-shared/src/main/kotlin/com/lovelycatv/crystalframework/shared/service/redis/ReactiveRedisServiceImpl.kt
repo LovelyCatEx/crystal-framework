@@ -1,13 +1,15 @@
 package com.lovelycatv.crystalframework.shared.service.redis
 
 import org.springframework.data.redis.core.*
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Service
 class ReactiveRedisServiceImpl(
-    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>
+    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val reactiveStringRedisTemplate: ReactiveStringRedisTemplate,
 ) : ReactiveRedisService {
     override fun hasKey(key: String): Mono<Boolean> {
         return this.reactiveRedisTemplate.hasKey(key)
@@ -15,6 +17,13 @@ class ReactiveRedisServiceImpl(
 
     override fun removeKey(vararg key: String): Mono<Long> {
         return this.reactiveRedisTemplate.delete(*key)
+    }
+
+    override fun executeScript(script: String, keys: List<String>, args: List<String>): Mono<String> {
+        val redisScript = RedisScript.of(script, String::class.java)
+        return this.reactiveStringRedisTemplate
+            .execute(redisScript, keys, args)
+            .next()
     }
 
     override fun <T: Any> opsForValue(): ReactiveValueOperations<String, T> {

@@ -62,7 +62,8 @@ data class SystemSettings(
     }
 
     data class Security(
-        val api: Api
+        val api: Api,
+        val loginRateLimit: LoginRateLimit,
     ) {
         data class Api(
             val encrypt: Encrypt
@@ -73,6 +74,16 @@ data class SystemSettings(
                 val securityLevel: Int,
             )
         }
+
+        data class LoginRateLimit(
+            val enabled: Boolean,
+            val windowSeconds: Int,
+            val maxAttemptsPerIp: Int,
+            val maxAttemptsPerAccount: Int,
+            val lockThreshold: Int,
+            val lockBaseSeconds: Int,
+            val lockMaxSeconds: Int,
+        )
     }
 
     data class OAuth(

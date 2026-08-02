@@ -14,10 +14,11 @@ import {
 import {RSAUtils} from "@/utils/rsa-utils.ts";
 import {AESUtils} from "@/utils/aes-utils.ts";
 import type {AxiosResponse} from "axios";
-import {isBanContext, isDisabledContext, isForbiddenContext} from "@/types/common/forbidden.types.ts";
+import {isBanContext, isDisabledContext, isForbiddenContext, isRateLimitContext} from "@/types/common/forbidden.types.ts";
 import {showForbiddenModal} from "@/components/ForbiddenModal.tsx";
 import {showBanModal} from "@/components/BanModal.tsx";
 import {showDisabledModal} from "@/components/DisabledModal.tsx";
+import {showRateLimitModal} from "@/components/RateLimitModal.tsx";
 
 export interface ApiResponse<T> {
     code: number;
@@ -98,6 +99,13 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
             showForbiddenModal(response.data, response.message);
         } else {
             void message.warning(response.message || i18n.t('api.forbidden'));
+        }
+        throw response;
+    } else if (response.code === 429) {
+        if (isRateLimitContext(response.data)) {
+            showRateLimitModal(response.data, response.message);
+        } else {
+            void message.warning(i18n.t('api.tooManyRequests'));
         }
         throw response;
     } else {

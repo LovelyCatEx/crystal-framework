@@ -351,6 +351,56 @@ object SystemSettingsConstants {
             }
         }
 
+        object LoginRateLimit {
+            val ENABLED = SettingsItemDeclaration(
+                key = "security.loginRateLimit.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1
+            )
+
+            val WINDOW_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.windowSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 300.toString(),
+                sort = 2
+            )
+
+            val MAX_ATTEMPTS_PER_IP = SettingsItemDeclaration(
+                key = "security.loginRateLimit.maxAttemptsPerIp",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 30.toString(),
+                sort = 3
+            )
+
+            val MAX_ATTEMPTS_PER_ACCOUNT = SettingsItemDeclaration(
+                key = "security.loginRateLimit.maxAttemptsPerAccount",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 10.toString(),
+                sort = 4
+            )
+
+            val LOCK_THRESHOLD = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockThreshold",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 5.toString(),
+                sort = 5
+            )
+
+            val LOCK_BASE_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockBaseSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 60.toString(),
+                sort = 6
+            )
+
+            val LOCK_MAX_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockMaxSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 3600.toString(),
+                sort = 7
+            )
+        }
     }
 
     object Module {
