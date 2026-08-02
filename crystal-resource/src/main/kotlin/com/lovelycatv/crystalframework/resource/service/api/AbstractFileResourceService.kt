@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import org.springframework.http.codec.multipart.FilePart
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -59,12 +60,16 @@ abstract class AbstractFileResourceService(
         inputStream: InputStream,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {
+        // Read bytes first so we can detect the actual MIME type from file content.
+        // The caller-provided fileContentType is intentionally ignored for security:
+        // a client can forge any Content-Type header.
+        val byteArray = inputStream.readBytes()
+        val detectedMimeType = detectMimeType(byteArray)
+
         fileResourceService.assertFileContentType(
             fileType,
-            fileContentType
+            detectedMimeType
         )
-
-        val byteArray = inputStream.readBytes()
 
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
@@ -93,7 +98,7 @@ abstract class AbstractFileResourceService(
         val result = this.doUploadFile(
             fileType,
             fileLength,
-            fileContentType,
+            detectedMimeType,
             fileNameWithExtension,
             uploadStream,
             objectKey,

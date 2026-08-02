@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
-import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.user.constants.CredentialAuthConstants
@@ -233,16 +232,7 @@ class UserServiceImpl(
         val (_, extension) = file.filename().split(".")
         val targetFileName = UUID.randomUUID().toString() + "." + extension
 
-        val service = fileResourceServiceManager.getService(
-            RoutingContext.of(
-                userId = userId,
-                fileType = ResourceFileType.USER_AVATAR,
-                fileName = targetFileName,
-                fileContentType = file.getContentType(),
-            )
-        )
-
-        val result = service.uploadFile(
+        val result = fileResourceServiceManager.uploadFile(
             userId,
             ResourceFileType.USER_AVATAR,
             file,

@@ -1,6 +1,5 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
-import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -143,16 +142,7 @@ class TenantServiceImpl(
         val (_, extension) = file.filename().split(".")
         val targetFileName = UUID.randomUUID().toString() + "." + extension
 
-        val service = fileResourceServiceManager.getService(
-            RoutingContext.of(
-                userId = userId,
-                fileType = ResourceFileType.TENANT_ICON,
-                fileName = targetFileName,
-                fileContentType = file.getContentType(),
-            )
-        )
-
-        val result = service.uploadFile(
+        val result = fileResourceServiceManager.uploadFile(
             userId,
             ResourceFileType.TENANT_ICON,
             file,
