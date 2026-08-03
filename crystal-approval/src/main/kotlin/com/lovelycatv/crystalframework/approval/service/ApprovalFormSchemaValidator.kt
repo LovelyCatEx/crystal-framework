@@ -117,15 +117,15 @@ object ApprovalFormSchemaValidator {
      *   * the diff may only touch fields that are visible AND writable at this node,
      *   * value-level type / range constraints still apply.
      *
-     * `readonly` collapses using the same rules as the frontend `mergeFieldOverrides` (decision 2):
-     * approval nodes default readonly=true, CC nodes force readonly=true regardless of overlay.
+     * `readonly` collapses using the same rules as the frontend `mergeFieldOverrides`: CC nodes
+     * force readonly=true regardless of overlay, every other node (APPROVAL included) falls back
+     * to the field's own `readonly` baseline unless the overlay overrides it.
      */
     fun validateTaskDiff(
         schemaJson: String?,
         nodeOverlayJson: String?,
         diffJson: String?,
         isCcNode: Boolean,
-        isApprovalNode: Boolean,
         dictAllowedCodes: Map<String, Set<String>> = emptyMap(),
     ): List<String> {
         if (diffJson.isNullOrBlank()) return emptyList()
@@ -154,7 +154,7 @@ object ApprovalFormSchemaValidator {
                 continue
             }
             val effectiveReadonly = mergeMergedFieldReadonly(
-                field, overlay?.fieldOverrides?.get(key), isCcNode, isApprovalNode,
+                field, overlay?.fieldOverrides?.get(key), isCcNode,
             )
             if (effectiveReadonly) {
                 errors += "Field '$key' is readonly at this node"
@@ -174,17 +174,17 @@ object ApprovalFormSchemaValidator {
         override?.visible ?: field.visible
 
     /**
-     * Merge readonly per decision 2. Mirror of the frontend `mergeFieldOverrides` logic. Kept
-     * private and tight so schema/formData/diff share the exact same interpretation.
+     * Merge readonly. Mirror of the frontend `mergeFieldOverrides` logic. Kept private and tight
+     * so schema/formData/diff share the exact same interpretation. CC nodes never mutate data and
+     * are hard-locked readonly; every other node (APPROVAL included) falls back to the field's own
+     * `readonly` baseline when the overlay does not override it.
      */
     private fun mergeMergedFieldReadonly(
         field: ApprovalFieldSchema,
         override: ApprovalFieldOverride?,
         isCcNode: Boolean,
-        isApprovalNode: Boolean,
     ): Boolean {
         if (isCcNode) return true
-        if (isApprovalNode) return override?.readonly ?: true
         return override?.readonly ?: field.readonly
     }
 

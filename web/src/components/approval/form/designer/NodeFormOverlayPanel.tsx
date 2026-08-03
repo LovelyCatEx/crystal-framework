@@ -94,7 +94,6 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
     }
 
     const isCcNode = nodeType === ApprovalFlowNodeType.CC;
-    const isApprovalNode = nodeType === ApprovalFlowNodeType.APPROVAL;
 
     const emitOverlayUpdate = (fieldKey: string, patch: Partial<ApprovalFieldOverride>) => {
         const current = overlay?.fieldOverrides ?? {};
@@ -124,7 +123,6 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
     const resolvedFor = (row: FieldRow, dimension: OverrideKey): boolean => {
         const {field, override} = row;
         if (dimension === 'readonly' && isCcNode) return true;
-        if (dimension === 'readonly' && isApprovalNode) return override?.readonly ?? true;
         const overrideValue = override?.[dimension];
         if (overrideValue !== undefined) return overrideValue;
         return field[dimension];
@@ -137,7 +135,7 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
      */
     const handleToggle = (row: FieldRow, dimension: OverrideKey, next: boolean) => {
         if (dimension === 'readonly' && isCcNode) return; // locked
-        const defaultValue = dimension === 'readonly' && isApprovalNode ? true : row.field[dimension];
+        const defaultValue = row.field[dimension];
         const patch: Partial<ApprovalFieldOverride> =
             next === defaultValue
                 ? {[dimension]: undefined}
@@ -226,14 +224,6 @@ export function NodeFormOverlayPanel(props: NodeFormOverlayPanelProps) {
                     type="info"
                     showIcon
                     message={t('components.nodeFormOverlay.ccInfo')}
-                    className="!py-1 !text-xs"
-                />
-            )}
-            {isApprovalNode && (
-                <Alert
-                    type="info"
-                    showIcon
-                    message={t('components.nodeFormOverlay.approvalInfo')}
                     className="!py-1 !text-xs"
                 />
             )}

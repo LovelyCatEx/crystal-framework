@@ -153,7 +153,6 @@ class ApprovalFlowEngineImpl(
                     nodeOverlayJson = node.formSchema,
                     diffJson = formData,
                     isCcNode = node.getRealType() == ApprovalFlowNodeType.CC,
-                    isApprovalNode = node.getRealType() == ApprovalFlowNodeType.APPROVAL,
                     dictAllowedCodes = dictAllowedCodes,
                 )
                 if (diffErrors.isNotEmpty()) {

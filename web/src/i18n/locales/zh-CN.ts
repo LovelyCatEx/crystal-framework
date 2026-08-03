@@ -2918,7 +2918,6 @@ export const zhCN: I18nRules = {
       subtitle: '为该节点单独覆盖每个字段的展示方式，未调整的开关沿用定义级设置',
       empty: '尚未定义任何字段，请先前往「表单设计器」新增字段',
       ccInfo: '抄送节点不会修改表单数据，「只读」已强制打开',
-      approvalInfo: '审批节点默认所有字段只读，如需允许当前审批人编辑，请将「只读」关闭',
       ccLockedTooltip: '抄送节点始终为只读，不可修改',
       column: {
         field: '字段',

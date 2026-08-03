@@ -2921,7 +2921,6 @@ export const enUS: I18nRules = {
       subtitle: 'Override how this node exposes each form field. Untouched switches follow the definition.',
       empty: 'No definition-level fields to override. Add fields on the Form Designer tab first.',
       ccInfo: 'CC nodes never mutate form data — Readonly is locked ON.',
-      approvalInfo: 'Approval nodes default fields to readonly. Flip Readonly OFF to let this approver edit the field.',
       ccLockedTooltip: 'CC nodes are always readonly and cannot be changed.',
       column: {
         field: 'Field',
