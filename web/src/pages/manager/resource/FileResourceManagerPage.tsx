@@ -3,8 +3,7 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     FileResourceManagerController,
     getResourceFileDownloadUrlById,
-    type ManagerCreateFileResourceDTO,
-    type ManagerReadFileResourceDTO
+    type ManagerCreateFileResourceDTO
 } from "@/api/resource/file-resource.api.ts";
 import {useEffect, useRef} from "react";
 import {type FileResource, ResourceFileType} from "@/types/resource/file-resource.types.ts";
@@ -141,7 +140,7 @@ export default function FileResourceManagerPage() {
                     </Form.Item>
                 </>
             }
-            query={async (props: ManagerReadFileResourceDTO) => {
+            query={async (props) => {
                 return (await FileResourceManagerController.query({
                     ...props,
                     scope: ResourceScope.SYSTEM,
@@ -159,7 +158,7 @@ export default function FileResourceManagerPage() {
                     ...props,
                     scope: ResourceScope.SYSTEM,
                     scopeId: '0',
-                } as ManagerCreateFileResourceDTO)).data!
+                } as unknown as ManagerCreateFileResourceDTO)).data!
             }}
             tableActions={[
                 {
