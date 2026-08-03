@@ -17,6 +17,11 @@ export const enUS: I18nRules = {
         title: 'Set Up Admin Account',
         subtitle: 'Please set up the system administrator account and password',
         form: {
+          initializationToken: {
+            placeholder: 'One-time Initialization Token',
+            required: 'Please enter the one-time initialization token',
+            help: 'Copy the token from the backend startup log'
+          },
           username: {
             placeholder: 'Admin Username',
             required: 'Please enter admin username',
@@ -4000,7 +4005,8 @@ export const enUS: I18nRules = {
       PROTECTED_RESOURCE: 'This resource is protected',
       NOT_TENANT_MEMBER: 'Not a member of this tenant',
       ROLE_PROTECTED: 'Role is protected from this operation',
-      PERMISSION_ESCALATION: 'Operation would escalate privileges'
+      PERMISSION_ESCALATION: 'Operation would escalate privileges',
+      INVALID_INITIALIZATION_TOKEN: 'Invalid system initialization token'
     },
     forbiddenScope: {
       SYSTEM: 'System',

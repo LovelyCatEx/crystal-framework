@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.system.controller
 
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.system.controller.dto.SystemInitializeDTO
 import com.lovelycatv.crystalframework.system.service.SystemInitializeService
@@ -28,11 +29,17 @@ class SystemInitializeController(
     @Unauthorized
     @PostMapping("/initialize")
     suspend fun initializeSystem(
+        @RequestHeader(
+            name = HeadersConstants.X_SYSTEM_INITIALIZE_TOKEN,
+            required = false,
+        )
+        initializationToken: String?,
         @RequestBody
         @Valid
         dto: SystemInitializeDTO
     ): ApiResponse<*> {
         systemInitializeService.initializeSystem(
+            initializationToken = initializationToken,
             username = dto.username,
             password = dto.password,
             email = dto.email,

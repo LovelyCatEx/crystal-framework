@@ -17,6 +17,11 @@ export const zhCN: I18nRules = {
         title: '设置管理员账号',
         subtitle: '请设置系统管理员的账号和密码',
         form: {
+          initializationToken: {
+            placeholder: '一次性初始化令牌',
+            required: '请输入一次性初始化令牌',
+            help: '请从后端启动日志中复制令牌'
+          },
           username: {
             placeholder: '管理员用户名',
             required: '请输入管理员用户名',
@@ -3998,7 +4003,8 @@ export const zhCN: I18nRules = {
       PROTECTED_RESOURCE: '该资源受保护',
       NOT_TENANT_MEMBER: '你不是该租户的成员',
       ROLE_PROTECTED: '该角色受保护，禁止执行此操作',
-      PERMISSION_ESCALATION: '该操作会导致权限提升'
+      PERMISSION_ESCALATION: '该操作会导致权限提升',
+      INVALID_INITIALIZATION_TOKEN: '系统初始化令牌无效'
     },
     forbiddenScope: {
       SYSTEM: '系统',

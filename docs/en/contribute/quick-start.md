@@ -74,7 +74,9 @@ pnpm dev
 
 ### 3. Open in Browser
 
-Navigate to the frontend dev server address. Log in with the default admin account (auto-initialized on first startup) to access the admin dashboard.
+When the backend starts before the system has been initialized, one instance prints a one-time system initialization token in its log. The token is stored in Redis, remains unchanged across normal restarts, and is not printed again by other instances.
+
+Open the frontend development server, go to the system initialization page, and enter the logged token, Root account details, and mail configuration. The token is invalidated immediately after successful initialization; then sign in with the newly created Root account.
 
 ## Verification
 

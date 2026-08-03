@@ -3,6 +3,10 @@ package com.lovelycatv.crystalframework.shared.constants
 object RedisConstants {
     const val JWT_SIGN_KEY = "jwt_sign_key"
 
+    const val SYSTEM_INITIALIZE_TOKEN = "system-initialize-token"
+
+    const val LOCK_SYSTEM_INITIALIZE = "lock:system:initialize"
+
     const val ENTITY_CACHE_BY_ID = "entity-cache:id:"
 
     const val ENTITY_CACHE_BY_LIST = "entity-cache:list:"

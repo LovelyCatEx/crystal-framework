@@ -11,6 +11,8 @@ interface ReactiveRedisService {
 
     fun removeKey(vararg key: String): Mono<Long>
 
+    fun compareAndDelete(key: String, expectedValue: String): Mono<Boolean>
+
     /**
      * Atomically evaluates a Lua [script] against Redis. Keys and args are passed and returned as
      * plain strings (String-serialized), so scripts can rely on `tonumber(...)` and callers get

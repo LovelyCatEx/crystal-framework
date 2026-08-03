@@ -11,6 +11,7 @@ const { Password } = Input;
 const { Title, Text } = Typography;
 
 interface AdminAccountFormData {
+  initializationToken: string;
   username: string;
   email: string;
   password: string;
@@ -83,10 +84,10 @@ export function SystemInitializePage() {
         smtpPassword: values.password,
         fromEmail: values.fromEmail,
         fromName: values.fromName || ProjectDisplayName,
-      });
+      }, adminData.initializationToken);
       void message.success(t('pages.systemInitializePage.complete.message'));
       setCurrentStep(2);
-    } catch (error) {
+    } catch {
       void message.error(t('pages.systemInitializePage.complete.messages.failed'));
     } finally {
       setLoading(false);
@@ -115,6 +116,21 @@ export function SystemInitializePage() {
               requiredMark={false}
               autoComplete="off"
             >
+              <Form.Item
+                name="initializationToken"
+                help={t('pages.systemInitializePage.adminAccount.form.initializationToken.help')}
+                rules={[
+                  { required: true, message: t('pages.systemInitializePage.adminAccount.form.initializationToken.required') },
+                ]}
+              >
+                <Password
+                  prefix={<LockOutlined className="text-gray-400 mr-2" />}
+                  placeholder={t('pages.systemInitializePage.adminAccount.form.initializationToken.placeholder')}
+                  className="rounded-xl h-11"
+                  autoComplete="off"
+                />
+              </Form.Item>
+
               <Form.Item
                 name="username"
                 rules={[
