@@ -253,6 +253,8 @@ main.tsx → BrowserRouter
 
 **后端枚举字段 Entity 规则：当实体字段对应枚举类型时，数据库存储枚举的 `typeId`（`Int`），Entity 中提供 `getRealXxx()` 方法转换为强类型枚举。详见 `docs/contribute/add-entity.md` 的「枚举字段」章节。**
 
+**枚举 when 必须穷尽所有分支，禁止 `else`：对枚举（`enum class`）进行 `when` 匹配时，必须显式列出该枚举的每一个分支，禁止使用 `else` 兜底。这样当枚举新增分支时编译器会强制报错提醒补全，避免遗漏。若某些分支确实无需处理，也必须显式写出这些分支并留空 / 抛异常 / 返回默认值，而不是用 `else` 一并吞掉。此规则仅针对枚举类型的 `when`，非枚举（如 `Int`、`String`、`sealed` 之外的开放类型）不受此限。**
+
 #### Controller
 
 一个 Controller 必须包含下面的所有注解：

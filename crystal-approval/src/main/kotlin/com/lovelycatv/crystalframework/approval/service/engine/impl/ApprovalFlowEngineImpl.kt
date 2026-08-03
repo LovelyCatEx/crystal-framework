@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.approval.service.engine.impl
 
 import com.lovelycatv.crystalframework.approval.types.*
+import com.lovelycatv.crystalframework.approval.constants.ApprovalNodeConfigConstants
 import com.lovelycatv.crystalframework.approval.entity.*
 import com.lovelycatv.crystalframework.approval.service.*
 import com.lovelycatv.crystalframework.approval.service.engine.ApprovalFlowEngine
@@ -355,18 +356,18 @@ class ApprovalFlowEngineImpl(
 
         return when (ApprovalFlowApproverStrategy.getById(config.strategy)) {
             ApprovalFlowApproverStrategy.SPECIFIED_USER -> {
-                val scope = ApprovalFlowScope.getById(instance.scope)
-                when (scope) {
+                when (val scope = ApprovalFlowScope.getById(instance.scope)) {
                     ApprovalFlowScope.TENANT -> {
                         @Suppress("UNCHECKED_CAST")
-                        val memberIds = config.strategyParams["memberIds"] as? List<String> ?: emptyList()
+                        val memberIds = config.strategyParams[ApprovalNodeConfigConstants.STRATEGY_PARAM_MEMBER_IDS] as? List<String> ?: emptyList()
                         memberIds.map { it.toLong() }
                     }
-                    else -> {
+                    ApprovalFlowScope.SYSTEM -> {
                         @Suppress("UNCHECKED_CAST")
-                        val userIds = config.strategyParams["userIds"] as? List<String> ?: emptyList()
+                        val userIds = config.strategyParams[ApprovalNodeConfigConstants.STRATEGY_PARAM_USER_IDS] as? List<String> ?: emptyList()
                         userIds.map { it.toLong() }
                     }
+                    null -> throw BusinessException("Unknown approval flow scope: ${instance.scope}")
                 }
             }
             else -> {
