@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.constants
 
+import java.time.Duration
+
 object RedisConstants {
     const val JWT_SIGN_KEY = "jwt_sign_key"
 
@@ -71,4 +73,33 @@ object RedisConstants {
     fun getMailCodeRateLimitIpKey(ip: String) = "$MAIL_CODE_RATE_LIMIT_IP_PREFIX$ip"
 
     fun getMailCodeRateLimitEmailKey(email: String) = "$MAIL_CODE_RATE_LIMIT_EMAIL_PREFIX$email"
+
+    /** Prefix for per-user, per-tenant cached authorities: `userAuthorities:$userId:$tenantSlice`. */
+    const val USER_AUTHORITIES_CACHE_PREFIX = "userAuthorities:"
+
+    /** Prefix for the Set indexing every tenant-slice key of a user: `userAuthorities:index:$userId`. */
+    const val USER_AUTHORITIES_INDEX_PREFIX = "userAuthorities:index:"
+
+    /** Sentinel tenant slice used when a session carries no tenant (system scope). */
+    const val NO_TENANT_SLICE = 0L
+
+    /** TTL for a cached authority slice. */
+    val USER_AUTHORITIES_CACHE_TTL: Duration = Duration.ofDays(3)
+
+    /**
+     * TTL for the per-user index Set. MUST stay strictly greater than [USER_AUTHORITIES_CACHE_TTL] and be
+     * refreshed on every slice rebuild, so the index always outlives every slice it points to — otherwise
+     * clearing the cache could miss live slices and leak stale cross-tenant authorities.
+     */
+    val USER_AUTHORITIES_INDEX_TTL: Duration = Duration.ofDays(4)
+
+    fun getUserAuthoritiesCacheKey(userId: Long, tenantId: Long?) =
+        "$USER_AUTHORITIES_CACHE_PREFIX$userId:${tenantId ?: NO_TENANT_SLICE}"
+
+    fun getUserAuthoritiesIndexKey(userId: Long) = "$USER_AUTHORITIES_INDEX_PREFIX$userId"
+
+    /** Prefix for the per-user force-logout timestamp (millis). */
+    const val FORCE_LOGOUT_KEY_PREFIX = "forceLogout:"
+
+    fun getForceLogoutKey(userId: Long) = "$FORCE_LOGOUT_KEY_PREFIX$userId"
 }

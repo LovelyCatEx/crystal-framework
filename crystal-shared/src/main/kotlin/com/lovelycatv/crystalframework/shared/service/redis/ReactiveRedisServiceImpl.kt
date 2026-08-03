@@ -26,6 +26,10 @@ class ReactiveRedisServiceImpl(
         return this.reactiveRedisTemplate.delete(*key)
     }
 
+    override fun expire(key: String, duration: Duration): Mono<Boolean> {
+        return this.reactiveRedisTemplate.expire(key, duration)
+    }
+
     override fun compareAndDelete(key: String, expectedValue: String): Mono<Boolean> {
         return this.reactiveRedisTemplate
             .execute(COMPARE_AND_DELETE_SCRIPT, listOf(key), listOf(expectedValue))

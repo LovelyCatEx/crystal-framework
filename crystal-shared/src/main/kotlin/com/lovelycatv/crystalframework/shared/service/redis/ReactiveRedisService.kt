@@ -11,6 +11,9 @@ interface ReactiveRedisService {
 
     fun removeKey(vararg key: String): Mono<Long>
 
+    /** Sets (or refreshes) the time-to-live of an existing [key]. Returns false if the key does not exist. */
+    fun expire(key: String, duration: Duration): Mono<Boolean>
+
     fun compareAndDelete(key: String, expectedValue: String): Mono<Boolean>
 
     /**
