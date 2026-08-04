@@ -15,8 +15,10 @@ import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import org.springframework.http.codec.multipart.FilePart
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.util.UUID
 
 abstract class AbstractFileResourceService(
     private val storageProvider: StorageProviderEntity,
@@ -78,6 +80,16 @@ abstract class AbstractFileResourceService(
             detectedMimeType
         )
 
+        val requestedExtension = fileNameWithExtension
+            .substringAfterLast('.', "")
+            .lowercase()
+        val canonicalExtension = fileResourceService.resolveFileExtension(
+            fileType,
+            detectedMimeType,
+            requestedExtension
+        ) ?: throw BusinessException("File extension does not match detected content type")
+        val canonicalFileName = "${UUID.randomUUID()}.$canonicalExtension"
+
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
         val uploadStream = ByteArrayInputStream(byteArray)
@@ -96,17 +108,16 @@ abstract class AbstractFileResourceService(
             )
         }
 
-        val objectKey = this.buildObjectKey(fileType, fileNameWithExtension)
+        val objectKey = this.buildObjectKey(fileType, canonicalFileName)
 
-        val (fileName, fileExtension) = fileNameWithExtension.run {
-            this.split(".")
-        }
+        val fileName = canonicalFileName.substringBeforeLast('.')
+        val fileExtension = canonicalExtension
 
         val result = this.doUploadFile(
             fileType,
             fileLength,
             detectedMimeType,
-            fileNameWithExtension,
+            canonicalFileName,
             uploadStream,
             objectKey,
             progressReporter

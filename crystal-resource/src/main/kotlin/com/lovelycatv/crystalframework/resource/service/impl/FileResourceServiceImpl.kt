@@ -6,9 +6,10 @@ import com.lovelycatv.crystalframework.resource.repository.FileResourceRepositor
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.ResourceAccessService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
-import com.lovelycatv.crystalframework.resource.utils.ResourceUrlSigner
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
+import com.lovelycatv.crystalframework.resource.utils.ResourceUrlSigner
+import com.lovelycatv.crystalframework.resource.utils.getMimeExtensions
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -56,6 +57,28 @@ class FileResourceServiceImpl(
             ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
         }
         return contentType in config.supportedContentTypes
+    }
+
+    override fun resolveFileExtension(
+        fileType: ResourceFileType,
+        contentType: String,
+        requestedExtension: String
+    ): String? {
+        val resourceConfig = this.getCrystalFrameworkConfiguration().resource
+        val config = when (fileType) {
+            ResourceFileType.USER_AVATAR -> resourceConfig.avatar
+            ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
+            ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
+        }
+        val normalizedExtension = requestedExtension.removePrefix(".").lowercase()
+        val allowedExtensions = config.supportedFileExtensions
+            .map { it.removePrefix(".").lowercase() }
+            .toSet()
+        val mimeExtensions = getMimeExtensions(contentType)
+        if (normalizedExtension !in allowedExtensions || normalizedExtension !in mimeExtensions) {
+            return null
+        }
+        return mimeExtensions.firstOrNull { it in allowedExtensions }
     }
 
     override suspend fun getByMD5(md5: String): FileResourceEntity? {

@@ -76,10 +76,16 @@ public class CrystalFrameworkConfiguration {
 
         public static class ResourceConfig {
             private String[] supportedContentTypes = new String[0];
+            private String[] supportedFileExtensions = new String[0];
 
             public String[] getSupportedContentTypes() { return supportedContentTypes; }
             public void setSupportedContentTypes(String[] supportedContentTypes) {
                 this.supportedContentTypes = supportedContentTypes;
+            }
+
+            public String[] getSupportedFileExtensions() { return supportedFileExtensions; }
+            public void setSupportedFileExtensions(String[] supportedFileExtensions) {
+                this.supportedFileExtensions = supportedFileExtensions;
             }
         }
 
