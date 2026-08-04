@@ -60,7 +60,7 @@ class MailServiceImpl(
 
             logger.info("Mail sent successfully, to: $to, subject: $subject, content: ${content.length} bytes")
         } catch (e: Exception) {
-            logger.error("Send email to $to failed, subject: $subject, content: $content", e)
+            logger.error("Send email to $to failed, subject: $subject, content: ${content.length} bytes", e)
             throw BusinessException("Send email to $to failed")
         }
     }
