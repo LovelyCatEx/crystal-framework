@@ -187,6 +187,32 @@ fun testSomething() {
 }
 ```
 
+### 回滚事务的两个陷阱（共享库 + 缓存）
+
+集成测试连的是共享真实库，且 `withTransactionalRollback` 只回滚、从不 commit。以下两点在「事务内先写后读」的测试里必踩，测试会读到脏数据而非自己造的数据：
+
+**① 表里可能已有真实行，测试必须先隔离。** 若测试逻辑依赖「表是空的 / 优先级从 0 开始 / 只有我造的行」，库里已存在的行会打乱它。在 `withTransactionalRollback` 块开头，用 Service 的 `batchDelete(ids)` 把已有行**软删除**（`deleted_time` 被 SQL 拦截器过滤，回滚后原样恢复，绝不污染真实数据）。软删除会同时骗过 `getActiveXxx()` 和 `repository.findAll()`（`findAll` 也带软删过滤），比 `enabled=false` 更彻底。
+
+> **⛔ 前提：仅适用于数据量小的表。** `batchDelete` 会对全部已存在行执行一次 UPDATE，仅适用于 storage routing rule 一类的少量配置表。对用户、审计日志、订单等大表禁止使用，否则将引发全表更新的性能问题与长事务锁。此类情形应告知用户该测试不适合基于共享库实现，改用带唯一过滤条件、仅作用于自身数据的写法，或不实现该测试。
+
+```kotlin
+// 事务内先清掉已有行，让测试只观察自己造的数据
+suspend fun clearExistingRules() {
+    val ids = ruleManagerService.getRepository().findAll().awaitListWithTimeout().map { it.id }
+    if (ids.isNotEmpty()) ruleManagerService.batchDelete(ids)
+}
+```
+
+**② 写后读要手动驱逐实体缓存。** `withUpdateEntityContext` / `withDeleteEntityContext` 的第二次缓存驱逐是 `runAfterCommitOrNow` 延迟到事务提交后的——回滚事务永不 commit，该驱逐永不触发。于是「create/update → 同事务内再读」会命中中间读写进缓存的旧值（旧 priority、旧 active 等）。断言读之前手动 `removeCache(id)` 强制穿透到库：
+
+```kotlin
+service.reorder(listOf(ruleB.id, ruleA.id))   // 已写库，但缓存仍是旧 priority
+service.removeCache(ruleB.id)                 // 手动驱逐，下次读穿透到库
+val reordered = service.getByIdOrNull(ruleB.id)
+```
+
+两点都只发生在测试侧：生产环境事务正常 commit，延迟驱逐会补上，实体最终一致。
+
 ### 异常测试
 
 Service 方法抛 `BusinessException` 时在 `withTransactionalRollback` 内用 `runCatching` 捕获：
