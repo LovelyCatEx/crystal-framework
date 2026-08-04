@@ -3,8 +3,10 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.lockRowForUpdate
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerUpdateTenantMemberDTO
@@ -64,6 +66,11 @@ class TenantMemberManagerServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateTenantMemberDTO): TenantMemberEntity {
+        // Serialize concurrent member creation for this tenant so the count-then-insert member-limit
+        // check below cannot be bypassed by parallel transactions (M-12). The lock on the tenant row
+        // is held until this transaction commits, so contenders re-read the count only after commit.
+        getEntityTemplate().lockRowForUpdate(TableConstants.TABLE_TENANTS, dto.tenantId)
+
         userManagerService.getByIdOrNull(dto.memberUserId)
             ?: throw BusinessException("User with ID ${dto.memberUserId} not found")
 

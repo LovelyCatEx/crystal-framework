@@ -2,8 +2,10 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.lockRowForUpdate
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerCreateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.invitation.dto.ManagerUpdateInvitationDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantInvitationEntity
@@ -46,6 +48,11 @@ class TenantInvitationManagerServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateInvitationDTO): TenantInvitationEntity {
+        // Serialize concurrent invitation creation for this tenant so the count-then-insert total /
+        // daily limit checks below cannot be bypassed by parallel transactions (M-12). The lock on the
+        // tenant row is held until this transaction commits, so contenders re-read counts only after commit.
+        getEntityTemplate().lockRowForUpdate(TableConstants.TABLE_TENANTS, dto.tenantId)
+
         val tireTypeId = tenantService.getByIdOrThrow(dto.tenantId).tireTypeId
         val now = System.currentTimeMillis()
 
