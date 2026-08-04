@@ -13,6 +13,18 @@ object RedisConstants {
 
     const val ENTITY_CACHE_BY_LIST = "entity-cache:list:"
 
+    /**
+     * Lower TTL bound (ms) for cache entries rehydrated by a read-through miss in
+     * [com.lovelycatv.crystalframework.shared.service.CachedBaseService.getByIdOrNull]. A read landing
+     * inside a concurrent write's evict-around window can rehydrate the pre-write row; capping such
+     * fills to a short TTL bounds how long that phantom can survive if the post-commit re-eviction
+     * races it. Explicit writes via `updateCache` keep the full 8–12h TTL.
+     */
+    const val ENTITY_CACHE_READTHROUGH_MIN_TTL_MS = 30_000L
+
+    /** Upper TTL bound (ms) for read-through miss rehydration. See [ENTITY_CACHE_READTHROUGH_MIN_TTL_MS]. */
+    const val ENTITY_CACHE_READTHROUGH_MAX_TTL_MS = 120_000L
+
     const val SYSTEM_SETTINGS_REFRESH_TOPIC = "crystalframework:system-settings:refresh"
 
     const val TENANT_SETTINGS_REFRESH_TOPIC = "crystalframework:tenant-settings:refresh"
