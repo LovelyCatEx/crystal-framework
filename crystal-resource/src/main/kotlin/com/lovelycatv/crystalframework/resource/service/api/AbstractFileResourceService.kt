@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadRes
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
 import com.lovelycatv.crystalframework.shared.utils.getContentType
@@ -33,6 +34,41 @@ abstract class AbstractFileResourceService(
     open fun buildObjectKey(fileType: ResourceFileType, fileNameWithExtension: String): String {
         return "${fileType.name.lowercase()}/$fileNameWithExtension"
     }
+
+    /**
+     * The provider's configured base URL, guaranteed to end with a single trailing slash so it can be
+     * concatenated directly with an object key. Centralized here so no impl re-implements the normalization.
+     */
+    protected fun normalizedProviderBaseUrl(): String {
+        val baseUrl = this.storageProvider.baseUrl
+        val withScheme = if (baseUrl.startsWith(HTTP_SCHEME_PREFIX) || baseUrl.startsWith(HTTPS_SCHEME_PREFIX)) {
+            baseUrl
+        } else {
+            "$HTTPS_SCHEME_PREFIX$baseUrl"
+        }
+        return if (withScheme.endsWith("/")) withScheme else "$withScheme/"
+    }
+
+    /**
+     * The object key without a leading slash, ready to append to [normalizedProviderBaseUrl].
+     */
+    protected fun normalizedObjectKey(entity: FileResourceEntity): String {
+        return entity.objectKey.removePrefix("/")
+    }
+
+    /**
+     * Produces a download URL for [entity] appropriate to [visibility] and this provider.
+     *
+     * The caller ([com.lovelycatv.crystalframework.resource.service.FileResourceService.getFileDownloadUrl])
+     * has already authorized the viewer at mint time; each provider decides how to honor [visibility]:
+     * PUBLIC resources may return a stable URL, while non-public resources must return a short-lived
+     * credential (HMAC signature for local files, vendor pre-signed GET URL for cloud storage) so a leaked
+     * link stops working after its TTL even if the bucket/CDN allows direct reads.
+     */
+    abstract suspend fun buildDownloadUrl(
+        entity: FileResourceEntity,
+        visibility: ResourceVisibility
+    ): String
 
     suspend fun uploadFile(
         userId: Long,
@@ -170,5 +206,11 @@ abstract class AbstractFileResourceService(
 
     open fun destroy() {
         // Release resources
+    }
+
+    companion object {
+        private const val HTTP_SCHEME_PREFIX = "http://"
+
+        private const val HTTPS_SCHEME_PREFIX = "https://"
     }
 }

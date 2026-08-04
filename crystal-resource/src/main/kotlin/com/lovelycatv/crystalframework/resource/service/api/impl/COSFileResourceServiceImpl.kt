@@ -1,20 +1,26 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
+import com.qcloud.cos.http.HttpMethodName
 import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import com.qcloud.cos.transfer.TransferManagerConfiguration
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.util.Date
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
@@ -63,6 +69,22 @@ class COSFileResourceServiceImpl(
         return this.transferManager!!
     }
 
+    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
+        val objectKey = normalizedObjectKey(entity)
+
+        return when (visibility) {
+            ResourceVisibility.PUBLIC ->
+                "${normalizedProviderBaseUrl()}$objectKey"
+            ResourceVisibility.AUTHENTICATED,
+            ResourceVisibility.SCOPE_MEMBER,
+            ResourceVisibility.OWNER_ONLY,
+            ResourceVisibility.SYSTEM_ADMIN -> withContext(Dispatchers.IO) {
+                val expiration = Date(System.currentTimeMillis() + PRESIGNED_URL_TTL_MS)
+                getClient().generatePresignedUrl(bucketName, objectKey, expiration, HttpMethodName.GET).toString()
+            }
+        }
+    }
+
     override suspend fun doUploadFile(
         fileType: ResourceFileType,
         fileLength: Long,
@@ -107,5 +129,10 @@ class COSFileResourceServiceImpl(
         super.destroy()
 
         this.transferManager?.shutdownNow(true)
+    }
+
+    companion object {
+        /** TTL for pre-signed GET URLs of non-public resources (30 minutes). */
+        private const val PRESIGNED_URL_TTL_MS = 30 * 60 * 1000L
     }
 }

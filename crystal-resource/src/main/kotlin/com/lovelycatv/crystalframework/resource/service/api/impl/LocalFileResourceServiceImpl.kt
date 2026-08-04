@@ -1,10 +1,14 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.resource.utils.ResourceUrlSigner
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,6 +23,8 @@ class LocalFileResourceServiceImpl(
     storageProvider: StorageProviderEntity,
     fileResourceService: FileResourceService,
     private val basePath: String,
+    private val systemModuleClient: SystemModuleClient,
+    private val resourceUrlSigner: ResourceUrlSigner,
 ) : AbstractFileResourceService(storageProvider, fileResourceService) {
     private val logger = logger()
 
@@ -87,4 +93,32 @@ class LocalFileResourceServiceImpl(
         return resolved
     }
 
+    /**
+     * Local files are served by [com.lovelycatv.crystalframework.resource.controller.LocalFileResourceController].
+     * Public files use a stable, cacheable URL; non-public files get a short-lived HMAC signature so an
+     * anonymous `<img>` request (which cannot carry an Authorization header) can be verified at read time.
+     */
+    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
+        val systemSettings = systemModuleClient.getSystemSettings()
+            ?: throw BusinessException("System settings not initialized")
+        val baseUrl = systemSettings.basic.getNormalizedBaseUrl(false)
+
+        return when (visibility) {
+            ResourceVisibility.PUBLIC ->
+                "$baseUrl/file/local/${entity.id}"
+            ResourceVisibility.AUTHENTICATED,
+            ResourceVisibility.SCOPE_MEMBER,
+            ResourceVisibility.OWNER_ONLY,
+            ResourceVisibility.SYSTEM_ADMIN -> {
+                val expiresAt = System.currentTimeMillis() + LOCAL_SIGNED_URL_TTL_MS
+                val signature = resourceUrlSigner.sign(entity.id, expiresAt)
+                "$baseUrl/file/local/${entity.id}?exp=$expiresAt&sig=$signature"
+            }
+        }
+    }
+
+    companion object {
+        /** Validity window of a signed local-file download URL (5 minutes). */
+        private const val LOCAL_SIGNED_URL_TTL_MS = 5 * 60 * 1000L
+    }
 }

@@ -1,16 +1,20 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import com.volcengine.tos.TOSV2
 import com.volcengine.tos.TOSV2ClientBuilder
+import com.volcengine.tos.comm.HttpMethod
 import com.volcengine.tos.model.`object`.AbortMultipartUploadInput
 import com.volcengine.tos.model.`object`.CompleteMultipartUploadV2Input
 import com.volcengine.tos.model.`object`.CreateMultipartUploadInput
 import com.volcengine.tos.model.`object`.ObjectMetaRequestOptions
+import com.volcengine.tos.model.`object`.PreSignedURLInput
 import com.volcengine.tos.model.`object`.UploadPartV2Input
 import com.volcengine.tos.model.`object`.UploadedPartV2
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +41,28 @@ class VolcEngineTOSFileResourceServiceImpl(
         }
 
         return this.client!!
+    }
+
+    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
+        val objectKey = normalizedObjectKey(entity)
+
+        return when (visibility) {
+            ResourceVisibility.PUBLIC ->
+                "${normalizedProviderBaseUrl()}$objectKey"
+            ResourceVisibility.AUTHENTICATED,
+            ResourceVisibility.SCOPE_MEMBER,
+            ResourceVisibility.OWNER_ONLY,
+            ResourceVisibility.SYSTEM_ADMIN -> withContext(Dispatchers.IO) {
+                getClient().preSignedURL(
+                    PreSignedURLInput.builder()
+                        .httpMethod(HttpMethod.GET)
+                        .bucket(bucketName)
+                        .key(objectKey)
+                        .expires(PRESIGNED_URL_TTL_SECONDS)
+                        .build()
+                ).signedUrl
+            }
+        }
     }
 
     override suspend fun doUploadFile(
@@ -149,5 +175,8 @@ class VolcEngineTOSFileResourceServiceImpl(
         private const val PROGRESS_COMPLETE = 100
 
         private const val CONTENT_DISPOSITION_PREFIX = "attachment; filename="
+
+        /** TTL for pre-signed GET URLs of non-public resources (30 minutes, expressed in seconds per TOS API). */
+        private const val PRESIGNED_URL_TTL_SECONDS = 30L * 60L
     }
 }
