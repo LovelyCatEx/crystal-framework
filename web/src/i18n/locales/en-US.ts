@@ -1920,8 +1920,14 @@ export const enUS: I18nRules = {
           placeholder: 'Storage object key'
         }
       },
+      actions: {
+        download: 'Download',
+        copyLink: 'Copy Link'
+      },
       messages: {
-        downloadFailed: 'Failed to get file download link'
+        downloadFailed: 'Failed to get file download link',
+        copyLinkSuccess: 'Link copied to clipboard',
+        copyLinkFailed: 'Failed to copy link'
       }
     },
     userRoleManager: {

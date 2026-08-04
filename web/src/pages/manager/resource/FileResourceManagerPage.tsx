@@ -1,4 +1,5 @@
-import {Button, Col, Form, Input, message, Row, Select} from "antd";
+import {Button, Col, Dropdown, Form, Input, message, Row, Select} from "antd";
+import type {MenuProps} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     FileResourceManagerController,
@@ -11,7 +12,7 @@ import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
-import {DownloadOutlined} from "@ant-design/icons";
+import {CopyOutlined, DownloadOutlined} from "@ant-design/icons";
 import {downloadFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
@@ -37,6 +38,37 @@ export default function FileResourceManagerPage() {
             await message.error(t('pages.fileResourceManager.messages.downloadFailed'));
         }
     };
+
+    const handleCopyFileEntityLink = async (record: FileResource) => {
+        const url = (await getResourceFileDownloadUrlById(record.id)).data;
+
+        if (!url) {
+            await message.error(t('pages.fileResourceManager.messages.downloadFailed'));
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(url);
+            await message.success(t('pages.fileResourceManager.messages.copyLinkSuccess'));
+        } catch {
+            await message.error(t('pages.fileResourceManager.messages.copyLinkFailed'));
+        }
+    };
+
+    const buildRowActionMenu = (record: FileResource): MenuProps['items'] => [
+        {
+            key: 'download',
+            icon: <DownloadOutlined />,
+            label: t('pages.fileResourceManager.actions.download'),
+            onClick: () => handleDownloadFileEntity(record),
+        },
+        {
+            key: 'copyLink',
+            icon: <CopyOutlined />,
+            label: t('pages.fileResourceManager.actions.copyLink'),
+            onClick: () => handleCopyFileEntityLink(record),
+        },
+    ];
 
     const filterableFields = [
         { field: 'id', type: 'number' as const, label: t('pages.fileResourceManager.filter.id') },
@@ -194,9 +226,9 @@ export default function FileResourceManagerPage() {
                 }
             ]}
             tableRowActionsRender={(record) => (
-                <>
-                    <Button type="text" size="small" icon={<DownloadOutlined />} onClick={() => handleDownloadFileEntity(record)} />
-                </>
+                <Dropdown menu={{ items: buildRowActionMenu(record) }} trigger={['hover']}>
+                    <Button type="text" size="small" icon={<DownloadOutlined />} />
+                </Dropdown>
             )}
         >
 

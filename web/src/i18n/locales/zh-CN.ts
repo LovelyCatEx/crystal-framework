@@ -1917,8 +1917,14 @@ export const zhCN: I18nRules = {
           placeholder: '存储对象键'
         }
       },
+      actions: {
+        download: '下载',
+        copyLink: '复制链接'
+      },
       messages: {
-        downloadFailed: '无法获取文件下载链接'
+        downloadFailed: '无法获取文件下载链接',
+        copyLinkSuccess: '链接已复制到剪贴板',
+        copyLinkFailed: '复制链接失败'
       }
     },
     userRoleManager: {
