@@ -46,10 +46,10 @@ export function OAuth2BindPage() {
                     return;
                 }
 
-                // Both response types now include oauthAccountId
-                const data = res.data as { oauthAccountId?: string };
-                const oauthAccountId = data.oauthAccountId;
-                if (!oauthAccountId) {
+                // The callback returns a short-lived, one-time binding token.
+                const data = res.data as { oauthBindToken?: string };
+                const oauthBindToken = data.oauthBindToken;
+                if (!oauthBindToken) {
                     setStatus('error');
                     setErrorMessage(t('pages.auth.oauth2Bind.failed'));
                     return;
@@ -57,7 +57,7 @@ export function OAuth2BindPage() {
 
                 // Step 2: Bind the resolved identity to the current user at the specified scope
                 return bindOAuthByAccountId({
-                    oauthAccountId,
+                    oauthBindToken,
                     scope: locationState.scope,
                 });
             })

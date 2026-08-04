@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.auth.service.impl
 
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
+import com.lovelycatv.crystalframework.auth.service.OAuthBindingTokenService
 import com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.auth.types.ProcessOAuth2AuthenticationSuccessResult
@@ -26,6 +27,7 @@ import reactor.kotlin.core.publisher.toMono
 class UserAuthorizationServiceImpl(
     private val userService: UserService,
     private val oAuthAccountService: OAuthAccountService,
+    private val oAuthBindingTokenService: OAuthBindingTokenService,
     private val jwtSignKeyStore: JWTSignKeyStore,
     private val userRbacQueryService: UserRbacQueryService,
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
@@ -112,17 +114,19 @@ class UserAuthorizationServiceImpl(
                                 ))
                             )
                         }
-                    } ?: ProcessOAuth2AuthenticationSuccessResult(
-                        user = null,
-                        oauth2Account = it,
-                        response = ApiResponse.success(mapOf(
-                            "oauthAccountId" to it.id.toString(),
-                            "platform" to it.getRealPlatform().name,
-                            "identifier" to it.identifier,
-                            "nickname" to it.nickname,
-                            "avatar" to it.avatar
-                        ))
-                    ).toMono()
+                    } ?: mono {
+                        ProcessOAuth2AuthenticationSuccessResult(
+                            user = null,
+                            oauth2Account = it,
+                            response = ApiResponse.success(mapOf(
+                                "oauthBindToken" to oAuthBindingTokenService.issue(it.id),
+                                "platform" to it.getRealPlatform().name,
+                                "identifier" to it.identifier,
+                                "nickname" to it.nickname,
+                                "avatar" to it.avatar
+                            ))
+                        )
+                    }
                 }
         }
     }

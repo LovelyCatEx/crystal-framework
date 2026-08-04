@@ -39,6 +39,10 @@ object RedisConstants {
 
     const val LOCK_OAUTH_BIND_PREFIX = "lock:oauth:bind:"
 
+    const val OAUTH_BIND_TOKEN_PREFIX = "oauth:bind:token:"
+
+    val OAUTH_BIND_TOKEN_TTL: Duration = Duration.ofMinutes(5)
+
     const val LOCK_APPROVAL_TOKEN_PREFIX = "lock:approval:token:"
 
     /** Sliding-window counter of authentication attempts keyed by client IP. */
