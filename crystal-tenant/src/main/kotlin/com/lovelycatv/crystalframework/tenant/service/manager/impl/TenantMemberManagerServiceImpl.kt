@@ -166,12 +166,25 @@ class TenantMemberManagerServiceImpl(
         )
     }
 
+    /**
+     * Deleting a member does not revoke the underlying user's still-valid JWT or cached authorities.
+     * Resolve the member users before deletion and force-logout them so existing tokens are rejected
+     * on the next request, matching the deactivation path in [update].
+     *
+     * Note: force-logout is user-scoped, so a user who belongs to multiple tenants will be logged out
+     * of all of them. This is the accepted tradeoff of reusing the existing user-level mechanism.
+     */
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun batchDelete(ids: List<Long>) {
+        val memberUserIds = ids.mapNotNull { getByIdOrNull(it)?.memberUserId }
+
         tenantMemberRoleRelationService.deleteByMemberIdIn(ids)
 
         tenantDepartmentMemberRelationService.deleteByMemberIdIn(ids)
 
         super.batchDelete(ids)
+
+        memberUserIds.forEach { userForceLogoutService.markForceLogout(it) }
     }
 
     override suspend fun findAllByTenantId(tenantId: Long): List<TenantMemberEntity> {
