@@ -52,7 +52,6 @@ abstract class AbstractFileResourceService(
             fileType = fileType,
             fileNameWithExtension = targetFileName,
             fileLength = fileSize,
-            fileContentType = filePart.getContentType(),
             inputStream = inputStream,
             progressReporter = progressReporter
         )
@@ -65,7 +64,6 @@ abstract class AbstractFileResourceService(
         fileType: ResourceFileType,
         fileNameWithExtension: String,
         fileLength: Long,
-        fileContentType: String,
         inputStream: InputStream,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {

@@ -1767,7 +1767,8 @@ export const zhCN: I18nRules = {
           placeholder: '选择存储类型',
           localFileSystem: '本地文件系统',
           aliyunOss: '阿里云 OSS',
-          tencentCos: '腾讯 OSS'
+          tencentCos: '腾讯 OSS',
+          volcEngineTos: '火山引擎 TOS'
         },
         description: {
           label: '描述',
@@ -3215,6 +3216,7 @@ export const zhCN: I18nRules = {
       localFileSystem: '本地文件系统',
       tencentCos: '腾讯云 COS',
       aliyunOss: '阿里云 OSS',
+      volcEngineTos: '火山引擎 TOS',
       selectTemplate: '选择配置模板',
       applyTemplate: '应用模板',
       applyTemplateTooltip: '应用模板'
@@ -3885,7 +3887,8 @@ export const zhCN: I18nRules = {
     storageProviderType: {
       0: '本地文件系统',
       1: '阿里云 OSS',
-      2: '腾讯云 COS'
+      2: '腾讯云 COS',
+      3: '火山引擎 TOS'
     },
 
     ruleDistributionType: {

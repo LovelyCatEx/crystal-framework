@@ -63,6 +63,7 @@ export default function StorageProviderManagerPage() {
                         { value: String(StorageProviderType.LOCAL_FILE_SYSTEM), label: t('pages.storageProviderManager.modal.type.localFileSystem') },
                         { value: String(StorageProviderType.ALIYUN_OSS), label: t('pages.storageProviderManager.modal.type.aliyunOss') },
                         { value: String(StorageProviderType.TENCENT_COS), label: t('pages.storageProviderManager.modal.type.tencentCos') },
+                        { value: String(StorageProviderType.VOLCENGINE_TOS), label: t('pages.storageProviderManager.modal.type.volcEngineTos') },
                     ]}
                     onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
                 />
@@ -110,6 +111,10 @@ export default function StorageProviderManagerPage() {
                                         {
                                             label: t('pages.storageProviderManager.modal.type.tencentCos'),
                                             value: StorageProviderType.TENCENT_COS,
+                                        },
+                                        {
+                                            label: t('pages.storageProviderManager.modal.type.volcEngineTos'),
+                                            value: StorageProviderType.VOLCENGINE_TOS,
                                         }
                                     ]}
                                 />
@@ -169,6 +174,10 @@ export default function StorageProviderManagerPage() {
                             {
                                 label: t('pages.storageProviderManager.modal.type.tencentCos'),
                                 value: StorageProviderType.TENCENT_COS,
+                            },
+                            {
+                                label: t('pages.storageProviderManager.modal.type.volcEngineTos'),
+                                value: StorageProviderType.VOLCENGINE_TOS,
                             }
                         ]}
                         onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}

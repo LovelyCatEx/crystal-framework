@@ -1770,7 +1770,8 @@ export const enUS: I18nRules = {
           placeholder: 'Select storage type',
           localFileSystem: 'Local File System',
           aliyunOss: 'Aliyun OSS',
-          tencentCos: 'Tencent COS'
+          tencentCos: 'Tencent COS',
+          volcEngineTos: 'VolcEngine TOS'
         },
         description: {
           label: 'Description',
@@ -3217,6 +3218,7 @@ export const enUS: I18nRules = {
       localFileSystem: 'Local File System',
       tencentCos: 'Tencent Cloud COS',
       aliyunOss: 'Aliyun OSS',
+      volcEngineTos: 'VolcEngine TOS',
       selectTemplate: 'Select Config Template',
       applyTemplate: 'Apply Template',
       applyTemplateTooltip: 'Apply Template'
@@ -3887,7 +3889,8 @@ export const enUS: I18nRules = {
     storageProviderType: {
       0: 'Local File System',
       1: 'Aliyun OSS',
-      2: 'Tencent COS'
+      2: 'Tencent COS',
+      3: 'VolcEngine TOS'
     },
 
     ruleDistributionType: {

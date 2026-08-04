@@ -187,6 +187,11 @@
             <version>0.3.1</version>
         </dependency>
         <dependency>
+            <groupId>com.volcengine</groupId>
+            <artifactId>ve-tos-java-sdk</artifactId>
+            <version>2.8.8</version>
+        </dependency>
+        <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>vertex-core</artifactId>
             <version>1.0.0</version>
