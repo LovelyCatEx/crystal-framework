@@ -1,12 +1,16 @@
 package com.lovelycatv.crystalframework.auth.filter
 
+import com.lovelycatv.crystalframework.auth.constants.LoginRateLimitConstants
 import com.lovelycatv.crystalframework.auth.event.LoginMethod
 import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
+import com.lovelycatv.crystalframework.auth.service.LoginRateLimitService
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.shared.exception.AccountBannedException
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.DisabledContext
+import com.lovelycatv.crystalframework.shared.exception.TooManyRequestsException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
+import com.lovelycatv.crystalframework.shared.utils.resolveClientIp
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.entity.UserEntity
 import com.lovelycatv.vertex.log.logger
@@ -29,7 +33,8 @@ class CustomLoginFilter(
     defaultFilterProcessesUrl: String,
     authenticationManager: ReactiveAuthenticationManager,
     userAuthorizationService: UserAuthorizationService,
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
+    private val loginRateLimitService: LoginRateLimitService,
 ) : AuthenticationWebFilter(authenticationManager) {
     private val logger = logger()
 
@@ -51,10 +56,14 @@ class CustomLoginFilter(
                         return@flatMap Mono.error(BusinessException("username or password is missing"))
                     }
 
-                    UsernamePasswordAuthenticationToken(
-                        "${username}:${tenantId}",
-                        password,
-                    ).toMono()
+                    val account = "${username}:${tenantId}"
+                    val ip = exchange.request.resolveClientIp()
+                    exchange.attributes[LoginRateLimitConstants.ATTR_LOGIN_ACCOUNT] = account
+
+                    mono {
+                        loginRateLimitService.checkAllowed(ip, account)
+                        UsernamePasswordAuthenticationToken(account, password)
+                    }
                 }
         }
 
@@ -62,6 +71,9 @@ class CustomLoginFilter(
             val loggedUser = authentication.principal as UserEntity
 
             mono {
+                exchange.exchange.attributes[LoginRateLimitConstants.ATTR_LOGIN_ACCOUNT]?.let { account ->
+                    loginRateLimitService.recordSuccess(account as String)
+                }
                 userAuthorizationService.buildLoginSuccessResponse(loggedUser)
             }.flatMap { data ->
                 logger.info("User ${loggedUser.username}#${loggedUser.id} is logged in with password")
@@ -100,8 +112,9 @@ class CustomLoginFilter(
         }
 
         setAuthenticationFailureHandler { exchange, exception ->
-            val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
+            val remoteIp = exchange.exchange.request.resolveClientIp()
             val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
+            val account = exchange.exchange.attributes[LoginRateLimitConstants.ATTR_LOGIN_ACCOUNT] as? String
 
             eventPublisher.publishEvent(
                 UserLoginEvent(
@@ -121,6 +134,8 @@ class CustomLoginFilter(
             )
 
             val response = when (exception) {
+                is TooManyRequestsException ->
+                    ApiResponse.tooManyRequests(exception.localizedMessage ?: "too many requests", exception.context)
                 is AccountBannedException ->
                     ApiResponse.forbidden(exception.localizedMessage ?: "banned", exception.context)
                 is DisabledException ->
@@ -130,12 +145,26 @@ class CustomLoginFilter(
             }
 
             exchange.exchange.response.statusCode = HttpStatus.OK
-            exchange.exchange.response.writeWith(
-                exchange.exchange.response.bufferFactory().wrap(
-                    response
-                        .toJSONString()
-                        .toByteArray()
-                ).toMono()
+            // Only bad-credential failures feed the brute-force counter; rate-limit rejections,
+            // bans and disabled accounts are not credential-guessing attempts.
+            val recordFailureMono = if (account != null &&
+                exception !is TooManyRequestsException &&
+                exception !is AccountBannedException &&
+                exception !is DisabledException
+            ) {
+                mono { loginRateLimitService.recordFailure(account) }.then()
+            } else {
+                Mono.empty()
+            }
+
+            recordFailureMono.then(
+                exchange.exchange.response.writeWith(
+                    exchange.exchange.response.bufferFactory().wrap(
+                        response
+                            .toJSONString()
+                            .toByteArray()
+                    ).toMono()
+                )
             )
         }
     }

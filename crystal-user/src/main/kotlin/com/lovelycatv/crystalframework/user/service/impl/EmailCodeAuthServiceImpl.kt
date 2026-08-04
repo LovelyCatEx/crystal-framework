@@ -1,8 +1,13 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.mail.service.MailService
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.ratelimit.RateLimitDimension
+import com.lovelycatv.crystalframework.shared.service.ratelimit.SlidingWindowRateLimiter
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.user.constants.EmailCodeRateLimitConstants
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
@@ -19,6 +24,8 @@ private const val ATTEMPTS_KEY_SUFFIX = ":attempts"
 class EmailCodeAuthServiceImpl(
     private val redisService: ReactiveRedisService,
     private val mailService: MailService,
+    private val slidingWindowRateLimiter: SlidingWindowRateLimiter,
+    private val systemModuleClient: SystemModuleClient,
 ) : EmailCodeAuthService {
     private val secureRandom = SecureRandom()
 
@@ -56,9 +63,15 @@ class EmailCodeAuthServiceImpl(
 
     override suspend fun withSendEmailCode(
         redisKey: String,
+        ip: String,
+        email: String,
         validMinutes: Long,
         action: suspend (code: String, mailService: MailService) -> Unit
     ) {
+        // Anti mail-bombing: per-IP / per-email / global sliding windows. Runs before the per-email
+        // 60s cooldown so it also caps sends spread across many distinct target addresses.
+        checkSendRateLimit(ip, email)
+
         val existingCode = redisService
             .get<String>(redisKey)
             .awaitFirstOrNull()
@@ -80,5 +93,26 @@ class EmailCodeAuthServiceImpl(
         redisService.removeKey("$redisKey$ATTEMPTS_KEY_SUFFIX").awaitFirstOrNull()
 
         action.invoke(code, this.mailService)
+    }
+
+    /**
+     * Enforces the email-code sending windows via the shared limiter. No-op when the feature is
+     * disabled or its settings are unavailable (the limiter itself fails open on Redis errors).
+     */
+    private suspend fun checkSendRateLimit(ip: String, email: String) {
+        val config = systemModuleClient.getSystemSettings()?.security?.emailCodeRateLimit ?: return
+        if (!config.enabled) {
+            return
+        }
+
+        slidingWindowRateLimiter.checkAllowed(
+            windowSeconds = config.windowSeconds,
+            dimensions = listOf(
+                RateLimitDimension(RedisConstants.getMailCodeRateLimitIpKey(ip), config.maxPerIp),
+                RateLimitDimension(RedisConstants.getMailCodeRateLimitEmailKey(email), config.maxPerEmail),
+                RateLimitDimension(RedisConstants.MAIL_CODE_RATE_LIMIT_GLOBAL_KEY, config.maxGlobal),
+            ),
+            message = EmailCodeRateLimitConstants.MESSAGE_TOO_MANY_SENDS,
+        )
     }
 }

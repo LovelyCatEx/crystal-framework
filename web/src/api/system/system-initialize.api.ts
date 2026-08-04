@@ -1,4 +1,5 @@
 import {doGet, doPost} from "../system-request.ts";
+import {HEADER_SYSTEM_INITIALIZE_TOKEN} from "@/global/constants.ts";
 
 export interface InitializeSystemDTO {
   username: string;
@@ -12,8 +13,11 @@ export interface InitializeSystemDTO {
   fromName: string;
 }
 
-export async function initializeSystem(dto: InitializeSystemDTO) {
-  return doPost<void>('/api/system/initialize', dto, { 'Content-Type': 'application/json' });
+export async function initializeSystem(dto: InitializeSystemDTO, initializationToken: string) {
+  return doPost<void>('/api/system/initialize', dto, {
+    'Content-Type': 'application/json',
+    [HEADER_SYSTEM_INITIALIZE_TOKEN]: initializationToken,
+  });
 }
 
 export async function checkSystemInitialized() {

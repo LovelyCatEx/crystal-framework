@@ -9,6 +9,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
@@ -43,6 +44,8 @@ class FileResourceManagerServiceImpl(
         return this.getRepository().save(
             FileResourceEntity(
                 id = snowIdGenerator.nextId(),
+                scope = dto.scope,
+                scopeId = dto.scopeId,
                 userId = dto.userId,
                 type = dto.type,
                 fileName = dto.fileName,
@@ -53,6 +56,10 @@ class FileResourceManagerServiceImpl(
                 objectKey = dto.objectKey
             ) newEntity true
         ).awaitFirstOrNull() ?: throw BusinessException("Could not create file resource")
+    }
+
+    override suspend fun findAllByScopeId(scopeId: Long): List<FileResourceEntity> {
+        return fileResourceRepository.findAllByScopeId(scopeId).awaitListWithTimeout()
     }
 
     override suspend fun applyDTOToEntity(

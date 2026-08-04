@@ -22,6 +22,7 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         is ForbiddenException -> handleForbiddenException(e)
         is UnauthorizedException -> handleUnauthorizedException(e)
         is BusinessException -> handleBusinessException(e)
+        is TooManyRequestsException -> handleTooManyRequestsException(e)
         is MissingRequestValueException -> handleMissingRequestValueException(e)
         is AuthorizationDeniedException -> handleAuthorizationDeniedException(e)
         is WebExchangeBindException -> handleWebExchangeBindException(e)
@@ -49,6 +50,7 @@ Each handler is invoked both by the `when` in `handle()` and exposed via `@Excep
 | `BusinessException` | `ApiResponse.badRequest()` | 400 | debug |
 | `ForbiddenException` | `ApiResponse.forbidden()` | 403 | debug |
 | `UnauthorizedException` | `ApiResponse.unauthorized()` | 401 | debug |
+| `TooManyRequestsException` | `ApiResponse.tooManyRequests()` | 429 | debug |
 | `AuthorizationDeniedException` | `ApiResponse.forbidden()` | 403 | debug |
 | `WebExchangeBindException` | `ApiResponse.badRequest()` (joins field errors) | 400 | debug |
 | `MissingRequestValueException` | `ApiResponse.badRequest()` (names the missing param) | 400 | debug |
@@ -98,7 +100,7 @@ class GlobalErrorWebExceptionHandler(
 
 ## Exception class structure
 
-The three custom exceptions live in `crystal-shared.exception`:
+The four custom exceptions live in `crystal-shared.exception`:
 
 ```kotlin
 // BusinessException
@@ -108,6 +110,7 @@ open class BusinessException(
 ) : RuntimeException(message, cause)
 
 // UnauthorizedException / ForbiddenException share the same shape
+// TooManyRequestsException additionally carries a RateLimitContext? (retryAfterSeconds on rate limit / lockout)
 ```
 
 Design notes:

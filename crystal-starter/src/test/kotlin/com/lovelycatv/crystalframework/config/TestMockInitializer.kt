@@ -23,11 +23,13 @@ class TestMockInitializer(
             whenever(
                 emailCodeAuthService.withSendEmailCode(
                     anyString(),
+                    anyString(),
+                    anyString(),
                     anyOrNull(),
                     anyOrNull()
                 )
             ).thenAnswer { invocation ->
-                val action = invocation.getArgument<suspend (String, MailService) -> Unit>(2)
+                val action = invocation.getArgument<suspend (String, MailService) -> Unit>(4)
                 runBlocking { action(emailCode, mailService) }
             }
 

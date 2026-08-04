@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.resource.repository.FileResourceRepositor
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 
 interface FileResourceService : CachedBaseService<FileResourceRepository, FileResourceEntity> {
     fun generateNextSnowId(gene: Long = 0): Long
@@ -26,11 +27,17 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
 
     suspend fun getByMD5(md5: String): FileResourceEntity?
 
-    suspend fun getFileDownloadUrl(entity: FileResourceEntity): String
+    /**
+     * Resolves a readable download URL for [entity]. Enforces [viewer]'s read entitlement via
+     * [ResourceAccessService.assertReadable] before minting the URL (mint-time check). Local
+     * non-public resources receive a short-lived HMAC-signed URL so a browser `<img>` tag can
+     * load them without an Authorization header; OSS/COS return the provider URL unchanged.
+     */
+    suspend fun getFileDownloadUrl(entity: FileResourceEntity, viewer: UserAuthentication?): String
 
-    suspend fun getFileDownloadUrl(entityId: Long?): String? {
+    suspend fun getFileDownloadUrl(entityId: Long?, viewer: UserAuthentication?): String? {
         return this.getByIdOrNull(entityId)?.let {
-            this.getFileDownloadUrl(it)
+            this.getFileDownloadUrl(it, viewer)
         }
     }
 }

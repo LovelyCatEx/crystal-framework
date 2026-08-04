@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.approval.service
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowGraphDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowGraphDTO.GraphEdgeDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowGraphDTO.GraphNodeDTO
+import com.lovelycatv.crystalframework.approval.constants.ApprovalNodeConfigConstants
 import com.lovelycatv.crystalframework.approval.types.*
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 
@@ -244,9 +245,9 @@ object ApprovalFlowGraphValidator {
                         // Rule 8: APPROVAL node with SPECIFIED_USER strategy must have at least 1 userId or memberIds
                         if (ApprovalFlowApproverStrategy.getById(config.strategy) == ApprovalFlowApproverStrategy.SPECIFIED_USER) {
                             @Suppress("UNCHECKED_CAST")
-                            val userIds = config.strategyParams["userIds"] as? List<*> ?: emptyList<Any>()
+                            val userIds = config.strategyParams[ApprovalNodeConfigConstants.STRATEGY_PARAM_USER_IDS] as? List<*> ?: emptyList<Any>()
                             @Suppress("UNCHECKED_CAST")
-                            val memberIds = config.strategyParams["memberIds"] as? List<*> ?: emptyList<Any>()
+                            val memberIds = config.strategyParams[ApprovalNodeConfigConstants.STRATEGY_PARAM_MEMBER_IDS] as? List<*> ?: emptyList<Any>()
                             if (userIds.isEmpty() && memberIds.isEmpty()) {
                                 errors += "APPROVAL node '${node.nodeKey}' with SPECIFIED_USER strategy must have at least 1 userId or memberIds"
                             }

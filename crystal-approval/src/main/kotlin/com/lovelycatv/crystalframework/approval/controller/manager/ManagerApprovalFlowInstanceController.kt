@@ -69,6 +69,16 @@ class ManagerApprovalFlowInstanceController(
 ) {
 
     /**
+     * The inherited scope-wide `/list` neither checks read-all authority nor injects the
+     * `initiator_id` filter, so it would let any tenant member enumerate every instance in
+     * the scope. Full visibility for read-all admins already flows through [buildQueryResponse]
+     * (`/query`); this endpoint is unused by the frontend, so return nothing here.
+     */
+    override suspend fun buildReadAllResponse(scopeId: Long): Any {
+        throw UnsupportedOperationException("read-all is not supported for approval instances")
+    }
+
+    /**
      * Read is intentionally allowed for any authenticated user — the endpoint is
      * shared between read-all admins and ordinary initiators viewing their own flows.
      * The triad declared above is only consulted by [buildQueryResponse] (and by

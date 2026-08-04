@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.benefit.TenantBenefitRegistry
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import com.lovelycatv.crystalframework.tenant.entity.TenantTireBenefitFeatureEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantTireBenefitFeatureRepository
 import com.lovelycatv.vertex.log.logger

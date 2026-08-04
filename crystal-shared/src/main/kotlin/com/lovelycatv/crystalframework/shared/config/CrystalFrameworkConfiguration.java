@@ -82,6 +82,24 @@ public class CrystalFrameworkConfiguration {
                 this.supportedContentTypes = supportedContentTypes;
             }
         }
+
+        /**
+         * Base64-encoded HMAC key used to sign short-lived download URLs for non-public
+         * local file resources (see LocalFileResourceController#readLocalFile).
+         * Must be set; the application fails to start when blank.
+         */
+        private String signingKey = "";
+
+        /** Signed download URL validity in seconds. Default 300 (5 minutes). */
+        private long signedUrlTtlSeconds = 300;
+
+        public String getSigningKey() { return signingKey; }
+        public void setSigningKey(String signingKey) { this.signingKey = signingKey; }
+
+        public long getSignedUrlTtlSeconds() { return signedUrlTtlSeconds; }
+        public void setSignedUrlTtlSeconds(long signedUrlTtlSeconds) {
+            this.signedUrlTtlSeconds = signedUrlTtlSeconds;
+        }
     }
 
     // -------------------------------------------------------------------------

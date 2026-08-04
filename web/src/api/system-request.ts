@@ -14,10 +14,11 @@ import {
 import {RSAUtils} from "@/utils/rsa-utils.ts";
 import {AESUtils} from "@/utils/aes-utils.ts";
 import type {AxiosResponse} from "axios";
-import {isBanContext, isDisabledContext, isForbiddenContext} from "@/types/common/forbidden.types.ts";
+import {isBanContext, isDisabledContext, isForbiddenContext, isRateLimitContext} from "@/types/common/forbidden.types.ts";
 import {showForbiddenModal} from "@/components/ForbiddenModal.tsx";
 import {showBanModal} from "@/components/BanModal.tsx";
 import {showDisabledModal} from "@/components/DisabledModal.tsx";
+import {showRateLimitModal} from "@/components/RateLimitModal.tsx";
 
 export interface ApiResponse<T> {
     code: number;
@@ -100,6 +101,13 @@ export async function handleApiResponse<T>(response: ApiResponse<T>) {
             void message.warning(response.message || i18n.t('api.forbidden'));
         }
         throw response;
+    } else if (response.code === 429) {
+        if (isRateLimitContext(response.data)) {
+            showRateLimitModal(response.data, response.message);
+        } else {
+            void message.warning(i18n.t('api.tooManyRequests'));
+        }
+        throw response;
     } else {
         void message.error(response.message || i18n.t('api.unknownError'))
         throw response;
@@ -140,7 +148,7 @@ function preProcessHeaders(type: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', he
 }
 
 export async function doGet<T>(url: string, query: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
-    console.log(`[G] <== ${url}`, query);
+    if (import.meta.env.DEV) console.log(`[G] <== ${url}`, query);
     const rawResult = await get<ApiResponse<T>>(
         url,
         query,
@@ -148,19 +156,19 @@ export async function doGet<T>(url: string, query: object = {}, headers: object 
     );
     await extractAesKeyFromResponse(rawResult);
     const result = rawResult.data;
-    console.log(`[G] ==> ${url}`, rawResult.data);
+    if (import.meta.env.DEV) console.log(`[G] ==> ${url}`, rawResult.data);
     return await handleApiResponse(result);
 }
 
 export async function doPost<T>(url: string, body: object = {}, headers: object = {}): Promise<ApiResponse<T>> {
-    console.log(`[P] <== ${url}`, body);
+    if (import.meta.env.DEV) console.log(`[P] <== ${url}`, body);
     const rawResult = await post<ApiResponse<T>>(
         url,
         body,
         preProcessHeaders('POST', headers)
     );
     await extractAesKeyFromResponse(rawResult);
-    console.log(`[P] ==> ${url}`, rawResult.data);
+    if (import.meta.env.DEV) console.log(`[P] ==> ${url}`, rawResult.data);
     const result = rawResult.data;
     return await handleApiResponse(result);
 }

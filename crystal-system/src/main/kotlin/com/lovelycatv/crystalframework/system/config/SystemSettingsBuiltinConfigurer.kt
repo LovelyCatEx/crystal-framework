@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.system.config
 
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.sdk.system.settings.config.SystemSettingsConfigurer
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -32,6 +32,18 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.Security.Api.Encrypt.ENABLE,
                 SystemSettingsConstants.Security.Api.Encrypt.SCOPE,
                 SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL,
+                SystemSettingsConstants.Security.LoginRateLimit.ENABLED,
+                SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS,
+                SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP,
+                SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT,
+                SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD,
+                SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS,
+                SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS,
+                SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED,
+                SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS,
+                SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP,
+                SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL,
+                SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL,
                 SystemSettingsConstants.OAuth.Github.ENABLED,
                 SystemSettingsConstants.OAuth.Github.USE_DEFAULT,
                 SystemSettingsConstants.OAuth.Github.AUTHORIZATION_URI,
@@ -60,6 +72,9 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.OAuth.Oicq.SCOPE,
                 SystemSettingsConstants.Module.TENANT_ENABLED,
                 SystemSettingsConstants.Module.APPROVAL_ENABLED,
+                SystemSettingsConstants.Resource.Visibility.USER_AVATAR,
+                SystemSettingsConstants.Resource.Visibility.TENANT_ICON,
+                SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR,
             )
         )
     }

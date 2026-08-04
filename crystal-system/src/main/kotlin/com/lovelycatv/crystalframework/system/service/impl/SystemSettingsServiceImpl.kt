@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.sdk.common.settings.matches
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope
 import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -13,7 +14,7 @@ import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.PostConstruct
@@ -100,6 +101,7 @@ class SystemSettingsServiceImpl(
             security = getSystemSecuritySettings(),
             oauth = getSystemOAuthSettings(),
             module = getSystemModuleSettings(),
+            resource = getSystemResourceSettings(),
         ).also {
             this.cachedSystemSettings = it
             this.syncToCacheAsync()
@@ -159,6 +161,22 @@ class SystemSettingsServiceImpl(
                     ),
                     securityLevel = getSettings<Long>(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt(),
                 )
+            ),
+            loginRateLimit = SystemSettings.Security.LoginRateLimit(
+                enabled = getSettings(SystemSettingsConstants.Security.LoginRateLimit.ENABLED)!!,
+                windowSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS)!!.toInt(),
+                maxAttemptsPerIp = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt(),
+                maxAttemptsPerAccount = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt(),
+                lockThreshold = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD)!!.toInt(),
+                lockBaseSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS)!!.toInt(),
+                lockMaxSeconds = getSettings<Long>(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS)!!.toInt(),
+            ),
+            emailCodeRateLimit = SystemSettings.Security.EmailCodeRateLimit(
+                enabled = getSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED)!!,
+                windowSeconds = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS)!!.toInt(),
+                maxPerIp = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP)!!.toInt(),
+                maxPerEmail = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt(),
+                maxGlobal = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL)!!.toInt(),
             )
         )
     }
@@ -167,6 +185,22 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Module(
             tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
             approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,
+        )
+    }
+
+    override suspend fun getSystemResourceSettings(): SystemSettings.Resource {
+        return SystemSettings.Resource(
+            visibility = SystemSettings.Resource.Visibility(
+                userAvatar = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.USER_AVATAR)!!
+                ),
+                tenantIcon = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_ICON)!!
+                ),
+                tenantMemberAvatar = ResourceVisibility.valueOf(
+                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR)!!
+                ),
+            )
         )
     }
 
@@ -232,6 +266,18 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SCOPE, settings.security.api.encrypt.scope.name)
         setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.ENABLED, settings.security.loginRateLimit.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS, settings.security.loginRateLimit.windowSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP, settings.security.loginRateLimit.maxAttemptsPerIp.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT, settings.security.loginRateLimit.maxAttemptsPerAccount.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD, settings.security.loginRateLimit.lockThreshold.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS, settings.security.loginRateLimit.lockBaseSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS, settings.security.loginRateLimit.lockMaxSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED, settings.security.emailCodeRateLimit.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS, settings.security.emailCodeRateLimit.windowSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP, settings.security.emailCodeRateLimit.maxPerIp.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL, settings.security.emailCodeRateLimit.maxPerEmail.toString())
+        setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL, settings.security.emailCodeRateLimit.maxGlobal.toString())
 
         setSettings(SystemSettingsConstants.OAuth.Github.ENABLED, settings.oauth.github.enabled.toString())
         setSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT, settings.oauth.github.useDefault?.toString())
@@ -264,6 +310,10 @@ class SystemSettingsServiceImpl(
 
         setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
         setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
+
+        setSettings(SystemSettingsConstants.Resource.Visibility.USER_AVATAR, settings.resource.visibility.userAvatar.name)
+        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_ICON, settings.resource.visibility.tenantIcon.name)
+        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR, settings.resource.visibility.tenantMemberAvatar.name)
 
         this.refreshSystemSettings()
     }

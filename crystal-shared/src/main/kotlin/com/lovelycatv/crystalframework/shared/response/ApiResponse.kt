@@ -10,6 +10,7 @@ data class ApiResponse<T>(
         const val BAD_REQUEST = 400
         const val UNAUTHORIZED = 401
         const val FORBIDDEN = 403
+        const val TOO_MANY_REQUESTS = 429
         const val INTERNAL_SERVER_ERROR_CODE = 500
 
         fun <T> success(data: T?, message: String = "success") = ApiResponse(SUCCESS_CODE, message, data)
@@ -17,6 +18,8 @@ data class ApiResponse<T>(
         fun <T> unauthorized(message: String, data: T? = null) = ApiResponse(UNAUTHORIZED, message, data)
 
         fun <T> forbidden(message: String, data: T? = null) = ApiResponse(FORBIDDEN, message, data)
+
+        fun <T> tooManyRequests(message: String, data: T? = null) = ApiResponse(TOO_MANY_REQUESTS, message, data)
 
         fun <T> badRequest(message: String, data: T? = null) = ApiResponse(BAD_REQUEST, message, data)
 

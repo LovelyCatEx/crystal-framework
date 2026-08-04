@@ -200,28 +200,62 @@ object SystemPermission {
     )
 
     // ============================================================
-    //   File Resource  (system)
+    //   File Resource  (x + system + tenantAdmin)
     // ============================================================
+    val ACTION_X_FILE_RESOURCE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "x.file.resource.create",
+        description = "Create file resources in any scope"
+    )
+    val ACTION_X_FILE_RESOURCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "x.file.resource.read",
+        description = "Read file resources in any scope"
+    )
+    val ACTION_X_FILE_RESOURCE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "x.file.resource.update",
+        description = "Update file resources in any scope"
+    )
+    val ACTION_X_FILE_RESOURCE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "x.file.resource.delete",
+        description = "Delete file resources in any scope"
+    )
+
     val ACTION_SYSTEM_FILE_RESOURCE_CREATE = SystemRbacPermissionDeclaration.action(
         name = "system.file.resource.create",
-        description = "Create file resources"
+        description = "Create system-scope file resources"
     )
     val ACTION_SYSTEM_FILE_RESOURCE_READ = SystemRbacPermissionDeclaration.action(
         name = "system.file.resource.read",
-        description = "Read file resources"
+        description = "Read system-scope file resources"
     )
     val ACTION_SYSTEM_FILE_RESOURCE_UPDATE = SystemRbacPermissionDeclaration.action(
         name = "system.file.resource.update",
-        description = "Update file resources"
+        description = "Update system-scope file resources"
     )
     val ACTION_SYSTEM_FILE_RESOURCE_DELETE = SystemRbacPermissionDeclaration.action(
         name = "system.file.resource.delete",
-        description = "Delete file resources"
+        description = "Delete system-scope file resources"
     )
     val MENU_SYSTEM_FILE_RESOURCE_MANAGER = SystemRbacPermissionDeclaration.menu(
         name = "system.file.resource",
         path = "/manager/file-resources",
         description = "Manage file resources menu"
+    )
+
+    val ACTION_TENANT_FILE_RESOURCE_CREATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.file.resource.create",
+        description = "Create tenant-scope file resources across tenants"
+    )
+    val ACTION_TENANT_FILE_RESOURCE_READ = SystemRbacPermissionDeclaration.action(
+        name = "tenant.file.resource.read",
+        description = "Read tenant-scope file resources across tenants"
+    )
+    val ACTION_TENANT_FILE_RESOURCE_UPDATE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.file.resource.update",
+        description = "Update tenant-scope file resources across tenants"
+    )
+    val ACTION_TENANT_FILE_RESOURCE_DELETE = SystemRbacPermissionDeclaration.action(
+        name = "tenant.file.resource.delete",
+        description = "Delete tenant-scope file resources across tenants"
     )
 
     // ============================================================

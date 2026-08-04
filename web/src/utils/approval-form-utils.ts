@@ -72,8 +72,8 @@ export function stringifyNodeOverlay(overlay: NodeFormOverlay): string {
  * Rules (decision 2):
  *   - Field not in `overlay.fieldOverrides` -> inherit definition values verbatim.
  *   - Per-property `override.visible / readonly / required` supersede definition values.
- *   - When the enclosing node is APPROVAL / CC, `readonly` defaults to `true` unless the
- *     overlay explicitly sets it to `false`.
+ *   - `readonly` falls back to the field's own `field.readonly` baseline when the overlay
+ *     does not override it (APPROVAL included) — the definition decides the default.
  *   - CC nodes force `readonly = true` regardless of overlay (CC never mutates data).
  *   - When `finalVisible === false` or `finalReadonly === true`, `finalRequired` is
  *     forced to `false` — an invisible / immutable field cannot be "required" of the user.
@@ -84,7 +84,6 @@ export function mergeFieldOverrides(
     options: { nodeType: number },
 ): MergedFieldSchema[] {
     const overrides = overlay?.fieldOverrides ?? {};
-    const isApprovalNode = options.nodeType === ApprovalFlowNodeType.APPROVAL;
     const isCcNode = options.nodeType === ApprovalFlowNodeType.CC;
 
     return definition.fields.map(field => {
@@ -92,14 +91,10 @@ export function mergeFieldOverrides(
 
         const finalVisible = override?.visible ?? field.visible;
 
-        let finalReadonly: boolean;
-        if (isCcNode) {
-            finalReadonly = true;
-        } else if (isApprovalNode) {
-            finalReadonly = override?.readonly ?? true;
-        } else {
-            finalReadonly = override?.readonly ?? field.readonly;
-        }
+        // CC nodes never mutate data, so they are hard-locked readonly regardless of overlay.
+        // Every other node (APPROVAL included) falls back to the field's own readonly baseline
+        // when the node overlay does not override it.
+        const finalReadonly: boolean = isCcNode ? true : (override?.readonly ?? field.readonly);
 
         const rawRequired = override?.required ?? field.required;
         const finalRequired = !finalVisible || finalReadonly ? false : rawRequired;

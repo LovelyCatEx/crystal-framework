@@ -9,7 +9,7 @@ import com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelat
 import com.lovelycatv.crystalframework.sdk.rbac.system.SystemRbacRegistry
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.system.service.SystemSettingsService
-import com.lovelycatv.crystalframework.system.types.SystemSettingsConstants
+import com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactive.awaitFirstOrNull

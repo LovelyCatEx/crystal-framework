@@ -1,7 +1,10 @@
 package com.lovelycatv.crystalframework.system.service
 
 interface SystemInitializeService {
+    suspend fun prepareInitializationToken(): String?
+
     suspend fun initializeSystem(
+        initializationToken: String?,
         username: String,
         password: String,
         email: String,

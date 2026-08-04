@@ -26,7 +26,7 @@ class UserServiceTest(
         val email = "test-$suffix@crystalframework.com"
         val emailCode = "123456"
 
-        userService.requestRegisterEmailConfirmationCode(email)
+        userService.requestRegisterEmailConfirmationCode(email, "127.0.0.1")
 
         userService.register(username, password, email, emailCode)
 

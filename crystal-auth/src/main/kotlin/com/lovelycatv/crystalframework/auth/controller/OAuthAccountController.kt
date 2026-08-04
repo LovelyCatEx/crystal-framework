@@ -2,6 +2,8 @@ package com.lovelycatv.crystalframework.auth.controller
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
+import com.lovelycatv.crystalframework.auth.constants.LoginRateLimitConstants
+import com.lovelycatv.crystalframework.auth.service.LoginRateLimitService
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
@@ -18,7 +20,9 @@ import com.lovelycatv.crystalframework.auth.controller.vo.UserOAuthAccountVO
 import com.lovelycatv.crystalframework.auth.controller.vo.TenantOAuthAccountVO
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
 import com.lovelycatv.crystalframework.user.service.UserService
+import com.lovelycatv.crystalframework.shared.utils.resolveClientIp
 import jakarta.validation.Valid
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -29,6 +33,7 @@ class OAuthAccountController(
     private val userService: UserService,
     private val userAuthorizationService: UserAuthorizationService,
     private val oAuthAccountService: OAuthAccountService,
+    private val loginRateLimitService: LoginRateLimitService,
 ) {
     @Audit(
         action = AuditAction.UPDATE,
@@ -39,6 +44,7 @@ class OAuthAccountController(
     @PostMapping("/bindOAuthAccount")
     suspend fun bindOAuthAccount(
         userAuthentication: UserAuthentication?,
+        request: ServerHttpRequest,
         @ModelAttribute
         @Valid
         dto: BindOAuthAccountDTO
@@ -61,11 +67,25 @@ class OAuthAccountController(
                 )
             }
         } else {
-            userService.bindUserFromOAuthAccount(
-                oauthAccountId = dto.oauthAccountId,
-                username = dto.username ?: throw BusinessException("unknown username"),
-                password = dto.password ?: throw BusinessException("unknown password"),
-            )
+            // Unauthenticated credential verification path: rate-limit exactly like form login.
+            val username = dto.username ?: throw BusinessException("unknown username")
+            val password = dto.password ?: throw BusinessException("unknown password")
+            val account = LoginRateLimitConstants.buildAccountKey(username)
+
+            loginRateLimitService.checkAllowed(request.resolveClientIp(), account)
+
+            val user = try {
+                userService.bindUserFromOAuthAccount(
+                    oauthAccountId = dto.oauthAccountId,
+                    username = username,
+                    password = password,
+                )
+            } catch (e: Exception) {
+                loginRateLimitService.recordFailure(account)
+                throw e
+            }
+            loginRateLimitService.recordSuccess(account)
+            user
         }
 
         return ApiResponse.success(

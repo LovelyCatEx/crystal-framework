@@ -20,6 +20,11 @@ class TaskRegistryInitializer(
 ) : ApplicationListener<ContextRefreshedEvent> {
 
     override fun onApplicationEvent(event: ContextRefreshedEvent) {
+        // ContextRefreshedEvent fires once per ApplicationContext, including the management child
+        // context created when management.server.port differs from server.port. Guard against
+        // double-registration by only processing the event from our own (root) context.
+        if (event.applicationContext !== applicationContext) return
+
         val taskBeans = applicationContext.getBeansOfType(ScheduledTask::class.java)
         taskBeans.values.forEach { task ->
             taskRegistry.register(task)

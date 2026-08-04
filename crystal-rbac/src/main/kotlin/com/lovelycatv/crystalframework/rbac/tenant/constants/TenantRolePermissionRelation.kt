@@ -78,6 +78,11 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_MESSAGE_CHANNEL_READ,
             TenantPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
             TenantPermission.ACTION_MESSAGE_CHANNEL_DELETE,
+            // File Resources
+            TenantPermission.ACTION_FILE_RESOURCE_CREATE,
+            TenantPermission.ACTION_FILE_RESOURCE_READ,
+            TenantPermission.ACTION_FILE_RESOURCE_UPDATE,
+            TenantPermission.ACTION_FILE_RESOURCE_DELETE,
         ),
         TenantRole.MEMBER to listOf(
             // Dashboard

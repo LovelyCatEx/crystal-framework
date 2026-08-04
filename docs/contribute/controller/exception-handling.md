@@ -22,6 +22,7 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
         is ForbiddenException -> handleForbiddenException(e)
         is UnauthorizedException -> handleUnauthorizedException(e)
         is BusinessException -> handleBusinessException(e)
+        is TooManyRequestsException -> handleTooManyRequestsException(e)
         is MissingRequestValueException -> handleMissingRequestValueException(e)
         is AuthorizationDeniedException -> handleAuthorizationDeniedException(e)
         is WebExchangeBindException -> handleWebExchangeBindException(e)
@@ -49,6 +50,7 @@ class GlobalExceptionHandler(private val auditEventRepository: AuditEventReposit
 | `BusinessException` | `ApiResponse.badRequest()` | 400 | debug |
 | `ForbiddenException` | `ApiResponse.forbidden()` | 403 | debug |
 | `UnauthorizedException` | `ApiResponse.unauthorized()` | 401 | debug |
+| `TooManyRequestsException` | `ApiResponse.tooManyRequests()` | 429 | debug |
 | `AuthorizationDeniedException` | `ApiResponse.forbidden()` | 403 | debug |
 | `WebExchangeBindException` | `ApiResponse.badRequest()`（拼接 field errors） | 400 | debug |
 | `MissingRequestValueException` | `ApiResponse.badRequest()`（标注缺失参数名） | 400 | debug |
@@ -98,7 +100,7 @@ class GlobalErrorWebExceptionHandler(
 
 ## 异常类结构
 
-三个自定义异常都在 `crystal-shared.exception` 包：
+四个自定义异常都在 `crystal-shared.exception` 包：
 
 ```kotlin
 // BusinessException
@@ -108,6 +110,7 @@ open class BusinessException(
 ) : RuntimeException(message, cause)
 
 // UnauthorizedException / ForbiddenException 结构相同
+// TooManyRequestsException 额外携带 RateLimitContext?（限流/锁定时的 retryAfterSeconds）
 ```
 
 设计要点：

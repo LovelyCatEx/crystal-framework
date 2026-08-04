@@ -7,7 +7,31 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
-## v1.13.3
+## v1.13.4
+
+2026-08-04
+
+### Features
++ feat(resource): Add scope-based file visibility control and signed URLs.
++ feat(shared): Fail fast at startup when nested tenant resource ownership is invalid.
++ feat(user): Rate-limit email-code sending to prevent mail bombing.
++ feat(auth): Rate-limit login attempts to prevent brute-force attacks.
+
+### Bug Fixes
++ fix(tenant): Force-logout a member's user on deactivation and tighten tenant resource ownership checks.
++ fix(approval): Correct approver read-only rules and tenant ownership validation, and reject unauthorized task and instance list queries.
++ fix(rbac): Scope the authority cache by tenant to prevent cross-tenant privilege escalation.
++ fix(backend): Harden system initialization.
++ fix(user): Validate email uniqueness before resetting an email, and unify OAuth-binding credential errors to prevent username enumeration.
++ fix(resource): Validate file types using magic-number detection.
++ fix(monitor): Move actuator to an internal-only management port.
++ fix(web): Fix frontend compilation errors and log requests and responses only in development.
+
+### Others
++ chore(system): Adjust system module package structure.
+
+---
+
 
 2026-08-02
 

@@ -44,7 +44,7 @@ class TenantProfileController(
                 userAuthentication.tenantId
         ) ?: throw BusinessException("Tenant not found")
 
-        val tenantProfileVO = tenant.toProfileVO(fileResourceService)
+        val tenantProfileVO = tenant.toProfileVO(fileResourceService, userAuthentication)
 
         return ApiResponse.success(tenantProfileVO.apply {
             if (RbacUtils.hasAuthority(TenantPermission.ACTION_PROFILE_READ.name)) {

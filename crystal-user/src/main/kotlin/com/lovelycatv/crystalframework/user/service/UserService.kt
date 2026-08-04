@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.service
 
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
 import com.lovelycatv.crystalframework.user.controller.vo.UserProfileVO
 import com.lovelycatv.crystalframework.user.entity.UserEntity
@@ -17,19 +18,19 @@ interface UserService : CachedBaseService<UserRepository, UserEntity> {
         emailConfirmationCode: String
     )
 
-    suspend fun requestRegisterEmailConfirmationCode(email: String)
+    suspend fun requestRegisterEmailConfirmationCode(email: String, ip: String)
 
     @Transactional(rollbackFor = [Exception::class])
     suspend fun resetPassword(email: String, emailCode: String, newPassword: String)
 
-    suspend fun requestResetPasswordEmailConfirmationCode(email: String)
+    suspend fun requestResetPasswordEmailConfirmationCode(email: String, ip: String)
 
     @Transactional(rollbackFor = [Exception::class])
     suspend fun resetEmailAddress(userId: Long, emailCode: String, newEmail: String)
 
-    suspend fun requestResetEmailAddressEmailConfirmationCode(email: String)
+    suspend fun requestResetEmailAddressEmailConfirmationCode(email: String, ip: String)
 
-    suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO
+    suspend fun getUserProfileVO(userId: Long, viewer: UserAuthentication?, fullAccess: Boolean): UserProfileVO
 
     @Transactional(rollbackFor = [Exception::class])
     suspend fun updateUserProfile(userId: Long, dto: UpdateUserProfileDTO)

@@ -6,12 +6,14 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
 import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import org.springframework.http.codec.multipart.FilePart
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -32,6 +34,8 @@ abstract class AbstractFileResourceService(
 
     suspend fun uploadFile(
         userId: Long,
+        scope: ResourceScope,
+        scopeId: Long,
         fileType: ResourceFileType,
         filePart: FilePart,
         targetFileName: String,
@@ -41,6 +45,8 @@ abstract class AbstractFileResourceService(
 
         return this.uploadFile(
             userId = userId,
+            scope = scope,
+            scopeId = scopeId,
             fileType = fileType,
             fileNameWithExtension = targetFileName,
             fileLength = fileSize,
@@ -52,6 +58,8 @@ abstract class AbstractFileResourceService(
 
     suspend fun uploadFile(
         userId: Long,
+        scope: ResourceScope,
+        scopeId: Long,
         fileType: ResourceFileType,
         fileNameWithExtension: String,
         fileLength: Long,
@@ -59,12 +67,16 @@ abstract class AbstractFileResourceService(
         inputStream: InputStream,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {
+        // Read bytes first so we can detect the actual MIME type from file content.
+        // The caller-provided fileContentType is intentionally ignored for security:
+        // a client can forge any Content-Type header.
+        val byteArray = inputStream.readBytes()
+        val detectedMimeType = detectMimeType(byteArray)
+
         fileResourceService.assertFileContentType(
             fileType,
-            fileContentType
+            detectedMimeType
         )
-
-        val byteArray = inputStream.readBytes()
 
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
@@ -93,7 +105,7 @@ abstract class AbstractFileResourceService(
         val result = this.doUploadFile(
             fileType,
             fileLength,
-            fileContentType,
+            detectedMimeType,
             fileNameWithExtension,
             uploadStream,
             objectKey,
@@ -104,6 +116,8 @@ abstract class AbstractFileResourceService(
             val fileResourceEntity = fileResourceService.getRepository().save(
                 FileResourceEntity(
                     id = fileResourceService.generateNextSnowId(),
+                    scope = scope.typeId,
+                    scopeId = scopeId,
                     userId = userId,
                     type = fileType.typeId,
                     fileName = fileName,
