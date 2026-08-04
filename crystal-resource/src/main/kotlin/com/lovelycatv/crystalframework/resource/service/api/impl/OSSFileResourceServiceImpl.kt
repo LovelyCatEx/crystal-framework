@@ -24,7 +24,8 @@ class OSSFileResourceServiceImpl(
     private val securityToken: String,
     private val region: String,
     private val bucketName: String,
-) : AbstractFileResourceService(storageProvider, fileResourceService) {
+    basePath: String,
+) : AbstractFileResourceService(storageProvider, fileResourceService, basePath) {
     private val logger = logger()
 
     private var client: OSSClient? = null

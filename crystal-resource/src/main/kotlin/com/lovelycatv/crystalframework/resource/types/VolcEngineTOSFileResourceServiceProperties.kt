@@ -6,4 +6,5 @@ data class VolcEngineTOSFileResourceServiceProperties(
     val region: String,
     val endpoint: String,
     val bucketName: String,
-)
+    override val basePath: String = "",
+) : FileResourceServiceProperties

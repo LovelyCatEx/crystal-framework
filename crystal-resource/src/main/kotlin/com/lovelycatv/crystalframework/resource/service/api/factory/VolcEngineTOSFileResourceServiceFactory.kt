@@ -26,6 +26,7 @@ class VolcEngineTOSFileResourceServiceFactory(
             region = properties.region,
             endpoint = properties.endpoint,
             bucketName = properties.bucketName,
+            basePath = properties.basePath,
         )
     }
 }

@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
+import com.lovelycatv.crystalframework.resource.types.FileResourceServiceProperties
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -23,7 +24,13 @@ import java.util.UUID
 
 abstract class AbstractFileResourceService(
     private val storageProvider: StorageProviderEntity,
-    private val fileResourceService: FileResourceService
+    private val fileResourceService: FileResourceService,
+    /**
+     * Shared object-key prefix (see [FileResourceServiceProperties.basePath]). Defaults to empty so a
+     * provider without one (or the local provider, which uses basePath as its filesystem root instead)
+     * produces the historical unprefixed key. Cloud factories pass their configured value here.
+     */
+    private val basePath: String = "",
 ) {
     private val logger = logger()
 
@@ -32,7 +39,9 @@ abstract class AbstractFileResourceService(
     }
 
     open fun buildObjectKey(fileType: ResourceFileType, fileNameWithExtension: String): String {
-        return "${fileType.name.lowercase()}/$fileNameWithExtension"
+        val key = "${fileType.name.lowercase()}$OBJECT_KEY_SEPARATOR$fileNameWithExtension"
+        val prefix = this.basePath.trim().trim(OBJECT_KEY_SEPARATOR)
+        return if (prefix.isEmpty()) key else "$prefix$OBJECT_KEY_SEPARATOR$key"
     }
 
     /**
@@ -245,5 +254,7 @@ abstract class AbstractFileResourceService(
 
         /** Milliseconds per second, for impls whose SDK expects a millisecond-based expiry. */
         protected const val MILLIS_PER_SECOND = 1000L
+
+        private const val OBJECT_KEY_SEPARATOR = '/'
     }
 }
