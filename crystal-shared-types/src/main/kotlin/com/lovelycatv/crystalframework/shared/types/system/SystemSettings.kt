@@ -81,6 +81,7 @@ data class SystemSettings(
         val api: Api,
         val loginRateLimit: LoginRateLimit,
         val emailCodeRateLimit: EmailCodeRateLimit,
+        val outbound: Outbound,
     ) {
         data class Api(
             val encrypt: Encrypt
@@ -108,6 +109,11 @@ data class SystemSettings(
             val maxPerIp: Int,
             val maxPerEmail: Int,
             val maxGlobal: Int,
+        )
+
+        data class Outbound(
+            val allowedHosts: List<String>,
+            val allowedSmtpHosts: List<String>,
         )
     }
 

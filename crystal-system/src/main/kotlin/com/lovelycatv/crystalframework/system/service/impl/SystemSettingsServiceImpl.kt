@@ -177,6 +177,10 @@ class SystemSettingsServiceImpl(
                 maxPerIp = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP)!!.toInt(),
                 maxPerEmail = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt(),
                 maxGlobal = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL)!!.toInt(),
+            ),
+            outbound = SystemSettings.Security.Outbound(
+                allowedHosts = getSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS)!!,
+                allowedSmtpHosts = getSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS)!!,
             )
         )
     }
@@ -278,6 +282,8 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP, settings.security.emailCodeRateLimit.maxPerIp.toString())
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL, settings.security.emailCodeRateLimit.maxPerEmail.toString())
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL, settings.security.emailCodeRateLimit.maxGlobal.toString())
+        setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS, settings.security.outbound.allowedHosts.toJSONString())
+        setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS, settings.security.outbound.allowedSmtpHosts.toJSONString())
 
         setSettings(SystemSettingsConstants.OAuth.Github.ENABLED, settings.oauth.github.enabled.toString())
         setSettings(SystemSettingsConstants.OAuth.Github.USE_DEFAULT, settings.oauth.github.useDefault?.toString())

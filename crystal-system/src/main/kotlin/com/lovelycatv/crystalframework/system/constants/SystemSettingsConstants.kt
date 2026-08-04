@@ -439,6 +439,21 @@ object SystemSettingsConstants {
                 sort = 5
             )
         }
+
+        object Outbound {
+            val ALLOWED_HOSTS = SettingsItemDeclaration(
+                key = "security.outbound.allowedHosts",
+                valueType = SettingsItemValueType.STRING_ARRAY,
+                defaultValue = """["*.feishu.cn"]""",
+                sort = 1
+            )
+            val ALLOWED_SMTP_HOSTS = SettingsItemDeclaration(
+                key = "security.outbound.allowedSmtpHosts",
+                valueType = SettingsItemValueType.STRING_ARRAY,
+                defaultValue = """["*.gmail.com","*.googlemail.com","*.outlook.com","*.office365.com","*.yahoo.com","*.qq.com","*.163.com","*.126.com","*.sina.com","*.aliyun.com","*.zoho.com","*.me.com"]""",
+                sort = 2
+            )
+        }
     }
 
     object Module {

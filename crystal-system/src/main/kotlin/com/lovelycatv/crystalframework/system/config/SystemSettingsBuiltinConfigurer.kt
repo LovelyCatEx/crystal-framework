@@ -44,6 +44,8 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP,
                 SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL,
                 SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL,
+                SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS,
+                SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS,
                 SystemSettingsConstants.OAuth.Github.ENABLED,
                 SystemSettingsConstants.OAuth.Github.USE_DEFAULT,
                 SystemSettingsConstants.OAuth.Github.AUTHORIZATION_URI,
