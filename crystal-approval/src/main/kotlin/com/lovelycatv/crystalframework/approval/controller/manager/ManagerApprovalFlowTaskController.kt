@@ -60,6 +60,14 @@ class ManagerApprovalFlowTaskController(
 >(
     managerService,
 ) {
+    /**
+     * Approval tasks have no read-all concept — access is assignee-scoped via [buildQueryResponse]
+     * (`/query`) or [queryMyTasks] (`/my`). The inherited scope-wide `/list` would bypass the
+     * assignee filter, so it is not supported.
+     */
+    override suspend fun buildReadAllResponse(scopeId: Long): Any {
+        throw UnsupportedOperationException("read-all is not supported for approval tasks")
+    }
 
     /**
      * This endpoint is a personal "my to-do" view: every authenticated user may READ, but

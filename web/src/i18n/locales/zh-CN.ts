@@ -17,6 +17,11 @@ export const zhCN: I18nRules = {
         title: '设置管理员账号',
         subtitle: '请设置系统管理员的账号和密码',
         form: {
+          initializationToken: {
+            placeholder: '一次性初始化令牌',
+            required: '请输入一次性初始化令牌',
+            help: '请从后端启动日志中复制令牌'
+          },
           username: {
             placeholder: '管理员用户名',
             required: '请输入管理员用户名',
@@ -2263,6 +2268,18 @@ export const zhCN: I18nRules = {
         'security.api.encrypt.enabled': '是否启用',
         'security.api.encrypt.scope': '作用域',
         'security.api.encrypt.securityLevel': '安全等级',
+        'security.loginRateLimit.enabled': '是否启用',
+        'security.loginRateLimit.windowSeconds': '滑动窗口时长（秒）',
+        'security.loginRateLimit.maxAttemptsPerIp': '单 IP 窗口内最大尝试次数',
+        'security.loginRateLimit.maxAttemptsPerAccount': '单账号窗口内最大尝试次数',
+        'security.loginRateLimit.lockThreshold': '触发锁定的连续失败次数',
+        'security.loginRateLimit.lockBaseSeconds': '锁定基础时长（秒）',
+        'security.loginRateLimit.lockMaxSeconds': '锁定最大时长（秒）',
+        'security.emailCodeRateLimit.enabled': '是否启用',
+        'security.emailCodeRateLimit.windowSeconds': '滑动窗口时长（秒）',
+        'security.emailCodeRateLimit.maxPerIp': '单 IP 窗口内最大发送次数',
+        'security.emailCodeRateLimit.maxPerEmail': '单邮箱窗口内最大发送次数',
+        'security.emailCodeRateLimit.maxGlobal': '全局窗口内最大发送次数',
         'oauth.github.enabled': '启用',
         'oauth.github.useDefault': '使用系统默认配置',
         'oauth.github.authorizationUri': '授权端点',
@@ -2291,6 +2308,9 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'resource.visibility.userAvatar': '用户头像可见性',
+        'resource.visibility.tenantIcon': '租户图标可见性',
+        'resource.visibility.tenantMemberAvatar': '租户成员头像可见性',
       },
       groups: {
         'basic': '基本设置',
@@ -2299,11 +2319,14 @@ export const zhCN: I18nRules = {
         'mail.smtp': 'SMTP 邮件服务',
         'messageChannel.lark': '飞书',
         'security.api.encrypt': 'Api 安全设置',
+        'security.loginRateLimit': '登录限流与锁定',
+        'security.emailCodeRateLimit': '邮件验证码限流',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'resource.visibility': '资源访问权限',
       },
       tabs: {
         'basic': '基本',
@@ -2313,6 +2336,7 @@ export const zhCN: I18nRules = {
         'security': '安全',
         'oauth': 'OAuth',
         'module': '功能模块',
+        'resource': '资源',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -2324,7 +2348,28 @@ export const zhCN: I18nRules = {
           'SYSTEM_NAME': '系统名称',
           'USER_NAME': '用户名称',
           'CUSTOM': '自定义',
-        }
+        },
+        'resource.visibility.userAvatar': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
+        'resource.visibility.tenantIcon': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
+        'resource.visibility.tenantMemberAvatar': {
+          'PUBLIC': '公开（任何人可访问）',
+          'AUTHENTICATED': '已登录用户',
+          'SCOPE_MEMBER': '同租户成员',
+          'OWNER_ONLY': '仅上传者本人',
+          'SYSTEM_ADMIN': '仅系统管理员',
+        },
       }
     },
     tenantPersonalProfile: {
@@ -2873,7 +2918,6 @@ export const zhCN: I18nRules = {
       subtitle: '为该节点单独覆盖每个字段的展示方式，未调整的开关沿用定义级设置',
       empty: '尚未定义任何字段，请先前往「表单设计器」新增字段',
       ccInfo: '抄送节点不会修改表单数据，「只读」已强制打开',
-      approvalInfo: '审批节点默认所有字段只读，如需允许当前审批人编辑，请将「只读」关闭',
       ccLockedTooltip: '抄送节点始终为只读，不可修改',
       column: {
         field: '字段',
@@ -3689,6 +3733,7 @@ export const zhCN: I18nRules = {
   api: {
     sessionExpired: '验证信息已过期',
     forbidden: '你无权访问当前资源',
+    tooManyRequests: '操作过于频繁，请稍后再试',
     unknownError: '未知错误',
     forbiddenModal: {
       title: '拒绝访问',
@@ -3709,6 +3754,10 @@ export const zhCN: I18nRules = {
     disabledModal: {
       title: '账号已被禁用',
       description: '你的账号已被管理员禁用，无法登录。如有疑问请联系管理员。'
+    },
+    rateLimitModal: {
+      title: '操作过于频繁',
+      retryAfter: '操作过于频繁，请在 {{seconds}} 秒后重试。'
     }
   },
 
@@ -3953,7 +4002,8 @@ export const zhCN: I18nRules = {
       PROTECTED_RESOURCE: '该资源受保护',
       NOT_TENANT_MEMBER: '你不是该租户的成员',
       ROLE_PROTECTED: '该角色受保护，禁止执行此操作',
-      PERMISSION_ESCALATION: '该操作会导致权限提升'
+      PERMISSION_ESCALATION: '该操作会导致权限提升',
+      INVALID_INITIALIZATION_TOKEN: '系统初始化令牌无效'
     },
     forbiddenScope: {
       SYSTEM: '系统',

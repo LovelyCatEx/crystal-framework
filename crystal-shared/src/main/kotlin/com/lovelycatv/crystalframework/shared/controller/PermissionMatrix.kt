@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.shared.controller
 
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.vertex.log.logger
 
 /**
@@ -119,6 +120,47 @@ data class PermissionMatrix(
         superFor(operation),
         tenantAdminFor(operation),
     ).filter { it != NOT_APPLICABLE }.toTypedArray()
+
+    /**
+     * Whether the current reactive-security principal holds any authority eligible for
+     * `(scope, operation)`. This is the raw layer OR-check shared by the manager controller line
+     * and any other component (e.g. the resource access service) that needs to reproduce the exact
+     * same authorisation decision without re-listing authority strings.
+     */
+    suspend fun grantsAuthority(scope: ResourceScope, operation: ScopedOperation): Boolean {
+        return RbacUtils.hasAnyAuthority(*layersFor(scope, operation))
+    }
+
+    /**
+     * Tenant-isolation counterpart of [grantsAuthority]: a caller holding a cross-tenant layer
+     * (super / tenantAdmin) may act on any tenant; otherwise the request's [scopeId] must equal the
+     * caller's own [callerTenantId]. SYSTEM scope has no tenant isolation and always passes.
+     */
+    suspend fun satisfiesOwnership(
+        scope: ResourceScope,
+        scopeId: Long?,
+        operation: ScopedOperation,
+        callerTenantId: Long?,
+    ): Boolean = when (scope) {
+        ResourceScope.SYSTEM -> true
+        ResourceScope.TENANT ->
+            RbacUtils.hasAnyAuthority(*crossTenantLayersFor(operation)) || scopeId == callerTenantId
+    }
+
+    /**
+     * Full manager-line read/write eligibility: [grantsAuthority] AND [satisfiesOwnership]. Reused
+     * by the resource access service so "a manager who may READ this resource" is decided in one
+     * place instead of duplicated per call site.
+     */
+    suspend fun grantsAccess(
+        scope: ResourceScope,
+        scopeId: Long?,
+        operation: ScopedOperation,
+        callerTenantId: Long?,
+    ): Boolean {
+        return grantsAuthority(scope, operation) &&
+            satisfiesOwnership(scope, scopeId, operation, callerTenantId)
+    }
 
     companion object {
         private val logger = logger()

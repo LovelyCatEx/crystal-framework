@@ -46,8 +46,7 @@ class SystemMaintenanceGuardFilter : WebFilter {
         val MAINTENANCE_ACCESS_PERMISSION: String = SystemPermission.ACTION_SYSTEM_MAINTENANCE_ACCESS.name
         private val pathPatternParser = PathPatternParser()
         private val allowList = listOf(
-            pathPatternParser.parse("/api/*/manager/system/maintenance"),
-            pathPatternParser.parse("/api/*/actuator/**")
+            pathPatternParser.parse("/api/*/manager/system/maintenance")
         )
     }
 }

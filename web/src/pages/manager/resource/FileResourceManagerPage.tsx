@@ -3,11 +3,11 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     FileResourceManagerController,
     getResourceFileDownloadUrlById,
-    type ManagerCreateFileResourceDTO,
-    type ManagerReadFileResourceDTO
+    type ManagerCreateFileResourceDTO
 } from "@/api/resource/file-resource.api.ts";
 import {useEffect, useRef} from "react";
 import {type FileResource, ResourceFileType} from "@/types/resource/file-resource.types.ts";
+import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
@@ -140,8 +140,12 @@ export default function FileResourceManagerPage() {
                     </Form.Item>
                 </>
             }
-            query={async (props: ManagerReadFileResourceDTO) => {
-                return (await FileResourceManagerController.query(props)).data!
+            query={async (props) => {
+                return (await FileResourceManagerController.query({
+                    ...props,
+                    scope: ResourceScope.SYSTEM,
+                    scopeId: '0',
+                })).data!
             }}
             delete={async (props) => {
                 return (await FileResourceManagerController.delete(props)).data!
@@ -150,7 +154,11 @@ export default function FileResourceManagerPage() {
                 return (await FileResourceManagerController.update(props)).data!
             }}
             create={async (props) => {
-                return (await FileResourceManagerController.create(props as ManagerCreateFileResourceDTO)).data!
+                return (await FileResourceManagerController.create({
+                    ...props,
+                    scope: ResourceScope.SYSTEM,
+                    scopeId: '0',
+                } as unknown as ManagerCreateFileResourceDTO)).data!
             }}
             tableActions={[
                 {

@@ -48,6 +48,18 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['security.api.encrypt.enabled', t('pages.systemSettingsManager.keys.security.api.encrypt.enabled')],
         ['security.api.encrypt.scope', t('pages.systemSettingsManager.keys.security.api.encrypt.scope')],
         ['security.api.encrypt.securityLevel', t('pages.systemSettingsManager.keys.security.api.encrypt.securityLevel')],
+        ['security.loginRateLimit.enabled', t('pages.systemSettingsManager.keys.security.loginRateLimit.enabled')],
+        ['security.loginRateLimit.windowSeconds', t('pages.systemSettingsManager.keys.security.loginRateLimit.windowSeconds')],
+        ['security.loginRateLimit.maxAttemptsPerIp', t('pages.systemSettingsManager.keys.security.loginRateLimit.maxAttemptsPerIp')],
+        ['security.loginRateLimit.maxAttemptsPerAccount', t('pages.systemSettingsManager.keys.security.loginRateLimit.maxAttemptsPerAccount')],
+        ['security.loginRateLimit.lockThreshold', t('pages.systemSettingsManager.keys.security.loginRateLimit.lockThreshold')],
+        ['security.loginRateLimit.lockBaseSeconds', t('pages.systemSettingsManager.keys.security.loginRateLimit.lockBaseSeconds')],
+        ['security.loginRateLimit.lockMaxSeconds', t('pages.systemSettingsManager.keys.security.loginRateLimit.lockMaxSeconds')],
+        ['security.emailCodeRateLimit.enabled', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.enabled')],
+        ['security.emailCodeRateLimit.windowSeconds', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.windowSeconds')],
+        ['security.emailCodeRateLimit.maxPerIp', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxPerIp')],
+        ['security.emailCodeRateLimit.maxPerEmail', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxPerEmail')],
+        ['security.emailCodeRateLimit.maxGlobal', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxGlobal')],
         ['oauth.github.enabled', t('pages.systemSettingsManager.keys.oauth.github.enabled')],
         ['oauth.github.useDefault', t('pages.systemSettingsManager.keys.oauth.github.useDefault')],
         ['oauth.github.authorizationUri', t('pages.systemSettingsManager.keys.oauth.github.authorizationUri')],
@@ -76,6 +88,9 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
         ['module.tenant.enabled', t('pages.systemSettingsManager.keys.module.tenant.enabled')],
         ['module.approval.enabled', t('pages.systemSettingsManager.keys.module.approval.enabled')],
+        ['resource.visibility.userAvatar', t('pages.systemSettingsManager.keys.resource.visibility.userAvatar')],
+        ['resource.visibility.tenantIcon', t('pages.systemSettingsManager.keys.resource.visibility.tenantIcon')],
+        ['resource.visibility.tenantMemberAvatar', t('pages.systemSettingsManager.keys.resource.visibility.tenantMemberAvatar')],
     ]);
 
     for (const key of pluginKeys) {
@@ -98,11 +113,14 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['mail.smtp', { label: t('pages.systemSettingsManager.groups.mail.smtp'), icon: <MailOutlined /> }],
         ['messageChannel.lark', { label: t('pages.systemSettingsManager.groups.messageChannel.lark'), icon: <RobotOutlined /> }],
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
+        ['security.loginRateLimit', { label: t('pages.systemSettingsManager.groups.security.loginRateLimit'), icon: <LockOutlined /> }],
+        ['security.emailCodeRateLimit', { label: t('pages.systemSettingsManager.groups.security.emailCodeRateLimit'), icon: <LockOutlined /> }],
         ['oauth.github', { label: t('pages.systemSettingsManager.groups.oauth.github'), icon: <ApiOutlined /> }],
         ['oauth.google', { label: t('pages.systemSettingsManager.groups.oauth.google'), icon: <ApiOutlined /> }],
         ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
         ['module.tenant', { label: t('pages.systemSettingsManager.groups.module.tenant'), icon: <AppstoreOutlined /> }],
         ['module.approval', { label: t('pages.systemSettingsManager.groups.module.approval'), icon: <AppstoreOutlined /> }],
+        ['resource.visibility', { label: t('pages.systemSettingsManager.groups.resource.visibility'), icon: <LockOutlined /> }],
     ]);
 
     for (const group of pluginGroups) {
@@ -126,6 +144,7 @@ export function useSettingsTabToTranslationMap(): Map<string, string> {
         ['security', t('pages.systemSettingsManager.tabs.security')],
         ['oauth', t('pages.systemSettingsManager.tabs.oauth')],
         ['module', t('pages.systemSettingsManager.tabs.module')],
+        ['resource', t('pages.systemSettingsManager.tabs.resource')],
     ]);
 
     for (const tab of pluginTabs) {

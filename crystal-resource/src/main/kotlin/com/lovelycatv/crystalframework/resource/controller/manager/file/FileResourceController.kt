@@ -29,6 +29,6 @@ class FileResourceController(
         userAuthentication: UserAuthentication,
         @RequestParam(value = "id") id: Long
     ): ApiResponse<*> {
-        return ApiResponse.success(fileResourceService.getFileDownloadUrl(id))
+        return ApiResponse.success(fileResourceService.getFileDownloadUrl(id, userAuthentication))
     }
 }

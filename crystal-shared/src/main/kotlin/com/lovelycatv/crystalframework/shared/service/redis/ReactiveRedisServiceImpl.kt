@@ -1,20 +1,48 @@
 package com.lovelycatv.crystalframework.shared.service.redis
 
 import org.springframework.data.redis.core.*
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Service
 class ReactiveRedisServiceImpl(
-    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>
+    private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val reactiveStringRedisTemplate: ReactiveStringRedisTemplate,
 ) : ReactiveRedisService {
+    companion object {
+        private val COMPARE_AND_DELETE_SCRIPT = RedisScript.of(
+            "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+            Long::class.java,
+        )
+    }
+
     override fun hasKey(key: String): Mono<Boolean> {
         return this.reactiveRedisTemplate.hasKey(key)
     }
 
     override fun removeKey(vararg key: String): Mono<Long> {
         return this.reactiveRedisTemplate.delete(*key)
+    }
+
+    override fun expire(key: String, duration: Duration): Mono<Boolean> {
+        return this.reactiveRedisTemplate.expire(key, duration)
+    }
+
+    override fun compareAndDelete(key: String, expectedValue: String): Mono<Boolean> {
+        return this.reactiveRedisTemplate
+            .execute(COMPARE_AND_DELETE_SCRIPT, listOf(key), listOf(expectedValue))
+            .next()
+            .map { it > 0L }
+            .defaultIfEmpty(false)
+    }
+
+    override fun executeScript(script: String, keys: List<String>, args: List<String>): Mono<String> {
+        val redisScript = RedisScript.of(script, String::class.java)
+        return this.reactiveStringRedisTemplate
+            .execute(redisScript, keys, args)
+            .next()
     }
 
     override fun <T: Any> opsForValue(): ReactiveValueOperations<String, T> {

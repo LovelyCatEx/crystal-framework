@@ -1,4 +1,4 @@
-import type {BaseEntity} from "../BaseEntity.ts";
+import type {BaseScopedEntity} from "../BaseScopedEntity.ts";
 
 export enum ResourceFileType {
     USER_AVATAR = 0,
@@ -6,7 +6,7 @@ export enum ResourceFileType {
     TENANT_MEMBER_AVATAR = 2,
 }
 
-export interface FileResource extends BaseEntity {
+export interface FileResource extends BaseScopedEntity {
     userId: string;
     type: number;
     fileName: string;

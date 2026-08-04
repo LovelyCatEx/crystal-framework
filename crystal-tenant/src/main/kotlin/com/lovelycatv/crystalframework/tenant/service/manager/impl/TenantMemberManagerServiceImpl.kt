@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.tenant.repository.TenantMemberRepository
 import com.lovelycatv.crystalframework.tenant.service.TenantBenefitService
 import com.lovelycatv.crystalframework.tenant.service.TenantDepartmentMemberRelationService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
+import com.lovelycatv.crystalframework.rbac.user.service.UserForceLogoutService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberProfileService
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.tenant.service.TenantService
@@ -46,6 +47,7 @@ class TenantMemberManagerServiceImpl(
     private val tenantMemberService: TenantMemberService,
     @Lazy
     private val tenantMemberProfileService: TenantMemberProfileService,
+    private val userForceLogoutService: UserForceLogoutService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantMemberManagerService {
     override val cacheStore: ReactiveExpiringKVStore<String, TenantMemberEntity>
@@ -124,6 +126,28 @@ class TenantMemberManagerServiceImpl(
         return original.apply {
             dto.status?.let { status = it }
         }
+    }
+
+    /**
+     * When a member is deactivated (status changes away from ACTIVE), the member's still-valid JWT
+     * and cached authorities are not revoked by the plain status update. Force-logout the underlying
+     * user so the existing token is rejected on the next request; re-login is already blocked by the
+     * member-status check on the token-issuing path (CustomUserDetailsService.checkIsTenantValid).
+     *
+     * Note: force-logout is user-scoped, so a user who belongs to multiple tenants will be logged out
+     * of all of them. This is the accepted tradeoff of reusing the existing user-level mechanism.
+     */
+    @Transactional(rollbackFor = [Exception::class])
+    override suspend fun update(dto: ManagerUpdateTenantMemberDTO): TenantMemberEntity? {
+        val before = getByIdOrNull(dto.id)
+        val result = super.update(dto)
+        if (result != null && before != null &&
+            before.getRealStatus() == TenantMemberStatus.ACTIVE &&
+            result.getRealStatus() != TenantMemberStatus.ACTIVE
+        ) {
+            userForceLogoutService.markForceLogout(result.memberUserId)
+        }
+        return result
     }
 
     override suspend fun queryVO(dto: ManagerReadTenantMemberDTO): PaginatedResponseData<TenantMemberVO> {

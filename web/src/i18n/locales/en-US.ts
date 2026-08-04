@@ -17,6 +17,11 @@ export const enUS: I18nRules = {
         title: 'Set Up Admin Account',
         subtitle: 'Please set up the system administrator account and password',
         form: {
+          initializationToken: {
+            placeholder: 'One-time Initialization Token',
+            required: 'Please enter the one-time initialization token',
+            help: 'Copy the token from the backend startup log'
+          },
           username: {
             placeholder: 'Admin Username',
             required: 'Please enter admin username',
@@ -2266,6 +2271,18 @@ export const enUS: I18nRules = {
         'security.api.encrypt.enabled': 'Enabled',
         'security.api.encrypt.scope': 'Scope',
         'security.api.encrypt.securityLevel': 'Security Level',
+        'security.loginRateLimit.enabled': 'Enabled',
+        'security.loginRateLimit.windowSeconds': 'Sliding Window (seconds)',
+        'security.loginRateLimit.maxAttemptsPerIp': 'Max Attempts Per IP (per window)',
+        'security.loginRateLimit.maxAttemptsPerAccount': 'Max Attempts Per Account (per window)',
+        'security.loginRateLimit.lockThreshold': 'Consecutive Failures Before Lockout',
+        'security.loginRateLimit.lockBaseSeconds': 'Base Lockout Duration (seconds)',
+        'security.loginRateLimit.lockMaxSeconds': 'Max Lockout Duration (seconds)',
+        'security.emailCodeRateLimit.enabled': 'Enabled',
+        'security.emailCodeRateLimit.windowSeconds': 'Sliding Window (seconds)',
+        'security.emailCodeRateLimit.maxPerIp': 'Max Sends Per IP (per window)',
+        'security.emailCodeRateLimit.maxPerEmail': 'Max Sends Per Email (per window)',
+        'security.emailCodeRateLimit.maxGlobal': 'Max Global Sends (per window)',
         'oauth.github.enabled': 'Enabled',
         'oauth.github.useDefault': 'Use System Default',
         'oauth.github.authorizationUri': 'Authorization URI',
@@ -2294,6 +2311,9 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'resource.visibility.userAvatar': 'User Avatar Visibility',
+        'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
+        'resource.visibility.tenantMemberAvatar': 'Tenant Member Avatar Visibility',
       },
       groups: {
         'basic': 'Basic Settings',
@@ -2302,11 +2322,14 @@ export const enUS: I18nRules = {
         'mail.smtp': 'SMTP Mail Service',
         'messageChannel.lark': 'Lark',
         'security.api.encrypt': 'Api Security',
+        'security.loginRateLimit': 'Login Rate Limit & Lockout',
+        'security.emailCodeRateLimit': 'Email Code Rate Limit',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'resource.visibility': 'Resource Access',
       },
       tabs: {
         'basic': 'Basic',
@@ -2316,6 +2339,7 @@ export const enUS: I18nRules = {
         'security': 'Security',
         'oauth': 'OAuth',
         'module': 'Modules',
+        'resource': 'Resource',
       },
       enums: {
         'security.api.encrypt.scope': {
@@ -2327,7 +2351,28 @@ export const enUS: I18nRules = {
           'SYSTEM_NAME': 'System Name',
           'USER_NAME': 'User Name',
           'CUSTOM': 'Custom',
-        }
+        },
+        'resource.visibility.userAvatar': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
+        'resource.visibility.tenantIcon': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
+        'resource.visibility.tenantMemberAvatar': {
+          'PUBLIC': 'Public (anyone)',
+          'AUTHENTICATED': 'Authenticated users',
+          'SCOPE_MEMBER': 'Same-tenant members',
+          'OWNER_ONLY': 'Uploader only',
+          'SYSTEM_ADMIN': 'System admin only',
+        },
       }
     },
     tenantPersonalProfile: {
@@ -2876,7 +2921,6 @@ export const enUS: I18nRules = {
       subtitle: 'Override how this node exposes each form field. Untouched switches follow the definition.',
       empty: 'No definition-level fields to override. Add fields on the Form Designer tab first.',
       ccInfo: 'CC nodes never mutate form data — Readonly is locked ON.',
-      approvalInfo: 'Approval nodes default fields to readonly. Flip Readonly OFF to let this approver edit the field.',
       ccLockedTooltip: 'CC nodes are always readonly and cannot be changed.',
       column: {
         field: 'Field',
@@ -3691,6 +3735,7 @@ export const enUS: I18nRules = {
   api: {
     sessionExpired: 'Your session has expired',
     forbidden: 'You do not have permission to access this resource',
+    tooManyRequests: 'Too many requests, please try again later',
     unknownError: 'Unknown error',
     forbiddenModal: {
       title: 'Access denied',
@@ -3711,6 +3756,10 @@ export const enUS: I18nRules = {
     disabledModal: {
       title: 'Account disabled',
       description: 'Your account has been disabled by an administrator and cannot log in. Please contact the administrator.'
+    },
+    rateLimitModal: {
+      title: 'Too many attempts',
+      retryAfter: 'Too many attempts. Please try again in {{seconds}} seconds.'
     }
   },
 
@@ -3955,7 +4004,8 @@ export const enUS: I18nRules = {
       PROTECTED_RESOURCE: 'This resource is protected',
       NOT_TENANT_MEMBER: 'Not a member of this tenant',
       ROLE_PROTECTED: 'Role is protected from this operation',
-      PERMISSION_ESCALATION: 'Operation would escalate privileges'
+      PERMISSION_ESCALATION: 'Operation would escalate privileges',
+      INVALID_INITIALIZATION_TOKEN: 'Invalid system initialization token'
     },
     forbiddenScope: {
       SYSTEM: 'System',

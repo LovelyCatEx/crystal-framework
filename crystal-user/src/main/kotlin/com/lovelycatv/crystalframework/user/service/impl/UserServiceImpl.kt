@@ -3,14 +3,16 @@ package com.lovelycatv.crystalframework.user.service.impl
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
-import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.user.constants.CredentialAuthConstants
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.constants.SystemRole
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.crystalframework.user.controller.dto.UpdateUserProfileDTO
@@ -94,9 +96,11 @@ class UserServiceImpl(
         logger.info("User ${user.username} registered successfully, id=${user.id}, email=${user.email}")
     }
 
-    override suspend fun requestRegisterEmailConfirmationCode(email: String) {
+    override suspend fun requestRegisterEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestRegisterEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService ->
             mailService.sendMailByType(
                 email,
@@ -135,9 +139,11 @@ class UserServiceImpl(
         logger.info("Password of user ${existingUser.username} / ${existingUser.email} has been reset")
     }
 
-    override suspend fun requestResetPasswordEmailConfirmationCode(email: String) {
+    override suspend fun requestResetPasswordEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestResetPasswordEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService ->
             mailService.sendMail(
                 email,
@@ -164,6 +170,11 @@ class UserServiceImpl(
             emailCode
         )
 
+        val existingOwner = this.getRepository().findByEmail(newEmail).awaitFirstOrNull()
+        if (existingOwner != null && existingOwner.id != userId) {
+            throw BusinessException("Email address is already in use")
+        }
+
         withUpdateEntityContext(user) {
             this.getRepository()
                 .save(user.apply { email = newEmail })
@@ -174,9 +185,11 @@ class UserServiceImpl(
         logger.info("Email of user ${user.username} / ${user.email} has been reset from $oldEmail to $newEmail")
     }
 
-    override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String) {
+    override suspend fun requestResetEmailAddressEmailConfirmationCode(email: String, ip: String) {
         emailCodeAuthService.withSendEmailCode(
-            redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email)
+            redisKey = RedisConstants.getRequestResetEmailAddressEmailCodeKey(email),
+            ip = ip,
+            email = email,
         ) { code, mailService  ->
             mailService.sendMail(
                 email,
@@ -188,13 +201,13 @@ class UserServiceImpl(
         }
     }
 
-    override suspend fun getUserProfileVO(userId: Long, fullAccess: Boolean): UserProfileVO {
+    override suspend fun getUserProfileVO(userId: Long, viewer: UserAuthentication?, fullAccess: Boolean): UserProfileVO {
         val user = getByIdOrThrow(userId, BusinessException("User $userId not found"))
 
         return UserProfileVO(
             id = user.id,
             nickname = user.nickname,
-            avatar = fileResourceService.getFileDownloadUrl(user.avatar),
+            avatar = fileResourceService.getFileDownloadUrl(user.avatar, viewer),
             username = if (fullAccess) user.username else null,
             email = if (fullAccess) user.email else null,
             registeredTime = if (fullAccess) user.createdTime else null,
@@ -226,17 +239,10 @@ class UserServiceImpl(
         val (_, extension) = file.filename().split(".")
         val targetFileName = UUID.randomUUID().toString() + "." + extension
 
-        val service = fileResourceServiceManager.getService(
-            RoutingContext.of(
-                userId = userId,
-                fileType = ResourceFileType.USER_AVATAR,
-                fileName = targetFileName,
-                fileContentType = file.getContentType(),
-            )
-        )
-
-        val result = service.uploadFile(
+        val result = fileResourceServiceManager.uploadFile(
             userId,
+            ResourceScope.SYSTEM,
+            0,
             ResourceFileType.USER_AVATAR,
             file,
             targetFileName
@@ -266,10 +272,17 @@ class UserServiceImpl(
         val user = this.getRepository()
             .findByUsernameOrEmail(username, username)
             .awaitFirstOrNull()
-            ?: throw BusinessException("user $username not found")
+
+        // Never let the response reveal whether the account exists: the absent-account branch burns an
+        // equivalent bcrypt comparison, and both failure branches throw the SAME message. This blocks
+        // username enumeration and credential probing against this unauthenticated endpoint.
+        if (user == null) {
+            passwordEncoder.matches(password, CredentialAuthConstants.DUMMY_PASSWORD_HASH)
+            throw BusinessException(CredentialAuthConstants.MESSAGE_INVALID_CREDENTIALS)
+        }
 
         if (!passwordEncoder.matches(password, user.password)) {
-            throw BusinessException("incorrect password")
+            throw BusinessException(CredentialAuthConstants.MESSAGE_INVALID_CREDENTIALS)
         }
 
         oAuthAccountService.bindUser(oauthAccountId, user.id)

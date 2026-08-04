@@ -11,6 +11,18 @@ interface ReactiveRedisService {
 
     fun removeKey(vararg key: String): Mono<Long>
 
+    /** Sets (or refreshes) the time-to-live of an existing [key]. Returns false if the key does not exist. */
+    fun expire(key: String, duration: Duration): Mono<Boolean>
+
+    fun compareAndDelete(key: String, expectedValue: String): Mono<Boolean>
+
+    /**
+     * Atomically evaluates a Lua [script] against Redis. Keys and args are passed and returned as
+     * plain strings (String-serialized), so scripts can rely on `tonumber(...)` and callers get
+     * predictable reply typing regardless of the default value serializer.
+     */
+    fun executeScript(script: String, keys: List<String>, args: List<String>): Mono<String>
+
     fun <T: Any> opsForValue(): ReactiveValueOperations<String, T>
 
     fun <T: Any> get(key: String): Mono<T>

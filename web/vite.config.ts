@@ -68,6 +68,11 @@ export default defineConfig(({ mode }) => {
       },
       sourcemap: false,
       minify: 'terser',
+      terserOptions: {
+        compress: {
+          pure_funcs: ['console.log'], // 兜底：生产构建移除所有 console.log，保留 console.error/warn
+        },
+      },
     },
     server: {
       proxy: {

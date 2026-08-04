@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.auth.event.LoginMethod
 import com.lovelycatv.crystalframework.auth.event.UserLoginEvent
 import com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter
 import com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter
+import com.lovelycatv.crystalframework.auth.service.LoginRateLimitService
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.auth.stores.JWTSignKeyStore
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
@@ -17,6 +18,7 @@ import com.lovelycatv.vertex.log.logger
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
@@ -44,13 +46,33 @@ class SecurityConfig(
     private val logger = logger()
     private val pathPatternParser = PathPatternParser()
 
+    /**
+     * Dedicated security chain for the actuator management port. Spring Boot's management child
+     * context inherits the parent's SecurityWebFilterChain beans, so without this chain the
+     * CustomAuthFilter would intercept actuator requests on port 9100 and return 401.
+     *
+     * This chain matches first (Order 1) and permits all actuator paths unconditionally.
+     * Network-level access control (port 9100 not published to the host) is the real guard.
+     */
     @Bean
+    @Order(1)
+    fun managementSecurityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        return http
+            .securityMatcher(org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher("/actuator/**"))
+            .csrf { it.disable() }
+            .authorizeExchange { it.anyExchange().permitAll() }
+            .build()
+    }
+
+    @Bean
+    @Order(2)
     fun securityWebFilterChain(
         http: ServerHttpSecurity,
         userAuthorizationService: UserAuthorizationService,
         jwtSignKeyStore: JWTSignKeyStore,
         userRbacQueryService: UserRbacQueryService,
         userForceLogoutService: UserForceLogoutService,
+        loginRateLimitService: LoginRateLimitService,
     ): SecurityWebFilterChain {
         http.exceptionHandling { exceptionHandlingSpec ->
             exceptionHandlingSpec.authenticationEntryPoint { exchange, exception ->
@@ -192,8 +214,7 @@ class SecurityConfig(
                     )
                 } +
                 listOf(
-                    pathPatternParser.parse("/login"),
-                    pathPatternParser.parse("/api/*/actuator/**")
+                    pathPatternParser.parse("/login")
                 )
 
         // custom authentications
@@ -219,7 +240,8 @@ class SecurityConfig(
                 "/api/v1/user/login",
                 reactiveAuthenticationManager,
                 userAuthorizationService,
-                eventPublisher
+                eventPublisher,
+                loginRateLimitService
             ),
             SecurityWebFiltersOrder.AUTHENTICATION
         )

@@ -10,11 +10,11 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberR
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserRbacQueryResult
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserTenantRbacQueryResult
 import com.lovelycatv.crystalframework.shared.constants.RbacConstants
+import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
-import java.time.Duration
 
 @Service
 class UserRbacQueryServiceImpl(
@@ -56,7 +56,7 @@ class UserRbacQueryServiceImpl(
         tenantMemberId: Long?,
         refreshCache: Boolean
     ): Set<GrantedAuthority> {
-        val redisKey = "userAuthorities:$userId"
+        val redisKey = RedisConstants.getUserAuthoritiesCacheKey(userId, tenantId)
         val cache = redisService
             .get<String>(redisKey)
             .awaitFirstOrNull()
@@ -97,20 +97,28 @@ class UserRbacQueryServiceImpl(
 
             redisService.set(
                 redisKey,
-                permissions.joinToString(
-                    separator = ",",
-                    prefix = "",
-                    postfix = ""
-                ) { it },
-                Duration.ofDays(3)
+                permissions.joinToString(separator = ",") { it },
+                RedisConstants.USER_AUTHORITIES_CACHE_TTL
             ).awaitFirstOrNull()
+
+            // Register this slice under the user's index Set and keep the index strictly longer-lived
+            // than any slice, so clearUserAuthoritiesCache can always enumerate and drop every slice.
+            val indexKey = RedisConstants.getUserAuthoritiesIndexKey(userId)
+            redisService.opsForSet<String>().add(indexKey, redisKey).awaitFirstOrNull()
+            redisService.expire(indexKey, RedisConstants.USER_AUTHORITIES_INDEX_TTL).awaitFirstOrNull()
 
             permissions.map { GrantedAuthority { it } }.toSet()
         }
     }
 
     override suspend fun clearUserAuthoritiesCache(userId: Long) {
-        val redisKey = "userAuthorities:$userId"
-        redisService.removeKey(redisKey).awaitFirstOrNull()
+        val indexKey = RedisConstants.getUserAuthoritiesIndexKey(userId)
+        val sliceKeys = redisService.opsForSet<String>()
+            .members(indexKey)
+            .collectList()
+            .awaitFirstOrNull()
+            .orEmpty()
+
+        redisService.removeKey(*(sliceKeys + indexKey).toTypedArray()).awaitFirstOrNull()
     }
 }

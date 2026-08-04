@@ -11,10 +11,12 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.crystalframework.shared.utils.resolveClientIp
 import com.lovelycatv.crystalframework.user.controller.dto.*
 import com.lovelycatv.crystalframework.user.service.UserService
 import jakarta.validation.Valid
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -39,11 +41,12 @@ class UserController(
     @Unauthorized
     @PostMapping("/requestRegisterEmailCode", version = "1")
     suspend fun requestRegisterEmailCode(
+        request: ServerHttpRequest,
         @ModelAttribute
         @Valid
         dto: RequestRegisterEmailCodeDTO
     ): ApiResponse<*> {
-        userService.requestRegisterEmailConfirmationCode(dto.email)
+        userService.requestRegisterEmailConfirmationCode(dto.email, request.resolveClientIp())
 
         return ApiResponse.success(null, "ok")
     }
@@ -63,11 +66,12 @@ class UserController(
     @Unauthorized
     @PostMapping("/requestPasswordResetEmailCode")
     suspend fun requestPasswordResetEmailCode(
+        request: ServerHttpRequest,
         @ModelAttribute
         @Valid
         dto: RequestResetPasswordEmailCodeDTO
     ): ApiResponse<*> {
-        userService.requestResetPasswordEmailConfirmationCode(dto.email)
+        userService.requestResetPasswordEmailConfirmationCode(dto.email, request.resolveClientIp())
 
         return ApiResponse.success(null)
     }
@@ -91,11 +95,12 @@ class UserController(
 
     @PostMapping("/requestResetEmailAddressEmailCode")
     suspend fun requestPasswordResetEmailCode(
+        request: ServerHttpRequest,
         userAuthentication: UserAuthentication,
         @ModelAttribute
         dto: RequestResetEmailAddressEmailCodeDTO
     ): ApiResponse<*> {
-        userService.requestResetEmailAddressEmailConfirmationCode(dto.newEmail)
+        userService.requestResetEmailAddressEmailConfirmationCode(dto.newEmail, request.resolveClientIp())
 
         return ApiResponse.success(null)
     }
@@ -117,6 +122,7 @@ class UserController(
         return ApiResponse.success(
             userService.getUserProfileVO(
                 userId = targetUserId,
+                viewer = userAuthentication,
                 fullAccess = targetUserId == userAuthentication?.userId
                         || RbacUtils.hasAuthority(SystemPermission.ACTION_SYSTEM_USER_READ.name)
             )

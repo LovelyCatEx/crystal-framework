@@ -9,9 +9,10 @@
 | `BusinessException(message)` | 400 | 业务校验失败，`message` 透传到前端 |
 | `UnauthorizedException(message)` | 401 | 未登录 / token 过期 |
 | `ForbiddenException(message)` | 403 | 已认证但权限不足 |
+| `TooManyRequestsException(message, context)` | 429 | 触发限流 / 锁定，`context` 携带 `RateLimitContext.retryAfterSeconds` |
 | `@Valid` 校验失败 | 400 | 无需手动抛，框架自动处理 |
 
-三个自定义异常都在 `com.lovelycatv.crystalframework.shared.exception` 包，均继承 `RuntimeException`。
+四个自定义异常都在 `com.lovelycatv.crystalframework.shared.exception` 包，均继承 `RuntimeException`。
 
 ## 使用示例
 

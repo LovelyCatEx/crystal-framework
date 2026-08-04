@@ -1,11 +1,15 @@
 package com.lovelycatv.crystalframework.resource.controller.manager.file.dto
 
+import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerCreateScopedDTO
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 data class ManagerCreateFileResourceDTO(
+    override val scope: Int = 0,
+    override val scopeId: Long = 0,
+
     @field:NotNull(message = "User ID is required")
     val userId: Long,
 
@@ -33,4 +37,4 @@ data class ManagerCreateFileResourceDTO(
     @field:NotBlank(message = "Object key is required")
     @field:Size(max = 256, message = "Object key length cannot exceed 256 characters")
     val objectKey: String
-)
+) : BaseManagerCreateScopedDTO(scope, scopeId)

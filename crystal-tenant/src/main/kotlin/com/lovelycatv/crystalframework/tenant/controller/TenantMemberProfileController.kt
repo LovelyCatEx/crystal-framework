@@ -49,7 +49,7 @@ class TenantMemberProfileController(
         val profile = tenantMemberProfileService.getByTenantIdAndTenantMemberId(tenantId, targetMemberId)
             ?: return ApiResponse.success(null)
 
-        return ApiResponse.success(profile.toProfileVO(fileResourceService, fullAccess))
+        return ApiResponse.success(profile.toProfileVO(fileResourceService, userAuthentication, fullAccess))
     }
 
     @PostMapping("/upsert")
@@ -75,7 +75,7 @@ class TenantMemberProfileController(
             locale = dto.locale,
         )
 
-        return ApiResponse.success(saved.toProfileVO(fileResourceService))
+        return ApiResponse.success(saved.toProfileVO(fileResourceService, userAuthentication))
     }
 
     @PostMapping("/uploadAvatar")
@@ -95,6 +95,6 @@ class TenantMemberProfileController(
             file = file,
         )
 
-        return ApiResponse.success(saved.toProfileVO(fileResourceService))
+        return ApiResponse.success(saved.toProfileVO(fileResourceService, userAuthentication))
     }
 }

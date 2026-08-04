@@ -65,6 +65,8 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+    signing-key: ${CRYSTAL_RESOURCE_SIGNING_KEY:zR7yq2N4bK8vXf1sJ0pWmC3hLd6tGuAe5oQnBiYxUkE=}
+    signed-url-ttl-seconds: 300
   monitor:
     flush-interval-ms: 30000
   sharding:
@@ -89,6 +91,11 @@ crystalframework:
     encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
 
 management:
+  # Actuator runs on a dedicated management port that is NOT published outside the container network,
+  # so metrics/health are only reachable by in-cluster scrapers (e.g. Prometheus) and never anonymously
+  # from the public internet. This is why the main SecurityFilterChain no longer needs an actuator permitAll.
+  server:
+    port: ${MANAGEMENT_PORT:9100}
   endpoints:
     web:
       exposure:

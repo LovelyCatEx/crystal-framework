@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.approval.service.manager.impl
 
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerCreateApprovalFlowDefinitionDTO
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowDefinitionDTO
+import com.lovelycatv.crystalframework.approval.constants.ApprovalNodeConfigConstants
 import com.lovelycatv.crystalframework.approval.controller.manager.dto.ManagerUpdateApprovalFlowGraphDTO
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowDefinitionEntity
 import com.lovelycatv.crystalframework.approval.entity.ApprovalFlowEdgeEntity
@@ -14,7 +15,12 @@ import com.lovelycatv.crystalframework.approval.service.ApprovalFlowGraphValidat
 import com.lovelycatv.crystalframework.approval.service.ApprovalFormSchemaValidator
 import com.lovelycatv.crystalframework.approval.service.manager.ApprovalFlowDefinitionManagerService
 import com.lovelycatv.crystalframework.approval.types.ApprovalFormSchema
+import com.lovelycatv.crystalframework.approval.types.ApprovalFlowApproverStrategy
+import com.lovelycatv.crystalframework.approval.types.ApprovalFlowNodeType
+import com.lovelycatv.crystalframework.approval.types.ApprovalFlowScope
+import com.lovelycatv.crystalframework.approval.types.ApprovalNodeConfig
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.parseObject
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -38,6 +44,7 @@ class ApprovalFlowDefinitionManagerServiceImpl(
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
     private val approvalDictResolver: ApprovalDictResolver,
+    private val tenantMemberService: TenantMemberService,
 ) : ApprovalFlowDefinitionManagerService {
     override val cacheStore: ReactiveExpiringKVStore<String, ApprovalFlowDefinitionEntity>
         get() = reactiveRedisService.asReactiveKVStore()
@@ -103,6 +110,43 @@ class ApprovalFlowDefinitionManagerServiceImpl(
         ResourceScope.getById(scopeTypeId)
             ?: throw BusinessException("Unknown scope type: $scopeTypeId")
 
+    /**
+     * For TENANT-scoped flows, every SPECIFIED_USER approver referenced by an APPROVAL node must be a
+     * tenant_member of this flow's own tenant. Without this check a tenant admin could inject another
+     * tenant's members as approvers (H-4). SYSTEM flows carry raw user ids that are not tenant-bound,
+     * so they are left to the engine's own resolution.
+     */
+    private suspend fun assertSpecifiedApproversBelongToScope(
+        dto: ManagerUpdateApprovalFlowGraphDTO,
+        definition: ApprovalFlowDefinitionEntity
+    ) {
+        if (definition.getRealScope() != ApprovalFlowScope.TENANT) {
+            return
+        }
+        val tenantId = definition.scopeId
+        for (nodeDTO in dto.nodes) {
+            if (nodeDTO.type != ApprovalFlowNodeType.APPROVAL.typeId) {
+                continue
+            }
+            val config = runCatching { nodeDTO.config?.parseObject<ApprovalNodeConfig>() }.getOrNull()
+                ?: continue
+            if (ApprovalFlowApproverStrategy.getById(config.strategy) != ApprovalFlowApproverStrategy.SPECIFIED_USER) {
+                continue
+            }
+            @Suppress("UNCHECKED_CAST")
+            val memberIds = config.strategyParams[ApprovalNodeConfigConstants.STRATEGY_PARAM_MEMBER_IDS] as? List<String>
+                ?: emptyList()
+            for (rawMemberId in memberIds) {
+                val memberId = rawMemberId.toLongOrNull()
+                    ?: throw BusinessException("APPROVAL node '${nodeDTO.nodeKey}' has an invalid member id: $rawMemberId")
+                val member = tenantMemberService.getByIdOrNull(memberId)
+                if (member == null || member.tenantId != tenantId) {
+                    throw BusinessException("APPROVAL node '${nodeDTO.nodeKey}' references a member not belonging to this tenant: $memberId")
+                }
+            }
+        }
+    }
+
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun updateGraph(dto: ManagerUpdateApprovalFlowGraphDTO): List<String> {
         // Fetch definition first so we can feed its formSchema into rules 37-40. If it doesn't
@@ -114,6 +158,11 @@ class ApprovalFlowDefinitionManagerServiceImpl(
         if (validationErrors.isNotEmpty()) {
             return validationErrors
         }
+
+        // Approver tenant-ownership check needs DB access, so it lives here rather than in the pure
+        // ApprovalFlowGraphValidator — mirroring how DICT cross-scope legality lives in the resolver.
+        // Guards against injecting other tenants' members as approvers (see H-4).
+        assertSpecifiedApproversBelongToScope(dto, definition)
 
         val newVersion = definition.currentVersion + 1
 

@@ -28,8 +28,23 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_READ,
             SystemPermission.MENU_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_MANAGER,
             SystemPermission.ACTION_SYSTEM_STORAGE_PROVIDER_ROUTING_RULE_READ,
+            // File Resource — menu
             SystemPermission.MENU_SYSTEM_FILE_RESOURCE_MANAGER,
+            // File Resource — system scope
+            SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_CREATE,
             SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_READ,
+            SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_UPDATE,
+            SystemPermission.ACTION_SYSTEM_FILE_RESOURCE_DELETE,
+            // File Resource — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_FILE_RESOURCE_CREATE,
+            SystemPermission.ACTION_TENANT_FILE_RESOURCE_READ,
+            SystemPermission.ACTION_TENANT_FILE_RESOURCE_UPDATE,
+            SystemPermission.ACTION_TENANT_FILE_RESOURCE_DELETE,
+            // File Resource — super (cross-scope, admin-only)
+            SystemPermission.ACTION_X_FILE_RESOURCE_CREATE,
+            SystemPermission.ACTION_X_FILE_RESOURCE_READ,
+            SystemPermission.ACTION_X_FILE_RESOURCE_UPDATE,
+            SystemPermission.ACTION_X_FILE_RESOURCE_DELETE,
             // Mail template
             SystemPermission.MENU_SYSTEM_MAIL_TEMPLATE_MANAGER,
             SystemPermission.ACTION_SYSTEM_MAIL_TEMPLATE_READ,

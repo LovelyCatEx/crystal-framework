@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.tenant.utils
 
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.controller.vo.TenantMemberProfileVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberProfileEntity
 
@@ -8,6 +9,7 @@ class TenantMemberProfileEntityExtensions private constructor()
 
 suspend fun TenantMemberProfileEntity.toProfileVO(
     fileResourceService: FileResourceService,
+    viewer: UserAuthentication?,
     fullAccess: Boolean = true
 ): TenantMemberProfileVO {
     return TenantMemberProfileVO(
@@ -18,7 +20,7 @@ suspend fun TenantMemberProfileEntity.toProfileVO(
         name = this.name,
         phone = if (fullAccess) this.phone else "",
         nickname = this.nickname,
-        avatar = fileResourceService.getFileDownloadUrl(this.avatar),
+        avatar = fileResourceService.getFileDownloadUrl(this.avatar, viewer),
         email = if (fullAccess) this.email else null,
         bio = this.bio,
         gender = this.gender,

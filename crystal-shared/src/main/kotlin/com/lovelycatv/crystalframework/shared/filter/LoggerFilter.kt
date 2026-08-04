@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.shared.filter
 
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
 import org.reactivestreams.Publisher
@@ -29,7 +30,8 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
         private const val MASK = "***"
         private val SENSITIVE_HEADER_NAMES = setOf(
             "authorization", "cookie", "set-cookie",
-            "proxy-authorization", "x-api-key", "x-forwarded-authorization"
+            "proxy-authorization", "x-api-key", "x-forwarded-authorization",
+            HeadersConstants.X_SYSTEM_INITIALIZE_TOKEN.lowercase()
         )
         private val SENSITIVE_JSON_KEY_REGEX = Regex(
             """"(password|newPassword|oldPassword|token|accessToken|refreshToken|clientSecret|appSecret|emailCode|smsCode)"\s*:\s*"[^"]*"""",

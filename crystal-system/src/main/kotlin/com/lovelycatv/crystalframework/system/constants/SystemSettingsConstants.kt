@@ -1,7 +1,8 @@
-package com.lovelycatv.crystalframework.system.types
+package com.lovelycatv.crystalframework.system.constants
 
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemDeclaration
 import com.lovelycatv.crystalframework.sdk.common.settings.types.SettingsItemValueType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 
 object SystemSettingsConstants {
     object Basic {
@@ -329,14 +330,14 @@ object SystemSettingsConstants {
             object Encrypt {
                 val ENABLE = SettingsItemDeclaration(
                     key = "security.api.encrypt.enabled",
-                    valueType =  SettingsItemValueType.BOOLEAN,
+                    valueType = SettingsItemValueType.BOOLEAN,
                     defaultValue = true.toString(),
                     sort = 1
                 )
 
                 val SCOPE = SettingsItemDeclaration(
                     key = "security.api.encrypt.scope",
-                    valueType =  SettingsItemValueType.ENUM_SINGLE,
+                    valueType = SettingsItemValueType.ENUM_SINGLE,
                     defaultValue = "ALL",
                     sort = 2,
                     enumValues = listOf("ALL", "ALL_ANNOTATED", "BY_ANNOTATED_LEVEL")
@@ -351,6 +352,93 @@ object SystemSettingsConstants {
             }
         }
 
+        object LoginRateLimit {
+            val ENABLED = SettingsItemDeclaration(
+                key = "security.loginRateLimit.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1
+            )
+
+            val WINDOW_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.windowSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 300.toString(),
+                sort = 2
+            )
+
+            val MAX_ATTEMPTS_PER_IP = SettingsItemDeclaration(
+                key = "security.loginRateLimit.maxAttemptsPerIp",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 30.toString(),
+                sort = 3
+            )
+
+            val MAX_ATTEMPTS_PER_ACCOUNT = SettingsItemDeclaration(
+                key = "security.loginRateLimit.maxAttemptsPerAccount",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 10.toString(),
+                sort = 4
+            )
+
+            val LOCK_THRESHOLD = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockThreshold",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 5.toString(),
+                sort = 5
+            )
+
+            val LOCK_BASE_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockBaseSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 60.toString(),
+                sort = 6
+            )
+
+            val LOCK_MAX_SECONDS = SettingsItemDeclaration(
+                key = "security.loginRateLimit.lockMaxSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 3600.toString(),
+                sort = 7
+            )
+        }
+
+        object EmailCodeRateLimit {
+            val ENABLED = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1
+            )
+
+            val WINDOW_SECONDS = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.windowSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 3600.toString(),
+                sort = 2
+            )
+
+            val MAX_PER_IP = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxPerIp",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 10.toString(),
+                sort = 3
+            )
+
+            val MAX_PER_EMAIL = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxPerEmail",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 5.toString(),
+                sort = 4
+            )
+
+            val MAX_GLOBAL = SettingsItemDeclaration(
+                key = "security.emailCodeRateLimit.maxGlobal",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 500.toString(),
+                sort = 5
+            )
+        }
     }
 
     object Module {
@@ -367,5 +455,35 @@ object SystemSettingsConstants {
             defaultValue = true.toString(),
             sort = 1
         )
+    }
+
+    object Resource {
+        object Visibility {
+            private val VISIBILITY_ENUM_VALUES = ResourceVisibility.entries.map { it.name }
+
+            val USER_AVATAR = SettingsItemDeclaration(
+                key = "resource.visibility.userAvatar",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.PUBLIC.name,
+                sort = 0,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+
+            val TENANT_ICON = SettingsItemDeclaration(
+                key = "resource.visibility.tenantIcon",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.PUBLIC.name,
+                sort = 1,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+
+            val TENANT_MEMBER_AVATAR = SettingsItemDeclaration(
+                key = "resource.visibility.tenantMemberAvatar",
+                valueType = SettingsItemValueType.ENUM_SINGLE,
+                defaultValue = ResourceVisibility.SCOPE_MEMBER.name,
+                sort = 2,
+                enumValues = VISIBILITY_ENUM_VALUES
+            )
+        }
     }
 }

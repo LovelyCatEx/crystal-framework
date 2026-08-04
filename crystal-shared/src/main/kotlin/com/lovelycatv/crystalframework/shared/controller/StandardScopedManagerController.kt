@@ -18,7 +18,6 @@ import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ScopedOperation
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
-import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
@@ -94,7 +93,7 @@ abstract class StandardScopedManagerController<
     ): Boolean {
         val matrix = permissions
             ?: error("StandardScopedManagerController#checkPermission must be overridden when no PermissionMatrix is supplied")
-        return RbacUtils.hasAnyAuthority(*matrix.layersFor(scope, operation))
+        return matrix.grantsAuthority(scope, operation)
     }
 
     // ─── Overridable hooks ───
@@ -110,16 +109,7 @@ abstract class StandardScopedManagerController<
         userAuthentication: UserAuthentication
     ): Boolean {
         val matrix = permissions ?: return true
-        return when (scope) {
-            ResourceScope.SYSTEM -> true
-            ResourceScope.TENANT -> {
-                if (RbacUtils.hasAnyAuthority(*matrix.crossTenantLayersFor(operation))) {
-                    true
-                } else {
-                    scopeId == userAuthentication.tenantId
-                }
-            }
-        }
+        return matrix.satisfiesOwnership(scope, scopeId, operation, userAuthentication.tenantId)
     }
 
     /** Resolve [ResourceScope] from the raw scope typeId. */

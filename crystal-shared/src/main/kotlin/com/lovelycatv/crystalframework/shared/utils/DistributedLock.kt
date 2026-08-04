@@ -29,11 +29,8 @@ suspend fun <T> ReactiveRedisService.withDistributedLock(
     return try {
         block()
     } finally {
-        // Best-effort release with token verification: don't remove another owner's lock
-        // if [ttl] elapsed and someone else acquired [lockKey] before we ran `finally`.
-        val current = this.get<String>(lockKey).awaitFirstOrNull()
-        if (current == token) {
-            this.removeKey(lockKey).awaitFirstOrNull()
+        runCatching {
+            this.compareAndDelete(lockKey, token).awaitFirstOrNull()
         }
     }
 }

@@ -441,6 +441,33 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // ============================================================
+    //   File Resource
+    // ============================================================
+    val ACTION_FILE_RESOURCE_CREATE = TenantPermissionDeclaration(
+        name = "i.tenant.file.resource.create",
+        description = "Create file resources within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    val ACTION_FILE_RESOURCE_READ = TenantPermissionDeclaration(
+        name = "i.tenant.file.resource.read",
+        description = "Read file resources within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    val ACTION_FILE_RESOURCE_UPDATE = TenantPermissionDeclaration(
+        name = "i.tenant.file.resource.update",
+        description = "Update file resources within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    val ACTION_FILE_RESOURCE_DELETE = TenantPermissionDeclaration(
+        name = "i.tenant.file.resource.delete",
+        description = "Delete file resources within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }
