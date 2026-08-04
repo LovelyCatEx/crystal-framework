@@ -43,25 +43,20 @@ class VolcEngineTOSFileResourceServiceImpl(
         return this.client!!
     }
 
-    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
-        val objectKey = normalizedObjectKey(entity)
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${normalizedProviderBaseUrl()}${normalizedObjectKey(entity)}"
+    }
 
-        return when (visibility) {
-            ResourceVisibility.PUBLIC ->
-                "${normalizedProviderBaseUrl()}$objectKey"
-            ResourceVisibility.AUTHENTICATED,
-            ResourceVisibility.SCOPE_MEMBER,
-            ResourceVisibility.OWNER_ONLY,
-            ResourceVisibility.SYSTEM_ADMIN -> withContext(Dispatchers.IO) {
-                getClient().preSignedURL(
-                    PreSignedURLInput.builder()
-                        .httpMethod(HttpMethod.GET)
-                        .bucket(bucketName)
-                        .key(objectKey)
-                        .expires(PRESIGNED_URL_TTL_SECONDS)
-                        .build()
-                ).signedUrl
-            }
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        return withContext(Dispatchers.IO) {
+            getClient().preSignedURL(
+                PreSignedURLInput.builder()
+                    .httpMethod(HttpMethod.GET)
+                    .bucket(bucketName)
+                    .key(normalizedObjectKey(entity))
+                    .expires(signedUrlTtlSeconds)
+                    .build()
+            ).signedUrl
         }
     }
 
@@ -175,8 +170,5 @@ class VolcEngineTOSFileResourceServiceImpl(
         private const val PROGRESS_COMPLETE = 100
 
         private const val CONTENT_DISPOSITION_PREFIX = "attachment; filename="
-
-        /** TTL for pre-signed GET URLs of non-public resources (30 minutes, expressed in seconds per TOS API). */
-        private const val PRESIGNED_URL_TTL_SECONDS = 30L * 60L
     }
 }

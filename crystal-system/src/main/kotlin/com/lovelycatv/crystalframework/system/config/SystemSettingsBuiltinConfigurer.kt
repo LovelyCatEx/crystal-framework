@@ -74,6 +74,7 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.OAuth.Oicq.SCOPE,
                 SystemSettingsConstants.Module.TENANT_ENABLED,
                 SystemSettingsConstants.Module.APPROVAL_ENABLED,
+                SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS,
                 SystemSettingsConstants.Resource.Visibility.USER_AVATAR,
                 SystemSettingsConstants.Resource.Visibility.TENANT_ICON,
                 SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR,

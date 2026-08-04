@@ -47,26 +47,20 @@ class OSSFileResourceServiceImpl(
         return this.client!!
     }
 
-    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
-        val objectKey = normalizedObjectKey(entity)
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${normalizedProviderBaseUrl()}${normalizedObjectKey(entity)}"
+    }
 
-        return when (visibility) {
-            ResourceVisibility.PUBLIC ->
-                "${normalizedProviderBaseUrl()}$objectKey"
-            ResourceVisibility.AUTHENTICATED,
-            ResourceVisibility.SCOPE_MEMBER,
-            ResourceVisibility.OWNER_ONLY,
-            ResourceVisibility.SYSTEM_ADMIN ->
-                getClient().presign(
-                    GetObjectRequest.newBuilder()
-                        .bucket(bucketName)
-                        .key(objectKey)
-                        .build(),
-                    PresignOptions.newBuilder()
-                        .expiration(Duration.ofMillis(PRESIGNED_URL_TTL_MS))
-                        .build()
-                ).url()
-        }
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        return getClient().presign(
+            GetObjectRequest.newBuilder()
+                .bucket(bucketName)
+                .key(normalizedObjectKey(entity))
+                .build(),
+            PresignOptions.newBuilder()
+                .expiration(Duration.ofSeconds(signedUrlTtlSeconds))
+                .build()
+        ).url()
     }
 
     override suspend fun doUploadFile(
@@ -101,8 +95,4 @@ class OSSFileResourceServiceImpl(
         this.client?.close()
     }
 
-    companion object {
-        /** TTL for pre-signed GET URLs of non-public resources (30 minutes). */
-        private const val PRESIGNED_URL_TTL_MS = 30 * 60 * 1000L
-    }
 }

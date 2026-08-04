@@ -69,19 +69,15 @@ class COSFileResourceServiceImpl(
         return this.transferManager!!
     }
 
-    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
-        val objectKey = normalizedObjectKey(entity)
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${normalizedProviderBaseUrl()}${normalizedObjectKey(entity)}"
+    }
 
-        return when (visibility) {
-            ResourceVisibility.PUBLIC ->
-                "${normalizedProviderBaseUrl()}$objectKey"
-            ResourceVisibility.AUTHENTICATED,
-            ResourceVisibility.SCOPE_MEMBER,
-            ResourceVisibility.OWNER_ONLY,
-            ResourceVisibility.SYSTEM_ADMIN -> withContext(Dispatchers.IO) {
-                val expiration = Date(System.currentTimeMillis() + PRESIGNED_URL_TTL_MS)
-                getClient().generatePresignedUrl(bucketName, objectKey, expiration, HttpMethodName.GET).toString()
-            }
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        return withContext(Dispatchers.IO) {
+            val objectKey = normalizedObjectKey(entity)
+            val expiration = Date(System.currentTimeMillis() + signedUrlTtlSeconds * MILLIS_PER_SECOND)
+            getClient().generatePresignedUrl(bucketName, objectKey, expiration, HttpMethodName.GET).toString()
         }
     }
 
@@ -131,8 +127,4 @@ class COSFileResourceServiceImpl(
         this.transferManager?.shutdownNow(true)
     }
 
-    companion object {
-        /** TTL for pre-signed GET URLs of non-public resources (30 minutes). */
-        private const val PRESIGNED_URL_TTL_MS = 30 * 60 * 1000L
-    }
 }

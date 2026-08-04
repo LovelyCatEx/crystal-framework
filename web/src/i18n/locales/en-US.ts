@@ -2314,6 +2314,7 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
         'resource.visibility.userAvatar': 'User Avatar Visibility',
         'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
         'resource.visibility.tenantMemberAvatar': 'Tenant Member Avatar Visibility',
@@ -2333,6 +2334,7 @@ export const enUS: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'resource.signedUrl': 'Signed URL',
         'resource.visibility': 'Resource Access',
       },
       tabs: {

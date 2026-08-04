@@ -87,11 +87,12 @@ class FileResourceServiceImpl(
         resourceAccessService.assertReadable(entity, viewer)
 
         val visibility = resourceAccessService.resolveVisibility(entity.getRealResourceFileType())
+        val signedUrlTtlSeconds = resourceAccessService.resolveSignedUrlTtlSeconds()
         val provider = storageProviderService.getByIdOrThrow(entity.storageProviderId)
 
         // Each provider decides how to honor visibility (stable URL for public resources, a short-lived
         // signature / vendor pre-signed URL for non-public ones). See AbstractFileResourceService.buildDownloadUrl.
-        return fileResourceServiceManager.getService(provider).buildDownloadUrl(entity, visibility)
+        return fileResourceServiceManager.getService(provider).buildDownloadUrl(entity, visibility, signedUrlTtlSeconds)
     }
 
     override val cacheStore: ReactiveExpiringKVStore<String, FileResourceEntity>

@@ -1,6 +1,7 @@
 import type {ReactNode} from "react";
 import {
     AppstoreOutlined,
+    ClockCircleOutlined,
     CopyrightCircleOutlined,
     InfoCircleOutlined,
     LockOutlined,
@@ -90,6 +91,7 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
         ['module.tenant.enabled', t('pages.systemSettingsManager.keys.module.tenant.enabled')],
         ['module.approval.enabled', t('pages.systemSettingsManager.keys.module.approval.enabled')],
+        ['resource.signedUrl.ttlSeconds', t('pages.systemSettingsManager.keys.resource.signedUrl.ttlSeconds')],
         ['resource.visibility.userAvatar', t('pages.systemSettingsManager.keys.resource.visibility.userAvatar')],
         ['resource.visibility.tenantIcon', t('pages.systemSettingsManager.keys.resource.visibility.tenantIcon')],
         ['resource.visibility.tenantMemberAvatar', t('pages.systemSettingsManager.keys.resource.visibility.tenantMemberAvatar')],
@@ -123,6 +125,7 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
         ['module.tenant', { label: t('pages.systemSettingsManager.groups.module.tenant'), icon: <AppstoreOutlined /> }],
         ['module.approval', { label: t('pages.systemSettingsManager.groups.module.approval'), icon: <AppstoreOutlined /> }],
+        ['resource.signedUrl', { label: t('pages.systemSettingsManager.groups.resource.signedUrl'), icon: <ClockCircleOutlined /> }],
         ['resource.visibility', { label: t('pages.systemSettingsManager.groups.resource.visibility'), icon: <LockOutlined /> }],
     ]);
 

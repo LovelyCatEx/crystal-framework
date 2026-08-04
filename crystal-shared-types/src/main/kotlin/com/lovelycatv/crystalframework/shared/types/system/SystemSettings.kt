@@ -14,8 +14,13 @@ data class SystemSettings(
     val resource: Resource,
 ) {
     data class Resource(
+        val signedUrl: SignedUrl,
         val visibility: Visibility,
     ) {
+        data class SignedUrl(
+            val ttlSeconds: Long,
+        )
+
         data class Visibility(
             val userAvatar: ResourceVisibility,
             val tenantIcon: ResourceVisibility,

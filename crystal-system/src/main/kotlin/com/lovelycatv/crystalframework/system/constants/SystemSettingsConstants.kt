@@ -473,6 +473,15 @@ object SystemSettingsConstants {
     }
 
     object Resource {
+        object SignedUrl {
+            val TTL_SECONDS = SettingsItemDeclaration(
+                key = "resource.signedUrl.ttlSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 1800.toString(),
+                sort = 0
+            )
+        }
+
         object Visibility {
             private val VISIBILITY_ENUM_VALUES = ResourceVisibility.entries.map { it.name }
 

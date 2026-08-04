@@ -2311,6 +2311,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
         'resource.visibility.userAvatar': '用户头像可见性',
         'resource.visibility.tenantIcon': '租户图标可见性',
         'resource.visibility.tenantMemberAvatar': '租户成员头像可见性',
@@ -2330,6 +2331,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'resource.signedUrl': '签名 URL',
         'resource.visibility': '资源访问权限',
       },
       tabs: {

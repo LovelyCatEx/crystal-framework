@@ -98,27 +98,19 @@ class LocalFileResourceServiceImpl(
      * Public files use a stable, cacheable URL; non-public files get a short-lived HMAC signature so an
      * anonymous `<img>` request (which cannot carry an Authorization header) can be verified at read time.
      */
-    override suspend fun buildDownloadUrl(entity: FileResourceEntity, visibility: ResourceVisibility): String {
-        val systemSettings = systemModuleClient.getSystemSettings()
-            ?: throw BusinessException("System settings not initialized")
-        val baseUrl = systemSettings.basic.getNormalizedBaseUrl(false)
-
-        return when (visibility) {
-            ResourceVisibility.PUBLIC ->
-                "$baseUrl/file/local/${entity.id}"
-            ResourceVisibility.AUTHENTICATED,
-            ResourceVisibility.SCOPE_MEMBER,
-            ResourceVisibility.OWNER_ONLY,
-            ResourceVisibility.SYSTEM_ADMIN -> {
-                val expiresAt = System.currentTimeMillis() + LOCAL_SIGNED_URL_TTL_MS
-                val signature = resourceUrlSigner.sign(entity.id, expiresAt)
-                "$baseUrl/file/local/${entity.id}?exp=$expiresAt&sig=$signature"
-            }
-        }
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${resolveBaseUrl()}/file/local/${entity.id}"
     }
 
-    companion object {
-        /** Validity window of a signed local-file download URL (5 minutes). */
-        private const val LOCAL_SIGNED_URL_TTL_MS = 5 * 60 * 1000L
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        val expiresAt = System.currentTimeMillis() + signedUrlTtlSeconds * MILLIS_PER_SECOND
+        val signature = resourceUrlSigner.sign(entity.id, expiresAt)
+        return "${resolveBaseUrl()}/file/local/${entity.id}?exp=$expiresAt&sig=$signature"
+    }
+
+    private suspend fun resolveBaseUrl(): String {
+        val systemSettings = systemModuleClient.getSystemSettings()
+            ?: throw BusinessException("System settings not initialized")
+        return systemSettings.basic.getNormalizedBaseUrl(false)
     }
 }

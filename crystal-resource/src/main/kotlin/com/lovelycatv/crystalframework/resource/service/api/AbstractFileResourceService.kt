@@ -60,14 +60,44 @@ abstract class AbstractFileResourceService(
      * Produces a download URL for [entity] appropriate to [visibility] and this provider.
      *
      * The caller ([com.lovelycatv.crystalframework.resource.service.FileResourceService.getFileDownloadUrl])
-     * has already authorized the viewer at mint time; each provider decides how to honor [visibility]:
-     * PUBLIC resources may return a stable URL, while non-public resources must return a short-lived
-     * credential (HMAC signature for local files, vendor pre-signed GET URL for cloud storage) so a leaked
-     * link stops working after its TTL even if the bucket/CDN allows direct reads.
+     * has already authorized the viewer at mint time. The visibility branching lives here once so no impl
+     * re-implements it: PUBLIC resources get a stable URL ([buildPublicDownloadUrl]), while non-public
+     * resources get a short-lived credential ([buildSignedDownloadUrl]) so a leaked link stops working
+     * after [signedUrlTtlSeconds] even if the bucket/CDN allows direct reads.
      */
-    abstract suspend fun buildDownloadUrl(
+    suspend fun buildDownloadUrl(
         entity: FileResourceEntity,
-        visibility: ResourceVisibility
+        visibility: ResourceVisibility,
+        signedUrlTtlSeconds: Long,
+    ): String {
+        return if (this.storageProvider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
+            when (visibility) {
+                ResourceVisibility.PUBLIC ->
+                    buildPublicDownloadUrl(entity)
+                ResourceVisibility.AUTHENTICATED,
+                ResourceVisibility.SCOPE_MEMBER,
+                ResourceVisibility.OWNER_ONLY,
+                ResourceVisibility.SYSTEM_ADMIN ->
+                    buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+            }
+        } else {
+            // For safety, force using presigned s3 url
+            buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+        }
+    }
+
+    /**
+     * A stable, cacheable URL for a PUBLIC resource. Readable by anyone; carries no expiry.
+     */
+    protected abstract suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String
+
+    /**
+     * A short-lived credentialed URL for a non-public resource, valid for [signedUrlTtlSeconds] seconds
+     * (HMAC signature for local files, vendor pre-signed GET URL for cloud storage).
+     */
+    protected abstract suspend fun buildSignedDownloadUrl(
+        entity: FileResourceEntity,
+        signedUrlTtlSeconds: Long,
     ): String
 
     suspend fun uploadFile(
@@ -212,5 +242,8 @@ abstract class AbstractFileResourceService(
         private const val HTTP_SCHEME_PREFIX = "http://"
 
         private const val HTTPS_SCHEME_PREFIX = "https://"
+
+        /** Milliseconds per second, for impls whose SDK expects a millisecond-based expiry. */
+        protected const val MILLIS_PER_SECOND = 1000L
     }
 }

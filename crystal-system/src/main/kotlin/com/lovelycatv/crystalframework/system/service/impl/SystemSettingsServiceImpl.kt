@@ -194,6 +194,9 @@ class SystemSettingsServiceImpl(
 
     override suspend fun getSystemResourceSettings(): SystemSettings.Resource {
         return SystemSettings.Resource(
+            signedUrl = SystemSettings.Resource.SignedUrl(
+                ttlSeconds = getSettings<Long>(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS)!!,
+            ),
             visibility = SystemSettings.Resource.Visibility(
                 userAvatar = ResourceVisibility.valueOf(
                     getSettings<String>(SystemSettingsConstants.Resource.Visibility.USER_AVATAR)!!
@@ -317,6 +320,7 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
         setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
 
+        setSettings(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS, settings.resource.signedUrl.ttlSeconds.toString())
         setSettings(SystemSettingsConstants.Resource.Visibility.USER_AVATAR, settings.resource.visibility.userAvatar.name)
         setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_ICON, settings.resource.visibility.tenantIcon.name)
         setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR, settings.resource.visibility.tenantMemberAvatar.name)
