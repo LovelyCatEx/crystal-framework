@@ -39,7 +39,7 @@ object RedisConstants {
 
     const val LOCK_OAUTH_BIND_PREFIX = "lock:oauth:bind:"
 
-    const val LOCK_APPROVAL_TASK_PREFIX = "lock:approval:task:"
+    const val LOCK_APPROVAL_TOKEN_PREFIX = "lock:approval:token:"
 
     /** Sliding-window counter of authentication attempts keyed by client IP. */
     const val LOGIN_RATE_LIMIT_IP_PREFIX = "auth:rl:ip:"
