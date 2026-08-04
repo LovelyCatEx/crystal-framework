@@ -88,9 +88,9 @@ class ManagerAuditLogControllerIntegrationTest(
     /**
      * Ensures [com.lovelycatv.crystalframework.shared.controller.Mutability.READ_ONLY] fires before
      * `authorize`. The create authority slot is [PermissionMatrix.NEVER_GRANTED] which the OR-check
-     * would reject anyway; this test proves the mutability guard blocks first and returns
-     * [com.lovelycatv.crystalframework.shared.exception.ForbiddenException] rather than
-     * [org.springframework.security.authorization.AuthorizationDeniedException].
+     * would reject anyway; both guards raise
+     * [com.lovelycatv.crystalframework.shared.exception.ForbiddenException], so this test only
+     * asserts the write is refused, not which guard fired.
      */
     @Test
     fun createEndpointDeniedByReadonlyMutability() {
