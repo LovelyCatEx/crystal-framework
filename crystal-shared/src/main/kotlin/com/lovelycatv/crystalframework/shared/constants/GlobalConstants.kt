@@ -7,6 +7,8 @@ object GlobalConstants {
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
 
+    const val BASE_PACKAGE = "com.lovelycatv.crystalframework"
+
     object FilterPriority {
         const val LOGGER_FILTER = Ordered.HIGHEST_PRECEDENCE
 
