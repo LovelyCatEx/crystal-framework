@@ -60,7 +60,11 @@ data class SystemSettings(
             val password: String,
             val ssl: Boolean,
             val fromEmail: String,
-        )
+        ) {
+            override fun toString(): String {
+                return "SMTP(host=$host, port=$port, username=$username, password=***, ssl=$ssl, fromEmail=$fromEmail)"
+            }
+        }
     }
 
     data class MessageChannel(
