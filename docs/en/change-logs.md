@@ -7,7 +7,25 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
-## v1.13.4
+## v1.13.5
+
+2026-08-05
+
+### Features
++ feat(resource): Expand resource storage with base upload paths, presigning, copy links, and VolcEngine TOS multipart uploads.
+
+### Bug Fixes
++ fix(auth): Strengthen login and OAuth-binding protection against username enumeration with one-time tokens.
++ fix(auth,user,tenant): Invalidate existing JWTs after user or member deletion, password reset, or email reset.
++ fix(security): Add an outbound URL allowlist to close tenant-controllable Lark SSRF.
++ fix(sharding,shared): Add Snowflake slot leasing and renew distributed locks while operations run.
++ fix(tenant): Serialize member and invitation quota checks to prevent concurrent bypass.
++ fix(cache,tenant): Defer post-write cache eviction until transaction commit and promptly invalidate member profile caches.
++ fix(user,tenant): Prevent duplicate emails and scope sensitive profile fields to the target tenant.
++ fix(resource): Validate uploaded file extensions against detected MIME types.
+
+---
+
 
 2026-08-04
 
