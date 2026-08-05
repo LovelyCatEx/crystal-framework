@@ -122,11 +122,12 @@ crystalframework:
       timestamp-length: 41
       data-center-id-length: 5
       worker-id-length: 5
-      sequence-id-length: 12
-      gene-id-length: 0
       data-center-id: 0
       worker-id: 0
-      actual-gene-length: 0
+      auto-allocate: true
+      lease-key-prefix: "crystal:snowflake:lease:"
+      lease-ttl-millis: 15000
+      lease-renew-interval-millis: 5000
   test:
     smtp:
       subject: Crystal Framework SMTP Test
