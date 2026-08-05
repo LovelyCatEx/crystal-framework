@@ -566,6 +566,46 @@ class ApprovalFlowEngineTest(
         }
     }
 
+    @Test
+    fun orApproveModeSecondSiblingCannotAdvance() {
+        withTransactionalRollback("or-approve-mode-second-sibling-cannot-advance") {
+            val p1 = mockUserId()
+            val p2 = mockUserId()
+            val initiator = mockUserId()
+
+            val def = createDefinition()
+            val start = createNode(def.id, 1, ApprovalFlowNodeType.START, "start")
+            val nodeA = createNode(
+                def.id, 1, ApprovalFlowNodeType.APPROVAL, "A",
+                approvalConfig(p1, p2, approveMode = ApprovalFlowApproveMode.OR)
+            )
+            val end = createNode(def.id, 1, ApprovalFlowNodeType.END, "end")
+
+            createEdge(def.id, 1, start.id, nodeA.id)
+            createEdge(def.id, 1, nodeA.id, end.id)
+
+            val instance = approvalFlowEngine.startFlow(
+                def.id, initiator, ApprovalFlowScope.SYSTEM, 0, "{}"
+            )
+            val pendingTasks = getPendingTasks(instance.id)
+            val taskP1 = pendingTasks.first { it.assigneeId == p1 }
+            val taskP2 = pendingTasks.first { it.assigneeId == p2 }
+
+            approvalFlowEngine.handleTask(taskP1.id, p1, true, null, null)
+
+            val error = runCatching {
+                approvalFlowEngine.handleTask(taskP2.id, p2, true, null, null)
+            }.exceptionOrNull()
+            assertNotNull(error)
+            assertTrue(error is com.lovelycatv.crystalframework.shared.exception.BusinessException)
+
+            val allTasks = taskService.findByInstanceIdAndNodeId(instance.id, nodeA.id).toList()
+            assertEquals(ApprovalFlowTaskStatus.APPROVED, allTasks.first { it.id == taskP1.id }.getRealStatus())
+            assertEquals(ApprovalFlowTaskStatus.SKIPPED, allTasks.first { it.id == taskP2.id }.getRealStatus())
+            assertEquals(ApprovalFlowInstanceStatus.APPROVED.typeId, instanceService.getByIdOrThrow(instance.id).status)
+        }
+    }
+
     /*
      * FORK + AND-reject cascade — a rejection in one parallel branch terminates the whole
      * instance, and the sibling branch's still-pending work is cleaned up:

@@ -65,7 +65,7 @@ class FileResourceServiceManager(
 
         return service.uploadFile(
             userId, scope, scopeId, fileType, targetFileName,
-            fileSize, detectedMimeType,
+            fileSize,
             ByteArrayInputStream(fileBytes),
             progressReporter
         )

@@ -45,6 +45,18 @@ export function StorageProviderConfigEditor({ value, onChange, placeholder }: St
                 region: "",
                 bucketName: ""
             }
+        },
+        {
+            label: t('components.storageProviderConfig.volcEngineTos'),
+            key: "volcengine_tos",
+            icon: <CloudOutlined />,
+            config: {
+                accessKey: "",
+                secretKey: "",
+                region: "",
+                endpoint: "",
+                bucketName: ""
+            }
         }
     ];
 

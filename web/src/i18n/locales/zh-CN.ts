@@ -1767,7 +1767,8 @@ export const zhCN: I18nRules = {
           placeholder: '选择存储类型',
           localFileSystem: '本地文件系统',
           aliyunOss: '阿里云 OSS',
-          tencentCos: '腾讯 OSS'
+          tencentCos: '腾讯 OSS',
+          volcEngineTos: '火山引擎 TOS'
         },
         description: {
           label: '描述',
@@ -1916,8 +1917,14 @@ export const zhCN: I18nRules = {
           placeholder: '存储对象键'
         }
       },
+      actions: {
+        download: '下载',
+        copyLink: '复制链接'
+      },
       messages: {
-        downloadFailed: '无法获取文件下载链接'
+        downloadFailed: '无法获取文件下载链接',
+        copyLinkSuccess: '链接已复制到剪贴板',
+        copyLinkFailed: '复制链接失败'
       }
     },
     userRoleManager: {
@@ -2280,6 +2287,8 @@ export const zhCN: I18nRules = {
         'security.emailCodeRateLimit.maxPerIp': '单 IP 窗口内最大发送次数',
         'security.emailCodeRateLimit.maxPerEmail': '单邮箱窗口内最大发送次数',
         'security.emailCodeRateLimit.maxGlobal': '全局窗口内最大发送次数',
+        'security.outbound.allowedHosts': '允许的出站域名',
+        'security.outbound.allowedSmtpHosts': '允许的 SMTP 出站主机',
         'oauth.github.enabled': '启用',
         'oauth.github.useDefault': '使用系统默认配置',
         'oauth.github.authorizationUri': '授权端点',
@@ -2308,6 +2317,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
         'resource.visibility.userAvatar': '用户头像可见性',
         'resource.visibility.tenantIcon': '租户图标可见性',
         'resource.visibility.tenantMemberAvatar': '租户成员头像可见性',
@@ -2321,11 +2331,13 @@ export const zhCN: I18nRules = {
         'security.api.encrypt': 'Api 安全设置',
         'security.loginRateLimit': '登录限流与锁定',
         'security.emailCodeRateLimit': '邮件验证码限流',
+        'security.outbound': '出站请求',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'resource.signedUrl': '签名 URL',
         'resource.visibility': '资源访问权限',
       },
       tabs: {
@@ -3212,6 +3224,7 @@ export const zhCN: I18nRules = {
       localFileSystem: '本地文件系统',
       tencentCos: '腾讯云 COS',
       aliyunOss: '阿里云 OSS',
+      volcEngineTos: '火山引擎 TOS',
       selectTemplate: '选择配置模板',
       applyTemplate: '应用模板',
       applyTemplateTooltip: '应用模板'
@@ -3882,7 +3895,8 @@ export const zhCN: I18nRules = {
     storageProviderType: {
       0: '本地文件系统',
       1: '阿里云 OSS',
-      2: '腾讯云 COS'
+      2: '腾讯云 COS',
+      3: '火山引擎 TOS'
     },
 
     ruleDistributionType: {

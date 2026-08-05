@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.entity.TenantPermissionEntity
 import com.lovelycatv.crystalframework.rbac.tenant.repository.TenantPermissionRepository
 import com.lovelycatv.crystalframework.rbac.tenant.service.TenantPermissionService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
+import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
@@ -23,5 +24,12 @@ class TenantPermissionServiceImpl(
 
     override fun getRepository(): TenantPermissionRepository {
         return this.tenantPermissionRepository
+    }
+
+    override suspend fun getByIds(ids: Collection<Long>): List<TenantPermissionEntity> {
+        if (ids.isEmpty()) {
+            return emptyList()
+        }
+        return tenantPermissionRepository.findAllById(ids).awaitListWithTimeout()
     }
 }

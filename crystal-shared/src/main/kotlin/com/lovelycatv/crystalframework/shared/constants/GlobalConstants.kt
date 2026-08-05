@@ -3,9 +3,11 @@ package com.lovelycatv.crystalframework.shared.constants
 import org.springframework.core.Ordered
 
 object GlobalConstants {
-    const val APP_VERSION = "1.13.4"
+    const val APP_VERSION = "1.13.5"
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
+
+    const val BASE_PACKAGE = "com.lovelycatv.crystalframework"
 
     object FilterPriority {
         const val LOGGER_FILTER = Ordered.HIGHEST_PRECEDENCE

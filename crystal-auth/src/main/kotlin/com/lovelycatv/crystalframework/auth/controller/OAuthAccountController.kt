@@ -1,9 +1,12 @@
 package com.lovelycatv.crystalframework.auth.controller
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
+import com.lovelycatv.crystalframework.audit.service.AuditLogRecorder
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.auth.constants.LoginRateLimitConstants
 import com.lovelycatv.crystalframework.auth.service.LoginRateLimitService
+import com.lovelycatv.crystalframework.auth.service.OAuthBindingTokenService
 import com.lovelycatv.crystalframework.auth.service.UserAuthorizationService
 import com.lovelycatv.crystalframework.shared.annotations.Unauthorized
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
@@ -33,13 +36,10 @@ class OAuthAccountController(
     private val userService: UserService,
     private val userAuthorizationService: UserAuthorizationService,
     private val oAuthAccountService: OAuthAccountService,
+    private val oAuthBindingTokenService: OAuthBindingTokenService,
+    private val auditLogRecorder: AuditLogRecorder,
     private val loginRateLimitService: LoginRateLimitService,
 ) {
-    @Audit(
-        action = AuditAction.UPDATE,
-        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
-        resourceIds = "#dto.oauthAccountId",
-    )
     @Unauthorized
     @PostMapping("/bindOAuthAccount")
     suspend fun bindOAuthAccount(
@@ -49,19 +49,18 @@ class OAuthAccountController(
         @Valid
         dto: BindOAuthAccountDTO
     ): ApiResponse<*> {
-        if (userAuthentication == null && dto.username == null && dto.password == null) {
+        val oauthAccountId = oAuthBindingTokenService.consume(dto.oauthBindToken)
+        val targetUser = if (userAuthentication == null && dto.username == null && dto.password == null) {
             throw BusinessException("authentication and params cannot both be null")
-        }
-
-        val targetUser = if (userAuthentication != null) {
+        } else if (userAuthentication != null) {
             if (dto.username == null || dto.password == null) {
                 userService.bindUserFromOAuthAccount(
-                    oauthAccountId = dto.oauthAccountId,
+                    oauthAccountId = oauthAccountId,
                     userId = userAuthentication.userId
                 )
             } else {
                 userService.bindUserFromOAuthAccount(
-                    oauthAccountId = dto.oauthAccountId,
+                    oauthAccountId = oauthAccountId,
                     username = dto.username,
                     password = dto.password,
                 )
@@ -76,7 +75,7 @@ class OAuthAccountController(
 
             val user = try {
                 userService.bindUserFromOAuthAccount(
-                    oauthAccountId = dto.oauthAccountId,
+                    oauthAccountId = oauthAccountId,
                     username = username,
                     password = password,
                 )
@@ -86,6 +85,18 @@ class OAuthAccountController(
             }
             loginRateLimitService.recordSuccess(account)
             user
+        }
+
+        if (userAuthentication != null) {
+            auditLogRecorder.record(
+                userAuthentication,
+                AuditRequestContext.current(),
+                AuditAction.UPDATE,
+                TableConstants.TABLE_OAUTH_ACCOUNTS,
+                listOf(oauthAccountId),
+                true,
+                null,
+            )
         }
 
         return ApiResponse.success(
@@ -117,8 +128,9 @@ class OAuthAccountController(
         @Valid
         dto: RegisterFromOAuthAccountDTO
     ): ApiResponse<*> {
+        val oauthAccountId = oAuthBindingTokenService.consume(dto.oauthBindToken)
         val user = userService.registerFromOAuthAccount(
-            oauthAccountId = dto.oauthAccountId,
+            oauthAccountId = oauthAccountId,
             username = dto.username,
             password = dto.password,
             nickname = dto.nickname
@@ -152,11 +164,6 @@ class OAuthAccountController(
      * at the given scope (SYSTEM or TENANT). The OAuth account must already exist (created by
      * the login/code-exchange flow via loginByOAuth2Code).
      */
-    @Audit(
-        action = AuditAction.UPDATE,
-        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
-        resourceIds = "#dto.oauthAccountId",
-    )
     @PostMapping("/bindByAccountId")
     suspend fun bindOAuthByAccountId(
         userAuthentication: UserAuthentication,
@@ -164,7 +171,8 @@ class OAuthAccountController(
         @Valid
         dto: BindOAuthByAccountIdDTO
     ): ApiResponse<*> {
-        val account = oAuthAccountService.getByIdOrNull(dto.oauthAccountId)
+        val oauthAccountId = oAuthBindingTokenService.consume(dto.oauthBindToken)
+        val account = oAuthAccountService.getByIdOrNull(oauthAccountId)
             ?: throw BusinessException("OAuth account not found")
 
         // The identity must either be unbound or belong to the current user
@@ -180,7 +188,7 @@ class OAuthAccountController(
         val scope = OAuthBindingScope.getByTypeId(dto.scope)
             ?: throw BusinessException("Invalid binding scope: ${dto.scope}")
 
-        return when (scope) {
+        val response = when (scope) {
             OAuthBindingScope.SYSTEM -> {
                 ApiResponse.success(
                     UserOAuthAccountVO(
@@ -206,5 +214,17 @@ class OAuthAccountController(
                 )
             }
         }
+
+        auditLogRecorder.record(
+            userAuthentication,
+            AuditRequestContext.current(),
+            AuditAction.UPDATE,
+            TableConstants.TABLE_OAUTH_ACCOUNTS,
+            listOf(account.id),
+            true,
+            null,
+        )
+
+        return response
     }
 }

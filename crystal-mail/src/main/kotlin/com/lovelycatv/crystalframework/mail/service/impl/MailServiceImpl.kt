@@ -39,7 +39,10 @@ class MailServiceImpl(
         if (this.mailSender == null) {
             val settings = systemModuleClient.getSystemSettings()
                 ?: throw IllegalStateException("System settings not initialized")
-            logger.info("MailSender is creating, settings: ${settings.mail}")
+            logger.info(
+                "MailSender is creating, SMTP host: ${settings.mail.smtp.host}, port: ${settings.mail.smtp.port}, " +
+                    "username: ${settings.mail.smtp.username}, ssl: ${settings.mail.smtp.ssl}"
+            )
             this.mailSender = createMailSender(settings.mail.smtp)
         }
 
@@ -57,7 +60,7 @@ class MailServiceImpl(
 
             logger.info("Mail sent successfully, to: $to, subject: $subject, content: ${content.length} bytes")
         } catch (e: Exception) {
-            logger.error("Send email to $to failed, subject: $subject, content: $content", e)
+            logger.error("Send email to $to failed, subject: $subject, content: ${content.length} bytes", e)
             throw BusinessException("Send email to $to failed")
         }
     }

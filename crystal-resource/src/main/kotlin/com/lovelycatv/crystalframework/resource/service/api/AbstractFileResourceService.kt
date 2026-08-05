@@ -4,9 +4,11 @@ import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
+import com.lovelycatv.crystalframework.resource.types.FileResourceServiceProperties
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
 import com.lovelycatv.crystalframework.shared.utils.getContentType
@@ -15,12 +17,20 @@ import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import org.springframework.http.codec.multipart.FilePart
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.util.UUID
 
 abstract class AbstractFileResourceService(
     private val storageProvider: StorageProviderEntity,
-    private val fileResourceService: FileResourceService
+    private val fileResourceService: FileResourceService,
+    /**
+     * Shared object-key prefix (see [FileResourceServiceProperties.basePath]). Defaults to empty so a
+     * provider without one (or the local provider, which uses basePath as its filesystem root instead)
+     * produces the historical unprefixed key. Cloud factories pass their configured value here.
+     */
+    private val basePath: String = "",
 ) {
     private val logger = logger()
 
@@ -29,8 +39,75 @@ abstract class AbstractFileResourceService(
     }
 
     open fun buildObjectKey(fileType: ResourceFileType, fileNameWithExtension: String): String {
-        return "${fileType.name.lowercase()}/$fileNameWithExtension"
+        val key = "${fileType.name.lowercase()}$OBJECT_KEY_SEPARATOR$fileNameWithExtension"
+        val prefix = this.basePath.trim().trim(OBJECT_KEY_SEPARATOR)
+        return if (prefix.isEmpty()) key else "$prefix$OBJECT_KEY_SEPARATOR$key"
     }
+
+    /**
+     * The provider's configured base URL, guaranteed to end with a single trailing slash so it can be
+     * concatenated directly with an object key. Centralized here so no impl re-implements the normalization.
+     */
+    protected fun normalizedProviderBaseUrl(): String {
+        val baseUrl = this.storageProvider.baseUrl
+        val withScheme = if (baseUrl.startsWith(HTTP_SCHEME_PREFIX) || baseUrl.startsWith(HTTPS_SCHEME_PREFIX)) {
+            baseUrl
+        } else {
+            "$HTTPS_SCHEME_PREFIX$baseUrl"
+        }
+        return if (withScheme.endsWith("/")) withScheme else "$withScheme/"
+    }
+
+    /**
+     * The object key without a leading slash, ready to append to [normalizedProviderBaseUrl].
+     */
+    protected fun normalizedObjectKey(entity: FileResourceEntity): String {
+        return entity.objectKey.removePrefix("/")
+    }
+
+    /**
+     * Produces a download URL for [entity] appropriate to [visibility] and this provider.
+     *
+     * The caller ([com.lovelycatv.crystalframework.resource.service.FileResourceService.getFileDownloadUrl])
+     * has already authorized the viewer at mint time. The visibility branching lives here once so no impl
+     * re-implements it: PUBLIC resources get a stable URL ([buildPublicDownloadUrl]), while non-public
+     * resources get a short-lived credential ([buildSignedDownloadUrl]) so a leaked link stops working
+     * after [signedUrlTtlSeconds] even if the bucket/CDN allows direct reads.
+     */
+    suspend fun buildDownloadUrl(
+        entity: FileResourceEntity,
+        visibility: ResourceVisibility,
+        signedUrlTtlSeconds: Long,
+    ): String {
+        return if (this.storageProvider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
+            when (visibility) {
+                ResourceVisibility.PUBLIC ->
+                    buildPublicDownloadUrl(entity)
+                ResourceVisibility.AUTHENTICATED,
+                ResourceVisibility.SCOPE_MEMBER,
+                ResourceVisibility.OWNER_ONLY,
+                ResourceVisibility.SYSTEM_ADMIN ->
+                    buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+            }
+        } else {
+            // For safety, force using presigned s3 url
+            buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+        }
+    }
+
+    /**
+     * A stable, cacheable URL for a PUBLIC resource. Readable by anyone; carries no expiry.
+     */
+    protected abstract suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String
+
+    /**
+     * A short-lived credentialed URL for a non-public resource, valid for [signedUrlTtlSeconds] seconds
+     * (HMAC signature for local files, vendor pre-signed GET URL for cloud storage).
+     */
+    protected abstract suspend fun buildSignedDownloadUrl(
+        entity: FileResourceEntity,
+        signedUrlTtlSeconds: Long,
+    ): String
 
     suspend fun uploadFile(
         userId: Long,
@@ -50,7 +127,6 @@ abstract class AbstractFileResourceService(
             fileType = fileType,
             fileNameWithExtension = targetFileName,
             fileLength = fileSize,
-            fileContentType = filePart.getContentType(),
             inputStream = inputStream,
             progressReporter = progressReporter
         )
@@ -63,7 +139,6 @@ abstract class AbstractFileResourceService(
         fileType: ResourceFileType,
         fileNameWithExtension: String,
         fileLength: Long,
-        fileContentType: String,
         inputStream: InputStream,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {
@@ -77,6 +152,16 @@ abstract class AbstractFileResourceService(
             fileType,
             detectedMimeType
         )
+
+        val requestedExtension = fileNameWithExtension
+            .substringAfterLast('.', "")
+            .lowercase()
+        val canonicalExtension = fileResourceService.resolveFileExtension(
+            fileType,
+            detectedMimeType,
+            requestedExtension
+        ) ?: throw BusinessException("File extension does not match detected content type")
+        val canonicalFileName = "${UUID.randomUUID()}.$canonicalExtension"
 
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
@@ -96,17 +181,16 @@ abstract class AbstractFileResourceService(
             )
         }
 
-        val objectKey = this.buildObjectKey(fileType, fileNameWithExtension)
+        val objectKey = this.buildObjectKey(fileType, canonicalFileName)
 
-        val (fileName, fileExtension) = fileNameWithExtension.run {
-            this.split(".")
-        }
+        val fileName = canonicalFileName.substringBeforeLast('.')
+        val fileExtension = canonicalExtension
 
         val result = this.doUploadFile(
             fileType,
             fileLength,
             detectedMimeType,
-            fileNameWithExtension,
+            canonicalFileName,
             uploadStream,
             objectKey,
             progressReporter
@@ -161,5 +245,16 @@ abstract class AbstractFileResourceService(
 
     open fun destroy() {
         // Release resources
+    }
+
+    companion object {
+        private const val HTTP_SCHEME_PREFIX = "http://"
+
+        private const val HTTPS_SCHEME_PREFIX = "https://"
+
+        /** Milliseconds per second, for impls whose SDK expects a millisecond-based expiry. */
+        protected const val MILLIS_PER_SECOND = 1000L
+
+        private const val OBJECT_KEY_SEPARATOR = '/'
     }
 }

@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.SetMemberRolesDTO
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
+import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
@@ -33,7 +34,8 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerTenantMemberRoleRelationController(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantMemberManagerService: TenantMemberManagerService,
-    private val tenantRoleManagerService: TenantRoleManagerService
+    private val tenantRoleManagerService: TenantRoleManagerService,
+    private val userRbacQueryService: UserRbacQueryService
 ) {
     @Audit(
         action = AuditAction.READ,
@@ -87,6 +89,30 @@ class ManagerTenantMemberRoleRelationController(
                 if (!tenantRoleManagerService.checkIsRelatedToRootParent(dto.roleIds, tenantId)) {
                     throw ForbiddenException("Roles do not belong to your tenant",
                         context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.TENANT))
+                }
+                val operatorMemberId = userAuthentication.tenantMemberId
+                    ?: throw ForbiddenException(
+                        context = ForbiddenContext(
+                            reason = ForbiddenReason.NOT_TENANT_MEMBER,
+                            scope = ResourceScope.TENANT,
+                        )
+                    )
+                val operatorPermissions = userRbacQueryService
+                    .getTenantMemberRbacAccessInfo(operatorMemberId, tenantId)
+                    .permissions
+                    .map { it.name }
+                    .toSet()
+                val targetPermissions = userRbacQueryService
+                    .getTenantPermissionsByRoleIds(dto.roleIds)
+                    .map { it.name }
+                    .toSet()
+                if (!operatorPermissions.containsAll(targetPermissions)) {
+                    throw ForbiddenException(
+                        context = ForbiddenContext(
+                            reason = ForbiddenReason.PERMISSION_ESCALATION,
+                            scope = ResourceScope.TENANT,
+                        )
+                    )
                 }
                 tenantMemberRoleRelationService.setMemberRoles(dto.memberId, dto.roleIds)
             } else {

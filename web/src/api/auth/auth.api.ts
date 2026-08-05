@@ -59,7 +59,7 @@ export async function loginByOAuth2Code(code: string, state: string) {
 }
 
 export interface BindOAuthAccountDTO {
-    oauthAccountId: string;
+    oauthBindToken: string;
     username?: string;
     password?: string;
 }
@@ -77,7 +77,7 @@ export async function unbindOAuthAccount(dto: UnbindOAuthAccountDTO) {
 }
 
 export interface RegisterFromOAuthAccountDTO {
-    oauthAccountId: string;
+    oauthBindToken: string;
     username: string;
     password: string;
     nickname: string;
@@ -88,7 +88,7 @@ export async function registerFromOAuthAccount(dto: RegisterFromOAuthAccountDTO)
 }
 
 export interface BindOAuthByAccountIdDTO {
-    oauthAccountId: string;
+    oauthBindToken: string;
     scope: number;
 }
 

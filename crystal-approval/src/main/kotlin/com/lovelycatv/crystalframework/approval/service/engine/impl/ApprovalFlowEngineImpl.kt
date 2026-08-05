@@ -16,6 +16,8 @@ import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.stereotype.Service
+import org.springframework.transaction.reactive.TransactionalOperator
+import org.springframework.transaction.reactive.executeAndAwait
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -30,7 +32,8 @@ class ApprovalFlowEngineImpl(
     private val ccNotifier: ApprovalCcNotifier,
     private val dictResolver: ApprovalDictResolver,
     private val snowIdGenerator: SnowIdGenerator,
-    private val reactiveRedisService: ReactiveRedisService
+    private val reactiveRedisService: ReactiveRedisService,
+    private val transactionalOperator: TransactionalOperator
 ) : ApprovalFlowEngine {
 
     @Transactional(rollbackFor = [Exception::class])
@@ -109,7 +112,6 @@ class ApprovalFlowEngineImpl(
         return instance
     }
 
-    @Transactional(rollbackFor = [Exception::class])
     override suspend fun handleTask(
         taskId: Long,
         operatorId: Long,
@@ -117,11 +119,27 @@ class ApprovalFlowEngineImpl(
         comment: String?,
         formData: String?
     ) {
+        val task = taskService.getByIdOrThrow(taskId)
+        val tokenId = task.tokenId
+
         reactiveRedisService.withDistributedLock(
-            lockKey = "${RedisConstants.LOCK_APPROVAL_TASK_PREFIX}$taskId",
+            lockKey = "${RedisConstants.LOCK_APPROVAL_TOKEN_PREFIX}$tokenId",
             busyMessage = "task is being processed, please retry later",
         ) {
-            val task = taskService.getByIdOrThrow(taskId)
+            transactionalOperator.executeAndAwait {
+                handleTaskWithinTransaction(taskId, operatorId, approved, comment, formData)
+            }
+        }
+    }
+
+    private suspend fun handleTaskWithinTransaction(
+        taskId: Long,
+        operatorId: Long,
+        approved: Boolean,
+        comment: String?,
+        formData: String?
+    ) {
+        val task = taskService.getByIdOrThrow(taskId)
 
             if (task.getRealStatus() != ApprovalFlowTaskStatus.PENDING) {
                 throw BusinessException("Task is not pending")
@@ -222,7 +240,6 @@ class ApprovalFlowEngineImpl(
                     }
                 }
             }
-        }
     }
 
     override suspend fun advanceToken(token: ApprovalFlowTokenEntity, instance: ApprovalFlowInstanceEntity) {

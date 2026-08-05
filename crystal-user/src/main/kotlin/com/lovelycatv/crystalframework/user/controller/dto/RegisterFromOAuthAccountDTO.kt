@@ -5,7 +5,8 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 data class RegisterFromOAuthAccountDTO(
-    val oauthAccountId: Long,
+    @field:NotBlank(message = "OAuth bind token is required")
+    val oauthBindToken: String,
 
     @field:NotBlank(message = "Username is required")
     @field:Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Username can only contain letters, numbers, underscores, and hyphens")

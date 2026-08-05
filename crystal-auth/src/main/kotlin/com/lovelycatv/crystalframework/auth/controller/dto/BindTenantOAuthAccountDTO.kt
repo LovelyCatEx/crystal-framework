@@ -1,8 +1,8 @@
 package com.lovelycatv.crystalframework.auth.controller.dto
 
-import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.NotBlank
 
 data class BindTenantOAuthAccountDTO(
-    @field:NotNull(message = "OAuth account ID is required")
-    val oauthAccountId: Long
+    @field:NotBlank(message = "OAuth bind token is required")
+    val oauthBindToken: String
 )

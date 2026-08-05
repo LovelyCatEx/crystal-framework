@@ -26,6 +26,7 @@ class OSSFileResourceServiceFactory(
             securityToken = properties.securityToken,
             region = properties.region,
             bucketName = properties.bucketName,
+            basePath = properties.basePath,
         )
     }
 }

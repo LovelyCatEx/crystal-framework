@@ -2,17 +2,14 @@ package com.lovelycatv.crystalframework.tenant.controller
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
-import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.utils.RbacUtils
-import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
+import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
 import com.lovelycatv.crystalframework.tenant.service.TenantService
-import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import jakarta.validation.Valid
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/tenant/profile")
 class TenantProfileController(
     private val tenantService: TenantService,
-    private val fileResourceService: FileResourceService
 ) {
     @Audit(
         action = AuditAction.READ,
@@ -36,32 +32,15 @@ class TenantProfileController(
         userAuthentication: UserAuthentication,
         @RequestParam(required = false)
         tenantId: Long?
-    ): ApiResponse<*> {
-        val tenant = tenantService.getByIdOrNull(
-            if (tenantId != null && tenantId > 0)
-                tenantId
-            else
-                userAuthentication.tenantId
-        ) ?: throw BusinessException("Tenant not found")
+    ): ApiResponse<TenantProfileVO> {
+        val targetTenantId = if (tenantId != null && tenantId > 0) {
+            tenantId
+        } else {
+            userAuthentication.tenantId
+                ?: throw BusinessException("invalid tenant authentication")
+        }
 
-        val tenantProfileVO = tenant.toProfileVO(fileResourceService, userAuthentication)
-
-        return ApiResponse.success(tenantProfileVO.apply {
-            if (RbacUtils.hasAuthority(TenantPermission.ACTION_PROFILE_READ.name)) {
-                // Do nothing
-            } else {
-                this.ownerUserId = null
-                this.tireTypeId = null
-                this.subscribedTime = null
-                this.expiresTime = null
-
-                if (!RbacUtils.hasAuthority(TenantPermission.ACTION_PROFILE_READ_BASIC.name)) {
-                    this.contactName = null
-                    this.contactEmail = null
-                    this.contactPhone = null
-                }
-            }
-        })
+        return ApiResponse.success(tenantService.getTenantProfile(targetTenantId, userAuthentication))
     }
 
     @Audit(

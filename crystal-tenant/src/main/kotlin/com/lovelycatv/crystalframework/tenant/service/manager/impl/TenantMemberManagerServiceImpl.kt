@@ -3,8 +3,10 @@ package com.lovelycatv.crystalframework.tenant.service.manager.impl
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
+import com.lovelycatv.crystalframework.shared.utils.lockRowForUpdate
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerReadTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerUpdateTenantMemberDTO
@@ -64,6 +66,11 @@ class TenantMemberManagerServiceImpl(
 
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun create(dto: ManagerCreateTenantMemberDTO): TenantMemberEntity {
+        // Serialize concurrent member creation for this tenant so the count-then-insert member-limit
+        // check below cannot be bypassed by parallel transactions (M-12). The lock on the tenant row
+        // is held until this transaction commits, so contenders re-read the count only after commit.
+        getEntityTemplate().lockRowForUpdate(TableConstants.TABLE_TENANTS, dto.tenantId)
+
         userManagerService.getByIdOrNull(dto.memberUserId)
             ?: throw BusinessException("User with ID ${dto.memberUserId} not found")
 
@@ -166,12 +173,25 @@ class TenantMemberManagerServiceImpl(
         )
     }
 
+    /**
+     * Deleting a member does not revoke the underlying user's still-valid JWT or cached authorities.
+     * Resolve the member users before deletion and force-logout them so existing tokens are rejected
+     * on the next request, matching the deactivation path in [update].
+     *
+     * Note: force-logout is user-scoped, so a user who belongs to multiple tenants will be logged out
+     * of all of them. This is the accepted tradeoff of reusing the existing user-level mechanism.
+     */
+    @Transactional(rollbackFor = [Exception::class])
     override suspend fun batchDelete(ids: List<Long>) {
+        val memberUserIds = ids.mapNotNull { getByIdOrNull(it)?.memberUserId }
+
         tenantMemberRoleRelationService.deleteByMemberIdIn(ids)
 
         tenantDepartmentMemberRelationService.deleteByMemberIdIn(ids)
 
         super.batchDelete(ids)
+
+        memberUserIds.forEach { userForceLogoutService.markForceLogout(it) }
     }
 
     override suspend fun findAllByTenantId(tenantId: Long): List<TenantMemberEntity> {

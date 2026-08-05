@@ -1,6 +1,8 @@
 package com.lovelycatv.crystalframework.auth.controller
 
 import com.lovelycatv.crystalframework.audit.annotations.Audit
+import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
+import com.lovelycatv.crystalframework.audit.service.AuditLogRecorder
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants.REQUEST_MAPPING_PREFIX
@@ -9,6 +11,7 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.auth.controller.dto.BindTenantOAuthAccountDTO
+import com.lovelycatv.crystalframework.auth.service.OAuthBindingTokenService
 import com.lovelycatv.crystalframework.auth.controller.dto.UnbindTenantOAuthAccountDTO
 import com.lovelycatv.crystalframework.auth.controller.vo.TenantOAuthAccountVO
 import com.lovelycatv.crystalframework.user.service.OAuthAccountService
@@ -30,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("$REQUEST_MAPPING_PREFIX/tenant/oauth")
 class TenantOAuthAccountController(
     private val oAuthAccountService: OAuthAccountService,
+    private val oAuthBindingTokenService: OAuthBindingTokenService,
+    private val auditLogRecorder: AuditLogRecorder,
 ) {
     @RequiresAuthority(anyOf = ["i.tenant.personal.profile.oauth.read"], scope = ResourceScope.TENANT)
     @GetMapping("/accounts")
@@ -54,11 +59,6 @@ class TenantOAuthAccountController(
         )
     }
 
-    @Audit(
-        action = AuditAction.UPDATE,
-        resourceType = TableConstants.TABLE_OAUTH_ACCOUNTS,
-        resourceIds = "#dto.oauthAccountId",
-    )
     @RequiresAuthority(anyOf = ["i.tenant.personal.profile.oauth.bind"], scope = ResourceScope.TENANT)
     @PostMapping("/bind")
     suspend fun bindTenantOAuthAccount(
@@ -69,10 +69,21 @@ class TenantOAuthAccountController(
     ): ApiResponse<*> {
         val tenantId = userAuthentication.assertTenantIdNotNull()
 
+        val oauthAccountId = oAuthBindingTokenService.consume(dto.oauthBindToken)
         val bound = oAuthAccountService.bindTenant(
-            accountId = dto.oauthAccountId,
+            accountId = oauthAccountId,
             userId = userAuthentication.userId,
             tenantId = tenantId,
+        )
+
+        auditLogRecorder.record(
+            userAuthentication,
+            AuditRequestContext.current(),
+            AuditAction.UPDATE,
+            TableConstants.TABLE_OAUTH_ACCOUNTS,
+            listOf(oauthAccountId),
+            true,
+            null,
         )
 
         return ApiResponse.success(

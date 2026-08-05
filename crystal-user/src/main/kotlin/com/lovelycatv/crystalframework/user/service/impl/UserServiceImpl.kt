@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
 import com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration
+import com.lovelycatv.crystalframework.rbac.user.service.UserForceLogoutService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
@@ -45,7 +46,8 @@ class UserServiceImpl(
     private val fileResourceServiceManager: FileResourceServiceManager,
     override val eventPublisher: ApplicationEventPublisher,
     private val oAuthAccountService: OAuthAccountService,
-    private val emailCodeAuthService: EmailCodeAuthService
+    private val emailCodeAuthService: EmailCodeAuthService,
+    private val userForceLogoutService: UserForceLogoutService
 ) : UserService {
     private val logger = logger()
 
@@ -136,6 +138,8 @@ class UserServiceImpl(
             ).awaitFirstOrNull() ?: throw BusinessException("Could not reset password")
         }
 
+        userForceLogoutService.markForceLogout(existingUser.id)
+
         logger.info("Password of user ${existingUser.username} / ${existingUser.email} has been reset")
     }
 
@@ -181,6 +185,8 @@ class UserServiceImpl(
                 .awaitFirstOrNull()
                 ?: throw BusinessException("could not reset email address for ${user.id}")
         }
+
+        userForceLogoutService.markForceLogout(user.id)
 
         logger.info("Email of user ${user.username} / ${user.email} has been reset from $oldEmail to $newEmail")
     }

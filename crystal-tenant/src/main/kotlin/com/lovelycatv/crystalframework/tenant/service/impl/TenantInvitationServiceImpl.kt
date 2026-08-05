@@ -16,6 +16,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.withDistributedLock
+import com.lovelycatv.crystalframework.shared.utils.runAfterCommitOrNow
 import com.lovelycatv.crystalframework.tenant.constants.TenantMailDeclaration
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.tenant.controller.manager.department.member.dto.ManagerCreateTenantDepartmentMemberDTO
@@ -165,39 +166,48 @@ class TenantInvitationServiceImpl(
             // 3. Record invitation code usage
             tenantInvitationRecordService.saveRecord(invitation.id, userId, realName, phoneNumber)
 
-            // 4. Notify members according to tenant settings
-            val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
-            val notification = tenantSettings.notification
+            // 4. Notify members according to tenant settings after the invitation transaction commits.
+            val reviewerEmails = if (invitation.requiresReviewing) {
+                resolveReviewerEmails(tenant)
+            } else {
+                emptyList()
+            }
 
-            if (invitation.requiresReviewing) {
-                // Resolving reviewers also guards the join request: reviewing is required but
-                // nobody can handle it -> deny.
-                val reviewerEmails = resolveReviewerEmails(tenant)
-                if (notification.memberJoinReview.email) {
-                    sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, reviewerEmails)
-                } else {
-                    logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+            runAfterCommitOrNow {
+                runCatching {
+                    val tenantSettings = tenantSettingsService.getTenantSettings(tenant.id)
+                    val notification = tenantSettings.notification
+                    val ownerEmail = resolveOwnerEmail(tenant)
+
+                    if (invitation.requiresReviewing) {
+                        if (notification.memberJoinReview.email) {
+                            sendMemberJoinReviewEmail(tenant, user, realName, phoneNumber, reviewerEmails)
+                        } else {
+                            logger.info("notification.memberJoinReview.email is disabled for tenant ${tenant.name} - ${tenant.id}, skip sending review email")
+                        }
+                        notifyViaChannels(
+                            tenantId = tenant.id,
+                            channelIds = notification.memberJoinReview.channels,
+                            content = notification.memberJoinReview.content,
+                            recipientEmails = reviewerEmails,
+                            label = "tenant member join review",
+                        )
+                    }
+
+                    if (notification.memberJoin.email) {
+                        sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber, ownerEmail)
+                    }
+                    notifyViaChannels(
+                        tenantId = tenant.id,
+                        channelIds = notification.memberJoin.channels,
+                        content = notification.memberJoin.content,
+                        recipientEmails = listOfNotNull(ownerEmail),
+                        label = "tenant member join notify",
+                    )
+                }.onFailure { exception ->
+                    logger.warn("Failed to send tenant member join notifications", exception)
                 }
-                notifyViaChannels(
-                    tenantId = tenant.id,
-                    channelIds = notification.memberJoinReview.channels,
-                    content = notification.memberJoinReview.content,
-                    recipientEmails = reviewerEmails,
-                    label = "tenant member join review",
-                )
             }
-
-            val ownerEmail = resolveOwnerEmail(tenant)
-            if (notification.memberJoin.email) {
-                sendMemberJoinNotifyEmail(tenant, user, realName, phoneNumber, ownerEmail)
-            }
-            notifyViaChannels(
-                tenantId = tenant.id,
-                channelIds = notification.memberJoin.channels,
-                content = notification.memberJoin.content,
-                recipientEmails = listOfNotNull(ownerEmail),
-                label = "tenant member join notify",
-            )
         }
     }
 

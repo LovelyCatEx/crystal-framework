@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.utils
 
+import com.lovelycatv.crystalframework.shared.config.SnowflakeNodeLease
+
 /**
  * flag                  timestamp                dataCenter worker sequence gene
  *  0   10000000000000000000000000000000000000001   10001    10001  1000001 10001
@@ -16,30 +18,18 @@ class SnowIdGenerator(
     private val workerIdLength: Int,
     private val sequenceIdLength: Int,
     private val geneIdLength: Int,
-    private val dataCenterId: Long,
-    private val workerId: Long,
-    private val actualGeneLength: Int
+    private val nodeLease: SnowflakeNodeLease,
 ) {
     private val maxSequence: Long
-    private val maxDataCenters: Long
-    private val maxWorkers: Long
- 
+
     init {
-        require(timestampLength + dataCenterIdLength + workerIdLength + sequenceIdLength + geneIdLength == 63) {
-            "Id length must be 64 in total."
+        require(timestampLength + dataCenterIdLength + workerIdLength + sequenceIdLength + geneIdLength <= 63) {
+            "Id fields must not exceed 64 bits in total."
         }
- 
+
+        require(sequenceIdLength >= 0) { "Sequence id length must not be negative" }
+        require(geneIdLength >= 0) { "Gene id length must not be negative" }
         maxSequence = 1L shl sequenceIdLength
-        maxDataCenters = 1L shl dataCenterIdLength
-        maxWorkers = 1L shl workerIdLength
-
-        require(dataCenterId < maxDataCenters) {
-            "Data center id out of range, max $maxDataCenters but current $dataCenterId"
-        }
-
-        require(workerId < maxWorkers) {
-            "Worker id out of range, max $maxWorkers but current $workerId"
-        }
     }
  
     private var lastTimestamp = 0L
@@ -50,6 +40,10 @@ class SnowIdGenerator(
  
     @Synchronized
     fun nextId(gene: Long = 0L): Long {
+        check(nodeLease.active) { "Snowflake node lease is no longer active" }
+        val nodeIds = nodeLease.nodeIds()
+        val currentDataCenterId = nodeIds[0]
+        val currentWorkerId = nodeIds[1]
         var currentTimestamp = System.currentTimeMillis()
  
         val shlBitsForTimestamp = 63 - timestampLength
@@ -83,10 +77,10 @@ class SnowIdGenerator(
         val timestamp = (currentTimestamp - startPoint) shl shlBitsForTimestamp
  
         val shlBitsForDataCenter = shlBitsForTimestamp - dataCenterIdLength
-        val datacenterId = dataCenterId shl shlBitsForDataCenter
+        val datacenterId = currentDataCenterId shl shlBitsForDataCenter
  
         val shlBitsForWorker = shlBitsForDataCenter - workerIdLength
-        val workerId = workerId shl shlBitsForWorker
+        val workerId = currentWorkerId shl shlBitsForWorker
  
         val realSequence = sequenceMap[gene] ?: 0
  
@@ -108,7 +102,7 @@ class SnowIdGenerator(
      * @param geneLength
      * @return
      */
-    fun getGene(origin: Long, geneLength: Int = actualGeneLength): Long {
+    fun getGene(origin: Long, geneLength: Int = geneIdLength): Long {
         return origin and ((1L shl geneLength) - 1)
     }
 }

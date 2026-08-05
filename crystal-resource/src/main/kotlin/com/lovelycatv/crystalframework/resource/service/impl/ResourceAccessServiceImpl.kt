@@ -39,6 +39,14 @@ class ResourceAccessServiceImpl(
         }
     }
 
+    override fun resolveSignedUrlTtlSeconds(): Long {
+        return systemModuleClient
+            .getSystemSettings(BusinessException("System settings not initialized"))!!
+            .resource
+            .signedUrl
+            .ttlSeconds
+    }
+
     override suspend fun isReadable(entity: FileResourceEntity, viewer: UserAuthentication?): Boolean {
         return when (resolveVisibility(entity.getRealResourceFileType())) {
             ResourceVisibility.PUBLIC -> true

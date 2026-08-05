@@ -13,6 +13,10 @@ package com.lovelycatv.crystalframework.auth.constants
 object LoginRateLimitConstants {
     const val MESSAGE_TOO_MANY_ATTEMPTS = "Too many login attempts, please try again later"
     const val MESSAGE_ACCOUNT_LOCKED = "Account temporarily locked due to repeated failures, please try again later"
+    const val MESSAGE_INVALID_CREDENTIALS = "invalid username or password"
+
+    /** BCrypt work factor used when the submitted account does not exist. */
+    const val DUMMY_PASSWORD_HASH = "{bcrypt}${'$'}2y${'$'}10${'$'}9nwqeG3SNdahXCl3Q6J2mu7GA3MAv1HnKO1wN14.kUcvFmmXwolyK"
 
     /** Exchange attribute carrying the resolved account key (`username:tenantId`) across filter handlers. */
     const val ATTR_LOGIN_ACCOUNT = "crystal.login.rateLimit.account"

@@ -55,16 +55,31 @@ crystalframework:
         - image/png
         - image/jpeg
         - image/webp
+      supported-file-extensions:
+        - png
+        - jpg
+        - jpeg
+        - webp
     tenant-icon:
       supported-content-types:
         - image/png
         - image/jpeg
         - image/webp
+      supported-file-extensions:
+        - png
+        - jpg
+        - jpeg
+        - webp
     tenant-member-avatar:
       supported-content-types:
         - image/png
         - image/jpeg
         - image/webp
+      supported-file-extensions:
+        - png
+        - jpg
+        - jpeg
+        - webp
     signing-key: ${CRYSTAL_RESOURCE_SIGNING_KEY:zR7yq2N4bK8vXf1sJ0pWmC3hLd6tGuAe5oQnBiYxUkE=}
     signed-url-ttl-seconds: 300
   monitor:
@@ -75,11 +90,12 @@ crystalframework:
       timestamp-length: 41
       data-center-id-length: 5
       worker-id-length: 5
-      sequence-id-length: 12
-      gene-id-length: 0
       data-center-id: ${SNOWFLAKE_DATA_CENTER_ID:0}
       worker-id: ${SNOWFLAKE_WORKER_ID:0}
-      actual-gene-length: 0
+      auto-allocate: true
+      lease-key-prefix: "crystal:snowflake:lease:"
+      lease-ttl-millis: 15000
+      lease-renew-interval-millis: 5000
   test:
     smtp:
       subject: Crystal Framework SMTP Test

@@ -6,16 +6,13 @@ import com.lovelycatv.crystalframework.resource.repository.FileResourceRepositor
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.ResourceAccessService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
-import com.lovelycatv.crystalframework.resource.utils.ResourceUrlSigner
+import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
-import com.lovelycatv.crystalframework.resource.types.StorageProviderType
-import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
-import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.resource.utils.getMimeExtensions
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
-import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -29,9 +26,8 @@ class FileResourceServiceImpl(
     private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration,
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
-    private val systemModuleClient: SystemModuleClient,
     private val resourceAccessService: ResourceAccessService,
-    private val resourceUrlSigner: ResourceUrlSigner,
+    private val fileResourceServiceManager: FileResourceServiceManager,
 ) : FileResourceService {
     override fun getRepository(): FileResourceRepository {
         return this.fileResourceRepository
@@ -58,6 +54,28 @@ class FileResourceServiceImpl(
         return contentType in config.supportedContentTypes
     }
 
+    override fun resolveFileExtension(
+        fileType: ResourceFileType,
+        contentType: String,
+        requestedExtension: String
+    ): String? {
+        val resourceConfig = this.getCrystalFrameworkConfiguration().resource
+        val config = when (fileType) {
+            ResourceFileType.USER_AVATAR -> resourceConfig.avatar
+            ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
+            ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
+        }
+        val normalizedExtension = requestedExtension.removePrefix(".").lowercase()
+        val allowedExtensions = config.supportedFileExtensions
+            .map { it.removePrefix(".").lowercase() }
+            .toSet()
+        val mimeExtensions = getMimeExtensions(contentType)
+        if (normalizedExtension !in allowedExtensions || normalizedExtension !in mimeExtensions) {
+            return null
+        }
+        return mimeExtensions.firstOrNull { it in allowedExtensions }
+    }
+
     override suspend fun getByMD5(md5: String): FileResourceEntity? {
         return this.getRepository()
             .findByMd5(md5)
@@ -68,44 +86,13 @@ class FileResourceServiceImpl(
         // Mint-time access check: never hand out a URL the viewer is not entitled to read.
         resourceAccessService.assertReadable(entity, viewer)
 
-        val provider = storageProviderService
-            .getByIdOrThrow(entity.storageProviderId)
+        val visibility = resourceAccessService.resolveVisibility(entity.getRealResourceFileType())
+        val signedUrlTtlSeconds = resourceAccessService.resolveSignedUrlTtlSeconds()
+        val provider = storageProviderService.getByIdOrThrow(entity.storageProviderId)
 
-        if (provider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
-            // This path is related to LocalFileResourceController$readLocalFile
-            val systemSettings = systemModuleClient.getSystemSettings()
-                ?: throw BusinessException("System settings not initialized")
-            val baseUrl = systemSettings.basic.getNormalizedBaseUrl(false)
-
-            // Public local files are served by a stable, cacheable URL; anything else gets a
-            // short-lived HMAC signature so an anonymous <img> request can be verified at read time.
-            return if (resourceAccessService.resolveVisibility(entity.getRealResourceFileType()) == ResourceVisibility.PUBLIC) {
-                "$baseUrl/file/local/${entity.id}"
-            } else {
-                val expiresAt = System.currentTimeMillis() + LOCAL_SIGNED_URL_TTL_MS
-                val signature = resourceUrlSigner.sign(entity.id, expiresAt)
-                "$baseUrl/file/local/${entity.id}?exp=$expiresAt&sig=$signature"
-            }
-        }
-
-        val baseUrl = provider.baseUrl
-            .run {
-                if (this.endsWith("/")) {
-                    this
-                } else {
-                    "$this/"
-                }
-            }
-
-        val key = entity.objectKey.run {
-            if (this.startsWith("/")) {
-                this.replaceFirst("/", "")
-            } else {
-                this
-            }
-        }
-
-        return baseUrl + key
+        // Each provider decides how to honor visibility (stable URL for public resources, a short-lived
+        // signature / vendor pre-signed URL for non-public ones). See AbstractFileResourceService.buildDownloadUrl.
+        return fileResourceServiceManager.getService(provider).buildDownloadUrl(entity, visibility, signedUrlTtlSeconds)
     }
 
     override val cacheStore: ReactiveExpiringKVStore<String, FileResourceEntity>
@@ -113,9 +100,4 @@ class FileResourceServiceImpl(
     override val listCacheStore: ReactiveExpiringKVStore<String, List<FileResourceEntity>>
         get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<FileResourceEntity> = FileResourceEntity::class
-
-    companion object {
-        /** Validity window of a signed local-file download URL (5 minutes). */
-        private const val LOCAL_SIGNED_URL_TTL_MS = 5 * 60 * 1000L
-    }
 }

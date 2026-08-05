@@ -1,6 +1,7 @@
 import type {ReactNode} from "react";
 import {
     AppstoreOutlined,
+    ClockCircleOutlined,
     CopyrightCircleOutlined,
     InfoCircleOutlined,
     LockOutlined,
@@ -60,6 +61,8 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['security.emailCodeRateLimit.maxPerIp', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxPerIp')],
         ['security.emailCodeRateLimit.maxPerEmail', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxPerEmail')],
         ['security.emailCodeRateLimit.maxGlobal', t('pages.systemSettingsManager.keys.security.emailCodeRateLimit.maxGlobal')],
+        ['security.outbound.allowedHosts', t('pages.systemSettingsManager.keys.security.outbound.allowedHosts')],
+        ['security.outbound.allowedSmtpHosts', t('pages.systemSettingsManager.keys.security.outbound.allowedSmtpHosts')],
         ['oauth.github.enabled', t('pages.systemSettingsManager.keys.oauth.github.enabled')],
         ['oauth.github.useDefault', t('pages.systemSettingsManager.keys.oauth.github.useDefault')],
         ['oauth.github.authorizationUri', t('pages.systemSettingsManager.keys.oauth.github.authorizationUri')],
@@ -88,6 +91,7 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['oauth.oicq.scope', t('pages.systemSettingsManager.keys.oauth.oicq.scope')],
         ['module.tenant.enabled', t('pages.systemSettingsManager.keys.module.tenant.enabled')],
         ['module.approval.enabled', t('pages.systemSettingsManager.keys.module.approval.enabled')],
+        ['resource.signedUrl.ttlSeconds', t('pages.systemSettingsManager.keys.resource.signedUrl.ttlSeconds')],
         ['resource.visibility.userAvatar', t('pages.systemSettingsManager.keys.resource.visibility.userAvatar')],
         ['resource.visibility.tenantIcon', t('pages.systemSettingsManager.keys.resource.visibility.tenantIcon')],
         ['resource.visibility.tenantMemberAvatar', t('pages.systemSettingsManager.keys.resource.visibility.tenantMemberAvatar')],
@@ -115,11 +119,13 @@ export function useSettingsGroupToTranslationMap(): Map<string, {label: string, 
         ['security.api.encrypt', { label: t('pages.systemSettingsManager.groups.security.api.encrypt'), icon: <LockOutlined /> }],
         ['security.loginRateLimit', { label: t('pages.systemSettingsManager.groups.security.loginRateLimit'), icon: <LockOutlined /> }],
         ['security.emailCodeRateLimit', { label: t('pages.systemSettingsManager.groups.security.emailCodeRateLimit'), icon: <LockOutlined /> }],
+        ['security.outbound', { label: t('pages.systemSettingsManager.groups.security.outbound'), icon: <LockOutlined /> }],
         ['oauth.github', { label: t('pages.systemSettingsManager.groups.oauth.github'), icon: <ApiOutlined /> }],
         ['oauth.google', { label: t('pages.systemSettingsManager.groups.oauth.google'), icon: <ApiOutlined /> }],
         ['oauth.oicq', { label: t('pages.systemSettingsManager.groups.oauth.oicq'), icon: <ApiOutlined /> }],
         ['module.tenant', { label: t('pages.systemSettingsManager.groups.module.tenant'), icon: <AppstoreOutlined /> }],
         ['module.approval', { label: t('pages.systemSettingsManager.groups.module.approval'), icon: <AppstoreOutlined /> }],
+        ['resource.signedUrl', { label: t('pages.systemSettingsManager.groups.resource.signedUrl'), icon: <ClockCircleOutlined /> }],
         ['resource.visibility', { label: t('pages.systemSettingsManager.groups.resource.visibility'), icon: <LockOutlined /> }],
     ]);
 

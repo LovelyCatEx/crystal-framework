@@ -76,10 +76,16 @@ public class CrystalFrameworkConfiguration {
 
         public static class ResourceConfig {
             private String[] supportedContentTypes = new String[0];
+            private String[] supportedFileExtensions = new String[0];
 
             public String[] getSupportedContentTypes() { return supportedContentTypes; }
             public void setSupportedContentTypes(String[] supportedContentTypes) {
                 this.supportedContentTypes = supportedContentTypes;
+            }
+
+            public String[] getSupportedFileExtensions() { return supportedFileExtensions; }
+            public void setSupportedFileExtensions(String[] supportedFileExtensions) {
+                this.supportedFileExtensions = supportedFileExtensions;
             }
         }
 
@@ -127,10 +133,12 @@ public class CrystalFrameworkConfiguration {
             private int timestampLength = 41;
             private int dataCenterIdLength = 5;
             private int workerIdLength = 5;
-            private int sequenceIdLength = 12;
-            private int geneIdLength = 0;
             private long dataCenterId = 0;
             private long workerId = 0;
+            private boolean autoAllocate = true;
+            private String leaseKeyPrefix = "crystal:snowflake:lease:";
+            private long leaseTtlMillis = 15000;
+            private long leaseRenewIntervalMillis = 5000;
             private int actualGeneLength = 0;
 
             public long getStartPoint() { return startPoint; }
@@ -145,20 +153,26 @@ public class CrystalFrameworkConfiguration {
             public int getWorkerIdLength() { return workerIdLength; }
             public void setWorkerIdLength(int workerIdLength) { this.workerIdLength = workerIdLength; }
 
-            public int getSequenceIdLength() { return sequenceIdLength; }
-            public void setSequenceIdLength(int sequenceIdLength) { this.sequenceIdLength = sequenceIdLength; }
-
-            public int getGeneIdLength() { return geneIdLength; }
-            public void setGeneIdLength(int geneIdLength) { this.geneIdLength = geneIdLength; }
-
             public long getDataCenterId() { return dataCenterId; }
             public void setDataCenterId(long dataCenterId) { this.dataCenterId = dataCenterId; }
 
             public long getWorkerId() { return workerId; }
             public void setWorkerId(long workerId) { this.workerId = workerId; }
 
-            public int getActualGeneLength() { return actualGeneLength; }
-            public void setActualGeneLength(int actualGeneLength) { this.actualGeneLength = actualGeneLength; }
+            public boolean getAutoAllocate() { return autoAllocate; }
+            public boolean isAutoAllocate() { return autoAllocate; }
+            public void setAutoAllocate(boolean autoAllocate) { this.autoAllocate = autoAllocate; }
+
+            public String getLeaseKeyPrefix() { return leaseKeyPrefix; }
+            public void setLeaseKeyPrefix(String leaseKeyPrefix) { this.leaseKeyPrefix = leaseKeyPrefix; }
+
+            public long getLeaseTtlMillis() { return leaseTtlMillis; }
+            public void setLeaseTtlMillis(long leaseTtlMillis) { this.leaseTtlMillis = leaseTtlMillis; }
+
+            public long getLeaseRenewIntervalMillis() { return leaseRenewIntervalMillis; }
+            public void setLeaseRenewIntervalMillis(long leaseRenewIntervalMillis) {
+                this.leaseRenewIntervalMillis = leaseRenewIntervalMillis;
+            }
         }
     }
 

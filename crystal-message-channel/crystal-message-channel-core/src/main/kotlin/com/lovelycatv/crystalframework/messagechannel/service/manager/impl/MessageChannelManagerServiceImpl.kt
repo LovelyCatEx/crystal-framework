@@ -7,7 +7,10 @@ import com.lovelycatv.crystalframework.messagechannel.entity.MessageChannelEntit
 import com.lovelycatv.crystalframework.messagechannel.repository.MessageChannelRepository
 import com.lovelycatv.crystalframework.messagechannel.service.manager.MessageChannelManagerService
 import com.lovelycatv.crystalframework.messagechannel.types.config.ChannelConfig
+import com.lovelycatv.crystalframework.messagechannel.types.config.EmailChannelConfig
+import com.lovelycatv.crystalframework.messagechannel.types.config.LarkChannelConfig
 import com.lovelycatv.crystalframework.messagechannel.utils.ChannelConfigCodec
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -15,6 +18,7 @@ import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
+import com.lovelycatv.crystalframework.shared.utils.OutboundUrlGuard
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -31,6 +35,7 @@ class MessageChannelManagerServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
+    private val systemModuleClient: SystemModuleClient,
 ) : MessageChannelManagerService {
 
     override val cacheStore: ReactiveExpiringKVStore<String, MessageChannelEntity>
@@ -132,6 +137,23 @@ class MessageChannelManagerServiceImpl(
                 "Config payload type ${parsed.channelType} mismatches channelType $channelType"
             )
         }
+        assertOutboundTargetAllowed(parsed)
         return parsed
+    }
+
+    /**
+     * Validates the outbound target of a channel config against the system outbound allowlists:
+     * Lark's HTTPS `baseUrl` against `allowedHosts`, and Email/SMTP's bare `host` against
+     * `allowedSmtpHosts` (scheme-agnostic, see [OutboundUrlGuard.assertHostAllowed]). Reads the
+     * outbound settings once and dispatches per config subtype.
+     */
+    private fun assertOutboundTargetAllowed(config: ChannelConfig) {
+        val outbound = systemModuleClient
+            .getSystemSettings(throwOnNull = BusinessException("System settings unavailable, cannot validate outbound URL"))!!
+            .security.outbound
+        when (config) {
+            is LarkChannelConfig -> OutboundUrlGuard.assertAllowed(config.baseUrl, outbound.allowedHosts)
+            is EmailChannelConfig -> OutboundUrlGuard.assertHostAllowed(config.host, outbound.allowedSmtpHosts)
+        }
     }
 }

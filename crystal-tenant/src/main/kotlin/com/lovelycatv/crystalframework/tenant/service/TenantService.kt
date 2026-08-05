@@ -1,7 +1,9 @@
 package com.lovelycatv.crystalframework.tenant.service
 
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
+import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
 import com.lovelycatv.crystalframework.tenant.repository.TenantRepository
@@ -9,6 +11,8 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.transaction.annotation.Transactional
 
 interface TenantService : CachedBaseService<TenantRepository, TenantEntity> {
+    suspend fun getTenantProfile(tenantId: Long, viewer: UserAuthentication): TenantProfileVO
+
     suspend fun getUserTenants(userId: Long): List<TenantEntity>
 
     /**

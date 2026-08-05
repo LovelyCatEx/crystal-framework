@@ -94,10 +94,11 @@ class TenantMemberProfileServiceImpl(
                 locale = locale,
             ).apply { newEntity() }
 
-            val saved = this.getRepository().save(entity).awaitFirstOrNull()
-                ?: throw BusinessException("could not create tenant user profile")
+            val saved = this.withInvalidateEntityCacheContext(entity.id) {
+                this.getRepository().save(entity).awaitFirstOrNull()
+                    ?: throw BusinessException("could not create tenant user profile")
+            }
 
-            this.updateCache(saved)
             saved
         } else {
             this.withUpdateEntityContext(existing) {

@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import com.lovelycatv.crystalframework.shared.event.*
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
+import com.lovelycatv.crystalframework.shared.utils.runAfterCommitOrNow
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 
@@ -135,7 +136,7 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
                     this.cacheStore.set(
                         cacheKey,
                         it,
-                        randomHourExpirationInMs(8, 12)
+                        (RedisConstants.ENTITY_CACHE_READTHROUGH_MIN_TTL_MS..RedisConstants.ENTITY_CACHE_READTHROUGH_MAX_TTL_MS).random()
                     )
 
                     this.eventPublisher.publishEvent(
@@ -158,7 +159,11 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
 
         val result = action.invoke()
 
-        this.removeCache(entityId)
+        // Second eviction is deferred to after the surrounding transaction commits. Evicting here (still
+        // pre-commit) leaves a window where a concurrent read misses, loads the still-old row and rehydrates
+        // the cache before commit — leaving a stale entry for the full read-through TTL. On rollback the hook
+        // never fires, so we neither over-evict nor risk touching reverted state.
+        runAfterCommitOrNow { this.removeCache(entityId) }
 
         return result
     }
@@ -169,11 +174,11 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
 
     /**
      * Evict-around update: delegates to [withInvalidateEntityCacheContext] so writes are
-     * bracketed by "clear cache → run action → clear cache again". Warming the cache with the
-     * post-write value here would risk stale entries when the surrounding transaction later
+     * bracketed by "clear cache → run action → clear cache again after commit". Warming the cache
+     * with the post-write value here would risk stale entries when the surrounding transaction later
      * rolls back (DB reverts, Redis keeps the phantom); the pre-clear also protects against a
      * concurrent reader rehydrating the cache from the still-old row while the action is
-     * mid-flight.
+     * mid-flight, and the post-commit clear sweeps any such rehydration once the new state is visible.
      */
     suspend fun withUpdateEntityContext(entityId: Long, action: suspend () -> ENTITY?): ENTITY? {
         return this.withInvalidateEntityCacheContext(entityId, action)
@@ -190,8 +195,11 @@ interface CachedBaseService<REPOSITORY: R2dbcRepository<ENTITY, Long>, ENTITY: B
 
         val result = action.invoke()
 
-        entityIds.forEach { entityId ->
-            this.removeCache(entityId)
+        // Deferred second eviction — see withInvalidateEntityCacheContext for the rationale.
+        runAfterCommitOrNow {
+            entityIds.forEach { entityId ->
+                this.removeCache(entityId)
+            }
         }
 
         return result
