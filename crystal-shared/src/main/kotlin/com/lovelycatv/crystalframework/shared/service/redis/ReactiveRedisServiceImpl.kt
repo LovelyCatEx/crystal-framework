@@ -16,6 +16,8 @@ class ReactiveRedisServiceImpl(
             "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
             Long::class.java,
         )
+        private const val COMPARE_AND_EXPIRE_SCRIPT =
+            "if redis.call('get', KEYS[1]) == cjson.encode(ARGV[1]) then return tostring(redis.call('pexpire', KEYS[1], tonumber(ARGV[2]))) else return '0' end"
     }
 
     override fun hasKey(key: String): Mono<Boolean> {
@@ -36,6 +38,14 @@ class ReactiveRedisServiceImpl(
             .next()
             .map { it > 0L }
             .defaultIfEmpty(false)
+    }
+
+    override fun compareAndExpire(key: String, expectedValue: String, duration: Duration): Mono<Boolean> {
+        return this.executeScript(
+            COMPARE_AND_EXPIRE_SCRIPT,
+            listOf(key),
+            listOf(expectedValue, duration.toMillis().toString()),
+        ).map { it == "1" }
     }
 
     override fun executeScript(script: String, keys: List<String>, args: List<String>): Mono<String> {
