@@ -11,7 +11,7 @@ export function getTenantOAuthAccounts() {
 }
 
 export interface BindTenantOAuthAccountDTO {
-    oauthAccountId: string;
+    oauthBindToken: string;
 }
 
 export function bindTenantOAuthAccount(dto: BindTenantOAuthAccountDTO) {

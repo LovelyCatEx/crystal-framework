@@ -1,15 +1,20 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
 import com.aliyun.sdk.service.oss2.OSSClient
+import com.aliyun.sdk.service.oss2.PresignOptions
 import com.aliyun.sdk.service.oss2.credentials.StaticCredentialsProvider
+import com.aliyun.sdk.service.oss2.models.GetObjectRequest
 import com.aliyun.sdk.service.oss2.models.PutObjectRequest
 import com.aliyun.sdk.service.oss2.transport.BinaryData
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import java.io.InputStream
+import java.time.Duration
 
 class OSSFileResourceServiceImpl(
     storageProvider: StorageProviderEntity,
@@ -19,7 +24,8 @@ class OSSFileResourceServiceImpl(
     private val securityToken: String,
     private val region: String,
     private val bucketName: String,
-) : AbstractFileResourceService(storageProvider, fileResourceService) {
+    basePath: String,
+) : AbstractFileResourceService(storageProvider, fileResourceService, basePath) {
     private val logger = logger()
 
     private var client: OSSClient? = null
@@ -40,6 +46,22 @@ class OSSFileResourceServiceImpl(
         }
 
         return this.client!!
+    }
+
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${normalizedProviderBaseUrl()}${normalizedObjectKey(entity)}"
+    }
+
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        return getClient().presign(
+            GetObjectRequest.newBuilder()
+                .bucket(bucketName)
+                .key(normalizedObjectKey(entity))
+                .build(),
+            PresignOptions.newBuilder()
+                .expiration(Duration.ofSeconds(signedUrlTtlSeconds))
+                .build()
+        ).url()
     }
 
     override suspend fun doUploadFile(
@@ -73,4 +95,5 @@ class OSSFileResourceServiceImpl(
 
         this.client?.close()
     }
+
 }

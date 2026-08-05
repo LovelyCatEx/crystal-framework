@@ -26,10 +26,14 @@ import kotlin.test.assertTrue
  */
 class ResourceAccessServiceImplTest {
 
+    /** Placeholder TTL; irrelevant to the visibility decision logic under test. */
+    private val SIGNED_URL_TTL_SECONDS = 3600L
+
     private fun systemModuleClientReturning(visibility: ResourceVisibility): SystemModuleClient {
         val settings = mock<SystemSettings>()
         whenever(settings.resource).thenReturn(
             SystemSettings.Resource(
+                signedUrl = SystemSettings.Resource.SignedUrl(ttlSeconds = SIGNED_URL_TTL_SECONDS),
                 visibility = SystemSettings.Resource.Visibility(
                     userAvatar = visibility,
                     tenantIcon = visibility,

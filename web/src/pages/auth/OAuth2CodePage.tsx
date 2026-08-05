@@ -53,7 +53,7 @@ function RegisterTab({userInfo}: RegisterTabProps) {
     const handleRegister = (values: RegisterFormData) => {
         setIsSubmitting(true);
         registerFromOAuthAccount({
-            oauthAccountId: userInfo.oauthAccountId,
+            oauthBindToken: userInfo.oauthBindToken,
             username: values.username,
             password: values.password,
             nickname: values.nickname
@@ -167,7 +167,7 @@ function BindTab({userInfo}: BindTabProps) {
     const handleBind = (values: BindFormData) => {
         setIsSubmitting(true);
         bindOAuthAccount({
-            oauthAccountId: userInfo.oauthAccountId,
+            oauthBindToken: userInfo.oauthBindToken,
             username: values.username,
             password: values.password
         })
@@ -243,7 +243,7 @@ function BindCurrentUserTab({userInfo, currentUser}: BindCurrentUserTabProps) {
     const handleBind = () => {
         setIsSubmitting(true);
         bindOAuthAccount({
-            oauthAccountId: userInfo.oauthAccountId
+            oauthBindToken: userInfo.oauthBindToken
         })
             .then((res) => {
                 if (res.data) {

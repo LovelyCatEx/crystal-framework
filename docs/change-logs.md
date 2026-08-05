@@ -7,7 +7,25 @@
 2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
 :::
 
-## v1.13.4
+## v1.13.5
+
+2026-08-05
+
+### 新功能
++ feat(resource): 扩展资源存储能力，支持基础上传路径、预签名、复制链接及火山引擎 TOS 分片上传。
+
+### Bug 修复
++ fix(auth): 加强登录与 OAuth 绑定保护，防止用户名枚举并支持一次性令牌。
++ fix(auth,user,tenant): 用户或成员删除、密码或邮箱重置后使现有 JWT 失效。
++ fix(security): 增加出站 URL 白名单，关闭租户可控的 Lark SSRF。
++ fix(sharding,shared): 增加 Snowflake 槽位租约，并在操作期间续租分布式锁。
++ fix(tenant): 串行化成员和邀请配额检查，防止并发绕过。
++ fix(cache,tenant): 将写后缓存清理延迟到事务提交后，并及时失效成员 profile 缓存。
++ fix(user,tenant): 防止重复邮箱，并限制 profile 敏感字段在目标租户范围内。
++ fix(resource): 根据检测到的 MIME 类型校验上传文件扩展名。
+
+---
+
 
 2026-08-04
 

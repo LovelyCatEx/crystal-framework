@@ -1,20 +1,26 @@
 package com.lovelycatv.crystalframework.resource.service.api.impl
 
+import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
+import com.qcloud.cos.http.HttpMethodName
 import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
 import com.qcloud.cos.transfer.TransferManager
 import com.qcloud.cos.transfer.TransferManagerConfiguration
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.util.Date
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
@@ -25,7 +31,8 @@ class COSFileResourceServiceImpl(
     private val secretKey: String,
     private val region: String,
     private val bucketName: String,
-) : AbstractFileResourceService(storageProvider, fileResourceService) {
+    basePath: String,
+) : AbstractFileResourceService(storageProvider, fileResourceService, basePath) {
     private val logger = logger()
 
     private var client: COSClient? = null
@@ -61,6 +68,18 @@ class COSFileResourceServiceImpl(
         }
 
         return this.transferManager!!
+    }
+
+    override suspend fun buildPublicDownloadUrl(entity: FileResourceEntity): String {
+        return "${normalizedProviderBaseUrl()}${normalizedObjectKey(entity)}"
+    }
+
+    override suspend fun buildSignedDownloadUrl(entity: FileResourceEntity, signedUrlTtlSeconds: Long): String {
+        return withContext(Dispatchers.IO) {
+            val objectKey = normalizedObjectKey(entity)
+            val expiration = Date(System.currentTimeMillis() + signedUrlTtlSeconds * MILLIS_PER_SECOND)
+            getClient().generatePresignedUrl(bucketName, objectKey, expiration, HttpMethodName.GET).toString()
+        }
     }
 
     override suspend fun doUploadFile(
@@ -108,4 +127,5 @@ class COSFileResourceServiceImpl(
 
         this.transferManager?.shutdownNow(true)
     }
+
 }

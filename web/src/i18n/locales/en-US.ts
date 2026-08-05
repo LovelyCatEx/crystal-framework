@@ -1770,7 +1770,8 @@ export const enUS: I18nRules = {
           placeholder: 'Select storage type',
           localFileSystem: 'Local File System',
           aliyunOss: 'Aliyun OSS',
-          tencentCos: 'Tencent COS'
+          tencentCos: 'Tencent COS',
+          volcEngineTos: 'VolcEngine TOS'
         },
         description: {
           label: 'Description',
@@ -1919,8 +1920,14 @@ export const enUS: I18nRules = {
           placeholder: 'Storage object key'
         }
       },
+      actions: {
+        download: 'Download',
+        copyLink: 'Copy Link'
+      },
       messages: {
-        downloadFailed: 'Failed to get file download link'
+        downloadFailed: 'Failed to get file download link',
+        copyLinkSuccess: 'Link copied to clipboard',
+        copyLinkFailed: 'Failed to copy link'
       }
     },
     userRoleManager: {
@@ -2283,6 +2290,8 @@ export const enUS: I18nRules = {
         'security.emailCodeRateLimit.maxPerIp': 'Max Sends Per IP (per window)',
         'security.emailCodeRateLimit.maxPerEmail': 'Max Sends Per Email (per window)',
         'security.emailCodeRateLimit.maxGlobal': 'Max Global Sends (per window)',
+        'security.outbound.allowedHosts': 'Allowed Outbound Hosts',
+        'security.outbound.allowedSmtpHosts': 'Allowed SMTP Outbound Hosts',
         'oauth.github.enabled': 'Enabled',
         'oauth.github.useDefault': 'Use System Default',
         'oauth.github.authorizationUri': 'Authorization URI',
@@ -2311,6 +2320,7 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
         'resource.visibility.userAvatar': 'User Avatar Visibility',
         'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
         'resource.visibility.tenantMemberAvatar': 'Tenant Member Avatar Visibility',
@@ -2324,11 +2334,13 @@ export const enUS: I18nRules = {
         'security.api.encrypt': 'Api Security',
         'security.loginRateLimit': 'Login Rate Limit & Lockout',
         'security.emailCodeRateLimit': 'Email Code Rate Limit',
+        'security.outbound': 'Outbound Requests',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'resource.signedUrl': 'Signed URL',
         'resource.visibility': 'Resource Access',
       },
       tabs: {
@@ -3214,6 +3226,7 @@ export const enUS: I18nRules = {
       localFileSystem: 'Local File System',
       tencentCos: 'Tencent Cloud COS',
       aliyunOss: 'Aliyun OSS',
+      volcEngineTos: 'VolcEngine TOS',
       selectTemplate: 'Select Config Template',
       applyTemplate: 'Apply Template',
       applyTemplateTooltip: 'Apply Template'
@@ -3884,7 +3897,8 @@ export const enUS: I18nRules = {
     storageProviderType: {
       0: 'Local File System',
       1: 'Aliyun OSS',
-      2: 'Tencent COS'
+      2: 'Tencent COS',
+      3: 'VolcEngine TOS'
     },
 
     ruleDistributionType: {

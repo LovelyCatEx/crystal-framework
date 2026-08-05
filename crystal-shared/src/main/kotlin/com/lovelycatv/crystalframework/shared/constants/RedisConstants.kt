@@ -13,6 +13,18 @@ object RedisConstants {
 
     const val ENTITY_CACHE_BY_LIST = "entity-cache:list:"
 
+    /**
+     * Lower TTL bound (ms) for cache entries rehydrated by a read-through miss in
+     * [com.lovelycatv.crystalframework.shared.service.CachedBaseService.getByIdOrNull]. A read landing
+     * inside a concurrent write's evict-around window can rehydrate the pre-write row; capping such
+     * fills to a short TTL bounds how long that phantom can survive if the post-commit re-eviction
+     * races it. Explicit writes via `updateCache` keep the full 8–12h TTL.
+     */
+    const val ENTITY_CACHE_READTHROUGH_MIN_TTL_MS = 30_000L
+
+    /** Upper TTL bound (ms) for read-through miss rehydration. See [ENTITY_CACHE_READTHROUGH_MIN_TTL_MS]. */
+    const val ENTITY_CACHE_READTHROUGH_MAX_TTL_MS = 120_000L
+
     const val SYSTEM_SETTINGS_REFRESH_TOPIC = "crystalframework:system-settings:refresh"
 
     const val TENANT_SETTINGS_REFRESH_TOPIC = "crystalframework:tenant-settings:refresh"
@@ -39,7 +51,11 @@ object RedisConstants {
 
     const val LOCK_OAUTH_BIND_PREFIX = "lock:oauth:bind:"
 
-    const val LOCK_APPROVAL_TASK_PREFIX = "lock:approval:task:"
+    const val OAUTH_BIND_TOKEN_PREFIX = "oauth:bind:token:"
+
+    val OAUTH_BIND_TOKEN_TTL: Duration = Duration.ofMinutes(5)
+
+    const val LOCK_APPROVAL_TOKEN_PREFIX = "lock:approval:token:"
 
     /** Sliding-window counter of authentication attempts keyed by client IP. */
     const val LOGIN_RATE_LIMIT_IP_PREFIX = "auth:rl:ip:"

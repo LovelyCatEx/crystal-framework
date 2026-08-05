@@ -14,8 +14,13 @@ data class SystemSettings(
     val resource: Resource,
 ) {
     data class Resource(
+        val signedUrl: SignedUrl,
         val visibility: Visibility,
     ) {
+        data class SignedUrl(
+            val ttlSeconds: Long,
+        )
+
         data class Visibility(
             val userAvatar: ResourceVisibility,
             val tenantIcon: ResourceVisibility,
@@ -60,7 +65,11 @@ data class SystemSettings(
             val password: String,
             val ssl: Boolean,
             val fromEmail: String,
-        )
+        ) {
+            override fun toString(): String {
+                return "SMTP(host=$host, port=$port, username=$username, password=***, ssl=$ssl, fromEmail=$fromEmail)"
+            }
+        }
     }
 
     data class MessageChannel(
@@ -77,6 +86,7 @@ data class SystemSettings(
         val api: Api,
         val loginRateLimit: LoginRateLimit,
         val emailCodeRateLimit: EmailCodeRateLimit,
+        val outbound: Outbound,
     ) {
         data class Api(
             val encrypt: Encrypt
@@ -104,6 +114,11 @@ data class SystemSettings(
             val maxPerIp: Int,
             val maxPerEmail: Int,
             val maxGlobal: Int,
+        )
+
+        data class Outbound(
+            val allowedHosts: List<String>,
+            val allowedSmtpHosts: List<String>,
         )
     }
 

@@ -51,6 +51,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `first matching rule by priority order wins over a later broader rule`() {
         withTransactionalRollback("router-priority-order") {
+            ruleTest.clearExistingRules()
             val avatarProvider = providerTest.mockStorageProvider()
             val fallbackProvider = providerTest.mockStorageProvider()
 
@@ -75,6 +76,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `falls through to match-all fallback rule when no earlier rule matches`() {
         withTransactionalRollback("router-fallback") {
+            ruleTest.clearExistingRules()
             val avatarProvider = providerTest.mockStorageProvider()
             val fallbackProvider = providerTest.mockStorageProvider()
 
@@ -98,6 +100,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `disabled target provider is skipped, falls through to next rule`() {
         withTransactionalRollback("router-disabled-provider") {
+            ruleTest.clearExistingRules()
             val disabledProvider = providerTest.mockStorageProvider(active = false)
             val activeFallback = providerTest.mockStorageProvider()
 
@@ -120,6 +123,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `no rule matches at all throws BusinessException`() {
         withTransactionalRollback("router-no-match") {
+            ruleTest.clearExistingRules()
             val provider = providerTest.mockStorageProvider()
             ruleTest.mockRoutingRule(
                 name = "icon-only-rule",
@@ -138,6 +142,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `FIRST_AVAILABLE distribution always picks the first candidate`() {
         withTransactionalRollback("router-first-available") {
+            ruleTest.clearExistingRules()
             val first = providerTest.mockStorageProvider()
             val second = providerTest.mockStorageProvider()
 
@@ -157,6 +162,7 @@ class RuleBasedStorageProviderRouterTest(
     @Test
     fun `RANDOM distribution picks one of the candidate providers`() {
         withTransactionalRollback("router-random") {
+            ruleTest.clearExistingRules()
             val first = providerTest.mockStorageProvider()
             val second = providerTest.mockStorageProvider()
             val candidateIds = setOf(first.id, second.id)

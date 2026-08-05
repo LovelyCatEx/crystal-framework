@@ -1,13 +1,24 @@
 package com.lovelycatv.crystalframework.tenant.service.impl
 
+import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
+import com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService
+import com.lovelycatv.crystalframework.shared.constants.RbacConstants
+import com.lovelycatv.crystalframework.shared.constants.SystemPermission
+import com.lovelycatv.crystalframework.shared.constants.SystemRole
+import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.utils.getContentType
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.crystalframework.tenant.controller.dto.UpdateTenantProfileDTO
+import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
+import com.lovelycatv.crystalframework.tenant.utils.toProfileVO
 import com.lovelycatv.crystalframework.tenant.controller.manager.member.dto.ManagerCreateTenantMemberDTO
 import com.lovelycatv.crystalframework.tenant.entity.TenantEntity
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
@@ -19,7 +30,6 @@ import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberR
 import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRoleService
 import com.lovelycatv.crystalframework.tenant.service.*
 import com.lovelycatv.crystalframework.tenant.service.manager.TenantMemberManagerService
-import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -39,6 +49,8 @@ class TenantServiceImpl(
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantMemberService: TenantMemberService,
     private val tenantMemberManagerService: TenantMemberManagerService,
+    private val userRbacQueryService: UserRbacQueryService,
+    private val fileResourceService: FileResourceService,
     private val fileResourceServiceManager: FileResourceServiceManager,
     private val tenantPermissionRepository: TenantPermissionRepository,
     private val tenantRolePermissionRelationRepository: TenantRolePermissionRelationRepository,
@@ -55,6 +67,39 @@ class TenantServiceImpl(
 
     override fun getRepository(): TenantRepository {
         return this.tenantRepository
+    }
+
+    override suspend fun getTenantProfile(tenantId: Long, viewer: UserAuthentication): TenantProfileVO {
+        val tenant = getByIdOrNull(tenantId) ?: throw BusinessException("Tenant not found")
+        val profile = tenant.toProfileVO(fileResourceService, viewer)
+        val targetMember = tenantMemberService.getByTenantIdAndUserId(tenantId, viewer.userId)
+            ?.takeIf { it.getRealStatus() == TenantMemberStatus.ACTIVE }
+        val targetPermissions = targetMember?.let {
+            userRbacQueryService.getTenantMemberRbacAccessInfo(it.id, tenantId).permissions
+                .map { permission -> permission.name }
+                .toSet()
+        }.orEmpty()
+        val crossTenantAdmin = RbacUtils.hasAnyAuthority(
+            SystemPermission.ACTION_SYSTEM_TENANT_READ.name,
+        )
+
+        if (crossTenantAdmin || TenantPermission.ACTION_PROFILE_READ.name in targetPermissions) {
+            return profile
+        }
+
+        profile.ownerUserId = null
+        profile.tireTypeId = null
+        profile.subscribedTime = null
+        profile.expiresTime = null
+
+        if (TenantPermission.ACTION_PROFILE_READ_BASIC.name !in targetPermissions) {
+            profile.contactName = null
+            profile.contactEmail = null
+            profile.contactPhone = null
+            profile.address = ""
+        }
+
+        return profile
     }
 
     override suspend fun getUserTenants(userId: Long): List<TenantEntity> {

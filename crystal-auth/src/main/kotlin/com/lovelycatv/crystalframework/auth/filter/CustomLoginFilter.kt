@@ -141,7 +141,7 @@ class CustomLoginFilter(
                 is DisabledException ->
                     ApiResponse.forbidden(exception.localizedMessage ?: "account disabled", DisabledContext())
                 else ->
-                    ApiResponse.unauthorized<Nothing>(exception.localizedMessage)
+                    ApiResponse.unauthorized<Nothing>(LoginRateLimitConstants.MESSAGE_INVALID_CREDENTIALS)
             }
 
             exchange.exchange.response.statusCode = HttpStatus.OK

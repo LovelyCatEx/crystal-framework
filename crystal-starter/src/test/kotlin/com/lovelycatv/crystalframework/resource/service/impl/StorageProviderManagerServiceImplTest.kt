@@ -30,9 +30,14 @@ class StorageProviderManagerServiceImplTest(
             )
         )
         if (active) return created
-        return storageProviderManagerService.update(
+        val updated = storageProviderManagerService.update(
             ManagerUpdateStorageProviderDTO(id = created.id, active = false)
         ) ?: error("Failed to disable mocked storage provider")
+        // update() defers its cache eviction to after the transaction commits, which never happens inside a
+        // rollback-only test transaction, so the entity cache would still serve the active=true snapshot.
+        // Evict manually so callers routing on this provider observe active=false.
+        storageProviderManagerService.removeCache(created.id)
+        return updated
     }
 
     @Test

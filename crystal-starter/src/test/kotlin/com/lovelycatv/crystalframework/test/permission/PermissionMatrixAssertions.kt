@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.test.permission
 import com.lovelycatv.crystalframework.shared.controller.PermissionMatrix
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
-import org.springframework.security.authorization.AuthorizationDeniedException
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -17,9 +16,9 @@ import kotlin.test.assertTrue
  * The exception kinds each helper distinguishes correspond to the enforcement paths in the
  * manager-controller family:
  *
- *  - [AuthorizationDeniedException] — thrown by [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize]
- *    when the RBAC OR-check across `matrix.layersFor(...)` fails. Standard main line.
- *  - [ForbiddenException]           — thrown by three separate paths, all mapped to HTTP 403:
+ *  - [ForbiddenException]           — thrown by every denial path, all mapped to HTTP 403:
+ *    - [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize]
+ *      when the RBAC OR-check across `matrix.layersFor(...)` fails. Standard main line.
  *    - [com.lovelycatv.crystalframework.shared.controller.Mutability.READ_ONLY.assertXxxAllowed]
  *      (write attempted on a Readonly controller — reached before authorize).
  *    - [com.lovelycatv.crystalframework.shared.controller.StandardScopedManagerController.assertAccess]
@@ -44,16 +43,21 @@ fun assertLayerAllowed(caught: Throwable?, layer: PermissionMatrix.Layer, action
 }
 
 /**
- * Assert the endpoint denied the caller via [AuthorizationDeniedException] — the exception type
- * that [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize]
- * raises when the RBAC OR-check against `matrix.layersFor(SYSTEM, op)` fails. Used by the
+ * Assert the endpoint denied the caller via [ForbiddenException] raised by the RBAC OR-check inside
+ * [com.lovelycatv.crystalframework.shared.controller.StandardManagerController.authorize] when
+ * `matrix.layersFor(resourceScope, op)` matches none of the caller's authorities. Used by the
  * Standard main line and its Readonly variant.
+ *
+ * Named distinctly from [assertDeniedByForbidden] so the failure message pinpoints the RBAC-layer
+ * origin ("expected the RBAC check to reject the read") even though both now assert the same
+ * exception type — since the structured-403 unification, every manager-controller denial path is a
+ * [ForbiddenException] so the frontend can render the ForbiddenModal.
  */
 fun assertLayerDeniedByAuthorization(caught: Throwable?, layer: PermissionMatrix.Layer, action: String) {
     assertNotNull(caught, "Layer $layer must be denied for $action but the call succeeded")
     assertTrue(
-        caught is AuthorizationDeniedException,
-        "Layer $layer denied for $action must throw AuthorizationDeniedException, got ${caught::class}: $caught",
+        caught is ForbiddenException,
+        "Layer $layer denied for $action must throw ForbiddenException, got ${caught::class}: $caught",
     )
 }
 

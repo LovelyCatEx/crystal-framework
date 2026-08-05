@@ -25,6 +25,7 @@ class COSFileResourceServiceFactory(
             secretKey = properties.secretKey,
             region = properties.region,
             bucketName = properties.bucketName,
+            basePath = properties.basePath,
         )
     }
 }

@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
-import org.springframework.security.authorization.AuthorizationDeniedException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import kotlin.test.assertTrue
 
 /**
@@ -101,8 +101,8 @@ class ManagerOAuthAccountControllerIntegrationTest(
                 else -> {
                     assertNotNull(caught, "Layer $layer must be denied (NOT_APPLICABLE slot)")
                     assertTrue(
-                        caught is AuthorizationDeniedException,
-                        "Expected AuthorizationDeniedException, got ${caught!!::class}",
+                        caught is ForbiddenException,
+                        "Expected ForbiddenException, got ${caught!!::class}",
                     )
                 }
             }
@@ -136,8 +136,8 @@ class ManagerOAuthAccountControllerIntegrationTest(
                 else -> {
                     assertNotNull(caught, "Layer $layer must be denied (NOT_APPLICABLE slot)")
                     assertTrue(
-                        caught is AuthorizationDeniedException,
-                        "Expected AuthorizationDeniedException, got ${caught!!::class}",
+                        caught is ForbiddenException,
+                        "Expected ForbiddenException, got ${caught!!::class}",
                     )
                 }
             }
@@ -164,8 +164,8 @@ class ManagerOAuthAccountControllerIntegrationTest(
 
             assertNotNull(caught, "Unauthorised user must be denied")
             assertTrue(
-                caught is AuthorizationDeniedException,
-                "Expected AuthorizationDeniedException, got ${caught!!::class}",
+                caught is ForbiddenException,
+                "Expected ForbiddenException, got ${caught!!::class}",
             )
         }
     }

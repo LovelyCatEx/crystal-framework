@@ -5,7 +5,7 @@ export interface LoginResponse {
 }
 
 export interface OAuth2UserInfo {
-    oauthAccountId: string;
+    oauthBindToken: string;
     platform: string;
     avatar: string;
     nickname: string;

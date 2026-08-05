@@ -31,8 +31,8 @@ object TableConstants {
     const val TABLE_TENANT_TIRE_BENEFIT_FEATURES = "tenant_tire_benefit_features"
     const val TABLE_TENANT_TIRE_BENEFIT_VALUES = "tenant_tire_benefit_values"
     const val TABLE_TENANT_SETTINGS = "tenant_settings"
-    const val TABLE_TENANT_MESSAGE_CHANNELS = "tenant_message_channels"
-    const val TABLE_TENANT_USER_PROFILES = "tenant_user_profiles"
+    const val TABLE_MESSAGE_CHANNELS = "message_channels"
+    const val TABLE_TENANT_MEMBER_PROFILES = "tenant_member_profiles"
     const val TABLE_TENANT_DICT_TYPES = "tenant_dict_type"
     const val TABLE_TENANT_DICT_ITEMS = "tenant_dict_item"
     const val TABLE_APPROVAL_FLOW_DEFINITION = "approval_flow_definition"
@@ -41,6 +41,7 @@ object TableConstants {
     const val TABLE_APPROVAL_FLOW_INSTANCE = "approval_flow_instance"
     const val TABLE_APPROVAL_FLOW_TASK = "approval_flow_task"
     const val TABLE_APPROVAL_FLOW_RECORD = "approval_flow_record"
+    const val TABLE_APPROVAL_FLOW_TOKEN = "approval_flow_token"
     const val TABLE_STORAGE_PROVIDER_ROUTING_RULES = "storage_provider_routing_rules"
     const val TABLE_USER_BAN_RECORDS = "user_ban_records"
 }

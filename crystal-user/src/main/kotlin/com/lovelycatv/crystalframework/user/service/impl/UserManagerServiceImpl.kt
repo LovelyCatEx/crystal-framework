@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.user.service.impl
 
+import com.lovelycatv.crystalframework.rbac.user.service.UserForceLogoutService
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -26,6 +27,7 @@ class UserManagerServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val userRoleRelationService: UserRoleRelationService,
+    private val userForceLogoutService: UserForceLogoutService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : UserManagerService {
     override val cacheStore: ReactiveExpiringKVStore<String, UserEntity>
@@ -64,10 +66,16 @@ class UserManagerServiceImpl(
         }
     }
 
+    /**
+     * Deleting a user does not revoke a still-valid JWT or cached authorities. Force-logout the
+     * deleted users so existing tokens are rejected on the next request, matching the ban path in
+     * ManagerUserController.
+     */
     @Transactional(rollbackFor = [Exception::class])
     override suspend fun batchDelete(ids: List<Long>) {
         super.batchDelete(ids)
         userRoleRelationService.deleteByUserIdIn(ids)
+        ids.forEach { userForceLogoutService.markForceLogout(it) }
     }
 
     override suspend fun setEnabled(userId: Long, enabled: Boolean) {

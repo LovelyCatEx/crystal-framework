@@ -25,6 +25,12 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
 
     fun checkFileContentType(fileType: ResourceFileType, contentType: String): Boolean
 
+    fun resolveFileExtension(
+        fileType: ResourceFileType,
+        contentType: String,
+        requestedExtension: String
+    ): String?
+
     suspend fun getByMD5(md5: String): FileResourceEntity?
 
     /**

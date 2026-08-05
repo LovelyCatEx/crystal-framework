@@ -6,4 +6,5 @@ data class OSSFileResourceServiceProperties(
     val securityToken: String,
     val region: String,
     val bucketName: String,
-)
+    override val basePath: String = "",
+) : FileResourceServiceProperties

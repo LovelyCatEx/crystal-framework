@@ -23,6 +23,11 @@ interface ResourceAccessService {
     fun resolveVisibility(fileType: ResourceFileType): ResourceVisibility
 
     /**
+     * Resolves the validity window (in seconds) for signed download URLs from the cached system settings.
+     */
+    fun resolveSignedUrlTtlSeconds(): Long
+
+    /**
      * @return true when [viewer] (nullable = anonymous) may read [entity] under its type's policy.
      */
     suspend fun isReadable(entity: FileResourceEntity, viewer: UserAuthentication?): Boolean

@@ -6,6 +6,8 @@ import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantPermissionType
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRolePermissionRelationService
+import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRoleService
+import com.lovelycatv.crystalframework.rbac.tenant.entity.TenantPermissionEntity
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserRbacQueryResult
 import com.lovelycatv.crystalframework.rbac.user.service.result.UserTenantRbacQueryResult
@@ -22,6 +24,7 @@ class UserRbacQueryServiceImpl(
     private val rolePermissionRelationService: UserRolePermissionRelationService,
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val tenantRolePermissionRelationService: TenantRolePermissionRelationService,
+    private val tenantRoleService: TenantRoleService,
     private val redisService: ReactiveRedisService
 ) : UserRbacQueryService {
     override suspend fun getUserRbacAccessInfo(userId: Long): UserRbacQueryResult {
@@ -50,6 +53,18 @@ class UserRbacQueryServiceImpl(
         )
     }
 
+    override suspend fun getTenantPermissionsByRoleIds(roleIds: Collection<Long>): Set<TenantPermissionEntity> {
+        if (roleIds.isEmpty()) {
+            return emptySet()
+        }
+        val recursiveRoleIds = roleIds
+            .flatMap { roleId -> listOf(roleId) + tenantRoleService.getParents(roleId).map { it.id } }
+            .toSet()
+        return tenantRolePermissionRelationService
+            .getRolePermissions(recursiveRoleIds.toList())
+            .distinctBy { it.id }
+            .toSet()
+    }
     override suspend fun getUserAuthorities(
         userId: Long,
         tenantId: Long?,
