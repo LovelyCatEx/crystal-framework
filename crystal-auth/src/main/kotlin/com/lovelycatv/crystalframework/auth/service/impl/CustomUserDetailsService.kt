@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.auth.service.impl
 
+import com.lovelycatv.crystalframework.auth.constants.LoginRateLimitConstants
 import com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService
 import com.lovelycatv.crystalframework.shared.exception.AccountBannedException
 import com.lovelycatv.crystalframework.shared.exception.BanContext
@@ -19,6 +20,7 @@ import kotlinx.coroutines.reactor.flux
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
+import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -61,35 +63,43 @@ class CustomUserDetailsService(
 
         return this.userRepository
             .findByUsernameOrEmail(realUsername, realUsername)
+            .map { it as UserDetails }
             .switchIfEmpty {
-                Mono.error(BusinessException("User $realUsername not found"))
+                User.withUsername(realUsername)
+                    .password(LoginRateLimitConstants.DUMMY_PASSWORD_HASH)
+                    .authorities(emptyList())
+                    .build()
+                    .toMono()
             }
-            .map { userEntity ->
-                userEntity.apply {
-                    setInternalRawAuthorities(
-                        runBlocking(Dispatchers.IO) {
-                            userRoleRelationService
-                                .getUserRoles(userEntity.id)
-                                .map { it.name }
-                        }
-                    )
-
-                    runBlocking(Dispatchers.IO) {
-                        userBanRecordManagerService.getActiveBan(userEntity.id)
-                    }?.let { banRecord ->
-                        throw AccountBannedException(
-                            banRecord.reason,
-                            BanContext(
-                                reason = banRecord.reason,
-                                bannedAt = banRecord.createdTime,
-                                banUntil = banRecord.banUntil,
-                            ),
+            .flatMap { userDetails ->
+                if (userDetails !is UserEntity) {
+                    userDetails.toMono()
+                } else {
+                    userDetails.apply {
+                        setInternalRawAuthorities(
+                            runBlocking(Dispatchers.IO) {
+                                userRoleRelationService
+                                    .getUserRoles(userDetails.id)
+                                    .map { it.name }
+                            }
                         )
+
+                        runBlocking(Dispatchers.IO) {
+                            userBanRecordManagerService.getActiveBan(userDetails.id)
+                        }?.let { banRecord ->
+                            throw AccountBannedException(
+                                banRecord.reason,
+                                BanContext(
+                                    reason = banRecord.reason,
+                                    bannedAt = banRecord.createdTime,
+                                    banUntil = banRecord.banUntil,
+                                ),
+                            )
+                        }
                     }
+
+                    checkIsTenantValid(userDetails, tenantMono)
                 }
-            }
-            .flatMap { userEntity ->
-                checkIsTenantValid(userEntity, tenantMono)
             }
     }
 
