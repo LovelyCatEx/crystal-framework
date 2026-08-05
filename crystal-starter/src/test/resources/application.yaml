@@ -1,6 +1,6 @@
 spring:
   application:
-    name: springboot-template
+    name: crystal-framework
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/db
     username: postgres
@@ -137,6 +137,8 @@ crystalframework:
         default-message: 'hello, world! <link href="https://github.com/LovelyCatEx/crystal-framework" title="Crystal Framework" />'
   message-channel:
     encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
+# Tracing is handled by the elastic-apm-agent (-javaagent), not the Spring Boot OTLP starter, which has
+# been removed. See the main application.yaml management block for the rationale.
 logging:
   level:
     root: info

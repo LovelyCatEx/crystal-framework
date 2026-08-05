@@ -106,11 +106,83 @@ services:
     networks:
       - crystalframework-dev-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      # Fleet (used by the APM integration) requires security to be enabled, hence xpack.security stays on.
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms256m -Xmx512m
+    ports:
+      - "${ELASTICSEARCH_PORT}:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - crystalframework-dev-network
+    healthcheck:
+      # Security is on, so the health probe must authenticate as the elastic superuser.
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      # Kibana authenticates to ES with an elastic/kibana service-account token (generated manually and
+      # placed in .env), never with the elastic superuser, per Elastic 8.x guidance.
+      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=${KIBANA_SERVICE_TOKEN}
+      # Fleet stores encrypted saved objects; Kibana refuses to start Fleet without a >=32 char key.
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+    ports:
+      - "${KIBANA_PORT}:5601"
+    networks:
+      - crystalframework-dev-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:${ELASTIC_STACK_VERSION}
+    container_name: apm-server
+    command:
+      - "--strict.perms=false"
+      - "-E"
+      - "apm-server.host=0.0.0.0:8200"
+      - "-E"
+      - "output.elasticsearch.hosts=[\"elasticsearch:9200\"]"
+      # Security is on, so the APM Server must authenticate to ES. Using the elastic superuser here keeps
+      # the dev setup simple; a dedicated apm_system-style user is preferable in production.
+      - "-E"
+      - "output.elasticsearch.username=elastic"
+      - "-E"
+      - "output.elasticsearch.password=${ELASTIC_PASSWORD}"
+      - "-E"
+      - "apm-server.kibana.enabled=true"
+      - "-E"
+      - "apm-server.kibana.host=kibana:5601"
+      - "-E"
+      - "apm-server.kibana.username=elastic"
+      - "-E"
+      - "apm-server.kibana.password=${ELASTIC_PASSWORD}"
+    ports:
+      - "${APM_SERVER_PORT}:8200"
+    networks:
+      - crystalframework-dev-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
   prometheus-data:
   grafana-data:
+  elasticsearch-data:
 
 networks:
   crystalframework-dev-network:
