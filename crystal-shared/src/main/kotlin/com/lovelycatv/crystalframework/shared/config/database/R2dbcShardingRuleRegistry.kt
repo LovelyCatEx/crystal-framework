@@ -30,16 +30,10 @@ class R2dbcShardingRuleRegistry(
                 }
                 val dataSourceName = rule.dataSourceName.trim()
                 dataSources.require(dataSourceName)
+                val normalizedRule = normalizeAndValidate(componentName, tableName, dataSourceName, rule)
                 if (rulesByTable.putIfAbsent(
                         tableName,
-                        RegisteredRule(
-                            componentName,
-                            rule.copy(
-                                tableName = tableName,
-                                dataSourceName = dataSourceName,
-                                shardingColumn = rule.shardingColumn?.trim()?.takeIf(String::isNotEmpty),
-                            ),
-                        ),
+                        RegisteredRule(componentName, normalizedRule),
                     ) != null
                 ) {
                     throw IllegalStateException(
@@ -50,11 +44,67 @@ class R2dbcShardingRuleRegistry(
         }
     }
 
+    /**
+     * Normalizes the [rule]'s table-level fields and enforces the all-or-nothing table-sharding
+     * contract: [R2dbcShardingRule.shardingColumn], [R2dbcShardingRule.algorithm] and
+     * [R2dbcShardingRule.actualTables] must either all be present (table sharding) or all be absent
+     * (data-source routing only).
+     */
+    private fun normalizeAndValidate(
+        componentName: String,
+        tableName: String,
+        dataSourceName: String,
+        rule: R2dbcShardingRule,
+    ): R2dbcShardingRule {
+        val shardingColumn = rule.shardingColumn?.trim()?.takeIf(String::isNotEmpty)
+        val algorithm = rule.algorithm
+        val actualTables = rule.actualTables
+            .map { it.trim().lowercase() }
+            .filter(String::isNotEmpty)
+
+        // `shardingColumn` alone is data-source routing metadata (consumed by R2dbcRouteDecision) and
+        // does NOT imply table sharding. Table sharding is only in play once an algorithm or an actual
+        // table list is declared; then all three fields must be present together.
+        val tableShardingConfigured = algorithm != null || actualTables.isNotEmpty()
+        if (tableShardingConfigured) {
+            require(shardingColumn != null) {
+                "R2dbcShardingRuleRegistry: component '$componentName' table '$tableName' declares table " +
+                    "sharding but shardingColumn is blank"
+            }
+            require(algorithm != null) {
+                "R2dbcShardingRuleRegistry: component '$componentName' table '$tableName' declares table " +
+                    "sharding but algorithm is null"
+            }
+            require(actualTables.isNotEmpty()) {
+                "R2dbcShardingRuleRegistry: component '$componentName' table '$tableName' declares table " +
+                    "sharding but actualTables is empty"
+            }
+            require(actualTables.toSet().size == actualTables.size) {
+                "R2dbcShardingRuleRegistry: component '$componentName' table '$tableName' declares duplicate " +
+                    "actual tables $actualTables"
+            }
+        }
+
+        return rule.copy(
+            tableName = tableName,
+            dataSourceName = dataSourceName,
+            shardingColumn = shardingColumn,
+            actualTables = actualTables,
+            algorithm = algorithm,
+        )
+    }
+
     fun find(tableName: String?): RegisteredRule? {
         return tableName?.trim()?.lowercase()?.let(rulesByTable::get)
     }
 
     fun rules(): List<RegisteredRule> = rulesByTable.values.toList()
+
+    /**
+     * True when no rule is registered. [CrystalShardingConnection] uses this to skip re-parsing every
+     * outbound statement in deployments that declare no sharding at all.
+     */
+    fun isEmpty(): Boolean = rulesByTable.isEmpty()
 
     data class RegisteredRule(
         val componentName: String,
