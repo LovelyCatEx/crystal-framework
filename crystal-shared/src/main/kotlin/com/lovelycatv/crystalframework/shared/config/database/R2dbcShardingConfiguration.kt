@@ -1,7 +1,9 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
+import io.r2dbc.pool.ConnectionPool
 import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.r2dbc.autoconfigure.R2dbcProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,6 +33,17 @@ class R2dbcShardingConfiguration {
         val registry = R2dbcDataSourceRegistry(listOf(primary) + additional)
         registry.require(configuration.database.defaultDataSource)
         return registry
+    }
+
+    @Bean
+    fun r2dbcConnectionPoolRegistry(
+        @Qualifier("rawR2dbcConnectionPool") primaryPool: ConnectionPool,
+        configuration: CrystalFrameworkConfiguration,
+    ): R2dbcConnectionPoolRegistry {
+        return R2dbcConnectionPoolRegistry(
+            primaryPool,
+            configuration.database.dataSources.toList(),
+        )
     }
 
     @Bean

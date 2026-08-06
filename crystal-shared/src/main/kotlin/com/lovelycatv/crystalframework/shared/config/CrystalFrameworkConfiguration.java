@@ -202,6 +202,7 @@ public class CrystalFrameworkConfiguration {
             private String url = "";
             private String username = "";
             private String password = "";
+            private Pool pool = new Pool();
 
             public String getName() { return name; }
             public void setName(String name) { this.name = name; }
@@ -214,6 +215,60 @@ public class CrystalFrameworkConfiguration {
 
             public String getPassword() { return password; }
             public void setPassword(String password) { this.password = password; }
+
+            public Pool getPool() { return pool; }
+            public void setPool(Pool pool) { this.pool = pool; }
+
+            public static class Pool {
+                private int initialSize = 5;
+                private int minIdle = 5;
+                private int maxSize = 40;
+                private Duration maxIdleTime = Duration.ofMinutes(30);
+                private Duration maxAcquireTime = Duration.ofSeconds(5);
+                private Duration maxCreateConnectionTime = Duration.ofSeconds(5);
+                private Duration maxLifeTime = null;
+                private Duration maxValidationTime = null;
+                private String validationQuery = "SELECT 1";
+                private int acquireRetry = 1;
+                private String validationDepth = "REMOTE";
+
+                public int getInitialSize() { return initialSize; }
+                public void setInitialSize(int initialSize) { this.initialSize = initialSize; }
+
+                public int getMinIdle() { return minIdle; }
+                public void setMinIdle(int minIdle) { this.minIdle = minIdle; }
+
+                public int getMaxSize() { return maxSize; }
+                public void setMaxSize(int maxSize) { this.maxSize = maxSize; }
+
+                public Duration getMaxIdleTime() { return maxIdleTime; }
+                public void setMaxIdleTime(Duration maxIdleTime) { this.maxIdleTime = maxIdleTime; }
+
+                public Duration getMaxAcquireTime() { return maxAcquireTime; }
+                public void setMaxAcquireTime(Duration maxAcquireTime) { this.maxAcquireTime = maxAcquireTime; }
+
+                public Duration getMaxCreateConnectionTime() { return maxCreateConnectionTime; }
+                public void setMaxCreateConnectionTime(Duration maxCreateConnectionTime) {
+                    this.maxCreateConnectionTime = maxCreateConnectionTime;
+                }
+
+                public Duration getMaxLifeTime() { return maxLifeTime; }
+                public void setMaxLifeTime(Duration maxLifeTime) { this.maxLifeTime = maxLifeTime; }
+
+                public Duration getMaxValidationTime() { return maxValidationTime; }
+                public void setMaxValidationTime(Duration maxValidationTime) {
+                    this.maxValidationTime = maxValidationTime;
+                }
+
+                public String getValidationQuery() { return validationQuery; }
+                public void setValidationQuery(String validationQuery) { this.validationQuery = validationQuery; }
+
+                public int getAcquireRetry() { return acquireRetry; }
+                public void setAcquireRetry(int acquireRetry) { this.acquireRetry = acquireRetry; }
+
+                public String getValidationDepth() { return validationDepth; }
+                public void setValidationDepth(String validationDepth) { this.validationDepth = validationDepth; }
+            }
         }
 
         public static class Routing {

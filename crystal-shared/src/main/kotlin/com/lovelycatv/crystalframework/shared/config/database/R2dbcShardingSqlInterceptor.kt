@@ -14,8 +14,9 @@ class R2dbcShardingSqlInterceptor(
     override fun getOrder(): Int = Ordered.LOWEST_PRECEDENCE
 
     override fun intercept(statement: Statement, tableName: String?): Statement {
+        val decision = router.resolve(tableName)
+
         if (logDecisions) {
-            val decision = router.resolve(tableName)
             logger.info(
                 "SQL route decision: table=${decision.tableName ?: "<unknown>"}, " +
                     "shardingColumn=${decision.shardingColumn ?: "<none>"}, " +
@@ -24,6 +25,7 @@ class R2dbcShardingSqlInterceptor(
                     "statementType=${statement.javaClass.simpleName}",
             )
         }
+
         return statement
     }
 }

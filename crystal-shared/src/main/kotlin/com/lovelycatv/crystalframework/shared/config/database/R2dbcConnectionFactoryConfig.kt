@@ -1,8 +1,7 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
-import io.r2dbc.pool.ConnectionPool
+import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import io.r2dbc.spi.ConnectionFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -12,8 +11,12 @@ class R2dbcConnectionFactoryConfig {
     @Bean(name = ["connectionFactory"])
     @Primary
     fun connectionFactory(
-        @Qualifier("rawR2dbcConnectionPool") pool: ConnectionPool,
+        poolRegistry: R2dbcConnectionPoolRegistry,
+        configuration: CrystalFrameworkConfiguration,
     ): ConnectionFactory {
-        return DelegatedR2dbcConnectionFactory(pool)
+        return R2dbcRoutingConnectionFactory(
+            poolRegistry,
+            configuration.database.defaultDataSource,
+        )
     }
 }
