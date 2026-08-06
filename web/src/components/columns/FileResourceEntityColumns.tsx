@@ -2,7 +2,7 @@ import React, {type JSX} from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {FileResource} from "@/types/resource/file-resource.types.ts";
-import {getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {getFileResourceStatus, getResourceFileType} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
@@ -156,6 +156,23 @@ export function useFileResourceTableColumns(): EntityTableColumns<FileResource> 
                         <span className="text-xs font-mono text-gray-500">{row.objectKey.substring(0, 30)}...</span>
                     </CopyableToolTip>
                 </Space>
+            }
+        },
+        {
+            title: t('components.columns.fileResource.status'),
+            dataIndex: "status",
+            key: "status",
+            render: function (_: unknown, row: FileResource): React.ReactNode | JSX.Element {
+                const statusColors: Record<number, string> = {
+                    0: 'processing',
+                    1: 'success',
+                    2: 'warning'
+                };
+                return (
+                    <Tag color={statusColors[row.status] || 'default'} className="text-xs font-mono">
+                        {getFileResourceStatus(row.status)}
+                    </Tag>
+                );
             }
         }
     ];

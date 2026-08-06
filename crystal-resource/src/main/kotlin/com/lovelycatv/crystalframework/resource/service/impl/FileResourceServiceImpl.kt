@@ -88,7 +88,7 @@ class FileResourceServiceImpl(
 
     override suspend fun reserveUpload(entity: FileResourceEntity): FileResourceEntity? {
         return withInvalidateEntityCacheContext(entity.id) {
-            fileResourceRepository.save(entity).awaitFirstOrNull()
+            fileResourceRepository.save(entity newEntity true).awaitFirstOrNull()
         }
     }
 

@@ -166,8 +166,6 @@ abstract class AbstractFileResourceService(
 
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
-        val uploadStream = ByteArrayInputStream(byteArray)
-
         val existing = fileResourceService.getByMD5(md5, scope.typeId, scopeId)
         if (existing != null) {
             logger.info("File $fileNameWithExtension already exists with md5 $md5, upload skipped, entity: ${existing.toJSONString()}")
@@ -175,7 +173,7 @@ abstract class AbstractFileResourceService(
         }
 
         val objectKey = this.buildObjectKey(fileType, canonicalFileName)
-        val uploadingEntity: FileResourceEntity = FileResourceEntity(
+        val uploadingEntity = FileResourceEntity(
             id = fileResourceService.generateNextSnowId(),
             scope = scope.typeId,
             scopeId = scopeId,

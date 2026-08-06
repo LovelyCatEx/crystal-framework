@@ -37,8 +37,10 @@ class FileResourceEntity(
     @Column(value = "status")
     var status: Int = FileResourceStatus.COMMITTED.typeId,
     @Column(value = "upload_token")
+    @JsonIgnore
     var uploadToken: String? = null,
     @Column(value = "lease_until")
+    @JsonIgnore
     var leaseUntil: Long? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),

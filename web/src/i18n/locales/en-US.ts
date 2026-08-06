@@ -3266,6 +3266,7 @@ export const enUS: I18nRules = {
         storageProvider: 'Storage Provider',
         uploader: 'Uploader',
         fileType: 'File Type',
+        status: 'Status',
         createdTime: 'Created Time',
         userId: 'User ID',
         providerId: 'Provider ID'
@@ -3798,6 +3799,11 @@ export const enUS: I18nRules = {
       0: 'User Avatar',
       1: 'Tenant Icon',
       2: 'Tenant Member Avatar'
+    },
+    fileResourceStatus: {
+      0: 'Uploading',
+      1: 'Committed',
+      2: 'Cleanup Pending'
     },
     departmentMemberRoleType: {
       0: 'Member',
