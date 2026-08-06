@@ -108,7 +108,7 @@ crystalframework:
     default-data-source: primary
     data-sources: []
     routing:
-      log-decisions: true
+      log-decisions: false
   test:
     smtp:
       subject: Crystal Framework SMTP Test
@@ -144,6 +144,7 @@ logging:
     io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: info
+    com.lovelycatv.crystalframework.shared.database: debug
 server:
   reactive:
     session:

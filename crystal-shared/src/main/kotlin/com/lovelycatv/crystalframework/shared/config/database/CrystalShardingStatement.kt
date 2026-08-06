@@ -17,9 +17,9 @@ import reactor.core.publisher.Mono
  * 1. On [bind] / [bindNull] / [add], cache all calls without executing
  * 2. Capture sharding column value
  * 3. On [execute]:
- *    - Extract sharding values from all batches, call [ShardingAlgorithm] to resolve real table
- *    - Validate all batches must route to the same real table (single-table routing constraint)
- *    - Acquire connection from [R2dbcConnectionPoolRegistry] using [R2dbcShardingRule.dataSourceName]
+ *    - Extract sharding values from all batches, call [ShardingAlgorithm] to resolve target
+ *    - Validate all batches must route to the same target (single-target constraint)
+ *    - Acquire connection from TransactionConnectionHolder or pool
  *    - Rewrite SQL (logical table → real table)
  *    - Replay all bind/add calls on real connection
  *    - Execute and return result
@@ -29,6 +29,7 @@ class CrystalShardingStatement(
     private val rule: R2dbcShardingRule,
     private val parsed: net.sf.jsqlparser.statement.Statement,
     private val tableNode: Table,
+    private val transactionHolder: TransactionConnectionHolder?,
 ) : Statement {
 
     private val statementActions = mutableListOf<(Statement) -> Unit>()
@@ -125,27 +126,42 @@ class CrystalShardingStatement(
         val target = targets.first()
 
         // 4. Acquire real connection from target data source
-        val pool = poolRegistry.require(target.dataSourceName)
-        return Flux.from(pool.create()).flatMap { realConnection ->
-            // 5. Rewrite SQL
-            tableNode.name = target.tableName
-            val finalSql = parsed.toString()
-
-            // 6. Create real statement and replay all calls
-            val realStmt = realConnection.createStatement(finalSql)
-
-            statementActions.forEach { it(realStmt) }
-
-            batches.forEachIndexed { index, batch ->
-                batch.actions.forEach { it(realStmt) }
-                if (index < batches.size - 1) {
-                    realStmt.add()
+        return if (transactionHolder != null) {
+            // In transaction: get connection from holder
+            Flux.from(transactionHolder.getOrCreateConnection(target.dataSourceName))
+                .flatMap { realConnection ->
+                    executeOnConnection(realConnection, target)
                 }
-            }
-
-            // 7. Execute
-            Flux.from(realStmt.execute())
+        } else {
+            // No transaction: temporary connection
+            val pool = poolRegistry.require(target.dataSourceName)
+            Flux.usingWhen(
+                pool.create(),
+                { realConnection -> executeOnConnection(realConnection, target) },
+                { it.close() }
+            )
         }
+    }
+
+    private fun executeOnConnection(realConnection: io.r2dbc.spi.Connection, target: ShardingTarget): Flux<out Result> {
+        // 5. Rewrite SQL
+        tableNode.name = target.tableName
+        val finalSql = parsed.toString()
+
+        // 6. Create real statement and replay all calls
+        val realStmt = realConnection.createStatement(finalSql)
+
+        statementActions.forEach { it(realStmt) }
+
+        batches.forEachIndexed { index, batch ->
+            batch.actions.forEach { it(realStmt) }
+            if (index < batches.size - 1) {
+                realStmt.add()
+            }
+        }
+
+        // 7. Execute
+        return Flux.from(realStmt.execute())
     }
 
     private fun resolveShardingTarget(shardingValue: Any?): ShardingTarget {

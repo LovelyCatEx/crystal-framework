@@ -16,6 +16,8 @@ import reactor.core.publisher.Mono
 internal class DelegatedStatement(
     private val pool: ConnectionPool,
     private val sql: String,
+    private val transactionHolder: TransactionConnectionHolder? = null,
+    private val dataSourceName: String? = null,
 ) : Statement {
 
     private val actions = mutableListOf<(Statement) -> Unit>()
@@ -50,16 +52,27 @@ internal class DelegatedStatement(
     }
 
     override fun execute(): Publisher<out Result> {
-        return Flux.usingWhen(
-            pool.create(),
-            { connection ->
-                val realStmt = connection.createStatement(sql)
-                actions.forEach { it(realStmt) }
-                Flux.from(realStmt.execute())
-            },
-            { connection -> connection.close() },
-            { connection, _ -> connection.close() },
-            { connection -> connection.close() }
-        )
+        return if (transactionHolder != null && dataSourceName != null) {
+            // In transaction: get connection from holder
+            Flux.from(transactionHolder.getOrCreateConnection(dataSourceName))
+                .flatMap { connection ->
+                    val realStmt = connection.createStatement(sql)
+                    actions.forEach { it(realStmt) }
+                    Flux.from(realStmt.execute())
+                }
+        } else {
+            // No transaction: temporary connection
+            Flux.usingWhen(
+                pool.create(),
+                { connection ->
+                    val realStmt = connection.createStatement(sql)
+                    actions.forEach { it(realStmt) }
+                    Flux.from(realStmt.execute())
+                },
+                { connection -> connection.close() },
+                { connection, _ -> connection.close() },
+                { connection -> connection.close() }
+            )
+        }
     }
 }

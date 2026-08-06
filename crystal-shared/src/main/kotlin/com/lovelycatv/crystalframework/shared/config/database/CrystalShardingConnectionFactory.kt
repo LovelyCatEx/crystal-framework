@@ -23,14 +23,12 @@ class CrystalShardingConnectionFactory(
 ) : ConnectionFactory {
 
     override fun create(): Publisher<Connection> {
-        return Mono.from(poolRegistry.require(R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME).create())
-            .map { primaryConnection ->
-                CrystalShardingConnection(
-                    poolRegistry = poolRegistry,
-                    shardingRuleRegistry = shardingRuleRegistry,
-                    primaryDelegate = primaryConnection,
-                )
-            }
+        return Mono.just(
+            CrystalShardingConnection(
+                poolRegistry = poolRegistry,
+                shardingRuleRegistry = shardingRuleRegistry,
+            )
+        )
     }
 
     override fun getMetadata(): ConnectionFactoryMetadata {

@@ -18,20 +18,57 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 
 /**
- * Crystal Framework virtual connection wrapper.
+ * Crystal Framework virtual connection wrapper with distributed transaction support.
  *
  * On [createStatement], parses SQL and queries sharding rules:
  * - Has table sharding rule → returns [CrystalShardingStatement] (virtual Statement)
  * - No table sharding / parse failed → returns [DelegatedStatement] (deferred connection)
  *
- * Transaction methods (begin/commit/rollback) delegate to primary data source connection.
- * Cross-data-source transactions are not supported in this version.
+ * Transaction methods manage multiple data source connections:
+ * - beginTransaction() creates TransactionConnectionHolder
+ * - Statements acquire connections lazily from holder
+ * - commitTransaction() commits all connections (rollback all if any fails)
+ * - rollbackTransaction() rollbacks all connections
+ *
+ * Note: This is NOT true XA. If one connection commits successfully but another fails,
+ * data inconsistency can occur. For production use, integrate Seata or XA coordinator.
  */
 class CrystalShardingConnection(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val shardingRuleRegistry: R2dbcShardingRuleRegistry,
-    private val primaryDelegate: Connection,
 ) : Connection {
+
+    @Volatile
+    private var transactionHolder: TransactionConnectionHolder? = null
+
+    override fun beginTransaction(): Publisher<Void> {
+        return Mono.fromRunnable {
+            val holder = TransactionConnectionHolder(poolRegistry)
+            holder.markTransactionStart()
+            transactionHolder = holder
+        }
+    }
+
+    override fun commitTransaction(): Publisher<Void> {
+        return Mono.defer {
+            val holder = transactionHolder
+            holder?.commitAll()?.doFinally { transactionHolder = null } ?: Mono.empty()
+        }
+    }
+
+    override fun rollbackTransaction(): Publisher<Void> {
+        return Mono.defer {
+            val holder = transactionHolder
+            holder?.rollbackAll()?.doFinally { transactionHolder = null } ?: Mono.empty()
+        }
+    }
+
+    override fun close(): Publisher<Void> {
+        return Mono.defer {
+            val holder = transactionHolder
+            holder?.closeAll() ?: Mono.empty()
+        }
+    }
 
     override fun createStatement(sql: String): Statement {
         // 1. Text-level rewriting (soft delete: deletedTime IS NULL, modifiedTime, etc.)
@@ -58,6 +95,7 @@ class CrystalShardingConnection(
                 rule = rule,
                 parsed = parsed,
                 tableNode = tableNode,
+                transactionHolder = transactionHolder,
             )
         } else {
             // No table sharding → delegate to data source with deferred connection
@@ -67,8 +105,14 @@ class CrystalShardingConnection(
     }
 
     private fun delegateToDataSource(dataSourceName: String, sql: String): Statement {
-        val pool = poolRegistry.require(dataSourceName)
-        return DelegatedStatement(pool, sql)
+        val holder = transactionHolder
+        return if (holder != null) {
+            // In transaction: use holder to get connection
+            DelegatedStatement(poolRegistry.require(dataSourceName), sql, holder, dataSourceName)
+        } else {
+            // No transaction: temporary connection
+            DelegatedStatement(poolRegistry.require(dataSourceName), sql)
+        }
     }
 
     private fun extractTableNode(statement: net.sf.jsqlparser.statement.Statement): Table? {
@@ -85,28 +129,56 @@ class CrystalShardingConnection(
         return name.removeSurrounding("\"").removeSurrounding("`")
     }
 
-    // Transaction methods delegate to primary
-    override fun beginTransaction(): Publisher<Void> = primaryDelegate.beginTransaction()
-    override fun beginTransaction(definition: TransactionDefinition): Publisher<Void> =
-        primaryDelegate.beginTransaction(definition)
-    override fun commitTransaction(): Publisher<Void> = primaryDelegate.commitTransaction()
-    override fun rollbackTransaction(): Publisher<Void> = primaryDelegate.rollbackTransaction()
-    override fun setTransactionIsolationLevel(isolationLevel: IsolationLevel): Publisher<Void> =
-        primaryDelegate.setTransactionIsolationLevel(isolationLevel)
-    override fun createSavepoint(name: String): Publisher<Void> = primaryDelegate.createSavepoint(name)
-    override fun releaseSavepoint(name: String): Publisher<Void> = primaryDelegate.releaseSavepoint(name)
-    override fun rollbackTransactionToSavepoint(name: String): Publisher<Void> =
-        primaryDelegate.rollbackTransactionToSavepoint(name)
+    // Other Connection methods delegate to primary pool (for metadata operations)
+    override fun beginTransaction(definition: TransactionDefinition): Publisher<Void> {
+        return beginTransaction()  // Ignore definition for now
+    }
 
-    override fun createBatch(): Batch = primaryDelegate.createBatch()
-    override fun setAutoCommit(autoCommit: Boolean): Publisher<Void> = primaryDelegate.setAutoCommit(autoCommit)
-    override fun setLockWaitTimeout(timeout: Duration): Publisher<Void> = primaryDelegate.setLockWaitTimeout(timeout)
-    override fun setStatementTimeout(timeout: Duration): Publisher<Void> = primaryDelegate.setStatementTimeout(timeout)
+    override fun setTransactionIsolationLevel(isolationLevel: IsolationLevel): Publisher<Void> {
+        return Mono.empty()  // Isolation level should be set per connection in holder
+    }
 
-    override fun close(): Publisher<Void> = primaryDelegate.close()
+    override fun createSavepoint(name: String): Publisher<Void> {
+        return Mono.error(UnsupportedOperationException("Savepoints not supported in distributed transactions"))
+    }
 
-    override fun validate(depth: ValidationDepth): Publisher<Boolean> = primaryDelegate.validate(depth)
-    override fun getMetadata(): ConnectionMetadata = primaryDelegate.metadata
-    override fun isAutoCommit(): Boolean = primaryDelegate.isAutoCommit
-    override fun getTransactionIsolationLevel(): IsolationLevel = primaryDelegate.transactionIsolationLevel
+    override fun releaseSavepoint(name: String): Publisher<Void> {
+        return Mono.error(UnsupportedOperationException("Savepoints not supported in distributed transactions"))
+    }
+
+    override fun rollbackTransactionToSavepoint(name: String): Publisher<Void> {
+        return Mono.error(UnsupportedOperationException("Savepoints not supported in distributed transactions"))
+    }
+
+    override fun createBatch(): Batch {
+        throw UnsupportedOperationException("Batch operations should use createStatement()")
+    }
+
+    override fun setAutoCommit(autoCommit: Boolean): Publisher<Void> {
+        return Mono.empty()  // Managed by transaction holder
+    }
+
+    override fun setLockWaitTimeout(timeout: Duration): Publisher<Void> {
+        return Mono.empty()
+    }
+
+    override fun setStatementTimeout(timeout: Duration): Publisher<Void> {
+        return Mono.empty()
+    }
+
+    override fun validate(depth: ValidationDepth): Publisher<Boolean> {
+        return Mono.just(true)
+    }
+
+    override fun getMetadata(): ConnectionMetadata {
+        // Create a simple ConnectionMetadata implementation
+        return object : ConnectionMetadata {
+            override fun getDatabaseProductName(): String = "Crystal Sharding Virtual Connection"
+            override fun getDatabaseVersion(): String = "1.0"
+        }
+    }
+
+    override fun isAutoCommit(): Boolean = false
+
+    override fun getTransactionIsolationLevel(): IsolationLevel = IsolationLevel.READ_COMMITTED
 }
