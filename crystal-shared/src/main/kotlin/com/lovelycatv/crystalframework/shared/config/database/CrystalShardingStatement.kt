@@ -101,35 +101,34 @@ class CrystalShardingStatement(
             )
         }
 
-        // 2. Resolve real table for each batch
-        val realTables = batches.map { batch ->
+        // 2. Resolve routing target for each batch
+        val targets = batches.map { batch ->
             if (!batch.shardingValueSet) {
                 throw ShardingException(
                     "Sharded table '${rule.tableName}' batch did not bind sharding column " +
                         "(index=$shardingParamIndex / name=$shardingParamName)",
                 )
             }
-            resolveRealTable(batch.shardingValue)
+            resolveShardingTarget(batch.shardingValue)
         }.toSet()
 
-        // 3. Validate single-table constraint
-        if (realTables.size != 1) {
+        // 3. Validate single-target constraint (all batches must route to same dataSource + table)
+        if (targets.size != 1) {
             return Flux.error(
                 ShardingException(
-                    "Batch on sharded table '${rule.tableName}' spans multiple actual tables $realTables; " +
+                    "Batch on sharded table '${rule.tableName}' spans multiple targets $targets; " +
                         "single-target routing only",
                 ),
             )
         }
 
-        val realTable = realTables.first()
-        val targetDataSource = rule.dataSourceName
+        val target = targets.first()
 
         // 4. Acquire real connection from target data source
-        val pool = poolRegistry.require(targetDataSource)
+        val pool = poolRegistry.require(target.dataSourceName)
         return Flux.from(pool.create()).flatMap { realConnection ->
             // 5. Rewrite SQL
-            tableNode.name = realTable
+            tableNode.name = target.tableName
             val finalSql = parsed.toString()
 
             // 6. Create real statement and replay all calls
@@ -149,17 +148,30 @@ class CrystalShardingStatement(
         }
     }
 
-    private fun resolveRealTable(shardingValue: Any?): String {
+    private fun resolveShardingTarget(shardingValue: Any?): ShardingTarget {
         val algorithm = rule.algorithm
             ?: throw ShardingException("Table '${rule.tableName}' has no sharding algorithm")
-        val realTable = algorithm.doSharding(rule.tableName, shardingValue).trim().lowercase()
-        if (realTable !in rule.actualTables) {
+
+        val target = algorithm.doSharding(rule.tableName, shardingValue)
+
+        // Validate data source exists
+        runCatching { poolRegistry.require(target.dataSourceName) }.getOrElse {
             throw ShardingException(
-                "Sharding algorithm for table '${rule.tableName}' returned '$realTable' " +
-                    "which is not in actualTables=${rule.actualTables} (shardingValue=$shardingValue)",
+                "Sharding algorithm for table '${rule.tableName}' returned dataSource='${target.dataSourceName}' " +
+                    "which does not exist in pool registry (shardingValue=$shardingValue)"
             )
         }
-        return realTable
+
+        // Validate table name (if table sharding is enabled)
+        val normalizedTable = target.tableName.trim().lowercase()
+        if (rule.actualTables.isNotEmpty() && normalizedTable !in rule.actualTables) {
+            throw ShardingException(
+                "Sharding algorithm for table '${rule.tableName}' returned tableName='$normalizedTable' " +
+                    "which is not in actualTables=${rule.actualTables} (shardingValue=$shardingValue)"
+            )
+        }
+
+        return target.copy(tableName = normalizedTable)
     }
 
     /**

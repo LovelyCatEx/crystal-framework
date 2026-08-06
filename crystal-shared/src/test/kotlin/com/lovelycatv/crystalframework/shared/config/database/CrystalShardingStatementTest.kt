@@ -17,16 +17,20 @@ import org.reactivestreams.Publisher
 import reactor.core.publisher.Mono
 
 /**
- * 测试 Crystal Framework 分片架构（[CrystalShardingConnectionFactory] / [CrystalShardingConnection] /
- * [CrystalShardingStatement]）的核心路由逻辑：字面量当场路由、占位符延迟路由、批处理单表约束。
+ * Tests Crystal Framework sharding architecture ([CrystalShardingConnectionFactory] / [CrystalShardingConnection] /
+ * [CrystalShardingStatement]) core routing logic: literal immediate routing, placeholder deferred routing,
+ * batch single-table constraint.
  */
 class CrystalShardingStatementTest {
 
-    // 简单 mod-4 算法：users -> users_<value % 4>
+    // Simple mod-4 algorithm: users -> primary.users_<value % 4>
     private val modAlgorithm = object : ShardingAlgorithm {
-        override fun doSharding(logicalTable: String, shardingValue: Any?): String {
+        override fun doSharding(logicalTable: String, shardingValue: Any?): ShardingTarget {
             val n = (shardingValue as Number).toLong()
-            return "${logicalTable}_${n % 4}"
+            return ShardingTarget(
+                dataSourceName = "primary",
+                tableName = "${logicalTable}_${n % 4}"
+            )
         }
     }
 

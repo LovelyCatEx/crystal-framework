@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 
 /**
- * Crystal Framework virtual connection, does not bind to any real physical connection.
+ * Crystal Framework virtual connection wrapper.
  *
  * On [createStatement], parses SQL and queries sharding rules:
  * - Has table sharding rule → returns [CrystalShardingStatement] (virtual Statement)
@@ -30,25 +30,8 @@ import java.time.Duration
 class CrystalShardingConnection(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val shardingRuleRegistry: R2dbcShardingRuleRegistry,
+    private val primaryDelegate: Connection,
 ) : Connection {
-
-    /**
-     * Real connection from primary data source, used for transaction management, metadata queries, etc.
-     * Lazy-loaded, acquired only on first call to transaction methods.
-     */
-    @Volatile
-    private var primaryDelegate: Connection? = null
-
-    private fun getPrimaryDelegate(): Connection {
-        return primaryDelegate ?: synchronized(this) {
-            primaryDelegate ?: run {
-                val conn = Mono.from(poolRegistry.require(R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME).create())
-                    .block() ?: throw IllegalStateException("Failed to acquire primary connection")
-                primaryDelegate = conn
-                conn
-            }
-        }
-    }
 
     override fun createStatement(sql: String): Statement {
         // 1. Text-level rewriting (soft delete: deletedTime IS NULL, modifiedTime, etc.)
@@ -103,30 +86,27 @@ class CrystalShardingConnection(
     }
 
     // Transaction methods delegate to primary
-    override fun beginTransaction(): Publisher<Void> = getPrimaryDelegate().beginTransaction()
+    override fun beginTransaction(): Publisher<Void> = primaryDelegate.beginTransaction()
     override fun beginTransaction(definition: TransactionDefinition): Publisher<Void> =
-        getPrimaryDelegate().beginTransaction(definition)
-    override fun commitTransaction(): Publisher<Void> = getPrimaryDelegate().commitTransaction()
-    override fun rollbackTransaction(): Publisher<Void> = getPrimaryDelegate().rollbackTransaction()
+        primaryDelegate.beginTransaction(definition)
+    override fun commitTransaction(): Publisher<Void> = primaryDelegate.commitTransaction()
+    override fun rollbackTransaction(): Publisher<Void> = primaryDelegate.rollbackTransaction()
     override fun setTransactionIsolationLevel(isolationLevel: IsolationLevel): Publisher<Void> =
-        getPrimaryDelegate().setTransactionIsolationLevel(isolationLevel)
-    override fun createSavepoint(name: String): Publisher<Void> = getPrimaryDelegate().createSavepoint(name)
-    override fun releaseSavepoint(name: String): Publisher<Void> = getPrimaryDelegate().releaseSavepoint(name)
+        primaryDelegate.setTransactionIsolationLevel(isolationLevel)
+    override fun createSavepoint(name: String): Publisher<Void> = primaryDelegate.createSavepoint(name)
+    override fun releaseSavepoint(name: String): Publisher<Void> = primaryDelegate.releaseSavepoint(name)
     override fun rollbackTransactionToSavepoint(name: String): Publisher<Void> =
-        getPrimaryDelegate().rollbackTransactionToSavepoint(name)
+        primaryDelegate.rollbackTransactionToSavepoint(name)
 
-    override fun createBatch(): Batch = getPrimaryDelegate().createBatch()
-    override fun setAutoCommit(autoCommit: Boolean): Publisher<Void> = getPrimaryDelegate().setAutoCommit(autoCommit)
-    override fun setLockWaitTimeout(timeout: Duration): Publisher<Void> = getPrimaryDelegate().setLockWaitTimeout(timeout)
-    override fun setStatementTimeout(timeout: Duration): Publisher<Void> = getPrimaryDelegate().setStatementTimeout(timeout)
+    override fun createBatch(): Batch = primaryDelegate.createBatch()
+    override fun setAutoCommit(autoCommit: Boolean): Publisher<Void> = primaryDelegate.setAutoCommit(autoCommit)
+    override fun setLockWaitTimeout(timeout: Duration): Publisher<Void> = primaryDelegate.setLockWaitTimeout(timeout)
+    override fun setStatementTimeout(timeout: Duration): Publisher<Void> = primaryDelegate.setStatementTimeout(timeout)
 
-    override fun close(): Publisher<Void> {
-        // Only close if primary connection was actually acquired
-        return primaryDelegate?.close() ?: Mono.empty()
-    }
+    override fun close(): Publisher<Void> = primaryDelegate.close()
 
-    override fun validate(depth: ValidationDepth): Publisher<Boolean> = getPrimaryDelegate().validate(depth)
-    override fun getMetadata(): ConnectionMetadata = getPrimaryDelegate().metadata
-    override fun isAutoCommit(): Boolean = getPrimaryDelegate().isAutoCommit
-    override fun getTransactionIsolationLevel(): IsolationLevel = getPrimaryDelegate().transactionIsolationLevel
+    override fun validate(depth: ValidationDepth): Publisher<Boolean> = primaryDelegate.validate(depth)
+    override fun getMetadata(): ConnectionMetadata = primaryDelegate.metadata
+    override fun isAutoCommit(): Boolean = primaryDelegate.isAutoCommit
+    override fun getTransactionIsolationLevel(): IsolationLevel = primaryDelegate.transactionIsolationLevel
 }
