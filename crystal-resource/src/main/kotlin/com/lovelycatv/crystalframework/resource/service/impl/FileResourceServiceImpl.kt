@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.ResourceAccessService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
+import com.lovelycatv.crystalframework.resource.types.FileResourceStatus
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.utils.getMimeExtensions
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
@@ -76,10 +77,73 @@ class FileResourceServiceImpl(
         return mimeExtensions.firstOrNull { it in allowedExtensions }
     }
 
-    override suspend fun getByMD5(md5: String): FileResourceEntity? {
-        return this.getRepository()
-            .findByMd5(md5)
-            .awaitFirstOrNull()
+    override suspend fun getByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity? {
+        return fileResourceRepository.findByMd5AndScopeAndScopeIdAndStatus(
+            md5,
+            scope,
+            scopeId,
+            FileResourceStatus.COMMITTED.typeId,
+        ).awaitFirstOrNull()
+    }
+
+    override suspend fun reserveUpload(entity: FileResourceEntity): FileResourceEntity? {
+        return withInvalidateEntityCacheContext(entity.id) {
+            fileResourceRepository.save(entity).awaitFirstOrNull()
+        }
+    }
+
+    override suspend fun commitUpload(entity: FileResourceEntity): Boolean {
+        return withInvalidateEntityCacheContext(entity.id) {
+            fileResourceRepository.commitUpload(
+                entity.id,
+                requireNotNull(entity.uploadToken),
+                FileResourceStatus.UPLOADING.typeId,
+                FileResourceStatus.COMMITTED.typeId,
+            ).awaitFirstOrNull() == 1L
+        }
+    }
+
+    override suspend fun removeUploadRecord(entity: FileResourceEntity): Boolean {
+        return withDeleteEntityContext(entity.id) {
+            fileResourceRepository.deleteUploadRecord(
+                entity.id,
+                requireNotNull(entity.uploadToken),
+                entity.status,
+            ).awaitFirstOrNull() == 1L
+        }
+    }
+
+    override suspend fun markUploadCleanupPending(entity: FileResourceEntity): Boolean {
+        return withInvalidateEntityCacheContext(entity.id) {
+            fileResourceRepository.markCleanupPending(
+                entity.id,
+                requireNotNull(entity.uploadToken),
+                FileResourceStatus.UPLOADING.typeId,
+                FileResourceStatus.CLEANUP_PENDING.typeId,
+            ).awaitFirstOrNull() == 1L
+        }
+    }
+
+    override suspend fun cleanupUploads(now: Long): Long {
+        var cleaned = 0L
+        fileResourceRepository.findCleanupCandidates(
+            now,
+            FileResourceStatus.UPLOADING.typeId,
+            FileResourceStatus.CLEANUP_PENDING.typeId,
+        ).collectList().awaitFirstOrNull()?.forEach { entity ->
+            if (entity.getRealStatus() == FileResourceStatus.UPLOADING) {
+                if (!markUploadCleanupPending(entity)) {
+                    return@forEach
+                }
+                entity.status = FileResourceStatus.CLEANUP_PENDING.typeId
+            }
+            val provider = storageProviderService.getByIdOrThrow(entity.storageProviderId)
+            val error = fileResourceServiceManager.getService(provider).deleteObject(entity.objectKey)
+            if (error == null && removeUploadRecord(entity)) {
+                cleaned++
+            }
+        }
+        return cleaned
     }
 
     override suspend fun getFileDownloadUrl(entity: FileResourceEntity, viewer: UserAuthentication?): String {

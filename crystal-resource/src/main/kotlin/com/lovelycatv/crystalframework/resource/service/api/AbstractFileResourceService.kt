@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
 import com.lovelycatv.crystalframework.resource.types.FileResourceServiceProperties
+import com.lovelycatv.crystalframework.resource.types.FileResourceStatus
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
@@ -167,71 +168,74 @@ abstract class AbstractFileResourceService(
 
         val uploadStream = ByteArrayInputStream(byteArray)
 
-        val existing = fileResourceService.getByMD5(md5)
+        val existing = fileResourceService.getByMD5(md5, scope.typeId, scopeId)
         if (existing != null) {
             logger.info("File $fileNameWithExtension already exists with md5 $md5, upload skipped, entity: ${existing.toJSONString()}")
-
-            return FileUploadResult(
-                success = true,
-                providerType = getStorageProvider(),
-                fileType = fileType,
-                objectKey = existing.objectKey,
-                fileResourceEntity = existing,
-                exception = null,
-            )
+            return FileUploadResult(true, getStorageProvider(), fileType, existing.objectKey, existing, null)
         }
 
         val objectKey = this.buildObjectKey(fileType, canonicalFileName)
+        val uploadingEntity: FileResourceEntity = FileResourceEntity(
+            id = fileResourceService.generateNextSnowId(),
+            scope = scope.typeId,
+            scopeId = scopeId,
+            userId = userId,
+            type = fileType.typeId,
+            fileName = canonicalFileName.substringBeforeLast('.'),
+            fileExtension = canonicalExtension,
+            md5 = md5,
+            fileSize = fileLength,
+            storageProviderId = storageProvider.id,
+            objectKey = objectKey,
+            status = FileResourceStatus.UPLOADING.typeId,
+            uploadToken = UUID.randomUUID().toString(),
+            leaseUntil = System.currentTimeMillis() + UPLOAD_LEASE_MILLIS,
+        )
 
-        val fileName = canonicalFileName.substringBeforeLast('.')
-        val fileExtension = canonicalExtension
+        val reserved = try {
+            fileResourceService.reserveUpload(uploadingEntity)
+        } catch (e: org.springframework.dao.DataIntegrityViolationException) {
+            fileResourceService.getByMD5(md5, scope.typeId, scopeId)
+        }
+        if (reserved == null || reserved.id != uploadingEntity.id) {
+            val current = reserved ?: fileResourceService.getByMD5(md5, scope.typeId, scopeId)
+            return if (current != null) {
+                FileUploadResult(true, getStorageProvider(), fileType, current.objectKey, current, null)
+            } else {
+                FileUploadResult(false, getStorageProvider(), fileType, objectKey, null, BusinessException("File upload is already in progress"))
+            }
+        }
 
         val result = this.doUploadFile(
             fileType,
             fileLength,
             detectedMimeType,
             canonicalFileName,
-            uploadStream,
+            ByteArrayInputStream(byteArray),
             objectKey,
             progressReporter
         )
-
-        return if (result == null) {
-            val fileResourceEntity = fileResourceService.getRepository().save(
-                FileResourceEntity(
-                    id = fileResourceService.generateNextSnowId(),
-                    scope = scope.typeId,
-                    scopeId = scopeId,
-                    userId = userId,
-                    type = fileType.typeId,
-                    fileName = fileName,
-                    fileExtension = fileExtension,
-                    md5 = md5,
-                    fileSize = fileLength,
-                    storageProviderId = storageProvider.id,
-                    objectKey = objectKey
-                ) newEntity true
-            ).awaitFirstOrNull()
-
-            FileUploadResult(
-                success = true,
-                providerType = getStorageProvider(),
-                fileType = fileType,
-                objectKey = objectKey,
-                fileResourceEntity = fileResourceEntity,
-                exception = null,
-            )
-        } else {
-            FileUploadResult(
-                success = false,
-                providerType = getStorageProvider(),
-                fileType = fileType,
-                objectKey = objectKey,
-                fileResourceEntity = null,
-                exception = result,
-            )
+        if (result != null) {
+            fileResourceService.removeUploadRecord(uploadingEntity)
+            return FileUploadResult(false, getStorageProvider(), fileType, objectKey, null, result)
         }
+
+        if (!fileResourceService.commitUpload(uploadingEntity)) {
+            val deleteError = this.deleteObject(objectKey)
+            if (deleteError != null) {
+                fileResourceService.markUploadCleanupPending(uploadingEntity)
+            } else {
+                fileResourceService.removeUploadRecord(uploadingEntity)
+            }
+            return FileUploadResult(false, getStorageProvider(), fileType, objectKey, null, BusinessException("Could not commit file resource"))
+        }
+
+        uploadingEntity.status = FileResourceStatus.COMMITTED.typeId
+        uploadingEntity.leaseUntil = null
+        return FileUploadResult(true, getStorageProvider(), fileType, objectKey, uploadingEntity, null)
     }
+
+    abstract suspend fun deleteObject(objectKey: String): Exception?
 
     protected abstract suspend fun doUploadFile(
         fileType: ResourceFileType,
@@ -256,5 +260,7 @@ abstract class AbstractFileResourceService(
         protected const val MILLIS_PER_SECOND = 1000L
 
         private const val OBJECT_KEY_SEPARATOR = '/'
+
+        private const val UPLOAD_LEASE_MILLIS = 10 * 60 * MILLIS_PER_SECOND
     }
 }

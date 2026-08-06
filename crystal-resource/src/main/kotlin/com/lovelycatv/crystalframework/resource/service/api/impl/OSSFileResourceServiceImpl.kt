@@ -6,6 +6,7 @@ import com.aliyun.sdk.service.oss2.credentials.StaticCredentialsProvider
 import com.aliyun.sdk.service.oss2.models.AbortMultipartUploadRequest
 import com.aliyun.sdk.service.oss2.models.CompleteMultipartUpload
 import com.aliyun.sdk.service.oss2.models.CompleteMultipartUploadRequest
+import com.aliyun.sdk.service.oss2.models.DeleteObjectRequest
 import com.aliyun.sdk.service.oss2.models.GetObjectRequest
 import com.aliyun.sdk.service.oss2.models.InitiateMultipartUploadRequest
 import com.aliyun.sdk.service.oss2.models.Part
@@ -68,6 +69,21 @@ class OSSFileResourceServiceImpl(
                 .expiration(Duration.ofSeconds(signedUrlTtlSeconds))
                 .build()
         ).url()
+    }
+
+    override suspend fun deleteObject(objectKey: String): Exception? {
+        return try {
+            getClient().deleteObject(
+                DeleteObjectRequest.newBuilder()
+                    .bucket(bucketName)
+                    .key(objectKey.removePrefix("/"))
+                    .build()
+            )
+            null
+        } catch (e: Exception) {
+            logger.error("An error occurred while deleting OSS object", e)
+            e
+        }
     }
 
     override suspend fun doUploadFile(

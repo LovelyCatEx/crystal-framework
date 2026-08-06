@@ -11,6 +11,7 @@ import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
 import com.qcloud.cos.http.HttpMethodName
+import com.qcloud.cos.model.DeleteObjectRequest
 import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
 import com.qcloud.cos.region.Region
@@ -81,6 +82,16 @@ class COSFileResourceServiceImpl(
             val objectKey = normalizedObjectKey(entity)
             val expiration = Date(System.currentTimeMillis() + signedUrlTtlSeconds * MILLIS_PER_SECOND)
             getClient().generatePresignedUrl(bucketName, objectKey, expiration, HttpMethodName.GET).toString()
+        }
+    }
+
+    override suspend fun deleteObject(objectKey: String): Exception? {
+        return try {
+            getClient().deleteObject(DeleteObjectRequest(bucketName, objectKey.removePrefix("/")))
+            null
+        } catch (e: Exception) {
+            logger.error("An error occurred while deleting COS object", e)
+            e
         }
     }
 
