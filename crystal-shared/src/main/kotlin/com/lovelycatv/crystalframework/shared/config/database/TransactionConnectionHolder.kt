@@ -109,34 +109,36 @@ class TransactionConnectionHolder(
 
             log.debug("Phase 1: Preparing {} connections with GID: {}", connList.size, gid)
 
-            var chain = Mono.empty<Void>()
-            dataSourceNames.forEachIndexed { index, dsName ->
+            // Create all PREPARE operations
+            val prepareOperations = dataSourceNames.mapIndexed { index, dsName ->
                 val xid = "${gid}_${dsName}"
 
-                chain = chain.then(
-                    Flux.from(
-                        connList[index].createStatement("PREPARE TRANSACTION '$xid'")
-                            .execute()
-                    ).flatMap { result ->
-                        Mono.from(result.rowsUpdated)
-                    }.then()
-                    .doOnSuccess {
-                        synchronized(preparedTransactions) {
-                            preparedTransactions[dsName] = xid
-                        }
-                        log.debug("Successfully prepared dataSource: {} with XID: {}", dsName, xid)
-                    }.doOnError { error ->
-                        log.warn("Failed to prepare dataSource: {} with XID: {}", dsName, xid, error)
+                Flux.from(
+                    connList[index].createStatement("PREPARE TRANSACTION '$xid'")
+                        .execute()
+                ).flatMap { result ->
+                    Mono.from(result.rowsUpdated)
+                }.then()
+                .doOnSuccess {
+                    synchronized(preparedTransactions) {
+                        preparedTransactions[dsName] = xid
                     }
-                )
+                    log.debug("Successfully prepared dataSource: {} with XID: {}", dsName, xid)
+                }.doOnError { error ->
+                    log.warn("Failed to prepare dataSource: {} with XID: {}", dsName, xid, error)
+                }
             }
 
-            chain.onErrorResume { error ->
-                log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)
-                rollbackPrepared().then(Mono.error(error))
-            }.doOnSuccess {
-                log.debug("Phase 1 completed: all {} connections prepared successfully", connList.size)
-            }
+            // Execute all operations sequentially (preserves Context including traceId)
+            Flux.concat(prepareOperations)
+                .then()
+                .onErrorResume { error ->
+                    log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)
+                    rollbackPrepared().then(Mono.error(error))
+                }
+                .doOnSuccess {
+                    log.debug("Phase 1 completed: all {} connections prepared successfully", connList.size)
+                }
         }
     }
 
@@ -156,33 +158,37 @@ class TransactionConnectionHolder(
 
             log.debug("Phase 2: Committing {} prepared transactions: {}", xids.size, xids.keys)
 
-            var chain = Mono.empty<Void>()
-            xids.forEach { (dsName, xid) ->
+            // Create all COMMIT PREPARED operations
+            val commitOperations = xids.map { (dsName, xid) ->
                 val conn = connections[dsName]
                 if (conn != null) {
-                    chain = chain.then(
-                        Flux.from(
-                            conn.createStatement("COMMIT PREPARED '$xid'")
-                                .execute()
-                        ).flatMap { result ->
-                            Mono.from(result.rowsUpdated)
-                        }.then()
-                        .doOnSuccess {
-                            log.debug("Successfully committed prepared transaction: {}", xid)
-                        }.doOnError { error ->
-                            log.warn("Failed to commit prepared transaction: {} (will retry)", xid, error)
-                        }
-                    )
+                    Flux.from(
+                        conn.createStatement("COMMIT PREPARED '$xid'")
+                            .execute()
+                    ).flatMap { result ->
+                        Mono.from(result.rowsUpdated)
+                    }.then()
+                    .doOnSuccess {
+                        log.debug("Successfully committed prepared transaction: {}", xid)
+                    }.doOnError { error ->
+                        log.warn("Failed to commit prepared transaction: {} (will retry)", xid, error)
+                    }
+                } else {
+                    Mono.empty<Void>()
                 }
             }
 
-            chain.doFinally {
-                synchronized(preparedTransactions) {
-                    preparedTransactions.clear()
+            // Execute all operations sequentially (preserves Context including traceId)
+            Flux.concat(commitOperations)
+                .then()
+                .doFinally {
+                    synchronized(preparedTransactions) {
+                        preparedTransactions.clear()
+                    }
                 }
-            }.doOnSuccess {
-                log.debug("Phase 2 completed: all {} prepared transactions committed successfully", xids.size)
-            }
+                .doOnSuccess {
+                    log.debug("Phase 2 completed: all {} prepared transactions committed successfully", xids.size)
+                }
         }
     }
 
@@ -202,34 +208,38 @@ class TransactionConnectionHolder(
 
             log.warn("Rolling back {} prepared transactions: {}", xids.size, xids.keys)
 
-            var chain = Mono.empty<Void>()
-            xids.forEach { (dsName, xid) ->
+            // Create all ROLLBACK PREPARED operations
+            val rollbackOperations = xids.map { (dsName, xid) ->
                 val conn = connections[dsName]
                 if (conn != null) {
-                    chain = chain.then(
-                        Flux.from(
-                            conn.createStatement("ROLLBACK PREPARED '$xid'")
-                                .execute()
-                        ).flatMap { result ->
-                            Mono.from(result.rowsUpdated)
-                        }.then()
-                        .doOnSuccess {
-                            log.warn("Successfully rolled back prepared transaction: {}", xid)
-                        }.onErrorResume { error ->
-                            log.warn("Failed to rollback prepared transaction: {} (ignored)", xid, error)
-                            Mono.empty()
-                        }
-                    )
+                    Flux.from(
+                        conn.createStatement("ROLLBACK PREPARED '$xid'")
+                            .execute()
+                    ).flatMap { result ->
+                        Mono.from(result.rowsUpdated)
+                    }.then()
+                    .doOnSuccess {
+                        log.warn("Successfully rolled back prepared transaction: {}", xid)
+                    }.onErrorResume { error ->
+                        log.warn("Failed to rollback prepared transaction: {} (ignored)", xid, error)
+                        Mono.empty()
+                    }
+                } else {
+                    Mono.empty<Void>()
                 }
             }
 
-            chain.doFinally {
-                synchronized(preparedTransactions) {
-                    preparedTransactions.clear()
+            // Execute all operations sequentially (preserves Context including traceId)
+            Flux.concat(rollbackOperations)
+                .then()
+                .doFinally {
+                    synchronized(preparedTransactions) {
+                        preparedTransactions.clear()
+                    }
                 }
-            }.doOnSuccess {
-                log.warn("All {} prepared transactions rolled back", xids.size)
-            }
+                .doOnSuccess {
+                    log.warn("All {} prepared transactions rolled back", xids.size)
+                }
         }
     }
 
