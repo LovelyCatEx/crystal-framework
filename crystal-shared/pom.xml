@@ -60,6 +60,13 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-shared-types</artifactId>
         </dependency>
+
+        <!-- Elastic APM API for manual instrumentation -->
+        <dependency>
+            <groupId>co.elastic.apm</groupId>
+            <artifactId>apm-agent-api</artifactId>
+            <version>1.56.0</version>
+        </dependency>
     </dependencies>
 
 </project>

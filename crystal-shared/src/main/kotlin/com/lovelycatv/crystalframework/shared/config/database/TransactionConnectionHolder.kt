@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
+import co.elastic.apm.api.ElasticApm
 import io.r2dbc.spi.Connection
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
@@ -109,9 +110,17 @@ class TransactionConnectionHolder(
 
             log.debug("Phase 1: Preparing {} connections with GID: {}", connList.size, gid)
 
+            // Create APM span for the entire PREPARE phase
+            val phaseSpan = ElasticApm.currentSpan()
+                .startSpan("db", "postgresql", "prepare")
+                .setName("2PC Phase 1: PREPARE ($gid)")
+
             // Create all PREPARE operations
             val prepareOperations = dataSourceNames.mapIndexed { index, dsName ->
                 val xid = "${gid}_${dsName}"
+
+                val prepareSpan = phaseSpan.startSpan("db", "postgresql", "query")
+                    .setName("PREPARE TRANSACTION '$xid'")
 
                 Flux.from(
                     connList[index].createStatement("PREPARE TRANSACTION '$xid'")
@@ -124,8 +133,11 @@ class TransactionConnectionHolder(
                         preparedTransactions[dsName] = xid
                     }
                     log.debug("Successfully prepared dataSource: {} with XID: {}", dsName, xid)
+                    prepareSpan.end()
                 }.doOnError { error ->
                     log.warn("Failed to prepare dataSource: {} with XID: {}", dsName, xid, error)
+                    prepareSpan.captureException(error)
+                    prepareSpan.end()
                 }
             }
 
@@ -134,10 +146,13 @@ class TransactionConnectionHolder(
                 .then()
                 .onErrorResume { error ->
                     log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)
+                    phaseSpan.captureException(error)
+                    phaseSpan.end()
                     rollbackPrepared().then(Mono.error(error))
                 }
                 .doOnSuccess {
                     log.debug("Phase 1 completed: all {} connections prepared successfully", connList.size)
+                    phaseSpan.end()
                 }
         }
     }
@@ -158,10 +173,18 @@ class TransactionConnectionHolder(
 
             log.debug("Phase 2: Committing {} prepared transactions: {}", xids.size, xids.keys)
 
+            // Create APM span for the entire COMMIT phase
+            val phaseSpan = ElasticApm.currentSpan()
+                .startSpan("db", "postgresql", "commit")
+                .setName("2PC Phase 2: COMMIT (${xids.size} prepared txns)")
+
             // Create all COMMIT PREPARED operations
             val commitOperations = xids.map { (dsName, xid) ->
                 val conn = connections[dsName]
                 if (conn != null) {
+                    val commitSpan = phaseSpan.startSpan("db", "postgresql", "query")
+                        .setName("COMMIT PREPARED '$xid'")
+
                     Flux.from(
                         conn.createStatement("COMMIT PREPARED '$xid'")
                             .execute()
@@ -170,8 +193,11 @@ class TransactionConnectionHolder(
                     }.then()
                     .doOnSuccess {
                         log.debug("Successfully committed prepared transaction: {}", xid)
+                        commitSpan.end()
                     }.doOnError { error ->
                         log.warn("Failed to commit prepared transaction: {} (will retry)", xid, error)
+                        commitSpan.captureException(error)
+                        commitSpan.end()
                     }
                 } else {
                     Mono.empty<Void>()
@@ -185,9 +211,13 @@ class TransactionConnectionHolder(
                     synchronized(preparedTransactions) {
                         preparedTransactions.clear()
                     }
+                    phaseSpan.end()
                 }
                 .doOnSuccess {
                     log.debug("Phase 2 completed: all {} prepared transactions committed successfully", xids.size)
+                }
+                .doOnError { error ->
+                    phaseSpan.captureException(error)
                 }
         }
     }
@@ -208,10 +238,18 @@ class TransactionConnectionHolder(
 
             log.warn("Rolling back {} prepared transactions: {}", xids.size, xids.keys)
 
+            // Create APM span for the entire ROLLBACK phase
+            val phaseSpan = ElasticApm.currentSpan()
+                .startSpan("db", "postgresql", "rollback")
+                .setName("2PC ROLLBACK (${xids.size} prepared txns)")
+
             // Create all ROLLBACK PREPARED operations
             val rollbackOperations = xids.map { (dsName, xid) ->
                 val conn = connections[dsName]
                 if (conn != null) {
+                    val rollbackSpan = phaseSpan.startSpan("db", "postgresql", "query")
+                        .setName("ROLLBACK PREPARED '$xid'")
+
                     Flux.from(
                         conn.createStatement("ROLLBACK PREPARED '$xid'")
                             .execute()
@@ -220,8 +258,11 @@ class TransactionConnectionHolder(
                     }.then()
                     .doOnSuccess {
                         log.warn("Successfully rolled back prepared transaction: {}", xid)
+                        rollbackSpan.end()
                     }.onErrorResume { error ->
                         log.warn("Failed to rollback prepared transaction: {} (ignored)", xid, error)
+                        rollbackSpan.captureException(error)
+                        rollbackSpan.end()
                         Mono.empty()
                     }
                 } else {
@@ -236,6 +277,7 @@ class TransactionConnectionHolder(
                     synchronized(preparedTransactions) {
                         preparedTransactions.clear()
                     }
+                    phaseSpan.end()
                 }
                 .doOnSuccess {
                     log.warn("All {} prepared transactions rolled back", xids.size)
