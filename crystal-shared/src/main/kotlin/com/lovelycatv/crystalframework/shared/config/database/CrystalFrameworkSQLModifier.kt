@@ -1,5 +1,6 @@
-package com.lovelycatv.crystalframework.shared.config
+package com.lovelycatv.crystalframework.shared.config.database
 
+import com.lovelycatv.crystalframework.shared.config.SqlStatementInterceptor
 import com.lovelycatv.vertex.log.logger
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.Table
@@ -10,9 +11,9 @@ import net.sf.jsqlparser.statement.update.Update
 
 /**
  * Pure dispatcher for outbound SQL rewriting: it parses the SQL once, resolves the target table,
- * then runs every registered [SqlStatementInterceptor] in ascending [SqlStatementInterceptor.order].
+ * then runs every registered [com.lovelycatv.crystalframework.shared.config.SqlStatementInterceptor] in ascending [com.lovelycatv.crystalframework.shared.config.SqlStatementInterceptor.order].
  * It holds no business rules of its own — soft-delete and `modified_time` maintenance live in
- * [SoftDeleteSqlInterceptor], and any module can contribute more interceptors as Spring beans.
+ * [com.lovelycatv.crystalframework.shared.config.SoftDeleteSqlInterceptor], and any module can contribute more interceptors as Spring beans.
  *
  * The interceptor chain is injected at startup (see the wiring in [R2dbcSQLInterceptorConfig]) so
  * this stays a singleton that call sites can invoke statically.

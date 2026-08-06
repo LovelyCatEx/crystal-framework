@@ -1,11 +1,16 @@
 spring:
   application:
     name: crystal-framework
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.r2dbc.autoconfigure.R2dbcAutoConfiguration
+      - org.springframework.boot.data.r2dbc.autoconfigure.DataR2dbcRepositoriesAutoConfiguration
   r2dbc:
     url: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
     pool:
+      enabled: false
       initial-size: 5
       min-idle: 5
       max-size: 40
@@ -19,6 +24,9 @@ spring:
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
   data:
+    r2dbc:
+      repositories:
+        enabled: false
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
