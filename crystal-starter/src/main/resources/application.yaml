@@ -144,7 +144,7 @@ logging:
     io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: info
-    com.lovelycatv.crystalframework.shared.database: debug
+    com.lovelycatv.crystalframework.shared.config.database.TransactionConnectionHolder: debug
 server:
   reactive:
     session:

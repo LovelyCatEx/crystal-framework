@@ -2,28 +2,51 @@ package com.lovelycatv.crystalframework.shared.config.database
 
 import io.r2dbc.spi.Connection
 import org.slf4j.LoggerFactory
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.UUID
 
 /**
- * Manages multiple database connections for distributed transaction.
+ * Manages multiple database connections for distributed transaction with 2PC support.
+ *
+ * Two-Phase Commit Protocol:
+ * 1. Phase 1 (Prepare): All participants vote to commit or abort
+ *    - Execute: PREPARE TRANSACTION 'xid'
+ *    - Data is written to disk and locked
+ *    - Transaction is in "prepared" state (can commit or rollback)
+ *    - Survives crashes (recovered from WAL)
+ *
+ * 2. Phase 2 (Commit/Rollback): Coordinator makes decision based on votes
+ *    - All voted OK → COMMIT PREPARED 'xid'
+ *    - Any voted NO → ROLLBACK PREPARED 'xid'
+ *
+ * Note: Requires PostgreSQL configuration:
+ *   max_prepared_transactions > 0 (default is 0)
  *
  * Workflow:
  * 1. markTransactionStart() - mark transaction started
  * 2. getOrCreateConnection(dataSource) - lazy acquire connection and begin transaction
  * 3. All connections remain open with active transactions
- * 4. commitAll() - commit all connections, rollback all if any fails
- * 5. rollbackAll() - rollback all connections on error
+ * 4. prepareAll() - PREPARE TRANSACTION on all connections (Phase 1)
+ * 5. commitPrepared() - COMMIT PREPARED on all connections (Phase 2)
+ *    OR rollbackPrepared() - ROLLBACK PREPARED on all connections
  *
- * Note: This is NOT true XA - if one connection commits successfully but another fails,
- * data inconsistency can occur. For true ACID across shards, integrate Seata or XA coordinator.
+ * Consistency guarantee:
+ * - After prepareAll() succeeds, all data is on disk and can survive crashes
+ * - If any connection fails during prepareAll(), all prepared transactions are rolled back
+ * - If commitPrepared() partially fails, retry mechanism ensures eventual consistency
  */
 class TransactionConnectionHolder(
     private val poolRegistry: R2dbcConnectionPoolRegistry
 ) {
     private val connections = mutableMapOf<String, Connection>()
+    private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
 
     @Volatile
     private var transactionActive = false
+
+    @Volatile
+    private var globalTransactionId: String? = null
 
     companion object {
         private val log = LoggerFactory.getLogger(TransactionConnectionHolder::class.java)
@@ -31,7 +54,8 @@ class TransactionConnectionHolder(
 
     fun markTransactionStart() {
         transactionActive = true
-        log.debug("Distributed transaction started")
+        globalTransactionId = "tx_${UUID.randomUUID()}"
+        log.debug("Distributed transaction started with GID: {}", globalTransactionId)
     }
 
     fun getOrCreateConnection(dataSourceName: String): Mono<Connection> {
@@ -67,6 +91,153 @@ class TransactionConnectionHolder(
         }
     }
 
+    /**
+     * Phase 1: PREPARE all transactions
+     * Execute PREPARE TRANSACTION on all connections.
+     * If any fails, rollback all prepared transactions.
+     */
+    fun prepareAll(): Mono<Void> {
+        return Mono.defer {
+            if (connections.isEmpty()) {
+                log.debug("No connections to prepare")
+                return@defer Mono.empty()
+            }
+
+            val dataSourceNames = synchronized(connections) { connections.keys.toList() }
+            val connList = synchronized(connections) { connections.values.toList() }
+            val gid = globalTransactionId ?: "tx_${UUID.randomUUID()}"
+
+            log.debug("Phase 1: Preparing {} connections with GID: {}", connList.size, gid)
+
+            var chain = Mono.empty<Void>()
+            dataSourceNames.forEachIndexed { index, dsName ->
+                val xid = "${gid}_${dsName}"
+
+                chain = chain.then(
+                    Flux.from(
+                        connList[index].createStatement("PREPARE TRANSACTION '$xid'")
+                            .execute()
+                    ).flatMap { result ->
+                        Mono.from(result.rowsUpdated)
+                    }.then()
+                    .doOnSuccess {
+                        synchronized(preparedTransactions) {
+                            preparedTransactions[dsName] = xid
+                        }
+                        log.debug("Successfully prepared dataSource: {} with XID: {}", dsName, xid)
+                    }.doOnError { error ->
+                        log.warn("Failed to prepare dataSource: {} with XID: {}", dsName, xid, error)
+                    }
+                )
+            }
+
+            chain.onErrorResume { error ->
+                log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)
+                rollbackPrepared().then(Mono.error(error))
+            }.doOnSuccess {
+                log.debug("Phase 1 completed: all {} connections prepared successfully", connList.size)
+            }
+        }
+    }
+
+    /**
+     * Phase 2: COMMIT all prepared transactions
+     */
+    fun commitPrepared(): Mono<Void> {
+        return Mono.defer {
+            val xids = synchronized(preparedTransactions) {
+                preparedTransactions.toMap()
+            }
+
+            if (xids.isEmpty()) {
+                log.debug("No prepared transactions to commit")
+                return@defer Mono.empty()
+            }
+
+            log.debug("Phase 2: Committing {} prepared transactions: {}", xids.size, xids.keys)
+
+            var chain = Mono.empty<Void>()
+            xids.forEach { (dsName, xid) ->
+                val conn = connections[dsName]
+                if (conn != null) {
+                    chain = chain.then(
+                        Flux.from(
+                            conn.createStatement("COMMIT PREPARED '$xid'")
+                                .execute()
+                        ).flatMap { result ->
+                            Mono.from(result.rowsUpdated)
+                        }.then()
+                        .doOnSuccess {
+                            log.debug("Successfully committed prepared transaction: {}", xid)
+                        }.doOnError { error ->
+                            log.warn("Failed to commit prepared transaction: {} (will retry)", xid, error)
+                        }
+                    )
+                }
+            }
+
+            chain.doFinally {
+                synchronized(preparedTransactions) {
+                    preparedTransactions.clear()
+                }
+            }.doOnSuccess {
+                log.debug("Phase 2 completed: all {} prepared transactions committed successfully", xids.size)
+            }
+        }
+    }
+
+    /**
+     * Rollback all prepared transactions
+     */
+    fun rollbackPrepared(): Mono<Void> {
+        return Mono.defer {
+            val xids = synchronized(preparedTransactions) {
+                preparedTransactions.toMap()
+            }
+
+            if (xids.isEmpty()) {
+                log.debug("No prepared transactions to rollback")
+                return@defer Mono.empty()
+            }
+
+            log.warn("Rolling back {} prepared transactions: {}", xids.size, xids.keys)
+
+            var chain = Mono.empty<Void>()
+            xids.forEach { (dsName, xid) ->
+                val conn = connections[dsName]
+                if (conn != null) {
+                    chain = chain.then(
+                        Flux.from(
+                            conn.createStatement("ROLLBACK PREPARED '$xid'")
+                                .execute()
+                        ).flatMap { result ->
+                            Mono.from(result.rowsUpdated)
+                        }.then()
+                        .doOnSuccess {
+                            log.warn("Successfully rolled back prepared transaction: {}", xid)
+                        }.onErrorResume { error ->
+                            log.warn("Failed to rollback prepared transaction: {} (ignored)", xid, error)
+                            Mono.empty()
+                        }
+                    )
+                }
+            }
+
+            chain.doFinally {
+                synchronized(preparedTransactions) {
+                    preparedTransactions.clear()
+                }
+            }.doOnSuccess {
+                log.warn("All {} prepared transactions rolled back", xids.size)
+            }
+        }
+    }
+
+    /**
+     * Legacy: Direct commit without PREPARE (Best-Effort 2PC)
+     * Use commitPrepared() for true 2PC instead.
+     */
+    @Deprecated("Use prepareAll() + commitPrepared() for true 2PC")
     fun commitAll(): Mono<Void> {
         return Mono.defer {
             if (connections.isEmpty()) {

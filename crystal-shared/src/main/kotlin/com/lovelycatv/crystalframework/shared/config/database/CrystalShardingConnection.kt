@@ -52,14 +52,19 @@ class CrystalShardingConnection(
     override fun commitTransaction(): Publisher<Void> {
         return Mono.defer {
             val holder = transactionHolder
-            holder?.commitAll()?.doFinally { transactionHolder = null } ?: Mono.empty()
+            holder?.// Two-Phase Commit Protocol
+            prepareAll()                    // Phase 1: PREPARE TRANSACTION
+                ?.then(holder.commitPrepared())     // Phase 2: COMMIT PREPARED
+                ?.doFinally { transactionHolder = null } ?: Mono.empty()
         }
     }
 
     override fun rollbackTransaction(): Publisher<Void> {
         return Mono.defer {
             val holder = transactionHolder
-            holder?.rollbackAll()?.doFinally { transactionHolder = null } ?: Mono.empty()
+            holder?.// Rollback prepared transactions if any
+            rollbackPrepared()?.then(holder.rollbackAll())  // Rollback non-prepared transactions
+                ?.doFinally { transactionHolder = null } ?: Mono.empty()
         }
     }
 
