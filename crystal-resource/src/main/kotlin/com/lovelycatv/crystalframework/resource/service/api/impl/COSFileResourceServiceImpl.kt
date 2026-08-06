@@ -38,6 +38,7 @@ class COSFileResourceServiceImpl(
     private var client: COSClient? = null
     private var transferManager: TransferManager? = null
 
+    @Synchronized
     private fun getClient(): COSClient {
         if (this.client == null) {
             // 1 (secretId, secretKey)
@@ -52,6 +53,7 @@ class COSFileResourceServiceImpl(
         return this.client!!
     }
 
+    @Synchronized
     private fun getTransferManager(): TransferManager {
         if (this.transferManager == null) {
             val cosClient = getClient()

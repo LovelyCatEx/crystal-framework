@@ -16,12 +16,15 @@ import org.springframework.core.OrderComparator
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
+import java.util.concurrent.ConcurrentHashMap
+import jakarta.annotation.PreDestroy
 
 @Component
 class FileResourceServiceManager(
     private val applicationContext: ApplicationContext
 ) {
-    private val cacheMap = mutableMapOf<Long, AbstractFileResourceService>()
+    private val cacheMap = ConcurrentHashMap<Long, AbstractFileResourceService>()
+    private val cacheLock = Any()
 
     suspend fun getService(context: RoutingContext): AbstractFileResourceService {
         val routers = applicationContext
@@ -72,17 +75,33 @@ class FileResourceServiceManager(
     }
 
     fun getService(provider: StorageProviderEntity): AbstractFileResourceService {
-        return cacheMap.getOrPut(provider.id) {
-            val serviceFactories = applicationContext
-                .getBeansOfType<FileResourceServiceFactory<*>>()
-                .values
+        synchronized(cacheLock) {
+            return cacheMap.computeIfAbsent(provider.id) {
+                val serviceFactories = applicationContext
+                    .getBeansOfType<FileResourceServiceFactory<*>>()
+                    .values
 
-            val factory = serviceFactories
-                .filter { it.getStorageProviderType() == provider.getRealStorageProviderType() }
-                .minWithOrNull(OrderComparator.INSTANCE)
-                ?: throw BusinessException("No file resource service factory found for provider ${provider.id}")
+                val factory = serviceFactories
+                    .filter { it.getStorageProviderType() == provider.getRealStorageProviderType() }
+                    .minWithOrNull(OrderComparator.INSTANCE)
+                    ?: throw BusinessException("No file resource service factory found for provider ${provider.id}")
 
-            factory.build(provider)
+                factory.build(provider)
+            }
+        }
+    }
+
+    fun invalidateService(providerId: Long) {
+        synchronized(cacheLock) {
+            cacheMap.remove(providerId)?.destroy()
+        }
+    }
+
+    @PreDestroy
+    fun destroy() {
+        synchronized(cacheLock) {
+            cacheMap.values.forEach { it.destroy() }
+            cacheMap.clear()
         }
     }
 }
