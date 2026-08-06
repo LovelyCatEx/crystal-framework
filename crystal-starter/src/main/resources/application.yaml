@@ -104,6 +104,11 @@ crystalframework:
       lease-key-prefix: "crystal:snowflake:lease:"
       lease-ttl-millis: 15000
       lease-renew-interval-millis: 5000
+  database:
+    default-data-source: primary
+    data-sources: []
+    routing:
+      log-decisions: true
   test:
     smtp:
       subject: Crystal Framework SMTP Test

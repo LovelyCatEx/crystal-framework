@@ -17,6 +17,7 @@ public class CrystalFrameworkConfiguration {
     private Resource resource = new Resource();
     private Monitor monitor = new Monitor();
     private Sharding sharding = new Sharding();
+    private Database database = new Database();
     private Test test = new Test();
     private MessageChannel messageChannel = new MessageChannel();
 
@@ -31,6 +32,9 @@ public class CrystalFrameworkConfiguration {
 
     public Sharding getSharding() { return sharding; }
     public void setSharding(Sharding sharding) { this.sharding = sharding; }
+
+    public Database getDatabase() { return database; }
+    public void setDatabase(Database database) { this.database = database; }
 
     public Test getTest() { return test; }
     public void setTest(Test test) { this.test = test; }
@@ -173,6 +177,50 @@ public class CrystalFrameworkConfiguration {
             public void setLeaseRenewIntervalMillis(long leaseRenewIntervalMillis) {
                 this.leaseRenewIntervalMillis = leaseRenewIntervalMillis;
             }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // crystalframework.database
+    // -------------------------------------------------------------------------
+    public static class Database {
+        private String defaultDataSource = "primary";
+        private DataSource[] dataSources = new DataSource[0];
+        private Routing routing = new Routing();
+
+        public String getDefaultDataSource() { return defaultDataSource; }
+        public void setDefaultDataSource(String defaultDataSource) { this.defaultDataSource = defaultDataSource; }
+
+        public DataSource[] getDataSources() { return dataSources; }
+        public void setDataSources(DataSource[] dataSources) { this.dataSources = dataSources; }
+
+        public Routing getRouting() { return routing; }
+        public void setRouting(Routing routing) { this.routing = routing; }
+
+        public static class DataSource {
+            private String name = "";
+            private String url = "";
+            private String username = "";
+            private String password = "";
+
+            public String getName() { return name; }
+            public void setName(String name) { this.name = name; }
+
+            public String getUrl() { return url; }
+            public void setUrl(String url) { this.url = url; }
+
+            public String getUsername() { return username; }
+            public void setUsername(String username) { this.username = username; }
+
+            public String getPassword() { return password; }
+            public void setPassword(String password) { this.password = password; }
+        }
+
+        public static class Routing {
+            private boolean logDecisions = true;
+
+            public boolean isLogDecisions() { return logDecisions; }
+            public void setLogDecisions(boolean logDecisions) { this.logDecisions = logDecisions; }
         }
     }
 
