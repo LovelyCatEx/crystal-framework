@@ -138,36 +138,42 @@ class OAuthAccountServiceImpl(
 
     override suspend fun bindTenant(accountId: Long, userId: Long, tenantId: Long): OAuthAccountEntity {
         val source = getByIdOrThrow(accountId, BusinessException("OAuth account $accountId not found"))
+        val lockKey = "${RedisConstants.LOCK_OAUTH_BIND_PREFIX}${source.platform}:${source.identifier}"
 
-        val rows = getRepository()
-            .findAllByPlatformAndIdentifier(source.platform, source.identifier)
-            .awaitListWithTimeout()
+        return reactiveRedisService.withDistributedLock(
+            lockKey = lockKey,
+            busyMessage = "OAuth account is being processed, please retry later",
+        ) {
+            val rows = getRepository()
+                .findAllByPlatformAndIdentifier(source.platform, source.identifier)
+                .awaitListWithTimeout()
 
-        // Cross-row invariant: the third-party identity may only belong to one user.
-        rows.firstOrNull { it.userId != null && it.userId != userId }?.let {
-            throw BusinessException("This account already belongs to another user")
+            // Cross-row invariant: the third-party identity may only belong to one user.
+            rows.firstOrNull { it.userId != null && it.userId != userId }?.let {
+                throw BusinessException("This account already belongs to another user")
+            }
+
+            // Idempotency: a tenant may hold at most one binding for this identity.
+            rows.firstOrNull {
+                it.scope == OAuthBindingScope.TENANT.typeId && it.tenantId == tenantId
+            }?.let {
+                throw BusinessException("This account is already bound in the current tenant")
+            }
+
+            getRepository().save(
+                OAuthAccountEntity(
+                    id = snowIdGenerator.nextId(),
+                    userId = userId,
+                    platform = source.platform,
+                    identifier = source.identifier,
+                    nickname = source.nickname,
+                    avatar = source.avatar,
+                    email = source.email,
+                    scope = OAuthBindingScope.TENANT.typeId,
+                    tenantId = tenantId,
+                ) newEntity true
+            ).awaitFirstOrNull() ?: throw BusinessException("Could not bind OAuth account in tenant")
         }
-
-        // Idempotency: a tenant may hold at most one binding for this identity.
-        rows.firstOrNull {
-            it.scope == OAuthBindingScope.TENANT.typeId && it.tenantId == tenantId
-        }?.let {
-            throw BusinessException("This account is already bound in the current tenant")
-        }
-
-        return getRepository().save(
-            OAuthAccountEntity(
-                id = snowIdGenerator.nextId(),
-                userId = userId,
-                platform = source.platform,
-                identifier = source.identifier,
-                nickname = source.nickname,
-                avatar = source.avatar,
-                email = source.email,
-                scope = OAuthBindingScope.TENANT.typeId,
-                tenantId = tenantId,
-            ) newEntity true
-        ).awaitFirstOrNull() ?: throw BusinessException("Could not bind OAuth account in tenant")
     }
 
     override suspend fun getUserTenantOAuthAccounts(userId: Long, tenantId: Long): List<OAuthAccountEntity> {

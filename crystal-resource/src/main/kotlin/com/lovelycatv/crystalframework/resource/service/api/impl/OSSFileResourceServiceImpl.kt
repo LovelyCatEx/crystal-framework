@@ -162,7 +162,7 @@ class OSSFileResourceServiceImpl(
                 PutObjectRequest.newBuilder()
                     .bucket(bucketName)
                     .key(objectKey)
-                    .contentLength(fileLength)
+                    .contentLength(fileLength.toInt())
                     .contentType(fileContentType)
                     .body(BinaryData.fromStream(inputStream))
                     .build()
