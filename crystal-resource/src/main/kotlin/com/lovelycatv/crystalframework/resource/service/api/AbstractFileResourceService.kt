@@ -12,13 +12,12 @@ import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
-import com.lovelycatv.crystalframework.shared.utils.getContentType
 import com.lovelycatv.crystalframework.shared.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import com.lovelycatv.crystalframework.resource.utils.detectMimeType
 import org.springframework.http.codec.multipart.FilePart
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import org.springframework.dao.DataIntegrityViolationException
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.util.UUID
@@ -143,17 +142,18 @@ abstract class AbstractFileResourceService(
         inputStream: InputStream,
         progressReporter: ((Int) -> Unit)? = null
     ): FileUploadResult {
-        // Read bytes first so we can detect the actual MIME type from file content.
-        // The caller-provided fileContentType is intentionally ignored for security:
-        // a client can forge any Content-Type header.
+        // 1. Read bytes and detect MIME type from file content
+        //    (caller-provided Content-Type header is ignored for security — clients can forge it)
         val byteArray = inputStream.readBytes()
         val detectedMimeType = detectMimeType(byteArray)
 
+        // 2. Validate detected MIME type against allowed types for this fileType category
         fileResourceService.assertFileContentType(
             fileType,
             detectedMimeType
         )
 
+        // 3. Resolve canonical file extension from MIME type and requested extension
         val requestedExtension = fileNameWithExtension
             .substringAfterLast('.', "")
             .lowercase()
@@ -164,14 +164,18 @@ abstract class AbstractFileResourceService(
         ) ?: throw BusinessException("File extension does not match detected content type")
         val canonicalFileName = "${UUID.randomUUID()}.$canonicalExtension"
 
+        // 4. Calculate MD5 for deduplication check
         val md5 = FileMD5Utils.calculateMD5(ByteArrayInputStream(byteArray))
 
-        val existing = fileResourceService.getByMD5(md5, scope.typeId, scopeId)
+        // 5. Check if file already exists by MD5 within the same scope
+        //    If found, return existing entity immediately (skip upload)
+        val existing = fileResourceService.getCommitedFileByMD5(md5, scope.typeId, scopeId)
         if (existing != null) {
             logger.info("File $fileNameWithExtension already exists with md5 $md5, upload skipped, entity: ${existing.toJSONString()}")
             return FileUploadResult(true, getStorageProvider(), fileType, existing.objectKey, existing, null)
         }
 
+        // 6. Build object key and create UPLOADING entity with lease timeout
         val objectKey = this.buildObjectKey(fileType, canonicalFileName)
         val uploadingEntity = FileResourceEntity(
             id = fileResourceService.generateNextSnowId(),
@@ -190,13 +194,15 @@ abstract class AbstractFileResourceService(
             leaseUntil = System.currentTimeMillis() + UPLOAD_LEASE_MILLIS,
         )
 
+        // 7. Reserve upload slot by inserting UPLOADING entity (unique constraint on MD5+scope)
+        //    If insert fails (race condition), another upload already owns this file — return existing
         val reserved = try {
-            fileResourceService.reserveUpload(uploadingEntity)
-        } catch (e: org.springframework.dao.DataIntegrityViolationException) {
-            fileResourceService.getByMD5(md5, scope.typeId, scopeId)
+            fileResourceService.reservePreUpload(uploadingEntity)
+        } catch (e: DataIntegrityViolationException) {
+            fileResourceService.getCommitedFileByMD5(md5, scope.typeId, scopeId)
         }
         if (reserved == null || reserved.id != uploadingEntity.id) {
-            val current = reserved ?: fileResourceService.getByMD5(md5, scope.typeId, scopeId)
+            val current = reserved ?: fileResourceService.getCommitedFileByMD5(md5, scope.typeId, scopeId)
             return if (current != null) {
                 FileUploadResult(true, getStorageProvider(), fileType, current.objectKey, current, null)
             } else {
@@ -204,6 +210,7 @@ abstract class AbstractFileResourceService(
             }
         }
 
+        // 8. Perform actual upload to storage provider (OSS/COS/local)
         val result = this.doUploadFile(
             fileType,
             fileLength,
@@ -218,6 +225,8 @@ abstract class AbstractFileResourceService(
             return FileUploadResult(false, getStorageProvider(), fileType, objectKey, null, result)
         }
 
+        // 9. Commit upload: transition entity from UPLOADING → COMMITTED status
+        //    If commit fails, delete uploaded object and mark cleanup pending
         if (!fileResourceService.commitUpload(uploadingEntity)) {
             val deleteError = this.deleteObject(objectKey)
             if (deleteError != null) {
@@ -228,6 +237,7 @@ abstract class AbstractFileResourceService(
             return FileUploadResult(false, getStorageProvider(), fileType, objectKey, null, BusinessException("Could not commit file resource"))
         }
 
+        // 10. Return success with committed entity
         uploadingEntity.status = FileResourceStatus.COMMITTED.typeId
         uploadingEntity.leaseUntil = null
         return FileUploadResult(true, getStorageProvider(), fileType, objectKey, uploadingEntity, null)

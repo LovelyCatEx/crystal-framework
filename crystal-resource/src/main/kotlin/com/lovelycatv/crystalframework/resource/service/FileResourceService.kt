@@ -31,9 +31,9 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
         requestedExtension: String
     ): String?
 
-    suspend fun getByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity?
+    suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity?
 
-    suspend fun reserveUpload(entity: FileResourceEntity): FileResourceEntity?
+    suspend fun reservePreUpload(entity: FileResourceEntity): FileResourceEntity?
 
     suspend fun commitUpload(entity: FileResourceEntity): Boolean
 

@@ -77,7 +77,7 @@ class FileResourceServiceImpl(
         return mimeExtensions.firstOrNull { it in allowedExtensions }
     }
 
-    override suspend fun getByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity? {
+    override suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity? {
         return fileResourceRepository.findByMd5AndScopeAndScopeIdAndStatus(
             md5,
             scope,
@@ -86,7 +86,7 @@ class FileResourceServiceImpl(
         ).awaitFirstOrNull()
     }
 
-    override suspend fun reserveUpload(entity: FileResourceEntity): FileResourceEntity? {
+    override suspend fun reservePreUpload(entity: FileResourceEntity): FileResourceEntity? {
         return withInvalidateEntityCacheContext(entity.id) {
             fileResourceRepository.save(entity newEntity true).awaitFirstOrNull()
         }

@@ -114,7 +114,7 @@ services:
       # Fleet (used by the APM integration) requires security to be enabled, hence xpack.security stays on.
       - xpack.security.enabled=true
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ES_JAVA_OPTS=-Xms256m -Xmx512m
+      - ES_JAVA_OPTS=-Xms256m -Xmx1024m
     ports:
       - "${ELASTICSEARCH_PORT}:9200"
     volumes:
