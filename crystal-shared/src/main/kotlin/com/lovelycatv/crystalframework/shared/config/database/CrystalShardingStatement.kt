@@ -11,18 +11,18 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
- * Crystal Framework 虚拟 Statement，推迟到 [execute] 时才从对应数据源取真实连接。
+ * Crystal Framework virtual Statement, defers real connection acquisition until [execute].
  *
- * 工作流程：
- * 1. [bind] / [bindNull] / [add] 时缓存所有调用，不实际执行
- * 2. 捕获分片列绑定的值
- * 3. [execute] 时：
- *    - 提取所有 batch 的分片值，调用 [ShardingAlgorithm] 算出真实表
- *    - 校验所有 batch 必须路由到同一张真实表（单表路由约束）
- *    - 从 [R2dbcConnectionPoolRegistry] 取 [R2dbcShardingRule.dataSourceName] 指定的连接
- *    - 改写 SQL（逻辑表 → 真实表）
- *    - 在真实连接上重放所有 bind/add 调用
- *    - 执行并返回结果
+ * Workflow:
+ * 1. On [bind] / [bindNull] / [add], cache all calls without executing
+ * 2. Capture sharding column value
+ * 3. On [execute]:
+ *    - Extract sharding values from all batches, call [ShardingAlgorithm] to resolve real table
+ *    - Validate all batches must route to the same real table (single-table routing constraint)
+ *    - Acquire connection from [R2dbcConnectionPoolRegistry] using [R2dbcShardingRule.dataSourceName]
+ *    - Rewrite SQL (logical table → real table)
+ *    - Replay all bind/add calls on real connection
+ *    - Execute and return result
  */
 class CrystalShardingStatement(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
@@ -36,8 +36,8 @@ class CrystalShardingStatement(
     private var current = Batch()
 
     /**
-     * 分片列在参数列表中的 0-based 索引位置，从 SQL 解析出。
-     * 例如 `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` 中 tenant_id → index=1
+     * 0-based index of sharding column in parameter list, parsed from SQL.
+     * Example: `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` → tenant_id at index=1
      */
     private val shardingParamIndex: Int by lazy { locateShardingParamIndex() }
     private val shardingParamName: String by lazy {
@@ -87,7 +87,7 @@ class CrystalShardingStatement(
     }
 
     override fun execute(): Publisher<out Result> {
-        // 1. 收尾当前 batch
+        // 1. Finalize current batch
         if (current.actions.isNotEmpty()) {
             batches += current
             current = Batch()
@@ -101,7 +101,7 @@ class CrystalShardingStatement(
             )
         }
 
-        // 2. 对每个 batch 算真实表
+        // 2. Resolve real table for each batch
         val realTables = batches.map { batch ->
             if (!batch.shardingValueSet) {
                 throw ShardingException(
@@ -112,7 +112,7 @@ class CrystalShardingStatement(
             resolveRealTable(batch.shardingValue)
         }.toSet()
 
-        // 3. 校验单表约束
+        // 3. Validate single-table constraint
         if (realTables.size != 1) {
             return Flux.error(
                 ShardingException(
@@ -125,14 +125,14 @@ class CrystalShardingStatement(
         val realTable = realTables.first()
         val targetDataSource = rule.dataSourceName
 
-        // 4. 从目标数据源取真实连接
+        // 4. Acquire real connection from target data source
         val pool = poolRegistry.require(targetDataSource)
         return Flux.from(pool.create()).flatMap { realConnection ->
-            // 5. 改写 SQL
+            // 5. Rewrite SQL
             tableNode.name = realTable
             val finalSql = parsed.toString()
 
-            // 6. 建真实 statement 并重放所有调用
+            // 6. Create real statement and replay all calls
             val realStmt = realConnection.createStatement(finalSql)
 
             statementActions.forEach { it(realStmt) }
@@ -144,7 +144,7 @@ class CrystalShardingStatement(
                 }
             }
 
-            // 7. 执行
+            // 7. Execute
             Flux.from(realStmt.execute())
         }
     }
@@ -163,9 +163,9 @@ class CrystalShardingStatement(
     }
 
     /**
-     * 从 SQL AST 中定位分片列对应的参数索引（0-based）。
-     * 例如 `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` 且 shardingColumn="tenant_id"
-     * → 在 columns 列表找到 tenant_id 在位置 1 → 对应 $2 → 绑定索引 = 1
+     * Locate parameter index (0-based) for sharding column from SQL AST.
+     * Example: `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` with shardingColumn="tenant_id"
+     * → find tenant_id at position 1 in columns list → corresponds to $2 → bind index = 1
      */
     private fun locateShardingParamIndex(): Int {
         val column = rule.shardingColumn
@@ -189,8 +189,8 @@ class CrystalShardingStatement(
                 position
             }
             else -> {
-                // SELECT/UPDATE/DELETE 的分片列在 WHERE 里，位置不固定，需要完整解析 WHERE AST
-                // 简化：假设业务 SQL 第一个参数就是分片列（实际项目需完整 WHERE 遍历）
+                // For SELECT/UPDATE/DELETE, sharding column is in WHERE clause with variable position
+                // Simplified: assume first parameter is sharding column (real projects need full WHERE traversal)
                 throw ShardingException(
                     "Sharding for ${parsed.javaClass.simpleName} on table '${rule.tableName}' requires " +
                         "literal sharding value or explicit parameter position (not yet implemented for WHERE clauses)",
@@ -207,7 +207,7 @@ class CrystalShardingStatement(
         return this.toList().indexOfFirst(predicate)
     }
 
-    /** 一个 batch 的所有 bind 调用 + 对应的分片值 */
+    /** All bind calls for one batch + corresponding sharding value */
     private class Batch {
         val actions = mutableListOf<(Statement) -> Unit>()
         var shardingValue: Any? = null

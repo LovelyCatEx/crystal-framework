@@ -7,14 +7,15 @@ import org.reactivestreams.Publisher
 import reactor.core.publisher.Mono
 
 /**
- * Crystal Framework 分片感知连接工厂。
+ * Crystal Framework sharding-aware connection factory.
  *
- * 返回虚拟连接 [CrystalShardingConnection]，不绑定任何真实物理连接。真实连接的获取推迟到
- * [io.r2dbc.spi.Statement.execute] 时，此时已有完整的 SQL 和绑定参数，可以精确路由到目标
- * 数据源和真实表。
+ * Returns virtual connection [CrystalShardingConnection], does not bind to any real physical connection.
+ * Real connection acquisition is deferred until [io.r2dbc.spi.Statement.execute], when complete SQL
+ * and bound parameters are available for accurate routing to target data source and real table.
  *
- * 这是 Crystal Framework 分库分表的入口，替代了之前的手动 Reactor Context 路由方式。规则配置
- * 在 [R2dbcShardingRule] 中声明，算法由用户通过 [ShardingAlgorithm] 接口注入。
+ * This is the entry point for Crystal Framework's database sharding, replacing the previous manual
+ * Reactor Context routing approach. Rules are declared in [R2dbcShardingRule], algorithms are
+ * injected by users via [ShardingAlgorithm] interface.
  */
 class CrystalShardingConnectionFactory(
     private val poolRegistry: R2dbcConnectionPoolRegistry,

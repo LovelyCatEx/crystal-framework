@@ -18,13 +18,14 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 
 /**
- * Crystal Framework 虚拟连接，不绑定任何真实物理连接。
+ * Crystal Framework virtual connection, does not bind to any real physical connection.
  *
- * 在 [createStatement] 时解析 SQL、查询分片规则：
- * - 有表分片规则 → 返回 [CrystalShardingStatement]（虚拟 Statement）
- * - 无表分片 / 解析失败 → 从对应数据源取真实连接并直接建 statement
+ * On [createStatement], parses SQL and queries sharding rules:
+ * - Has table sharding rule → returns [CrystalShardingStatement] (virtual Statement)
+ * - No table sharding / parse failed → returns [DelegatedStatement] (deferred connection)
  *
- * 事务方法（begin/commit/rollback）委托给 primary 数据源的连接。跨数据源事务不在本版本支持范围。
+ * Transaction methods (begin/commit/rollback) delegate to primary data source connection.
+ * Cross-data-source transactions are not supported in this version.
  */
 class CrystalShardingConnection(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
@@ -32,7 +33,8 @@ class CrystalShardingConnection(
 ) : Connection {
 
     /**
-     * Primary 数据源的真实连接，用于事务管理、元数据查询等。懒加载，首次调用事务方法时才取。
+     * Real connection from primary data source, used for transaction management, metadata queries, etc.
+     * Lazy-loaded, acquired only on first call to transaction methods.
      */
     @Volatile
     private var primaryDelegate: Connection? = null
@@ -49,25 +51,25 @@ class CrystalShardingConnection(
     }
 
     override fun createStatement(sql: String): Statement {
-        // 1. 文本层改写（软删除 deletedTime IS NULL、modifiedTime 等）
+        // 1. Text-level rewriting (soft delete: deletedTime IS NULL, modifiedTime, etc.)
         val processedSql = CrystalFrameworkSQLModifier.processSql(sql)
 
-        // 2. 解析 SQL AST
+        // 2. Parse SQL AST
         val parsed = runCatching { CCJSqlParserUtil.parse(processedSql) }.getOrNull()
             ?: return delegateToDataSource(R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME, processedSql)
 
-        // 3. 提取表节点
+        // 3. Extract table node
         val tableNode = extractTableNode(parsed)
             ?: return delegateToDataSource(R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME, processedSql)
 
         val logicalTable = stripQuotes(tableNode.name).lowercase()
 
-        // 4. 查分片规则
+        // 4. Query sharding rule
         val rule = shardingRuleRegistry.find(logicalTable)?.rule
 
-        // 5. 路由决策
+        // 5. Routing decision
         return if (rule?.tableShardingEnabled == true) {
-            // 有表分片 → 返回虚拟 Statement，推迟到 execute() 时取真实连接
+            // Has table sharding → return virtual Statement, defer real connection to execute()
             CrystalShardingStatement(
                 poolRegistry = poolRegistry,
                 rule = rule,
@@ -75,7 +77,7 @@ class CrystalShardingConnection(
                 tableNode = tableNode,
             )
         } else {
-            // 无表分片 → 直接从对应数据源取连接建 statement
+            // No table sharding → delegate to data source with deferred connection
             val targetDataSource = rule?.dataSourceName ?: R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME
             delegateToDataSource(targetDataSource, processedSql)
         }
@@ -83,9 +85,7 @@ class CrystalShardingConnection(
 
     private fun delegateToDataSource(dataSourceName: String, sql: String): Statement {
         val pool = poolRegistry.require(dataSourceName)
-        val connection = Mono.from(pool.create()).block()
-            ?: throw IllegalStateException("Failed to acquire connection from $dataSourceName")
-        return connection.createStatement(sql)
+        return DelegatedStatement(pool, sql)
     }
 
     private fun extractTableNode(statement: net.sf.jsqlparser.statement.Statement): Table? {
@@ -102,7 +102,7 @@ class CrystalShardingConnection(
         return name.removeSurrounding("\"").removeSurrounding("`")
     }
 
-    // 事务方法委托给 primary
+    // Transaction methods delegate to primary
     override fun beginTransaction(): Publisher<Void> = getPrimaryDelegate().beginTransaction()
     override fun beginTransaction(definition: TransactionDefinition): Publisher<Void> =
         getPrimaryDelegate().beginTransaction(definition)
