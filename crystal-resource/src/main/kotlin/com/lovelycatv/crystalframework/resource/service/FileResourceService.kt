@@ -28,7 +28,6 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
     fun resolveFileExtension(
         fileType: ResourceFileType,
         contentType: String,
-        requestedExtension: String
     ): String?
 
     suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity?

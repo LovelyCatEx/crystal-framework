@@ -153,15 +153,15 @@ abstract class AbstractFileResourceService(
             detectedMimeType
         )
 
-        // 3. Resolve canonical file extension from MIME type and requested extension
-        val requestedExtension = fileNameWithExtension
-            .substringAfterLast('.', "")
-            .lowercase()
+        // 3. Resolve canonical file extension purely from detected MIME type.
+        //    The uploader-supplied extension is ignored on purpose: e.g. the tenant-avatar cropper
+        //    on the frontend re-encodes PNG as JPEG, so the incoming ".png" no longer matches the
+        //    actual bytes. Only the detected content type decides the on-disk extension; the safety
+        //    net is still assertFileContentType() above, which rejects anything outside the allow-list.
         val canonicalExtension = fileResourceService.resolveFileExtension(
             fileType,
             detectedMimeType,
-            requestedExtension
-        ) ?: throw BusinessException("File extension does not match detected content type")
+        ) ?: throw BusinessException("No allowed file extension found for detected content type $detectedMimeType")
         val canonicalFileName = "${UUID.randomUUID()}.$canonicalExtension"
 
         // 4. Calculate MD5 for deduplication check

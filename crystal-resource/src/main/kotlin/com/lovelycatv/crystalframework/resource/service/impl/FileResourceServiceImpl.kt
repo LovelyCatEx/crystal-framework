@@ -58,7 +58,6 @@ class FileResourceServiceImpl(
     override fun resolveFileExtension(
         fileType: ResourceFileType,
         contentType: String,
-        requestedExtension: String
     ): String? {
         val resourceConfig = this.getCrystalFrameworkConfiguration().resource
         val config = when (fileType) {
@@ -66,15 +65,10 @@ class FileResourceServiceImpl(
             ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
             ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
         }
-        val normalizedExtension = requestedExtension.removePrefix(".").lowercase()
         val allowedExtensions = config.supportedFileExtensions
             .map { it.removePrefix(".").lowercase() }
             .toSet()
-        val mimeExtensions = getMimeExtensions(contentType)
-        if (normalizedExtension !in allowedExtensions || normalizedExtension !in mimeExtensions) {
-            return null
-        }
-        return mimeExtensions.firstOrNull { it in allowedExtensions }
+        return getMimeExtensions(contentType).firstOrNull { it in allowedExtensions }
     }
 
     override suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity? {
