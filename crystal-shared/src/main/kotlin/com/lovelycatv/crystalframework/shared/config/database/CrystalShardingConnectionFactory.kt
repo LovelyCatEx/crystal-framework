@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
 import com.lovelycatv.crystalframework.shared.config.observability.ApmTraceHeaders
+import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryMetadata
@@ -30,6 +31,10 @@ class CrystalShardingConnectionFactory(
                     poolRegistry = poolRegistry,
                     shardingRuleRegistry = shardingRuleRegistry,
                     traceHeaders = context.getOrDefault(ApmTraceHeaders::class.java, ApmTraceHeaders(emptyMap()))!!.values,
+                    transactionLabel = context.getOrDefault(
+                        DistributedTransactionLabel::class.java,
+                        DistributedTransactionLabel.DEFAULT,
+                    )!!,
                 )
             )
         }

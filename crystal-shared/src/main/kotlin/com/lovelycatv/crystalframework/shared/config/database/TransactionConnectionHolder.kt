@@ -1,8 +1,10 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
 import co.elastic.apm.api.ElasticApm
+import co.elastic.apm.api.Outcome
 import co.elastic.apm.api.Span
 import co.elastic.apm.api.Transaction
+import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Connection
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
@@ -42,6 +44,7 @@ import java.util.UUID
 class TransactionConnectionHolder(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val traceHeaders: Map<String, String>,
+    private val transactionLabel: DistributedTransactionLabel,
 ) {
     private val connections = mutableMapOf<String, Connection>()
     private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
@@ -57,12 +60,12 @@ class TransactionConnectionHolder(
 
     companion object {
         private const val APM_TRANSACTION_TYPE = "distributed"
-        private const val APM_TRANSACTION_NAME_PREFIX = "Distributed Transaction"
         private const val APM_SUMMARY_SPAN_TYPE = "distributed"
         private const val APM_SUMMARY_SPAN_SUBTYPE = "transaction"
         private const val APM_SUMMARY_SPAN_ACTION = "execute"
         private const val APM_LABEL_GLOBAL_TRANSACTION_ID = "distributed.transaction.id"
         private const val APM_LABEL_BUSINESS_TRANSACTION_ID = "distributed.business_transaction.id"
+        private const val APM_LABEL_RESULT = "distributed.transaction.result"
         private const val APM_RESULT_COMMITTED = "COMMITTED"
         private const val APM_RESULT_ROLLED_BACK = "ROLLED_BACK"
         private const val APM_RESULT_FAILED = "FAILED"
@@ -75,26 +78,38 @@ class TransactionConnectionHolder(
         val gid = globalTransactionId ?: return
 
         apmTransaction = ElasticApm.startTransactionWithRemoteParent(traceHeaders::get)
-            .setName("$APM_TRANSACTION_NAME_PREFIX $gid")
+            .setName(transactionLabel.name)
             .setType(APM_TRANSACTION_TYPE)
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
+            .also { txn -> transactionLabel.labels.forEach { (k, v) -> txn.addLabel(k, v) } }
 
         requestSummarySpan = ElasticApm.currentSpan()
             .startSpan(APM_SUMMARY_SPAN_TYPE, APM_SUMMARY_SPAN_SUBTYPE, APM_SUMMARY_SPAN_ACTION)
-            .setName("$APM_TRANSACTION_NAME_PREFIX $gid")
+            .setName(transactionLabel.name)
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
             .addLabel(APM_LABEL_BUSINESS_TRANSACTION_ID, apmTransaction?.id ?: "")
+            .also { span -> transactionLabel.labels.forEach { (k, v) -> span.addLabel(k, v) } }
 
         log.debug("Distributed transaction started with GID: {}", globalTransactionId)
     }
 
     private fun finishApmTransaction(result: String? = null, error: Throwable? = null) {
         synchronized(this) {
+            val outcome = when (result) {
+                APM_RESULT_COMMITTED -> Outcome.SUCCESS
+                APM_RESULT_ROLLED_BACK, APM_RESULT_FAILED -> Outcome.FAILURE
+                else -> Outcome.UNKNOWN
+            }
             error?.let { apmTransaction?.captureException(it) }
-            result?.let { apmTransaction?.setResult(it) }
+            result?.let {
+                apmTransaction?.setResult(it)
+                apmTransaction?.addLabel(APM_LABEL_RESULT, it)
+            }
+            apmTransaction?.setOutcome(outcome)
             requestSummarySpan?.let { span ->
                 error?.let { span.captureException(it) }
-                result?.let { span.setName("$APM_TRANSACTION_NAME_PREFIX $it") }
+                result?.let { span.addLabel(APM_LABEL_RESULT, it) }
+                span.setOutcome(outcome)
                 span.end()
                 requestSummarySpan = null
             }
