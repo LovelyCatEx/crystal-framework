@@ -31,10 +31,10 @@ import java.lang.reflect.Method
     matchIfMissing = true,
 )
 @Order(GlobalConstants.AspectPriority.APM_SPAN_TRACE)
-class ApmSpanTraceAspect {
+class ApmWebfluxSpanTraceAspect {
 
     companion object {
-        private val log = LoggerFactory.getLogger(ApmSpanTraceAspect::class.java)
+        private val log = LoggerFactory.getLogger(ApmWebfluxSpanTraceAspect::class.java)
     }
 
     @Around(
@@ -155,7 +155,7 @@ class ApmSpanTraceAspect {
         }
 
     private fun resolveParent(ctx: reactor.util.context.ContextView): Span =
-        if (ctx.hasKey(ApmParentSpan::class.java)) ctx.get<ApmParentSpan>(ApmParentSpan::class.java).span
+        if (ctx.hasKey(ApmParentSpan::class.java)) ctx.get(ApmParentSpan::class.java).span
         else ElasticApm.currentSpan()
 
     // Kotlin suspend methods: let the proxy handle the coroutine<->reactive adaptation. Spring's

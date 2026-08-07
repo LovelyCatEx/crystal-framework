@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono
  * invisible in Kibana APM UI.
  */
 @Component
-class ApmTransactionFilter : WebFilter, Ordered {
+class ApmWebfluxTransactionFilter : WebFilter, Ordered {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
@@ -38,7 +38,16 @@ class ApmTransactionFilter : WebFilter, Ordered {
         transaction.activate()
 
         return chain.filter(exchange)
-            .contextWrite { context -> context.put(ApmTraceHeaders::class.java, ApmTraceHeaders(traceHeaders.toMap())) }
+            // The transaction is only thread-local (via activate()), so once the chain hops onto a
+            // reactive/coroutine thread ElasticApm.currentSpan() no longer sees it. Publish it into the
+            // Reactor Context as the parent span so ApmSpanTraceAspect.resolveParent() can attach the
+            // top-level method span to the real transaction instead of falling back to a no-op span.
+            // Transaction extends Span, so it fits the existing ApmParentSpan container as-is.
+            .contextWrite { context ->
+                context
+                    .put(ApmTraceHeaders::class.java, ApmTraceHeaders(traceHeaders.toMap()))
+                    .put(ApmParentSpan::class.java, ApmParentSpan(transaction))
+            }
             .doOnSuccess {
                 // Set response status
                 val statusCode = exchange.response.statusCode?.value() ?: 200
