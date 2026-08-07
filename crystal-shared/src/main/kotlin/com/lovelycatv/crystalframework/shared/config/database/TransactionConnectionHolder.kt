@@ -45,6 +45,7 @@ class TransactionConnectionHolder(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val traceHeaders: Map<String, String>,
     private val transactionLabel: DistributedTransactionLabel,
+    private val apmParentSpan: Span?,
 ) {
     private val connections = mutableMapOf<String, Connection>()
     private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
@@ -83,7 +84,7 @@ class TransactionConnectionHolder(
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
             .also { txn -> transactionLabel.labels.forEach { (k, v) -> txn.addLabel(k, v) } }
 
-        requestSummarySpan = ElasticApm.currentSpan()
+        requestSummarySpan = (apmParentSpan ?: ElasticApm.currentSpan())
             .startSpan(APM_SUMMARY_SPAN_TYPE, APM_SUMMARY_SPAN_SUBTYPE, APM_SUMMARY_SPAN_ACTION)
             .setName(transactionLabel.name)
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)

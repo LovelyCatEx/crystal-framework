@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
+import co.elastic.apm.api.Span
 import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Batch
 import io.r2dbc.spi.Connection
@@ -39,6 +40,7 @@ class CrystalShardingConnection(
     private val shardingRuleRegistry: R2dbcShardingRuleRegistry,
     private val traceHeaders: Map<String, String>,
     private val transactionLabel: DistributedTransactionLabel,
+    private val apmParentSpan: Span?,
 ) : Connection {
 
     @Volatile
@@ -46,7 +48,7 @@ class CrystalShardingConnection(
 
     override fun beginTransaction(): Publisher<Void> {
         return Mono.fromRunnable {
-            val holder = TransactionConnectionHolder(poolRegistry, traceHeaders, transactionLabel)
+            val holder = TransactionConnectionHolder(poolRegistry, traceHeaders, transactionLabel, apmParentSpan)
             holder.markTransactionStart()
             transactionHolder = holder
         }

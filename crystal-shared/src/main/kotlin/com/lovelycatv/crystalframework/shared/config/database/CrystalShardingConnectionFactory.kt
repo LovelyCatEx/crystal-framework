@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
+import com.lovelycatv.crystalframework.shared.config.observability.ApmParentSpan
 import com.lovelycatv.crystalframework.shared.config.observability.ApmTraceHeaders
 import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Connection
@@ -35,6 +36,9 @@ class CrystalShardingConnectionFactory(
                         DistributedTransactionLabel::class.java,
                         DistributedTransactionLabel.DEFAULT,
                     )!!,
+                    apmParentSpan = if (context.hasKey(ApmParentSpan::class.java))
+                        context.get<ApmParentSpan>(ApmParentSpan::class.java).span
+                    else null,
                 )
             )
         }

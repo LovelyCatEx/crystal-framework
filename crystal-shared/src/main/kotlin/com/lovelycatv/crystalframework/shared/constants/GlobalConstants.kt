@@ -36,6 +36,10 @@ object GlobalConstants {
         const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
 
         const val MAIL_SEND_LOG_RECORDER = 100
+
+        // Runs innermost so the span brackets the actual business method rather than other aspects'
+        // overhead. Nested @Traced methods still form correct parent/child spans via Reactor Context.
+        const val APM_SPAN_TRACE = 2000
     }
 
     object ExtModule {
