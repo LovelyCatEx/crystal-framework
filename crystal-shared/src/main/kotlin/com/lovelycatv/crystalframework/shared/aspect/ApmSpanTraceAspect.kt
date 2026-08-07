@@ -14,7 +14,6 @@ import org.aspectj.lang.reflect.MethodSignature
 import org.slf4j.LoggerFactory
 import org.springframework.aop.support.AopUtils
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.core.CoroutinesUtils
 import org.springframework.core.KotlinDetector
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.core.annotation.Order
@@ -22,9 +21,6 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.lang.reflect.Method
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.intrinsics.startCoroutineUninterceptedOrReturn
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 
 @Aspect
 @Component
@@ -72,7 +68,7 @@ class ApmSpanTraceAspect {
         val name = "${targetClass.simpleName}#${signature.name}"
 
         return when {
-            KotlinDetector.isSuspendingFunction(resolvedMethod) -> traceSuspend(pjp, resolvedMethod, name)
+            KotlinDetector.isSuspendingFunction(resolvedMethod) -> traceSuspend(pjp, name)
             Mono::class.java.isAssignableFrom(resolvedMethod.returnType) -> {
                 @Suppress("UNCHECKED_CAST")
                 wrapMono(pjp.proceed() as Mono<Any>, name)
@@ -162,22 +158,15 @@ class ApmSpanTraceAspect {
         if (ctx.hasKey(ApmParentSpan::class.java)) ctx.get<ApmParentSpan>(ApmParentSpan::class.java).span
         else ElasticApm.currentSpan()
 
+    // Kotlin suspend methods: let the proxy handle the coroutine<->reactive adaptation. Spring's
+    // JdkDynamicAopProxy / CglibAopProxy detect the suspending function, run the whole advice chain
+    // (including TransactionInterceptor) in Mono form, then await it back to a Continuation for the
+    // caller. So pjp.proceed() here already returns the Mono produced by the proxied invocation with
+    // the transaction context intact — we only wrap it for the span. Re-invoking pjp.target directly
+    // (the previous approach) bypassed the proxy chain and silently skipped @Transactional.
     @Suppress("UNCHECKED_CAST")
-    private fun traceSuspend(pjp: ProceedingJoinPoint, method: Method, name: String): Any? {
-        val args = pjp.args
-        val continuation = args.last() as Continuation<Any?>
-        val realArgs = args.copyOfRange(0, args.size - 1)
-        val target = pjp.target
-
-        val mono: Mono<Any> = Mono.defer {
-            Mono.from(
-                CoroutinesUtils.invokeSuspendingFunction(method, target, *realArgs)
-                    as org.reactivestreams.Publisher<Any>,
-            )
-        }
-        
-        return wrapMono(mono, name)
-    }
+    private fun traceSuspend(pjp: ProceedingJoinPoint, name: String): Any? =
+        wrapMono(pjp.proceed() as Mono<Any>, name)
 
     private fun emitLog(name: String, startNanos: Long) {
         if (!log.isDebugEnabled) return
