@@ -40,7 +40,8 @@ import java.util.UUID
  * - If commitPrepared() partially fails, retry mechanism ensures eventual consistency
  */
 class TransactionConnectionHolder(
-    private val poolRegistry: R2dbcConnectionPoolRegistry
+    private val poolRegistry: R2dbcConnectionPoolRegistry,
+    private val traceHeaders: Map<String, String>,
 ) {
     private val connections = mutableMapOf<String, Connection>()
     private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
@@ -56,7 +57,7 @@ class TransactionConnectionHolder(
 
     companion object {
         private const val APM_TRANSACTION_TYPE = "distributed"
-        private const val APM_TRANSACTION_NAME_PREFIX = "Distributed transaction"
+        private const val APM_TRANSACTION_NAME_PREFIX = "Distributed Transaction"
         private const val APM_SUMMARY_SPAN_TYPE = "distributed"
         private const val APM_SUMMARY_SPAN_SUBTYPE = "transaction"
         private const val APM_SUMMARY_SPAN_ACTION = "execute"
@@ -70,10 +71,10 @@ class TransactionConnectionHolder(
 
     fun markTransactionStart() {
         transactionActive = true
-        globalTransactionId = "tx_${UUID.randomUUID()}"
+        globalTransactionId = "tx_${UUID.randomUUID().toString().replace("-", "")}"
         val gid = globalTransactionId ?: return
 
-        apmTransaction = ElasticApm.startTransaction()
+        apmTransaction = ElasticApm.startTransactionWithRemoteParent(traceHeaders::get)
             .setName("$APM_TRANSACTION_NAME_PREFIX $gid")
             .setType(APM_TRANSACTION_TYPE)
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)

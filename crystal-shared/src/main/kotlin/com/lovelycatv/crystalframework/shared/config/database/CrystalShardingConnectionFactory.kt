@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
+import com.lovelycatv.crystalframework.shared.config.observability.ApmTraceHeaders
 import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryMetadata
@@ -23,12 +24,15 @@ class CrystalShardingConnectionFactory(
 ) : ConnectionFactory {
 
     override fun create(): Publisher<Connection> {
-        return Mono.just(
-            CrystalShardingConnection(
-                poolRegistry = poolRegistry,
-                shardingRuleRegistry = shardingRuleRegistry,
+        return Mono.deferContextual { context ->
+            Mono.just(
+                CrystalShardingConnection(
+                    poolRegistry = poolRegistry,
+                    shardingRuleRegistry = shardingRuleRegistry,
+                    traceHeaders = context.getOrDefault(ApmTraceHeaders::class.java, ApmTraceHeaders(emptyMap()))!!.values,
+                )
             )
-        )
+        }
     }
 
     override fun getMetadata(): ConnectionFactoryMetadata {

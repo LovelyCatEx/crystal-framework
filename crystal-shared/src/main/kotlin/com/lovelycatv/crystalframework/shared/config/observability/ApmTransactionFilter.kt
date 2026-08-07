@@ -27,22 +27,18 @@ class ApmTransactionFilter : WebFilter, Ordered {
         val method = request.method.name()
         val path = request.uri.path
 
-        // Create APM transaction for this HTTP request
-        val transaction = ElasticApm.startTransaction()
+        val transaction = ElasticApm.startTransactionWithRemoteParent(request.headers::getFirst)
         transaction.setName("$method $path")
         transaction.setType(Transaction.TYPE_REQUEST)
         transaction.addLabel("http.method", method)
         transaction.addLabel("http.url", request.uri.toString())
 
-        // Add request headers for distributed tracing
-        request.headers["traceparent"]?.firstOrNull()?.let { traceparent ->
-            transaction.addLabel("traceparent", traceparent)
-        }
-
-        // Activate transaction for this request context
+        val traceHeaders = mutableMapOf<String, String>()
+        transaction.injectTraceHeaders(traceHeaders::put)
         transaction.activate()
 
         return chain.filter(exchange)
+            .contextWrite { context -> context.put(ApmTraceHeaders::class.java, ApmTraceHeaders(traceHeaders.toMap())) }
             .doOnSuccess {
                 // Set response status
                 val statusCode = exchange.response.statusCode?.value() ?: 200

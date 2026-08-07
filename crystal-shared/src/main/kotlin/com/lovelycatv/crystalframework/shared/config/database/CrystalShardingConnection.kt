@@ -36,6 +36,7 @@ import java.time.Duration
 class CrystalShardingConnection(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val shardingRuleRegistry: R2dbcShardingRuleRegistry,
+    private val traceHeaders: Map<String, String>,
 ) : Connection {
 
     @Volatile
@@ -43,7 +44,7 @@ class CrystalShardingConnection(
 
     override fun beginTransaction(): Publisher<Void> {
         return Mono.fromRunnable {
-            val holder = TransactionConnectionHolder(poolRegistry)
+            val holder = TransactionConnectionHolder(poolRegistry, traceHeaders)
             holder.markTransactionStart()
             transactionHolder = holder
         }
