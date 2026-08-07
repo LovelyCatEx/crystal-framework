@@ -1,6 +1,8 @@
 package com.lovelycatv.crystalframework.shared.config.database
 
 import co.elastic.apm.api.ElasticApm
+import co.elastic.apm.api.Span
+import co.elastic.apm.api.Transaction
 import io.r2dbc.spi.Connection
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
@@ -49,14 +51,56 @@ class TransactionConnectionHolder(
     @Volatile
     private var globalTransactionId: String? = null
 
+    private var apmTransaction: Transaction? = null
+    private var requestSummarySpan: Span? = null
+
     companion object {
+        private const val APM_TRANSACTION_TYPE = "distributed"
+        private const val APM_TRANSACTION_NAME_PREFIX = "Distributed transaction"
+        private const val APM_SUMMARY_SPAN_TYPE = "distributed"
+        private const val APM_SUMMARY_SPAN_SUBTYPE = "transaction"
+        private const val APM_SUMMARY_SPAN_ACTION = "execute"
+        private const val APM_LABEL_GLOBAL_TRANSACTION_ID = "distributed.transaction.id"
+        private const val APM_LABEL_BUSINESS_TRANSACTION_ID = "distributed.business_transaction.id"
+        private const val APM_RESULT_COMMITTED = "COMMITTED"
+        private const val APM_RESULT_ROLLED_BACK = "ROLLED_BACK"
+        private const val APM_RESULT_FAILED = "FAILED"
         private val log = LoggerFactory.getLogger(TransactionConnectionHolder::class.java)
     }
 
     fun markTransactionStart() {
         transactionActive = true
         globalTransactionId = "tx_${UUID.randomUUID()}"
+        val gid = globalTransactionId ?: return
+
+        apmTransaction = ElasticApm.startTransaction()
+            .setName("$APM_TRANSACTION_NAME_PREFIX $gid")
+            .setType(APM_TRANSACTION_TYPE)
+            .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
+
+        requestSummarySpan = ElasticApm.currentSpan()
+            .startSpan(APM_SUMMARY_SPAN_TYPE, APM_SUMMARY_SPAN_SUBTYPE, APM_SUMMARY_SPAN_ACTION)
+            .setName("$APM_TRANSACTION_NAME_PREFIX $gid")
+            .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
+            .addLabel(APM_LABEL_BUSINESS_TRANSACTION_ID, apmTransaction?.id ?: "")
+
         log.debug("Distributed transaction started with GID: {}", globalTransactionId)
+    }
+
+    private fun finishApmTransaction(result: String? = null, error: Throwable? = null) {
+        synchronized(this) {
+            error?.let { apmTransaction?.captureException(it) }
+            result?.let { apmTransaction?.setResult(it) }
+            requestSummarySpan?.let { span ->
+                error?.let { span.captureException(it) }
+                result?.let { span.setName("$APM_TRANSACTION_NAME_PREFIX $it") }
+                span.end()
+                requestSummarySpan = null
+            }
+            apmTransaction?.end()
+            apmTransaction = null
+            transactionActive = false
+        }
     }
 
     fun getOrCreateConnection(dataSourceName: String): Mono<Connection> {
@@ -101,6 +145,7 @@ class TransactionConnectionHolder(
         return Mono.defer {
             if (connections.isEmpty()) {
                 log.debug("No connections to prepare")
+                finishApmTransaction(APM_RESULT_COMMITTED)
                 return@defer Mono.empty()
             }
 
@@ -111,7 +156,7 @@ class TransactionConnectionHolder(
             log.debug("Phase 1: Preparing {} connections with GID: {}", connList.size, gid)
 
             // Create APM span for the entire PREPARE phase
-            val phaseSpan = ElasticApm.currentSpan()
+            val phaseSpan = requireNotNull(apmTransaction)
                 .startSpan("db", "postgresql", "prepare")
                 .setName("2PC Phase 1: PREPARE ($gid)")
 
@@ -148,6 +193,7 @@ class TransactionConnectionHolder(
                     log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)
                     phaseSpan.captureException(error)
                     phaseSpan.end()
+                    apmTransaction?.captureException(error)
                     rollbackPrepared().then(Mono.error(error))
                 }
                 .doOnSuccess {
@@ -168,13 +214,14 @@ class TransactionConnectionHolder(
 
             if (xids.isEmpty()) {
                 log.debug("No prepared transactions to commit")
+                finishApmTransaction(APM_RESULT_COMMITTED)
                 return@defer Mono.empty()
             }
 
             log.debug("Phase 2: Committing {} prepared transactions: {}", xids.size, xids.keys)
 
             // Create APM span for the entire COMMIT phase
-            val phaseSpan = ElasticApm.currentSpan()
+            val phaseSpan = requireNotNull(apmTransaction)
                 .startSpan("db", "postgresql", "commit")
                 .setName("2PC Phase 2: COMMIT (${xids.size} prepared txns)")
 
@@ -215,9 +262,11 @@ class TransactionConnectionHolder(
                 }
                 .doOnSuccess {
                     log.debug("Phase 2 completed: all {} prepared transactions committed successfully", xids.size)
+                    finishApmTransaction(APM_RESULT_COMMITTED)
                 }
                 .doOnError { error ->
                     phaseSpan.captureException(error)
+                    finishApmTransaction(APM_RESULT_FAILED, error)
                 }
         }
     }
@@ -233,13 +282,14 @@ class TransactionConnectionHolder(
 
             if (xids.isEmpty()) {
                 log.debug("No prepared transactions to rollback")
+                finishApmTransaction(APM_RESULT_ROLLED_BACK)
                 return@defer Mono.empty()
             }
 
             log.warn("Rolling back {} prepared transactions: {}", xids.size, xids.keys)
 
             // Create APM span for the entire ROLLBACK phase
-            val phaseSpan = ElasticApm.currentSpan()
+            val phaseSpan = requireNotNull(apmTransaction)
                 .startSpan("db", "postgresql", "rollback")
                 .setName("2PC ROLLBACK (${xids.size} prepared txns)")
 
@@ -278,6 +328,7 @@ class TransactionConnectionHolder(
                         preparedTransactions.clear()
                     }
                     phaseSpan.end()
+                    finishApmTransaction(APM_RESULT_ROLLED_BACK)
                 }
                 .doOnSuccess {
                     log.warn("All {} prepared transactions rolled back", xids.size)
@@ -360,6 +411,7 @@ class TransactionConnectionHolder(
 
     fun closeAll(): Mono<Void> {
         return Mono.defer {
+            finishApmTransaction(APM_RESULT_ROLLED_BACK)
             if (connections.isEmpty()) {
                 log.debug("No connections to close")
                 return@defer Mono.empty()
