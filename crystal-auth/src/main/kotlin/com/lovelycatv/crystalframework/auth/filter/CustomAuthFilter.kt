@@ -1,5 +1,9 @@
 package com.lovelycatv.crystalframework.auth.filter
 
+import co.elastic.apm.api.ElasticApm
+import co.elastic.apm.api.Outcome
+import co.elastic.apm.api.Span
+import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
@@ -15,6 +19,7 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import org.springframework.web.util.pattern.PathPattern
 import reactor.core.publisher.Mono
+import java.util.concurrent.atomic.AtomicBoolean
 
 class CustomAuthFilter(
     val unauthorizedPathPatterns: List<PathPattern>,
@@ -28,6 +33,38 @@ class CustomAuthFilter(
     val assertNotForceLoggedOut: suspend (userId: Long, tokenIssuedAt: Long?) -> Unit,
 ) : WebFilter {
     private val logger = logger()
+
+    companion object {
+        // Brackets the filter's own pre-`chain.filter` work (session resolve + force-logout check +
+        // authority lookup), which the auto-trace aspect cannot see because a WebFilter is not a
+        // @Service / @Controller bean.
+        private const val AUTH_SPAN_NAME = "CustomAuthFilter#authenticate"
+
+        // Child spans splitting the authenticate work: the force-logout revocation check vs. the RBAC
+        // authority lookup, so their individual timings are visible instead of only the filter total.
+        private const val FORCE_LOGOUT_SPAN_NAME = "CustomAuthFilter#assertNotForceLoggedOut"
+        private const val AUTHORITIES_SPAN_NAME = "CustomAuthFilter#getUserAuthorities"
+    }
+
+    /**
+     * Runs [block] bracketed by a child span of [parent] named [name], so async/coroutine execution
+     * still nests correctly under the parent instead of relying on the thread-local current span.
+     * Shared by both authenticate sub-steps to avoid duplicating the span open / capture / end boilerplate.
+     */
+    private inline fun <T> withChildSpan(parent: Span, name: String, block: () -> T): T {
+        val span = parent
+            .startSpan(ApmSpanConstants.SPAN_TYPE, ApmSpanConstants.SPAN_SUBTYPE, ApmSpanConstants.SPAN_ACTION)
+            .setName(name)
+        try {
+            return block()
+        } catch (e: Throwable) {
+            span.captureException(e)
+            span.setOutcome(Outcome.FAILURE)
+            throw e
+        } finally {
+            span.end()
+        }
+    }
 
     override fun filter(
         exchange: ServerWebExchange,
@@ -74,6 +111,12 @@ class CustomAuthFilter(
             null
         }
 
+        val span = ElasticApm.currentSpan()
+            .startSpan(ApmSpanConstants.SPAN_TYPE, ApmSpanConstants.SPAN_SUBTYPE, ApmSpanConstants.SPAN_ACTION)
+            .setName(AUTH_SPAN_NAME)
+        val spanEnded = AtomicBoolean(false)
+        val endSpan = { if (spanEnded.compareAndSet(false, true)) span.end() }
+
         return exchange.session.flatMap { session ->
             if (authorization != null && claims != null) {
                 val userId = claims["userId"]
@@ -100,22 +143,33 @@ class CustomAuthFilter(
                 val tokenIssuedAt = claims.issuedAt?.time
 
                 mono {
-                    assertNotForceLoggedOut.invoke(userId, tokenIssuedAt)
-                    getUserAuthorities.invoke(userId, tenantId, tenantMemberId)
-                }.flatMap {
-                    val token = UsernamePasswordAuthenticationToken(
-                        claims.subject,
-                        null,
-                        it
-                    )
-
-                    chain.filter(exchange).contextMerge(
-                        ReactiveSecurityContextHolder.withAuthentication(token)
-                    )
+                    withChildSpan(span, FORCE_LOGOUT_SPAN_NAME) {
+                        assertNotForceLoggedOut.invoke(userId, tokenIssuedAt)
+                    }
+                    withChildSpan(span, AUTHORITIES_SPAN_NAME) {
+                        getUserAuthorities.invoke(userId, tenantId, tenantMemberId)
+                    }
                 }
+                    .doOnError { error ->
+                        span.captureException(error)
+                        span.setOutcome(Outcome.FAILURE)
+                    }
+                    .doFinally { endSpan() }
+                    .flatMap {
+                        val token = UsernamePasswordAuthenticationToken(
+                            claims.subject,
+                            null,
+                            it
+                        )
+
+                        chain.filter(exchange).contextMerge(
+                            ReactiveSecurityContextHolder.withAuthentication(token)
+                        )
+                    }
             } else {
+                endSpan()
                 chain.filter(exchange)
             }
-        }
+        }.doOnError { endSpan() }
     }
 }

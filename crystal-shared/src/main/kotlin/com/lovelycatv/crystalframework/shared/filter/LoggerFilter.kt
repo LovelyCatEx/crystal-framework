@@ -1,5 +1,7 @@
 package com.lovelycatv.crystalframework.shared.filter
 
+import co.elastic.apm.api.ElasticApm
+import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.HeadersConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -27,6 +29,10 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
     private val logger = logger()
 
     companion object {
+        // Brackets the synchronous request-body join + regex redaction that runs after the whole body
+        // is buffered. Only the CPU block is spanned, not the upstream buffering (that is network I/O).
+        private const val REQUEST_BODY_SPAN_NAME = "LoggerFilter#redactRequestBody"
+
         private const val MASK = "***"
         private val SENSITIVE_HEADER_NAMES = setOf(
             "authorization", "cookie", "set-cookie",
@@ -81,30 +87,37 @@ class LoggerFilter(private val snowIdGenerator: SnowIdGenerator) : WebFilter {
     ) : ServerHttpRequestDecorator(originalRequest) {
         override fun getBody(): Flux<DataBuffer> {
             return super.getBody().collectList().flatMapMany { dataBuffers ->
-                val joined = dataBuffers.joinToString("") { buffer ->
-                    val bytes = ByteArray(buffer.readableByteCount())
-                    buffer.read(bytes)
-                    DataBufferUtils.release(buffer)
-                    String(bytes, StandardCharsets.UTF_8)
-                }
-
-                val logJoined = redactBody(joined)
-                logger.debug("[$id] Request Body:")
-                if (joined.isNotEmpty()) {
-                    if (logJoined.length > 2000) {
-                        logger.debug("[$id]   ${logJoined.substring(0, 2000)}... (truncated)")
-                    } else {
-                        logger.debug("[$id]   $logJoined")
+                val span = ElasticApm.currentSpan()
+                    .startSpan(ApmSpanConstants.SPAN_TYPE, ApmSpanConstants.SPAN_SUBTYPE, ApmSpanConstants.SPAN_ACTION)
+                    .setName(REQUEST_BODY_SPAN_NAME)
+                try {
+                    val joined = dataBuffers.joinToString("") { buffer ->
+                        val bytes = ByteArray(buffer.readableByteCount())
+                        buffer.read(bytes)
+                        DataBufferUtils.release(buffer)
+                        String(bytes, StandardCharsets.UTF_8)
                     }
-                } else {
-                    logger.debug("[$id]   (empty)")
-                }
 
-                Flux.just(
-                    response
-                        .bufferFactory()
-                        .wrap(joined.toByteArray(StandardCharsets.UTF_8))
-                )
+                    val logJoined = redactBody(joined)
+                    logger.debug("[$id] Request Body:")
+                    if (joined.isNotEmpty()) {
+                        if (logJoined.length > 2000) {
+                            logger.debug("[$id]   ${logJoined.substring(0, 2000)}... (truncated)")
+                        } else {
+                            logger.debug("[$id]   $logJoined")
+                        }
+                    } else {
+                        logger.debug("[$id]   (empty)")
+                    }
+
+                    Flux.just(
+                        response
+                            .bufferFactory()
+                            .wrap(joined.toByteArray(StandardCharsets.UTF_8))
+                    )
+                } finally {
+                    span.end()
+                }
             }
         }
     }

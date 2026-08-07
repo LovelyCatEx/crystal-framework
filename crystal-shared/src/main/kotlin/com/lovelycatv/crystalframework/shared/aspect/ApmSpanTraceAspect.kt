@@ -4,6 +4,7 @@ import co.elastic.apm.api.ElasticApm
 import co.elastic.apm.api.Outcome
 import co.elastic.apm.api.Span
 import com.lovelycatv.crystalframework.shared.config.observability.ApmParentSpan
+import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
 import com.lovelycatv.crystalframework.shared.config.observability.Untraced
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import org.aspectj.lang.ProceedingJoinPoint
@@ -37,17 +38,26 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 class ApmSpanTraceAspect {
 
     companion object {
-        private const val SPAN_TYPE = "app"
-        private const val SPAN_SUBTYPE = "kotlin"
-        private const val SPAN_ACTION = "invoke"
         private val log = LoggerFactory.getLogger(ApmSpanTraceAspect::class.java)
     }
 
     @Around(
-        "(@within(org.springframework.stereotype.Service) " +
+        // @within matches the *declaring* type, so it covers methods written directly in an annotated
+        // @Service / @Controller class. The standardized CRUD endpoints live in the non-annotated base
+        // classes instead — controller methods in AbstractManagerController / StandardManagerController,
+        // service methods as default methods on the CachedBaseService interface hierarchy — so @within
+        // misses them. The two `within(<base>+)` clauses add those hierarchies back by declaring type.
+        //
+        // These are all *static* pointcuts: Spring decides proxy-eligibility from the bean class at
+        // startup, so only beans in these hierarchies are proxied. (A dynamic @target(...) instead
+        // forces Spring to proxy every bean for a runtime check, which fails on final Kotlin beans such
+        // as @Bean-produced config classes that the kotlin-spring all-open plugin does not open.)
+        "execution(public * com.lovelycatv.crystalframework..*(..)) && (" +
+            "@within(org.springframework.stereotype.Service) " +
             "|| @within(org.springframework.web.bind.annotation.RestController) " +
-            "|| @within(org.springframework.stereotype.Controller)) " +
-            "&& execution(public * com.lovelycatv.crystalframework..*(..))",
+            "|| @within(org.springframework.stereotype.Controller) " +
+            "|| within(com.lovelycatv.crystalframework.shared.controller.AbstractManagerController+) " +
+            "|| within(com.lovelycatv.crystalframework.shared.service.CachedBaseService+))",
     )
     fun trace(pjp: ProceedingJoinPoint): Any? {
         val signature = pjp.signature as MethodSignature
@@ -84,7 +94,11 @@ class ApmSpanTraceAspect {
 
     private fun traceSync(pjp: ProceedingJoinPoint, name: String): Any? {
         val parent: Span = ElasticApm.currentSpan()
-        val span = parent.startSpan(SPAN_TYPE, SPAN_SUBTYPE, SPAN_ACTION).setName(name)
+        val span = parent.startSpan(
+            ApmSpanConstants.SPAN_TYPE,
+            ApmSpanConstants.SPAN_SUBTYPE,
+            ApmSpanConstants.SPAN_ACTION,
+        ).setName(name)
         val startNanos = System.nanoTime()
         return try {
             val result = pjp.proceed()
@@ -103,7 +117,11 @@ class ApmSpanTraceAspect {
     private fun <T : Any> wrapMono(mono: Mono<T>, name: String): Mono<T> =
         mono.transformDeferredContextual { source, ctx ->
             val parent = resolveParent(ctx)
-            val span = parent.startSpan(SPAN_TYPE, SPAN_SUBTYPE, SPAN_ACTION).setName(name)
+            val span = parent.startSpan(
+            ApmSpanConstants.SPAN_TYPE,
+            ApmSpanConstants.SPAN_SUBTYPE,
+            ApmSpanConstants.SPAN_ACTION,
+        ).setName(name)
             val startNanos = System.nanoTime()
             source
                 .contextWrite { it.put(ApmParentSpan::class.java, ApmParentSpan(span)) }
@@ -121,7 +139,11 @@ class ApmSpanTraceAspect {
     private fun <T : Any> wrapFlux(flux: Flux<T>, name: String): Flux<T> =
         flux.transformDeferredContextual { source, ctx ->
             val parent = resolveParent(ctx)
-            val span = parent.startSpan(SPAN_TYPE, SPAN_SUBTYPE, SPAN_ACTION).setName(name)
+            val span = parent.startSpan(
+            ApmSpanConstants.SPAN_TYPE,
+            ApmSpanConstants.SPAN_SUBTYPE,
+            ApmSpanConstants.SPAN_ACTION,
+        ).setName(name)
             val startNanos = System.nanoTime()
             source
                 .contextWrite { it.put(ApmParentSpan::class.java, ApmParentSpan(span)) }

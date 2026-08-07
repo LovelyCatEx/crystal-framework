@@ -37,9 +37,11 @@ object GlobalConstants {
 
         const val MAIL_SEND_LOG_RECORDER = 100
 
-        // Runs innermost so the span brackets the actual business method rather than other aspects'
-        // overhead. Nested @Traced methods still form correct parent/child spans via Reactor Context.
-        const val APM_SPAN_TRACE = 2000
+        // Lowest order value = highest precedence = runs outermost, so the span brackets the other
+        // aspects' overhead (audit / permission checks) together with the business method rather than
+        // only the method body. Nested @Traced methods still form correct parent/child spans via
+        // Reactor Context.
+        const val APM_SPAN_TRACE = -2000
     }
 
     object ExtModule {
