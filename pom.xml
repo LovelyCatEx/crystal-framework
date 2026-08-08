@@ -36,6 +36,7 @@
 
     <modules>
         <module>crystal-shared</module>
+        <module>crystal-database</module>
         <module>crystal-audit</module>
         <module>crystal-schedule</module>
         <module>crystal-resource</module>
@@ -78,6 +79,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared-types</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-database</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

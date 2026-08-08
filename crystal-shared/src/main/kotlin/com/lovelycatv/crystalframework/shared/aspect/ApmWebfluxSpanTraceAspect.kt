@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.shared.aspect
 
 import co.elastic.apm.api.ElasticApm
 import co.elastic.apm.api.Outcome
+import co.elastic.apm.api.Scope
 import co.elastic.apm.api.Span
 import com.lovelycatv.crystalframework.shared.config.observability.ApmParentSpan
 import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
@@ -96,6 +97,13 @@ class ApmWebfluxSpanTraceAspect {
             ApmSpanConstants.SPAN_ACTION,
         ).setName(name)
         val startNanos = System.nanoTime()
+        // activate() makes this span the thread-local active context so the APM agent's
+        // auto-instrumentation (Redis, HTTP client, ...) hangs its child spans under this
+        // method span rather than directly under the transaction. Safe on the sync path:
+        // no thread switch occurs between activate() and scope.close(), so the Scope
+        // lifecycle is exact. Do NOT replicate this pattern in wrapMono/wrapFlux/traceSuspend
+        // — those paths hop threads and require the agent's Reactor plugin for propagation.
+        val scope: Scope = span.activate()
         return try {
             val result = pjp.proceed()
             span.setOutcome(Outcome.SUCCESS)
@@ -106,6 +114,7 @@ class ApmWebfluxSpanTraceAspect {
             throw error
         } finally {
             emitLog(name, startNanos)
+            scope.close()  // deactivate before ending — Scope must not outlive its span
             span.end()
         }
     }
@@ -114,10 +123,10 @@ class ApmWebfluxSpanTraceAspect {
         mono.transformDeferredContextual { source, ctx ->
             val parent = resolveParent(ctx)
             val span = parent.startSpan(
-            ApmSpanConstants.SPAN_TYPE,
-            ApmSpanConstants.SPAN_SUBTYPE,
-            ApmSpanConstants.SPAN_ACTION,
-        ).setName(name)
+                ApmSpanConstants.SPAN_TYPE,
+                ApmSpanConstants.SPAN_SUBTYPE,
+                ApmSpanConstants.SPAN_ACTION,
+            ).setName(name)
             val startNanos = System.nanoTime()
             source
                 .contextWrite { it.put(ApmParentSpan::class.java, ApmParentSpan(span)) }
@@ -136,10 +145,10 @@ class ApmWebfluxSpanTraceAspect {
         flux.transformDeferredContextual { source, ctx ->
             val parent = resolveParent(ctx)
             val span = parent.startSpan(
-            ApmSpanConstants.SPAN_TYPE,
-            ApmSpanConstants.SPAN_SUBTYPE,
-            ApmSpanConstants.SPAN_ACTION,
-        ).setName(name)
+                ApmSpanConstants.SPAN_TYPE,
+                ApmSpanConstants.SPAN_SUBTYPE,
+                ApmSpanConstants.SPAN_ACTION,
+            ).setName(name)
             val startNanos = System.nanoTime()
             source
                 .contextWrite { it.put(ApmParentSpan::class.java, ApmParentSpan(span)) }

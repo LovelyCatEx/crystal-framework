@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.database
 
 import com.lovelycatv.crystalframework.sdk.database.TableRegistry
 import com.lovelycatv.crystalframework.sdk.database.config.TableConfigurer
-import com.lovelycatv.crystalframework.shared.config.SoftDeleteSqlInterceptor
+import com.lovelycatv.crystalframework.database.interceptor.SoftDeleteSqlInterceptor
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
