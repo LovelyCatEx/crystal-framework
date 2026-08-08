@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.tenant.controller.vo.TenantProfileVO
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.crystalframework.shared.utils.reactor.withDistributedTransactionName
 import jakarta.validation.Valid
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.validation.annotation.Validated
@@ -73,7 +74,9 @@ class TenantProfileController(
         @RequestPart("file") file: FilePart
     ): ApiResponse<*> {
         userAuthentication.assertTenantIdNotNull()
-        tenantService.uploadTenantIcon(userAuthentication.userId, userAuthentication.tenantId!!, file)
+        withDistributedTransactionName("UploadTenantIcon") {
+            tenantService.uploadTenantIcon(userAuthentication.userId, userAuthentication.tenantId!!, file)
+        }
         return ApiResponse.success(null)
     }
 }

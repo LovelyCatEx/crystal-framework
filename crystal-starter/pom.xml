@@ -66,6 +66,10 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-database</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-shared-types</artifactId>
         </dependency>
         <dependency>
@@ -119,6 +123,13 @@
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-approval</artifactId>
+        </dependency>
+        <!-- Formats log events as Elastic Common Schema (ECS) JSON so the elastic-apm-agent's
+             log_sending can ship them to APM Server / Elasticsearch and correlate them with traces. -->
+        <dependency>
+            <groupId>co.elastic.logging</groupId>
+            <artifactId>logback-ecs-encoder</artifactId>
+            <version>1.7.0</version>
         </dependency>
     </dependencies>
 

@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.shared.constants
 import org.springframework.core.Ordered
 
 object GlobalConstants {
-    const val APP_VERSION = "1.13.5"
+    const val APP_VERSION = "1.14.1"
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
 
@@ -36,6 +36,12 @@ object GlobalConstants {
         const val MANAGER_CONTROLLER_PERMISSION_CHECK = 1000
 
         const val MAIL_SEND_LOG_RECORDER = 100
+
+        // Lowest order value = highest precedence = runs outermost, so the span brackets the other
+        // aspects' overhead (audit / permission checks) together with the business method rather than
+        // only the method body. Nested @Traced methods still form correct parent/child spans via
+        // Reactor Context.
+        const val APM_SPAN_TRACE = -2000
     }
 
     object ExtModule {

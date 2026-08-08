@@ -6,6 +6,12 @@ export enum ResourceFileType {
     TENANT_MEMBER_AVATAR = 2,
 }
 
+export enum FileResourceStatus {
+    UPLOADING = 0,
+    COMMITTED = 1,
+    CLEANUP_PENDING = 2,
+}
+
 export interface FileResource extends BaseScopedEntity {
     userId: string;
     type: number;
@@ -15,4 +21,5 @@ export interface FileResource extends BaseScopedEntity {
     fileSize: string;
     storageProviderId: string;
     objectKey: string;
+    status: number;
 }

@@ -3264,6 +3264,7 @@ export const zhCN: I18nRules = {
         storageProvider: '存储提供商',
         uploader: '上传者',
         fileType: '文件类型',
+        status: '状态',
         createdTime: '创建时间',
         userId: '用户ID',
         providerId: '提供商ID'
@@ -3796,6 +3797,11 @@ export const zhCN: I18nRules = {
       0: '用户头像',
       1: '租户图标',
       2: '租户成员头像'
+    },
+    fileResourceStatus: {
+      0: '上传中',
+      1: '已提交',
+      2: '待清理'
     },
     departmentMemberRoleType: {
       0: '普通成员',

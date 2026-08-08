@@ -1,34 +1,25 @@
 package com.lovelycatv.crystalframework.shared.utils
 
-import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.withTimeoutOrNull
 import reactor.core.publisher.Flux
-import reactor.core.scheduler.Schedulers
 import java.time.Duration
-import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.milliseconds
 
 class KotlinReactiveExtensions private constructor()
 
-suspend fun <T: Any> Flux<T>.awaitListWithTimeout(
-    timeout: Duration = Duration.ofMillis(1000)
+suspend fun <T : Any> Flux<T>.awaitListWithTimeout(
+    timeout: Duration = Duration.ofMillis(10000)
 ): List<T> {
+    val disposable = subscribe()
     return try {
-        // !!! IMPORTANT !!!
-        val disposable = this.subscribe()
-
-        val result: List<T>? = withTimeoutOrNull(timeout.toMillis().milliseconds) {
-            this@awaitListWithTimeout
-                .subscribeOn(Schedulers.boundedElastic())
+        val result = withTimeoutOrNull(timeout.toMillis().milliseconds) {
+            subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic())
                 .collectList()
-                .awaitSingleOrNull()
+                .awaitSingle()
         }
-
-        return (result ?: emptyList()).also {
-            disposable.dispose()
-        }
-    } catch (_: TimeoutException) {
-        println("awaitListWithTimeout() function timeout: $timeout ms")
-        emptyList()
+        result ?: emptyList()
+    } finally {
+        disposable.dispose()
     }
 }

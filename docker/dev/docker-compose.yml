@@ -11,6 +11,8 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - crystalframework_postgres_data:/var/lib/postgresql/data
+      - ./config/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     networks:
       - crystalframework_network
     healthcheck:

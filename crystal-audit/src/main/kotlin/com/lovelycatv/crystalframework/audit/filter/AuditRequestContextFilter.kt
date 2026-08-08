@@ -8,8 +8,11 @@
 
 package com.lovelycatv.crystalframework.audit.filter
 
+import co.elastic.apm.api.ElasticApm
+import co.elastic.apm.api.Outcome
 import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
 import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
+import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -37,6 +40,13 @@ class AuditRequestContextFilter(
     private val snowIdGenerator: SnowIdGenerator
 ) : WebFilter {
 
+    companion object {
+        // Brackets the FIRST `exchange.session` resolution of the request (Redis-backed). This filter
+        // has the highest precedence, so it bears the actual session-store I/O; later filters reuse the
+        // cached session. The auto-trace aspect cannot see it since a WebFilter is not a bean it advises.
+        private const val SESSION_SPAN_NAME = "AuditRequestContextFilter#resolveSession"
+    }
+
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
 
@@ -51,7 +61,17 @@ class AuditRequestContextFilter(
             userAgent = userAgent
         )
 
-        return exchange.session.flatMap { session ->
+        val sessionSpan = ElasticApm.currentSpan()
+            .startSpan(ApmSpanConstants.SPAN_TYPE, ApmSpanConstants.SPAN_SUBTYPE, ApmSpanConstants.SPAN_ACTION)
+            .setName(SESSION_SPAN_NAME)
+
+        return exchange.session
+            .doOnError { error ->
+                sessionSpan.captureException(error)
+                sessionSpan.setOutcome(Outcome.FAILURE)
+            }
+            .doFinally { sessionSpan.end() }
+            .flatMap { session ->
             session.attributes[SessionConstants.AUDIT_REMOTE_IP] = remoteIp ?: ""
             session.attributes[SessionConstants.AUDIT_USER_AGENT] = userAgent ?: ""
 

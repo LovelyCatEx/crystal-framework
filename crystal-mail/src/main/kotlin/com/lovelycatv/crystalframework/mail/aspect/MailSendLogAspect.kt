@@ -9,6 +9,7 @@ import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactor.ReactorContext
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -38,6 +39,11 @@ class MailSendLogAspect(
         val subject = args[1] as String
         val content = args[2] as String
 
+        val continuation = args.filterIsInstance<Continuation<*>>().firstOrNull()
+        val reactorContext = continuation?.context?.get(ReactorContext)?.context
+        val userId = reactorContext?.let(CurrentUserId::from)
+        val tenantId = reactorContext?.let(CurrentTenantId::from)
+
         var success = true
         var errorMessage: String? = null
         var result: Any?
@@ -51,8 +57,6 @@ class MailSendLogAspect(
         } finally {
             mailLogScope.launch {
                 try {
-                    val userId = CurrentUserId.current()
-                    val tenantId = CurrentTenantId.current()
                     val fromEmail = systemModuleClient.getSystemSettings()?.mail?.smtp?.fromEmail ?: ""
 
                     mailSendLogService.record(

@@ -28,10 +28,19 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
     fun resolveFileExtension(
         fileType: ResourceFileType,
         contentType: String,
-        requestedExtension: String
     ): String?
 
-    suspend fun getByMD5(md5: String): FileResourceEntity?
+    suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity?
+
+    suspend fun reservePreUpload(entity: FileResourceEntity): FileResourceEntity?
+
+    suspend fun commitUpload(entity: FileResourceEntity): Boolean
+
+    suspend fun removeUploadRecord(entity: FileResourceEntity): Boolean
+
+    suspend fun markUploadCleanupPending(entity: FileResourceEntity): Boolean
+
+    suspend fun cleanupUploads(now: Long): Long
 
     /**
      * Resolves a readable download URL for [entity]. Enforces [viewer]'s read entitlement via

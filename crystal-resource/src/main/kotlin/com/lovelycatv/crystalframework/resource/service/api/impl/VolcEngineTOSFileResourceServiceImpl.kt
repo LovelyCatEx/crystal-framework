@@ -13,6 +13,7 @@ import com.volcengine.tos.comm.HttpMethod
 import com.volcengine.tos.model.`object`.AbortMultipartUploadInput
 import com.volcengine.tos.model.`object`.CompleteMultipartUploadV2Input
 import com.volcengine.tos.model.`object`.CreateMultipartUploadInput
+import com.volcengine.tos.model.`object`.DeleteObjectInput
 import com.volcengine.tos.model.`object`.ObjectMetaRequestOptions
 import com.volcengine.tos.model.`object`.PreSignedURLInput
 import com.volcengine.tos.model.`object`.UploadPartV2Input
@@ -58,6 +59,20 @@ class VolcEngineTOSFileResourceServiceImpl(
                     .expires(signedUrlTtlSeconds)
                     .build()
             ).signedUrl
+        }
+    }
+
+    override suspend fun deleteObject(objectKey: String): Exception? {
+        return try {
+            getClient().deleteObject(
+                DeleteObjectInput()
+                    .setBucket(bucketName)
+                    .setKey(objectKey.removePrefix("/"))
+            )
+            null
+        } catch (e: Exception) {
+            logger.error("An error occurred while deleting VolcEngine TOS object", e)
+            e
         }
     }
 

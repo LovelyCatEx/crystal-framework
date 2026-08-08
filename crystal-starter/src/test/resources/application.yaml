@@ -1,11 +1,16 @@
 spring:
   application:
-    name: springboot-template
+    name: crystal-framework
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.r2dbc.autoconfigure.R2dbcAutoConfiguration
+      - org.springframework.boot.data.r2dbc.autoconfigure.DataR2dbcRepositoriesAutoConfiguration
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/db
     username: postgres
     password: 123456
     pool:
+      enabled: false
       initial-size: 5
       min-idle: 5
       max-size: 40
@@ -19,6 +24,9 @@ spring:
     username: postgres
     password: 123456
   data:
+    r2dbc:
+      repositories:
+        enabled: false
     redis:
       host: localhost
       port: 6379
@@ -128,6 +136,11 @@ crystalframework:
       lease-key-prefix: "crystal:snowflake:lease:"
       lease-ttl-millis: 15000
       lease-renew-interval-millis: 5000
+  database:
+    default-data-source: primary
+    data-sources: []
+    routing:
+      log-decisions: true
   test:
     smtp:
       subject: Crystal Framework SMTP Test
@@ -137,6 +150,8 @@ crystalframework:
         default-message: 'hello, world! <link href="https://github.com/LovelyCatEx/crystal-framework" title="Crystal Framework" />'
   message-channel:
     encryption-key: ${CRYSTAL_MSG_CHANNEL_AES_KEY:TP6qY8C0V7Q6cjlLgkSrPg+/ILT/bXLVmK1+HkBnbk0=}
+# Tracing is handled by the elastic-apm-agent (-javaagent), not the Spring Boot OTLP starter, which has
+# been removed. See the main application.yaml management block for the rationale.
 logging:
   level:
     root: info

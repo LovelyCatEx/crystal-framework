@@ -186,6 +186,11 @@ class SystemSettingsServiceImpl(
     }
 
     override suspend fun getSystemModuleSettings(): SystemSettings.Module {
+        // Serve from the in-process settings cache when warm (invalidated via the Redis refresh topic).
+        // Fall back to per-key reads only while the cache is cold, e.g. during getSystemSettings()'s own
+        // build path (line where module = getSystemModuleSettings()). Reading the field directly instead
+        // of calling getSystemSettings() is required to avoid infinite recursion during that build.
+        cachedSystemSettings?.let { return it.module }
         return SystemSettings.Module(
             tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
             approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,

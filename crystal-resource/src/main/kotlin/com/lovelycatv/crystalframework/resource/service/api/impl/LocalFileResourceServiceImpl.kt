@@ -69,6 +69,18 @@ class LocalFileResourceServiceImpl(
         }
     }
 
+    override suspend fun deleteObject(objectKey: String): Exception? {
+        return try {
+            withContext(Dispatchers.IO) {
+                Files.deleteIfExists(getFilePath(objectKey))
+            }
+            null
+        } catch (e: Exception) {
+            logger.error("An error occurred while deleting local file", e)
+            e
+        }
+    }
+
     fun getFile(objectKey: String): File? {
         val targetPath = resolvePath(objectKey)
         val file = targetPath.toFile()

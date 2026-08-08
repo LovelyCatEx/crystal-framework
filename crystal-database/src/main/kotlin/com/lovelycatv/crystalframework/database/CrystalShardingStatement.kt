@@ -1,0 +1,295 @@
+package com.lovelycatv.crystalframework.database
+
+import com.lovelycatv.crystalframework.database.constants.R2dbcDataSourceConstants
+import com.lovelycatv.crystalframework.database.transaction.TransactionConnectionHolder
+import com.lovelycatv.crystalframework.database.exception.ShardingException
+import com.lovelycatv.crystalframework.database.sharding.R2dbcShardingRule
+import com.lovelycatv.crystalframework.database.sharding.ShardingTarget
+import io.r2dbc.spi.Connection
+import io.r2dbc.spi.Result
+import io.r2dbc.spi.Statement
+import net.sf.jsqlparser.expression.DoubleValue
+import net.sf.jsqlparser.expression.Expression
+import net.sf.jsqlparser.expression.LongValue
+import net.sf.jsqlparser.expression.StringValue
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList
+import net.sf.jsqlparser.schema.Column
+import net.sf.jsqlparser.schema.Table
+import net.sf.jsqlparser.statement.insert.Insert
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
+
+/**
+ * Crystal Framework virtual Statement, defers real connection acquisition until [execute].
+ *
+ * Workflow:
+ * 1. On [bind] / [bindNull] / [add], cache all calls without executing
+ * 2. Capture sharding column value
+ * 3. On [execute]:
+ *    - Extract sharding values from all batches, call [com.lovelycatv.crystalframework.database.sharding.ShardingAlgorithm] to resolve target
+ *    - Validate all batches must route to the same target (single-target constraint)
+ *    - Acquire connection from TransactionConnectionHolder or pool
+ *    - Rewrite SQL (logical table → real table)
+ *    - Replay all bind/add calls on real connection
+ *    - Execute and return result
+ */
+class CrystalShardingStatement(
+    private val poolRegistry: R2dbcConnectionPoolRegistry,
+    private val rule: R2dbcShardingRule,
+    private val parsed: net.sf.jsqlparser.statement.Statement,
+    private val tableNode: Table,
+    private val transactionHolder: TransactionConnectionHolder?,
+) : Statement {
+
+    private val statementActions = mutableListOf<(Statement) -> Unit>()
+    private val batches = mutableListOf<Batch>()
+    private var current = Batch()
+
+    /**
+     * 0-based index of sharding column in parameter list, parsed from SQL.
+     * Example: `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` → tenant_id at index=1
+     */
+    private val shardingParamIndex: Int by lazy { locateShardingParamIndex() }
+    private val shardingParamName: String by lazy {
+        "${R2dbcDataSourceConstants.POSITIONAL_PARAMETER_PREFIX}${shardingParamIndex + 1}"
+    }
+
+    override fun bind(index: Int, value: Any): Statement = apply {
+        current.actions += { it.bind(index, value) }
+        if (index == shardingParamIndex) {
+            current.setShardingValue(value)
+        }
+    }
+
+    override fun bind(name: String, value: Any): Statement = apply {
+        current.actions += { it.bind(name, value) }
+        if (name == shardingParamName) {
+            current.setShardingValue(value)
+        }
+    }
+
+    override fun bindNull(index: Int, type: Class<*>): Statement = apply {
+        current.actions += { it.bindNull(index, type) }
+        if (index == shardingParamIndex) {
+            current.setShardingValue(null)
+        }
+    }
+
+    override fun bindNull(name: String, type: Class<*>): Statement = apply {
+        current.actions += { it.bindNull(name, type) }
+        if (name == shardingParamName) {
+            current.setShardingValue(null)
+        }
+    }
+
+    override fun add(): Statement = apply {
+        batches += current
+        current = Batch()
+    }
+
+    override fun returnGeneratedValues(vararg columns: String): Statement = apply {
+        val copy = columns.clone()
+        statementActions += { it.returnGeneratedValues(*copy) }
+    }
+
+    override fun fetchSize(rows: Int): Statement = apply {
+        statementActions += { it.fetchSize(rows) }
+    }
+
+    override fun execute(): Publisher<out Result> {
+        // 1. Finalize current batch
+        if (current.actions.isNotEmpty()) {
+            batches += current
+            current = Batch()
+        }
+
+        if (batches.isEmpty()) {
+            // No bind calls: fall back to literal sharding values written directly in the SQL,
+            // e.g. INSERT INTO users (id, tenant_id, name) VALUES (1, 6, 'Alice')
+            val literalValues = extractLiteralShardingValues()
+                ?: return Flux.error(
+                    ShardingException(
+                        "Sharded table '${rule.tableName}' statement executed without any bind calls " +
+                                "and no literal value found for sharding column '${rule.shardingColumn}'",
+                    ),
+                )
+            literalValues.forEach { value ->
+                batches += Batch().apply { setShardingValue(value) }
+            }
+        }
+
+        // 2. Resolve routing target for each batch
+        val targets = batches.map { batch ->
+            if (!batch.shardingValueSet) {
+                throw ShardingException(
+                    "Sharded table '${rule.tableName}' batch did not bind sharding column " +
+                            "(index=$shardingParamIndex / name=$shardingParamName)",
+                )
+            }
+            resolveShardingTarget(batch.shardingValue)
+        }.toSet()
+
+        // 3. Validate single-target constraint (all batches must route to same dataSource + table)
+        if (targets.size != 1) {
+            return Flux.error(
+                ShardingException(
+                    "Batch on sharded table '${rule.tableName}' spans multiple targets $targets; " +
+                            "single-target routing only",
+                ),
+            )
+        }
+
+        val target = targets.first()
+
+        // 4. Acquire real connection from target data source
+        return if (transactionHolder != null) {
+            // In transaction: get connection from holder
+            Flux.from(transactionHolder.getOrCreateConnection(target.dataSourceName))
+                .flatMap { realConnection ->
+                    executeOnConnection(realConnection, target)
+                }
+        } else {
+            // No transaction: temporary connection
+            val pool = poolRegistry.require(target.dataSourceName)
+            Flux.usingWhen(
+                pool.create(),
+                { realConnection -> executeOnConnection(realConnection, target) },
+                { it.close() }
+            )
+        }
+    }
+
+    private fun executeOnConnection(realConnection: Connection, target: ShardingTarget): Flux<out Result> {
+        // 5. Rewrite SQL
+        tableNode.name = target.tableName
+        val finalSql = parsed.toString()
+
+        // 6. Create real statement and replay all calls
+        val realStmt = realConnection.createStatement(finalSql)
+
+        statementActions.forEach { it(realStmt) }
+
+        batches.forEachIndexed { index, batch ->
+            batch.actions.forEach { it(realStmt) }
+            if (index < batches.size - 1) {
+                realStmt.add()
+            }
+        }
+
+        // 7. Execute
+        return Flux.from(realStmt.execute())
+    }
+
+    private fun resolveShardingTarget(shardingValue: Any?): ShardingTarget {
+        val algorithm = rule.algorithm
+            ?: throw ShardingException("Table '${rule.tableName}' has no sharding algorithm")
+
+        val target = algorithm.doSharding(rule.tableName, shardingValue)
+
+        // Validate data source exists
+        runCatching { poolRegistry.require(target.dataSourceName) }.getOrElse {
+            throw ShardingException(
+                "Sharding algorithm for table '${rule.tableName}' returned dataSource='${target.dataSourceName}' " +
+                        "which does not exist in pool registry (shardingValue=$shardingValue)"
+            )
+        }
+
+        // Validate table name (if table sharding is enabled)
+        val normalizedTable = target.tableName.trim().lowercase()
+        if (rule.actualTables.isNotEmpty() && normalizedTable !in rule.actualTables) {
+            throw ShardingException(
+                "Sharding algorithm for table '${rule.tableName}' returned tableName='$normalizedTable' " +
+                        "which is not in actualTables=${rule.actualTables} (shardingValue=$shardingValue)"
+            )
+        }
+
+        return target.copy(tableName = normalizedTable)
+    }
+
+    /**
+     * Locate parameter index (0-based) for sharding column from SQL AST.
+     * Example: `INSERT INTO users (id, tenant_id, name) VALUES ($1, $2, $3)` with shardingColumn="tenant_id"
+     * → find tenant_id at position 1 in columns list → corresponds to $2 → bind index = 1
+     */
+    private fun locateShardingParamIndex(): Int {
+        val column = rule.shardingColumn
+            ?: throw ShardingException("Table '${rule.tableName}' is sharded but has no sharding column")
+
+        return when (parsed) {
+            is Insert -> {
+                val insert = parsed as Insert
+                val columns = insert.columns
+                    ?: throw ShardingException(
+                        "INSERT on sharded table '${rule.tableName}' has no column list",
+                    )
+                val position = columns.indexOfFirstColumn { col ->
+                    stripQuotes(col.columnName).equals(column, ignoreCase = true)
+                }
+                if (position < 0) {
+                    throw ShardingException(
+                        "Sharding column '$column' not found in INSERT column list for table '${rule.tableName}'",
+                    )
+                }
+                position
+            }
+            else -> {
+                // For SELECT/UPDATE/DELETE, sharding column is in WHERE clause with variable position
+                // Simplified: assume first parameter is sharding column (real projects need full WHERE traversal)
+                throw ShardingException(
+                    "Sharding for ${parsed.javaClass.simpleName} on table '${rule.tableName}' requires " +
+                            "literal sharding value or explicit parameter position (not yet implemented for WHERE clauses)",
+                )
+            }
+        }
+    }
+
+    private fun stripQuotes(name: String): String {
+        return name.removeSurrounding("\"").removeSurrounding("`")
+    }
+
+    private fun ExpressionList<Column>.indexOfFirstColumn(predicate: (Column) -> Boolean): Int {
+        return this.toList().indexOfFirst(predicate)
+    }
+
+    /**
+     * Extract literal sharding values embedded directly in an INSERT ... VALUES statement,
+     * one per value row. Returns null when the statement is not a literal-value INSERT or the
+     * sharding column is a placeholder / unsupported expression (caller then requires bind calls).
+     */
+    private fun extractLiteralShardingValues(): List<Any>? {
+        val insert = parsed as? Insert ?: return null
+        val expressions = insert.values?.expressions ?: return null
+        val rows: List<List<Expression>> =
+            if (expressions.isNotEmpty() && expressions[0] is ParenthesedExpressionList<*>) {
+                expressions.map { (it as ExpressionList<*>).toList() }
+            } else {
+                listOf(expressions.toList())
+            }
+        return rows.map { row ->
+            val cell = row.getOrNull(shardingParamIndex) ?: return null
+            literalValueOf(cell) ?: return null
+        }.ifEmpty { null }
+    }
+
+    private fun literalValueOf(expression: Expression): Any? = when (expression) {
+        is LongValue -> expression.value
+        is StringValue -> expression.value
+        is DoubleValue -> expression.value
+        else -> null
+    }
+
+    /** All bind calls for one batch + corresponding sharding value */
+    private class Batch {
+        val actions = mutableListOf<(Statement) -> Unit>()
+        var shardingValue: Any? = null
+            private set
+        var shardingValueSet: Boolean = false
+            private set
+
+        fun setShardingValue(value: Any?) {
+            shardingValue = value
+            shardingValueSet = true
+        }
+    }
+}

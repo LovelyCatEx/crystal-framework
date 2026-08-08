@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.database
 
 import com.lovelycatv.crystalframework.CrystalFrameworkApplicationTests
-import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkSQLModifier
+import com.lovelycatv.crystalframework.database.utils.CrystalFrameworkSQLModifier
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
