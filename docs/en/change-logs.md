@@ -7,6 +7,31 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.14.1
+
+2026-08-08
+
+### Features
++ feat(observability): Integrate Elastic APM tracing and ECS log shipping, with auto-tracing of @Service / @Controller methods, enhanced call-chain stack traces, W3C trace-header propagation, and caller-defined distributed transaction names.
++ feat(observability): Add a distributed transaction recorder and APM instrumentation.
++ feat(database): Implement distributed transactions across shards (PostgreSQL 2PC) and sharding routing, with reactor-context data-source routing and sharding route metadata.
++ feat(resource): Complete the file upload status lifecycle and support Aliyun OSS multipart uploads.
+
+### Bug Fixes
++ fix(database): Fix a connection pool leak caused by an acquisition race in the 2PC connection holder, and return connections to the pool after distributed transaction commit/rollback.
++ fix(database): Remove blocking connection acquisition and preserve traceId in 2PC operations using Flux.concat.
++ fix(observability): Propagate the APM transaction into the Reactor Context as the parent span, and stop suspend tracing from bypassing the @Transactional proxy.
++ fix(resource): Use the MIME-derived extension instead of the uploader-provided extension check, and make the file service cache concurrency-safe.
++ fix(auth,user): Lock tenant OAuth account binding and prevent duplicate OAuth2 success processing.
++ fix(mail): Preserve user and tenant context in async logs.
++ fix(shared): Prevent duplicate reactive subscriptions.
+
+### Others
++ refactor(database): Extract sharding and 2PC into a standalone crystal-database module and switch to a ShardingSphere-style deferred connection architecture.
++ refactor(shared): Split R2DBC infrastructure configuration and extract SQL soft-delete into a pluggable interceptor chain.
+
+---
+
 ## v1.13.5
 
 2026-08-05
