@@ -61,26 +61,30 @@ class CrystalShardingConnection(
     override fun commitTransaction(): Publisher<Void> {
         return Mono.defer {
             val holder = transactionHolder
-            holder?.// Two-Phase Commit Protocol
-            prepareAll()                    // Phase 1: PREPARE TRANSACTION
-                ?.then(holder.commitPrepared())     // Phase 2: COMMIT PREPARED
-                ?.doFinally { transactionHolder = null } ?: Mono.empty()
+            // Two-Phase Commit: PREPARE then COMMIT PREPARED. Real connections are returned to
+            // the pool by close() -> holder.closeAll(); do NOT drop the holder here, or close()
+            // can no longer reach it and the underlying pooled connections leak.
+            holder?.prepareAll()
+                ?.then(holder.commitPrepared())
+                ?: Mono.empty()
         }
     }
 
     override fun rollbackTransaction(): Publisher<Void> {
         return Mono.defer {
             val holder = transactionHolder
-            holder?.// Rollback prepared transactions if any
-            rollbackPrepared()?.then(holder.rollbackAll())  // Rollback non-prepared transactions
-                ?.doFinally { transactionHolder = null } ?: Mono.empty()
+            // Rollback prepared then non-prepared transactions. The holder is released by
+            // close(), not here (see commitTransaction).
+            holder?.rollbackPrepared()
+                ?.then(holder.rollbackAll())
+                ?: Mono.empty()
         }
     }
 
     override fun close(): Publisher<Void> {
         return Mono.defer {
             val holder = transactionHolder
-            holder?.closeAll() ?: Mono.empty()
+            holder?.closeAll()?.doFinally { transactionHolder = null } ?: Mono.empty()
         }
     }
 
