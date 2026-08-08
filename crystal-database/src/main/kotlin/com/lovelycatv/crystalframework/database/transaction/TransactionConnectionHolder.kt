@@ -51,6 +51,14 @@ class TransactionConnectionHolder(
     private val connections = mutableMapOf<String, Connection>()
     private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
 
+    // One shared, cached acquisition Mono per data source. Concurrent statements in the same
+    // transaction must reuse a single pool.create()+beginTransaction() instead of each racing to
+    // acquire their own physical connection (only the last would win the `connections` map, the
+    // rest would leak out of the pool forever). `.cache()` guarantees exactly one acquisition whose
+    // result is shared by all subscribers; the connection is registered into `connections` so
+    // closeAll() can always reclaim it.
+    private val acquisitions = mutableMapOf<String, Mono<Connection>>()
+
     @Volatile
     private var transactionActive = false
 
@@ -124,32 +132,37 @@ class TransactionConnectionHolder(
     fun getOrCreateConnection(dataSourceName: String): Mono<Connection> {
         return Mono.defer {
             synchronized(connections) {
-                val existing = connections[dataSourceName]
-                if (existing != null) {
-                    log.debug("Reusing existing connection for dataSource: {}", dataSourceName)
-                    return@defer Mono.just(existing)
+                // Reuse the single cached acquisition for this data source. The first subscriber
+                // triggers exactly one pool.create()+beginTransaction(); all concurrent subscribers
+                // share that same result, so no duplicate physical connection is ever leased and
+                // leaked. Registering into `connections` on success lets closeAll() reclaim it.
+                acquisitions.getOrPut(dataSourceName) {
+                    Mono.defer {
+                        log.debug("Acquiring new connection for dataSource: {}", dataSourceName)
+                        Mono.from(poolRegistry.require(dataSourceName).create())
+                            .flatMap { conn ->
+                                val begin = if (transactionActive) {
+                                    log.debug("Beginning transaction on dataSource: {}", dataSourceName)
+                                    Mono.from(conn.beginTransaction()).thenReturn(conn)
+                                } else {
+                                    Mono.just(conn)
+                                }
+                                begin.doOnNext {
+                                    synchronized(connections) {
+                                        connections[dataSourceName] = conn
+                                    }
+                                    log.debug("Connection acquired and registered for dataSource: {}", dataSourceName)
+                                }.onErrorResume { error ->
+                                    // beginTransaction failed after the physical connection was leased:
+                                    // close it so it returns to the pool, and drop the cached acquisition
+                                    // so a later call can retry cleanly.
+                                    log.warn("Failed to acquire connection for dataSource: {}", dataSourceName, error)
+                                    synchronized(connections) { acquisitions.remove(dataSourceName) }
+                                    Mono.from(conn.close()).onErrorComplete().then(Mono.error(error))
+                                }
+                            }
+                    }.cache()
                 }
-
-                log.debug("Acquiring new connection for dataSource: {}", dataSourceName)
-                Mono.from(poolRegistry.require(dataSourceName).create())
-                    .flatMap { conn ->
-                        if (transactionActive) {
-                            log.debug("Beginning transaction on dataSource: {}", dataSourceName)
-                            Mono.from(conn.beginTransaction())
-                                .thenReturn(conn)
-                        } else {
-                            Mono.just(conn)
-                        }
-                    }
-                    .doOnNext { conn ->
-                        synchronized(connections) {
-                            connections[dataSourceName] = conn
-                        }
-                        log.debug("Connection acquired and registered for dataSource: {}", dataSourceName)
-                    }
-                    .doOnError { error ->
-                        log.warn("Failed to acquire connection for dataSource: {}", dataSourceName, error)
-                    }
             }
         }
     }
@@ -431,6 +444,7 @@ class TransactionConnectionHolder(
         return Mono.defer {
             finishApmTransaction(APM_RESULT_ROLLED_BACK)
             if (connections.isEmpty()) {
+                synchronized(connections) { acquisitions.clear() }
                 log.debug("No connections to close")
                 return@defer Mono.empty()
             }
@@ -457,6 +471,7 @@ class TransactionConnectionHolder(
             chain.doFinally {
                 synchronized(connections) {
                     connections.clear()
+                    acquisitions.clear()
                 }
                 log.debug("All connections closed and cleared")
             }
