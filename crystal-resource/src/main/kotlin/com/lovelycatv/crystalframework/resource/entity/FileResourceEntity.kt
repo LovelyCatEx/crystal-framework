@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.resource.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.lovelycatv.crystalframework.resource.types.FileResourceStatus
 import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.entity.BaseScopedEntity
@@ -33,10 +34,24 @@ class FileResourceEntity(
     var storageProviderId: Long = 0,
     @Column(value = "object_key")
     var objectKey: String = "",
+    @Column(value = "status")
+    var status: Int = FileResourceStatus.COMMITTED.typeId,
+    @Column(value = "upload_token")
+    @JsonIgnore
+    var uploadToken: String? = null,
+    @Column(value = "lease_until")
+    @JsonIgnore
+    var leaseUntil: Long? = null,
     createdTime: Long = System.currentTimeMillis(),
     modifiedTime: Long = System.currentTimeMillis(),
     deletedTime: Long? = null
 ) : BaseScopedEntity(id, scope, scopeId, createdTime, modifiedTime, deletedTime) {
+    @JsonIgnore
+    fun getRealStatus(): FileResourceStatus {
+        return FileResourceStatus.getByTypeId(this.status)
+            ?: throw BusinessException("file resource status ${this.status} not found")
+    }
+
     @JsonIgnore
     fun getRealResourceFileType(): ResourceFileType {
         return ResourceFileType.getByTypeId(this.type)

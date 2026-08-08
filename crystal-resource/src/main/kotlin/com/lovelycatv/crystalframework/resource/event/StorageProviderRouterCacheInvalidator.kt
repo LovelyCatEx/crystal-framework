@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.resource.event
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderRoutingRuleEntity
 import com.lovelycatv.crystalframework.resource.interfaces.StorageProviderRouter
+import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.shared.event.SingleEntityCacheEvent
 import com.lovelycatv.vertex.log.logger
 import org.springframework.beans.factory.getBeansOfType
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class StorageProviderRouterCacheInvalidator(
-    private val applicationContext: ApplicationContext
+    private val applicationContext: ApplicationContext,
+    private val fileResourceServiceManager: FileResourceServiceManager,
 ) {
     private val logger = logger()
 
@@ -27,6 +29,14 @@ class StorageProviderRouterCacheInvalidator(
                 .forEach { it.invalidateCache() }
 
             logger.info("StorageProviderRouter cache invalidated successfully, triggered by event: $event")
+        }
+    }
+
+    @EventListener
+    fun handleStorageProviderCacheEvent(event: SingleEntityCacheEvent) {
+        if (event.entityClass == StorageProviderEntity::class) {
+            fileResourceServiceManager.invalidateService(event.entityId)
+            logger.info("FileResourceService cache invalidated successfully, triggered by event: $event")
         }
     }
 }

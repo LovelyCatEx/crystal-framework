@@ -29,6 +29,10 @@ export function getResourceFileType(type: number): string {
     return translateEnum('resourceFileType', type);
 }
 
+export function getFileResourceStatus(status: number): string {
+    return translateEnum('fileResourceStatus', status);
+}
+
 export function getDepartmentMemberRoleType(roleType: number): string {
     return translateEnum('departmentMemberRoleType', roleType);
 }

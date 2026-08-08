@@ -1,11 +1,16 @@
 spring:
   application:
-    name: springboot-template
+    name: crystal-framework
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.r2dbc.autoconfigure.R2dbcAutoConfiguration
+      - org.springframework.boot.data.r2dbc.autoconfigure.DataR2dbcRepositoriesAutoConfiguration
   r2dbc:
     url: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
     pool:
+      enabled: false
       initial-size: 5
       min-idle: 5
       max-size: 40
@@ -19,6 +24,9 @@ spring:
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
   data:
+    r2dbc:
+      repositories:
+        enabled: false
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
@@ -96,6 +104,11 @@ crystalframework:
       lease-key-prefix: "crystal:snowflake:lease:"
       lease-ttl-millis: 15000
       lease-renew-interval-millis: 5000
+  database:
+    default-data-source: primary
+    data-sources: []
+    routing:
+      log-decisions: false
   test:
     smtp:
       subject: Crystal Framework SMTP Test
@@ -131,6 +144,7 @@ logging:
     io.r2dbc.postgresql: info
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: info
+    com.lovelycatv.crystalframework.shared.config.database.TransactionConnectionHolder: debug
 server:
   reactive:
     session:

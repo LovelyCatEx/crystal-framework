@@ -25,6 +25,7 @@ abstract class BaseEntity(
         const val COLUMN_ID = "id"
         const val CREATED_TIME = "created_time"
         const val MODIFIED_TIME = "modified_time"
+        const val DELETED_TIME = "deleted_time"
     }
 
     @Transient

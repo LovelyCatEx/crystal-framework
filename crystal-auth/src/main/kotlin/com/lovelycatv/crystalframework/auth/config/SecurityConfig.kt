@@ -114,34 +114,33 @@ class SecurityConfig(
                 exchange.exchange.response.headers.set(CONTENT_TYPE, APPLICATION_JSON)
 
                 val result = userAuthorizationService.processOAuth2AuthenticationSuccess(authentication)
+                    .doOnNext { responseData ->
+                        val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
+                        val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
 
-                result.subscribe { responseData ->
-                    val remoteIp = exchange.exchange.request.remoteAddress?.address?.hostAddress
-                    val userAgent = exchange.exchange.request.headers.getFirst("User-Agent")
+                        val oauth2Token = authentication as OAuth2AuthenticationToken
+                        val clientRegistrationId = oauth2Token.authorizedClientRegistrationId
+                        val oauthPlatform = clientRegistrationIdOAuthPlatformConverter.convert(clientRegistrationId)
+                        val oauth2Username = responseData.oauth2Account?.nickname
+                        val oauth2AccountId = responseData.oauth2Account?.id
 
-                    val oauth2Token = authentication as OAuth2AuthenticationToken
-                    val clientRegistrationId = oauth2Token.authorizedClientRegistrationId
-                    val oauthPlatform = clientRegistrationIdOAuthPlatformConverter.convert(clientRegistrationId)
-                    val oauth2Username = responseData.oauth2Account?.nickname
-                    val oauth2AccountId = responseData.oauth2Account?.id
-
-                    eventPublisher.publishEvent(
-                        UserLoginEvent(
-                            source = this,
-                            userId = responseData.user?.id,
-                            username = responseData.user?.username,
-                            tenantId = null,
-                            loginMethod = LoginMethod.OAUTH2.code,
-                            oauth2Type = oauthPlatform?.typeId,
-                            oauth2Username = oauth2Username,
-                            oauth2AccountId = oauth2AccountId,
-                            success = true,
-                            errorMessage = null,
-                            remoteIp = remoteIp,
-                            userAgent = userAgent
+                        eventPublisher.publishEvent(
+                            UserLoginEvent(
+                                source = this,
+                                userId = responseData.user?.id,
+                                username = responseData.user?.username,
+                                tenantId = null,
+                                loginMethod = LoginMethod.OAUTH2.code,
+                                oauth2Type = oauthPlatform?.typeId,
+                                oauth2Username = oauth2Username,
+                                oauth2AccountId = oauth2AccountId,
+                                success = true,
+                                errorMessage = null,
+                                remoteIp = remoteIp,
+                                userAgent = userAgent
+                            )
                         )
-                    )
-                }
+                    }
 
                 exchange.exchange.response.writeWith(
                     result.map {

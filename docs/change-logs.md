@@ -7,6 +7,31 @@
 2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
 :::
 
+## v1.14.1
+
+2026-08-08
+
+### 新功能
++ feat(observability): 接入 Elastic APM 链路追踪与 ECS 日志采集，支持自动追踪 @Service / @Controller 方法、增强调用链堆栈、透传 W3C 追踪头并允许调用方自定义分布式事务名。
++ feat(observability): 新增分布式事务记录器与 APM 埋点。
++ feat(database): 实现跨分片的分布式事务（PostgreSQL 2PC）与分片路由能力，支持基于 reactor context 的数据源路由和分片元数据。
++ feat(resource): 完善文件上传状态生命周期，支持阿里云 OSS 分片上传。
+
+### Bug 修复
++ fix(database): 修复 2PC 连接持有器并发获取竞态导致的连接池泄漏，并确保分布式事务提交/回滚后归还连接。
++ fix(database): 移除阻塞式连接获取，使用 Flux.concat 保留 2PC 操作中的 traceId。
++ fix(observability): 将 APM 事务传入 Reactor Context 作为父 span，并修复 suspend 追踪绕过 @Transactional 代理的问题。
++ fix(resource): 改用 MIME 推导的扩展名替代上传方扩展名校验，并保证文件服务缓存的并发安全。
++ fix(auth,user): 加锁租户 OAuth 账号绑定，防止 OAuth2 登录成功重复处理。
++ fix(mail): 异步日志中保留用户与租户上下文。
++ fix(shared): 防止重复的响应式订阅。
+
+### 其他
++ refactor(database): 将分片与 2PC 抽取为独立的 crystal-database 模块，并改用 ShardingSphere 风格的延迟连接架构。
++ refactor(shared): 拆分 R2DBC 基础设施配置，将 SQL 软删除抽取为可插拔的拦截器链。
+
+---
+
 ## v1.13.5
 
 2026-08-05

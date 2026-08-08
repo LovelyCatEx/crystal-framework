@@ -2,7 +2,7 @@ package com.lovelycatv.crystalframework.database
 
 import com.lovelycatv.crystalframework.sdk.database.TableRegistry
 import com.lovelycatv.crystalframework.sdk.database.config.TableConfigurer
-import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkSQLModifier
+import com.lovelycatv.crystalframework.database.interceptor.SoftDeleteSqlInterceptor
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.TableConstants
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class TableRegistryInitializer(
+    softDeleteSqlInterceptor: SoftDeleteSqlInterceptor,
     configurers: List<TableConfigurer> = emptyList(),
 ) {
 
@@ -77,7 +78,7 @@ class TableRegistryInitializer(
 
         verifyAllBaseEntitiesRegistered(baseEntityTables)
 
-        CrystalFrameworkSQLModifier.registerBaseEntityTables(baseEntityTables)
+        softDeleteSqlInterceptor.registerBaseEntityTables(baseEntityTables)
     }
 
     /**

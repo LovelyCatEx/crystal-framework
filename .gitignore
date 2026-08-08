@@ -46,3 +46,4 @@ docker/.env
 .worktrees/
 .flattened-pom.xml
 /ext
+elastic-apm-agent-1.56.0.jar
