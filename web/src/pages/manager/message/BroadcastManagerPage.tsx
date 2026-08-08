@@ -6,7 +6,6 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     BroadcastManagerController,
     type ManagerCreateBroadcastDTO,
-    type ManagerReadBroadcastDTO,
     type ManagerUpdateBroadcastDTO,
 } from "@/api/message/broadcast.api.ts";
 import {AudienceType, BroadcastCategory, ScopeType} from "@/types/message/broadcast.types.ts";
@@ -143,7 +142,7 @@ export default function BroadcastManagerPage() {
                     </Row>
                 </>
             }
-            query={async (props: ManagerReadBroadcastDTO) => {
+            query={async (props) => {
                 return (await BroadcastManagerController.query({
                     ...props,
                     scope: ScopeType.SYSTEM,

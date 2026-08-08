@@ -1,6 +1,7 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerReadScopedDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import type {Broadcast} from "@/types/message/broadcast.types.ts";
+import {doGet, doPost, type ApiResponse} from "../system-request.ts";
 
 /**
  * Frontend write-side client for {@link com.lovelycatv.crystalframework.message.controller.manager.broadcast.ManagerBroadcastController}
@@ -54,3 +55,26 @@ class BroadcastManagerControllerClass extends BaseManagerController<
 }
 
 export const BroadcastManagerController = new BroadcastManagerControllerClass();
+
+/**
+ * End-user consumer endpoints for {@link com.lovelycatv.crystalframework.message.controller.BroadcastController}
+ * (base `/broadcast`). Read-diffusion: the user only ever sees broadcasts they have not read yet;
+ * opening one records a lazy read marker. There is no "all history" endpoint by design.
+ */
+
+// GET /broadcast/unread → List<MsgBroadcastEntity>: broadcasts the caller has not read yet.
+export async function listUnreadBroadcasts(): Promise<ApiResponse<Broadcast[]>> {
+    return doGet<Broadcast[]>('/api/broadcast/unread');
+}
+
+// GET /broadcast/unread-count → Long (serialized as string): number of unread broadcasts.
+export async function getBroadcastUnreadCount(): Promise<ApiResponse<string>> {
+    return doGet<string>('/api/broadcast/unread-count');
+}
+
+// POST /broadcast/mark-read (@RequestParam broadcastId) → records the read marker. broadcastId is a
+// query param, not a body field: @RequestParam binds from the query string, and the request-body
+// encryption layer would otherwise hide it.
+export async function markBroadcastRead(broadcastId: string): Promise<ApiResponse<null>> {
+    return doPost<null>(`/api/broadcast/mark-read?broadcastId=${encodeURIComponent(broadcastId)}`);
+}

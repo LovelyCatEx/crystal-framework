@@ -3067,6 +3067,14 @@ export const enUS: I18nRules = {
       emptyNearby: 'No nearby addresses found',
       loading: 'Searching nearby addresses...'
     },
+    notification: {
+      // NotificationBell / NotificationCenter
+      title: 'Notifications',
+      empty: 'No unread notifications',
+      conversations: {
+        systemBroadcast: 'System Announcements'
+      }
+    },
     dashboard: {
       // DashboardPage
       greeting: {

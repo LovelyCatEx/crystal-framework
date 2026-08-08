@@ -3065,6 +3065,14 @@ export const zhCN: I18nRules = {
       emptyNearby: '附近暂无可选地址',
       loading: '正在搜索附近地址...'
     },
+    notification: {
+      // NotificationBell / NotificationCenter
+      title: '通知中心',
+      empty: '暂无未读通知',
+      conversations: {
+        systemBroadcast: '系统公告'
+      }
+    },
     dashboard: {
       // DashboardPage
       greeting: {
