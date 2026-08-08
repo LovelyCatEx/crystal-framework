@@ -132,3 +132,19 @@ export function getForbiddenReason(reason: string): string {
 export function getForbiddenScope(scope: string): string {
     return translateEnum('forbiddenScope', scope);
 }
+
+export function getScopeType(type: number): string {
+    return translateEnum('scopeType', type);
+}
+
+export function getPartyType(type: number): string {
+    return translateEnum('partyType', type);
+}
+
+export function getAudienceType(type: number): string {
+    return translateEnum('audienceType', type);
+}
+
+export function getBroadcastCategory(category: number): string {
+    return translateEnum('broadcastCategory', category);
+}

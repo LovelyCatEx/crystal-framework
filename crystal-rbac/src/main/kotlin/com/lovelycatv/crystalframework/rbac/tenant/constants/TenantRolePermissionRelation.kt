@@ -41,6 +41,11 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_DICT_ITEM_READ,
             TenantPermission.ACTION_DICT_ITEM_UPDATE,
             TenantPermission.ACTION_DICT_ITEM_DELETE,
+            // Broadcast (within own tenant)
+            TenantPermission.ACTION_BROADCAST_CREATE,
+            TenantPermission.ACTION_BROADCAST_READ,
+            TenantPermission.ACTION_BROADCAST_UPDATE,
+            TenantPermission.ACTION_BROADCAST_DELETE,
         ),
         TenantRole.ADMIN to listOf(
             // Profile

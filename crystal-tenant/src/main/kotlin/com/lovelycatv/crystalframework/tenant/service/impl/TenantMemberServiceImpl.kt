@@ -42,4 +42,12 @@ class TenantMemberServiceImpl(
         val user = userService.getByIdOrNull(tenantMemberEntity.memberUserId)
         return TenantMemberVO.fromEntity(tenantMemberEntity, user)
     }
+
+    override suspend fun listMemberUserIds(tenantId: Long): List<Long> =
+        getRepository().findAllByTenantId(tenantId).collectList().awaitFirstOrNull().orEmpty()
+            .map { it.memberUserId }
+
+    override suspend fun listTenantIdsByUserId(userId: Long): List<Long> =
+        getRepository().findAllByMemberUserId(userId).collectList().awaitFirstOrNull().orEmpty()
+            .map { it.tenantId }
 }

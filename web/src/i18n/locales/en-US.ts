@@ -1000,6 +1000,7 @@ export const enUS: I18nRules = {
         'system.user.login.log': 'Manage user login logs menu',
         'system.monitor.sessions': 'Manage active sessions menu',
         'system.announcement': 'Manage announcements menu',
+        'system.broadcast': 'Broadcast management menu',
         'system.approval.flow.definition': 'Manage approval flow definitions menu',
         'system.dict.type': 'Manage system dictionary types menu',
         'system.dict.item': 'Manage system dictionary items menu',
@@ -1205,6 +1206,18 @@ export const enUS: I18nRules = {
         'tenant.dict.item.read': 'Read tenant-scope dictionary items across tenants',
         'tenant.dict.item.update': 'Update tenant-scope dictionary items across tenants',
         'tenant.dict.item.delete': 'Delete tenant-scope dictionary items across tenants',
+        'x.broadcast.create': 'Create broadcasts in any scope',
+        'x.broadcast.read': 'Read broadcasts in any scope',
+        'x.broadcast.update': 'Update broadcasts in any scope',
+        'x.broadcast.delete': 'Delete broadcasts in any scope',
+        'system.broadcast.create': 'Create system-scope broadcasts',
+        'system.broadcast.read': 'Read system-scope broadcasts',
+        'system.broadcast.update': 'Update system-scope broadcasts',
+        'system.broadcast.delete': 'Delete system-scope broadcasts',
+        'tenant.broadcast.create': 'Create tenant-scope broadcasts across tenants',
+        'tenant.broadcast.read': 'Read tenant-scope broadcasts across tenants',
+        'tenant.broadcast.update': 'Update tenant-scope broadcasts across tenants',
+        'tenant.broadcast.delete': 'Delete tenant-scope broadcasts across tenants',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': 'My tenant dashboard menu',
         'i.tenant.profile': 'My tenant profile menu',
@@ -1264,6 +1277,10 @@ export const enUS: I18nRules = {
         'i.tenant.dict.item.read': 'Read dictionary items within own tenant',
         'i.tenant.dict.item.update': 'Update dictionary items within own tenant',
         'i.tenant.dict.item.delete': 'Delete dictionary items within own tenant',
+        'i.tenant.broadcast.create': 'Create broadcasts within own tenant',
+        'i.tenant.broadcast.read': 'Read broadcasts within own tenant',
+        'i.tenant.broadcast.update': 'Update broadcasts within own tenant',
+        'i.tenant.broadcast.delete': 'Delete broadcasts within own tenant',
         'i.tenant.approval.flow.definition.create': 'Create approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.read': 'Read approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.update': 'Update approval flow definitions within own tenant',
@@ -2507,6 +2524,38 @@ export const enUS: I18nRules = {
         statusUpdateFailed: 'Status update failed',
       },
     },
+    broadcastManager: {
+      title: 'Broadcast Management',
+      subtitle: 'Manage system-scope broadcasts (system announcements)',
+      modal: {
+        title: {
+          label: 'Title',
+          required: 'Please enter a title',
+          maxLength: 'Title cannot exceed 256 characters',
+        },
+        content: {
+          label: 'Content',
+          required: 'Please enter content',
+        },
+        category: {
+          label: 'Category',
+        },
+        audienceType: {
+          label: 'Audience',
+          required: 'Please select an audience',
+        },
+        publishTime: {
+          label: 'Publish time',
+          placeholder: 'Leave empty to publish immediately',
+          help: 'Visible to users only after this time; empty means publish immediately',
+        },
+        expireTime: {
+          label: 'Expire time',
+          placeholder: 'Leave empty to never expire',
+          help: 'Automatically taken down after this time; empty means never expire',
+        },
+      },
+    },
     managerContainer: {
       notOrganizationIdentity: 'Not Organization Identity',
       current: 'Current',
@@ -3449,6 +3498,19 @@ export const enUS: I18nRules = {
         userId: 'User ID',
         noAvatar: 'No Avatar'
       },
+      broadcast: {
+        title: 'Title',
+        content: 'Content',
+        category: 'Category',
+        scopeType: 'Scope',
+        audience: 'Audience',
+        sender: 'Sender',
+        publishTime: 'Publish Time',
+        expireTime: 'Expire Time',
+        systemSender: 'System',
+        audienceRef: 'Ref',
+        unknown: 'Unknown'
+      },
       mailTemplate: {
         name: 'Name',
         type: 'Type',
@@ -4030,6 +4092,23 @@ export const enUS: I18nRules = {
     forbiddenScope: {
       SYSTEM: 'System',
       TENANT: 'Tenant'
+    },
+    scopeType: {
+      0: 'System',
+      1: 'Tenant'
+    },
+    partyType: {
+      0: 'User',
+      1: 'System',
+      2: 'Tenant'
+    },
+    audienceType: {
+      0: 'All Users',
+      1: 'Tenant Members',
+      2: 'Segment'
+    },
+    broadcastCategory: {
+      0: 'Announcement'
     }
   },
 
@@ -4063,6 +4142,7 @@ export const enUS: I18nRules = {
     userLoginLog: 'User Login Log',
     sessionMonitor: 'Session',
     announcement: 'Announcement',
+    broadcast: 'Broadcast',
     tenantDictType: 'Dictionary Type',
     tenantDictItem: 'Dictionary Item',
     approvalFlowDefinition: 'Approval Flow Definition',
@@ -4129,6 +4209,7 @@ export const enUS: I18nRules = {
       sessions: 'Online Sessions',
       systemMonitor: 'System Monitor',
       announcements: 'Announcement Management',
+      broadcasts: 'Broadcast Management',
       tenantDictTypes: 'Dictionary Type Management',
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',

@@ -997,6 +997,7 @@ export const zhCN: I18nRules = {
         'system.user.login.log': '用户登录日志菜单',
         'system.monitor.sessions': '会话监控菜单',
         'system.announcement': '公告菜单',
+        'system.broadcast': '站内信公告菜单',
         'system.approval.flow.definition': '审批流程定义菜单',
         'system.dict.type': '系统字典类型菜单',
         'system.dict.item': '系统字典项菜单',
@@ -1202,6 +1203,18 @@ export const zhCN: I18nRules = {
         'tenant.dict.item.read': '跨租户读取租户级字典项',
         'tenant.dict.item.update': '跨租户更新租户级字典项',
         'tenant.dict.item.delete': '跨租户删除租户级字典项',
+        'x.broadcast.create': '在任意作用域创建广播',
+        'x.broadcast.read': '在任意作用域读取广播',
+        'x.broadcast.update': '在任意作用域更新广播',
+        'x.broadcast.delete': '在任意作用域删除广播',
+        'system.broadcast.create': '创建系统级广播',
+        'system.broadcast.read': '读取系统级广播',
+        'system.broadcast.update': '更新系统级广播',
+        'system.broadcast.delete': '删除系统级广播',
+        'tenant.broadcast.create': '跨租户创建租户级广播',
+        'tenant.broadcast.read': '跨租户读取租户级广播',
+        'tenant.broadcast.update': '跨租户更新租户级广播',
+        'tenant.broadcast.delete': '跨租户删除租户级广播',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': '我的租户仪表盘菜单',
         'i.tenant.profile': '我的租户资料菜单',
@@ -1261,6 +1274,10 @@ export const zhCN: I18nRules = {
         'i.tenant.dict.item.read': '读取本租户字典项',
         'i.tenant.dict.item.update': '更新本租户字典项',
         'i.tenant.dict.item.delete': '删除本租户字典项',
+        'i.tenant.broadcast.create': '创建本租户广播',
+        'i.tenant.broadcast.read': '读取本租户广播',
+        'i.tenant.broadcast.update': '更新本租户广播',
+        'i.tenant.broadcast.delete': '删除本租户广播',
         'i.tenant.approval.flow.definition.create': '创建本租户审批流程定义',
         'i.tenant.approval.flow.definition.read': '读取本租户审批流程定义',
         'i.tenant.approval.flow.definition.update': '更新本租户审批流程定义',
@@ -2504,6 +2521,38 @@ export const zhCN: I18nRules = {
         statusUpdateFailed: '状态更新失败',
       },
     },
+    broadcastManager: {
+      title: '广播管理',
+      subtitle: '管理系统范围的广播（系统公告）',
+      modal: {
+        title: {
+          label: '标题',
+          required: '请输入标题',
+          maxLength: '标题不能超过 256 个字符',
+        },
+        content: {
+          label: '内容',
+          required: '请输入内容',
+        },
+        category: {
+          label: '分类',
+        },
+        audienceType: {
+          label: '受众',
+          required: '请选择受众',
+        },
+        publishTime: {
+          label: '发布时间',
+          placeholder: '留空则立即发布',
+          help: '到达该时间后用户才可见，留空表示立即发布',
+        },
+        expireTime: {
+          label: '过期时间',
+          placeholder: '留空则永不过期',
+          help: '到达该时间后自动下架，留空表示永不过期',
+        },
+      },
+    },
     managerContainer: {
       notOrganizationIdentity: '非组织身份',
       current: '当前',
@@ -3447,6 +3496,19 @@ export const zhCN: I18nRules = {
         userInfo: '用户信息',
         noAvatar: '无头像'
       },
+      broadcast: {
+        title: '标题',
+        content: '内容',
+        category: '分类',
+        scopeType: '范围',
+        audience: '受众',
+        sender: '发送方',
+        publishTime: '发布时间',
+        expireTime: '过期时间',
+        systemSender: '系统',
+        audienceRef: '引用',
+        unknown: '未知'
+      },
       mailTemplate: {
         name: '名称',
         type: '类型',
@@ -4028,6 +4090,23 @@ export const zhCN: I18nRules = {
     forbiddenScope: {
       SYSTEM: '系统',
       TENANT: '租户'
+    },
+    scopeType: {
+      0: '系统',
+      1: '租户'
+    },
+    partyType: {
+      0: '用户',
+      1: '系统',
+      2: '租户'
+    },
+    audienceType: {
+      0: '全体用户',
+      1: '租户成员',
+      2: '人群分组'
+    },
+    broadcastCategory: {
+      0: '公告'
     }
   },
 
@@ -4061,6 +4140,7 @@ export const zhCN: I18nRules = {
     userLoginLog: '用户登录日志',
     sessionMonitor: '会话',
     announcement: '公告',
+    broadcast: '广播',
     tenantDictType: '字典类型',
     tenantDictItem: '字典项',
     approvalFlowDefinition: '审批流程定义',
@@ -4127,6 +4207,7 @@ export const zhCN: I18nRules = {
       sessions: '在线会话',
       systemMonitor: '系统监控',
       announcements: '公告管理',
+      broadcasts: '广播管理',
       tenantDictTypes: '字典类型管理',
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',

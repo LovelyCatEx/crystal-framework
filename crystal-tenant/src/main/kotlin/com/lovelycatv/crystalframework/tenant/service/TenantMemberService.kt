@@ -9,4 +9,10 @@ interface TenantMemberService : CachedBaseService<TenantMemberRepository, Tenant
     suspend fun getByTenantIdAndUserId(tenantId: Long, userId: Long): TenantMemberEntity?
 
     suspend fun transformTenantMemberVO(tenantMemberEntity: TenantMemberEntity): TenantMemberVO
+
+    /** All member user ids belonging to the given tenant. */
+    suspend fun listMemberUserIds(tenantId: Long): List<Long>
+
+    /** All tenant ids the given user is a member of. */
+    suspend fun listTenantIdsByUserId(userId: Long): List<Long>
 }

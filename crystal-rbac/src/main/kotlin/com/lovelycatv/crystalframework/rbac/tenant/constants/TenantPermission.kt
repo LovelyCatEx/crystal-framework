@@ -468,6 +468,30 @@ object TenantPermission {
         type = TenantPermissionType.ACTION,
     )
 
+    // ============================================================
+    //   Broadcast (within own tenant)
+    // ============================================================
+    val ACTION_BROADCAST_CREATE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.create",
+        description = "Create broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_READ = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.read",
+        description = "Read broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_UPDATE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.update",
+        description = "Update broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_DELETE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.delete",
+        description = "Delete broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
     fun allPermissions(): List<TenantPermissionDeclaration> {
         return KotlinObjectClassUtils.extractAllValProperties(TenantPermission, false)
     }

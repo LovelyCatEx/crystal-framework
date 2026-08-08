@@ -67,6 +67,7 @@ const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLogi
 const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
 const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
 const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/AnnouncementManagerPage.tsx"));
+const BroadcastManagerPage = lazy(() => import("@/pages/manager/message/BroadcastManagerPage.tsx"));
 const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictTypeManagerPage.tsx"));
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
@@ -611,6 +612,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <NotificationOutlined />,
             label: t('menu.admin.announcements'),
             page: <AnnouncementManagerPage />,
+        },
+        {
+            key: '/manager/broadcasts',
+            path: '/manager/broadcasts',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.broadcasts'),
+            page: <BroadcastManagerPage />,
         },
         {
             key: '/manager/system-dict-types',
