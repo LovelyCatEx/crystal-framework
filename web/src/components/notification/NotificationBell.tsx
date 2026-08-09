@@ -21,7 +21,7 @@ export function NotificationBell() {
                 <Button
                     type="text"
                     shape="circle"
-                    icon={<BellOutlined style={{fontSize: 18}}/>}
+                    icon={<BellOutlined style={{fontSize: 16}}/>}
                     onClick={() => setOpen(true)}
                     aria-label={t('components.notification.title')}
                 />
@@ -30,6 +30,7 @@ export function NotificationBell() {
                 title={t('components.notification.title')}
                 open={open}
                 onCancel={() => setOpen(false)}
+                maskClosable
                 footer={null}
                 width={760}
                 styles={{body: {padding: 0}}}

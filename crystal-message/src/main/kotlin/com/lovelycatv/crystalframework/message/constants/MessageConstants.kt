@@ -14,4 +14,7 @@ object MessageConstants {
 
     /** Upper bound for a single page of conversation messages (write-diffusion pull). */
     const val MAX_CONVERSATION_PAGE_SIZE = 20
+
+    /** Upper bound for a single page of the broadcast history listing (read-diffusion pull). */
+    const val MAX_BROADCAST_PAGE_SIZE = 20
 }

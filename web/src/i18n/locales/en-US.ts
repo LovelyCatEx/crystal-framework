@@ -3070,7 +3070,9 @@ export const enUS: I18nRules = {
     notification: {
       // NotificationBell / NotificationCenter
       title: 'Notifications',
-      empty: 'No unread notifications',
+      emptyHistory: 'No announcements yet',
+      expired: 'Expired',
+      noMore: 'No more',
       conversations: {
         systemBroadcast: 'System Announcements'
       }

@@ -3068,7 +3068,9 @@ export const zhCN: I18nRules = {
     notification: {
       // NotificationBell / NotificationCenter
       title: '通知中心',
-      empty: '暂无未读通知',
+      emptyHistory: '暂无公告',
+      expired: '已过期',
+      noMore: '没有更多了',
       conversations: {
         systemBroadcast: '系统公告'
       }

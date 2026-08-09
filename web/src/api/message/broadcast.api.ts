@@ -1,6 +1,7 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerReadScopedDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
-import type {Broadcast} from "@/types/message/broadcast.types.ts";
+import type {Broadcast, BroadcastInboxItem} from "@/types/message/broadcast.types.ts";
+import type {PaginatedResponseData} from "@/types/api.types.ts";
 import {doGet, doPost, type ApiResponse} from "../system-request.ts";
 
 /**
@@ -58,14 +59,10 @@ export const BroadcastManagerController = new BroadcastManagerControllerClass();
 
 /**
  * End-user consumer endpoints for {@link com.lovelycatv.crystalframework.message.controller.BroadcastController}
- * (base `/broadcast`). Read-diffusion: the user only ever sees broadcasts they have not read yet;
- * opening one records a lazy read marker. There is no "all history" endpoint by design.
+ * (base `/broadcast`). Read-diffusion: `unread-count` returns the number of unread, non-expired
+ * broadcasts (for the header badge); `history` returns every visible broadcast (read + expired
+ * included) with a `read` flag; opening one records a lazy read marker.
  */
-
-// GET /broadcast/unread → List<MsgBroadcastEntity>: broadcasts the caller has not read yet.
-export async function listUnreadBroadcasts(): Promise<ApiResponse<Broadcast[]>> {
-    return doGet<Broadcast[]>('/api/broadcast/unread');
-}
 
 // GET /broadcast/unread-count → Long (serialized as string): number of unread broadcasts.
 export async function getBroadcastUnreadCount(): Promise<ApiResponse<string>> {
@@ -77,4 +74,13 @@ export async function getBroadcastUnreadCount(): Promise<ApiResponse<string>> {
 // encryption layer would otherwise hide it.
 export async function markBroadcastRead(broadcastId: string): Promise<ApiResponse<null>> {
     return doPost<null>(`/api/broadcast/mark-read?broadcastId=${encodeURIComponent(broadcastId)}`);
+}
+
+// GET /broadcast/history?page&pageSize → PaginatedResponseData<BroadcastInboxVO>: every broadcast
+// visible to the caller (read + expired included), newest first, each tagged with `read`.
+export async function listBroadcastHistory(
+    page: number,
+    pageSize: number,
+): Promise<ApiResponse<PaginatedResponseData<BroadcastInboxItem>>> {
+    return doGet<PaginatedResponseData<BroadcastInboxItem>>('/api/broadcast/history', {page, pageSize});
 }

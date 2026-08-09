@@ -44,3 +44,11 @@ export interface Broadcast extends BaseEntity {
     publishTime: string;
     expireTime: string | null;
 }
+
+/**
+ * Serialized backend BroadcastInboxVO — a {@link Broadcast} plus whether the current user has read
+ * it. Returned by the history listing, where read/unread and expired items coexist.
+ */
+export interface BroadcastInboxItem extends Broadcast {
+    read: boolean;
+}
