@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Badge, Button, Modal} from "antd";
 import {BellOutlined} from "@ant-design/icons";
-import {useBroadcastInbox} from "@/compositions/use-broadcast-inbox.ts";
+import {useTotalUnread} from "@/compositions/use-total-unread.ts";
 import {NotificationCenter} from "@/components/notification/NotificationCenter.tsx";
 
 /**
@@ -13,7 +13,7 @@ import {NotificationCenter} from "@/components/notification/NotificationCenter.t
 export function NotificationBell() {
     const {t} = useTranslation();
     const [open, setOpen] = useState(false);
-    const {unreadCount} = useBroadcastInbox();
+    const {unreadCount} = useTotalUnread();
 
     return (
         <>

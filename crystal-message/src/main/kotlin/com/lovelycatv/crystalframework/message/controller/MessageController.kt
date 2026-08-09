@@ -5,12 +5,14 @@ import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.message.constants.MessageConstants
 import com.lovelycatv.crystalframework.message.controller.dto.SendMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendTenantMessageDTO
+import com.lovelycatv.crystalframework.message.controller.dto.SendToTenantDTO
 import com.lovelycatv.crystalframework.message.service.InboxService
 import com.lovelycatv.crystalframework.message.service.MessageService
 import com.lovelycatv.crystalframework.message.service.MsgConversationMemberService
 import com.lovelycatv.crystalframework.message.types.ContentType
 import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.Scope
+import com.lovelycatv.crystalframework.sdk.message.config.ContactableTenantProvider
 import com.lovelycatv.crystalframework.sdk.message.config.UserTenantProvider
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
@@ -45,6 +47,7 @@ class MessageController(
     private val inboxService: InboxService,
     private val msgConversationMemberService: MsgConversationMemberService,
     private val userTenantProvider: UserTenantProvider,
+    private val contactableTenantProvider: ContactableTenantProvider,
 ) {
     @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
     @PostMapping("/send")
@@ -90,6 +93,40 @@ class MessageController(
             actingUserId = userAuthentication.userId,
         )
         return ApiResponse.success(message)
+    }
+
+    @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
+    @PostMapping("/send-to-tenant")
+    suspend fun sendToTenant(
+        userAuthentication: UserAuthentication,
+        @RequestBody dto: SendToTenantDTO,
+    ): ApiResponse<*> {
+        val tenantId = dto.tenantId.toLongOrNull()
+            ?: throw BusinessException("Invalid tenantId: ${dto.tenantId}")
+        val contentType = dto.contentType?.let {
+            ContentType.getByTypeId(it) ?: throw BusinessException("Unknown content type: $it")
+        } ?: ContentType.TEXT
+        val message = messageService.send(
+            scope = Scope(ScopeType.TENANT, tenantId),
+            sender = Party(PartyType.USER, userAuthentication.userId),
+            target = Party(PartyType.TENANT, tenantId),
+            content = dto.content,
+            contentType = contentType,
+            actingUserId = userAuthentication.userId,
+            enforceScopeMembership = false,
+        )
+        return ApiResponse.success(message)
+    }
+
+    @GetMapping("/contactable-tenants")
+    suspend fun contactableTenants(
+        userAuthentication: UserAuthentication,
+        @RequestParam(required = false) keyword: String?,
+        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "20") pageSize: Int,
+    ): ApiResponse<*> {
+        val result = contactableTenantProvider.pageContactableTenants(keyword, page, pageSize)
+        return ApiResponse.success(result)
     }
 
     @GetMapping("/inbox-conversations")

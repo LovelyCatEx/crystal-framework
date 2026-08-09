@@ -324,6 +324,15 @@ object TenantPermission {
     )
 
     // ============================================================
+    //   Message Reception (customer-service inbox)
+    // ============================================================
+    val ACTION_MESSAGE_RECEPTION_HANDLE = TenantPermissionDeclaration(
+        name = "i.tenant.message.reception.handle",
+        description = "See and reply to customer-service conversations initiated by users toward own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    // ============================================================
     //   Dictionary Type
     // ============================================================
     val MENU_DICT_TYPE = TenantPermissionDeclaration(

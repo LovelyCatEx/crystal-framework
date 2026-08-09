@@ -1,5 +1,6 @@
 import useSWR, {mutate as globalMutate} from "swr";
 import useSWRInfinite from "swr/infinite";
+import {revalidateTotalUnread} from "@/compositions/use-total-unread.ts";
 import {useCallback} from "react";
 import {
     getBroadcastUnreadCount,
@@ -71,7 +72,7 @@ export function useBroadcastHistory() {
 
     const markRead = useCallback(async (broadcastId: string) => {
         await markBroadcastRead(broadcastId);
-        await Promise.all([swr.mutate(), revalidateUnread()]);
+        await Promise.all([swr.mutate(), revalidateUnread(), revalidateTotalUnread()]);
     }, [swr]);
 
     return {

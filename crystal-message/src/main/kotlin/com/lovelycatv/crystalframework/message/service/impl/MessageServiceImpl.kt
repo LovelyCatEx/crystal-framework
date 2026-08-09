@@ -49,8 +49,9 @@ class MessageServiceImpl(
         content: String,
         contentType: ContentType,
         actingUserId: Long,
+        enforceScopeMembership: Boolean,
     ): MsgMessageEntity {
-        if (!scopeResolverRegistry.resolve(scope.type).isMember(scope, actingUserId)) {
+        if (enforceScopeMembership && !scopeResolverRegistry.resolve(scope.type).isMember(scope, actingUserId)) {
             throw ForbiddenException("User $actingUserId is not a member of scope ${scope.key()}")
         }
         if (!partyResolverRegistry.resolve(sender.type).canActAs(sender, actingUserId)) {

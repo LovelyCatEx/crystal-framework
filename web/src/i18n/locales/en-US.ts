@@ -1218,6 +1218,10 @@ export const enUS: I18nRules = {
         'tenant.broadcast.read': 'Read tenant-scope broadcasts across tenants',
         'tenant.broadcast.update': 'Update tenant-scope broadcasts across tenants',
         'tenant.broadcast.delete': 'Delete tenant-scope broadcasts across tenants',
+        'tenant.file.resource.create': 'Create tenant-scope file resources across tenants',
+        'tenant.file.resource.read': 'Read tenant-scope file resources across tenants',
+        'tenant.file.resource.update': 'Update tenant-scope file resources across tenants',
+        'tenant.file.resource.delete': 'Delete tenant-scope file resources across tenants',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': 'My tenant dashboard menu',
         'i.tenant.profile': 'My tenant profile menu',
@@ -1281,6 +1285,11 @@ export const enUS: I18nRules = {
         'i.tenant.broadcast.read': 'Read broadcasts within own tenant',
         'i.tenant.broadcast.update': 'Update broadcasts within own tenant',
         'i.tenant.broadcast.delete': 'Delete broadcasts within own tenant',
+        'i.tenant.file.resource.create': 'Create file resources within own tenant',
+        'i.tenant.file.resource.read': 'Read file resources within own tenant',
+        'i.tenant.file.resource.update': 'Update file resources within own tenant',
+        'i.tenant.file.resource.delete': 'Delete file resources within own tenant',
+        'i.tenant.message.reception.handle': 'See and reply to customer-service conversations initiated by users toward own tenant',
         'i.tenant.approval.flow.definition.create': 'Create approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.read': 'Read approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.update': 'Update approval flow definitions within own tenant',
@@ -3074,7 +3083,20 @@ export const enUS: I18nRules = {
       expired: 'Expired',
       noMore: 'No more',
       conversations: {
-        systemBroadcast: 'System Announcements'
+        title: 'Conversations',
+        systemBroadcast: 'System Announcements',
+        personal: 'Personal',
+        deskTag: 'Desk'
+      },
+      contact: {
+        start: 'New',
+        title: 'Select a tenant',
+        searchPlaceholder: 'Search tenant name',
+        empty: 'No contactable tenants',
+        draftTag: 'Draft',
+        startHint: 'Send the first message to start the conversation',
+        composerPlaceholder: 'Type a message. Enter to send, Shift+Enter for newline',
+        send: 'Send'
       }
     },
     dashboard: {

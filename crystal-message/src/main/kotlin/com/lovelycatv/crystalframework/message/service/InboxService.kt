@@ -1,14 +1,17 @@
 package com.lovelycatv.crystalframework.message.service
 
-import com.lovelycatv.crystalframework.message.entity.MsgConversationMemberEntity
+import com.lovelycatv.crystalframework.message.controller.vo.ConversationInboxVO
 
 /**
  * A user's unified inbox view across both fanout strategies: write-diffusion
  * conversations and read-diffusion announcements.
  */
 interface InboxService {
-    /** The user's conversation memberships (write-diffusion reverse index). */
-    suspend fun listConversations(userId: Long): List<MsgConversationMemberEntity>
+    /**
+     * The user's conversations (write-diffusion reverse index), newest-active first, each
+     * enriched with the counterpart party so the frontend can render titles directly.
+     */
+    suspend fun listConversations(userId: Long): List<ConversationInboxVO>
 
     /**
      * Total unread badge = unread conversation messages + unread announcements.

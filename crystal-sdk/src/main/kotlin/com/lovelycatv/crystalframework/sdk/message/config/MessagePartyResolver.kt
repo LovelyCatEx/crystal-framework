@@ -23,4 +23,11 @@ interface MessagePartyResolver {
 
     /** Whether [userId] is allowed to send a message under this party's name (authorization). */
     suspend fun canActAs(party: Party, userId: Long): Boolean
+
+    /**
+     * The party's outward-facing display name (a conversation counterpart title in an
+     * inbox list). Null when this party type has no meaningful name (e.g. SYSTEM) or the
+     * referenced entity no longer exists — callers fall back to a generic label.
+     */
+    suspend fun resolveDisplayName(party: Party): String?
 }

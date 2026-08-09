@@ -16,6 +16,13 @@ interface MessageService {
      * Send a direct (point-to-point) message from [sender] to [target] within [scope],
      * physically performed by real user [actingUserId]. Finds or creates the isolated
      * conversation, persists one message copy, and updates recipients' unread state.
+     *
+     * [enforceScopeMembership] gates the "acting user belongs to the scope" precheck.
+     * It stays true for intra-scope messaging (a member writing inside their own
+     * tenant). It is set false for the "outside user contacts a tenant's
+     * customer-service desk" case, where the sender is legitimately not a member of
+     * the target tenant scope; the sender's authority is still fully enforced by the
+     * sender party's [com.lovelycatv.crystalframework.sdk.message.config.MessagePartyResolver.canActAs].
      */
     suspend fun send(
         scope: Scope,
@@ -24,6 +31,7 @@ interface MessageService {
         content: String,
         contentType: ContentType,
         actingUserId: Long,
+        enforceScopeMembership: Boolean = true,
     ): MsgMessageEntity
 
     /** Page a conversation's messages (newest first). */

@@ -1215,6 +1215,10 @@ export const zhCN: I18nRules = {
         'tenant.broadcast.read': '跨租户读取租户级广播',
         'tenant.broadcast.update': '跨租户更新租户级广播',
         'tenant.broadcast.delete': '跨租户删除租户级广播',
+        'tenant.file.resource.create': '跨租户创建租户级文件资源',
+        'tenant.file.resource.read': '跨租户读取租户级文件资源',
+        'tenant.file.resource.update': '跨租户更新租户级文件资源',
+        'tenant.file.resource.delete': '跨租户删除租户级文件资源',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': '我的租户仪表盘菜单',
         'i.tenant.profile': '我的租户资料菜单',
@@ -1278,6 +1282,11 @@ export const zhCN: I18nRules = {
         'i.tenant.broadcast.read': '读取本租户广播',
         'i.tenant.broadcast.update': '更新本租户广播',
         'i.tenant.broadcast.delete': '删除本租户广播',
+        'i.tenant.file.resource.create': '创建本租户文件资源',
+        'i.tenant.file.resource.read': '读取本租户文件资源',
+        'i.tenant.file.resource.update': '更新本租户文件资源',
+        'i.tenant.file.resource.delete': '删除本租户文件资源',
+        'i.tenant.message.reception.handle': '查看并回复用户发给本租户的客服会话',
         'i.tenant.approval.flow.definition.create': '创建本租户审批流程定义',
         'i.tenant.approval.flow.definition.read': '读取本租户审批流程定义',
         'i.tenant.approval.flow.definition.update': '更新本租户审批流程定义',
@@ -3072,7 +3081,20 @@ export const zhCN: I18nRules = {
       expired: '已过期',
       noMore: '没有更多了',
       conversations: {
-        systemBroadcast: '系统公告'
+        title: '会话',
+        systemBroadcast: '系统公告',
+        personal: '个人',
+        deskTag: '客服台'
+      },
+      contact: {
+        start: '发起会话',
+        title: '选择租户',
+        searchPlaceholder: '搜索租户名称',
+        empty: '暂无可联系的租户',
+        draftTag: '草稿',
+        startHint: '发送第一条消息以开始会话',
+        composerPlaceholder: '输入消息，Enter 发送，Shift+Enter 换行',
+        send: '发送'
       }
     },
     dashboard: {
