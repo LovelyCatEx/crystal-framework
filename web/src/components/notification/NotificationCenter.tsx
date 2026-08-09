@@ -1,4 +1,4 @@
-import {useLayoutEffect, useMemo, useRef, useState} from "react";
+import {type CSSProperties, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Badge, Button, Empty, List, Spin, Tag, theme, Typography} from "antd";
 import {MessageOutlined, NotificationOutlined, PlusOutlined, ShopOutlined, UserOutlined} from "@ant-design/icons";
@@ -52,10 +52,16 @@ function isExpired(broadcast: Broadcast): boolean {
  *
  * The component carries no outer frame of its own (only the inner column divider); the caller supplies
  * the border — the header bell's Modal, or the page container. [fillParent] makes it stretch to the
- * parent's height (full-page use) instead of the fixed modal height.
+ * parent's height (full-page use) instead of the fixed modal height. [className] / [style] pass
+ * through to the root so the caller decides visuals like background (merged after the built-in
+ * height, so caller styles win).
  */
-export function NotificationCenter(props: {fillParent?: boolean} = {}) {
-    const {fillParent = false} = props;
+export function NotificationCenter(props: {
+    fillParent?: boolean;
+    className?: string;
+    style?: CSSProperties;
+} = {}) {
+    const {fillParent = false, className, style} = props;
     const {t} = useTranslation();
     const {token} = useToken();
     const {unreadCount} = useBroadcastInbox();
@@ -184,8 +190,8 @@ export function NotificationCenter(props: {fillParent?: boolean} = {}) {
 
     return (
         <div
-            className="flex overflow-hidden"
-            style={{height: fillParent ? '100%' : 480}}
+            className={`flex overflow-hidden${className ? ` ${className}` : ''}`}
+            style={{height: fillParent ? '100%' : 480, ...style}}
         >
             {/* Left: conversation list */}
             <div

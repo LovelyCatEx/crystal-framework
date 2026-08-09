@@ -39,15 +39,13 @@ export function NotificationBell() {
                 styles={{body: {padding: 0}}}
             >
                 {/* The center is frameless (to embed cleanly in pages); the modal supplies the frame here. */}
-                <div
+                <NotificationCenter
                     style={{
+                        background: token.colorBgContainer,
                         border: `1px solid ${token.colorBorderSecondary}`,
                         borderRadius: token.borderRadiusLG,
-                        overflow: 'hidden',
                     }}
-                >
-                    <NotificationCenter/>
-                </div>
+                />
             </Modal>
         </>
     );
