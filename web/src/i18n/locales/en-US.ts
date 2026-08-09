@@ -3078,7 +3078,7 @@ export const enUS: I18nRules = {
     },
     notification: {
       // NotificationBell / NotificationCenter
-      title: 'Notifications',
+      title: 'Message Center',
       emptyHistory: 'No announcements yet',
       expired: 'Expired',
       noMore: 'No more',
@@ -4187,6 +4187,7 @@ export const enUS: I18nRules = {
     pub: {
       dashboard: 'Dashboard',
       profile: 'Profile',
+      messageCenter: 'Message Center',
       initiableApprovalFlows: 'Initiate Approval',
       myApprovalFlows: 'My Approvals',
       approvalTaskHandle: 'Approval To-Do'

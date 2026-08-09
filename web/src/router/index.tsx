@@ -12,6 +12,7 @@ import {
     KeyOutlined,
     LineChartOutlined,
     MailOutlined,
+    MessageOutlined,
     MonitorOutlined,
     NotificationOutlined,
     SafetyOutlined,
@@ -33,6 +34,7 @@ const UserBanRecordManagerPage = lazy(() => import("../pages/manager/user/UserBa
 const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
 const SystemSettingsManagerPage = lazy(() => import("../pages/manager/settings/SystemSettingsManagerPage.tsx"));
 const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfilePage.tsx"));
+const MessageCenterPage = lazy(() => import("../pages/manager/message/MessageCenterPage.tsx"));
 const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
 const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
 const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
@@ -96,7 +98,7 @@ import type {PluginRouteItem} from "@/plugin/types.ts";
 import i18n from "@/i18n";
 import type {MenuGroup, MenuItem} from "@/types/menu.types.ts";
 import type {MenuItemType} from "antd/lib/menu/interface";
-import {menuPathDashboard, menuPathProfile} from "@/router/paths.ts";
+import {menuPathDashboard, menuPathMessageCenter, menuPathProfile} from "@/router/paths.ts";
 import {resolveDisabledMenuPrefixes} from "@/router/system-module-menu-paths.ts";
 
 
@@ -183,6 +185,13 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
+        },
+        {
+            key: menuPathMessageCenter,
+            path: menuPathMessageCenter,
+            icon: <MessageOutlined />,
+            label: t('menu.pub.messageCenter'),
+            page: <MessageCenterPage />
         },
         {
             key: '/manager/approval/initiate',

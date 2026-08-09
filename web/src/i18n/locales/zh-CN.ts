@@ -3076,7 +3076,7 @@ export const zhCN: I18nRules = {
     },
     notification: {
       // NotificationBell / NotificationCenter
-      title: '通知中心',
+      title: '消息中心',
       emptyHistory: '暂无公告',
       expired: '已过期',
       noMore: '没有更多了',
@@ -4185,6 +4185,7 @@ export const zhCN: I18nRules = {
     pub: {
       dashboard: '仪表盘',
       profile: '个人中心',
+      messageCenter: '消息中心',
       initiableApprovalFlows: '发起审批',
       myApprovalFlows: '我的审批',
       approvalTaskHandle: '审批处理'

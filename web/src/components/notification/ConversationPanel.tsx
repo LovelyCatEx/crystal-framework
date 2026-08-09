@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Button, Empty, Input, Spin, theme} from "antd";
+import {Button, Empty, Input, Spin, theme, Typography} from "antd";
 import {SendOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
 import {queryConversationMessages, send, sendAsTenant, sendToTenant} from "@/api/message/message.api.ts";
@@ -9,9 +9,13 @@ import type {MsgMessage} from "@/types/message/message.types.ts";
 import {PartyType} from "@/types/message/broadcast.types.ts";
 
 const {useToken} = theme;
+const {Text} = Typography;
 
 // Matches backend MAX_CONVERSATION_PAGE_SIZE.
 const PAGE_SIZE = 20;
+
+// Scroll within this many px of the top triggers loading the previous (older) page.
+const LOAD_MORE_THRESHOLD_PX = 8;
 
 /**
  * One conversation the acting user participates in, in either state:
@@ -66,35 +70,77 @@ export function ConversationPanel(props: {
     const {t} = useTranslation();
     const {token} = useToken();
 
-    const [messages, setMessages] = useState<MsgMessage[]>([]);
+    // Accumulated newest-first (as the backend returns); rendered oldest→newest.
+    const [records, setRecords] = useState<MsgMessage[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
-    const bottomRef = useRef<HTMLDivElement>(null);
 
-    const loadMessages = useCallback(async (cid: string) => {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const prevScrollHeightRef = useRef(0);
+
+    const hasMore = page < totalPages;
+
+    // Load page 1 (newest) fresh, replacing any accumulation; caller scrolls to bottom afterwards.
+    const loadFirstPage = useCallback(async (cid: string) => {
         setLoading(true);
         try {
             const data = (await queryConversationMessages(cid, 1, PAGE_SIZE)).data;
-            // Backend returns newest-first; IM shows oldest→newest.
-            setMessages([...(data?.records ?? [])].reverse());
+            setRecords(data?.records ?? []);
+            setPage(1);
+            setTotalPages(data?.totalPages ?? 0);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    // Virtual conversation starts empty; a real one pulls its history.
+    // Virtual conversation starts empty; a real one pulls its newest page.
     useEffect(() => {
         if (conversationId) {
-            void loadMessages(conversationId);
+            void loadFirstPage(conversationId);
         } else {
-            setMessages([]);
+            setRecords([]);
+            setPage(1);
+            setTotalPages(0);
         }
-    }, [conversationId, loadMessages]);
+    }, [conversationId, loadFirstPage]);
 
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({behavior: 'auto'});
-    }, [messages]);
+    const ordered = [...records].reverse();
+
+    // First page lands at the bottom (newest); a prepended older page keeps the viewport anchored so
+    // the list appears to grow upward — mirrors the broadcast history panel.
+    useLayoutEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        if (prevScrollHeightRef.current > 0) {
+            el.scrollTop = el.scrollHeight - prevScrollHeightRef.current;
+            prevScrollHeightRef.current = 0;
+        } else {
+            bottomRef.current?.scrollIntoView({behavior: 'auto'});
+        }
+    }, [records]);
+
+    const onScroll = () => {
+        const el = scrollRef.current;
+        if (!el || !hasMore || loadingMore || !conversationId) return;
+        if (el.scrollTop <= LOAD_MORE_THRESHOLD_PX) {
+            prevScrollHeightRef.current = el.scrollHeight;
+            setLoadingMore(true);
+            const next = page + 1;
+            void queryConversationMessages(conversationId, next, PAGE_SIZE)
+                .then((res) => {
+                    // Older page appended to the newest-first tail; reverse() then puts it on top.
+                    setRecords((prev) => [...prev, ...(res.data?.records ?? [])]);
+                    setPage(next);
+                    setTotalPages(res.data?.totalPages ?? totalPages);
+                })
+                .finally(() => setLoadingMore(false));
+        }
+    };
 
     const onSend = async () => {
         const content = draft.trim();
@@ -106,7 +152,7 @@ export function ConversationPanel(props: {
             if (sent) {
                 // Virtual → real: first message materialized the conversation.
                 if (!conversationId) onEstablished(sent.conversationId);
-                await loadMessages(sent.conversationId);
+                await loadFirstPage(sent.conversationId);
             }
         } finally {
             setSending(false);
@@ -116,15 +162,22 @@ export function ConversationPanel(props: {
     return (
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Message history */}
-            <div className="flex-1 overflow-auto" style={{padding: 16}}>
+            <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-auto" style={{padding: 16}}>
                 {loading ? (
                     <div className="flex justify-center py-8"><Spin/></div>
-                ) : messages.length === 0 ? (
+                ) : ordered.length === 0 ? (
                     <div className="flex h-full items-center justify-center">
                         <Empty description={t('components.notification.contact.startHint')}/>
                     </div>
                 ) : (
-                    messages.map((msg) => {
+                    <>
+                    <div className="flex justify-center pb-2" style={{minHeight: 22}}>
+                        {loadingMore && <Spin size="small"/>}
+                        {!hasMore && !loadingMore && (
+                            <Text type="secondary" className="text-xs">{t('components.notification.noMore')}</Text>
+                        )}
+                    </div>
+                    {ordered.map((msg) => {
                         // "Mine" = sent as the identity I'm viewing this conversation as, so a fellow
                         // receptionist's reply (also sent as the tenant) sits on my side in the desk view.
                         const mine = msg.senderPartyType === target.viewingPartyType
@@ -153,7 +206,8 @@ export function ConversationPanel(props: {
                                 </div>
                             </div>
                         );
-                    })
+                    })}
+                    </>
                 )}
                 <div ref={bottomRef}/>
             </div>

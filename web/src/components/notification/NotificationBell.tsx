@@ -1,9 +1,11 @@
 import {useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Badge, Button, Modal} from "antd";
+import {Badge, Button, Modal, theme} from "antd";
 import {BellOutlined} from "@ant-design/icons";
 import {useTotalUnread} from "@/compositions/use-total-unread.ts";
 import {NotificationCenter} from "@/components/notification/NotificationCenter.tsx";
+
+const {useToken} = theme;
 
 /**
  * Header bell: shows the live unread-broadcast count (SWR-polled) as a badge and opens the
@@ -12,6 +14,7 @@ import {NotificationCenter} from "@/components/notification/NotificationCenter.t
  */
 export function NotificationBell() {
     const {t} = useTranslation();
+    const {token} = useToken();
     const [open, setOpen] = useState(false);
     const {unreadCount} = useTotalUnread();
 
@@ -35,7 +38,16 @@ export function NotificationBell() {
                 width={760}
                 styles={{body: {padding: 0}}}
             >
-                <NotificationCenter/>
+                {/* The center is frameless (to embed cleanly in pages); the modal supplies the frame here. */}
+                <div
+                    style={{
+                        border: `1px solid ${token.colorBorderSecondary}`,
+                        borderRadius: token.borderRadiusLG,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <NotificationCenter/>
+                </div>
             </Modal>
         </>
     );

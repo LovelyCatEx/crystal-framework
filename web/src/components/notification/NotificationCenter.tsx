@@ -49,8 +49,13 @@ function isExpired(broadcast: Broadcast): boolean {
  * "System Announcements" row with the caller's write-diffusion conversations (peer / tenant-desk /
  * customer) fetched from the inbox. A newly started tenant contact is held locally as a virtual draft
  * until its first message materializes it server-side, at which point it folds into the fetched list.
+ *
+ * The component carries no outer frame of its own (only the inner column divider); the caller supplies
+ * the border — the header bell's Modal, or the page container. [fillParent] makes it stretch to the
+ * parent's height (full-page use) instead of the fixed modal height.
  */
-export function NotificationCenter() {
+export function NotificationCenter(props: {fillParent?: boolean} = {}) {
+    const {fillParent = false} = props;
     const {t} = useTranslation();
     const {token} = useToken();
     const {unreadCount} = useBroadcastInbox();
@@ -180,11 +185,7 @@ export function NotificationCenter() {
     return (
         <div
             className="flex overflow-hidden"
-            style={{
-                height: 480,
-                border: `1px solid ${token.colorBorderSecondary}`,
-                borderRadius: token.borderRadiusLG,
-            }}
+            style={{height: fillParent ? '100%' : 480}}
         >
             {/* Left: conversation list */}
             <div
