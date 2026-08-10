@@ -37,6 +37,9 @@ export interface ConversationTarget {
     // PartyType typeId of the other side (0=USER, 1=SYSTEM, 2=TENANT).
     counterpartType: number;
     counterpartId: string | null;
+    // Whether the counterpart is a member of the tenant I am currently acting as — drives the org
+    // view's internal-vs-external split. Always false in a plain system-user session.
+    counterpartInCurrentOrg: boolean;
     // ScopeType typeId of the conversation's isolation boundary (0=SYSTEM, 1=TENANT).
     scopeType: number;
     scopeId: string | null;

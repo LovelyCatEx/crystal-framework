@@ -9,7 +9,10 @@ import com.lovelycatv.crystalframework.message.service.MsgConversationMemberServ
 import com.lovelycatv.crystalframework.message.service.MsgConversationService
 import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.PartyResolverRegistry
+import com.lovelycatv.crystalframework.sdk.message.Scope
+import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
+import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
@@ -19,10 +22,11 @@ class InboxServiceImpl(
     private val msgConversationService: MsgConversationService,
     private val msgConversationPartyRepository: MsgConversationPartyRepository,
     private val partyResolverRegistry: PartyResolverRegistry,
+    private val scopeResolverRegistry: ScopeResolverRegistry,
     private val broadcastService: BroadcastService,
 ) : InboxService {
 
-    override suspend fun listConversations(userId: Long): List<ConversationInboxVO> =
+    override suspend fun listConversations(userId: Long, currentTenantId: Long?): List<ConversationInboxVO> =
         msgConversationMemberService.listByUser(userId)
             .flatMap { member ->
                 val conversation = msgConversationService.getByIdOrNull(member.conversationId)
@@ -42,11 +46,28 @@ class InboxServiceImpl(
                         counterpartType = counterpart?.partyType ?: PartyType.SYSTEM.typeId,
                         counterpartId = counterpart?.partyId,
                         counterpartName = counterpart?.let { resolveName(it) },
+                        counterpartInCurrentOrg = isCounterpartInCurrentOrg(currentTenantId, counterpart),
                         lastMessageTime = conversation.lastMessageTime,
                     )
                 }
             }
             .sortedByDescending { it.lastMessageTime ?: Long.MIN_VALUE }
+
+    /**
+     * Whether [counterpart] is a member of the tenant the caller is currently acting as. Only a plain
+     * USER counterpart can be an org member; a TENANT/SYSTEM face is never "internal". Returns false
+     * when the caller supplied no acting tenant (plain system-user session — everything is external).
+     */
+    private suspend fun isCounterpartInCurrentOrg(
+        currentTenantId: Long?,
+        counterpart: MsgConversationPartyEntity?,
+    ): Boolean {
+        if (currentTenantId == null || counterpart == null) return false
+        if (counterpart.getRealPartyType() != PartyType.USER) return false
+        val counterpartUserId = counterpart.partyId ?: return false
+        return scopeResolverRegistry.resolve(ScopeType.TENANT)
+            .isMember(Scope(ScopeType.TENANT, currentTenantId), counterpartUserId)
+    }
 
     /**
      * The identities the user acts *as* in this conversation: every seated party whose recipient set

@@ -31,6 +31,9 @@ export interface ConversationInboxVO {
     counterpartType: number;
     counterpartId: string | null;
     counterpartName: string | null;
+    // Whether the counterpart is a member of the tenant I am currently acting as. Drives the org
+    // view's internal-vs-external split; always false in a plain system-user session.
+    counterpartInCurrentOrg: boolean;
     lastMessageTime: string | null;
 }
 

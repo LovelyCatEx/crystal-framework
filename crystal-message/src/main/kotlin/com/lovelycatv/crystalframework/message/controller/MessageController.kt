@@ -183,8 +183,11 @@ class MessageController(
     }
 
     @GetMapping("/inbox-conversations")
-    suspend fun inboxConversations(userAuthentication: UserAuthentication): ApiResponse<*> =
-        ApiResponse.success(inboxService.listConversations(userAuthentication.userId))
+    suspend fun inboxConversations(
+        userAuthentication: UserAuthentication,
+        @RequestParam(required = false) currentTenantId: Long?,
+    ): ApiResponse<*> =
+        ApiResponse.success(inboxService.listConversations(userAuthentication.userId, currentTenantId))
 
     @GetMapping("/inbox-unread-count")
     suspend fun inboxUnreadCount(userAuthentication: UserAuthentication): ApiResponse<*> {

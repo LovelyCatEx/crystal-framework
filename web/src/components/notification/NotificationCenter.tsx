@@ -75,9 +75,11 @@ export function NotificationCenter(props: {
     const {t} = useTranslation();
     const {token} = useToken();
     const {unreadCount} = useBroadcastInbox();
-    const {conversations, refresh: refreshInbox} = useInboxConversations();
     const {userProfile} = useLoggedUser();
     const {joinedTenants, currentTenant} = useUserTenants();
+    // Fold the currently-acting tenant into the fetch so `counterpartInCurrentOrg` is computed against
+    // the org I am logged into; switching org identity refetches with the correct flags.
+    const {conversations, refresh: refreshInbox} = useInboxConversations(currentTenant?.tenantId);
 
     const [activeKey, setActiveKey] = useState<string>(SYSTEM_BROADCAST);
     const [drafts, setDrafts] = useState<ConversationTarget[]>([]);
@@ -94,6 +96,7 @@ export function NotificationCenter(props: {
             viewingPartyName: c.viewingPartyName,
             counterpartType: c.counterpartType,
             counterpartId: c.counterpartId,
+            counterpartInCurrentOrg: c.counterpartInCurrentOrg,
             scopeType: c.scopeType,
             scopeId: c.scopeId,
             unreadCount: c.unreadCount,
@@ -124,12 +127,15 @@ export function NotificationCenter(props: {
     // ── Org-tab partitions (only relevant when currentTenant is set) ───────────
     const myTenantId = currentTenant?.tenantId ?? null;
 
-    // Member conversations I hold as a current-org USER (includes cross-org sends scoped to my org).
+    // Internal member conversations: scoped to my current org, held as a USER, counterpart is a
+    // member of my current org. Outside people I contacted as an org member (same scope but a
+    // non-member counterpart) fall through to the External section below.
     const orgMemberTargets = targets.filter(
         (it) => it.scopeType === ScopeType.TENANT
             && it.scopeId === myTenantId
             && it.viewingPartyType === PartyType.USER
-            && it.counterpartType === PartyType.USER,
+            && it.counterpartType === PartyType.USER
+            && it.counterpartInCurrentOrg,
     );
     // Desk conversations I staff (I am the TENANT party).
     const deskByViewing = useMemo(() => {
@@ -143,13 +149,15 @@ export function NotificationCenter(props: {
         }
         return [...map.values()];
     }, [targets]);
-    // External section: SYSTEM peer chats (duplicated from System tab) + TENANT-scoped convos from
-    // other orgs sent to me (not my current org's scope, not a desk I staff).
+    // External section: org-context user conversations whose counterpart is NOT a member of my
+    // current org — covers both directions (an outside person I contacted while acting as an org
+    // member, scoped to my org; and another org's member who contacted me, scoped to their org).
+    // SYSTEM-scope personal chats never appear here — they belong solely to the System tab.
     const orgExternalTargets = targets.filter(
-        (it) => it.viewingPartyType === PartyType.USER && (
-            it.scopeType === ScopeType.SYSTEM
-            || (it.scopeType === ScopeType.TENANT && it.scopeId !== myTenantId && it.counterpartType === PartyType.USER)
-        ),
+        (it) => it.scopeType === ScopeType.TENANT
+            && it.viewingPartyType === PartyType.USER
+            && it.counterpartType === PartyType.USER
+            && !it.counterpartInCurrentOrg,
     );
 
     const openTarget = (target: ConversationTarget) => {
@@ -173,6 +181,8 @@ export function NotificationCenter(props: {
             viewingPartyName: null,
             counterpartType: PartyType.TENANT,
             counterpartId: tenant.id,
+            // A tenant desk is never an org "member"; this draft lives under the System tab regardless.
+            counterpartInCurrentOrg: false,
             scopeType: ScopeType.TENANT,
             scopeId: tenant.id,
             unreadCount: 0,
@@ -184,7 +194,7 @@ export function NotificationCenter(props: {
         setActiveKey(key);
     };
 
-    const onTenantMatePicked = (_tenant: UserTenantVO, mate: TenantMateVO) => {
+    const onTenantMatePicked = (tenant: UserTenantVO, mate: TenantMateVO) => {
         setStartConversationOpen(false);
         // System-tab: peer chat (SYSTEM scope). Org-tab: member chat scoped to currentTenant.
         const isOrgIdentity = identityTab === 'tenant' && myTenantId != null;
@@ -196,6 +206,9 @@ export function NotificationCenter(props: {
             viewingPartyName: null,
             counterpartType: PartyType.USER,
             counterpartId: mate.userId,
+            // Internal only when acting as my org and the mate belongs to my current org; a mate from
+            // another org contacted while acting as my org is external.
+            counterpartInCurrentOrg: isOrgIdentity && tenant.tenantId === myTenantId,
             scopeType: isOrgIdentity ? ScopeType.TENANT : ScopeType.SYSTEM,
             // Org-tab: always scope to MY current org, regardless of which org the mate belongs to.
             scopeId: isOrgIdentity ? myTenantId : null,

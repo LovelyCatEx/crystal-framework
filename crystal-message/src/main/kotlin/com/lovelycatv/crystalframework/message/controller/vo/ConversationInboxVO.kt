@@ -13,6 +13,10 @@ import tools.jackson.databind.ser.std.ToStringSerializer
  *   entry lands in and, with the counterpart, which send endpoint a reply routes to.
  * - [counterpartType] / [counterpartId] / [counterpartName] — the *other* party, resolved so the
  *   frontend can render a title without a second round-trip.
+ * - [counterpartInCurrentOrg] — whether the counterpart is a member of the caller's currently-acting
+ *   tenant. Drives the org view's internal-vs-external split: a peer who is not a member of the org I
+ *   am currently acting in is external. `false` whenever the caller supplied no acting tenant, when the
+ *   counterpart is not a single user, or when the counterpart belongs to no such membership.
  *
  * [scopeType] / [scopeId] carry the conversation's isolation boundary. All `Long` fields are emitted
  * as `String` per the Long-serialization rule.
@@ -32,6 +36,7 @@ data class ConversationInboxVO(
     @get:JsonSerialize(using = ToStringSerializer::class)
     val counterpartId: Long?,
     val counterpartName: String?,
+    val counterpartInCurrentOrg: Boolean,
     @get:JsonSerialize(using = ToStringSerializer::class)
     val lastMessageTime: Long?,
 )

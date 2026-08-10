@@ -9,11 +9,15 @@ const KEY_INBOX_CONVERSATIONS = 'inbox-conversations';
  * each enriched with the counterpart party and unread count, newest-active first. Distinct from
  * {@link useBroadcastInbox}, which owns the read-diffusion announcement stream. Callers refresh
  * after sending or marking a conversation read.
+ *
+ * [currentTenantId] is the tenant the caller is currently acting as; it is folded into the SWR key so
+ * switching org identity refetches with the correct `counterpartInCurrentOrg` flags. Omit it for a
+ * plain system-user session.
  */
-export function useInboxConversations() {
+export function useInboxConversations(currentTenantId?: string) {
     const swr = useSWR(
-        KEY_INBOX_CONVERSATIONS,
-        async () => (await listInboxConversations()).data ?? [],
+        [KEY_INBOX_CONVERSATIONS, currentTenantId ?? null],
+        async () => (await listInboxConversations(currentTenantId)).data ?? [],
     );
 
     return {

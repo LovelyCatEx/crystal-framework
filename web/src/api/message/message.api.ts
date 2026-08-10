@@ -108,9 +108,13 @@ export async function queryContactableTenants(
     return doGet('/api/message/contactable-tenants', params);
 }
 
-/** GET /message/inbox-conversations — the acting user's conversations, enriched with counterpart party. */
-export async function listInboxConversations(): Promise<ApiResponse<ConversationInboxVO[]>> {
-    return doGet('/api/message/inbox-conversations');
+/**
+ * GET /message/inbox-conversations — the acting user's conversations, enriched with counterpart party.
+ * `currentTenantId` is the tenant the caller is currently acting as (omit for a plain system-user
+ * session); it only decides each entry's `counterpartInCurrentOrg` flag, never filters the result.
+ */
+export async function listInboxConversations(currentTenantId?: string): Promise<ApiResponse<ConversationInboxVO[]>> {
+    return doGet('/api/message/inbox-conversations', currentTenantId ? {currentTenantId} : undefined);
 }
 
 /** GET /message/inbox-unread-count — total unread badge (conversation messages + announcements). */
