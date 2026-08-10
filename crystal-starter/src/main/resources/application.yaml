@@ -104,6 +104,7 @@ crystalframework:
       lease-key-prefix: "crystal:snowflake:lease:"
       lease-ttl-millis: 15000
       lease-renew-interval-millis: 5000
+    rules: []
   database:
     default-data-source: primary
     data-sources: []

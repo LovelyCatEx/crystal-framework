@@ -129,8 +129,19 @@ public class CrystalFrameworkConfiguration {
     public static class Sharding {
         private Snowflake snowflake = new Snowflake();
 
+        /**
+         * Config-driven R2DBC sharding rules. Each entry maps a logical table to a target data source
+         * (declared under crystalframework.database.data-sources); optional sharding-column /
+         * actual-tables / algorithm-ref turn it into a table-sharding rule. Consumed by
+         * ConfigDrivenShardingRuleComponent in crystal-database.
+         */
+        private Rule[] rules = new Rule[0];
+
         public Snowflake getSnowflake() { return snowflake; }
         public void setSnowflake(Snowflake snowflake) { this.snowflake = snowflake; }
+
+        public Rule[] getRules() { return rules; }
+        public void setRules(Rule[] rules) { this.rules = rules; }
 
         public static class Snowflake {
             private long startPoint = 0;
@@ -177,6 +188,33 @@ public class CrystalFrameworkConfiguration {
             public void setLeaseRenewIntervalMillis(long leaseRenewIntervalMillis) {
                 this.leaseRenewIntervalMillis = leaseRenewIntervalMillis;
             }
+        }
+
+        public static class Rule {
+            private String table = "";
+            private String dataSource = "";
+            private String shardingColumn = "";
+            private String[] actualTables = new String[0];
+            private String algorithmRef = "";
+            private String inlineExpression = "";
+
+            public String getTable() { return table; }
+            public void setTable(String table) { this.table = table; }
+
+            public String getDataSource() { return dataSource; }
+            public void setDataSource(String dataSource) { this.dataSource = dataSource; }
+
+            public String getShardingColumn() { return shardingColumn; }
+            public void setShardingColumn(String shardingColumn) { this.shardingColumn = shardingColumn; }
+
+            public String[] getActualTables() { return actualTables; }
+            public void setActualTables(String[] actualTables) { this.actualTables = actualTables; }
+
+            public String getAlgorithmRef() { return algorithmRef; }
+            public void setAlgorithmRef(String algorithmRef) { this.algorithmRef = algorithmRef; }
+
+            public String getInlineExpression() { return inlineExpression; }
+            public void setInlineExpression(String inlineExpression) { this.inlineExpression = inlineExpression; }
         }
     }
 

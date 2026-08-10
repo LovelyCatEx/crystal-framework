@@ -6,4 +6,4 @@ package com.lovelycatv.crystalframework.database.exception
  * IN / OR predicate, a batch that spans multiple actual tables, or an algorithm returning a table
  * outside the declared actual-table set.
  */
-class ShardingException(message: String) : RuntimeException(message)
+class ShardingException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
