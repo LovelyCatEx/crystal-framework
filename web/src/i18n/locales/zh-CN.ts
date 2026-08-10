@@ -3086,7 +3086,11 @@ export const zhCN: I18nRules = {
         personal: '个人',
         organizationTag: '组织',
         deskTag: '客服台',
-        external: '外部'
+        external: '外部',
+        systemTab: '系统用户',
+        deskContactTag: '联系的客服台',
+        membersTag: '成员',
+        externalTag: '外部'
       },
       startConversation: {
         start: '发起会话',

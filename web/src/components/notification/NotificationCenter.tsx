@@ -1,6 +1,6 @@
 import {type CSSProperties, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Badge, Button, Empty, List, Spin, Tag, theme, Typography} from "antd";
+import {Badge, Button, Empty, List, Segmented, Spin, Tag, theme, Typography} from "antd";
 import {MessageOutlined, NotificationOutlined, PlusOutlined, ShopOutlined, UserOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
 import {useBroadcastHistory, useBroadcastInbox} from "@/compositions/use-broadcast-inbox.ts";
@@ -30,6 +30,9 @@ enum NotificationConversationKind {
 
 const {SYSTEM_BROADCAST} = NotificationConversationKind;
 
+/** Which identity perspective the left list is showing. */
+type IdentityTab = 'system' | 'tenant';
+
 /**
  * Left-list / active-key / dedup identity: the viewing identity plus the counterpart. Stable across
  * a draft materializing (conversationId is data, not identity), and distinct across scopes and each
@@ -48,16 +51,20 @@ function isExpired(broadcast: Broadcast): boolean {
 
 /**
  * Embeddable notification center: a left conversation list + right content panel. Works both inside
- * a Modal (header bell) and inline in a page. The left list merges the built-in read-diffusion
- * "System Announcements" row with the caller's write-diffusion conversations (peer / tenant-desk /
- * customer) fetched from the inbox. A newly started tenant contact is held locally as a virtual draft
- * until its first message materializes it server-side, at which point it folds into the fetched list.
+ * a Modal (header bell) and inline in a page.
  *
- * The component carries no outer frame of its own (only the inner column divider); the caller supplies
- * the border — the header bell's Modal, or the page container. [fillParent] makes it stretch to the
- * parent's height (full-page use) instead of the fixed modal height. [className] / [style] pass
- * through to the root so the caller decides visuals like background (merged after the built-in
- * height, so caller styles win).
+ * When the user has a current tenant (authenticated tenant session), the left column shows an
+ * identity-tab switcher between «System User» and «Current Org»:
+ *
+ *   System tab  — SYSTEM-scope peer chats + service-desk contacts the user initiated (USER→TENANT).
+ *   Org tab     — TENANT(currentTenant)-scope member chats + desk conversations the user staffs +
+ *                 External section (SYSTEM-scope peer chats duplicated here, plus any TENANT-scope
+ *                 conversations from other orgs addressed to the user).
+ *
+ * When there is no current tenant the switcher is hidden and only the system view is shown.
+ *
+ * [fillParent] makes it stretch to the parent's height (full-page use). [className] / [style] pass
+ * through to the root so the caller decides frame and background.
  */
 export function NotificationCenter(props: {
     fillParent?: boolean;
@@ -71,11 +78,12 @@ export function NotificationCenter(props: {
     const {conversations, refresh: refreshInbox} = useInboxConversations();
     const {userProfile} = useLoggedUser();
     const {joinedTenants, currentTenant} = useUserTenants();
-    const hasTenants = (joinedTenants?.length ?? 0) > 0;
 
     const [activeKey, setActiveKey] = useState<string>(SYSTEM_BROADCAST);
     const [drafts, setDrafts] = useState<ConversationTarget[]>([]);
     const [startConversationOpen, setStartConversationOpen] = useState(false);
+    // Identity tab: only meaningful when currentTenant is set.
+    const [identityTab, setIdentityTab] = useState<IdentityTab>('system');
 
     const inboxTargets: ConversationTarget[] = useMemo(
         () => conversations.map((c: ConversationInboxVO) => ({
@@ -94,40 +102,55 @@ export function NotificationCenter(props: {
     );
 
     // Drafts not yet represented by a fetched conversation (dedup by viewing identity + counterpart).
-    const materializedKeys = useMemo(
-        () => new Set(inboxTargets.map(targetKey)),
-        [inboxTargets],
-    );
+    const materializedKeys = useMemo(() => new Set(inboxTargets.map(targetKey)), [inboxTargets]);
     const targets = [
         ...inboxTargets,
         ...drafts.filter((d) => !materializedKeys.has(targetKey(d))),
     ];
     const activeTarget = targets.find((it) => targetKey(it) === activeKey) ?? null;
 
-    // Partition by scope and viewing identity: personal, organization members, then staffed desks.
-    const personalTargets = targets.filter((it) =>
-        it.scopeType === ScopeType.SYSTEM && it.viewingPartyType === PartyType.USER,
+    // ── System-tab partitions ──────────────────────────────────────────────────
+    // Peer chats: SYSTEM scope, I am a plain USER.
+    const systemPeerTargets = targets.filter(
+        (it) => it.scopeType === ScopeType.SYSTEM && it.viewingPartyType === PartyType.USER,
     );
-    const organizationByScope = new Map<string, {id: string; name: string; items: ConversationTarget[]}>();
-    const deskByViewing = new Map<string, {id: string; name: string; items: ConversationTarget[]}>();
-    const tenantNameById = new Map((joinedTenants ?? []).map((tenant) => [tenant.tenantId, tenant.tenantName]));
-    for (const it of targets) {
-        if (it.scopeType !== ScopeType.TENANT) continue;
-        if (it.viewingPartyType === PartyType.USER && it.scopeId != null) {
-            const section = organizationByScope.get(it.scopeId)
-                ?? {id: it.scopeId, name: tenantNameById.get(it.scopeId) ?? it.scopeId, items: []};
-            section.items.push(it);
-            organizationByScope.set(it.scopeId, section);
-        }
-        if (it.viewingPartyType === PartyType.TENANT && it.viewingPartyId != null) {
-            const section = deskByViewing.get(it.viewingPartyId)
+    // Service-desk contacts I initiated: TENANT scope, I am USER, counterpart is TENANT.
+    const deskContactTargets = targets.filter(
+        (it) => it.scopeType === ScopeType.TENANT
+            && it.viewingPartyType === PartyType.USER
+            && it.counterpartType === PartyType.TENANT,
+    );
+
+    // ── Org-tab partitions (only relevant when currentTenant is set) ───────────
+    const myTenantId = currentTenant?.tenantId ?? null;
+
+    // Member conversations I hold as a current-org USER (includes cross-org sends scoped to my org).
+    const orgMemberTargets = targets.filter(
+        (it) => it.scopeType === ScopeType.TENANT
+            && it.scopeId === myTenantId
+            && it.viewingPartyType === PartyType.USER
+            && it.counterpartType === PartyType.USER,
+    );
+    // Desk conversations I staff (I am the TENANT party).
+    const deskByViewing = useMemo(() => {
+        const map = new Map<string, {id: string; name: string; items: ConversationTarget[]}>();
+        for (const it of targets) {
+            if (it.viewingPartyType !== PartyType.TENANT || it.viewingPartyId == null) continue;
+            const section = map.get(it.viewingPartyId)
                 ?? {id: it.viewingPartyId, name: it.viewingPartyName ?? it.viewingPartyId, items: []};
             section.items.push(it);
-            deskByViewing.set(it.viewingPartyId, section);
+            map.set(it.viewingPartyId, section);
         }
-    }
-    const organizationSections = [...organizationByScope.values()];
-    const deskSections = [...deskByViewing.values()];
+        return [...map.values()];
+    }, [targets]);
+    // External section: SYSTEM peer chats (duplicated from System tab) + TENANT-scoped convos from
+    // other orgs sent to me (not my current org's scope, not a desk I staff).
+    const orgExternalTargets = targets.filter(
+        (it) => it.viewingPartyType === PartyType.USER && (
+            it.scopeType === ScopeType.SYSTEM
+            || (it.scopeType === ScopeType.TENANT && it.scopeId !== myTenantId && it.counterpartType === PartyType.USER)
+        ),
+    );
 
     const openTarget = (target: ConversationTarget) => {
         setActiveKey(targetKey(target));
@@ -141,7 +164,7 @@ export function NotificationCenter(props: {
 
     const onTenantPicked = (tenant: ContactableTenantView) => {
         setStartConversationOpen(false);
-        // Contacting a tenant is always a personal-identity conversation (I am the customer).
+        // Contacting a tenant desk is always a system-user identity act (I am the customer).
         const draft: ConversationTarget = {
             conversationId: null,
             title: tenant.name,
@@ -155,18 +178,16 @@ export function NotificationCenter(props: {
             unreadCount: 0,
         };
         const key = targetKey(draft);
-        // Prefer an existing conversation with this tenant over spawning a fresh draft.
         const existing = inboxTargets.find((it) => targetKey(it) === key);
-        if (existing) {
-            openTarget(existing);
-            return;
-        }
+        if (existing) { openTarget(existing); return; }
         setDrafts((prev) => (prev.some((d) => targetKey(d) === key) ? prev : [...prev, draft]));
         setActiveKey(key);
     };
 
-    const onTenantMatePicked = (tenant: UserTenantVO, mate: TenantMateVO) => {
+    const onTenantMatePicked = (_tenant: UserTenantVO, mate: TenantMateVO) => {
         setStartConversationOpen(false);
+        // System-tab: peer chat (SYSTEM scope). Org-tab: member chat scoped to currentTenant.
+        const isOrgIdentity = identityTab === 'tenant' && myTenantId != null;
         const draft: ConversationTarget = {
             conversationId: null,
             title: mate.nickname,
@@ -175,28 +196,25 @@ export function NotificationCenter(props: {
             viewingPartyName: null,
             counterpartType: PartyType.USER,
             counterpartId: mate.userId,
-            scopeType: ScopeType.TENANT,
-            scopeId: tenant.tenantId,
+            scopeType: isOrgIdentity ? ScopeType.TENANT : ScopeType.SYSTEM,
+            // Org-tab: always scope to MY current org, regardless of which org the mate belongs to.
+            scopeId: isOrgIdentity ? myTenantId : null,
             unreadCount: 0,
         };
         const key = targetKey(draft);
         const existing = inboxTargets.find((it) => targetKey(it) === key);
-        if (existing) {
-            openTarget(existing);
-            return;
-        }
+        if (existing) { openTarget(existing); return; }
         setDrafts((prev) => (prev.some((d) => targetKey(d) === key) ? prev : [...prev, draft]));
         setActiveKey(key);
     };
 
-    // First message materialized the draft — refetch so it folds into the fetched list. The active
-    // key is the viewing/counterpart slot, unchanged by materialization, so selection is preserved.
+    // First message materialized the draft — refetch so it folds into the fetched list.
     const onEstablished = () => {
         void refreshInbox();
         void revalidateTotalUnread();
     };
 
-    const renderTargetItem = (target: ConversationTarget) => {
+    const renderTargetItem = (target: ConversationTarget, showExternalTag = false) => {
         const key = targetKey(target);
         const isTenant = target.counterpartType === PartyType.TENANT;
         return (
@@ -214,7 +232,7 @@ export function NotificationCenter(props: {
                         : <UserOutlined style={{color: token.colorPrimary}}/>}
                     title={<div className="flex items-center gap-1">
                         <span>{target.title}</span>
-                        {target.scopeType === ScopeType.TENANT && target.scopeId !== currentTenant?.tenantId && (
+                        {showExternalTag && (
                             <Tag color="default">{t('components.notification.conversations.external')}</Tag>
                         )}
                     </div>}
@@ -233,6 +251,79 @@ export function NotificationCenter(props: {
         <div style={{padding: '6px 16px'}}>
             <Text type="secondary" style={{fontSize: 12}}>{label}</Text>
         </div>
+    );
+
+    const systemBroadcastRow = (
+        <List
+            dataSource={[SYSTEM_BROADCAST]}
+            renderItem={(kind) => (
+                <List.Item
+                    className="cursor-pointer"
+                    style={{
+                        paddingInline: 16,
+                        background: kind === activeKey ? token.colorFillTertiary : undefined,
+                    }}
+                    onClick={() => setActiveKey(kind)}
+                >
+                    <List.Item.Meta
+                        avatar={<NotificationOutlined style={{color: token.colorPrimary}}/>}
+                        title={t('components.notification.conversations.systemBroadcast')}
+                    />
+                    <Badge count={unreadCount} size="small"/>
+                </List.Item>
+            )}
+        />
+    );
+
+    /** Left-column contents for the System-identity tab. */
+    const systemTabList = (
+        <>
+            {systemBroadcastRow}
+            {systemPeerTargets.length > 0 && (
+                <List
+                    header={sectionHeader(t('components.notification.conversations.personal'))}
+                    dataSource={systemPeerTargets}
+                    renderItem={(it) => renderTargetItem(it)}
+                />
+            )}
+            {deskContactTargets.length > 0 && (
+                <List
+                    header={sectionHeader(t('components.notification.conversations.deskContactTag'))}
+                    dataSource={deskContactTargets}
+                    renderItem={(it) => renderTargetItem(it)}
+                />
+            )}
+        </>
+    );
+
+    /** Left-column contents for the Org-identity tab. */
+    const orgTabList = (
+        <>
+            {orgMemberTargets.length > 0 && (
+                <List
+                    header={sectionHeader(t('components.notification.conversations.membersTag'))}
+                    dataSource={orgMemberTargets}
+                    renderItem={(it) => renderTargetItem(it)}
+                />
+            )}
+            {deskByViewing.map((desk) => (
+                <List
+                    key={desk.id}
+                    header={sectionHeader(
+                        `${desk.name} · ${t('components.notification.conversations.deskTag')}`,
+                    )}
+                    dataSource={desk.items}
+                    renderItem={(it) => renderTargetItem(it)}
+                />
+            ))}
+            {orgExternalTargets.length > 0 && (
+                <List
+                    header={sectionHeader(t('components.notification.conversations.externalTag'))}
+                    dataSource={orgExternalTargets}
+                    renderItem={(it) => renderTargetItem(it, true)}
+                />
+            )}
+        </>
     );
 
     return (
@@ -256,53 +347,23 @@ export function NotificationCenter(props: {
                         {t('components.notification.startConversation.start')}
                     </Button>
                 </div>
+                {/* Identity switcher — only rendered when the user has an authenticated tenant. */}
+                {currentTenant != null && (
+                    <div style={{padding: '0 12px 8px'}}>
+                        <Segmented
+                            block
+                            size="small"
+                            value={identityTab}
+                            onChange={(v) => setIdentityTab(v as IdentityTab)}
+                            options={[
+                                {label: t('components.notification.conversations.systemTab'), value: 'system'},
+                                {label: currentTenant.tenantName, value: 'tenant'},
+                            ]}
+                        />
+                    </div>
+                )}
                 <div className="flex-1 overflow-auto">
-                    <List
-                        dataSource={[SYSTEM_BROADCAST]}
-                        renderItem={(kind) => (
-                            <List.Item
-                                className="cursor-pointer"
-                                style={{
-                                    paddingInline: 16,
-                                    background: kind === activeKey ? token.colorFillTertiary : undefined,
-                                }}
-                                onClick={() => setActiveKey(kind)}
-                            >
-                                <List.Item.Meta
-                                    avatar={<NotificationOutlined style={{color: token.colorPrimary}}/>}
-                                    title={t('components.notification.conversations.systemBroadcast')}
-                                />
-                                <Badge count={unreadCount} size="small"/>
-                            </List.Item>
-                        )}
-                    />
-                    {personalTargets.length > 0 && (
-                        <List
-                            header={sectionHeader(t('components.notification.conversations.personal'))}
-                            dataSource={personalTargets}
-                            renderItem={renderTargetItem}
-                        />
-                    )}
-                    {hasTenants && organizationSections.map((organization) => (
-                        <List
-                            key={organization.id}
-                            header={sectionHeader(
-                                `${organization.name} · ${t('components.notification.conversations.organizationTag')}`,
-                            )}
-                            dataSource={organization.items}
-                            renderItem={renderTargetItem}
-                        />
-                    ))}
-                    {hasTenants && deskSections.map((desk) => (
-                        <List
-                            key={desk.id}
-                            header={sectionHeader(
-                                `${desk.name} · ${t('components.notification.conversations.deskTag')}`,
-                            )}
-                            dataSource={desk.items}
-                            renderItem={renderTargetItem}
-                        />
-                    ))}
+                    {identityTab === 'system' || currentTenant == null ? systemTabList : orgTabList}
                 </div>
             </div>
 
@@ -349,10 +410,10 @@ function BroadcastHistoryPanel() {
         const el = containerRef.current;
         if (!el) return;
         if (!initializedRef.current) {
-            el.scrollTop = el.scrollHeight; // first content: land on the newest
+            el.scrollTop = el.scrollHeight;
             if (ordered.length > 0) initializedRef.current = true;
         } else if (prevScrollHeightRef.current > 0) {
-            el.scrollTop = el.scrollHeight - prevScrollHeightRef.current; // older page prepended: hold position
+            el.scrollTop = el.scrollHeight - prevScrollHeightRef.current;
             prevScrollHeightRef.current = 0;
         }
     }, [ordered]);

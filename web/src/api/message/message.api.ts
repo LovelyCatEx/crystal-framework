@@ -35,6 +35,14 @@ export interface SendInTenantMessageDTO {
     contentType?: number;
 }
 
+// Mirrors SendToMemberDTO. Sender must be a member of tenantId; target need not be (cross-org allowed).
+export interface SendToMemberDTO {
+    tenantId: string;
+    targetUserId: string;
+    content: string;
+    contentType?: number;
+}
+
 // Mirrors SendToTenantDTO. User (sender) proactively contacts a tenant's customer-service desk.
 export interface SendToTenantDTO {
     tenantId: string;
@@ -78,6 +86,15 @@ export async function sendAsTenant(dto: SendTenantMessageDTO): Promise<ApiRespon
 /** Send a direct message to a fellow member inside the supplied tenant scope. */
 export async function sendInTenant(dto: SendInTenantMessageDTO): Promise<ApiResponse<MsgMessage>> {
     return doPost('/api/message/send-in-tenant', dto, { 'Content-Type': 'application/json' });
+}
+
+/**
+ * Send a direct message as an org member to any user (cross-org allowed). Sender must
+ * be a member of tenantId; target need not be. Conversation is isolated in TENANT scope.
+ * Mirrors POST /message/send-to-member.
+ */
+export async function sendToMember(dto: SendToMemberDTO): Promise<ApiResponse<MsgMessage>> {
+    return doPost('/api/message/send-to-member', dto, { 'Content-Type': 'application/json' });
 }
 
 /**

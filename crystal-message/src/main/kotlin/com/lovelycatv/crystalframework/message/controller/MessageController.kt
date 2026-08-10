@@ -6,6 +6,7 @@ import com.lovelycatv.crystalframework.message.constants.MessageConstants
 import com.lovelycatv.crystalframework.message.controller.dto.SendInTenantMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendTenantMessageDTO
+import com.lovelycatv.crystalframework.message.controller.dto.SendToMemberDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendToTenantDTO
 import com.lovelycatv.crystalframework.message.service.InboxService
 import com.lovelycatv.crystalframework.message.service.MessageService
@@ -140,6 +141,32 @@ class MessageController(
             contentType = contentType,
             actingUserId = userAuthentication.userId,
             enforceScopeMembership = false,
+        )
+        return ApiResponse.success(message)
+    }
+
+    @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
+    @PostMapping("/send-to-member")
+    suspend fun sendToMember(
+        userAuthentication: UserAuthentication,
+        @RequestBody dto: SendToMemberDTO,
+    ): ApiResponse<*> {
+        val tenantId = dto.tenantId.toLongOrNull()
+            ?: throw BusinessException("Invalid tenantId: ${dto.tenantId}")
+        val targetUserId = dto.targetUserId.toLongOrNull()
+            ?: throw BusinessException("Invalid targetUserId: ${dto.targetUserId}")
+        val contentType = dto.contentType?.let {
+            ContentType.getByTypeId(it) ?: throw BusinessException("Unknown content type: $it")
+        } ?: ContentType.TEXT
+        val message = messageService.send(
+            scope = Scope(ScopeType.TENANT, tenantId),
+            sender = Party(PartyType.USER, userAuthentication.userId),
+            target = Party(PartyType.USER, targetUserId),
+            content = dto.content,
+            contentType = contentType,
+            actingUserId = userAuthentication.userId,
+            enforceScopeMembership = true,
+            enforceTargetScopeMembership = false,
         )
         return ApiResponse.success(message)
     }

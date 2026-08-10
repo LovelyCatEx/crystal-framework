@@ -3088,7 +3088,11 @@ export const enUS: I18nRules = {
         personal: 'Personal',
         organizationTag: 'Organization',
         deskTag: 'Desk',
-        external: 'External'
+        external: 'External',
+        systemTab: 'System User',
+        deskContactTag: 'Service Desks',
+        membersTag: 'Members',
+        externalTag: 'External'
       },
       startConversation: {
         start: 'Start conversation',
