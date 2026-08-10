@@ -3086,7 +3086,20 @@ export const enUS: I18nRules = {
         title: 'Conversations',
         systemBroadcast: 'System Announcements',
         personal: 'Personal',
-        deskTag: 'Desk'
+        organizationTag: 'Organization',
+        deskTag: 'Desk',
+        external: 'External'
+      },
+      startConversation: {
+        start: 'Start conversation',
+        title: 'Start conversation',
+        tenantTab: 'Tenant',
+        tenantMemberTab: 'Organization Members'
+      },
+      tenantChat: {
+        title: 'Select an organization member',
+        tenantPlaceholder: 'Select an organization',
+        empty: 'This organization has no members'
       },
       contact: {
         start: 'New',

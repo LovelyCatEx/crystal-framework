@@ -8,10 +8,13 @@ import {useInboxConversations} from "@/compositions/use-inbox-conversations.ts";
 import {useLoggedUser} from "@/compositions/use-logged-user.ts";
 import {revalidateTotalUnread} from "@/compositions/use-total-unread.ts";
 import {markConversationRead} from "@/api/message/message.api.ts";
+import {useUserTenants} from "@/compositions/use-tenant.ts";
 import type {Broadcast, BroadcastInboxItem} from "@/types/message/broadcast.types.ts";
 import {PartyType, ScopeType} from "@/types/message/broadcast.types.ts";
 import type {ContactableTenantView, ConversationInboxVO} from "@/types/message/message.types.ts";
-import {ContactTenantModal} from "./ContactTenantModal.tsx";
+import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
+import type {TenantMateVO} from "@/types/tenant/tenant-member.types.ts";
+import {StartConversationModal} from "./StartConversationModal.tsx";
 import {ConversationPanel, type ConversationTarget} from "./ConversationPanel.tsx";
 
 const {useToken} = theme;
@@ -29,13 +32,13 @@ const {SYSTEM_BROADCAST} = NotificationConversationKind;
 
 /**
  * Left-list / active-key / dedup identity: the viewing identity plus the counterpart. Stable across
- * a draft materializing (conversationId is data, not identity), and distinct for each side of a
- * self-conversation — where the user both staffs and contacted one desk — since their viewing and
- * counterpart parties are swapped. Assumes at most one conversation per (viewing, counterpart) pair,
- * which the backend guarantees by reusing the conversation for a given party set.
+ * a draft materializing (conversationId is data, not identity), and distinct across scopes and each
+ * side of a self-conversation — where the user both staffs and contacted one desk — since their
+ * viewing and counterpart parties are swapped. Assumes at most one conversation per scoped party set,
+ * which the backend guarantees by reusing the conversation for a given dedupe key.
  */
 function targetKey(target: ConversationTarget): string {
-    return `${target.viewingPartyType}:${target.viewingPartyId}|${target.counterpartType}:${target.counterpartId}`;
+    return `${target.scopeType}:${target.scopeId}|${target.viewingPartyType}:${target.viewingPartyId}|${target.counterpartType}:${target.counterpartId}`;
 }
 
 /** True when a broadcast's expireTime is in the past. Expired items still appear in history. */
@@ -67,10 +70,12 @@ export function NotificationCenter(props: {
     const {unreadCount} = useBroadcastInbox();
     const {conversations, refresh: refreshInbox} = useInboxConversations();
     const {userProfile} = useLoggedUser();
+    const {joinedTenants, currentTenant} = useUserTenants();
+    const hasTenants = (joinedTenants?.length ?? 0) > 0;
 
     const [activeKey, setActiveKey] = useState<string>(SYSTEM_BROADCAST);
     const [drafts, setDrafts] = useState<ConversationTarget[]>([]);
-    const [pickerOpen, setPickerOpen] = useState(false);
+    const [startConversationOpen, setStartConversationOpen] = useState(false);
 
     const inboxTargets: ConversationTarget[] = useMemo(
         () => conversations.map((c: ConversationInboxVO) => ({
@@ -99,16 +104,29 @@ export function NotificationCenter(props: {
     ];
     const activeTarget = targets.find((it) => targetKey(it) === activeKey) ?? null;
 
-    // Partition by viewing identity: my personal conversations, then one section per staffed desk.
-    const personalTargets = targets.filter((it) => it.viewingPartyType === PartyType.USER);
+    // Partition by scope and viewing identity: personal, organization members, then staffed desks.
+    const personalTargets = targets.filter((it) =>
+        it.scopeType === ScopeType.SYSTEM && it.viewingPartyType === PartyType.USER,
+    );
+    const organizationByScope = new Map<string, {id: string; name: string; items: ConversationTarget[]}>();
     const deskByViewing = new Map<string, {id: string; name: string; items: ConversationTarget[]}>();
+    const tenantNameById = new Map((joinedTenants ?? []).map((tenant) => [tenant.tenantId, tenant.tenantName]));
     for (const it of targets) {
-        if (it.viewingPartyType !== PartyType.TENANT || it.viewingPartyId == null) continue;
-        const section = deskByViewing.get(it.viewingPartyId)
-            ?? {id: it.viewingPartyId, name: it.viewingPartyName ?? it.viewingPartyId, items: []};
-        section.items.push(it);
-        deskByViewing.set(it.viewingPartyId, section);
+        if (it.scopeType !== ScopeType.TENANT) continue;
+        if (it.viewingPartyType === PartyType.USER && it.scopeId != null) {
+            const section = organizationByScope.get(it.scopeId)
+                ?? {id: it.scopeId, name: tenantNameById.get(it.scopeId) ?? it.scopeId, items: []};
+            section.items.push(it);
+            organizationByScope.set(it.scopeId, section);
+        }
+        if (it.viewingPartyType === PartyType.TENANT && it.viewingPartyId != null) {
+            const section = deskByViewing.get(it.viewingPartyId)
+                ?? {id: it.viewingPartyId, name: it.viewingPartyName ?? it.viewingPartyId, items: []};
+            section.items.push(it);
+            deskByViewing.set(it.viewingPartyId, section);
+        }
     }
+    const organizationSections = [...organizationByScope.values()];
     const deskSections = [...deskByViewing.values()];
 
     const openTarget = (target: ConversationTarget) => {
@@ -122,7 +140,7 @@ export function NotificationCenter(props: {
     };
 
     const onTenantPicked = (tenant: ContactableTenantView) => {
-        setPickerOpen(false);
+        setStartConversationOpen(false);
         // Contacting a tenant is always a personal-identity conversation (I am the customer).
         const draft: ConversationTarget = {
             conversationId: null,
@@ -138,6 +156,30 @@ export function NotificationCenter(props: {
         };
         const key = targetKey(draft);
         // Prefer an existing conversation with this tenant over spawning a fresh draft.
+        const existing = inboxTargets.find((it) => targetKey(it) === key);
+        if (existing) {
+            openTarget(existing);
+            return;
+        }
+        setDrafts((prev) => (prev.some((d) => targetKey(d) === key) ? prev : [...prev, draft]));
+        setActiveKey(key);
+    };
+
+    const onTenantMatePicked = (tenant: UserTenantVO, mate: TenantMateVO) => {
+        setStartConversationOpen(false);
+        const draft: ConversationTarget = {
+            conversationId: null,
+            title: mate.nickname,
+            viewingPartyType: PartyType.USER,
+            viewingPartyId: userProfile?.id ?? null,
+            viewingPartyName: null,
+            counterpartType: PartyType.USER,
+            counterpartId: mate.userId,
+            scopeType: ScopeType.TENANT,
+            scopeId: tenant.tenantId,
+            unreadCount: 0,
+        };
+        const key = targetKey(draft);
         const existing = inboxTargets.find((it) => targetKey(it) === key);
         if (existing) {
             openTarget(existing);
@@ -170,7 +212,12 @@ export function NotificationCenter(props: {
                     avatar={isTenant
                         ? <ShopOutlined style={{color: token.colorPrimary}}/>
                         : <UserOutlined style={{color: token.colorPrimary}}/>}
-                    title={target.title}
+                    title={<div className="flex items-center gap-1">
+                        <span>{target.title}</span>
+                        {target.scopeType === ScopeType.TENANT && target.scopeId !== currentTenant?.tenantId && (
+                            <Tag color="default">{t('components.notification.conversations.external')}</Tag>
+                        )}
+                    </div>}
                     description={target.conversationId == null
                         ? <Tag icon={<MessageOutlined/>} color="default">
                             {t('components.notification.contact.draftTag')}
@@ -204,9 +251,9 @@ export function NotificationCenter(props: {
                         type="text"
                         size="small"
                         icon={<PlusOutlined/>}
-                        onClick={() => setPickerOpen(true)}
+                        onClick={() => setStartConversationOpen(true)}
                     >
-                        {t('components.notification.contact.start')}
+                        {t('components.notification.startConversation.start')}
                     </Button>
                 </div>
                 <div className="flex-1 overflow-auto">
@@ -236,7 +283,17 @@ export function NotificationCenter(props: {
                             renderItem={renderTargetItem}
                         />
                     )}
-                    {deskSections.map((desk) => (
+                    {hasTenants && organizationSections.map((organization) => (
+                        <List
+                            key={organization.id}
+                            header={sectionHeader(
+                                `${organization.name} · ${t('components.notification.conversations.organizationTag')}`,
+                            )}
+                            dataSource={organization.items}
+                            renderItem={renderTargetItem}
+                        />
+                    ))}
+                    {hasTenants && deskSections.map((desk) => (
                         <List
                             key={desk.id}
                             header={sectionHeader(
@@ -261,10 +318,12 @@ export function NotificationCenter(props: {
                 )}
             </div>
 
-            <ContactTenantModal
-                open={pickerOpen}
-                onClose={() => setPickerOpen(false)}
-                onSelect={onTenantPicked}
+            <StartConversationModal
+                open={startConversationOpen}
+                tenants={joinedTenants ?? []}
+                onClose={() => setStartConversationOpen(false)}
+                onTenantSelect={onTenantPicked}
+                onTenantMateSelect={onTenantMatePicked}
             />
         </div>
     );

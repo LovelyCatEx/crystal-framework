@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.PartyResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
+import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.request.PageQuery
@@ -50,9 +51,17 @@ class MessageServiceImpl(
         contentType: ContentType,
         actingUserId: Long,
         enforceScopeMembership: Boolean,
+        enforceTargetScopeMembership: Boolean,
     ): MsgMessageEntity {
-        if (enforceScopeMembership && !scopeResolverRegistry.resolve(scope.type).isMember(scope, actingUserId)) {
+        val scopeResolver = scopeResolverRegistry.resolve(scope.type)
+        val targetUserId = target.id
+        if (enforceScopeMembership && !scopeResolver.isMember(scope, actingUserId)) {
             throw ForbiddenException("User $actingUserId is not a member of scope ${scope.key()}")
+        }
+        if (enforceTargetScopeMembership && target.type == PartyType.USER &&
+            (targetUserId == null || !scopeResolver.isMember(scope, targetUserId))
+        ) {
+            throw ForbiddenException("Target user $targetUserId is not a member of scope ${scope.key()}")
         }
         if (!partyResolverRegistry.resolve(sender.type).canActAs(sender, actingUserId)) {
             throw ForbiddenException("User $actingUserId cannot act as party ${sender.type}:${sender.id}")

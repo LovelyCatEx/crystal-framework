@@ -3,10 +3,10 @@ import {useTranslation} from "react-i18next";
 import {Button, Empty, Input, Spin, theme, Typography} from "antd";
 import {SendOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
-import {queryConversationMessages, send, sendAsTenant, sendToTenant} from "@/api/message/message.api.ts";
+import {queryConversationMessages, send, sendAsTenant, sendInTenant, sendToTenant} from "@/api/message/message.api.ts";
 import type {ApiResponse} from "@/api/system-request.ts";
 import type {MsgMessage} from "@/types/message/message.types.ts";
-import {PartyType} from "@/types/message/broadcast.types.ts";
+import {PartyType, ScopeType} from "@/types/message/broadcast.types.ts";
 
 const {useToken} = theme;
 const {Text} = Typography;
@@ -57,6 +57,9 @@ function routeSend(target: ConversationTarget, content: string): Promise<ApiResp
     }
     if (target.counterpartType === PartyType.TENANT) {
         return sendToTenant({tenantId: target.counterpartId!, content});
+    }
+    if (target.scopeType === ScopeType.TENANT) {
+        return sendInTenant({tenantId: target.scopeId!, targetUserId: target.counterpartId!, content});
     }
     return send({targetUserId: target.counterpartId!, content});
 }

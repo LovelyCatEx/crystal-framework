@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.message.controller
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.message.constants.MessageConstants
+import com.lovelycatv.crystalframework.message.controller.dto.SendInTenantMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendTenantMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendToTenantDTO
@@ -67,6 +68,31 @@ class MessageController(
             content = dto.content,
             contentType = contentType,
             actingUserId = userAuthentication.userId,
+        )
+        return ApiResponse.success(message)
+    }
+
+    @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
+    @PostMapping("/send-in-tenant")
+    suspend fun sendInTenant(
+        userAuthentication: UserAuthentication,
+        @RequestBody dto: SendInTenantMessageDTO,
+    ): ApiResponse<*> {
+        val tenantId = dto.tenantId.toLongOrNull()
+            ?: throw BusinessException("Invalid tenantId: ${dto.tenantId}")
+        val targetUserId = dto.targetUserId.toLongOrNull()
+            ?: throw BusinessException("Invalid targetUserId: ${dto.targetUserId}")
+        val contentType = dto.contentType?.let {
+            ContentType.getByTypeId(it) ?: throw BusinessException("Unknown content type: $it")
+        } ?: ContentType.TEXT
+        val message = messageService.send(
+            scope = Scope(ScopeType.TENANT, tenantId),
+            sender = Party(PartyType.USER, userAuthentication.userId),
+            target = Party(PartyType.USER, targetUserId),
+            content = dto.content,
+            contentType = contentType,
+            actingUserId = userAuthentication.userId,
+            enforceTargetScopeMembership = true,
         )
         return ApiResponse.success(message)
     }

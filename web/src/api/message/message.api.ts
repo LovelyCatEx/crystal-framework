@@ -27,6 +27,14 @@ export interface SendTenantMessageDTO {
     contentType?: number;
 }
 
+// Mirrors SendInTenantMessageDTO. A tenant member sends directly to another member in the same tenant.
+export interface SendInTenantMessageDTO {
+    tenantId: string;
+    targetUserId: string;
+    content: string;
+    contentType?: number;
+}
+
 // Mirrors SendToTenantDTO. User (sender) proactively contacts a tenant's customer-service desk.
 export interface SendToTenantDTO {
     tenantId: string;
@@ -65,6 +73,11 @@ export async function send(dto: SendMessageDTO): Promise<ApiResponse<MsgMessage>
  */
 export async function sendAsTenant(dto: SendTenantMessageDTO): Promise<ApiResponse<MsgMessage>> {
     return doPost('/api/message/send-as-tenant', dto, { 'Content-Type': 'application/json' });
+}
+
+/** Send a direct message to a fellow member inside the supplied tenant scope. */
+export async function sendInTenant(dto: SendInTenantMessageDTO): Promise<ApiResponse<MsgMessage>> {
+    return doPost('/api/message/send-in-tenant', dto, { 'Content-Type': 'application/json' });
 }
 
 /**

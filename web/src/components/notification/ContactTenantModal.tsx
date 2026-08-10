@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {Empty, Input, List, Modal, Pagination, Spin} from "antd";
+import {Empty, Input, List, Pagination, Spin} from "antd";
 import {ShopOutlined} from "@ant-design/icons";
 import {queryContactableTenants} from "@/api/message/message.api.ts";
 import type {ContactableTenantView} from "@/types/message/message.types.ts";
@@ -14,12 +14,10 @@ const PAGE_SIZE = 20;
  * endpoint so future per-user visibility rules live server-side in one place. Table-modal UX
  * (search + paginated list ≤20/page) mirrors EntitySelector for consistency.
  */
-export function ContactTenantModal(props: {
-    open: boolean;
-    onClose: () => void;
+export function ContactTenantPanel(props: {
     onSelect: (tenant: ContactableTenantView) => void;
 }) {
-    const {open, onClose, onSelect} = props;
+    const {onSelect} = props;
     const {t} = useTranslation();
 
     const [keyword, setKeyword] = useState("");
@@ -39,14 +37,9 @@ export function ContactTenantModal(props: {
         }
     }, []);
 
-    // Reset to a clean first page whenever the modal is (re)opened.
     useEffect(() => {
-        if (open) {
-            setKeyword("");
-            setPage(1);
-            void load("", 1);
-        }
-    }, [open, load]);
+        void load("", 1);
+    }, [load]);
 
     const onSearch = (kw: string) => {
         setKeyword(kw);
@@ -60,14 +53,7 @@ export function ContactTenantModal(props: {
     };
 
     return (
-        <Modal
-            open={open}
-            onCancel={onClose}
-            footer={null}
-            title={t('components.notification.contact.title')}
-            width={480}
-            destroyOnHidden
-        >
+        <>
             <Input.Search
                 allowClear
                 placeholder={t('components.notification.contact.searchPlaceholder')}
@@ -106,6 +92,6 @@ export function ContactTenantModal(props: {
                     />
                 </div>
             )}
-        </Modal>
+        </>
     );
 }

@@ -23,6 +23,9 @@ interface MessageService {
      * customer-service desk" case, where the sender is legitimately not a member of
      * the target tenant scope; the sender's authority is still fully enforced by the
      * sender party's [com.lovelycatv.crystalframework.sdk.message.config.MessagePartyResolver.canActAs].
+     *
+     * [enforceTargetScopeMembership] additionally requires a USER target to belong
+     * to [scope], which is used for tenant-internal member conversations.
      */
     suspend fun send(
         scope: Scope,
@@ -32,6 +35,7 @@ interface MessageService {
         contentType: ContentType,
         actingUserId: Long,
         enforceScopeMembership: Boolean = true,
+        enforceTargetScopeMembership: Boolean = false,
     ): MsgMessageEntity
 
     /** Page a conversation's messages (newest first). */

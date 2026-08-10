@@ -3084,7 +3084,20 @@ export const zhCN: I18nRules = {
         title: '会话',
         systemBroadcast: '系统公告',
         personal: '个人',
-        deskTag: '客服台'
+        organizationTag: '组织',
+        deskTag: '客服台',
+        external: '外部'
+      },
+      startConversation: {
+        start: '发起会话',
+        title: '发起会话',
+        tenantTab: '租户',
+        tenantMemberTab: '组织成员'
+      },
+      tenantChat: {
+        title: '选择组织成员',
+        tenantPlaceholder: '选择组织',
+        empty: '该组织暂无成员'
       },
       contact: {
         start: '发起会话',
