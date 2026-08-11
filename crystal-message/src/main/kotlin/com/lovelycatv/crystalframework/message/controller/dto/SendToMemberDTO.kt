@@ -1,13 +1,11 @@
 package com.lovelycatv.crystalframework.message.controller.dto
 
 /**
- * Send a direct message from the acting user (who must be a member of [tenantId])
- * to any user, regardless of whether the target belongs to [tenantId]. This is the
- * cross-org peer send: the conversation is isolated within the sender's tenant scope,
- * but the recipient need not be a member of that scope.
- *
- * Contrast with [SendInTenantMessageDTO], which additionally enforces that the
- * target is a member of the same tenant.
+ * Send a direct message between two members of the same tenant. The endpoint enforces that
+ * BOTH the acting user and [targetUserId] are members of [tenantId]; the resulting conversation
+ * is isolated within that TENANT scope. This is the only member-to-member peer channel — strict
+ * scope isolation forbids cross-scope peer chats, so contacting a user outside your shared tenant
+ * must instead go through the tenant's service desk.
  */
 data class SendToMemberDTO(
     val tenantId: String,

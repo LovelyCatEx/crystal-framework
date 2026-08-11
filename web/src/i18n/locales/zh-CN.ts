@@ -3095,8 +3095,14 @@ export const zhCN: I18nRules = {
       startConversation: {
         start: '发起会话',
         title: '发起会话',
+        userTab: '用户',
         tenantTab: '租户',
         tenantMemberTab: '组织成员'
+      },
+      contactUser: {
+        searchPlaceholder: '输入完整用户名或邮箱',
+        hint: '输入完整的用户名或邮箱以发起会话',
+        empty: '未找到匹配的用户'
       },
       tenantChat: {
         title: '选择组织成员',

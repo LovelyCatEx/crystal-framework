@@ -13,6 +13,18 @@ export interface ContactableTenantView {
 }
 
 /**
+ * Minimal read-only user view for exact-match contactable-user lookup. Mirrors
+ * {@link com.lovelycatv.crystalframework.sdk.message.config.ContactableUserView}. Deliberately
+ * minimal (no email/phone/authorities) to avoid leaking user-internal details through messaging.
+ */
+export interface ContactableUserView {
+    id: string;           // Long serialized as String
+    username: string;
+    nickname: string;
+    avatar: string | null;  // avatar file id (Long as String), null when unset
+}
+
+/**
  * One inbox entry, expanded per *viewing party* (the identity the user acts as). Mirrors
  * {@link com.lovelycatv.crystalframework.message.controller.vo.ConversationInboxVO}. A user who
  * staffs the very desk they contacted gets two entries for one conversation — one under `USER`

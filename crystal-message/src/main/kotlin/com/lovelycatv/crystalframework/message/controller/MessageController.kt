@@ -3,7 +3,6 @@ package com.lovelycatv.crystalframework.message.controller
 import com.lovelycatv.crystalframework.audit.annotations.Audit
 import com.lovelycatv.crystalframework.audit.types.AuditAction
 import com.lovelycatv.crystalframework.message.constants.MessageConstants
-import com.lovelycatv.crystalframework.message.controller.dto.SendInTenantMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendTenantMessageDTO
 import com.lovelycatv.crystalframework.message.controller.dto.SendToMemberDTO
@@ -15,6 +14,7 @@ import com.lovelycatv.crystalframework.message.types.ContentType
 import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.config.ContactableTenantProvider
+import com.lovelycatv.crystalframework.sdk.message.config.ContactableUserProvider
 import com.lovelycatv.crystalframework.sdk.message.config.UserTenantProvider
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
@@ -50,6 +50,7 @@ class MessageController(
     private val msgConversationMemberService: MsgConversationMemberService,
     private val userTenantProvider: UserTenantProvider,
     private val contactableTenantProvider: ContactableTenantProvider,
+    private val contactableUserProvider: ContactableUserProvider,
 ) {
     @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
     @PostMapping("/send")
@@ -69,31 +70,6 @@ class MessageController(
             content = dto.content,
             contentType = contentType,
             actingUserId = userAuthentication.userId,
-        )
-        return ApiResponse.success(message)
-    }
-
-    @Audit(action = AuditAction.CREATE, resourceType = TableConstants.TABLE_MSG_MESSAGES)
-    @PostMapping("/send-in-tenant")
-    suspend fun sendInTenant(
-        userAuthentication: UserAuthentication,
-        @RequestBody dto: SendInTenantMessageDTO,
-    ): ApiResponse<*> {
-        val tenantId = dto.tenantId.toLongOrNull()
-            ?: throw BusinessException("Invalid tenantId: ${dto.tenantId}")
-        val targetUserId = dto.targetUserId.toLongOrNull()
-            ?: throw BusinessException("Invalid targetUserId: ${dto.targetUserId}")
-        val contentType = dto.contentType?.let {
-            ContentType.getByTypeId(it) ?: throw BusinessException("Unknown content type: $it")
-        } ?: ContentType.TEXT
-        val message = messageService.send(
-            scope = Scope(ScopeType.TENANT, tenantId),
-            sender = Party(PartyType.USER, userAuthentication.userId),
-            target = Party(PartyType.USER, targetUserId),
-            content = dto.content,
-            contentType = contentType,
-            actingUserId = userAuthentication.userId,
-            enforceTargetScopeMembership = true,
         )
         return ApiResponse.success(message)
     }
@@ -166,7 +142,7 @@ class MessageController(
             contentType = contentType,
             actingUserId = userAuthentication.userId,
             enforceScopeMembership = true,
-            enforceTargetScopeMembership = false,
+            enforceTargetScopeMembership = true,
         )
         return ApiResponse.success(message)
     }
@@ -179,6 +155,19 @@ class MessageController(
         @RequestParam(defaultValue = "20") pageSize: Int,
     ): ApiResponse<*> {
         val result = contactableTenantProvider.pageContactableTenants(keyword, page, pageSize)
+        return ApiResponse.success(result)
+    }
+
+    @GetMapping("/contactable-users")
+    suspend fun contactableUsers(
+        userAuthentication: UserAuthentication,
+        @RequestParam(required = false) keyword: String?,
+        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "20") pageSize: Int,
+    ): ApiResponse<*> {
+        val result = contactableUserProvider.searchContactableUsers(
+            userAuthentication.userId, keyword, page, pageSize,
+        )
         return ApiResponse.success(result)
     }
 

@@ -1,20 +1,37 @@
 import {Modal, Tabs} from "antd";
 import {useTranslation} from "react-i18next";
-import type {ContactableTenantView} from "@/types/message/message.types.ts";
+import type {ContactableTenantView, ContactableUserView} from "@/types/message/message.types.ts";
 import type {TenantMateVO} from "@/types/tenant/tenant-member.types.ts";
 import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import {ContactTenantPanel} from "./ContactTenantModal.tsx";
+import {ContactUserPanel} from "./ContactUserModal.tsx";
 import {TenantMateSelectorPanel} from "./TenantMateSelectorModal.tsx";
 
+/**
+ * Identity-driven initiation dialog. The acting identity — not a free choice inside the dialog —
+ * decides what you may start and in which scope, so the two identities stay isolated:
+ *
+ *   system identity → search a user (exact match) for a SYSTEM-scope peer chat, or contact a
+ *                      tenant service desk (also a system-user act).
+ *   org identity    → pick a member of the current org for a TENANT-scope member chat. No user
+ *                      search and no desk here: acting as the org you only talk to its members.
+ *
+ * [currentTenant] is required for the org identity (it is the locked scope); it is null only when
+ * the user has no authenticated tenant, in which case [identity] is always 'system'.
+ */
 export function StartConversationModal(props: {
     open: boolean;
-    tenants: UserTenantVO[];
+    identity: 'system' | 'tenant';
+    currentTenant?: UserTenantVO | null;
     onClose: () => void;
+    onUserSelect: (user: ContactableUserView) => void;
     onTenantSelect: (tenant: ContactableTenantView) => void;
-    onTenantMateSelect: (tenant: UserTenantVO, mate: TenantMateVO) => void;
+    onOrgMemberSelect: (tenant: UserTenantVO, mate: TenantMateVO) => void;
 }) {
-    const {open, tenants, onClose, onTenantSelect, onTenantMateSelect} = props;
+    const {open, identity, currentTenant, onClose, onUserSelect, onTenantSelect, onOrgMemberSelect} = props;
     const {t} = useTranslation();
+
+    const isOrg = identity === 'tenant' && currentTenant != null;
 
     return (
         <Modal
@@ -25,20 +42,28 @@ export function StartConversationModal(props: {
             width={480}
             destroyOnHidden
         >
-            <Tabs
-                items={[
-                    {
-                        key: 'tenant',
-                        label: t('components.notification.startConversation.tenantTab'),
-                        children: <ContactTenantPanel onSelect={onTenantSelect}/>,
-                    },
-                    {
-                        key: 'tenant-member',
-                        label: t('components.notification.startConversation.tenantMemberTab'),
-                        children: <TenantMateSelectorPanel tenants={tenants} onSelect={onTenantMateSelect}/>,
-                    },
-                ]}
-            />
+            {isOrg ? (
+                <TenantMateSelectorPanel
+                    tenants={[currentTenant]}
+                    lockedTenant={currentTenant}
+                    onSelect={onOrgMemberSelect}
+                />
+            ) : (
+                <Tabs
+                    items={[
+                        {
+                            key: 'user',
+                            label: t('components.notification.startConversation.userTab'),
+                            children: <ContactUserPanel onSelect={onUserSelect}/>,
+                        },
+                        {
+                            key: 'tenant',
+                            label: t('components.notification.startConversation.tenantTab'),
+                            children: <ContactTenantPanel onSelect={onTenantSelect}/>,
+                        },
+                    ]}
+                />
+            )}
         </Modal>
     );
 }

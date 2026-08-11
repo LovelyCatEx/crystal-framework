@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Empty, List, Pagination, Select, Spin} from "antd";
 import {UserOutlined} from "@ant-design/icons";
@@ -8,12 +8,23 @@ import type {TenantMateVO} from "@/types/tenant/tenant-member.types.ts";
 
 const PAGE_SIZE = 20;
 
+/**
+ * Member picker. When [lockedTenant] is given (org-identity flow) the org is fixed and the selector
+ * is hidden — you only ever DM members of the org you are acting as. Without it (falls back to
+ * [tenants]) the user picks which of their joined orgs to browse.
+ */
 export function TenantMateSelectorPanel(props: {
     tenants: UserTenantVO[];
+    lockedTenant?: UserTenantVO;
     onSelect: (tenant: UserTenantVO, mate: TenantMateVO) => void;
 }) {
-    const {tenants, onSelect} = props;
+    const {lockedTenant, onSelect} = props;
     const {t} = useTranslation();
+    // A locked org collapses the choice list to that single org; the selector is then not rendered.
+    const tenants = useMemo(
+        () => (lockedTenant ? [lockedTenant] : props.tenants),
+        [lockedTenant, props.tenants],
+    );
     const [tenantId, setTenantId] = useState<string>();
     const [page, setPage] = useState(1);
     const [records, setRecords] = useState<TenantMateVO[]>([]);
@@ -54,13 +65,15 @@ export function TenantMateSelectorPanel(props: {
 
     return (
         <>
-            <Select
-                className="mb-3 w-full"
-                value={tenantId}
-                options={tenants.map((tenant) => ({value: tenant.tenantId, label: tenant.tenantName}))}
-                onChange={onTenantChange}
-                placeholder={t('components.notification.tenantChat.tenantPlaceholder')}
-            />
+            {!lockedTenant && (
+                <Select
+                    className="mb-3 w-full"
+                    value={tenantId}
+                    options={tenants.map((tenant) => ({value: tenant.tenantId, label: tenant.tenantName}))}
+                    onChange={onTenantChange}
+                    placeholder={t('components.notification.tenantChat.tenantPlaceholder')}
+                />
+            )}
             {loading ? (
                 <div className="flex justify-center py-8"><Spin/></div>
             ) : records.length === 0 ? (

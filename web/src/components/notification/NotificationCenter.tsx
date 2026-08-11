@@ -11,7 +11,11 @@ import {markConversationRead} from "@/api/message/message.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import type {Broadcast, BroadcastInboxItem} from "@/types/message/broadcast.types.ts";
 import {PartyType, ScopeType} from "@/types/message/broadcast.types.ts";
-import type {ContactableTenantView, ConversationInboxVO} from "@/types/message/message.types.ts";
+import type {
+    ContactableTenantView,
+    ContactableUserView,
+    ConversationInboxVO,
+} from "@/types/message/message.types.ts";
 import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import type {TenantMateVO} from "@/types/tenant/tenant-member.types.ts";
 import {StartConversationModal} from "./StartConversationModal.tsx";
@@ -76,7 +80,7 @@ export function NotificationCenter(props: {
     const {token} = useToken();
     const {unreadCount} = useBroadcastInbox();
     const {userProfile} = useLoggedUser();
-    const {joinedTenants, currentTenant} = useUserTenants();
+    const {currentTenant} = useUserTenants();
     // Fold the currently-acting tenant into the fetch so `counterpartInCurrentOrg` is computed against
     // the org I am logged into; switching org identity refetches with the correct flags.
     const {conversations, refresh: refreshInbox} = useInboxConversations(currentTenant?.tenantId);
@@ -149,16 +153,9 @@ export function NotificationCenter(props: {
         }
         return [...map.values()];
     }, [targets]);
-    // External section: org-context user conversations whose counterpart is NOT a member of my
-    // current org — covers both directions (an outside person I contacted while acting as an org
-    // member, scoped to my org; and another org's member who contacted me, scoped to their org).
-    // SYSTEM-scope personal chats never appear here — they belong solely to the System tab.
-    const orgExternalTargets = targets.filter(
-        (it) => it.scopeType === ScopeType.TENANT
-            && it.viewingPartyType === PartyType.USER
-            && it.counterpartType === PartyType.USER
-            && !it.counterpartInCurrentOrg,
-    );
+    // No External section on the Org tab: a TENANT-scoped conversation only ever exists between two
+    // members of that org (internal), so anything external is a SYSTEM-scope thread shown — tagged
+    // "external" — under the System tab instead.
 
     const openTarget = (target: ConversationTarget) => {
         setActiveKey(targetKey(target));
@@ -170,23 +167,9 @@ export function NotificationCenter(props: {
         }
     };
 
-    const onTenantPicked = (tenant: ContactableTenantView) => {
+    // Materialize a draft into the list (or reopen it if a conversation already exists for its key).
+    const openDraft = (draft: ConversationTarget) => {
         setStartConversationOpen(false);
-        // Contacting a tenant desk is always a system-user identity act (I am the customer).
-        const draft: ConversationTarget = {
-            conversationId: null,
-            title: tenant.name,
-            viewingPartyType: PartyType.USER,
-            viewingPartyId: userProfile?.id ?? null,
-            viewingPartyName: null,
-            counterpartType: PartyType.TENANT,
-            counterpartId: tenant.id,
-            // A tenant desk is never an org "member"; this draft lives under the System tab regardless.
-            counterpartInCurrentOrg: false,
-            scopeType: ScopeType.TENANT,
-            scopeId: tenant.id,
-            unreadCount: 0,
-        };
         const key = targetKey(draft);
         const existing = inboxTargets.find((it) => targetKey(it) === key);
         if (existing) { openTarget(existing); return; }
@@ -194,11 +177,47 @@ export function NotificationCenter(props: {
         setActiveKey(key);
     };
 
-    const onTenantMatePicked = (tenant: UserTenantVO, mate: TenantMateVO) => {
-        setStartConversationOpen(false);
-        // System-tab: peer chat (SYSTEM scope). Org-tab: member chat scoped to currentTenant.
-        const isOrgIdentity = identityTab === 'tenant' && myTenantId != null;
-        const draft: ConversationTarget = {
+    const onTenantPicked = (tenant: ContactableTenantView) => {
+        // Contacting a tenant desk is always a system-user identity act (I am the customer). A tenant
+        // desk is never an org "member", so this draft lives under the System tab regardless.
+        openDraft({
+            conversationId: null,
+            title: tenant.name,
+            viewingPartyType: PartyType.USER,
+            viewingPartyId: userProfile?.id ?? null,
+            viewingPartyName: null,
+            counterpartType: PartyType.TENANT,
+            counterpartId: tenant.id,
+            counterpartInCurrentOrg: false,
+            scopeType: ScopeType.TENANT,
+            scopeId: tenant.id,
+            unreadCount: 0,
+        });
+    };
+
+    // System identity → a SYSTEM-scope peer chat with any user found by exact search. Never carries
+    // a tenant scope, so it stays isolated from org-identity threads. counterpartInCurrentOrg is left
+    // false on the draft; the backend recomputes it when the first message materializes the thread.
+    const onUserPicked = (user: ContactableUserView) => {
+        openDraft({
+            conversationId: null,
+            title: user.nickname,
+            viewingPartyType: PartyType.USER,
+            viewingPartyId: userProfile?.id ?? null,
+            viewingPartyName: null,
+            counterpartType: PartyType.USER,
+            counterpartId: user.id,
+            counterpartInCurrentOrg: false,
+            scopeType: ScopeType.SYSTEM,
+            scopeId: null,
+            unreadCount: 0,
+        });
+    };
+
+    // Org identity → a TENANT-scope member chat within the current org. The picker only surfaces
+    // members of the acting org, so scope is always the current tenant and both parties share it.
+    const onOrgMemberPicked = (tenant: UserTenantVO, mate: TenantMateVO) => {
+        openDraft({
             conversationId: null,
             title: mate.nickname,
             viewingPartyType: PartyType.USER,
@@ -206,19 +225,11 @@ export function NotificationCenter(props: {
             viewingPartyName: null,
             counterpartType: PartyType.USER,
             counterpartId: mate.userId,
-            // Internal only when acting as my org and the mate belongs to my current org; a mate from
-            // another org contacted while acting as my org is external.
-            counterpartInCurrentOrg: isOrgIdentity && tenant.tenantId === myTenantId,
-            scopeType: isOrgIdentity ? ScopeType.TENANT : ScopeType.SYSTEM,
-            // Org-tab: always scope to MY current org, regardless of which org the mate belongs to.
-            scopeId: isOrgIdentity ? myTenantId : null,
+            counterpartInCurrentOrg: true,
+            scopeType: ScopeType.TENANT,
+            scopeId: tenant.tenantId,
             unreadCount: 0,
-        };
-        const key = targetKey(draft);
-        const existing = inboxTargets.find((it) => targetKey(it) === key);
-        if (existing) { openTarget(existing); return; }
-        setDrafts((prev) => (prev.some((d) => targetKey(d) === key) ? prev : [...prev, draft]));
-        setActiveKey(key);
+        });
     };
 
     // First message materialized the draft — refetch so it folds into the fetched list.
@@ -296,7 +307,9 @@ export function NotificationCenter(props: {
                 <List
                     header={sectionHeader(t('components.notification.conversations.personal'))}
                     dataSource={systemPeerTargets}
-                    renderItem={(it) => renderTargetItem(it)}
+                    // A peer whose counterpart is not a member of the org I'm logged into is an
+                    // external contact — tag it so cross-org threads read clearly in the personal list.
+                    renderItem={(it) => renderTargetItem(it, !it.counterpartInCurrentOrg)}
                 />
             )}
             {deskContactTargets.length > 0 && (
@@ -329,13 +342,6 @@ export function NotificationCenter(props: {
                     renderItem={(it) => renderTargetItem(it)}
                 />
             ))}
-            {orgExternalTargets.length > 0 && (
-                <List
-                    header={sectionHeader(t('components.notification.conversations.externalTag'))}
-                    dataSource={orgExternalTargets}
-                    renderItem={(it) => renderTargetItem(it, true)}
-                />
-            )}
         </>
     );
 
@@ -394,10 +400,12 @@ export function NotificationCenter(props: {
 
             <StartConversationModal
                 open={startConversationOpen}
-                tenants={joinedTenants ?? []}
+                identity={currentTenant == null ? 'system' : identityTab}
+                currentTenant={currentTenant}
                 onClose={() => setStartConversationOpen(false)}
+                onUserSelect={onUserPicked}
                 onTenantSelect={onTenantPicked}
-                onTenantMateSelect={onTenantMatePicked}
+                onOrgMemberSelect={onOrgMemberPicked}
             />
         </div>
     );

@@ -2,6 +2,7 @@ import {doGet, doPost, type ApiResponse} from "../system-request.ts";
 import type {PaginatedResponseData} from "@/types/api.types.ts";
 import type {
     ContactableTenantView,
+    ContactableUserView,
     ConversationInboxVO,
     MsgMessage,
 } from "@/types/message/message.types.ts";
@@ -27,15 +28,7 @@ export interface SendTenantMessageDTO {
     contentType?: number;
 }
 
-// Mirrors SendInTenantMessageDTO. A tenant member sends directly to another member in the same tenant.
-export interface SendInTenantMessageDTO {
-    tenantId: string;
-    targetUserId: string;
-    content: string;
-    contentType?: number;
-}
-
-// Mirrors SendToMemberDTO. Sender must be a member of tenantId; target need not be (cross-org allowed).
+// Mirrors SendToMemberDTO. Member-to-member DM inside one tenant: both sender and target must be members of tenantId.
 export interface SendToMemberDTO {
     tenantId: string;
     targetUserId: string;
@@ -52,6 +45,13 @@ export interface SendToTenantDTO {
 
 // Query params for GET /message/contactable-tenants (paginated tenant directory for initiating conversations).
 export interface ContactableTenantQueryParams {
+    keyword?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+// Query params for GET /message/contactable-users (exact-match user lookup for initiating peer conversations).
+export interface ContactableUserQueryParams {
     keyword?: string;
     page?: number;
     pageSize?: number;
@@ -83,15 +83,10 @@ export async function sendAsTenant(dto: SendTenantMessageDTO): Promise<ApiRespon
     return doPost('/api/message/send-as-tenant', dto, { 'Content-Type': 'application/json' });
 }
 
-/** Send a direct message to a fellow member inside the supplied tenant scope. */
-export async function sendInTenant(dto: SendInTenantMessageDTO): Promise<ApiResponse<MsgMessage>> {
-    return doPost('/api/message/send-in-tenant', dto, { 'Content-Type': 'application/json' });
-}
-
 /**
- * Send a direct message as an org member to any user (cross-org allowed). Sender must
- * be a member of tenantId; target need not be. Conversation is isolated in TENANT scope.
- * Mirrors POST /message/send-to-member.
+ * Send a member-to-member direct message inside one tenant. Both the acting user and the target
+ * must be members of tenantId; the conversation is isolated in that TENANT scope. Mirrors POST
+ * /message/send-to-member.
  */
 export async function sendToMember(dto: SendToMemberDTO): Promise<ApiResponse<MsgMessage>> {
     return doPost('/api/message/send-to-member', dto, { 'Content-Type': 'application/json' });
@@ -106,6 +101,17 @@ export async function queryContactableTenants(
     params: ContactableTenantQueryParams = {}
 ): Promise<ApiResponse<PaginatedResponseData<ContactableTenantView>>> {
     return doGet('/api/message/contactable-tenants', params);
+}
+
+/**
+ * Look up contactable users by exact match on username/email (server-side exact search — no
+ * fuzzy directory listing, to avoid leaking the user base). Results capped at `pageSize` ≤ 20.
+ * Mirrors GET /message/contactable-users.
+ */
+export async function queryContactableUsers(
+    params: ContactableUserQueryParams = {}
+): Promise<ApiResponse<PaginatedResponseData<ContactableUserView>>> {
+    return doGet('/api/message/contactable-users', params);
 }
 
 /**

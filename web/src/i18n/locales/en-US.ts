@@ -3097,8 +3097,14 @@ export const enUS: I18nRules = {
       startConversation: {
         start: 'Start conversation',
         title: 'Start conversation',
+        userTab: 'User',
         tenantTab: 'Tenant',
         tenantMemberTab: 'Organization Members'
+      },
+      contactUser: {
+        searchPlaceholder: 'Enter exact username or email',
+        hint: 'Search by exact username or email to start a chat',
+        empty: 'No matching user found'
       },
       tenantChat: {
         title: 'Select an organization member',
