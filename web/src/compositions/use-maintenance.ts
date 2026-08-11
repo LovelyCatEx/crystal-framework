@@ -20,6 +20,7 @@ export function useMaintenanceStatus() {
     const {data, isLoading, error, mutate} = useSWR<SystemMaintenanceStatusVO>(
         'systemMaintenanceStatus',
         () => getSystemMaintenanceMode().then((res) => res.data!),
+        {revalidateOnFocus: true},
     );
 
     return {
