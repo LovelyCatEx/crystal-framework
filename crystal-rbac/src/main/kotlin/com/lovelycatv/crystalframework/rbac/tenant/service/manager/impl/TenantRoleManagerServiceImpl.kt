@@ -5,11 +5,13 @@ import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.M
 import com.lovelycatv.crystalframework.rbac.tenant.entity.TenantRoleEntity
 import com.lovelycatv.crystalframework.rbac.tenant.repository.TenantRoleRepository
 import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRolePermissionRelationService
+import com.lovelycatv.crystalframework.rbac.tenant.service.TenantRoleService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantMemberRoleRelationService
 import com.lovelycatv.crystalframework.rbac.tenant.service.manager.TenantRoleManagerService
 import com.lovelycatv.crystalframework.sdk.rbac.tenant.types.TenantRoleDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
+import com.lovelycatv.crystalframework.shared.types.rbac.TenantRoleAuthoritiesInvalidationEvent
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.awaitListWithTimeout
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
@@ -27,6 +29,7 @@ class TenantRoleManagerServiceImpl(
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
     private val tenantRolePermissionRelationService: TenantRolePermissionRelationService,
+    private val tenantRoleService: TenantRoleService,
     private val tenantMemberRoleRelationService: TenantMemberRoleRelationService,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
 ) : TenantRoleManagerService {
@@ -60,18 +63,48 @@ class TenantRoleManagerServiceImpl(
             tenantId = dto.tenantId,
             name = dto.name,
             description = dto.description,
-            parentId = dto.parentId
+            parentId = validateParentRole(dto.parentId, dto.tenantId),
         ).apply { newEntity() }
         return tenantRoleRepository.save(entity).awaitFirstOrNull()
             ?: throw RuntimeException("Could not create tenant role")
+    }
+
+    override suspend fun update(dto: ManagerUpdateTenantRoleDTO): TenantRoleEntity? {
+        val original = getByIdOrNull(dto.id) ?: return null
+        val affectedRoleIds = if (dto.parentId != null && dto.parentId != original.parentId) {
+            (listOf(original) + tenantRoleService.getChildren(original.id))
+                .map { it.id }
+                .toSet()
+        } else {
+            emptySet()
+        }
+
+        return super.update(dto)?.also {
+            affectedRoleIds.forEach { roleId ->
+                eventPublisher.publishEvent(TenantRoleAuthoritiesInvalidationEvent(roleId))
+            }
+        }
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantRoleDTO, original: TenantRoleEntity): TenantRoleEntity {
         return original.apply {
             dto.name?.let { name = it }
             dto.description?.let { description = it }
-            dto.parentId?.let { parentId = it }
+            dto.parentId?.let { parentId = validateParentRole(it, tenantId) }
         }
+    }
+
+    private suspend fun validateParentRole(parentId: Long?, tenantId: Long): Long? {
+        if (parentId == null) {
+            return null
+        }
+
+        val parentRole = getByIdOrNull(parentId)
+            ?: throw BusinessException("Parent role $parentId does not exist")
+        if (parentRole.tenantId != tenantId) {
+            throw BusinessException("Parent role $parentId does not belong to tenant $tenantId")
+        }
+        return parentRole.id
     }
 
     override suspend fun createFromDeclaration(
