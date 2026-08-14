@@ -2346,6 +2346,9 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'module.message.systemPeerEnabled': 'Enable System Peer Messaging',
+        'module.message.tenantScopeEnabled': 'Enable Tenant-Scope Messaging',
+        'module.message.tenantDeskEnabled': 'Enable Tenant Service Desk',
         'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
         'resource.visibility.userAvatar': 'User Avatar Visibility',
         'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
@@ -2366,6 +2369,7 @@ export const enUS: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'module.message': 'Message Module',
         'resource.signedUrl': 'Signed URL',
         'resource.visibility': 'Resource Access',
       },
@@ -3099,7 +3103,9 @@ export const enUS: I18nRules = {
         title: 'Start conversation',
         userTab: 'User',
         tenantTab: 'Tenant',
-        tenantMemberTab: 'Organization Members'
+        tenantMemberTab: 'Organization Members',
+        tenantScopeDisabled: 'Tenant conversation feature has been disabled by administrator',
+        allFeaturesDisabled: 'Conversation feature has been disabled by administrator'
       },
       contactUser: {
         searchPlaceholder: 'Enter exact username or email',

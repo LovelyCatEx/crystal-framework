@@ -13,6 +13,7 @@ import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
@@ -24,10 +25,13 @@ class InboxServiceImpl(
     private val partyResolverRegistry: PartyResolverRegistry,
     private val scopeResolverRegistry: ScopeResolverRegistry,
     private val broadcastService: BroadcastService,
+    private val systemModuleClient: SystemModuleClient,
 ) : InboxService {
 
-    override suspend fun listConversations(userId: Long, currentTenantId: Long?): List<ConversationInboxVO> =
-        msgConversationMemberService.listByUser(userId)
+    override suspend fun listConversations(userId: Long, currentTenantId: Long?): List<ConversationInboxVO> {
+        val module = systemModuleClient.getSystemSettings()?.module
+
+        return msgConversationMemberService.listByUser(userId)
             .flatMap { member ->
                 val conversation = msgConversationService.getByIdOrNull(member.conversationId)
                     ?: return@flatMap emptyList()
@@ -51,7 +55,43 @@ class InboxServiceImpl(
                     )
                 }
             }
+            .filter { conversation ->
+                // Filter out conversations based on disabled message modules
+                if (module == null) return@filter true
+
+                val scopeType = ScopeType.getByTypeId(conversation.scopeType) ?: return@filter true
+                val counterpartType = PartyType.getByTypeId(conversation.counterpartType) ?: return@filter true
+                val viewingPartyType = PartyType.getByTypeId(conversation.viewingPartyType) ?: return@filter true
+
+                when (scopeType) {
+                    ScopeType.SYSTEM -> {
+                        // SYSTEM scope USER→USER: messageSystemPeerEnabled
+                        if (counterpartType == PartyType.USER && module.messageSystemPeerEnabled == false) {
+                            return@filter false
+                        }
+                    }
+                    ScopeType.TENANT -> {
+                        // Check if this is a desk conversation (either viewing or counterpart is TENANT)
+                        val isDeskConversation = viewingPartyType == PartyType.TENANT || counterpartType == PartyType.TENANT
+
+                        if (isDeskConversation) {
+                            // TENANT scope with TENANT party: messageTenantDeskEnabled
+                            if (module.messageTenantDeskEnabled == false) {
+                                return@filter false
+                            }
+                        } else {
+                            // TENANT scope USER→USER: messageTenantScopeEnabled
+                            if (module.messageTenantScopeEnabled == false) {
+                                return@filter false
+                            }
+                        }
+                    }
+                }
+
+                true
+            }
             .sortedByDescending { it.lastMessageTime ?: Long.MIN_VALUE }
+    }
 
     /**
      * Whether [counterpart] is a member of the tenant the caller is currently acting as. Only a plain

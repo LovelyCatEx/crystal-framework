@@ -10,8 +10,8 @@ data class SystemSettings(
     val messageChannel: MessageChannel,
     val security: Security,
     val oauth: OAuth,
-    val module: Module,
     val resource: Resource,
+    val module: Module,
 ) {
     data class Resource(
         val signedUrl: SignedUrl,
@@ -143,5 +143,8 @@ data class SystemSettings(
     data class Module(
         val tenantEnabled: Boolean,
         val approvalEnabled: Boolean,
+        val messageSystemPeerEnabled: Boolean,
+        val messageTenantScopeEnabled: Boolean,
+        val messageTenantDeskEnabled: Boolean,
     )
 }

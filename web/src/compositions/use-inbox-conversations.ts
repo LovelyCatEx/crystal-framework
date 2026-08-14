@@ -18,6 +18,9 @@ export function useInboxConversations(currentTenantId?: string) {
     const swr = useSWR(
         [KEY_INBOX_CONVERSATIONS, currentTenantId ?? null],
         async () => (await listInboxConversations(currentTenantId)).data ?? [],
+        {
+            revalidateOnFocus: true,
+        },
     );
 
     return {

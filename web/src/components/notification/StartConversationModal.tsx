@@ -6,6 +6,9 @@ import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import {ContactTenantPanel} from "./ContactTenantModal.tsx";
 import {ContactUserPanel} from "./ContactUserModal.tsx";
 import {TenantMateSelectorPanel} from "./TenantMateSelectorModal.tsx";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
+import {SystemModuleKey} from "@/router/system-module-menu-paths.ts";
+import type {JSX} from "react";
 
 /**
  * Identity-driven initiation dialog. The acting identity — not a free choice inside the dialog —
@@ -30,8 +33,27 @@ export function StartConversationModal(props: {
 }) {
     const {open, identity, currentTenant, onClose, onUserSelect, onTenantSelect, onOrgMemberSelect} = props;
     const {t} = useTranslation();
+    const {isModuleEnabled} = useSystemIntegrated();
 
     const isOrg = identity === 'tenant' && currentTenant != null;
+
+    const systemPeerEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_SYSTEM_PEER);
+    const tenantScopeEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_TENANT_SCOPE);
+    const tenantDeskEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_TENANT_DESK);
+
+    // Build tabs dynamically based on enabled features
+    const systemTabs = [
+        systemPeerEnabled && {
+            key: 'user',
+            label: t('components.notification.startConversation.userTab'),
+            children: <ContactUserPanel onSelect={onUserSelect}/>,
+        },
+        tenantDeskEnabled && {
+            key: 'tenant',
+            label: t('components.notification.startConversation.tenantTab'),
+            children: <ContactTenantPanel onSelect={onTenantSelect}/>,
+        },
+    ].filter((tab): tab is {key: string; label: string; children: JSX.Element} => Boolean(tab));
 
     return (
         <Modal
@@ -43,26 +65,27 @@ export function StartConversationModal(props: {
             destroyOnHidden
         >
             {isOrg ? (
-                <TenantMateSelectorPanel
-                    tenants={[currentTenant]}
-                    lockedTenant={currentTenant}
-                    onSelect={onOrgMemberSelect}
-                />
+                // Org identity: show member selector if tenantScope is enabled, otherwise show disabled message
+                tenantScopeEnabled ? (
+                    <TenantMateSelectorPanel
+                        tenants={[currentTenant]}
+                        lockedTenant={currentTenant}
+                        onSelect={onOrgMemberSelect}
+                    />
+                ) : (
+                    <div style={{padding: 16, textAlign: 'center', color: '#999'}}>
+                        {t('components.notification.startConversation.tenantScopeDisabled')}
+                    </div>
+                )
             ) : (
-                <Tabs
-                    items={[
-                        {
-                            key: 'user',
-                            label: t('components.notification.startConversation.userTab'),
-                            children: <ContactUserPanel onSelect={onUserSelect}/>,
-                        },
-                        {
-                            key: 'tenant',
-                            label: t('components.notification.startConversation.tenantTab'),
-                            children: <ContactTenantPanel onSelect={onTenantSelect}/>,
-                        },
-                    ]}
-                />
+                // System identity: show available tabs based on enabled features
+                systemTabs.length > 0 ? (
+                    <Tabs items={systemTabs} />
+                ) : (
+                    <div style={{padding: 16, textAlign: 'center', color: '#999'}}>
+                        {t('components.notification.startConversation.allFeaturesDisabled')}
+                    </div>
+                )
             )}
         </Modal>
     );

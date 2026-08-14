@@ -2343,6 +2343,9 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'module.message.systemPeerEnabled': '启用系统用户私聊',
+        'module.message.tenantScopeEnabled': '启用租户内私聊',
+        'module.message.tenantDeskEnabled': '启用租户服务台',
         'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
         'resource.visibility.userAvatar': '用户头像可见性',
         'resource.visibility.tenantIcon': '租户图标可见性',
@@ -2363,6 +2366,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'module.message': '消息模块',
         'resource.signedUrl': '签名 URL',
         'resource.visibility': '资源访问权限',
       },
@@ -3097,7 +3101,9 @@ export const zhCN: I18nRules = {
         title: '发起会话',
         userTab: '用户',
         tenantTab: '租户',
-        tenantMemberTab: '组织成员'
+        tenantMemberTab: '组织成员',
+        tenantScopeDisabled: '租户会话功能已被管理员禁用',
+        allFeaturesDisabled: '会话功能已被管理员禁用'
       },
       contactUser: {
         searchPlaceholder: '输入完整用户名或邮箱',

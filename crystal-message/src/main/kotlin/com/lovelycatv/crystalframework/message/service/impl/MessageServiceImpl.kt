@@ -15,6 +15,8 @@ import com.lovelycatv.crystalframework.sdk.message.PartyResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
+import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
 import com.lovelycatv.crystalframework.shared.request.PageQuery
@@ -40,6 +42,7 @@ class MessageServiceImpl(
     private val msgMessageRepository: MsgMessageRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val r2dbcEntityTemplate: R2dbcEntityTemplate,
+    private val systemModuleClient: SystemModuleClient,
 ) : MessageService {
 
     @Transactional(rollbackFor = [Exception::class])
@@ -53,6 +56,7 @@ class MessageServiceImpl(
         enforceScopeMembership: Boolean,
         enforceTargetScopeMembership: Boolean,
     ): MsgMessageEntity {
+        checkMessageFeatureEnabled(scope, target)
         val scopeResolver = scopeResolverRegistry.resolve(scope.type)
         val targetUserId = target.id
         if (enforceScopeMembership && !scopeResolver.isMember(scope, actingUserId)) {
@@ -130,6 +134,24 @@ class MessageServiceImpl(
         val conversation = msgConversationService.getByIdOrNull(conversationId)
             ?: throw BusinessException("Conversation $conversationId not found")
         msgConversationMemberService.markRead(conversationId, userId, conversation.lastMessageId)
+    }
+
+    private suspend fun checkMessageFeatureEnabled(scope: Scope, target: Party) {
+        val module = systemModuleClient.getSystemSettings(
+            throwOnNull = BusinessException("System settings not available")
+        )!!.module
+        when (scope.type) {
+            ScopeType.SYSTEM if target.type == PartyType.USER && !module.messageSystemPeerEnabled ->
+                throw BusinessException("System peer messaging is disabled by administrator")
+
+            ScopeType.TENANT if target.type == PartyType.USER && !module.messageTenantScopeEnabled ->
+                throw BusinessException("Tenant-scope messaging is disabled by administrator")
+
+            ScopeType.TENANT if target.type == PartyType.TENANT && !module.messageTenantDeskEnabled ->
+                throw BusinessException("Tenant service desk is disabled by administrator")
+
+            else -> {}
+        }
     }
 
     companion object {

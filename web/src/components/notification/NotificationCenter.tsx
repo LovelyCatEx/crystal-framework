@@ -20,6 +20,8 @@ import type {UserTenantVO} from "@/types/tenant/tenant.types.ts";
 import type {TenantMateVO} from "@/types/tenant/tenant-member.types.ts";
 import {StartConversationModal} from "./StartConversationModal.tsx";
 import {ConversationPanel, type ConversationTarget} from "./ConversationPanel.tsx";
+import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
+import {SystemModuleKey} from "@/router/system-module-menu-paths.ts";
 
 const {useToken} = theme;
 const {Text, Paragraph, Title} = Typography;
@@ -81,9 +83,19 @@ export function NotificationCenter(props: {
     const {unreadCount} = useBroadcastInbox();
     const {userProfile} = useLoggedUser();
     const {currentTenant} = useUserTenants();
+    const {isModuleEnabled} = useSystemIntegrated();
     // Fold the currently-acting tenant into the fetch so `counterpartInCurrentOrg` is computed against
     // the org I am logged into; switching org identity refetches with the correct flags.
     const {conversations, refresh: refreshInbox} = useInboxConversations(currentTenant?.tenantId);
+
+    const systemPeerEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_SYSTEM_PEER);
+    const tenantScopeEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_TENANT_SCOPE);
+    const tenantDeskEnabled = isModuleEnabled(SystemModuleKey.MESSAGE_TENANT_DESK);
+
+    // Hide start conversation button if all message features are disabled
+    const canStartConversation = systemPeerEnabled || tenantScopeEnabled || tenantDeskEnabled;
+    // Show identity switcher if: (1) tenant scope is enabled, OR (2) tenant desk is enabled (members need to handle desk conversations)
+    const showIdentitySwitcher = currentTenant != null && (tenantScopeEnabled || tenantDeskEnabled);
 
     const [activeKey, setActiveKey] = useState<string>(SYSTEM_BROADCAST);
     const [drafts, setDrafts] = useState<ConversationTarget[]>([]);
@@ -357,17 +369,19 @@ export function NotificationCenter(props: {
             >
                 <div className="flex items-center justify-between" style={{padding: '8px 12px'}}>
                     <Text strong>{t('components.notification.conversations.title')}</Text>
-                    <Button
-                        type="text"
-                        size="small"
-                        icon={<PlusOutlined/>}
-                        onClick={() => setStartConversationOpen(true)}
-                    >
-                        {t('components.notification.startConversation.start')}
-                    </Button>
+                    {canStartConversation && (
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<PlusOutlined/>}
+                            onClick={() => setStartConversationOpen(true)}
+                        >
+                            {t('components.notification.startConversation.start')}
+                        </Button>
+                    )}
                 </div>
-                {/* Identity switcher — only rendered when the user has an authenticated tenant. */}
-                {currentTenant != null && (
+                {/* Identity switcher — only rendered when the user has an authenticated tenant and tenant scope is enabled. */}
+                {showIdentitySwitcher && (
                     <div style={{padding: '0 12px 8px'}}>
                         <Segmented
                             block
@@ -382,7 +396,7 @@ export function NotificationCenter(props: {
                     </div>
                 )}
                 <div className="flex-1 overflow-auto">
-                    {identityTab === 'system' || currentTenant == null ? systemTabList : orgTabList}
+                    {identityTab === 'system' || !showIdentitySwitcher ? systemTabList : orgTabList}
                 </div>
             </div>
 

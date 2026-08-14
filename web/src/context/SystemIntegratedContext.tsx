@@ -9,6 +9,7 @@ interface SystemIntegratedContextValue {
     maintenanceInfo: MaintenanceInfoVO | undefined;
     waterMarkInfo: WaterMarkInfo | undefined;
     disabledModules: string[];
+    isModuleEnabled: (moduleKey: string) => boolean;
     isLoading: boolean;
     error: Error | undefined;
     mutate: () => void;
@@ -27,6 +28,7 @@ export function SystemIntegratedProvider({children}: { children: React.ReactNode
         maintenanceInfo: data?.maintenance,
         waterMarkInfo: data?.waterMark,
         disabledModules: data?.disabledModules ?? [],
+        isModuleEnabled: (moduleKey: string) => !(data?.disabledModules ?? []).includes(moduleKey),
         isLoading,
         error,
         mutate,
