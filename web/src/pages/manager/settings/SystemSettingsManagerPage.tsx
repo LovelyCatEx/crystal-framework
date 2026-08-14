@@ -31,11 +31,13 @@ import {
 } from "@ant-design/icons";
 import {downloadJson, importJsonFromFile} from "@/utils/file-download.ts";
 import {useTranslation} from "react-i18next";
-import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
+import {SWR_KEY_SYSTEM_MAINTENANCE_STATUS, useMaintenanceStatus} from "@/compositions/use-maintenance.ts";
 import {settingsGroupExtraRenderers, settingsItemRenderers} from "@/pages/manager/settings/settings-renderers.tsx";
 import {SettingsRendererContainer} from "@/components/settings/SettingsRendererContainer.tsx";
 import {mergeRenderers} from "@/components/settings/merge-renderers.ts";
 import {pluginRegistry} from "@/plugin/registry.ts";
+import {SWR_KEY_SYSTEM_INTEGRATED_INFO} from "@/context/SystemIntegratedContext.tsx";
+import {mutate as swrMutate} from "swr";
 
 export default function SystemSettingsManagerPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -106,6 +108,11 @@ export default function SystemSettingsManagerPage() {
             .then(() => {
                 void message.success(t('pages.systemSettingsManager.saveSuccess'))
                 setChangesModalOpen(false)
+                // Settings feed both the integrated snapshot (module toggles, water mark, OAuth flags,
+                // maintenance) and the maintenance status endpoint; force both consumers to refetch
+                // so their subscribers see the change without waiting for tab-focus revalidation.
+                void swrMutate(SWR_KEY_SYSTEM_INTEGRATED_INFO)
+                void swrMutate(SWR_KEY_SYSTEM_MAINTENANCE_STATUS)
             })
             .catch(() => {
                 void message.error(t('pages.systemSettingsManager.saveFailed'))
@@ -154,6 +161,9 @@ export default function SystemSettingsManagerPage() {
                 return updateSystemMaintenanceMode(!isInMaintenance)
                     .then(() => {
                         void mutateMaintenance();
+                        // Integrated snapshot also carries the maintenance flag — refresh it too so
+                        // MaintenanceGuard picks up the change immediately.
+                        void swrMutate(SWR_KEY_SYSTEM_INTEGRATED_INFO)
                     })
                     .catch(() => {
                         void message.error(t('pages.systemSettingsManager.switchMaintenanceModeFailed'));
