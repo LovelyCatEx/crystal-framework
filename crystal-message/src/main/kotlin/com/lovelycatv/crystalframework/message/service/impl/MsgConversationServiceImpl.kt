@@ -5,6 +5,8 @@ import com.lovelycatv.crystalframework.message.repository.MsgConversationReposit
 import com.lovelycatv.crystalframework.message.repository.MsgConversationPartyRepository
 import com.lovelycatv.crystalframework.message.service.MsgConversationService
 import com.lovelycatv.crystalframework.message.types.ConversationKind
+import com.lovelycatv.crystalframework.sdk.message.Party
+import com.lovelycatv.crystalframework.sdk.message.PartyResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -20,6 +22,7 @@ import kotlin.reflect.KClass
 class MsgConversationServiceImpl(
     private val msgConversationRepository: MsgConversationRepository,
     private val msgConversationPartyRepository: MsgConversationPartyRepository,
+    private val partyResolverRegistry: PartyResolverRegistry,
     private val snowIdGenerator: SnowIdGenerator,
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
@@ -62,12 +65,18 @@ class MsgConversationServiceImpl(
             }
         }
 
-    override suspend fun isTenantServiceDeskConversation(conversationId: Long): Boolean {
-        val partyTypes = msgConversationPartyRepository.findAllByConversationId(conversationId)
+    override suspend fun isTenantServiceDeskConversation(conversationId: Long): Boolean =
+        listParties(conversationId).any { it.type == PartyType.TENANT }
+
+    override suspend fun isCurrentTenantServiceDeskRecipient(conversationId: Long, userId: Long): Boolean =
+        listParties(conversationId).any { party ->
+            userId in partyResolverRegistry.resolve(party.type).resolveRecipients(party)
+        }
+
+    private suspend fun listParties(conversationId: Long): List<Party> =
+        msgConversationPartyRepository.findAllByConversationId(conversationId)
             .collectList()
             .awaitFirstOrNull()
-            ?.map { it.getRealPartyType() }
-            ?: return false
-        return PartyType.TENANT in partyTypes
-    }
+            ?.map { party -> Party(party.getRealPartyType(), party.partyId) }
+            ?: emptyList()
 }

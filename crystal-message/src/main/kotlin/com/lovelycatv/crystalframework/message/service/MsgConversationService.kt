@@ -27,4 +27,7 @@ interface MsgConversationService :
 
     /** Whether this conversation includes a tenant service-desk party. */
     suspend fun isTenantServiceDeskConversation(conversationId: Long): Boolean
+
+    /** Whether [userId] is currently an eligible receptionist for this service-desk conversation. */
+    suspend fun isCurrentTenantServiceDeskRecipient(conversationId: Long, userId: Long): Boolean
 }

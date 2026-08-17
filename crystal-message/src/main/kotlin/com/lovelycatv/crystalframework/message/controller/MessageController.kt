@@ -220,8 +220,13 @@ class MessageController(
         val conversation = msgConversationService.getByIdOrThrow(conversationId)
         if (conversation.getRealScopeType() != ScopeType.TENANT) return
 
-        // Only a service-desk conversation may legitimately include an external user.
-        if (msgConversationService.isTenantServiceDeskConversation(conversationId)) return
+        // Service-desk recipients are derived from live reception permissions, not historical inbox rows.
+        if (msgConversationService.isTenantServiceDeskConversation(conversationId)) {
+            if (!msgConversationService.isCurrentTenantServiceDeskRecipient(conversationId, userId)) {
+                throw scopeMismatch(ResourceScope.TENANT)
+            }
+            return
+        }
 
         val tenantId = conversation.scopeId ?: throw scopeMismatch(ResourceScope.TENANT)
         val isCurrentMember = scopeResolverRegistry.resolve(ScopeType.TENANT)
