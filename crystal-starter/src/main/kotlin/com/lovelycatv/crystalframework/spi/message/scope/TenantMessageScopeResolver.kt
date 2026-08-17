@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.spi.message.scope
 import com.lovelycatv.crystalframework.sdk.message.Scope
 import com.lovelycatv.crystalframework.sdk.message.config.MessageScopeResolver
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus
 import com.lovelycatv.crystalframework.tenant.service.TenantMemberService
 import org.springframework.stereotype.Component
 
@@ -20,7 +21,9 @@ class TenantMessageScopeResolver(
 
     override suspend fun isMember(scope: Scope, userId: Long): Boolean {
         val tenantId = scope.id ?: return false
-        return tenantMemberService.getByTenantIdAndUserId(tenantId, userId) != null
+        // A retained member row is not enough after a member is deactivated.
+        return tenantMemberService.getByTenantIdAndUserId(tenantId, userId)
+            ?.getRealStatus() == TenantMemberStatus.ACTIVE
     }
 
     /**

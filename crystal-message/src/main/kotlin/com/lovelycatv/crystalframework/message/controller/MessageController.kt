@@ -10,9 +10,11 @@ import com.lovelycatv.crystalframework.message.controller.dto.SendToTenantDTO
 import com.lovelycatv.crystalframework.message.service.InboxService
 import com.lovelycatv.crystalframework.message.service.MessageService
 import com.lovelycatv.crystalframework.message.service.MsgConversationMemberService
+import com.lovelycatv.crystalframework.message.service.MsgConversationService
 import com.lovelycatv.crystalframework.message.types.ContentType
 import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.Scope
+import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.config.ContactableTenantProvider
 import com.lovelycatv.crystalframework.sdk.message.config.ContactableUserProvider
 import com.lovelycatv.crystalframework.sdk.message.config.UserTenantProvider
@@ -48,6 +50,8 @@ class MessageController(
     private val messageService: MessageService,
     private val inboxService: InboxService,
     private val msgConversationMemberService: MsgConversationMemberService,
+    private val msgConversationService: MsgConversationService,
+    private val scopeResolverRegistry: ScopeResolverRegistry,
     private val userTenantProvider: UserTenantProvider,
     private val contactableTenantProvider: ContactableTenantProvider,
     private val contactableUserProvider: ContactableUserProvider,
@@ -208,15 +212,30 @@ class MessageController(
     }
 
     private suspend fun assertMember(conversationId: Long, userId: Long) {
+        // The materialized member row is an inbox index, so it alone cannot survive tenant membership revocation.
         val isMember = msgConversationMemberService.listByUser(userId).any { it.conversationId == conversationId }
         if (!isMember) {
-            throw ForbiddenException(
-                "Not a member of conversation $conversationId",
-                context = ForbiddenContext(
-                    reason = ForbiddenReason.SCOPE_MISMATCH,
-                    scope = ResourceScope.SYSTEM,
-                ),
-            )
+            throw scopeMismatch(ResourceScope.SYSTEM)
+        }
+        val conversation = msgConversationService.getByIdOrThrow(conversationId)
+        if (conversation.getRealScopeType() != ScopeType.TENANT) return
+
+        // Only a service-desk conversation may legitimately include an external user.
+        if (msgConversationService.isTenantServiceDeskConversation(conversationId)) return
+
+        val tenantId = conversation.scopeId ?: throw scopeMismatch(ResourceScope.TENANT)
+        val isCurrentMember = scopeResolverRegistry.resolve(ScopeType.TENANT)
+            .isMember(Scope(ScopeType.TENANT, tenantId), userId)
+        if (!isCurrentMember) {
+            throw scopeMismatch(ResourceScope.TENANT)
         }
     }
+
+    private fun scopeMismatch(scope: ResourceScope): ForbiddenException =
+        ForbiddenException(
+            context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scope,
+            ),
+        )
 }

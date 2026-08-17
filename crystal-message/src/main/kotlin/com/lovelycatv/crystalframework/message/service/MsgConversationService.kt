@@ -24,4 +24,7 @@ interface MsgConversationService :
         messageId: Long,
         messageTime: Long,
     ): MsgConversationEntity?
+
+    /** Whether this conversation includes a tenant service-desk party. */
+    suspend fun isTenantServiceDeskConversation(conversationId: Long): Boolean
 }
