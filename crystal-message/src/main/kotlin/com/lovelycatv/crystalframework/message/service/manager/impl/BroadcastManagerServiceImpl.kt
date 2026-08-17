@@ -1,6 +1,7 @@
 package com.lovelycatv.crystalframework.message.service.manager.impl
 
 import com.lovelycatv.crystalframework.message.controller.manager.broadcast.dto.ManagerCreateBroadcastDTO
+import com.lovelycatv.crystalframework.message.controller.manager.broadcast.dto.ManagerReadBroadcastDTO
 import com.lovelycatv.crystalframework.message.controller.manager.broadcast.dto.ManagerUpdateBroadcastDTO
 import com.lovelycatv.crystalframework.message.entity.MsgBroadcastEntity
 import com.lovelycatv.crystalframework.message.repository.MsgBroadcastRepository
@@ -11,6 +12,7 @@ import com.lovelycatv.crystalframework.message.utils.toScopeType
 import com.lovelycatv.crystalframework.sdk.message.types.AudienceType
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
+import com.lovelycatv.crystalframework.shared.database.criteriaFromQueryNode
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
@@ -19,6 +21,7 @@ import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.relational.core.query.Criteria
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 
@@ -40,6 +43,19 @@ class BroadcastManagerServiceImpl(
 
     override fun getEntityTemplate(): R2dbcEntityTemplate = r2dbcEntityTemplate
 
+    override suspend fun buildQueryCriteria(dto: ManagerReadBroadcastDTO): Criteria {
+        val scope = ResourceScope.getById(dto.scope)
+            ?: throw BusinessException("broadcast scope ${dto.scope} is invalid")
+        val scopeCriteria = Criteria.where(COLUMN_SCOPE_TYPE).`is`(scope.toScopeType().typeId)
+            .and(
+                when (scope) {
+                    ResourceScope.SYSTEM -> Criteria.where(COLUMN_SCOPE_ID).`is`(0L)
+                    ResourceScope.TENANT -> Criteria.where(COLUMN_SCOPE_ID).`is`(dto.scopeId)
+                }
+            )
+        return dto.query?.let { scopeCriteria.and(criteriaFromQueryNode(it)) } ?: scopeCriteria
+    }
+
     override suspend fun create(dto: ManagerCreateBroadcastDTO): MsgBroadcastEntity {
         val scope = ResourceScope.getById(dto.scope)
             ?: throw BusinessException("broadcast scope ${dto.scope} is invalid")
@@ -51,7 +67,7 @@ class BroadcastManagerServiceImpl(
 
         // The sender party is derived from the scope, never taken from the client: a SYSTEM-scoped
         // broadcast is sent as the system; a TENANT-scoped one is sent as that tenant.
-        val storedScopeId = if (scopeType == ScopeType.SYSTEM) null else dto.scopeId
+        val storedScopeId = dto.scopeId
         val senderPartyType = if (scopeType == ScopeType.SYSTEM) PartyType.SYSTEM else PartyType.TENANT
         val senderPartyId = storedScopeId
 
@@ -94,6 +110,11 @@ class BroadcastManagerServiceImpl(
     override suspend fun resolveRootScope(id: Long): Pair<ResourceScope, Long>? {
         val entity = getByIdOrNull(id) ?: return null
         return entity.getRealScopeType().toResourceScope() to (entity.scopeId ?: 0L)
+    }
+
+    companion object {
+        private const val COLUMN_SCOPE_TYPE = "scope_type"
+        private const val COLUMN_SCOPE_ID = "scope_id"
     }
 
     /**

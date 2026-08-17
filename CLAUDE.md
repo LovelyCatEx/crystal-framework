@@ -319,6 +319,19 @@ CrystalFramework 是一个 Spring Boot 4 + React 19 企业级框架，支持多�
 
 技术栈：Spring Boot 4.0、Spring WebFlux、R2DBC、PostgreSQL、Redis、Flyway、Spring Security、JJWT、SnailJob。
 
+### 消息模块 Scope 设计
+
+消息模块中的 `ScopeType.SYSTEM` 与 `ScopeType.TENANT` 是消息域范围；管理端使用 `ResourceScope`，通过 `MessageScopeMapping` 显式映射，禁止混用或直接比较两个枚举。
+
+`msg_broadcasts` 是直接 scoped 资源，采用固定存储约定：
+
+| scope_type | scope_id |
+|------------|----------|
+| SYSTEM     | `0`      |
+| TENANT     | 真实 `tenantId` |
+
+广播管理端的职责必须分层：`StandardScopedManagerController` 仅根据请求的 `scope/scopeId` 完成权限与 tenantPem 所有权校验；`BroadcastManagerServiceImpl.buildQueryCriteria()` 必须把同一范围固化为数据库条件，并与客户端 `QueryNode` 用 `AND` 合并。SYSTEM 查询必须限定 `scope_type = SYSTEM AND scope_id = 0`；TENANT 查询必须限定 `scope_type = TENANT AND scope_id = 请求的 tenantId`。禁止只校验 Controller 的 DTO scope 而让 Service 执行未带 scope 条件的查询。
+
 ### 前端（web/，React 19 + TypeScript）
 
 | 目录                  | 用途                                                                                     |
