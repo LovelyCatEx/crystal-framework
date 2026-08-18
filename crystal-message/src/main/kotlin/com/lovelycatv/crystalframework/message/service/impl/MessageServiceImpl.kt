@@ -56,7 +56,7 @@ class MessageServiceImpl(
         enforceScopeMembership: Boolean,
         enforceTargetScopeMembership: Boolean,
     ): MsgMessageEntity {
-        checkMessageFeatureEnabled(scope, target)
+        checkMessageFeatureEnabled(scope, sender, target)
         val scopeResolver = scopeResolverRegistry.resolve(scope.type)
         val targetUserId = target.id
         if (enforceScopeMembership && !scopeResolver.isMember(scope, actingUserId)) {
@@ -156,7 +156,7 @@ class MessageServiceImpl(
         msgConversationMemberService.markRead(conversationId, userId, conversation.lastMessageId)
     }
 
-    private suspend fun checkMessageFeatureEnabled(scope: Scope, target: Party) {
+    private suspend fun checkMessageFeatureEnabled(scope: Scope, sender: Party, target: Party) {
         val module = systemModuleClient.getSystemSettings(
             throwOnNull = BusinessException("System settings not available")
         )!!.module
@@ -164,11 +164,12 @@ class MessageServiceImpl(
             ScopeType.SYSTEM if target.type == PartyType.USER && !module.messageSystemPeerEnabled ->
                 throw BusinessException("System peer messaging is disabled by administrator")
 
-            ScopeType.TENANT if target.type == PartyType.USER && !module.messageTenantScopeEnabled ->
-                throw BusinessException("Tenant-scope messaging is disabled by administrator")
-
-            ScopeType.TENANT if target.type == PartyType.TENANT && !module.messageTenantDeskEnabled ->
+            ScopeType.TENANT if (sender.type == PartyType.TENANT || target.type == PartyType.TENANT) &&
+                !module.messageTenantDeskEnabled ->
                 throw BusinessException("Tenant service desk is disabled by administrator")
+
+            ScopeType.TENANT if !module.messageTenantScopeEnabled ->
+                throw BusinessException("Tenant-scope messaging is disabled by administrator")
 
             else -> {}
         }
