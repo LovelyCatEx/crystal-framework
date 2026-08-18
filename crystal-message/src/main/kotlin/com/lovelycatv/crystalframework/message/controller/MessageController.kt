@@ -196,6 +196,7 @@ class MessageController(
         @RequestParam(defaultValue = "20") pageSize: Int,
     ): ApiResponse<*> {
         assertMember(conversationId, userAuthentication.userId)
+        messageService.assertConversationFeatureEnabled(conversationId)
         val cappedPageSize = pageSize.coerceIn(1, MessageConstants.MAX_CONVERSATION_PAGE_SIZE)
         return ApiResponse.success(messageService.getConversationMessages(conversationId, page, cappedPageSize))
     }
@@ -207,6 +208,7 @@ class MessageController(
         @RequestParam conversationId: Long,
     ): ApiResponse<*> {
         assertMember(conversationId, userAuthentication.userId)
+        messageService.assertConversationFeatureEnabled(conversationId)
         messageService.markConversationRead(conversationId, userAuthentication.userId)
         return ApiResponse.success(null)
     }

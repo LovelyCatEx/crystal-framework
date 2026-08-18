@@ -115,6 +115,26 @@ class MessageServiceImpl(
         return message
     }
 
+    override suspend fun assertConversationFeatureEnabled(conversationId: Long) {
+        val conversation = msgConversationService.getByIdOrThrow(conversationId)
+        val module = systemModuleClient.getSystemSettings(
+            throwOnNull = BusinessException("System settings not available")
+        )!!.module
+        when (conversation.getRealScopeType()) {
+            ScopeType.SYSTEM -> if (!module.messageSystemPeerEnabled) {
+                throw BusinessException("System peer messaging is disabled by administrator")
+            }
+
+            ScopeType.TENANT -> if (msgConversationService.isTenantServiceDeskConversation(conversationId)) {
+                if (!module.messageTenantDeskEnabled) {
+                    throw BusinessException("Tenant service desk is disabled by administrator")
+                }
+            } else if (!module.messageTenantScopeEnabled) {
+                throw BusinessException("Tenant-scope messaging is disabled by administrator")
+            }
+        }
+    }
+
     override suspend fun getConversationMessages(
         conversationId: Long,
         page: Int,

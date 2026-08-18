@@ -38,6 +38,9 @@ interface MessageService {
         enforceTargetScopeMembership: Boolean = false,
     ): MsgMessageEntity
 
+    /** Reject access when the feature owning this persisted conversation is disabled. */
+    suspend fun assertConversationFeatureEnabled(conversationId: Long)
+
     /** Page a conversation's messages (newest first). */
     suspend fun getConversationMessages(
         conversationId: Long,
