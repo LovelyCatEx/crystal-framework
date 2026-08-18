@@ -1,14 +1,18 @@
 import useSWR, {mutate as globalMutate} from "swr";
 import {getInboxUnreadCount} from "@/api/message/message.api.ts";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {MESSAGE_SWR_KEY_PREFIX} from "@/utils/message-swr-cache.ts";
 
 // Poll cadence for the aggregate header badge. Matches the broadcast badge's 30s.
 const UNREAD_REFRESH_INTERVAL_MS = 30_000;
 
-const KEY_TOTAL_UNREAD = 'total-unread';
+const KEY_TOTAL_UNREAD = `${MESSAGE_SWR_KEY_PREFIX}total-unread`;
 
 /** Revalidate the aggregate header badge from anywhere a read happens (broadcast or conversation). */
 export function revalidateTotalUnread(): Promise<unknown> {
-    return globalMutate(KEY_TOTAL_UNREAD);
+    return globalMutate(
+        (key) => Array.isArray(key) && key[0] === KEY_TOTAL_UNREAD,
+    );
 }
 
 /**
@@ -18,8 +22,9 @@ export function revalidateTotalUnread(): Promise<unknown> {
  * counts announcements only (used for the "System Announcements" row inside the center).
  */
 export function useTotalUnread() {
+    const {userProfile} = useLoggedUser();
     const countSwr = useSWR(
-        KEY_TOTAL_UNREAD,
+        userProfile?.id ? [KEY_TOTAL_UNREAD, userProfile.id] : null,
         async () => Number((await getInboxUnreadCount()).data ?? 0),
         {refreshInterval: UNREAD_REFRESH_INTERVAL_MS},
     );

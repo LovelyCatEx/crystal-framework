@@ -1,8 +1,10 @@
 import useSWR from "swr";
 import {listInboxConversations} from "@/api/message/message.api.ts";
 import type {ConversationInboxVO} from "@/types/message/message.types.ts";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {MESSAGE_SWR_KEY_PREFIX} from "@/utils/message-swr-cache.ts";
 
-const KEY_INBOX_CONVERSATIONS = 'inbox-conversations';
+const KEY_INBOX_CONVERSATIONS = `${MESSAGE_SWR_KEY_PREFIX}inbox-conversations`;
 
 /**
  * The acting user's write-diffusion conversations (peer, tenant-desk, and customer sides alike),
@@ -15,8 +17,9 @@ const KEY_INBOX_CONVERSATIONS = 'inbox-conversations';
  * plain system-user session.
  */
 export function useInboxConversations(currentTenantId?: string) {
+    const {userProfile} = useLoggedUser();
     const swr = useSWR(
-        [KEY_INBOX_CONVERSATIONS, currentTenantId ?? null],
+        userProfile?.id ? [KEY_INBOX_CONVERSATIONS, userProfile.id, currentTenantId ?? null] : null,
         async () => (await listInboxConversations(currentTenantId)).data ?? [],
         {
             revalidateOnFocus: true,

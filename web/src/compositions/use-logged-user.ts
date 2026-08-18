@@ -10,10 +10,10 @@ export const useLoggedUser = () => {
     const auth = getUserAuthentication();
     const hasAuthToken = !!auth && !auth.expired;
 
-    const { userProfile, refreshUserProfile } = useCurrentUserProfile(hasAuthToken);
+    const { userProfile, refreshUserProfile } = useCurrentUserProfile(auth?.token);
 
     const { data: accessibleResourcesResponse, isLoading: isAccessibleMenusLoading } = useSWRComposition<ApiResponse<UserAccessibleResourceVO>>(
-        hasAuthToken ? 'getUserAccessibleMenus' : undefined,
+        auth?.token ? ['getUserAccessibleMenus', auth.token] : undefined,
         getUserAccessibleMenus,
         () => void message.error("无法获取资源列表")
     );

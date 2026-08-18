@@ -1,10 +1,10 @@
 import type {ApiResponse} from "../api/system-request.ts";
 import React, {useEffect, useState} from "react";
 import {message} from "antd";
-import useSWR, {type KeyedMutator, type SWRConfiguration} from "swr";
+import useSWR, {type Key, type KeyedMutator, type SWRConfiguration} from "swr";
 
 export function useSWRComposition<T>(
-    key: string | undefined,
+    key: Key | undefined,
     func: () => Promise<T>,
     onError?: (error: Error) => void,
     options?: SWRConfiguration<T>
@@ -30,7 +30,7 @@ export function useSWRComposition<T>(
 }
 
 export function useSWRState<T>(
-    key: string | undefined,
+    key: Key | undefined,
     func: () => Promise<ApiResponse<T>>,
     onError?: (error: Error) => void,
     options?: SWRConfiguration<ApiResponse<T>>

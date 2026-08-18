@@ -8,6 +8,8 @@ import {
     markBroadcastRead,
 } from "@/api/message/broadcast.api.ts";
 import type {BroadcastInboxItem} from "@/types/message/broadcast.types.ts";
+import {useLoggedUser} from "@/compositions/use-logged-user.ts";
+import {MESSAGE_SWR_KEY_PREFIX} from "@/utils/message-swr-cache.ts";
 
 // Poll cadence for the unread red dot. 30s balances freshness against request volume for a
 // header badge that every logged-in user renders.
@@ -16,12 +18,14 @@ const UNREAD_REFRESH_INTERVAL_MS = 30_000;
 // Page size for the history "load more" list; matches backend MAX_BROADCAST_PAGE_SIZE (20).
 const HISTORY_PAGE_SIZE = 20;
 
-const KEY_UNREAD_COUNT = 'broadcast-unread-count';
-const KEY_HISTORY = 'broadcast-history';
+const KEY_UNREAD_COUNT = `${MESSAGE_SWR_KEY_PREFIX}broadcast-unread-count`;
+const KEY_HISTORY = `${MESSAGE_SWR_KEY_PREFIX}broadcast-history`;
 
 /** Revalidate the header unread badge. Shared so history's markRead also drops the header dot. */
 function revalidateUnread(): Promise<unknown> {
-    return globalMutate(KEY_UNREAD_COUNT);
+    return globalMutate(
+        (key) => Array.isArray(key) && key[0] === KEY_UNREAD_COUNT,
+    );
 }
 
 /**
@@ -31,8 +35,9 @@ function revalidateUnread(): Promise<unknown> {
  * refreshInterval, which the shared helper does not forward.
  */
 export function useBroadcastInbox() {
+    const {userProfile} = useLoggedUser();
     const countSwr = useSWR(
-        KEY_UNREAD_COUNT,
+        userProfile?.id ? [KEY_UNREAD_COUNT, userProfile.id] : null,
         async () => Number((await getBroadcastUnreadCount()).data ?? '0'),
         {refreshInterval: UNREAD_REFRESH_INTERVAL_MS},
     );
@@ -50,12 +55,13 @@ export function useBroadcastInbox() {
  * header dot. Uses useSWRInfinite for accumulate-on-scroll paging.
  */
 export function useBroadcastHistory() {
+    const {userProfile} = useLoggedUser();
     const swr = useSWRInfinite(
         (index: number, previous: {hasMore: boolean} | null) => {
-            if (previous && !previous.hasMore) return null;
-            return [KEY_HISTORY, index + 1];
+            if (!userProfile?.id || (previous && !previous.hasMore)) return null;
+            return [KEY_HISTORY, userProfile.id, index + 1];
         },
-        async ([, page]: [string, number]) => {
+        async ([, , page]: [string, string, number]) => {
             const data = (await listBroadcastHistory(page, HISTORY_PAGE_SIZE)).data;
             return {
                 records: data?.records ?? [],
