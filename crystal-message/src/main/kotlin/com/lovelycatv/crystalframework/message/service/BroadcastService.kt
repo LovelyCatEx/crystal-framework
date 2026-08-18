@@ -20,8 +20,8 @@ interface BroadcastService {
     /** Count of [listUnread]. */
     suspend fun unreadCount(userId: Long, tenantIds: Collection<Long>): Long
 
-    /** Record that [userId] has read [broadcastId]. Idempotent. */
-    suspend fun markRead(broadcastId: Long, userId: Long)
+    /** Record that [userId] has read a published broadcast visible in [currentTenantId]'s active scope. */
+    suspend fun markRead(broadcastId: Long, userId: Long, currentTenantId: Long?)
 
     /**
      * Paginated history of every broadcast visible to [userId] — whose audience the user matches and

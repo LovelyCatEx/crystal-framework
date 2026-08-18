@@ -63,7 +63,7 @@ class BroadcastController(
         userAuthentication: UserAuthentication,
         @RequestParam broadcastId: Long,
     ): ApiResponse<*> {
-        broadcastService.markRead(broadcastId, userAuthentication.userId)
+        broadcastService.markRead(broadcastId, userAuthentication.userId, userAuthentication.tenantId)
         return ApiResponse.success(null)
     }
 }

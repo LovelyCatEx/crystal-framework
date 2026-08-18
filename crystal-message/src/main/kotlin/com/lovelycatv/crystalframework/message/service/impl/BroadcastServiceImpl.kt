@@ -6,9 +6,15 @@ import com.lovelycatv.crystalframework.message.repository.MsgBroadcastReadReposi
 import com.lovelycatv.crystalframework.message.repository.MsgBroadcastRepository
 import com.lovelycatv.crystalframework.message.service.BroadcastService
 import com.lovelycatv.crystalframework.message.types.BroadcastInboxItem
+import com.lovelycatv.crystalframework.message.utils.toResourceScope
 import com.lovelycatv.crystalframework.sdk.message.Audience
 import com.lovelycatv.crystalframework.sdk.message.AudienceCandidate
 import com.lovelycatv.crystalframework.sdk.message.AudienceResolverRegistry
+import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.request.PaginatedResponseData
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -66,7 +72,23 @@ class BroadcastServiceImpl(
             .collectList().awaitFirstOrNull().orEmpty()
             .map { it.broadcastId }.toSet()
 
-    override suspend fun markRead(broadcastId: Long, userId: Long) {
+    override suspend fun markRead(broadcastId: Long, userId: Long, currentTenantId: Long?) {
+        val broadcast = msgBroadcastRepository.findById(broadcastId).awaitFirstOrNull()
+            ?: throw BusinessException("Broadcast $broadcastId not found")
+        val scopeType = broadcast.getRealScopeType()
+        val tenantIds = when (scopeType) {
+            ScopeType.SYSTEM -> emptySet()
+            ScopeType.TENANT -> {
+                if (currentTenantId == null || broadcast.scopeId != currentTenantId) {
+                    throw scopeMismatch(scopeType)
+                }
+                setOf(currentTenantId)
+            }
+        }
+        val candidate = AudienceCandidate(userId = userId, tenantIds = tenantIds)
+        if (broadcast.publishTime > System.currentTimeMillis() || !matchesAudience(broadcast, candidate)) {
+            throw scopeMismatch(scopeType)
+        }
         if (msgBroadcastReadRepository.findByBroadcastIdAndUserId(broadcastId, userId)
                 .awaitFirstOrNull() != null
         ) return
@@ -78,6 +100,14 @@ class BroadcastServiceImpl(
             ).apply { newEntity() }
         ).awaitFirstOrNull()
     }
+
+    private fun scopeMismatch(scopeType: ScopeType): ForbiddenException =
+        ForbiddenException(
+            context = ForbiddenContext(
+                reason = ForbiddenReason.SCOPE_MISMATCH,
+                scope = scopeType.toResourceScope(),
+            ),
+        )
 
     private suspend fun matchesAudience(broadcast: MsgBroadcastEntity, candidate: AudienceCandidate): Boolean {
         val audienceType = broadcast.getRealAudienceType()
