@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.sdk.message.ScopeResolverRegistry
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ScopeType
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
+import com.lovelycatv.crystalframework.shared.types.system.SystemSettings
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
@@ -56,39 +57,14 @@ class InboxServiceImpl(
                 }
             }
             .filter { conversation ->
-                // Filter out conversations based on disabled message modules
-                if (module == null) return@filter true
-
-                val scopeType = ScopeType.getByTypeId(conversation.scopeType) ?: return@filter true
-                val counterpartType = PartyType.getByTypeId(conversation.counterpartType) ?: return@filter true
-                val viewingPartyType = PartyType.getByTypeId(conversation.viewingPartyType) ?: return@filter true
-
-                when (scopeType) {
-                    ScopeType.SYSTEM -> {
-                        // SYSTEM scope USER→USER: messageSystemPeerEnabled
-                        if (counterpartType == PartyType.USER && module.messageSystemPeerEnabled == false) {
-                            return@filter false
-                        }
-                    }
-                    ScopeType.TENANT -> {
-                        // Check if this is a desk conversation (either viewing or counterpart is TENANT)
-                        val isDeskConversation = viewingPartyType == PartyType.TENANT || counterpartType == PartyType.TENANT
-
-                        if (isDeskConversation) {
-                            // TENANT scope with TENANT party: messageTenantDeskEnabled
-                            if (module.messageTenantDeskEnabled == false) {
-                                return@filter false
-                            }
-                        } else {
-                            // TENANT scope USER→USER: messageTenantScopeEnabled
-                            if (module.messageTenantScopeEnabled == false) {
-                                return@filter false
-                            }
-                        }
-                    }
-                }
-
-                true
+                isConversationFeatureEnabled(
+                    ScopeType.getByTypeId(conversation.scopeType),
+                    listOfNotNull(
+                        PartyType.getByTypeId(conversation.viewingPartyType),
+                        PartyType.getByTypeId(conversation.counterpartType),
+                    ),
+                    module,
+                )
             }
             .sortedByDescending { it.lastMessageTime ?: Long.MIN_VALUE }
     }
@@ -128,8 +104,35 @@ class InboxServiceImpl(
     private fun MsgConversationPartyEntity.toParty(): Party = Party(getRealPartyType(), partyId)
 
     override suspend fun totalUnread(userId: Long, tenantIds: Collection<Long>): Long {
+        val module = systemModuleClient.getSystemSettings()?.module
         val conversationUnread = msgConversationMemberService.listByUser(userId)
-            .sumOf { it.unreadCount.toLong() }
+            .sumOf { member ->
+                val conversation = msgConversationService.getByIdOrNull(member.conversationId) ?: return@sumOf 0L
+                val parties = msgConversationPartyRepository.findAllByConversationId(member.conversationId)
+                    .collectList().awaitFirstOrNull().orEmpty()
+                if (isConversationFeatureEnabled(
+                        conversation.getRealScopeType(),
+                        parties.map { it.getRealPartyType() },
+                        module,
+                    )
+                ) member.unreadCount.toLong() else 0L
+            }
         return conversationUnread + broadcastService.unreadCount(userId, tenantIds)
+    }
+
+    private fun isConversationFeatureEnabled(
+        scopeType: ScopeType?,
+        partyTypes: Collection<PartyType>,
+        module: SystemSettings.Module?,
+    ): Boolean {
+        if (module == null || scopeType == null) return true
+        return when (scopeType) {
+            ScopeType.SYSTEM -> module.messageSystemPeerEnabled
+            ScopeType.TENANT -> if (PartyType.TENANT in partyTypes) {
+                module.messageTenantDeskEnabled
+            } else {
+                module.messageTenantScopeEnabled
+            }
+        }
     }
 }
