@@ -147,14 +147,15 @@ class MessageServiceImpl(
         page: Int,
         pageSize: Int,
     ): PaginatedResponseData<MsgMessageEntity> {
+        val safePage = page.coerceAtLeast(1)
         val criteria = Criteria.where(COLUMN_CONVERSATION_ID).`is`(conversationId)
         val baseQuery = Query.query(criteria).sort(Sort.by(Sort.Direction.DESC, BaseEntity.CREATED_TIME))
         val total = r2dbcEntityTemplate.count(baseQuery, MsgMessageEntity::class.java).awaitFirstOrNull() ?: 0L
         val records = r2dbcEntityTemplate
-            .select(baseQuery.limit(pageSize).offset(((page - 1) * pageSize).toLong()), MsgMessageEntity::class.java)
+            .select(baseQuery.limit(pageSize).offset(((safePage - 1) * pageSize).toLong()), MsgMessageEntity::class.java)
             .collectList()
             .awaitFirstOrNull() ?: emptyList()
-        return PageQuery(page, pageSize).toPaginatedResponseData(total = total, records = records)
+        return PageQuery(safePage, pageSize).toPaginatedResponseData(total = total, records = records)
     }
 
     override suspend fun markConversationRead(conversationId: Long, userId: Long) {

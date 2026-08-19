@@ -197,8 +197,9 @@ class MessageController(
     ): ApiResponse<*> {
         assertMember(conversationId, userAuthentication.userId)
         messageService.assertConversationFeatureEnabled(conversationId)
+        val cappedPage = page.coerceAtLeast(1)
         val cappedPageSize = pageSize.coerceIn(1, MessageConstants.MAX_CONVERSATION_PAGE_SIZE)
-        return ApiResponse.success(messageService.getConversationMessages(conversationId, page, cappedPageSize))
+        return ApiResponse.success(messageService.getConversationMessages(conversationId, cappedPage, cappedPageSize))
     }
 
     @Audit(action = AuditAction.UPDATE, resourceType = TableConstants.TABLE_MSG_CONVERSATION_MEMBERS)
