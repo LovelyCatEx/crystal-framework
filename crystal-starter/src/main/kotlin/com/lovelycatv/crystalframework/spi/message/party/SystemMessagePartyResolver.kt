@@ -19,6 +19,8 @@ class SystemMessagePartyResolver : MessagePartyResolver {
 
     override suspend fun resolveRecipients(party: Party): Collection<Long> = emptyList()
 
+    override suspend fun isAvailable(party: Party): Boolean = false
+
     override suspend fun canActAs(party: Party, userId: Long): Boolean = false
 
     override suspend fun resolveDisplayName(party: Party): String? = null

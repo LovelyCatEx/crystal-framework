@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.message.service.impl
 
+import com.lovelycatv.crystalframework.message.constants.MessageConstants
 import com.lovelycatv.crystalframework.message.entity.MsgConversationPartyEntity
 import com.lovelycatv.crystalframework.message.entity.MsgMessageEntity
 import com.lovelycatv.crystalframework.message.repository.MsgConversationPartyRepository
@@ -69,6 +70,9 @@ class MessageServiceImpl(
         }
         if (!partyResolverRegistry.resolve(sender.type).canActAs(sender, actingUserId)) {
             throw ForbiddenException("User $actingUserId cannot act as party ${sender.type}:${sender.id}")
+        }
+        if (!partyResolverRegistry.resolve(target.type).isAvailable(target)) {
+            throw BusinessException(MessageConstants.TARGET_UNAVAILABLE_MESSAGE)
         }
 
         val parties = listOf(sender, target)

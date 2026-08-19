@@ -21,6 +21,9 @@ class UserMessagePartyResolver(
     override suspend fun resolveRecipients(party: Party): Collection<Long> =
         party.id?.let { listOf(it) } ?: emptyList()
 
+    override suspend fun isAvailable(party: Party): Boolean =
+        party.id?.let { userService.getByIdOrNull(it)?.getEnabledFlag() == true } == true
+
     override suspend fun canActAs(party: Party, userId: Long): Boolean = party.id == userId
 
     override suspend fun resolveDisplayName(party: Party): String? =

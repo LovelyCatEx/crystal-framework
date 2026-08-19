@@ -5,6 +5,7 @@ import com.lovelycatv.crystalframework.sdk.message.Party
 import com.lovelycatv.crystalframework.sdk.message.config.MessagePartyResolver
 import com.lovelycatv.crystalframework.sdk.message.types.PartyType
 import com.lovelycatv.crystalframework.sdk.message.types.ReadGranularity
+import com.lovelycatv.crystalframework.shared.types.tenant.TenantStatus
 import com.lovelycatv.crystalframework.tenant.service.TenantService
 import org.springframework.stereotype.Component
 
@@ -27,6 +28,9 @@ class TenantMessagePartyResolver(
         val tenantId = party.id ?: return emptyList()
         return receptionistUserIds(tenantId)
     }
+
+    override suspend fun isAvailable(party: Party): Boolean =
+        party.id?.let { tenantService.getByIdOrNull(it)?.getRealStatus() == TenantStatus.ACTIVE } == true
 
     override suspend fun canActAs(party: Party, userId: Long): Boolean {
         val tenantId = party.id ?: return false

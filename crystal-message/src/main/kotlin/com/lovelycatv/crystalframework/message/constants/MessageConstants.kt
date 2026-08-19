@@ -12,6 +12,9 @@ object MessageConstants {
     /** Separates individual party keys within the parties segment. */
     const val DEDUPE_PARTY_SEPARATOR = "-"
 
+    /** Rejected when a direct-message target is absent, deleted, disabled, or inactive. */
+    const val TARGET_UNAVAILABLE_MESSAGE = "Message target is unavailable"
+
     /** Upper bound for a single page of conversation messages (write-diffusion pull). */
     const val MAX_CONVERSATION_PAGE_SIZE = 20
 

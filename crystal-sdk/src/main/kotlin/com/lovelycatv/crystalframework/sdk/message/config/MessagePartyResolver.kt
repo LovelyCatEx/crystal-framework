@@ -21,6 +21,9 @@ interface MessagePartyResolver {
     /** Expand the party into the concrete real users that should receive a message. */
     suspend fun resolveRecipients(party: Party): Collection<Long>
 
+    /** Whether this party is an active, reachable target for a direct message. */
+    suspend fun isAvailable(party: Party): Boolean
+
     /** Whether [userId] is allowed to send a message under this party's name (authorization). */
     suspend fun canActAs(party: Party, userId: Long): Boolean
 
