@@ -52,6 +52,30 @@ class MessageServiceTest(
     }
 
     @Test
+    fun rejectsSelfSendBeforePersisting() {
+        withTransactionalRollback("message-rejects-self-send") {
+            val user = userServiceTest.mockRegisteredUser()
+            val conversationCount = msgConversationRepository.count().awaitFirstOrNull()
+            val messageCount = msgMessageRepository.count().awaitFirstOrNull()
+
+            val result = runCatching {
+                messageService.send(
+                    scope = Scope(ScopeType.SYSTEM, null),
+                    sender = Party(PartyType.USER, user.id),
+                    target = Party(PartyType.USER, user.id),
+                    content = TEST_MESSAGE_CONTENT,
+                    contentType = ContentType.TEXT,
+                    actingUserId = user.id,
+                )
+            }
+
+            assertIs<BusinessException>(result.exceptionOrNull())
+            assertEquals(conversationCount, msgConversationRepository.count().awaitFirstOrNull())
+            assertEquals(messageCount, msgMessageRepository.count().awaitFirstOrNull())
+        }
+    }
+
+    @Test
     fun rejectsDisabledUserTargetBeforePersisting() {
         withTransactionalRollback("message-rejects-disabled-user-target") {
             val sender = userServiceTest.mockRegisteredUser()

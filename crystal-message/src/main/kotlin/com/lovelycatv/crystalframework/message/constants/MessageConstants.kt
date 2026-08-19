@@ -15,6 +15,9 @@ object MessageConstants {
     /** Rejected when a direct-message target is absent, deleted, disabled, or inactive. */
     const val TARGET_UNAVAILABLE_MESSAGE = "Message target is unavailable"
 
+    /** Rejected when a direct-message sender and target resolve to the same party. */
+    const val SELF_SEND_MESSAGE = "Cannot send a direct message to yourself"
+
     /** Upper bound for a single page of conversation messages (write-diffusion pull). */
     const val MAX_CONVERSATION_PAGE_SIZE = 20
 

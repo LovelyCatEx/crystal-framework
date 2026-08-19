@@ -74,6 +74,9 @@ class MessageServiceImpl(
         if (!partyResolverRegistry.resolve(target.type).isAvailable(target)) {
             throw BusinessException(MessageConstants.TARGET_UNAVAILABLE_MESSAGE)
         }
+        if (sender == target) {
+            throw BusinessException(MessageConstants.SELF_SEND_MESSAGE)
+        }
 
         val parties = listOf(sender, target)
         val dedupeKey = DedupeKeyBuilder.build(scope, ConversationKind.DIRECT, parties)
