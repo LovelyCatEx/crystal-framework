@@ -41,9 +41,14 @@ class MsgConversationMemberServiceImpl(
     override suspend fun incrementUnread(conversationId: Long, userId: Long): MsgConversationMemberEntity? {
         val member = msgConversationMemberRepository
             .findByConversationIdAndUserId(conversationId, userId).awaitFirstOrNull() ?: return null
-        return withUpdateEntityContext(member.id) {
-            withUpdateById(member.id) { unreadCount += 1 }
+        withInvalidateEntityCacheContext(member.id) {
+            msgConversationMemberRepository.incrementUnread(
+                conversationId = conversationId,
+                userId = userId,
+                modifiedTime = System.currentTimeMillis(),
+            ).awaitFirstOrNull()
         }
+        return msgConversationMemberRepository.findByConversationIdAndUserId(conversationId, userId).awaitFirstOrNull()
     }
 
     override suspend fun markRead(

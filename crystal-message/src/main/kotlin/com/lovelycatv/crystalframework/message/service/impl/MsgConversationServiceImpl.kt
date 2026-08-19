@@ -57,13 +57,17 @@ class MsgConversationServiceImpl(
         conversationId: Long,
         messageId: Long,
         messageTime: Long,
-    ): MsgConversationEntity? =
-        withUpdateEntityContext(conversationId) {
-            withUpdateById(conversationId) {
-                lastMessageId = messageId
-                lastMessageTime = messageTime
-            }
+    ): MsgConversationEntity? {
+        withInvalidateEntityCacheContext(conversationId) {
+            msgConversationRepository.advanceLastMessage(
+                conversationId = conversationId,
+                messageId = messageId,
+                messageTime = messageTime,
+                modifiedTime = System.currentTimeMillis(),
+            ).awaitFirstOrNull()
         }
+        return msgConversationRepository.findById(conversationId).awaitFirstOrNull()
+    }
 
     override suspend fun isTenantServiceDeskConversation(conversationId: Long): Boolean =
         listParties(conversationId).any { it.type == PartyType.TENANT }
