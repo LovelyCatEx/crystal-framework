@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.message.service.impl
 
 import com.lovelycatv.crystalframework.message.entity.MsgBroadcastEntity
-import com.lovelycatv.crystalframework.message.entity.MsgBroadcastReadEntity
 import com.lovelycatv.crystalframework.message.repository.MsgBroadcastReadRepository
 import com.lovelycatv.crystalframework.message.repository.MsgBroadcastRepository
 import com.lovelycatv.crystalframework.message.service.BroadcastService
@@ -89,15 +88,14 @@ class BroadcastServiceImpl(
         if (broadcast.publishTime > System.currentTimeMillis() || !matchesAudience(broadcast, candidate)) {
             throw scopeMismatch(scopeType)
         }
-        if (msgBroadcastReadRepository.findByBroadcastIdAndUserId(broadcastId, userId)
-                .awaitFirstOrNull() != null
-        ) return
-        msgBroadcastReadRepository.save(
-            MsgBroadcastReadEntity(
-                id = snowIdGenerator.nextId(),
-                broadcastId = broadcastId,
-                userId = userId,
-            ).apply { newEntity() }
+        val readTime = System.currentTimeMillis()
+        msgBroadcastReadRepository.insertIgnoringExisting(
+            id = snowIdGenerator.nextId(),
+            broadcastId = broadcastId,
+            userId = userId,
+            readTime = readTime,
+            createdTime = readTime,
+            modifiedTime = readTime,
         ).awaitFirstOrNull()
     }
 
