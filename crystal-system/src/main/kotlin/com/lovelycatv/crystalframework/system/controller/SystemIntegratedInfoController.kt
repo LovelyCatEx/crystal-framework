@@ -32,6 +32,9 @@ class SystemIntegratedInfoController(
         val disabledModules = buildList {
             if (!systemSettings.module.tenantEnabled) add(SystemModulePathConstants.Tenant.KEY)
             if (!systemSettings.module.approvalEnabled) add(SystemModulePathConstants.Approval.KEY)
+            if (!systemSettings.module.messageSystemPeerEnabled) add(SystemModulePathConstants.MessageSystemPeer.KEY)
+            if (!systemSettings.module.messageTenantScopeEnabled) add(SystemModulePathConstants.MessageTenantScope.KEY)
+            if (!systemSettings.module.messageTenantDeskEnabled) add(SystemModulePathConstants.MessageTenantDesk.KEY)
         }
         return ApiResponse.success(
             SystemIntegratedInfoVO(

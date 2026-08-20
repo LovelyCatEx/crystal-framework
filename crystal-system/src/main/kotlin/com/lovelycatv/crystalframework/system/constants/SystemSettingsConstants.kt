@@ -470,6 +470,27 @@ object SystemSettingsConstants {
             defaultValue = true.toString(),
             sort = 1
         )
+
+        val MESSAGE_SYSTEM_PEER_ENABLED = SettingsItemDeclaration(
+            key = "module.message.systemPeerEnabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 2
+        )
+
+        val MESSAGE_TENANT_SCOPE_ENABLED = SettingsItemDeclaration(
+            key = "module.message.tenantScopeEnabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 3
+        )
+
+        val MESSAGE_TENANT_DESK_ENABLED = SettingsItemDeclaration(
+            key = "module.message.tenantDeskEnabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 4
+        )
     }
 
     object Resource {

@@ -1,4 +1,7 @@
+import {clearMessageSWRCache} from "@/utils/message-swr-cache.ts";
+
 export function setUserAuthentication(token: string, expiresIn: number) {
+    void clearMessageSWRCache();
     localStorage.setItem('access_token', token);
     localStorage.setItem('expires', String(new Date().getTime() + expiresIn));
 }
@@ -23,6 +26,7 @@ export function getUserAuthentication(): {
 }
 
 export function clearUserAuthentication() {
+    void clearMessageSWRCache();
     localStorage.removeItem('access_token');
     localStorage.removeItem('expires');
 }

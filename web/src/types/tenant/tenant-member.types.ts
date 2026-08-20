@@ -22,6 +22,11 @@ export interface TenantMemberVO extends TenantMember {
     user: User;
 }
 
+export interface TenantMateVO {
+    userId: string;
+    nickname: string;
+}
+
 export interface TenantMemberProfileVO {
     id: string;
     tenantId: string;

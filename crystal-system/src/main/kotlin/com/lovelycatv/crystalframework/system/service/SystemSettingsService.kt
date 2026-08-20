@@ -8,7 +8,7 @@ import com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity
 import com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository
 
 interface SystemSettingsService : CachedBaseService<SystemSettingsRepository, SystemSettingsEntity> {
-    fun refreshSystemSettings()
+    suspend fun refreshSystemSettings()
 
     suspend fun getSystemSettings(): SystemSettings
 

@@ -6,6 +6,7 @@
  */
 export const menuPathDashboard = "/manager/dashboard";
 export const menuPathProfile = "/manager/profile";
+export const menuPathMessageCenter = "/manager/message-center";
 export const menuPathLogin = "/auth/login";
 export const menuPathRegister = "/auth/register";
 export const menuPathResetPassword = "/auth/reset-password";

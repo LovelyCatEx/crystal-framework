@@ -146,6 +146,23 @@ object SystemRolePermissionRelation {
             SystemPermission.ACTION_TENANT_DICT_ITEM_READ,
             SystemPermission.ACTION_TENANT_DICT_ITEM_UPDATE,
             SystemPermission.ACTION_TENANT_DICT_ITEM_DELETE,
+            // Broadcast — menu
+            SystemPermission.MENU_SYSTEM_BROADCAST,
+            // Broadcast — system scope
+            SystemPermission.ACTION_SYSTEM_BROADCAST_CREATE,
+            SystemPermission.ACTION_SYSTEM_BROADCAST_READ,
+            SystemPermission.ACTION_SYSTEM_BROADCAST_UPDATE,
+            SystemPermission.ACTION_SYSTEM_BROADCAST_DELETE,
+            // Broadcast — tenant-admin (cross-tenant, TENANT scope only)
+            SystemPermission.ACTION_TENANT_BROADCAST_CREATE,
+            SystemPermission.ACTION_TENANT_BROADCAST_READ,
+            SystemPermission.ACTION_TENANT_BROADCAST_UPDATE,
+            SystemPermission.ACTION_TENANT_BROADCAST_DELETE,
+            // Broadcast — super (cross-scope, admin-only)
+            SystemPermission.ACTION_X_BROADCAST_CREATE,
+            SystemPermission.ACTION_X_BROADCAST_READ,
+            SystemPermission.ACTION_X_BROADCAST_UPDATE,
+            SystemPermission.ACTION_X_BROADCAST_DELETE,
             // Dictionary — super (cross-scope, admin-only)
             SystemPermission.ACTION_X_DICT_TYPE_CREATE,
             SystemPermission.ACTION_X_DICT_TYPE_READ,

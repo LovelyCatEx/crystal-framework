@@ -9,6 +9,7 @@ import io.r2dbc.pool.ConnectionPool
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.r2dbc.autoconfigure.R2dbcProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -48,6 +49,14 @@ class R2dbcShardingConfiguration {
             primaryPool,
             configuration.database.dataSources.toList(),
         )
+    }
+
+    @Bean
+    fun configDrivenShardingRuleComponent(
+        configuration: CrystalFrameworkConfiguration,
+        applicationContext: ApplicationContext,
+    ): ConfigDrivenShardingRuleComponent {
+        return ConfigDrivenShardingRuleComponent(configuration, applicationContext)
     }
 
     @Bean

@@ -324,6 +324,15 @@ object TenantPermission {
     )
 
     // ============================================================
+    //   Message Reception (customer-service inbox)
+    // ============================================================
+    val ACTION_MESSAGE_RECEPTION_HANDLE = TenantPermissionDeclaration(
+        name = "i.tenant.message.reception.handle",
+        description = "See and reply to customer-service conversations initiated by users toward own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    // ============================================================
     //   Dictionary Type
     // ============================================================
     val MENU_DICT_TYPE = TenantPermissionDeclaration(
@@ -465,6 +474,30 @@ object TenantPermission {
     val ACTION_FILE_RESOURCE_DELETE = TenantPermissionDeclaration(
         name = "i.tenant.file.resource.delete",
         description = "Delete file resources within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+
+    // ============================================================
+    //   Broadcast (within own tenant)
+    // ============================================================
+    val ACTION_BROADCAST_CREATE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.create",
+        description = "Create broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_READ = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.read",
+        description = "Read broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_UPDATE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.update",
+        description = "Update broadcasts within own tenant",
+        type = TenantPermissionType.ACTION,
+    )
+    val ACTION_BROADCAST_DELETE = TenantPermissionDeclaration(
+        name = "i.tenant.broadcast.delete",
+        description = "Delete broadcasts within own tenant",
         type = TenantPermissionType.ACTION,
     )
 

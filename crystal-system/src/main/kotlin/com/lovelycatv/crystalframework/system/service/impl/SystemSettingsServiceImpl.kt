@@ -81,15 +81,14 @@ class SystemSettingsServiceImpl(
         get() = reactiveRedisService.asReactiveKVStore()
     override val entityClass: KClass<SystemSettingsEntity> = SystemSettingsEntity::class
 
-    override fun refreshSystemSettings() {
+    override suspend fun refreshSystemSettings() {
         this.cachedSystemSettings = null
 
-        this.syncToCacheAsync()
+        this.syncToCache()
 
         reactiveRedisTemplate
             .convertAndSend(refreshTopic.topic, instanceId)
             .subscribe()
-
     }
 
     override suspend fun getSystemSettings(): SystemSettings {
@@ -100,11 +99,11 @@ class SystemSettingsServiceImpl(
             messageChannel = getSystemMessageChannelSettings(),
             security = getSystemSecuritySettings(),
             oauth = getSystemOAuthSettings(),
-            module = getSystemModuleSettings(),
             resource = getSystemResourceSettings(),
+            module = getSystemModuleSettings(),
         ).also {
             this.cachedSystemSettings = it
-            this.syncToCacheAsync()
+            this.syncToCache()
         }
     }
 
@@ -194,6 +193,9 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Module(
             tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
             approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,
+            messageSystemPeerEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED)!!,
+            messageTenantScopeEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED)!!,
+            messageTenantDeskEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED)!!,
         )
     }
 
@@ -322,13 +324,16 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.OAuth.Oicq.CLIENT_SECRET, settings.oauth.oicq.clientSecret)
         setSettings(SystemSettingsConstants.OAuth.Oicq.SCOPE, settings.oauth.oicq.scope.toJSONString())
 
-        setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
-        setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
-
         setSettings(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS, settings.resource.signedUrl.ttlSeconds.toString())
         setSettings(SystemSettingsConstants.Resource.Visibility.USER_AVATAR, settings.resource.visibility.userAvatar.name)
         setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_ICON, settings.resource.visibility.tenantIcon.name)
         setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR, settings.resource.visibility.tenantMemberAvatar.name)
+
+        setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
+        setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
+        setSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED, settings.module.messageSystemPeerEnabled.toString())
+        setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED, settings.module.messageTenantScopeEnabled.toString())
+        setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED, settings.module.messageTenantDeskEnabled.toString())
 
         this.refreshSystemSettings()
     }
@@ -417,12 +422,6 @@ class SystemSettingsServiceImpl(
             this.setSettings(key, newValue)
 
             newValue
-        }
-    }
-
-    private fun syncToCacheAsync() {
-        coroutineScope.launch {
-            this@SystemSettingsServiceImpl.syncToCache()
         }
     }
 

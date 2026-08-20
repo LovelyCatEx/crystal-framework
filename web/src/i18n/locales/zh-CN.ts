@@ -997,6 +997,7 @@ export const zhCN: I18nRules = {
         'system.user.login.log': '用户登录日志菜单',
         'system.monitor.sessions': '会话监控菜单',
         'system.announcement': '公告菜单',
+        'system.broadcast': '站内信公告菜单',
         'system.approval.flow.definition': '审批流程定义菜单',
         'system.dict.type': '系统字典类型菜单',
         'system.dict.item': '系统字典项菜单',
@@ -1202,6 +1203,22 @@ export const zhCN: I18nRules = {
         'tenant.dict.item.read': '跨租户读取租户级字典项',
         'tenant.dict.item.update': '跨租户更新租户级字典项',
         'tenant.dict.item.delete': '跨租户删除租户级字典项',
+        'x.broadcast.create': '在任意作用域创建广播',
+        'x.broadcast.read': '在任意作用域读取广播',
+        'x.broadcast.update': '在任意作用域更新广播',
+        'x.broadcast.delete': '在任意作用域删除广播',
+        'system.broadcast.create': '创建系统级广播',
+        'system.broadcast.read': '读取系统级广播',
+        'system.broadcast.update': '更新系统级广播',
+        'system.broadcast.delete': '删除系统级广播',
+        'tenant.broadcast.create': '跨租户创建租户级广播',
+        'tenant.broadcast.read': '跨租户读取租户级广播',
+        'tenant.broadcast.update': '跨租户更新租户级广播',
+        'tenant.broadcast.delete': '跨租户删除租户级广播',
+        'tenant.file.resource.create': '跨租户创建租户级文件资源',
+        'tenant.file.resource.read': '跨租户读取租户级文件资源',
+        'tenant.file.resource.update': '跨租户更新租户级文件资源',
+        'tenant.file.resource.delete': '跨租户删除租户级文件资源',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': '我的租户仪表盘菜单',
         'i.tenant.profile': '我的租户资料菜单',
@@ -1261,6 +1278,15 @@ export const zhCN: I18nRules = {
         'i.tenant.dict.item.read': '读取本租户字典项',
         'i.tenant.dict.item.update': '更新本租户字典项',
         'i.tenant.dict.item.delete': '删除本租户字典项',
+        'i.tenant.broadcast.create': '创建本租户广播',
+        'i.tenant.broadcast.read': '读取本租户广播',
+        'i.tenant.broadcast.update': '更新本租户广播',
+        'i.tenant.broadcast.delete': '删除本租户广播',
+        'i.tenant.file.resource.create': '创建本租户文件资源',
+        'i.tenant.file.resource.read': '读取本租户文件资源',
+        'i.tenant.file.resource.update': '更新本租户文件资源',
+        'i.tenant.file.resource.delete': '删除本租户文件资源',
+        'i.tenant.message.reception.handle': '查看并回复用户发给本租户的客服会话',
         'i.tenant.approval.flow.definition.create': '创建本租户审批流程定义',
         'i.tenant.approval.flow.definition.read': '读取本租户审批流程定义',
         'i.tenant.approval.flow.definition.update': '更新本租户审批流程定义',
@@ -2317,6 +2343,9 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
+        'module.message.systemPeerEnabled': '启用系统用户私聊',
+        'module.message.tenantScopeEnabled': '启用租户内私聊',
+        'module.message.tenantDeskEnabled': '启用租户服务台',
         'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
         'resource.visibility.userAvatar': '用户头像可见性',
         'resource.visibility.tenantIcon': '租户图标可见性',
@@ -2337,6 +2366,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
+        'module.message': '消息模块',
         'resource.signedUrl': '签名 URL',
         'resource.visibility': '资源访问权限',
       },
@@ -2502,6 +2532,38 @@ export const zhCN: I18nRules = {
       messages: {
         statusUpdateSuccess: '状态更新成功',
         statusUpdateFailed: '状态更新失败',
+      },
+    },
+    broadcastManager: {
+      title: '广播管理',
+      subtitle: '管理系统范围的广播（系统公告）',
+      modal: {
+        title: {
+          label: '标题',
+          required: '请输入标题',
+          maxLength: '标题不能超过 256 个字符',
+        },
+        content: {
+          label: '内容',
+          required: '请输入内容',
+        },
+        category: {
+          label: '分类',
+        },
+        audienceType: {
+          label: '受众',
+          required: '请选择受众',
+        },
+        publishTime: {
+          label: '发布时间',
+          placeholder: '留空则立即发布',
+          help: '到达该时间后用户才可见，留空表示立即发布',
+        },
+        expireTime: {
+          label: '过期时间',
+          placeholder: '留空则永不过期',
+          help: '到达该时间后自动下架，留空表示永不过期',
+        },
       },
     },
     managerContainer: {
@@ -3016,6 +3078,54 @@ export const zhCN: I18nRules = {
       emptyNearby: '附近暂无可选地址',
       loading: '正在搜索附近地址...'
     },
+    notification: {
+      // NotificationBell / NotificationCenter
+      title: '消息中心',
+      emptyHistory: '暂无公告',
+      expired: '已过期',
+      noMore: '没有更多了',
+      conversations: {
+        title: '会话',
+        systemBroadcast: '系统公告',
+        personal: '个人',
+        organizationTag: '组织',
+        deskTag: '客服台',
+        external: '外部',
+        systemTab: '系统用户',
+        deskContactTag: '联系的客服台',
+        membersTag: '成员',
+        externalTag: '外部'
+      },
+      startConversation: {
+        start: '发起会话',
+        title: '发起会话',
+        userTab: '用户',
+        tenantTab: '租户',
+        tenantMemberTab: '组织成员',
+        tenantScopeDisabled: '租户会话功能已被管理员禁用',
+        allFeaturesDisabled: '会话功能已被管理员禁用'
+      },
+      contactUser: {
+        searchPlaceholder: '输入完整用户名或邮箱',
+        hint: '输入完整的用户名或邮箱以发起会话',
+        empty: '未找到匹配的用户'
+      },
+      tenantChat: {
+        title: '选择组织成员',
+        tenantPlaceholder: '选择组织',
+        empty: '该组织暂无成员'
+      },
+      contact: {
+        start: '发起会话',
+        title: '选择租户',
+        searchPlaceholder: '搜索租户名称',
+        empty: '暂无可联系的租户',
+        draftTag: '草稿',
+        startHint: '发送第一条消息以开始会话',
+        composerPlaceholder: '输入消息，Enter 发送，Shift+Enter 换行',
+        send: '发送'
+      }
+    },
     dashboard: {
       // DashboardPage
       greeting: {
@@ -3446,6 +3556,19 @@ export const zhCN: I18nRules = {
         unbound: '未绑定用户',
         userInfo: '用户信息',
         noAvatar: '无头像'
+      },
+      broadcast: {
+        title: '标题',
+        content: '内容',
+        category: '分类',
+        scopeType: '范围',
+        audience: '受众',
+        sender: '发送方',
+        publishTime: '发布时间',
+        expireTime: '过期时间',
+        systemSender: '系统',
+        audienceRef: '引用',
+        unknown: '未知'
       },
       mailTemplate: {
         name: '名称',
@@ -4028,6 +4151,23 @@ export const zhCN: I18nRules = {
     forbiddenScope: {
       SYSTEM: '系统',
       TENANT: '租户'
+    },
+    scopeType: {
+      0: '系统',
+      1: '租户'
+    },
+    partyType: {
+      0: '用户',
+      1: '系统',
+      2: '租户'
+    },
+    audienceType: {
+      0: '全体用户',
+      1: '租户成员',
+      2: '人群分组'
+    },
+    broadcastCategory: {
+      0: '公告'
     }
   },
 
@@ -4061,6 +4201,7 @@ export const zhCN: I18nRules = {
     userLoginLog: '用户登录日志',
     sessionMonitor: '会话',
     announcement: '公告',
+    broadcast: '广播',
     tenantDictType: '字典类型',
     tenantDictItem: '字典项',
     approvalFlowDefinition: '审批流程定义',
@@ -4073,6 +4214,7 @@ export const zhCN: I18nRules = {
     pub: {
       dashboard: '仪表盘',
       profile: '个人中心',
+      messageCenter: '消息中心',
       initiableApprovalFlows: '发起审批',
       myApprovalFlows: '我的审批',
       approvalTaskHandle: '审批处理'
@@ -4127,6 +4269,7 @@ export const zhCN: I18nRules = {
       sessions: '在线会话',
       systemMonitor: '系统监控',
       announcements: '公告管理',
+      broadcasts: '广播管理',
       tenantDictTypes: '字典类型管理',
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',

@@ -2,6 +2,7 @@ package com.lovelycatv.crystalframework.tenant.repository
 
 import com.lovelycatv.crystalframework.shared.repository.BaseRepository
 import com.lovelycatv.crystalframework.tenant.entity.TenantMemberEntity
+import org.springframework.data.domain.Pageable
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -10,6 +11,8 @@ import reactor.core.publisher.Mono
 @Repository
 interface TenantMemberRepository : BaseRepository<TenantMemberEntity> {
     fun findAllByTenantId(tenantId: Long): Flux<TenantMemberEntity>
+
+    fun findAllByTenantId(tenantId: Long, pageable: Pageable): Flux<TenantMemberEntity>
 
     fun findAllByMemberUserId(memberUserId: Long): Flux<TenantMemberEntity>
 

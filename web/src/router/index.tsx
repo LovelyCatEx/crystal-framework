@@ -12,6 +12,7 @@ import {
     KeyOutlined,
     LineChartOutlined,
     MailOutlined,
+    MessageOutlined,
     MonitorOutlined,
     NotificationOutlined,
     SafetyOutlined,
@@ -33,6 +34,7 @@ const UserBanRecordManagerPage = lazy(() => import("../pages/manager/user/UserBa
 const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
 const SystemSettingsManagerPage = lazy(() => import("../pages/manager/settings/SystemSettingsManagerPage.tsx"));
 const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfilePage.tsx"));
+const MessageCenterPage = lazy(() => import("../pages/manager/message/MessageCenterPage.tsx"));
 const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
 const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
 const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
@@ -67,6 +69,7 @@ const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLogi
 const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
 const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
 const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/AnnouncementManagerPage.tsx"));
+const BroadcastManagerPage = lazy(() => import("@/pages/manager/message/BroadcastManagerPage.tsx"));
 const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictTypeManagerPage.tsx"));
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
@@ -95,7 +98,7 @@ import type {PluginRouteItem} from "@/plugin/types.ts";
 import i18n from "@/i18n";
 import type {MenuGroup, MenuItem} from "@/types/menu.types.ts";
 import type {MenuItemType} from "antd/lib/menu/interface";
-import {menuPathDashboard, menuPathProfile} from "@/router/paths.ts";
+import {menuPathDashboard, menuPathMessageCenter, menuPathProfile} from "@/router/paths.ts";
 import {resolveDisabledMenuPrefixes} from "@/router/system-module-menu-paths.ts";
 
 
@@ -182,6 +185,13 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
+        },
+        {
+            key: menuPathMessageCenter,
+            path: menuPathMessageCenter,
+            icon: <MessageOutlined />,
+            label: t('menu.pub.messageCenter'),
+            page: <MessageCenterPage />
         },
         {
             key: '/manager/approval/initiate',
@@ -611,6 +621,13 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <NotificationOutlined />,
             label: t('menu.admin.announcements'),
             page: <AnnouncementManagerPage />,
+        },
+        {
+            key: '/manager/broadcasts',
+            path: '/manager/broadcasts',
+            icon: <NotificationOutlined />,
+            label: t('menu.admin.broadcasts'),
+            page: <BroadcastManagerPage />,
         },
         {
             key: '/manager/system-dict-types',

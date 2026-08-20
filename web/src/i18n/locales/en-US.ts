@@ -1000,6 +1000,7 @@ export const enUS: I18nRules = {
         'system.user.login.log': 'Manage user login logs menu',
         'system.monitor.sessions': 'Manage active sessions menu',
         'system.announcement': 'Manage announcements menu',
+        'system.broadcast': 'Broadcast management menu',
         'system.approval.flow.definition': 'Manage approval flow definitions menu',
         'system.dict.type': 'Manage system dictionary types menu',
         'system.dict.item': 'Manage system dictionary items menu',
@@ -1205,6 +1206,22 @@ export const enUS: I18nRules = {
         'tenant.dict.item.read': 'Read tenant-scope dictionary items across tenants',
         'tenant.dict.item.update': 'Update tenant-scope dictionary items across tenants',
         'tenant.dict.item.delete': 'Delete tenant-scope dictionary items across tenants',
+        'x.broadcast.create': 'Create broadcasts in any scope',
+        'x.broadcast.read': 'Read broadcasts in any scope',
+        'x.broadcast.update': 'Update broadcasts in any scope',
+        'x.broadcast.delete': 'Delete broadcasts in any scope',
+        'system.broadcast.create': 'Create system-scope broadcasts',
+        'system.broadcast.read': 'Read system-scope broadcasts',
+        'system.broadcast.update': 'Update system-scope broadcasts',
+        'system.broadcast.delete': 'Delete system-scope broadcasts',
+        'tenant.broadcast.create': 'Create tenant-scope broadcasts across tenants',
+        'tenant.broadcast.read': 'Read tenant-scope broadcasts across tenants',
+        'tenant.broadcast.update': 'Update tenant-scope broadcasts across tenants',
+        'tenant.broadcast.delete': 'Delete tenant-scope broadcasts across tenants',
+        'tenant.file.resource.create': 'Create tenant-scope file resources across tenants',
+        'tenant.file.resource.read': 'Read tenant-scope file resources across tenants',
+        'tenant.file.resource.update': 'Update tenant-scope file resources across tenants',
+        'tenant.file.resource.delete': 'Delete tenant-scope file resources across tenants',
         // Tenant permissions - Menus (tenantPem layer, own tenant)
         'i.tenant.dashboard': 'My tenant dashboard menu',
         'i.tenant.profile': 'My tenant profile menu',
@@ -1264,6 +1281,15 @@ export const enUS: I18nRules = {
         'i.tenant.dict.item.read': 'Read dictionary items within own tenant',
         'i.tenant.dict.item.update': 'Update dictionary items within own tenant',
         'i.tenant.dict.item.delete': 'Delete dictionary items within own tenant',
+        'i.tenant.broadcast.create': 'Create broadcasts within own tenant',
+        'i.tenant.broadcast.read': 'Read broadcasts within own tenant',
+        'i.tenant.broadcast.update': 'Update broadcasts within own tenant',
+        'i.tenant.broadcast.delete': 'Delete broadcasts within own tenant',
+        'i.tenant.file.resource.create': 'Create file resources within own tenant',
+        'i.tenant.file.resource.read': 'Read file resources within own tenant',
+        'i.tenant.file.resource.update': 'Update file resources within own tenant',
+        'i.tenant.file.resource.delete': 'Delete file resources within own tenant',
+        'i.tenant.message.reception.handle': 'See and reply to customer-service conversations initiated by users toward own tenant',
         'i.tenant.approval.flow.definition.create': 'Create approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.read': 'Read approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.update': 'Update approval flow definitions within own tenant',
@@ -2320,6 +2346,9 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
+        'module.message.systemPeerEnabled': 'Enable System Peer Messaging',
+        'module.message.tenantScopeEnabled': 'Enable Tenant-Scope Messaging',
+        'module.message.tenantDeskEnabled': 'Enable Tenant Service Desk',
         'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
         'resource.visibility.userAvatar': 'User Avatar Visibility',
         'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
@@ -2340,6 +2369,7 @@ export const enUS: I18nRules = {
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
+        'module.message': 'Message Module',
         'resource.signedUrl': 'Signed URL',
         'resource.visibility': 'Resource Access',
       },
@@ -2505,6 +2535,38 @@ export const enUS: I18nRules = {
       messages: {
         statusUpdateSuccess: 'Status updated successfully',
         statusUpdateFailed: 'Status update failed',
+      },
+    },
+    broadcastManager: {
+      title: 'Broadcast Management',
+      subtitle: 'Manage system-scope broadcasts (system announcements)',
+      modal: {
+        title: {
+          label: 'Title',
+          required: 'Please enter a title',
+          maxLength: 'Title cannot exceed 256 characters',
+        },
+        content: {
+          label: 'Content',
+          required: 'Please enter content',
+        },
+        category: {
+          label: 'Category',
+        },
+        audienceType: {
+          label: 'Audience',
+          required: 'Please select an audience',
+        },
+        publishTime: {
+          label: 'Publish time',
+          placeholder: 'Leave empty to publish immediately',
+          help: 'Visible to users only after this time; empty means publish immediately',
+        },
+        expireTime: {
+          label: 'Expire time',
+          placeholder: 'Leave empty to never expire',
+          help: 'Automatically taken down after this time; empty means never expire',
+        },
       },
     },
     managerContainer: {
@@ -3018,6 +3080,54 @@ export const enUS: I18nRules = {
       emptyNearby: 'No nearby addresses found',
       loading: 'Searching nearby addresses...'
     },
+    notification: {
+      // NotificationBell / NotificationCenter
+      title: 'Message Center',
+      emptyHistory: 'No announcements yet',
+      expired: 'Expired',
+      noMore: 'No more',
+      conversations: {
+        title: 'Conversations',
+        systemBroadcast: 'System Announcements',
+        personal: 'Personal',
+        organizationTag: 'Organization',
+        deskTag: 'Desk',
+        external: 'External',
+        systemTab: 'System User',
+        deskContactTag: 'Service Desks',
+        membersTag: 'Members',
+        externalTag: 'External'
+      },
+      startConversation: {
+        start: 'Start conversation',
+        title: 'Start conversation',
+        userTab: 'User',
+        tenantTab: 'Tenant',
+        tenantMemberTab: 'Organization Members',
+        tenantScopeDisabled: 'Tenant conversation feature has been disabled by administrator',
+        allFeaturesDisabled: 'Conversation feature has been disabled by administrator'
+      },
+      contactUser: {
+        searchPlaceholder: 'Enter exact username or email',
+        hint: 'Search by exact username or email to start a chat',
+        empty: 'No matching user found'
+      },
+      tenantChat: {
+        title: 'Select an organization member',
+        tenantPlaceholder: 'Select an organization',
+        empty: 'This organization has no members'
+      },
+      contact: {
+        start: 'New',
+        title: 'Select a tenant',
+        searchPlaceholder: 'Search tenant name',
+        empty: 'No contactable tenants',
+        draftTag: 'Draft',
+        startHint: 'Send the first message to start the conversation',
+        composerPlaceholder: 'Type a message. Enter to send, Shift+Enter for newline',
+        send: 'Send'
+      }
+    },
     dashboard: {
       // DashboardPage
       greeting: {
@@ -3448,6 +3558,19 @@ export const enUS: I18nRules = {
         userInfo: 'User Info',
         userId: 'User ID',
         noAvatar: 'No Avatar'
+      },
+      broadcast: {
+        title: 'Title',
+        content: 'Content',
+        category: 'Category',
+        scopeType: 'Scope',
+        audience: 'Audience',
+        sender: 'Sender',
+        publishTime: 'Publish Time',
+        expireTime: 'Expire Time',
+        systemSender: 'System',
+        audienceRef: 'Ref',
+        unknown: 'Unknown'
       },
       mailTemplate: {
         name: 'Name',
@@ -4030,6 +4153,23 @@ export const enUS: I18nRules = {
     forbiddenScope: {
       SYSTEM: 'System',
       TENANT: 'Tenant'
+    },
+    scopeType: {
+      0: 'System',
+      1: 'Tenant'
+    },
+    partyType: {
+      0: 'User',
+      1: 'System',
+      2: 'Tenant'
+    },
+    audienceType: {
+      0: 'All Users',
+      1: 'Tenant Members',
+      2: 'Segment'
+    },
+    broadcastCategory: {
+      0: 'Announcement'
     }
   },
 
@@ -4063,6 +4203,7 @@ export const enUS: I18nRules = {
     userLoginLog: 'User Login Log',
     sessionMonitor: 'Session',
     announcement: 'Announcement',
+    broadcast: 'Broadcast',
     tenantDictType: 'Dictionary Type',
     tenantDictItem: 'Dictionary Item',
     approvalFlowDefinition: 'Approval Flow Definition',
@@ -4075,6 +4216,7 @@ export const enUS: I18nRules = {
     pub: {
       dashboard: 'Dashboard',
       profile: 'Profile',
+      messageCenter: 'Message Center',
       initiableApprovalFlows: 'Initiate Approval',
       myApprovalFlows: 'My Approvals',
       approvalTaskHandle: 'Approval To-Do'
@@ -4129,6 +4271,7 @@ export const enUS: I18nRules = {
       sessions: 'Online Sessions',
       systemMonitor: 'System Monitor',
       announcements: 'Announcement Management',
+      broadcasts: 'Broadcast Management',
       tenantDictTypes: 'Dictionary Type Management',
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',

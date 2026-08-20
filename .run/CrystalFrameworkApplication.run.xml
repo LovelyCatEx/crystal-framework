@@ -9,7 +9,7 @@
       <option name="environmentVariables" />
     </selectedOptions>
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.lovelycatv.crystalframework.SpringbootTemplateApplication" />
-    <option name="VM_PARAMETERS" value="-Xms256m -Xmx512m -javaagent:$PROJECT_DIR$/elastic-apm-agent-1.56.0.jar -Delastic.apm.service_name=crystal-framework -Delastic.apm.secret_token= -Delastic.apm.server_url=http://localhost:8200 -Delastic.apm.environment=dev -Delastic.apm.application_packages=com.lovelycatv.crystalframework -Delastic.apm.log_sending=true -Delastic.apm.enable_log_correlation=true -Delastic.apm.span_min_duration=0ms" />
+    <option name="VM_PARAMETERS" value="-Xms256m -Xmx512m -javaagent:$PROJECT_DIR$/elastic-apm-agent-1.56.0.jar -Delastic.apm.service_name=crystal-framework -Delastic.apm.secret_token= -Delastic.apm.server_url=http://localhost:8200 -Delastic.apm.environment=dev -Delastic.apm.application_packages=com.lovelycatv.crystalframework -Delastic.apm.log_sending=true -Delastic.apm.enable_log_correlation=true -Delastic.apm.span_min_duration=0ms -Delastic.apm.transaction_max_spans=2000" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

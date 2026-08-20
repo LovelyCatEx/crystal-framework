@@ -53,6 +53,7 @@
         <module>crystal-tenant</module>
         <module>crystal-auth</module>
         <module>crystal-approval</module>
+        <module>crystal-message</module>
     </modules>
 
     <scm>
@@ -66,7 +67,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.14.1</revision>
+        <revision>1.14.2</revision>
     </properties>
 
     <dependencyManagement>
@@ -119,6 +120,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-message</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

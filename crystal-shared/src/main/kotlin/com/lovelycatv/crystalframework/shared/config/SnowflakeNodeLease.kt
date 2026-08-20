@@ -55,7 +55,9 @@ class SnowflakeNodeLease(
     }
 
     @Synchronized
-    fun nodeIds(): LongArray = longArrayOf(
+    fun nodeIds(): LongArray = this.calculateNodeIds(this.slot)
+
+    private fun calculateNodeIds(slot: Int): LongArray = longArrayOf(
         (slot / (1 shl config.workerIdLength)).toLong(),
         (slot % (1 shl config.workerIdLength)).toLong(),
     )
@@ -74,9 +76,10 @@ class SnowflakeNodeLease(
             (config.dataCenterId * maxWorkers + config.workerId).toInt()
         }
         val probeCount = if (config.autoAllocate || startSlot != null) maxSlots else 1
+        val calc = calculateNodeIds(initialSlot)
 
         logger.info(
-            "Snowflake node lease probing: startSlot=$initialSlot, probeCount=$probeCount, " +
+            "Snowflake node lease probing: startSlot=$initialSlot (dataCenterId=${calc[0]}, workerId=${calc[1]}), probeCount=$probeCount, " +
                 "autoAllocate=${config.autoAllocate}, maxSlots=$maxSlots",
         )
 
@@ -120,8 +123,14 @@ class SnowflakeNodeLease(
 
     private fun recoverLease(): Boolean {
         val previousSlot = slot
+        val calcPrev = this.calculateNodeIds(previousSlot)
         val recoveryStartSlot = (previousSlot + 1) % (1 shl (config.dataCenterIdLength + config.workerIdLength))
-        logger.warn("Snowflake node lease recovery started: lostSlot=$previousSlot, startSlot=$recoveryStartSlot")
+        val calcRecovery = this.calculateNodeIds(recoveryStartSlot)
+        logger.warn(
+            "Snowflake node lease recovery started: " +
+                    "lostSlot=$previousSlot (dataCenterId=${calcPrev[0]}, workerId=${calcPrev[1]}), " +
+                    "startSlot=$recoveryStartSlot (dataCenterId=${calcRecovery[0]}, workerId=${calcRecovery[1]})"
+        )
         val recoveredSlot = acquireSlot(recoveryStartSlot)
             ?: run {
                 logger.error("Snowflake node lease recovery failed: no available slot")
@@ -138,12 +147,15 @@ class SnowflakeNodeLease(
     override fun destroy() {
         active = false
         renewalJob.cancel()
+
+        val calc = this.calculateNodeIds(slot)
+
         val released = runCatching {
             redisService.compareAndDelete(leaseKey, leaseToken).block() == true
         }.onFailure { error ->
-            logger.warn("Snowflake node lease release failed: slot=$slot, message=${error.message}")
+            logger.warn("Snowflake node lease release failed: slot=$slot (dataCenterId=${calc[0]}, workerId=${calc[1]}), message=${error.message}")
         }.getOrDefault(false)
-        logger.info("Snowflake node lease released: slot=$slot, deleted=$released")
+        logger.info("Snowflake node lease released: slot=$slot (dataCenterId=${calc[0]}, workerId=${calc[1]}), deleted=$released")
         scope.cancel()
     }
 }

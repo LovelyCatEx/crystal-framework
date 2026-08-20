@@ -1,4 +1,5 @@
 import {ConfigProvider, theme} from "antd";
+import {SWRConfig} from "swr";
 import {Route, Routes} from "react-router-dom";
 import {RequireAuthComponent} from "./components/base/RequireAuthComponent.tsx";
 import type {MaintenanceStatus} from "./components/base/MaintenanceGuard.tsx";
@@ -99,11 +100,13 @@ function App() {
   };
 
   return (
-      <ConfigProvider theme={themeConfig} modal={{mask: {closable: false}}}>
-          <SystemIntegratedProvider>
-              <AppContent />
-          </SystemIntegratedProvider>
-      </ConfigProvider>
+      <SWRConfig value={{revalidateOnFocus: false}}>
+          <ConfigProvider theme={themeConfig} modal={{mask: {closable: false}}}>
+              <SystemIntegratedProvider>
+                  <AppContent />
+              </SystemIntegratedProvider>
+          </ConfigProvider>
+      </SWRConfig>
   )
 }
 

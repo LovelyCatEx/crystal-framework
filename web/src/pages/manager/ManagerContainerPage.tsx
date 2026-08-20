@@ -53,6 +53,7 @@ import {switchTenant} from "@/api/auth/auth.api.ts";
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {TenantMemberStatus} from "@/types/tenant/tenant-member.types.ts";
 import {LanguageSwitcher} from "@/components/LanguageSwitcher.tsx";
+import {NotificationBell} from "@/components/notification/NotificationBell.tsx";
 import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 import {SystemModuleKey} from "@/router/system-module-menu-paths.ts";
 import {SystemModuleGate} from "@/components/SystemModuleGate.tsx";
@@ -737,6 +738,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
                     />
 
                     <LanguageSwitcher />
+
+                    <NotificationBell />
 
                     <Dropdown
                         menu={{
