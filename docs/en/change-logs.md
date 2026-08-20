@@ -7,6 +7,40 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.14.2
+
+2026-08-20
+
+### Features
++ feat(message): Add in-app messaging with broadcast (read-diffusion) and conversation (write-diffusion) models.
++ feat(message): Add an IM-style broadcast inbox with paginated conversation history.
++ feat(message): Add user and tenant customer-service conversations with an identity-partitioned inbox.
++ feat(message): Add tenant member conversations and a unified start-conversation dialog.
++ feat(message): Add identity-based inbox tabs and cross-organization member conversations.
++ feat(message): Add a segment-driven start-conversation dialog with exact user search and system/tenant conversation isolation.
++ feat(message): Add module toggles for message features.
++ feat(web): Add a header notification center for system broadcasts.
++ feat(web): Add a message-center page with an aggregated unread badge and conversation paging.
++ feat(database): Add config-driven R2DBC sharding rules with a SpEL inline algorithm.
+
+### Bug Fixes
++ fix(rbac): Protect reserved system role identities and prevent cross-tenant tenant role inheritance.
++ fix(tenant): Enforce department boundaries.
++ fix(resource): Protect file manager metadata.
++ fix(message): Isolate conversation and broadcast access by scope, and isolate caches by scope and user.
++ fix(message): Enforce active tenant membership and live scoped message access.
++ fix(message): Block disabled conversation access, exclude disabled conversations from the unread count, and revoke stale service desk access.
++ fix(message): Isolate inbox conversations by identity and split internal/external organization conversations by counterpart membership.
++ fix(message): Make broadcast reads idempotent and validate broadcast read scope.
++ fix(message): Make inbox updates atomic and reject unavailable message targets and self direct-messages.
++ fix(message): Validate the conversation history query parameter and reset the conversation panel when the identity tab or tenant changes.
++ fix(web): Disable SWR revalidateOnFocus globally to stop the refetch storm on tab focus, and revalidate the system-integrated snapshot after settings writes.
+
+### Others
++ style(web): Let NotificationCenter pass through className/style, with callers owning the frame and background.
+
+---
+
 ## v1.14.1
 
 2026-08-08
