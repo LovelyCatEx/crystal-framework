@@ -1,4 +1,4 @@
-import {type CSSProperties, useLayoutEffect, useMemo, useRef, useState} from "react";
+import {type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Badge, Button, Empty, List, Segmented, Spin, Tag, theme, Typography} from "antd";
 import {MessageOutlined, NotificationOutlined, PlusOutlined, ShopOutlined, UserOutlined} from "@ant-design/icons";
@@ -102,6 +102,14 @@ export function NotificationCenter(props: {
     const [startConversationOpen, setStartConversationOpen] = useState(false);
     // Identity tab: only meaningful when currentTenant is set.
     const [identityTab, setIdentityTab] = useState<IdentityTab>('system');
+
+    // Switching the identity tab or acting tenant resets the right panel to blank so a conversation
+    // opened under the previous identity can't keep sending under the wrong one.
+    const firstRunRef = useRef(true);
+    useEffect(() => {
+        if (firstRunRef.current) { firstRunRef.current = false; return; }
+        setActiveKey('');
+    }, [currentTenant?.tenantId]);
 
     const inboxTargets: ConversationTarget[] = useMemo(
         () => conversations.map((c: ConversationInboxVO) => ({
@@ -387,7 +395,10 @@ export function NotificationCenter(props: {
                             block
                             size="small"
                             value={identityTab}
-                            onChange={(v) => setIdentityTab(v as IdentityTab)}
+                            onChange={(v) => {
+                                setIdentityTab(v as IdentityTab);
+                                setActiveKey('');
+                            }}
                             options={[
                                 {label: t('components.notification.conversations.systemTab'), value: 'system'},
                                 {label: currentTenant.tenantName, value: 'tenant'},
