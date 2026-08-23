@@ -68,6 +68,7 @@
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
         <revision>1.14.2</revision>
+        <project.parent.basedir>${maven.multiModuleProjectDirectory}</project.parent.basedir>
     </properties>
 
     <dependencyManagement>
@@ -352,14 +353,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -543,6 +536,62 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-rules</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>17</version>
+                                    <message>JDK 17 or higher is required!</message>
+                                </requireJavaVersion>
+
+                                <requireMavenVersion>
+                                    <version>3.8</version>
+                                    <message>Maven 3.8 or higher is required!</message>
+                                </requireMavenVersion>
+
+                                <banDuplicatePomDependencyVersions />
+
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>log4j:log4j</exclude>
+                                        <exclude>*:*-SNAPSHOT</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+
+                                <requireReleaseDeps />
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.ozsie</groupId>
+                <artifactId>detekt-maven-plugin</artifactId>
+                <version>1.23.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <config>${project.parent.basedir}/detekt/detekt.yml</config>
+                    <baseline>${project.parent.basedir}/detekt/baseline-${project.name}.xml</baseline>
+                    <report>html:${project.build.directory}/detekt-report.html</report>
+                </configuration>
             </plugin>
         </plugins>
     </build>

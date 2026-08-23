@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:EncryptResponseAdvice.kt$EncryptResponseAdvice$// BY_ANNOTATED_LEVEL mode: encrypt only annotated endpoints with securityLevel &lt;= system's securityLevel</ID>
+    <ID>MaxLineLength:EncryptResponseAdvice.kt$EncryptResponseAdvice$?:</ID>
+    <ID>MaxLineLength:EncryptResponseAdvice.kt$EncryptResponseAdvice$logger.error("As the handler type is not supported, the response encryption will be skipped. Type: ${handler::class.qualifiedName}")</ID>
+    <ID>NewLineAtEndOfFile:EncryptedResponseData.kt$com.lovelycatv.crystalframework.encrypt.annotations.EncryptedResponseData.kt</ID>
+    <ID>ReturnCount:EncryptResponseAdvice.kt$EncryptResponseAdvice$override fun handleResult( exchange: ServerWebExchange, result: HandlerResult ): Mono&lt;Void&gt;</ID>
+    <ID>ReturnCount:EncryptResponseAdvice.kt$EncryptResponseAdvice$override fun supports(result: HandlerResult): Boolean</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:MessageChainXmlParser.kt$MessageChainXmlParser$private fun parseAttrs(raw: String): Map&lt;String, String&gt;</ID>
+    <ID>LoopWithTooManyJumpStatements:MessageChainXmlParser.kt$MessageChainXmlParser$while</ID>
+    <ID>MaxLineLength:MessageChainXmlWriter.kt$MessageChainXmlWriter$throw IllegalArgumentException("RawHtmlSegment has no XML form; channels should consume it directly")</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:OAuthAccountEntity.kt$OAuthAccountEntity$( id: Long = 0, @Column(value = "user_id") @get:JsonSerialize(using = ToStringSerializer::class) var userId: Long? = null, @Column(value = "platform") var platform: Int = 0, @Column(value = "identifier") var identifier: String = "", @Column(value = "nickname") var nickname: String? = null, @Column(value = "avatar") var avatar: String? = null, @Column(value = "email") var email: String? = null, @Column(value = "scope") var scope: Int = OAuthBindingScope.SYSTEM.typeId, @Column(value = "tenant_id") @get:JsonSerialize(using = ToStringSerializer::class) var tenantId: Long? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:UserBanRecordEntity.kt$UserBanRecordEntity$( id: Long = 0, @Column(value = "user_id") var userId: Long = 0, @Column(value = "reason") var reason: String = "", @Column(value = "ban_until") @get:JsonSerialize(using = ToStringSerializer::class) var banUntil: Long? = null, @Column(value = "lifted_time") @get:JsonSerialize(using = ToStringSerializer::class) var liftedTime: Long? = null, @Column(value = "operator_user_id") var operatorUserId: Long = 0, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:UserEntity.kt$UserEntity$( id: Long = 0, @Column(value = "username") private var username: String = "", @Column(value = "password") @field:NotQueryable private var password: String = "", @Column(value = "email") var email: String? = null, @Column(value = "nickname") var nickname: String = "", @Column("avatar") @get:JsonSerialize(using = ToStringSerializer::class) var avatar: Long? = null, @Column(value = "enabled") private var enabled: Boolean = true, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:UserManagerServiceImpl.kt$UserManagerServiceImpl$( private val userRepository: UserRepository, private val passwordEncoder: PasswordEncoder, private val snowIdGenerator: SnowIdGenerator, private val reactiveRedisService: ReactiveRedisService, override val eventPublisher: ApplicationEventPublisher, private val userRoleRelationService: UserRoleRelationService, private val userForceLogoutService: UserForceLogoutService, private val r2dbcEntityTemplate: R2dbcEntityTemplate, )</ID>
+    <ID>LongParameterList:UserServiceImpl.kt$UserServiceImpl$( private val userRepository: UserRepository, private val snowIdGenerator: SnowIdGenerator, private val passwordEncoder: PasswordEncoder, private val userRoleRelationService: UserRoleRelationService, private val reactiveRedisService: ReactiveRedisService, private val fileResourceService: FileResourceService, private val fileResourceServiceManager: FileResourceServiceManager, override val eventPublisher: ApplicationEventPublisher, private val oAuthAccountService: OAuthAccountService, private val emailCodeAuthService: EmailCodeAuthService, private val userForceLogoutService: UserForceLogoutService )</ID>
+    <ID>MagicNumber:EmailCodeAuthServiceImpl.kt$EmailCodeAuthServiceImpl$1000L</ID>
+    <ID>MagicNumber:EmailCodeAuthServiceImpl.kt$EmailCodeAuthServiceImpl$60</ID>
+    <ID>MaxLineLength:GoogleOAuth2AuthenticationTokenAccountConverter.kt$GoogleOAuth2AuthenticationTokenAccountConverter$?:</ID>
+    <ID>MaxLineLength:ManagerCreateUserDTO.kt$ManagerCreateUserDTO$@field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "Password must be at least 8 characters and contain both letters and numbers")</ID>
+    <ID>MaxLineLength:OAuthAccountService.kt$OAuthAccountService$suspend fun getAccountsByPlatformAndIdentifier(platform: OAuthPlatform, identifier: String): List&lt;OAuthAccountEntity&gt;</ID>
+    <ID>MaxLineLength:OAuthAccountServiceImpl.kt$OAuthAccountServiceImpl$context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.SYSTEM)</ID>
+    <ID>MaxLineLength:OAuthAccountServiceImpl.kt$OAuthAccountServiceImpl$logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been bound to user $userId")</ID>
+    <ID>MaxLineLength:OAuthAccountServiceImpl.kt$OAuthAccountServiceImpl$logger.info("OAuth account named ${result.nickname} of platform ${result.getRealPlatform()} has been unbound by user $userId")</ID>
+    <ID>MaxLineLength:OAuthAccountServiceImpl.kt$OAuthAccountServiceImpl$logger.info("Tenant OAuth account ${entity.nickname} of platform ${entity.getRealPlatform()} unbound by user $userId in tenant $tenantId")</ID>
+    <ID>MaxLineLength:OAuthAccountServiceImpl.kt$OAuthAccountServiceImpl$override suspend</ID>
+    <ID>MaxLineLength:RegisterFromOAuthAccountDTO.kt$RegisterFromOAuthAccountDTO$@field:Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Username can only contain letters, numbers, underscores, and hyphens")</ID>
+    <ID>MaxLineLength:ResetPasswordDTO.kt$ResetPasswordDTO$@field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "Password must be at least 8 characters and contain both letters and numbers")</ID>
+    <ID>MaxLineLength:UserRegisterDTO.kt$UserRegisterDTO$@field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "Password must be at least 8 characters and contain both letters and numbers")</ID>
+    <ID>MaxLineLength:UserServiceImpl.kt$UserServiceImpl$?:</ID>
+    <ID>MaxLineLength:UserServiceImpl.kt$UserServiceImpl$logger.error("could not upload avatar for user: $userId, fileResource: ${result.fileResourceEntity.toJSONString()}", result.exception)</ID>
+    <ID>MaxLineLength:UserServiceImpl.kt$UserServiceImpl$override suspend</ID>
+    <ID>NewLineAtEndOfFile:ClientRegistrationIdOAuthPlatformConverter.kt$com.lovelycatv.crystalframework.user.converters.types.ClientRegistrationIdOAuthPlatformConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:DefaultClientRegistrationIdOAuthPlatformConverter.kt$com.lovelycatv.crystalframework.user.converters.DefaultClientRegistrationIdOAuthPlatformConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:EmailCodeAuthService.kt$com.lovelycatv.crystalframework.user.service.EmailCodeAuthService.kt</ID>
+    <ID>NewLineAtEndOfFile:GithubOAuth2AuthenticationTokenAccountConverter.kt$com.lovelycatv.crystalframework.user.converters.GithubOAuth2AuthenticationTokenAccountConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:GoogleOAuth2AuthenticationTokenAccountConverter.kt$com.lovelycatv.crystalframework.user.converters.GoogleOAuth2AuthenticationTokenAccountConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuth2AuthenticationTokenAccountConverter.kt$com.lovelycatv.crystalframework.user.converters.types.OAuth2AuthenticationTokenAccountConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuth2AuthenticationTokenAccountConverterManager.kt$com.lovelycatv.crystalframework.user.converters.OAuth2AuthenticationTokenAccountConverterManager.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountEntity.kt$com.lovelycatv.crystalframework.user.entity.OAuthAccountEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountManagerServiceImpl.kt$com.lovelycatv.crystalframework.user.service.manager.impl.OAuthAccountManagerServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountRepository.kt$com.lovelycatv.crystalframework.user.repository.OAuthAccountRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountService.kt$com.lovelycatv.crystalframework.user.service.OAuthAccountService.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountServiceImpl.kt$com.lovelycatv.crystalframework.user.service.impl.OAuthAccountServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:OICQOAuth2AuthenticationTokenAccountConverter.kt$com.lovelycatv.crystalframework.user.converters.OICQOAuth2AuthenticationTokenAccountConverter.kt</ID>
+    <ID>NewLineAtEndOfFile:UserController.kt$com.lovelycatv.crystalframework.user.controller.UserController.kt</ID>
+    <ID>NewLineAtEndOfFile:UserService.kt$com.lovelycatv.crystalframework.user.service.UserService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserServiceImpl.kt$com.lovelycatv.crystalframework.user.service.impl.UserServiceImpl.kt</ID>
+    <ID>TooGenericExceptionThrown:UserManagerServiceImpl.kt$UserManagerServiceImpl$throw RuntimeException("Could not create user")</ID>
+    <ID>TooManyFunctions:UserEntity.kt$UserEntity : BaseEntityUserDetails</ID>
+    <ID>TooManyFunctions:UserService.kt$UserService : CachedBaseService</ID>
+    <ID>TooManyFunctions:UserServiceImpl.kt$UserServiceImpl : UserService</ID>
+    <ID>UnusedParameter:UserController.kt$UserController$userAuthentication: UserAuthentication</ID>
+    <ID>WildcardImport:UserController.kt$import com.lovelycatv.crystalframework.user.controller.dto.*</ID>
+    <ID>WildcardImport:UserController.kt$import org.springframework.web.bind.annotation.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

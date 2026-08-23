@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$private suspend fun process()</ID>
+    <ID>LongParameterList:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$( private val applicationContext: ApplicationContext, private val mailTemplateCategoryRepository: MailTemplateCategoryRepository, private val mailTemplateTypeRepository: MailTemplateTypeRepository, private val snowIdGenerator: SnowIdGenerator, private val objectMapper: ObjectMapper, private val mailTemplateRepository: MailTemplateRepository, private val mailTemplateManagerService: MailTemplateManagerService )</ID>
+    <ID>LongParameterList:MailSendLogEntity.kt$MailSendLogEntity$( id: Long = 0, @Column("from_email") val fromEmail: String = "", @Column("to_email") val toEmail: String = "", @Column("subject") val subject: String = "", @Column("content") @field:NotQueryable val content: String = "", @Column("success") val success: Boolean = true, @Column("error_message") val errorMessage: String? = null, @Column("user_id") val userId: Long? = null, @Column("tenant_id") val tenantId: Long? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:MailSendLogService.kt$MailSendLogService$( fromEmail: String, toEmail: String, subject: String, content: String, success: Boolean, errorMessage: String?, userId: Long?, tenantId: Long? )</ID>
+    <ID>LongParameterList:MailTemplateEntity.kt$MailTemplateEntity$( id: Long = 0, @Column(value = "type_id") var typeId: Long = 0, @Column(value = "name") var name: String = "", @Column(value = "description") var description: String? = null, @Column(value = "title") var title: String = "", @Column(value = "content") var content: String = "", @Column(value = "active") var active: Boolean = true, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:MailTemplateTypeEntity.kt$MailTemplateTypeEntity$( id: Long = 0, @Column(value = "name") var name: String = "", @Column(value = "description") var description: String? = null, @Column(value = "variables") var variables: String = "", @Column(value = "category_id") var categoryId: Long = 0, @Column(value = "allow_multiple") var allowMultiple: Boolean = false, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>MagicNumber:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$64</ID>
+    <ID>MagicNumber:MailServiceImpl.kt$MailServiceImpl$5000</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$)</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$allCategoriesInDatabase[categoryDeclaration.name] ?: throw IllegalStateException("Mail template category '${categoryDeclaration.name}' not found in database after creation")</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$allTypesInDatabase[typeDeclaration.name] ?: throw IllegalStateException("Mail template type '${typeDeclaration.name}' not found in database after creation")</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$categoryId = categoryWithEntityMap[typeDeclaration.categoryDeclaration]?.id ?: throw IllegalStateException("Mail template category entity not found for type '${typeDeclaration.name}'")</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$logger.info("* ${typeDeclaration.name} (variables: $variables, allowMultiple: ${typeDeclaration.allowMultiple})")</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$logger.info("√ ${typeDeclaration.name} (variables: $variables, allowMultiple: ${typeDeclaration.allowMultiple})")</ID>
+    <ID>MaxLineLength:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$typeId = typeWithEntityMap[templateDeclaration.type]?.id ?: throw IllegalStateException("Mail template type entity not found for template '${templateDeclaration.name}'")</ID>
+    <ID>MaxLineLength:MailSendLogManagerService.kt$MailSendLogManagerService$override suspend</ID>
+    <ID>NewLineAtEndOfFile:DefaultMailModuleConfigure.kt$com.lovelycatv.crystalframework.mail.config.DefaultMailModuleConfigure.kt</ID>
+    <ID>NewLineAtEndOfFile:DefaultSystemMailTemplateConfigure.kt$com.lovelycatv.crystalframework.mail.config.DefaultSystemMailTemplateConfigure.kt</ID>
+    <ID>NewLineAtEndOfFile:MailModuleAutoConfigure.kt$com.lovelycatv.crystalframework.mail.config.MailModuleAutoConfigure.kt</ID>
+    <ID>NewLineAtEndOfFile:MailSendLogEntity.kt$com.lovelycatv.crystalframework.mail.entity.MailSendLogEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:MailSendLogManagerServiceImpl.kt$com.lovelycatv.crystalframework.mail.service.manager.impl.MailSendLogManagerServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:MailSendLogService.kt$com.lovelycatv.crystalframework.mail.service.MailSendLogService.kt</ID>
+    <ID>NewLineAtEndOfFile:MailSendLogServiceImpl.kt$com.lovelycatv.crystalframework.mail.service.impl.MailSendLogServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateCategoryEntity.kt$com.lovelycatv.crystalframework.mail.entity.MailTemplateCategoryEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateCategoryRepository.kt$com.lovelycatv.crystalframework.mail.repository.MailTemplateCategoryRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateEntity.kt$com.lovelycatv.crystalframework.mail.entity.MailTemplateEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateTypeEntity.kt$com.lovelycatv.crystalframework.mail.entity.MailTemplateTypeEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateTypeRepository.kt$com.lovelycatv.crystalframework.mail.repository.MailTemplateTypeRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerCreateMailSendLogDTO.kt$com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerCreateMailSendLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerDeleteMailSendLogDTO.kt$com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerDeleteMailSendLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerUpdateMailSendLogDTO.kt$com.lovelycatv.crystalframework.mail.controller.manager.dto.ManagerUpdateMailSendLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemMailDeclaration.kt$com.lovelycatv.crystalframework.mail.constants.SystemMailDeclaration.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemMailTemplateAutoConfigure.kt$com.lovelycatv.crystalframework.mail.config.SystemMailTemplateAutoConfigure.kt</ID>
+    <ID>ThrowsCount:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$private suspend fun process()</ID>
+    <ID>TooGenericExceptionCaught:MailSendLogAspect.kt$MailSendLogAspect$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MailServiceImpl.kt$MailServiceImpl$e: Exception</ID>
+    <ID>UseCheckOrError:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$throw IllegalStateException("Mail template category '${categoryDeclaration.name}' not found in database after creation")</ID>
+    <ID>UseCheckOrError:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$throw IllegalStateException("Mail template category entity not found for type '${typeDeclaration.name}'")</ID>
+    <ID>UseCheckOrError:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$throw IllegalStateException("Mail template type '${typeDeclaration.name}' not found in database after creation")</ID>
+    <ID>UseCheckOrError:MailModuleAutoConfigure.kt$MailModuleAutoConfigure$throw IllegalStateException("Mail template type entity not found for template '${templateDeclaration.name}'")</ID>
+    <ID>UseCheckOrError:MailServiceImpl.kt$MailServiceImpl$throw IllegalStateException("System settings not initialized")</ID>
+  </CurrentIssues>
+</SmellBaseline>

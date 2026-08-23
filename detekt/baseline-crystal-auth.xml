@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:CustomAuthFilter.kt$CustomAuthFilter$(tenantId != null &amp;&amp; tenantMemberId == null) || (tenantId == null &amp;&amp; tenantMemberId != null)</ID>
+    <ID>ComplexCondition:CustomLoginFilter.kt$CustomLoginFilter$account != null &amp;&amp; exception !is TooManyRequestsException &amp;&amp; exception !is AccountBannedException &amp;&amp; exception !is DisabledException</ID>
+    <ID>ComplexCondition:WebFluxConfig.kt$WebFluxConfig.&lt;no name provided&gt;$(tenantId != null &amp;&amp; tenantMemberId == null) || (tenantId == null &amp;&amp; tenantMemberId != null)</ID>
+    <ID>CyclomaticComplexMethod:CustomAuthFilter.kt$CustomAuthFilter$override fun filter( exchange: ServerWebExchange, chain: WebFilterChain ): Mono&lt;Void&gt;</ID>
+    <ID>CyclomaticComplexMethod:UnauthorizedPathScanner.kt$UnauthorizedPathScanner$fun getUnauthorizedEndpointsSimple(): List&lt;String&gt;</ID>
+    <ID>InstanceOfCheckForException:CustomAuthFilter.kt$CustomAuthFilter$e is ExpiredJwtException</ID>
+    <ID>LongMethod:CustomAuthFilter.kt$CustomAuthFilter$override fun filter( exchange: ServerWebExchange, chain: WebFilterChain ): Mono&lt;Void&gt;</ID>
+    <ID>LongMethod:SecurityConfig.kt$SecurityConfig$@Bean @Order(2) fun securityWebFilterChain( http: ServerHttpSecurity, userAuthorizationService: UserAuthorizationService, jwtSignKeyStore: JWTSignKeyStore, userRbacQueryService: UserRbacQueryService, userForceLogoutService: UserForceLogoutService, loginRateLimitService: LoginRateLimitService, ): SecurityWebFilterChain</ID>
+    <ID>LongParameterList:SecurityConfig.kt$SecurityConfig$( http: ServerHttpSecurity, userAuthorizationService: UserAuthorizationService, jwtSignKeyStore: JWTSignKeyStore, userRbacQueryService: UserRbacQueryService, userForceLogoutService: UserForceLogoutService, loginRateLimitService: LoginRateLimitService, )</ID>
+    <ID>LongParameterList:UserAuthorizationServiceImpl.kt$UserAuthorizationServiceImpl$( private val userService: UserService, private val oAuthAccountService: OAuthAccountService, private val oAuthBindingTokenService: OAuthBindingTokenService, private val jwtSignKeyStore: JWTSignKeyStore, private val userRbacQueryService: UserRbacQueryService, private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration, private val userBanRecordManagerService: UserBanRecordManagerService, )</ID>
+    <ID>LongParameterList:UserLoginEvent.kt$UserLoginEvent$( source: Any, val userId: Long?, val username: String?, val tenantId: Long?, val loginMethod: Int, val oauth2Type: Int?, val oauth2Username: String?, val oauth2AccountId: Long?, val success: Boolean, val errorMessage: String?, val remoteIp: String?, val userAgent: String? )</ID>
+    <ID>LongParameterList:UserLoginLogEntity.kt$UserLoginLogEntity$( id: Long = 0, @Column("user_id") val userId: Long? = null, @Column("username") val username: String? = null, @Column("tenant_id") val tenantId: Long? = null, @Column("login_method") val loginMethod: Int = 0, @Column("oauth2_type") val oauth2Type: Int? = null, @Column("oauth2_username") val oauth2Username: String? = null, @Column("oauth2_account_id") val oauth2AccountId: Long? = null, @Column("success") val success: Boolean = true, @Column("error_message") val errorMessage: String? = null, @Column("remote_ip") val remoteIp: String? = null, @Column("user_agent") val userAgent: String? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>MagicNumber:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$1000L</ID>
+    <ID>MagicNumber:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$999L</ID>
+    <ID>MagicNumber:UserAuthoritiesCacheInvalidator.kt$UserAuthoritiesCacheInvalidator$4</ID>
+    <ID>MaxLineLength:BindOAuthAccountDTO.kt$BindOAuthAccountDTO$@field:Pattern(regexp = "^[a-zA-Z0-9_@.-]+$", message = "Username can only contain letters, numbers, underscores, hyphens, dots, and @")</ID>
+    <ID>MaxLineLength:CustomAuthFilter.kt$CustomAuthFilter$val getUserAuthorities: suspend (userId: Long, tenantId: Long?, tenantMemberId: Long?) -&gt; Collection&lt;GrantedAuthority&gt;</ID>
+    <ID>MaxLineLength:LoginRateLimitConstants.kt$LoginRateLimitConstants$const</ID>
+    <ID>MaxLineLength:OAuthBindingTokenServiceImpl.kt$OAuthBindingTokenServiceImpl$"local value = redis.call('get', KEYS[1]); if value then redis.call('del', KEYS[1]); return value else return '' end"</ID>
+    <ID>MaxLineLength:SecurityConfig.kt$SecurityConfig$.</ID>
+    <ID>MaxLineLength:UnauthorizedPathScanner.kt$UnauthorizedPathScanner$}</ID>
+    <ID>MaxLineLength:UserAuthoritiesCacheInvalidator.kt$UserAuthoritiesCacheInvalidator$*</ID>
+    <ID>MaxLineLength:UserAuthorizationService.kt$UserAuthorizationService$*</ID>
+    <ID>MaxLineLength:UserAuthorizationService.kt$UserAuthorizationService$fun processOAuth2AuthenticationSuccess(authentication: Authentication): Mono&lt;ProcessOAuth2AuthenticationSuccessResult&gt;</ID>
+    <ID>MaxLineLength:UserAuthorizationServiceImpl.kt$UserAuthorizationServiceImpl$override</ID>
+    <ID>MaxLineLength:UserLoginLogManagerService.kt$UserLoginLogManagerService$override suspend</ID>
+    <ID>NestedBlockDepth:CustomAuthFilter.kt$CustomAuthFilter$override fun filter( exchange: ServerWebExchange, chain: WebFilterChain ): Mono&lt;Void&gt;</ID>
+    <ID>NestedBlockDepth:UnauthorizedPathScanner.kt$UnauthorizedPathScanner$fun getUnauthorizedEndpointsSimple(): List&lt;String&gt;</ID>
+    <ID>NewLineAtEndOfFile:ClientRegistrationIdOAuthPlatformConverterAutoConfiguration.kt$com.lovelycatv.crystalframework.auth.config.ClientRegistrationIdOAuthPlatformConverterAutoConfiguration.kt</ID>
+    <ID>NewLineAtEndOfFile:CustomAuthFilter.kt$com.lovelycatv.crystalframework.auth.filter.CustomAuthFilter.kt</ID>
+    <ID>NewLineAtEndOfFile:CustomLoginFilter.kt$com.lovelycatv.crystalframework.auth.filter.CustomLoginFilter.kt</ID>
+    <ID>NewLineAtEndOfFile:CustomOAuth2UserService.kt$com.lovelycatv.crystalframework.auth.service.impl.CustomOAuth2UserService.kt</ID>
+    <ID>NewLineAtEndOfFile:LoginMethod.kt$com.lovelycatv.crystalframework.auth.event.LoginMethod.kt</ID>
+    <ID>NewLineAtEndOfFile:LoginSuccessResponseData.kt$com.lovelycatv.crystalframework.auth.service.result.LoginSuccessResponseData.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerCreateUserLoginLogDTO.kt$com.lovelycatv.crystalframework.auth.controller.manager.dto.ManagerCreateUserLoginLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerDeleteUserLoginLogDTO.kt$com.lovelycatv.crystalframework.auth.controller.manager.dto.ManagerDeleteUserLoginLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerUpdateUserLoginLogDTO.kt$com.lovelycatv.crystalframework.auth.controller.manager.dto.ManagerUpdateUserLoginLogDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthAccountController.kt$com.lovelycatv.crystalframework.auth.controller.OAuthAccountController.kt</ID>
+    <ID>NewLineAtEndOfFile:PasswordEncoderConfig.kt$com.lovelycatv.crystalframework.auth.config.PasswordEncoderConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:ProcessOAuth2AuthenticationSuccessResult.kt$com.lovelycatv.crystalframework.auth.types.ProcessOAuth2AuthenticationSuccessResult.kt</ID>
+    <ID>NewLineAtEndOfFile:QQOAuth2UserService.kt$com.lovelycatv.crystalframework.auth.service.impl.QQOAuth2UserService.kt</ID>
+    <ID>NewLineAtEndOfFile:SecurityConfig.kt$com.lovelycatv.crystalframework.auth.config.SecurityConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:UnauthorizedPathScanner.kt$com.lovelycatv.crystalframework.auth.config.UnauthorizedPathScanner.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAuthController.kt$com.lovelycatv.crystalframework.auth.controller.UserAuthController.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAuthoritiesCacheInvalidator.kt$com.lovelycatv.crystalframework.auth.event.UserAuthoritiesCacheInvalidator.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAuthorizationService.kt$com.lovelycatv.crystalframework.auth.service.UserAuthorizationService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAuthorizationServiceImpl.kt$com.lovelycatv.crystalframework.auth.service.impl.UserAuthorizationServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginEvent.kt$com.lovelycatv.crystalframework.auth.event.UserLoginEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginEventListener.kt$com.lovelycatv.crystalframework.auth.event.UserLoginEventListener.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginLogEntity.kt$com.lovelycatv.crystalframework.auth.entity.UserLoginLogEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginLogManagerServiceImpl.kt$com.lovelycatv.crystalframework.auth.service.manager.impl.UserLoginLogManagerServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginLogService.kt$com.lovelycatv.crystalframework.auth.service.UserLoginLogService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserLoginLogServiceImpl.kt$com.lovelycatv.crystalframework.auth.service.impl.UserLoginLogServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserOAuthAccountVO.kt$com.lovelycatv.crystalframework.auth.controller.vo.UserOAuthAccountVO.kt</ID>
+    <ID>NewLineAtEndOfFile:WebFluxConfig.kt$com.lovelycatv.crystalframework.auth.config.WebFluxConfig.kt</ID>
+    <ID>ReturnCount:WebFluxConfig.kt$WebFluxConfig.&lt;no name provided&gt;$override fun resolveArgument( parameter: MethodParameter, bindingContext: BindingContext, exchange: ServerWebExchange, ): Mono&lt;Any&gt;</ID>
+    <ID>SpreadOperator:SecurityConfig.kt$SecurityConfig$(*(listOf("/login/oauth2/code/**") + unauthorizedPathPatterns.map { it.patternString }).toTypedArray())</ID>
+    <ID>ThrowsCount:OAuthAccountController.kt$OAuthAccountController$@PostMapping("/bindByAccountId") suspend fun bindOAuthByAccountId( userAuthentication: UserAuthentication, @ModelAttribute @Valid dto: BindOAuthByAccountIdDTO ): ApiResponse&lt;*&gt;</ID>
+    <ID>ThrowsCount:OAuthAccountController.kt$OAuthAccountController$@Unauthorized @PostMapping("/bindOAuthAccount") suspend fun bindOAuthAccount( userAuthentication: UserAuthentication?, request: ServerHttpRequest, @ModelAttribute @Valid dto: BindOAuthAccountDTO ): ApiResponse&lt;*&gt;</ID>
+    <ID>TooGenericExceptionCaught:CustomAuthFilter.kt$CustomAuthFilter$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:CustomAuthFilter.kt$CustomAuthFilter$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:OAuthAccountController.kt$OAuthAccountController$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WebFluxConfig.kt$WebFluxConfig.&lt;no name provided&gt;$e: Exception</ID>
+    <ID>WildcardImport:OAuthAccountController.kt$import org.springframework.web.bind.annotation.*</ID>
+    <ID>WildcardImport:UnauthorizedPathScanner.kt$import org.springframework.web.bind.annotation.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

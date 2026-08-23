@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:CrystalFrameworkSQLModifier.kt$CrystalFrameworkSQLModifier$*</ID>
+    <ID>MaxLineLength:CrystalShardingConnectionFactory.kt$CrystalShardingConnectionFactory$*</ID>
+    <ID>MaxLineLength:CrystalShardingConnectionFactory.kt$CrystalShardingConnectionFactory$traceHeaders = context.getOrDefault(ApmTraceHeaders::class.java, ApmTraceHeaders(emptyMap()))!!.values</ID>
+    <ID>MaxLineLength:CrystalShardingStatement.kt$CrystalShardingStatement$"literal sharding value or explicit parameter position (not yet implemented for WHERE clauses)"</ID>
+    <ID>MaxLineLength:CrystalShardingStatement.kt$CrystalShardingStatement$*</ID>
+    <ID>MaxLineLength:CrystalShardingStatementTest.kt$CrystalShardingStatementTest$*</ID>
+    <ID>MaxLineLength:JSqlParserPlaceholderProbeTest.kt$JSqlParserPlaceholderProbeTest$println("[PROBE] INSERT values expr = ${insert.values?.expressions?.map { it.javaClass.simpleName to it.toString() }}")</ID>
+    <ID>MaxLineLength:R2dbcShardingRuleRegistry.kt$R2dbcShardingRuleRegistry$*</ID>
+    <ID>MaxLineLength:ShardingAlgorithm.kt$ShardingAlgorithm$*</ID>
+    <ID>MaxLineLength:SoftDeleteSqlInterceptor.kt$SoftDeleteSqlInterceptor$*</ID>
+    <ID>MaxLineLength:SqlStatementInterceptor.kt$SqlStatementInterceptor$*</ID>
+    <ID>MaxLineLength:SqlStatementInterceptorRegistrar.kt$SqlStatementInterceptorRegistrar$*</ID>
+    <ID>MaxLineLength:TransactionConnectionHolder.kt$TransactionConnectionHolder$log.warn("Phase 1 failed, rolling back all {} prepared transactions", preparedTransactions.size, error)</ID>
+    <ID>NewLineAtEndOfFile:CrystalFrameworkSQLModifier.kt$com.lovelycatv.crystalframework.database.utils.CrystalFrameworkSQLModifier.kt</ID>
+    <ID>NewLineAtEndOfFile:R2dbcDataSourceConstants.kt$com.lovelycatv.crystalframework.database.constants.R2dbcDataSourceConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:R2dbcRouteDecision.kt$com.lovelycatv.crystalframework.database.R2dbcRouteDecision.kt</ID>
+    <ID>NewLineAtEndOfFile:ShardingException.kt$com.lovelycatv.crystalframework.database.exception.ShardingException.kt</ID>
+    <ID>NewLineAtEndOfFile:SqlStatementInterceptorRegistrar.kt$com.lovelycatv.crystalframework.database.interceptor.SqlStatementInterceptorRegistrar.kt</ID>
+    <ID>NewLineAtEndOfFile:TransactionConnectionHolder.kt$com.lovelycatv.crystalframework.database.transaction.TransactionConnectionHolder.kt</ID>
+    <ID>ReturnCount:CrystalShardingConnection.kt$CrystalShardingConnection$override fun createStatement(sql: String): Statement</ID>
+    <ID>ReturnCount:CrystalShardingStatement.kt$CrystalShardingStatement$override fun execute(): Publisher&lt;out Result&gt;</ID>
+    <ID>ReturnCount:CrystalShardingStatement.kt$CrystalShardingStatement$private fun extractLiteralShardingValues(): List&lt;Any&gt;?</ID>
+    <ID>SpreadOperator:CrystalShardingStatement.kt$CrystalShardingStatement$(*copy)</ID>
+    <ID>SpreadOperator:DelegatedStatement.kt$DelegatedStatement$(*copy)</ID>
+    <ID>ThrowsCount:CrystalShardingStatement.kt$CrystalShardingStatement$private fun locateShardingParamIndex(): Int</ID>
+    <ID>ThrowsCount:CrystalShardingStatement.kt$CrystalShardingStatement$private fun resolveShardingTarget(shardingValue: Any?): ShardingTarget</ID>
+    <ID>TooGenericExceptionCaught:CrystalFrameworkSQLModifier.kt$CrystalFrameworkSQLModifier$e: Exception</ID>
+    <ID>TooManyFunctions:CrystalShardingConnection.kt$CrystalShardingConnection : Connection</ID>
+    <ID>TooManyFunctions:CrystalShardingStatement.kt$CrystalShardingStatement : Statement</ID>
+    <ID>TooManyFunctions:TransactionConnectionHolder.kt$TransactionConnectionHolder</ID>
+    <ID>UseCheckOrError:R2dbcConnectionPoolRegistry.kt$R2dbcConnectionPoolRegistry$throw IllegalStateException("R2dbcConnectionPoolRegistry: duplicate data source name '$name'")</ID>
+    <ID>UseCheckOrError:R2dbcDataSourceRegistry.kt$R2dbcDataSourceRegistry$throw IllegalStateException("R2dbcDataSourceRegistry: duplicate name '$name'")</ID>
+    <ID>UseCheckOrError:R2dbcShardingRuleRegistry.kt$R2dbcShardingRuleRegistry$throw IllegalStateException( "R2dbcShardingRuleRegistry: duplicate component name '$componentName'", )</ID>
+    <ID>UseCheckOrError:R2dbcShardingRuleRegistry.kt$R2dbcShardingRuleRegistry$throw IllegalStateException( "R2dbcShardingRuleRegistry: duplicate table '$tableName'", )</ID>
+  </CurrentIssues>
+</SmellBaseline>
