@@ -1,6 +1,7 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
-import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
+import type {StorageProvider, StorageProviderTypeDeclaration} from "@/types/resource/storage-provider.types.ts";
 import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
+import {doGet} from "@/api/system-request.ts";
 
 export const StorageProviderManagerController = new BaseManagerController<
     StorageProvider,
@@ -8,6 +9,11 @@ export const StorageProviderManagerController = new BaseManagerController<
     ManagerReadStorageProviderDTO,
     ManagerUpdateStorageProviderDTO
 >('/manager/storage-provider');
+
+export function getStorageProviderTypes(): Promise<StorageProviderTypeDeclaration[]> {
+    return doGet<StorageProviderTypeDeclaration[]>('/api/manager/storage-provider/types')
+        .then(r => r.data ?? []);
+}
 
 export interface ManagerCreateStorageProviderDTO {
     name: string;

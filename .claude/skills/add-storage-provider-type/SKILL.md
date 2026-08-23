@@ -1,6 +1,6 @@
 ---
 name: add-storage-provider-type
-description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新的对象存储厂商类型，让框架管理端识别该类型；如需运行时可用，还需实现 FileResourceServiceFactory。
+description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新的对象存储厂商类型，并实现 FileResourceServiceFactory 让新类型可读写运行。第三方厂商可完整接入。
 ---
 
 # 新增存储服务商类型（StorageProviderType）
@@ -8,19 +8,6 @@ description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新�
 ## 触发条件
 
 当用户需要在 crystal-resource 提供的四种内置存储厂商（`LOCAL_FILE_SYSTEM` / `ALIYUN_OSS` / `TENCENT_COS` / `VOLCENGINE_TOS`）之外，接入一种新的对象存储实现（如 MinIO、AWS S3、七牛云等）时使用。
-
-## ⚠️ 现状与限制（必读）
-
-当前框架对"扩展存储厂商"的支持**只完成了一半**，动手前请与用户确认目标：
-
-| 能力 | 现状 | 说明 |
-|---|---|---|
-| 通过 SDK 注册厂商声明（`StorageProviderTypeDeclaration`）到 `StorageProviderTypeRegistry` | ✅ 已就绪 | 管理端 UI、`storage_providers.type` 的显示/映射能识别第三方 `typeId` |
-| 通过实现 `FileResourceServiceFactory` 提供实际的上传/下载运行时 | ⚠️ **暂不支持** | `FileResourceServiceFactory.getStorageProviderType()` 返回类型仍是**内置 enum** `StorageProviderType`，无法返回第三方声明；`FileResourceServiceManager` 里的匹配逻辑 `it.getStorageProviderType() == provider.getRealStorageProviderType()` 也只能用内置枚举比较 |
-
-**结论：** 第三方今天**可以**注册声明让管理端认识新类型，**但无法**让新类型跑起来。要真正打通运行时，需要框架先把 factory 与 manager 的匹配改为按 `typeId: Int` 而非 enum 比较——这一步需要用户先决定是否要动。
-
-**如果用户只需要"内部新加一个内置厂商"**（在 `crystal-resource` 内直接扩展），流程见本文档"内置厂商扩展路径"章节；这条路不受上述限制。
 
 ## 输入格式
 
@@ -31,7 +18,16 @@ description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新�
 3. **typeId**（`Int`，第三方 `>= 1000`；`0..3` 为框架保留）
 4. **displayName**（管理端展示名）
 5. **description**（可选长描述）
-6. **是否要求实现运行时 factory**（若"是"，先阅读上文限制章节）
+6. **Properties 字段**（该厂商 SDK 需要的连接参数，如 `endpoint`、`accessKey`、`secretKey`、`bucket` 等）
+
+## 架构说明（必读）
+
+第三方厂商已可完整接入运行时。核心机制：
+
+- `FileResourceServiceFactory.getStorageProviderTypeId(): Int` 返回声明的 `typeId`
+- `FileResourceServiceManager` 通过 `it.getStorageProviderTypeId() == provider.type` 匹配 factory
+- 管理端前端 `GET /manager/storage-provider/types` 端点返回 Registry 全量声明，UI 下拉/表格标签自动包含第三方
+- 前端 i18n 优先，覆盖不到的第三方 typeId 会 fallback 到后端 `displayName`
 
 ## 前提信息
 
@@ -42,6 +38,8 @@ description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新�
 | `StorageProviderTypeDeclaration` | `crystal-sdk/.../sdk/resource/storage/types/StorageProviderTypeDeclaration.kt` | 声明接口 |
 | `StorageProviderTypeRegistry` | `crystal-sdk/.../sdk/resource/storage/StorageProviderTypeRegistry.kt` | 全局注册表，`typeId` 与 `key` 双维度唯一 |
 | `StorageProviderTypeConfigurer` | `crystal-sdk/.../sdk/resource/storage/config/StorageProviderTypeConfigurer.kt` | SPI 函数接口 |
+| `FileResourceServiceFactory<S>` | `crystal-resource/.../resource/service/api/factory/FileResourceServiceFactory.kt` | 运行时工厂接口，`getStorageProviderTypeId(): Int` |
+| `AbstractFileResourceService` | `crystal-resource/.../resource/service/api/AbstractFileResourceService.kt` | 运行时上传/下载抽象类，覆写 `hasVendorSignedUrl()` 可切换 URL 策略 |
 
 ### 声明接口字段（`StorageProviderTypeDeclaration`）
 
@@ -49,7 +47,7 @@ description: 通过 crystal-sdk 向 StorageProviderTypeRegistry 注册一个新�
 |---|---|---|
 | `typeId` | `Int` | **主键**，写入 `storage_providers.type`；第三方 `>= 1000` |
 | `key` | `String` | 全局唯一字符串键（允许含 `.`，与 `ResourceFileTypeDeclaration.key` 不同） |
-| `displayName` | `String` | 管理端展示名 |
+| `displayName` | `String` | 管理端展示名，前端 i18n 覆盖不到时的 fallback |
 | `description` | `String` | 长描述，默认空 |
 
 ### 内置类型写法（可仿照）
@@ -79,9 +77,7 @@ enum class StorageProviderType(
 
 ## 执行步骤
 
-### 场景 A：仅注册 SDK 声明（管理端可见即可）
-
-#### 第 1 步：定义 Declaration 实现
+### 第 1 步：定义 Declaration 实现
 
 **文件：** `<your-module>/.../types/AcmeStorageProviderType.kt`
 
@@ -111,7 +107,7 @@ enum class AcmeStorageProviderType(
 - `typeId >= 1000`
 - `key` 建议 `<vendor>.<name>`，方便区分内置与第三方
 
-#### 第 2 步：创建 Configurer
+### 第 2 步：创建 Configurer
 
 **文件：** `<your-module>/.../config/AcmeStorageProviderTypeConfigurer.kt`
 
@@ -133,76 +129,98 @@ class AcmeStorageProviderTypeConfigurer : StorageProviderTypeConfigurer {
 
 **关键注意：不要**加 `@Order(Ordered.HIGHEST_PRECEDENCE)`，留给内置。
 
-#### 第 3 步：验证
+### 第 3 步：定义 Properties 数据类
 
-**后端：**
+**文件：** `<your-module>/.../types/MinIOFileResourceServiceProperties.kt`
+
+参考 `crystal-resource/.../resource/types/AliyunOSSFileResourceServiceProperties.kt`。字段是该厂商 SDK 连接所需的参数（endpoint、accessKey 等），存于 `storage_providers.properties` 的 JSON。
+
+### 第 4 步：实现 AbstractFileResourceService
+
+**文件：** `<your-module>/.../service/impl/MinIOFileResourceService.kt`
+
+继承 `AbstractFileResourceService`，实现上传/下载/删除等方法。若厂商支持自签 URL（如 S3 预签名），覆写 `hasVendorSignedUrl(): Boolean = true`；否则保持默认 `false`（走 base URL + 路径拼接）。
+
+参考 `AliyunOSSFileResourceServiceImpl` / `LocalFileResourceServiceImpl` 的实现。
+
+### 第 5 步：实现 FileResourceServiceFactory
+
+**文件：** `<your-module>/.../service/factory/MinIOFileResourceServiceFactory.kt`
+
+```kotlin
+package com.acme.myplugin.resource.service.factory
+
+import com.acme.myplugin.resource.types.AcmeStorageProviderType
+import com.acme.myplugin.resource.service.impl.MinIOFileResourceService
+import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
+import com.lovelycatv.crystalframework.resource.service.api.factory.FileResourceServiceFactory
+import org.springframework.stereotype.Component
+
+@Component
+class MinIOFileResourceServiceFactory : FileResourceServiceFactory<MinIOFileResourceService> {
+    override fun getStorageProviderTypeId(): Int = AcmeStorageProviderType.MINIO.typeId
+
+    override fun build(storageProvider: StorageProviderEntity): MinIOFileResourceService {
+        // 解析 properties JSON → MinIOFileResourceServiceProperties → 构造 Service
+        ...
+    }
+}
+```
+
+**关键注意：** `getStorageProviderTypeId()` 必须返回与 Declaration 完全一致的 `typeId`，否则 `FileResourceServiceManager` 匹配失败，运行时会抛 "no factory for storageProviderType=xxx"。
+
+### 第 6 步：（可选）前端 i18n 覆盖
+
+若希望管理端使用本地化名称而不是后端 `displayName`，在 `web/src/i18n/locales/*.ts` 的 `enums.storageProviderType` 下加：
+
+```ts
+enums: {
+    storageProviderType: {
+        1000: 'MinIO 对象存储',  // 中文
+        // 英文文件里对应加英文
+    }
+}
+```
+
+若不加，管理端直接使用后端 `displayName` 字段值，也能显示。
+
+### 第 7 步：验证
 
 ```bash
 ./mvnw -pl <your-module> -am clean compile -DskipTests
 ```
 
-启动后管理端"存储服务商"页面应能看到新类型；数据库里 `storage_providers.type = 1000` 的记录展示时会用 `displayName`。
+启动后：
 
----
-
-### 场景 B：真正提供运行时上传/下载 —— 目前不完全支持
-
-想让新厂商真的能上传/下载文件，需要提供一个 `FileResourceServiceFactory<S>` 实现（可参考 `crystal-resource/.../service/api/factory/LocalFileResourceServiceFactory.kt`）。
-
-**但是：** 现有 `FileResourceServiceFactory` 接口签名为
-
-```kotlin
-interface FileResourceServiceFactory<S: AbstractFileResourceService> {
-    fun getStorageProviderType(): StorageProviderType   // ← 内置 enum，无法返回第三方 declaration
-    fun build(storageProvider: StorageProviderEntity): S
-}
-```
-
-且 `FileResourceServiceManager` 通过 `.filter { it.getStorageProviderType() == provider.getRealStorageProviderType() }` 匹配 factory —— **第三方无法为自己的 `typeId` 挂上 factory**。
-
-要打通，需要框架层先做以下改造（这是**用户/框架维护者**的工作，本 skill 不覆盖代码修改）：
-
-1. `FileResourceServiceFactory.getStorageProviderType()` 返回类型改为 `Int typeId` 或 `StorageProviderTypeDeclaration`
-2. `StorageProviderEntity.getRealStorageProviderType()` 提供 `typeId: Int` 视图或改为查 Registry
-3. `FileResourceServiceManager` 的匹配逻辑改为按 `typeId` 比较
-
-**动手前必须先与用户确认是否愿意接受这次框架层改造。** 若接受，请另开任务；本 skill 只覆盖场景 A 的 SDK 声明层。
-
----
-
-### 内置厂商扩展路径（不走 SDK，直接扩 crystal-resource）
-
-若目标是**在框架内**加一个内置厂商（例如给 `crystal-resource` 官方补一个 MinIO 支持），流程反而更直接、无上述限制：
-
-1. 在 `crystal-resource/.../resource/types/StorageProviderType.kt` 的 enum 中**追加**一个 entry（如 `MINIO(typeId = 4, ...)`）——由于内置 configurer 用 `entries` 全量注册，新 entry 自动进 Registry
-2. 在 `crystal-resource/.../resource/service/api/factory/` 下新建 `MinIOFileResourceServiceFactory : FileResourceServiceFactory<...>`，标注 `@Component`
-3. 在 `crystal-resource/.../resource/service/api/impl/` 下新建对应的 `AbstractFileResourceService` 实现
-4. 在 `crystal-resource/.../resource/types/` 下新建对应的 `Properties` 数据类（参考 `LocalFileResourceServiceProperties`）
-5. 编译 + 启动验证
-
-**这条路能立刻跑起来**，因为 factory 的匹配用的就是内置 enum，本身就在同一模块内。
+1. 管理端"存储服务商"页面的"类型"下拉能选到新类型
+2. 新建一条 `type = 1000` 的记录并填 properties
+3. 上传一个测试文件到该 provider —— 若失败查日志，通常是 properties JSON 结构与 Factory 里的解析不一致
 
 ## 输出格式
 
 完成后向用户汇报：
 
-1. 新增的 Declaration 类路径 + typeId / key / displayName 列表
+1. Declaration 类路径 + typeId / key / displayName
 2. Configurer 类路径
-3. 若走"场景 A（仅声明）"：明确告知**运行时目前无法执行**，仅管理端可见
-4. 若走"内置厂商扩展路径"：Factory / ServiceImpl / Properties 三个文件的路径 + `typeId` 值
+3. Properties 数据类路径
+4. Service 实现类路径 + 是否覆写 `hasVendorSignedUrl()`
+5. Factory 类路径 + 返回的 `typeId`
+6. 是否新增了前端 i18n 覆盖
 
 ## 关联 Skills
 
 - `add-registry` —— 通用 Registry 套路
-- `add-resource-file-type` —— 同一批 Registry 化改造中的姊妹 skill；语义相似但**限制不同**（那边运行时已完全支持第三方）
 
 ## 常见错误
 
-### 错误 1：以为注册 Declaration 就能跑
-声明只让管理端"认识"新类型，实际读写文件走的是 `FileResourceServiceFactory` → `AbstractFileResourceService`，那条路目前尚未打通第三方入口（见"场景 B"）。
+### 错误 1：Factory 的 `getStorageProviderTypeId()` 与 Declaration 的 `typeId` 不一致
+`FileResourceServiceManager` 用 `Int` 相等匹配，任何一处填错都会导致运行时抛 "no factory for storageProviderType=xxx"。规范做法：Factory 里直接引用枚举 `AcmeStorageProviderType.MINIO.typeId`。
 
 ### 错误 2：`typeId` 与内置冲突
 `0..3` 已被内置四种厂商占用，第三方必须 `>= 1000`，否则启动抛 `duplicate typeId`。
 
 ### 错误 3：在第三方 configurer 上加 `HIGHEST_PRECEDENCE`
 会导致第三方比内置更早注册，一旦你的 `typeId` 与内置某项冲突，错误信息就会指向"内置重复"，误导排查。留默认顺序即可。
+
+### 错误 4：Properties JSON 结构与 Factory 解析不一致
+`storage_providers.properties` 存的是 JSON 字符串，Factory 需要用 Jackson 解析回 Properties 对象。字段名不匹配、类型不匹配都会抛反序列化异常。用 `objectMapper.readValue(props, MyProperties::class.java)` 前先检查数据。

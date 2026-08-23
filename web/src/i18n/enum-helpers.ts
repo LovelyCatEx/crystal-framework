@@ -53,10 +53,6 @@ export function getSystemSettingsItemValueType(type: string): string {
     return translateEnum('systemSettingsItemValueType', type);
 }
 
-export function getStorageProviderType(type: number): string {
-    return translateEnum('storageProviderType', type);
-}
-
 export function getRuleDistributionType(type: number): string {
     return translateEnum('ruleDistributionType', type);
 }

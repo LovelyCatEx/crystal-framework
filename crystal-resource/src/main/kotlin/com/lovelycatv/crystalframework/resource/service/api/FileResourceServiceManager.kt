@@ -82,7 +82,7 @@ class FileResourceServiceManager(
                     .values
 
                 val factory = serviceFactories
-                    .filter { it.getStorageProviderType() == provider.getRealStorageProviderType() }
+                    .filter { it.getStorageProviderTypeId() == provider.type }
                     .minWithOrNull(OrderComparator.INSTANCE)
                     ?: throw BusinessException("No file resource service factory found for provider ${provider.id}")
 

@@ -3,7 +3,8 @@ import {useTranslation} from "react-i18next";
 import {EntityIdSelector} from "./EntityIdSelector.tsx";
 import {useStorageProviderTableColumns} from "../columns/StorageProviderEntityColumns.tsx";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
-import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
+import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
+import {useStorageProviderTypes} from "@/compositions/use-storage-provider-types.ts";
 
 interface StorageProviderIdSelectorProps {
     value?: string | null;
@@ -13,7 +14,8 @@ interface StorageProviderIdSelectorProps {
 export function StorageProviderIdSelector({ value, onChange }: StorageProviderIdSelectorProps) {
     const { t } = useTranslation();
     const columns = useStorageProviderTableColumns();
-    
+    const { getLabel } = useStorageProviderTypes();
+
     return (
         <EntityIdSelector<StorageProvider>
             value={value}
@@ -22,7 +24,7 @@ export function StorageProviderIdSelector({ value, onChange }: StorageProviderId
             entityName={t('entityNames.storageProvider')}
             columns={columns}
             controller={StorageProviderManagerController}
-            displayRender={(provider) => `${provider.name} (${StorageProviderType[provider.type]})`}
+            displayRender={(provider) => `${provider.name} (${getLabel(provider.type)})`}
             placeholder={t('components.selector.entityIdSelector.placeholder')}
             icon={<CloudOutlined />}
         />

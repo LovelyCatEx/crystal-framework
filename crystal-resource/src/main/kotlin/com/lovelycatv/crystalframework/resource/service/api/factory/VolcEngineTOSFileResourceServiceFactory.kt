@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 class VolcEngineTOSFileResourceServiceFactory(
     private val fileResourceService: FileResourceService,
 ) : FileResourceServiceFactory<VolcEngineTOSFileResourceServiceImpl> {
-    override fun getStorageProviderType(): StorageProviderType {
-        return StorageProviderType.VOLCENGINE_TOS
+    override fun getStorageProviderTypeId(): Int {
+        return StorageProviderType.VOLCENGINE_TOS.typeId
     }
 
     override fun build(storageProvider: StorageProviderEntity): VolcEngineTOSFileResourceServiceImpl {
