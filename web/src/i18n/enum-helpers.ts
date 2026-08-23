@@ -137,6 +137,10 @@ export function getScopeType(type: number): string {
     return translateEnum('scopeType', type);
 }
 
+export function getResourceVisibility(visibility: string): string {
+    return translateEnum('ResourceVisibility', visibility);
+}
+
 export function getPartyType(type: number): string {
     return translateEnum('partyType', type);
 }

@@ -13,7 +13,7 @@ export interface SettingsGroupProps {
     isFirst: boolean;
     groupTranslationMap: Map<string, { label: string; icon?: ReactNode }>;
     keyTranslationMap: Map<string, string>;
-    enumTranslator: (settingsKey: string, enumValue: string) => string;
+    enumTranslator: (settingsKey: string, enumValue: string, enumTypeKey: string | null) => string;
     itemRenderers?: Map<string, SettingsItemRenderer>;
     groupExtraRenderers?: Map<string, SettingsGroupExtraRenderer>;
     /** Maximum number of columns at large breakpoint. Defaults to 3. */

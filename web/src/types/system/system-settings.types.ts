@@ -11,6 +11,7 @@ export interface SystemSettingsSchema {
     value: string | null;
     defaultValue: string | null;
     enumValues: string[] | null;
+    enumTypeKey: string | null;
     tab: string | null;
     group: string | null;
     isSecret: boolean;

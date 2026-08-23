@@ -30,7 +30,7 @@ enum class ResourceFileType(
 ) : ResourceFileTypeDeclaration {
     USER_AVATAR(
         typeId = 0,
-        key = "builtin.user_avatar",
+        key = "builtin_user_avatar",
         displayName = "User avatar",
         description = "Avatar image uploaded by an end user for their own profile.",
         supportedContentTypes = setOf("image/png", "image/jpeg", "image/webp"),
@@ -40,7 +40,7 @@ enum class ResourceFileType(
     ),
     TENANT_ICON(
         typeId = 1,
-        key = "builtin.tenant_icon",
+        key = "builtin_tenant_icon",
         displayName = "Tenant icon",
         description = "Icon image representing a tenant, visible to tenant members and administrators.",
         supportedContentTypes = setOf("image/png", "image/jpeg", "image/webp"),
@@ -50,7 +50,7 @@ enum class ResourceFileType(
     ),
     TENANT_MEMBER_AVATAR(
         typeId = 2,
-        key = "builtin.tenant_member_avatar",
+        key = "builtin_tenant_member_avatar",
         displayName = "Tenant member avatar",
         description = "Avatar image uploaded by a member within the context of a specific tenant.",
         supportedContentTypes = setOf("image/png", "image/jpeg", "image/webp"),

@@ -12,7 +12,7 @@ export interface SettingsItemProps {
     schema: SystemSettingsSchema;
     loading?: boolean;
     keyTranslationMap: Map<string, string>;
-    enumTranslator: (settingsKey: string, enumValue: string) => string;
+    enumTranslator: (settingsKey: string, enumValue: string, enumTypeKey: string | null) => string;
     customRenderer?: SettingsItemRenderer;
 }
 
@@ -79,7 +79,7 @@ export function SettingsItem(props: SettingsItemProps) {
                     disabled={props.loading}
                     options={(props.schema.enumValues ?? []).map((item) => ({
                         value: item,
-                        label: props.enumTranslator(props.settingsKey, item),
+                        label: props.enumTranslator(props.settingsKey, item, props.schema.enumTypeKey),
                     }))}
                 />
             ) : props.schema.valueType == SystemSettingsItemValueType.ENUM_MULTIPLE ? (
@@ -88,7 +88,7 @@ export function SettingsItem(props: SettingsItemProps) {
                     disabled={props.loading}
                     options={(props.schema.enumValues ?? []).map((item) => ({
                         value: item,
-                        label: props.enumTranslator(props.settingsKey, item),
+                        label: props.enumTranslator(props.settingsKey, item, props.schema.enumTypeKey),
                     }))}
                 />
             ) : props.schema.valueType == SystemSettingsItemValueType.BOOLEAN_ARRAY ? (

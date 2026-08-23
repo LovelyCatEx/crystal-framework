@@ -515,6 +515,8 @@ object SystemSettingsConstants {
              * — so third-party file types get their own visibility setting without touching
              * this file.
              */
+            const val ENUM_TYPE_KEY: String = "ResourceVisibility"
+
             fun declarationFor(
                 fileTypeKey: String,
                 defaultVisibility: ResourceVisibility,
@@ -526,6 +528,7 @@ object SystemSettingsConstants {
                     defaultValue = defaultVisibility.name,
                     sort = sort,
                     enumValues = ENUM_VALUES,
+                    enumTypeKey = ENUM_TYPE_KEY,
                 )
             }
         }

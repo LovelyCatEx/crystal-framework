@@ -20,7 +20,11 @@ interface ResourceFileTypeDeclaration {
     /** Stable integer written to `file_resources.type`. Built-in: 0..2; third-party: >= 1000. */
     val typeId: Int
 
-    /** Globally-unique string identifier, namespaced (`"builtin.user_avatar"`, `"acme.corporate_avatar"`). */
+    /**
+     * Globally-unique string identifier. Must NOT contain `.` (the visibility system-settings
+     * schema splits group/tab by dot). Use `_` or `-` between words. Namespace with an owner
+     * prefix, e.g. `"builtin_user_avatar"`, `"acme_corporate_avatar"`.
+     */
     val key: String
 
     /** Human-readable label used by admin UIs. */

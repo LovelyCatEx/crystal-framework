@@ -248,8 +248,10 @@ export default function SystemSettingsManagerPage() {
                             tabTranslationMap={settingsTabToTranslationMap}
                             groupTranslationMap={settingsGroupToTranslationMap}
                             keyTranslationMap={settingsKeyToTranslationMap}
-                            enumTranslator={(key, value) =>
-                                t(`pages.systemSettingsManager.enums.${key}.${value}`)
+                            enumTranslator={(key, value, enumTypeKey) =>
+                                enumTypeKey
+                                    ? t(`enums.${enumTypeKey}.${value}` as never) as string
+                                    : t(`pages.systemSettingsManager.enums.${key}.${value}`)
                             }
                             itemRenderers={itemRenderers}
                             groupExtraRenderers={groupExtraRenderers}

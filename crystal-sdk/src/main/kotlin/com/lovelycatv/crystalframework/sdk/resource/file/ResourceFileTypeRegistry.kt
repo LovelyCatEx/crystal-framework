@@ -25,6 +25,13 @@ class ResourceFileTypeRegistry {
                 "ResourceFileTypeRegistry: blank key for typeId ${declaration.typeId}"
             )
         }
+        if ("." in key) {
+            throw IllegalStateException(
+                "ResourceFileTypeRegistry: key '$key' must not contain '.' — the visibility " +
+                    "system-settings schema splits group/tab by '.', so a dotted key would land in a " +
+                    "phantom group. Use '_' or '-' to separate words."
+            )
+        }
 
         if (byTypeId.putIfAbsent(declaration.typeId, declaration) != null) {
             throw IllegalStateException(
