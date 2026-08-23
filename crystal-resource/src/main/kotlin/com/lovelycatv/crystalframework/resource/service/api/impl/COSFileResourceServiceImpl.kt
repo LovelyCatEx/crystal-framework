@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.vertex.log.logger
 import com.qcloud.cos.COSClient
@@ -96,7 +96,7 @@ class COSFileResourceServiceImpl(
     }
 
     override suspend fun doUploadFile(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         fileLength: Long,
         fileContentType: String,
         fileNameWithExtension: String,

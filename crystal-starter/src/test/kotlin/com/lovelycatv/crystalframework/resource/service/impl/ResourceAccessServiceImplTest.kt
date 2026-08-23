@@ -35,9 +35,7 @@ class ResourceAccessServiceImplTest {
             SystemSettings.Resource(
                 signedUrl = SystemSettings.Resource.SignedUrl(ttlSeconds = SIGNED_URL_TTL_SECONDS),
                 visibility = SystemSettings.Resource.Visibility(
-                    userAvatar = visibility,
-                    tenantIcon = visibility,
-                    tenantMemberAvatar = visibility,
+                    overrides = ResourceFileType.entries.associate { it.key to visibility }
                 )
             )
         )

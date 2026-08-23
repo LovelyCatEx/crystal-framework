@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.system.service.impl
 
+import com.lovelycatv.crystalframework.sdk.resource.file.ResourceFileTypeRegistry
 import com.lovelycatv.crystalframework.sdk.system.settings.SystemSettingsRegistry
 import com.lovelycatv.crystalframework.sdk.common.settings.SettingsMaskConstants
 import com.lovelycatv.crystalframework.sdk.common.settings.matches
@@ -38,6 +39,7 @@ class SystemSettingsServiceImpl(
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
     private val systemSettingsRegistry: SystemSettingsRegistry,
+    private val resourceFileTypeRegistry: ResourceFileTypeRegistry,
     override val eventPublisher: ApplicationEventPublisher,
 ) : SystemSettingsService {
     private val logger = logger()
@@ -205,15 +207,14 @@ class SystemSettingsServiceImpl(
                 ttlSeconds = getSettings<Long>(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS)!!,
             ),
             visibility = SystemSettings.Resource.Visibility(
-                userAvatar = ResourceVisibility.valueOf(
-                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.USER_AVATAR)!!
-                ),
-                tenantIcon = ResourceVisibility.valueOf(
-                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_ICON)!!
-                ),
-                tenantMemberAvatar = ResourceVisibility.valueOf(
-                    getSettings<String>(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR)!!
-                ),
+                overrides = resourceFileTypeRegistry.declarations().associate { decl ->
+                    val declaration = SystemSettingsConstants.Resource.Visibility.declarationFor(
+                        fileTypeKey = decl.key,
+                        defaultVisibility = decl.defaultVisibility,
+                        sort = decl.typeId,
+                    )
+                    decl.key to ResourceVisibility.valueOf(getSettings<String>(declaration)!!)
+                }
             )
         )
     }
@@ -325,9 +326,15 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.OAuth.Oicq.SCOPE, settings.oauth.oicq.scope.toJSONString())
 
         setSettings(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS, settings.resource.signedUrl.ttlSeconds.toString())
-        setSettings(SystemSettingsConstants.Resource.Visibility.USER_AVATAR, settings.resource.visibility.userAvatar.name)
-        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_ICON, settings.resource.visibility.tenantIcon.name)
-        setSettings(SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR, settings.resource.visibility.tenantMemberAvatar.name)
+        resourceFileTypeRegistry.declarations().forEach { decl ->
+            val declaration = SystemSettingsConstants.Resource.Visibility.declarationFor(
+                fileTypeKey = decl.key,
+                defaultVisibility = decl.defaultVisibility,
+                sort = decl.typeId,
+            )
+            val override = settings.resource.visibility.overrides[decl.key] ?: decl.defaultVisibility
+            setSettings(declaration, override.name)
+        }
 
         setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
         setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())

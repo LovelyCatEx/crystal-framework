@@ -5,8 +5,8 @@ import com.lovelycatv.crystalframework.resource.interfaces.RoutingContext
 import com.lovelycatv.crystalframework.resource.interfaces.StorageProviderRouter
 import com.lovelycatv.crystalframework.resource.service.api.factory.FileResourceServiceFactory
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.utils.detectMimeType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.asInputStreamWithLength
@@ -47,7 +47,7 @@ class FileResourceServiceManager(
         userId: Long,
         scope: ResourceScope,
         scopeId: Long,
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         file: FilePart,
         targetFileName: String,
         progressReporter: ((Int) -> Unit)? = null

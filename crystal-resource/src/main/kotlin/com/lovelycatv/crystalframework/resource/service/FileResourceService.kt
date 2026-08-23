@@ -3,7 +3,7 @@ package com.lovelycatv.crystalframework.resource.service
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.CachedBaseService
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
@@ -14,7 +14,7 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
     fun getCrystalFrameworkConfiguration(): CrystalFrameworkConfiguration
 
     fun assertFileContentType(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         contentType: String,
         t: Throwable = BusinessException("unsupported content type $contentType")
     ) {
@@ -23,10 +23,10 @@ interface FileResourceService : CachedBaseService<FileResourceRepository, FileRe
         }
     }
 
-    fun checkFileContentType(fileType: ResourceFileType, contentType: String): Boolean
+    fun checkFileContentType(fileType: ResourceFileTypeDeclaration, contentType: String): Boolean
 
     fun resolveFileExtension(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         contentType: String,
     ): String?
 

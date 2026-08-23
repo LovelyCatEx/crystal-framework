@@ -4,6 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Unified configuration class for all crystalframework.* properties.
@@ -63,19 +65,17 @@ public class CrystalFrameworkConfiguration {
     // crystalframework.resource
     // -------------------------------------------------------------------------
     public static class Resource {
-        private ResourceConfig avatar = new ResourceConfig();
-        private ResourceConfig tenantIcon = new ResourceConfig();
-        private ResourceConfig tenantMemberAvatar = new ResourceConfig();
+        /**
+         * Per-file-type overrides keyed by {@code ResourceFileTypeDeclaration.key}. Any entry here
+         * replaces (not merges) the built-in {@code supportedContentTypes} / {@code supportedFileExtensions}
+         * declared on the corresponding {@code ResourceFileType}. Empty by default; operators add entries
+         * to widen or narrow the whitelist for a specific file type without rebuilding the app.
+         */
+        private Map<String, ResourceConfig> fileTypeOverrides = new LinkedHashMap<>();
 
-        public ResourceConfig getAvatar() { return avatar; }
-        public void setAvatar(ResourceConfig avatar) { this.avatar = avatar; }
-
-        public ResourceConfig getTenantIcon() { return tenantIcon; }
-        public void setTenantIcon(ResourceConfig tenantIcon) { this.tenantIcon = tenantIcon; }
-
-        public ResourceConfig getTenantMemberAvatar() { return tenantMemberAvatar; }
-        public void setTenantMemberAvatar(ResourceConfig tenantMemberAvatar) {
-            this.tenantMemberAvatar = tenantMemberAvatar;
+        public Map<String, ResourceConfig> getFileTypeOverrides() { return fileTypeOverrides; }
+        public void setFileTypeOverrides(Map<String, ResourceConfig> fileTypeOverrides) {
+            this.fileTypeOverrides = fileTypeOverrides;
         }
 
         public static class ResourceConfig {

@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.resource.constants.FileResourcePermission
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.interfaces.ResourceTenantMembershipChecker
 import com.lovelycatv.crystalframework.resource.service.ResourceAccessService
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
@@ -27,16 +27,13 @@ class ResourceAccessServiceImpl(
     @Lazy private val membershipChecker: ResourceTenantMembershipChecker?,
 ) : ResourceAccessService {
 
-    override fun resolveVisibility(fileType: ResourceFileType): ResourceVisibility {
-        val visibility = systemModuleClient
+    override fun resolveVisibility(fileType: ResourceFileTypeDeclaration): ResourceVisibility {
+        val overrides = systemModuleClient
             .getSystemSettings(BusinessException("System settings not initialized"))!!
             .resource
             .visibility
-        return when (fileType) {
-            ResourceFileType.USER_AVATAR -> visibility.userAvatar
-            ResourceFileType.TENANT_ICON -> visibility.tenantIcon
-            ResourceFileType.TENANT_MEMBER_AVATAR -> visibility.tenantMemberAvatar
-        }
+            .overrides
+        return overrides[fileType.key] ?: fileType.defaultVisibility
     }
 
     override fun resolveSignedUrlTtlSeconds(): Long {
