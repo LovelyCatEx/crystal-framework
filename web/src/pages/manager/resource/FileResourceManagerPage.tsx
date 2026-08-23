@@ -7,9 +7,9 @@ import {
     type ManagerCreateFileResourceDTO
 } from "@/api/resource/file-resource.api.ts";
 import {useEffect, useRef} from "react";
-import {type FileResource, ResourceFileType} from "@/types/resource/file-resource.types.ts";
+import {type FileResource} from "@/types/resource/file-resource.types.ts";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
-import {getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {useResourceFileTypes} from "@/compositions/use-resource-file-types.ts";
 import {useFileResourceTableColumns} from "@/components/columns/FileResourceEntityColumns.tsx";
 import {StorageProviderIdSelector, UserIdSelector} from "@/components/selector";
 import {CopyOutlined, DownloadOutlined} from "@ant-design/icons";
@@ -24,6 +24,9 @@ export default function FileResourceManagerPage() {
     });
     const {t} = useTranslation();
     const columns = useFileResourceTableColumns();
+    const {types: resourceFileTypes} = useResourceFileTypes();
+    const fileTypeOptions = resourceFileTypes.map((d) => ({value: d.typeId, label: d.displayName}));
+    const fileTypeOptionsAsString = resourceFileTypes.map((d) => ({value: String(d.typeId), label: d.displayName}));
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
@@ -82,10 +85,7 @@ export default function FileResourceManagerPage() {
                     value={value !== undefined ? String(value) : undefined}
                     allowClear
                     placeholder={t('pages.fileResourceManager.filter.all')}
-                    options={[
-                        { value: String(ResourceFileType.USER_AVATAR), label: getResourceFileType(ResourceFileType.USER_AVATAR) },
-                        { value: String(ResourceFileType.TENANT_ICON), label: getResourceFileType(ResourceFileType.TENANT_ICON) },
-                    ]}
+                    options={fileTypeOptionsAsString}
                     onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
                 />
             ),
@@ -122,16 +122,7 @@ export default function FileResourceManagerPage() {
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
                                     placeholder={t('pages.fileResourceManager.modal.type.placeholder')}
-                                    options={[
-                                        {
-                                            label: getResourceFileType(ResourceFileType.USER_AVATAR),
-                                            value: ResourceFileType.USER_AVATAR,
-                                        },
-                                        {
-                                            label: getResourceFileType(ResourceFileType.TENANT_ICON),
-                                            value: ResourceFileType.TENANT_ICON,
-                                        }
-                                    ]}
+                                    options={fileTypeOptions}
                                 />
                             </Form.Item>
                         </Col>
@@ -212,14 +203,7 @@ export default function FileResourceManagerPage() {
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.fileResourceManager.filter.all') },
-                            {
-                                label: getResourceFileType(ResourceFileType.USER_AVATAR),
-                                value: ResourceFileType.USER_AVATAR,
-                            },
-                            {
-                                label: getResourceFileType(ResourceFileType.TENANT_ICON),
-                                value: ResourceFileType.TENANT_ICON,
-                            }
+                            ...fileTypeOptions,
                         ]}
                         onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,

@@ -25,10 +25,6 @@ export function getTenantStatus(status: number): string {
     return translateEnum('tenantStatus', status);
 }
 
-export function getResourceFileType(type: number): string {
-    return translateEnum('resourceFileType', type);
-}
-
 export function getFileResourceStatus(status: number): string {
     return translateEnum('fileResourceStatus', status);
 }

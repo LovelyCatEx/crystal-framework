@@ -1,9 +1,20 @@
 import type {BaseScopedEntity} from "../BaseScopedEntity.ts";
 
-export enum ResourceFileType {
-    USER_AVATAR = 0,
-    TENANT_ICON = 1,
-    TENANT_MEMBER_AVATAR = 2,
+export enum ResourceVisibility {
+    PUBLIC = 'PUBLIC',
+    AUTHENTICATED = 'AUTHENTICATED',
+    OWNER_ONLY = 'OWNER_ONLY',
+    SCOPE_MEMBER = 'SCOPE_MEMBER',
+}
+
+export interface ResourceFileTypeDeclaration {
+    typeId: number;
+    key: string;
+    displayName: string;
+    description: string;
+    supportedContentTypes: string[];
+    supportedFileExtensions: string[];
+    defaultVisibility: ResourceVisibility;
 }
 
 export enum FileResourceStatus {
