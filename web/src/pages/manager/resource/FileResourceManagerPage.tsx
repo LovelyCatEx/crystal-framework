@@ -24,9 +24,9 @@ export default function FileResourceManagerPage() {
     });
     const {t} = useTranslation();
     const columns = useFileResourceTableColumns();
-    const {types: resourceFileTypes} = useResourceFileTypes();
-    const fileTypeOptions = resourceFileTypes.map((d) => ({value: d.typeId, label: d.displayName}));
-    const fileTypeOptionsAsString = resourceFileTypes.map((d) => ({value: String(d.typeId), label: d.displayName}));
+    const {types: resourceFileTypes, getLabel} = useResourceFileTypes();
+    const fileTypeOptions = resourceFileTypes.map((d) => ({value: d.typeId, label: getLabel(d.typeId)}));
+    const fileTypeOptionsAsString = resourceFileTypes.map((d) => ({value: String(d.typeId), label: getLabel(d.typeId)}));
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true });
