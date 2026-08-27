@@ -1,6 +1,6 @@
 package com.lovelycatv.crystalframework.resource.interfaces
 
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import java.time.Instant
 import java.time.ZoneId
 
@@ -12,7 +12,7 @@ import java.time.ZoneId
  */
 data class RoutingContext(
     val userId: Long,
-    val fileType: ResourceFileType,
+    val fileType: ResourceFileTypeDeclaration,
     val fileName: String,
     val fileExtension: String,
     val fileContentType: String,
@@ -36,7 +36,7 @@ data class RoutingContext(
     companion object {
         fun of(
             userId: Long,
-            fileType: ResourceFileType,
+            fileType: ResourceFileTypeDeclaration,
             fileName: String,
             fileContentType: String = "application/octet-stream",
             fileSize: Long = -1L,

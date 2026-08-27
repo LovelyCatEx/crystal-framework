@@ -1,0 +1,153 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:OutboundUrlGuard.kt$OutboundUrlGuard$address.isLoopbackAddress || address.isAnyLocalAddress || address.isLinkLocalAddress || address.isSiteLocalAddress || address.isMulticastAddress</ID>
+    <ID>CyclomaticComplexMethod:QueryNodeEvaluator.kt$QueryNodeEvaluator$private fun evaluateCondition(node: ConditionNode, context: Map&lt;String, Any?&gt;): Boolean</ID>
+    <ID>FunctionNaming:PermissionMatrixBuilder.kt$PermissionMatrixBuilder$fun `super`(block: PermissionLayerBuilder.() -&gt; Unit)</ID>
+    <ID>FunctionNaming:TypedCriteriaBuilder.kt$TypedCriteriaBuilder$fun &lt;V&gt; `in`(property: KProperty1&lt;T, V&gt;, values: Collection&lt;V&gt;): TypedCriteriaBuilder&lt;T&gt;</ID>
+    <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customCreate( userAuthentication: UserAuthentication, dto: CREATE_DTO ): ApiResponse&lt;*&gt;?</ID>
+    <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customDelete( userAuthentication: UserAuthentication, dto: DELETE_DTO ): ApiResponse&lt;*&gt;?</ID>
+    <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customQuery( userAuthentication: UserAuthentication, dto: READ_DTO ): ApiResponse&lt;*&gt;?</ID>
+    <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customReadAll( userAuthentication: UserAuthentication, tenantId: Long, ): ApiResponse&lt;*&gt;?</ID>
+    <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customUpdate( userAuthentication: UserAuthentication, dto: UPDATE_DTO ): ApiResponse&lt;*&gt;?</ID>
+    <ID>LargeClass:SystemPermission.kt$SystemPermission</ID>
+    <ID>LongParameterList:AbstractManagerController.kt$AbstractManagerController$( action: ManagerAction, userAuthentication: UserAuthentication, createDto: CREATE_DTO? = null, readDto: READ_DTO? = null, updateDto: UPDATE_DTO? = null, deleteDto: DELETE_DTO? = null, )</ID>
+    <ID>LongParameterList:PermissionMatrixBuilder.kt$( systemCreate: String, systemRead: String, systemUpdate: String, systemDelete: String, superCreate: String = PermissionMatrix.NOT_APPLICABLE, superRead: String = PermissionMatrix.NOT_APPLICABLE, superUpdate: String = PermissionMatrix.NOT_APPLICABLE, superDelete: String = PermissionMatrix.NOT_APPLICABLE, )</ID>
+    <ID>LongParameterList:PermissionMatrixBuilder.kt$( tenantAdminCreate: String, tenantAdminRead: String, tenantAdminUpdate: String, tenantAdminDelete: String, tenantPemCreate: String, tenantPemRead: String, tenantPemUpdate: String, tenantPemDelete: String, superCreate: String = PermissionMatrix.NOT_APPLICABLE, superRead: String = PermissionMatrix.NOT_APPLICABLE, superUpdate: String = PermissionMatrix.NOT_APPLICABLE, superDelete: String = PermissionMatrix.NOT_APPLICABLE, systemCreate: String = PermissionMatrix.NOT_APPLICABLE, systemRead: String = PermissionMatrix.NOT_APPLICABLE, systemUpdate: String = PermissionMatrix.NOT_APPLICABLE, systemDelete: String = PermissionMatrix.NOT_APPLICABLE, )</ID>
+    <ID>LongParameterList:SnowIdGenerator.kt$SnowIdGenerator$( private val startPoint: Long, private val timestampLength: Int, private val dataCenterIdLength: Int, private val workerIdLength: Int, private val sequenceIdLength: Int, private val geneIdLength: Int, private val nodeLease: SnowflakeNodeLease, )</ID>
+    <ID>MagicNumber:AES.kt$AES$12</ID>
+    <ID>MagicNumber:AES.kt$AES$128</ID>
+    <ID>MagicNumber:AES.kt$AES$256</ID>
+    <ID>MagicNumber:ApmWebfluxSpanTraceAspect.kt$ApmWebfluxSpanTraceAspect$1_000_000.0</ID>
+    <ID>MagicNumber:ApmWebfluxTransactionFilter.kt$ApmWebfluxTransactionFilter$10</ID>
+    <ID>MagicNumber:ApmWebfluxTransactionFilter.kt$ApmWebfluxTransactionFilter$100</ID>
+    <ID>MagicNumber:ApmWebfluxTransactionFilter.kt$ApmWebfluxTransactionFilter$200</ID>
+    <ID>MagicNumber:CachedBaseService.kt$CachedBaseService$12</ID>
+    <ID>MagicNumber:CachedBaseService.kt$CachedBaseService$3600000L</ID>
+    <ID>MagicNumber:CachedBaseService.kt$CachedBaseService$8</ID>
+    <ID>MagicNumber:DistributedLock.kt$10</ID>
+    <ID>MagicNumber:DistributedLock.kt$3</ID>
+    <ID>MagicNumber:FileMD5Utils.kt$FileMD5Utils$8192</ID>
+    <ID>MagicNumber:GlobalErrorWebExceptionHandler.kt$GlobalErrorWebExceptionHandler$2</ID>
+    <ID>MagicNumber:KotlinReactiveExtensions.kt$10000</ID>
+    <ID>MagicNumber:LoggerFilter.kt$LoggerFilter.RequestDecorator$2000</ID>
+    <ID>MagicNumber:LoggerFilter.kt$LoggerFilter.ResponseDecorator$96</ID>
+    <ID>MagicNumber:OutboundUrlGuard.kt$OutboundUrlGuard$255</ID>
+    <ID>MagicNumber:OutboundUrlGuard.kt$OutboundUrlGuard$4</ID>
+    <ID>MagicNumber:PageQuery.kt$PageQuery$20</ID>
+    <ID>MagicNumber:RSA.kt$RSA$2048</ID>
+    <ID>MagicNumber:RedisConstants.kt$RedisConstants$3</ID>
+    <ID>MagicNumber:RedisConstants.kt$RedisConstants$4</ID>
+    <ID>MagicNumber:RedisConstants.kt$RedisConstants$5</ID>
+    <ID>MagicNumber:SlidingWindowRateLimiterImpl.kt$SlidingWindowRateLimiterImpl$1000L</ID>
+    <ID>MagicNumber:SnowIdGenerator.kt$SnowIdGenerator$63</ID>
+    <ID>MagicNumber:SnowflakeIdGeneratorRegistry.kt$SnowflakeIdGeneratorRegistry$63</ID>
+    <ID>MaxLineLength:ApiResponse.kt$ApiResponse.Companion$fun &lt;T&gt; internalServerError(message: String, data: T? = null)</ID>
+    <ID>MaxLineLength:CachedBaseService.kt$CachedBaseService$(RedisConstants.ENTITY_CACHE_READTHROUGH_MIN_TTL_MS..RedisConstants.ENTITY_CACHE_READTHROUGH_MAX_TTL_MS).random()</ID>
+    <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "GT requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
+    <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "GTE requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
+    <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "LT requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
+    <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "LTE requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
+    <ID>MaxLineLength:JSONExtensions.kt$fun</ID>
+    <ID>MaxLineLength:JSONExtensions.kt$inline</ID>
+    <ID>MaxLineLength:JacksonConfig.kt$JacksonConfig$addSerializer(Long::class.javaPrimitiveType, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)</ID>
+    <ID>MaxLineLength:LoggerFilter.kt$LoggerFilter.Companion$""""(password|newPassword|oldPassword|token|accessToken|refreshToken|clientSecret|appSecret|emailCode|smsCode)"\s*:\s*"[^"]*""""</ID>
+    <ID>MaxLineLength:LoggerFilter.kt$LoggerFilter.Companion$"""\b(password|newPassword|oldPassword|token|accessToken|refreshToken|clientSecret|appSecret|emailCode|smsCode)=[^&amp;\s]+"""</ID>
+    <ID>MaxLineLength:LoggerFilter.kt$LoggerFilter.ResponseDecorator$logger.debug("[$id] (response body does not seem to be a json object) contentLength: ${bodyStr.length}")</ID>
+    <ID>MaxLineLength:RSATest.kt$RSATest$val priv = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDKH0pbbvxwFcPPHat/i8zCqRUO/1OtoL5MU7Q2ySkrRsQvL3Ox0OScsRhMJj34brQajXWlPQ8h6FJFdCmkZvw5XGz+pv3XiWmsROQx2m0R+17NOoJ81ma9NKr2A4nP25EuNxDKTmjjVdFzwpJmlsoqI2WAwcRxz9vLBJe+NUiMFQ92bIjwoBzRcT+w7coCQgo8cBD4ddKAcCp9gdYn+9Ar/Saos8P7YmV+cHTI9omv4AsAC0phiALGhPUA5Djb65HZX3VBYZJppmtYzQNT6BoMxxl3RcxSvqJY+D3mdCXCfYpGHGCJm3t3EJW/kqW9lCYYL0MRYmW7tcLz3s7wQyytAgMBAAECggEAJRxjqbASF35XinK3J18CxIcI/8zvj0ShTCBeSWTb8z82DDfZNT/WidKWVHz9Cd1BolJw1FsGqUIfwPLYJoBmNR38QTFmECoBxgiMIX8qYY/W0zW3+bXf/UNrVGpH5ms5F9QyeAK3jW4XW/rQqJdtHRmMrHxnVkJE59y7A8iCvn1Xu13cO0IcZW0qyzdGQnrVgmctZXJ+JtQiXuSZvF8K7LpJhHSzpdwhdtbKnbEIYBqHEBUcGmPd54QkvM2bYQ6KrWTir3yhqNeJgMEt7tIldDEUKQAug8FRAKoSaK7QLh6rcwXLtrnwcZubUl2CcP0G+J8QcG+M8X+bxgfY+FIjPQKBgQDyXEi0Mg5eyqEHl15LsKTUvOn0UmbVgFbQGQqEUNRpvuh404T+H0Mgw+hhvEsBZ2hS2TqoZLib1jEAaUvzMqeiiPU1nUHsPa9IFISBNIPPPaOdBs8awuk1CZLkfHK0N+BDXyyu/LMn+JLEecEzhNCsoPJ2sV0DWTFDJlbYHedpdwKBgQDVf0oHJFc+bhc1Y8l1DFddK6+60FAOJBx569ExRO/NfHqvxjNYQuJffjZDVURpboJU+gcdGCYiILongQPP/01t1j41QEYsuZZ1JbfTKI89gVNDCcNFotB/EzUz6Wp1gABc7ZcRd67Auoya36OEl7QCL28nkdNb8AE02/waeYij+wKBgFG4UEOCRVotFNMMdR0seMfK01AwoMAIwDz21Jb88kKdvqFPIR7Wx7m6lRaveNMGXSTiXmb9X0oclPVAi/167Q9fAt+LIPlZa0rwsCUo4fD1JcAC1b5+Tkg17DPiyoJ9/L56zwRJ7NbjeAmLzFtkw0ASHO9sqqJAZt3vhYTlwGvNAoGACf9s+wqjn0POiGyE2ZtbV/ycvRXWOeNNBhSZ9kGxLSFAKY0RiHeRXEFvzxVmH73SEqKmxKEF4CFCNmlfQVVGTfdzcFDzOFL0jcXXZucGVi4BNSl24ILwWpMOscCjgJ8e5TsnEOVW5KWXwgTpBmOIRXXtMaAtkqeZlt0aYC8CzBMCgYBE5reaqEs5W9eOwksgUvhtJtaFnSNUtsjiUfonffRqh6O5OQ+7wkvKRx0xV1sUMU0aCPG96Po/yWJzV3BCd3iQNfSqzu3OE3bi0R2gZuv1Q0B469PKtk90er+a8qRHGIqbiG5TZahppdhpOivoumTNQnwVfYoYrFX6Dmy2vkndHA=="</ID>
+    <ID>MaxLineLength:RSATest.kt$RSATest$val pub = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyh9KW278cBXDzx2rf4vMwqkVDv9TraC+TFO0NskpK0bELy9zsdDknLEYTCY9+G60Go11pT0PIehSRXQppGb8OVxs/qb914lprETkMdptEftezTqCfNZmvTSq9gOJz9uRLjcQyk5o41XRc8KSZpbKKiNlgMHEcc/bywSXvjVIjBUPdmyI8KAc0XE/sO3KAkIKPHAQ+HXSgHAqfYHWJ/vQK/0mqLPD+2JlfnB0yPaJr+ALAAtKYYgCxoT1AOQ42+uR2V91QWGSaaZrWM0DU+gaDMcZd0XMUr6iWPg95nQlwn2KRhxgiZt7dxCVv5KlvZQmGC9DEWJlu7XC897O8EMsrQIDAQAB"</ID>
+    <ID>MaxLineLength:ReactiveRedisServiceImpl.kt$ReactiveRedisServiceImpl.Companion$"if redis.call('get', KEYS[1]) == cjson.encode(ARGV[1]) then return tostring(redis.call('pexpire', KEYS[1], tonumber(ARGV[2]))) else return '0' end"</ID>
+    <ID>MaxLineLength:SlidingWindowRateLimiter.kt$SlidingWindowRateLimiter$*</ID>
+    <ID>MaxLineLength:SnowIdGenerator.kt$SnowIdGenerator$"Clock moved backwards. Refusing to generate id for timestamp $currentTimestamp. Latest generated at $lastTimestamp"</ID>
+    <ID>MaxLineLength:SnowflakeNodeLease.kt$SnowflakeNodeLease$"Snowflake node lease probing: startSlot=$initialSlot (dataCenterId=${calc[0]}, workerId=${calc[1]}), probeCount=$probeCount, "</ID>
+    <ID>MaxLineLength:SnowflakeNodeLease.kt$SnowflakeNodeLease$logger.info("Snowflake node lease released: slot=$slot (dataCenterId=${calc[0]}, workerId=${calc[1]}), deleted=$released")</ID>
+    <ID>MaxLineLength:SnowflakeNodeLease.kt$SnowflakeNodeLease$logger.warn("Snowflake node lease release failed: slot=$slot (dataCenterId=${calc[0]}, workerId=${calc[1]}), message=${error.message}")</ID>
+    <ID>MaxLineLength:StandardScopedManagerController.kt$StandardScopedManagerController$?:</ID>
+    <ID>MaxLineLength:StandardTenantManagerController.kt$StandardTenantManagerController$?:</ID>
+    <ID>MaxLineLength:StandardTenantManagerController.kt$StandardTenantManagerController$throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminCreate, permissions.tenantPemCreate))</ID>
+    <ID>MaxLineLength:StandardTenantManagerController.kt$StandardTenantManagerController$throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminDelete, permissions.tenantPemDelete))</ID>
+    <ID>MaxLineLength:StandardTenantManagerController.kt$StandardTenantManagerController$throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminRead, permissions.tenantPemRead))</ID>
+    <ID>MaxLineLength:StandardTenantManagerController.kt$StandardTenantManagerController$throw ForbiddenException(context = tenantMissingPermission(permissions.tenantAdminUpdate, permissions.tenantPemUpdate))</ID>
+    <ID>MaxLineLength:SystemModulePathConstants.kt$SystemModulePathConstants.Tenant$// Everything user-facing under /tenant (incl. me-profile, benefits, invitation, oauth, profile, settings, ...)</ID>
+    <ID>MayBeConst:AbstractManagerController.kt$AbstractManagerController.Companion$val PARAMETERIZED_ENTITY_INDEX = 2</ID>
+    <ID>NestedBlockDepth:KotlinObjectClassUtils.kt$KotlinObjectClassUtils$inline fun &lt;reified T&gt; extractAllValProperties( instance: Any, includingNestedObjectClass: Boolean ): List&lt;T&gt;</ID>
+    <ID>NewLineAtEndOfFile:AES.kt$com.lovelycatv.crystalframework.shared.utils.encrypt.AES.kt</ID>
+    <ID>NewLineAtEndOfFile:ApiResponse.kt$com.lovelycatv.crystalframework.shared.response.ApiResponse.kt</ID>
+    <ID>NewLineAtEndOfFile:BaseManagerUpdateDTO.kt$com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:BaseService.kt$com.lovelycatv.crystalframework.shared.service.BaseService.kt</ID>
+    <ID>NewLineAtEndOfFile:BusinessException.kt$com.lovelycatv.crystalframework.shared.exception.BusinessException.kt</ID>
+    <ID>NewLineAtEndOfFile:CachedBaseManagerService.kt$com.lovelycatv.crystalframework.shared.service.CachedBaseManagerService.kt</ID>
+    <ID>NewLineAtEndOfFile:CachedBaseService.kt$com.lovelycatv.crystalframework.shared.service.CachedBaseService.kt</ID>
+    <ID>NewLineAtEndOfFile:ContextKey.kt$com.lovelycatv.crystalframework.shared.context.ContextKey.kt</ID>
+    <ID>NewLineAtEndOfFile:CurrentTenantId.kt$com.lovelycatv.crystalframework.shared.context.CurrentTenantId.kt</ID>
+    <ID>NewLineAtEndOfFile:CurrentUserId.kt$com.lovelycatv.crystalframework.shared.context.CurrentUserId.kt</ID>
+    <ID>NewLineAtEndOfFile:EntityCacheEvent.kt$com.lovelycatv.crystalframework.shared.event.EntityCacheEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:EntityCacheEventType.kt$com.lovelycatv.crystalframework.shared.types.EntityCacheEventType.kt</ID>
+    <ID>NewLineAtEndOfFile:EntityListCacheEvent.kt$com.lovelycatv.crystalframework.shared.event.EntityListCacheEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:FileMD5Utils.kt$com.lovelycatv.crystalframework.shared.utils.FileMD5Utils.kt</ID>
+    <ID>NewLineAtEndOfFile:ForbiddenException.kt$com.lovelycatv.crystalframework.shared.exception.ForbiddenException.kt</ID>
+    <ID>NewLineAtEndOfFile:GlobalConstants.kt$com.lovelycatv.crystalframework.shared.constants.GlobalConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:GlobalErrorWebExceptionHandler.kt$com.lovelycatv.crystalframework.shared.exception.GlobalErrorWebExceptionHandler.kt</ID>
+    <ID>NewLineAtEndOfFile:GlobalExceptionHandler.kt$com.lovelycatv.crystalframework.shared.exception.GlobalExceptionHandler.kt</ID>
+    <ID>NewLineAtEndOfFile:InvalidateCache.kt$com.lovelycatv.crystalframework.shared.annotations.InvalidateCache.kt</ID>
+    <ID>NewLineAtEndOfFile:JSONExtensions.kt$com.lovelycatv.crystalframework.shared.utils.JSONExtensions.kt</ID>
+    <ID>NewLineAtEndOfFile:JacksonConfig.kt$com.lovelycatv.crystalframework.shared.config.JacksonConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:KotlinObjectClassUtils.kt$com.lovelycatv.crystalframework.shared.utils.KotlinObjectClassUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:LoggerFilter.kt$com.lovelycatv.crystalframework.shared.filter.LoggerFilter.kt</ID>
+    <ID>NewLineAtEndOfFile:MiscExtensions.kt$com.lovelycatv.crystalframework.shared.utils.MiscExtensions.kt</ID>
+    <ID>NewLineAtEndOfFile:NotQueryable.kt$com.lovelycatv.crystalframework.shared.annotations.NotQueryable.kt</ID>
+    <ID>NewLineAtEndOfFile:PermissionType.kt$com.lovelycatv.crystalframework.shared.types.PermissionType.kt</ID>
+    <ID>NewLineAtEndOfFile:RSA.kt$com.lovelycatv.crystalframework.shared.utils.encrypt.RSA.kt</ID>
+    <ID>NewLineAtEndOfFile:RSATest.kt$com.lovelycatv.crystalframework.shared.utils.encrypt.RSATest.kt</ID>
+    <ID>NewLineAtEndOfFile:RbacConstants.kt$com.lovelycatv.crystalframework.shared.constants.RbacConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:RbacUtils.kt$com.lovelycatv.crystalframework.shared.utils.RbacUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:ReactiveExpiringKVStore.kt$com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore.kt</ID>
+    <ID>NewLineAtEndOfFile:ReactiveRedisService.kt$com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService.kt</ID>
+    <ID>NewLineAtEndOfFile:ReactiveRedisServiceImpl.kt$com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:RedisConstants.kt$com.lovelycatv.crystalframework.shared.constants.RedisConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:SessionConstants.kt$com.lovelycatv.crystalframework.shared.constants.SessionConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:SingleEntityCacheEvent.kt$com.lovelycatv.crystalframework.shared.event.SingleEntityCacheEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:SnowIdGenerator.kt$com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator.kt</ID>
+    <ID>NewLineAtEndOfFile:SpringDataExtensions.kt$com.lovelycatv.crystalframework.shared.utils.SpringDataExtensions.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemRole.kt$com.lovelycatv.crystalframework.shared.constants.SystemRole.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantRelationshipCheckService.kt$com.lovelycatv.crystalframework.shared.service.TenantRelationshipCheckService.kt</ID>
+    <ID>NewLineAtEndOfFile:Unauthorized.kt$com.lovelycatv.crystalframework.shared.annotations.Unauthorized.kt</ID>
+    <ID>NewLineAtEndOfFile:UnauthorizedException.kt$com.lovelycatv.crystalframework.shared.exception.UnauthorizedException.kt</ID>
+    <ID>ReturnCount:ApmWebfluxSpanTraceAspect.kt$ApmWebfluxSpanTraceAspect$private fun isSkipped(method: Method, targetClass: Class&lt;*&gt;): Boolean</ID>
+    <ID>ReturnCount:BaseScopedManagerService.kt$BaseScopedManagerService$override suspend fun resolveRootScope(id: Long): Pair&lt;ResourceScope, Long&gt;?</ID>
+    <ID>ReturnCount:CrystalDatabaseExtensions.kt$private fun coerceNumericString(value: Any): Any</ID>
+    <ID>ReturnCount:EntityQueryableFieldsResolver.kt$EntityQueryableFieldsResolver$private fun extractColumnName(prop: KProperty1&lt;*, *&gt;): String?</ID>
+    <ID>ReturnCount:EntityQueryableFieldsResolver.kt$EntityQueryableFieldsResolver$private fun isNotQueryable(prop: KProperty1&lt;*, *&gt;): Boolean</ID>
+    <ID>ReturnCount:OutboundUrlGuard.kt$OutboundUrlGuard$private fun hostMatchesPattern(host: String, pattern: String): Boolean</ID>
+    <ID>ReturnCount:QueryNodeEvaluator.kt$QueryNodeEvaluator$private fun compareNumeric(actual: Any?, expected: Any?): Int?</ID>
+    <ID>ReturnCount:QueryNodeEvaluator.kt$QueryNodeEvaluator$private fun looseEquals(actual: Any?, expected: Any?): Boolean</ID>
+    <ID>ReturnCount:RequiresAuthorityAspect.kt$RequiresAuthorityAspect$@Around( "@annotation(com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority) || " + "@within(com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority)" ) fun enforce(joinPoint: ProceedingJoinPoint): Any?</ID>
+    <ID>ReturnCount:ServerHttpRequestExtensions.kt$fun ServerHttpRequest.resolveClientIp(): String</ID>
+    <ID>ReturnCount:SlidingWindowRateLimiterImpl.kt$SlidingWindowRateLimiterImpl$override suspend fun checkAllowed( windowSeconds: Int, dimensions: List&lt;RateLimitDimension&gt;, message: String, )</ID>
+    <ID>ReturnCount:SpringSecurityAnnotationBanBeanFactoryPostProcessor.kt$SpringSecurityAnnotationBanBeanFactoryPostProcessor$private fun resolveBeanClass( beanFactory: ConfigurableListableBeanFactory, beanName: String, ): Class&lt;*&gt;?</ID>
+    <ID>SpreadOperator:PermissionMatrix.kt$PermissionMatrix$(*crossTenantLayersFor(operation))</ID>
+    <ID>SpreadOperator:PermissionMatrix.kt$PermissionMatrix$(*layersFor(scope, operation))</ID>
+    <ID>SpreadOperator:StandardManagerController.kt$StandardManagerController$(*required)</ID>
+    <ID>SwallowedException:OutboundUrlGuard.kt$OutboundUrlGuard$e: Exception</ID>
+    <ID>ThrowsCount:OutboundUrlGuard.kt$OutboundUrlGuard$fun assertAllowed(rawUrl: String, allowedHostSuffixes: List&lt;String&gt;)</ID>
+    <ID>TooGenericExceptionCaught:ApmWebfluxSpanTraceAspect.kt$ApmWebfluxSpanTraceAspect$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:OutboundUrlGuard.kt$OutboundUrlGuard$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SlidingWindowRateLimiterImpl.kt$SlidingWindowRateLimiterImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SystemModuleClient.kt$SystemModuleClient$e: Exception</ID>
+    <ID>TooManyFunctions:BaseManagerService.kt$BaseManagerService&lt;REPOSITORY: BaseRepository&lt;ENTITY&gt;, ENTITY: BaseEntity, CREATE_DTO: Any, READ_DTO: BaseManagerReadDTO, UPDATE_DTO: BaseManagerUpdateDTO, DELETE_DTO: BaseManagerDeleteDTO&gt; : BaseService</ID>
+    <ID>TooManyFunctions:CachedBaseService.kt$CachedBaseService&lt;REPOSITORY: R2dbcRepository&lt;ENTITY, Long&gt;, ENTITY: BaseEntity&gt; : BaseService</ID>
+    <ID>TooManyFunctions:GlobalExceptionHandler.kt$GlobalExceptionHandler</ID>
+    <ID>TooManyFunctions:ReactiveRedisService.kt$ReactiveRedisService</ID>
+    <ID>TooManyFunctions:ReactiveRedisServiceImpl.kt$ReactiveRedisServiceImpl : ReactiveRedisService</ID>
+    <ID>TooManyFunctions:RedisConstants.kt$RedisConstants</ID>
+    <ID>TooManyFunctions:StandardScopedManagerController.kt$StandardScopedManagerController&lt;SERVICE, REPOSITORY : BaseRepository&lt;ENTITY&gt;, ENTITY : BaseEntity, CREATE_DTO : Any, READ_DTO : BaseManagerReadDTO, UPDATE_DTO : BaseManagerUpdateDTO, DELETE_DTO : BaseManagerDeleteDTO&gt; : AbstractManagerController</ID>
+    <ID>TooManyFunctions:StandardTenantManagerController.kt$StandardTenantManagerController&lt;SERVICE : BaseTenantResourceManagerService&lt;REPOSITORY, ENTITY, CREATE_DTO, READ_DTO, UPDATE_DTO, DELETE_DTO&gt;, REPOSITORY : BaseRepository&lt;ENTITY&gt;, ENTITY, CREATE_DTO : Any, READ_DTO : BaseManagerReadTenantResourceDTO, UPDATE_DTO : BaseManagerUpdateDTO, DELETE_DTO : BaseManagerDeleteDTO&gt; : AbstractManagerController</ID>
+    <ID>TooManyFunctions:TypedCriteriaBuilder.kt$TypedCriteriaBuilder&lt;T : Any&gt;</ID>
+    <ID>UnusedPrivateProperty:GlobalExceptionHandler.kt$GlobalExceptionHandler$private val auditEventRepository: AuditEventRepository</ID>
+    <ID>UseCheckOrError:EntityColumnCache.kt$EntityColumnCache$throw IllegalStateException("Unable to find column name of property ${property.name}")</ID>
+    <ID>WildcardImport:CachedBaseService.kt$import com.lovelycatv.crystalframework.shared.event.*</ID>
+    <ID>WildcardImport:ReactiveRedisService.kt$import org.springframework.data.redis.core.*</ID>
+    <ID>WildcardImport:ReactiveRedisServiceImpl.kt$import org.springframework.data.redis.core.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

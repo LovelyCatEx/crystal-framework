@@ -2,6 +2,7 @@ import {Card, Descriptions, Spin, Tag} from "antd";
 import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
+import {useStorageProviderTypes} from "@/compositions/use-storage-provider-types.ts";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 
@@ -9,26 +10,22 @@ interface StorageProviderCardProps {
     providerId: string;
 }
 
-const STORAGE_PROVIDER_TYPE_COLOR_MAP: Record<number, string> = {
+const BUILTIN_TYPE_COLORS: Record<number, string> = {
     0: "default",
     1: "orange",
-    2: "blue"
+    2: "blue",
+    3: "purple",
 };
 
 export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
     const { t } = useTranslation();
+    const { getLabel } = useStorageProviderTypes();
     const { data: provider, isLoading } = useSWRComposition<StorageProvider | null>(
         `storage-provider-card-${providerId}`,
         async () => {
             return await StorageProviderManagerController.getById(providerId);
         }
     );
-
-    const getStorageProviderTypeMap = (): Record<number, string> => ({
-        0: t('components.popCard.storageProvider.localFileSystem'),
-        1: t('components.popCard.storageProvider.aliyunOSS'),
-        2: t('components.popCard.storageProvider.tencentCOS')
-    });
 
     if (isLoading) {
         return (
@@ -69,8 +66,8 @@ export function StorageProviderCard({ providerId }: StorageProviderCardProps) {
                     </CopyableToolTip>
                 </Descriptions.Item>
                 <Descriptions.Item label={t('components.popCard.storageProvider.type')}>
-                    <Tag color={STORAGE_PROVIDER_TYPE_COLOR_MAP[provider.type] as string} className="text-xs">
-                        {getStorageProviderTypeMap()[provider.type] || t('components.popCard.storageProvider.unknownType')}
+                    <Tag color={BUILTIN_TYPE_COLORS[provider.type] ?? 'default'} className="text-xs">
+                        {getLabel(provider.type)}
                     </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label={t('components.popCard.storageProvider.description')}>

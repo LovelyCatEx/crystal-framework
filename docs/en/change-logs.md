@@ -7,6 +7,25 @@
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
 :::
 
+## v1.14.3
+
+2026-08-27
+
+### Features
++ feat(resource): Make storage provider types extensible through the SDK.
++ feat(resource): Make resource file types extensible through the SDK Registry.
++ feat(resource): Expose resource file type extension capabilities through the SDK Registry.
++ feat(resource): Make storage providers and resource file types SDK-extensible.
+
+### Bug Fixes
++ fix(resource): Show localized resource file type labels in manager filters and modals.
+
+### Others
++ build(backend): Add dependency-check and git-commit-id plugins and enrich the startup banner.
++ build(backend): Introduce detekt static analysis and enforcer rules.
+
+---
+
 ## v1.14.2
 
 2026-08-20

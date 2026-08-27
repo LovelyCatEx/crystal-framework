@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:GatewayRegistry.kt$GatewayRegistry$?:</ID>
+    <ID>MaxLineLength:ResourceFileTypeDeclaration.kt$ResourceFileTypeDeclaration$*</ID>
+    <ID>MaxLineLength:StorageProviderTypeDeclaration.kt$StorageProviderTypeDeclaration$*</ID>
+    <ID>NewLineAtEndOfFile:CrystalFrameworkModule.kt$com.lovelycatv.crystalframework.sdk.CrystalFrameworkModule.kt</ID>
+    <ID>NewLineAtEndOfFile:MailModuleConfigure.kt$com.lovelycatv.crystalframework.sdk.mail.config.MailModuleConfigure.kt</ID>
+    <ID>NewLineAtEndOfFile:MailTemplateDeclaration.kt$com.lovelycatv.crystalframework.sdk.mail.types.MailTemplateDeclaration.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemMailTemplateConfigure.kt$com.lovelycatv.crystalframework.sdk.mail.config.SystemMailTemplateConfigure.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemRbacConfigurer.kt$com.lovelycatv.crystalframework.sdk.rbac.system.config.SystemRbacConfigurer.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantMailTemplateConfigure.kt$com.lovelycatv.crystalframework.sdk.mail.config.TenantMailTemplateConfigure.kt</ID>
+    <ID>SwallowedException:SettingsValidation.kt$e: Exception</ID>
+    <ID>ThrowsCount:ResourceFileTypeRegistry.kt$ResourceFileTypeRegistry$fun register(declaration: ResourceFileTypeDeclaration)</ID>
+    <ID>ThrowsCount:StorageProviderTypeRegistry.kt$StorageProviderTypeRegistry$fun register(declaration: StorageProviderTypeDeclaration)</ID>
+    <ID>TooGenericExceptionCaught:SettingsValidation.kt$e: Exception</ID>
+    <ID>TooManyFunctions:SystemRbacRegistry.kt$SystemRbacRegistry</ID>
+    <ID>TooManyFunctions:TenantRbacRegistry.kt$TenantRbacRegistry</ID>
+    <ID>UseCheckOrError:AbstractSettingsRegistry.kt$AbstractSettingsRegistry$throw IllegalStateException("${this::class.simpleName}: duplicate setting key '$settingKey'")</ID>
+    <ID>UseCheckOrError:AudienceResolverRegistry.kt$AudienceResolverRegistry$throw IllegalStateException( "AudienceResolverRegistry: duplicate resolver for audience type '${resolver.audienceType}'" )</ID>
+    <ID>UseCheckOrError:AudienceResolverRegistry.kt$AudienceResolverRegistry$throw IllegalStateException( "AudienceResolverRegistry: no resolver registered for audience type '$type'" )</ID>
+    <ID>UseCheckOrError:EncryptionExclusionRegistry.kt$EncryptionExclusionRegistry$throw IllegalStateException( "EncryptionExclusionRegistry: duplicate path pattern '$pattern'" )</ID>
+    <ID>UseCheckOrError:GatewayRegistry.kt$GatewayRegistry$throw IllegalStateException("Gateway [${type.qualifiedName}] is already registered")</ID>
+    <ID>UseCheckOrError:GatewayRegistry.kt$GatewayRegistry$throw IllegalStateException("Gateway [${type.qualifiedName}] is not registered. Is the providing module on the classpath?")</ID>
+    <ID>UseCheckOrError:PartyResolverRegistry.kt$PartyResolverRegistry$throw IllegalStateException( "PartyResolverRegistry: duplicate resolver for party type '${resolver.partyType}'" )</ID>
+    <ID>UseCheckOrError:PartyResolverRegistry.kt$PartyResolverRegistry$throw IllegalStateException( "PartyResolverRegistry: no resolver registered for party type '$type'" )</ID>
+    <ID>UseCheckOrError:ResourceFileTypeRegistry.kt$ResourceFileTypeRegistry$throw IllegalStateException( "ResourceFileTypeRegistry: blank key for typeId ${declaration.typeId}" )</ID>
+    <ID>UseCheckOrError:ResourceFileTypeRegistry.kt$ResourceFileTypeRegistry$throw IllegalStateException( "ResourceFileTypeRegistry: duplicate key '$key'" )</ID>
+    <ID>UseCheckOrError:ResourceFileTypeRegistry.kt$ResourceFileTypeRegistry$throw IllegalStateException( "ResourceFileTypeRegistry: duplicate typeId ${declaration.typeId}" )</ID>
+    <ID>UseCheckOrError:ResourceFileTypeRegistry.kt$ResourceFileTypeRegistry$throw IllegalStateException( "ResourceFileTypeRegistry: no declaration for typeId $typeId" )</ID>
+    <ID>UseCheckOrError:ScopeResolverRegistry.kt$ScopeResolverRegistry$throw IllegalStateException( "ScopeResolverRegistry: duplicate resolver for scope type '${resolver.scopeType}'" )</ID>
+    <ID>UseCheckOrError:ScopeResolverRegistry.kt$ScopeResolverRegistry$throw IllegalStateException( "ScopeResolverRegistry: no resolver registered for scope type '$type'" )</ID>
+    <ID>UseCheckOrError:StorageProviderTypeRegistry.kt$StorageProviderTypeRegistry$throw IllegalStateException( "StorageProviderTypeRegistry: blank key for typeId ${declaration.typeId}" )</ID>
+    <ID>UseCheckOrError:StorageProviderTypeRegistry.kt$StorageProviderTypeRegistry$throw IllegalStateException( "StorageProviderTypeRegistry: duplicate key '$key'" )</ID>
+    <ID>UseCheckOrError:StorageProviderTypeRegistry.kt$StorageProviderTypeRegistry$throw IllegalStateException( "StorageProviderTypeRegistry: duplicate typeId ${declaration.typeId}" )</ID>
+    <ID>UseCheckOrError:StorageProviderTypeRegistry.kt$StorageProviderTypeRegistry$throw IllegalStateException( "StorageProviderTypeRegistry: no declaration for typeId $typeId" )</ID>
+  </CurrentIssues>
+</SmellBaseline>

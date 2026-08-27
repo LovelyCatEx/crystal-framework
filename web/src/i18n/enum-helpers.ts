@@ -25,10 +25,6 @@ export function getTenantStatus(status: number): string {
     return translateEnum('tenantStatus', status);
 }
 
-export function getResourceFileType(type: number): string {
-    return translateEnum('resourceFileType', type);
-}
-
 export function getFileResourceStatus(status: number): string {
     return translateEnum('fileResourceStatus', status);
 }
@@ -51,10 +47,6 @@ export function getPermissionType(type: number): string {
 
 export function getSystemSettingsItemValueType(type: string): string {
     return translateEnum('systemSettingsItemValueType', type);
-}
-
-export function getStorageProviderType(type: number): string {
-    return translateEnum('storageProviderType', type);
 }
 
 export function getRuleDistributionType(type: number): string {
@@ -135,6 +127,10 @@ export function getForbiddenScope(scope: string): string {
 
 export function getScopeType(type: number): string {
     return translateEnum('scopeType', type);
+}
+
+export function getResourceVisibility(visibility: string): string {
+    return translateEnum('ResourceVisibility', visibility);
 }
 
 export function getPartyType(type: number): string {

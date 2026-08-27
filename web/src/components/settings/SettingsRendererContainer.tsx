@@ -11,7 +11,7 @@ export interface SettingsRendererContainerProps {
     tabTranslationMap: Map<string, string>;
     groupTranslationMap: Map<string, { label: string; icon?: ReactNode }>;
     keyTranslationMap: Map<string, string>;
-    enumTranslator: (settingsKey: string, enumValue: string) => string;
+    enumTranslator: (settingsKey: string, enumValue: string, enumTypeKey: string | null) => string;
     itemRenderers?: Map<string, SettingsItemRenderer>;
     groupExtraRenderers?: Map<string, SettingsGroupExtraRenderer>;
     showTabs?: boolean;

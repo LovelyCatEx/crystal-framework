@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:Gender.kt$Gender.OTHER$3</ID>
+    <ID>MagicNumber:TenantMemberStatus.kt$TenantMemberStatus.ACTIVE$4</ID>
+    <ID>MagicNumber:TenantMemberStatus.kt$TenantMemberStatus.REVIEWING$3</ID>
+    <ID>MaxLineLength:SystemSettings.kt$SystemSettings.Resource.Visibility$*</ID>
+    <ID>NewLineAtEndOfFile:ApiEncryptionScope.kt$com.lovelycatv.crystalframework.shared.types.encrypt.ApiEncryptionScope.kt</ID>
+    <ID>NewLineAtEndOfFile:BaseEntity.kt$com.lovelycatv.crystalframework.shared.types.entity.BaseEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:BaseTenantEntity.kt$com.lovelycatv.crystalframework.shared.types.tenant.entity.BaseTenantEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:OAuthPlatform.kt$com.lovelycatv.crystalframework.shared.types.auth.OAuthPlatform.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettings.kt$com.lovelycatv.crystalframework.shared.types.system.SystemSettings.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantMemberStatus.kt$com.lovelycatv.crystalframework.shared.types.tenant.TenantMemberStatus.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantStatus.kt$com.lovelycatv.crystalframework.shared.types.tenant.TenantStatus.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAuthenticatedTenantVO.kt$com.lovelycatv.crystalframework.shared.types.tenant.entity.UserAuthenticatedTenantVO.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

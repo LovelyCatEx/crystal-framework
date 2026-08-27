@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.resource.service.impl
 
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.repository.FileResourceRepository
@@ -8,7 +9,6 @@ import com.lovelycatv.crystalframework.resource.service.ResourceAccessService
 import com.lovelycatv.crystalframework.resource.service.StorageProviderService
 import com.lovelycatv.crystalframework.resource.service.api.FileResourceServiceManager
 import com.lovelycatv.crystalframework.resource.types.FileResourceStatus
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.utils.getMimeExtensions
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
@@ -43,32 +43,36 @@ class FileResourceServiceImpl(
     }
 
     override fun checkFileContentType(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         contentType: String
     ): Boolean {
-        val resourceConfig = this.getCrystalFrameworkConfiguration().resource
-        val config = when (fileType) {
-            ResourceFileType.USER_AVATAR -> resourceConfig.avatar
-            ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
-            ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
-        }
-        return contentType in config.supportedContentTypes
+        return contentType in resolveSupportedContentTypes(fileType)
     }
 
     override fun resolveFileExtension(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         contentType: String,
     ): String? {
-        val resourceConfig = this.getCrystalFrameworkConfiguration().resource
-        val config = when (fileType) {
-            ResourceFileType.USER_AVATAR -> resourceConfig.avatar
-            ResourceFileType.TENANT_ICON -> resourceConfig.tenantIcon
-            ResourceFileType.TENANT_MEMBER_AVATAR -> resourceConfig.tenantMemberAvatar
-        }
-        val allowedExtensions = config.supportedFileExtensions
+        val allowedExtensions = resolveSupportedFileExtensions(fileType)
             .map { it.removePrefix(".").lowercase() }
             .toSet()
         return getMimeExtensions(contentType).firstOrNull { it in allowedExtensions }
+    }
+
+    /**
+     * Effective content-type whitelist for [fileType]: the declaration's built-in defaults, with a
+     * per-key entry from `crystalframework.resource.file-type-overrides.<key>` replacing (not
+     * merging) them when present. This lets operators tighten or widen the whitelist for any
+     * built-in or third-party type without rebuilding.
+     */
+    private fun resolveSupportedContentTypes(fileType: ResourceFileTypeDeclaration): Set<String> {
+        val override = crystalFrameworkConfiguration.resource.fileTypeOverrides[fileType.key]
+        return override?.supportedContentTypes?.toSet() ?: fileType.supportedContentTypes
+    }
+
+    private fun resolveSupportedFileExtensions(fileType: ResourceFileTypeDeclaration): Set<String> {
+        val override = crystalFrameworkConfiguration.resource.fileTypeOverrides[fileType.key]
+        return override?.supportedFileExtensions?.toSet() ?: fileType.supportedFileExtensions
     }
 
     override suspend fun getCommitedFileByMD5(md5: String, scope: Int, scopeId: Long): FileResourceEntity? {

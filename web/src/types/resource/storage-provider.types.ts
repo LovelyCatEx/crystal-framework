@@ -1,10 +1,10 @@
 import type {BaseEntity} from "../BaseEntity.ts";
 
-export enum StorageProviderType {
-    LOCAL_FILE_SYSTEM = 0,
-    ALIYUN_OSS = 1,
-    TENCENT_COS = 2,
-    VOLCENGINE_TOS = 3
+export interface StorageProviderTypeDeclaration {
+    typeId: number;
+    key: string;
+    displayName: string;
+    description: string;
 }
 
 export interface StorageProvider extends BaseEntity {

@@ -9,8 +9,7 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {StorageProviderRoutingRuleManagerController, reorderStorageProviderRoutingRules, type ManagerCreateStorageProviderRoutingRuleDTO, type ManagerReadStorageProviderRoutingRuleDTO,} from "@/api/resource/storage-provider-routing-rule.api.ts";
 import type {StorageProviderRoutingRule} from "@/types/resource/storage-provider-routing-rule.types.ts";
 import {RuleDistributionType} from "@/types/resource/storage-provider-routing-rule.types.ts";
-import {ResourceFileType} from "@/types/resource/file-resource.types.ts";
-import {getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {useResourceFileTypes} from "@/compositions/use-resource-file-types.ts";
 import {type StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
 import {useStorageProviderRoutingRuleTableColumns} from "@/components/columns/StorageProviderRoutingRuleEntityColumns.tsx";
@@ -49,11 +48,8 @@ interface ConditionTreeFieldProps { value?: string | null; onChange?: (value: st
 
 function ConditionTreeField({value, onChange}: ConditionTreeFieldProps) {
     const {t} = useTranslation();
-    const fileTypeOptions = [
-        ResourceFileType.USER_AVATAR,
-        ResourceFileType.TENANT_ICON,
-        ResourceFileType.TENANT_MEMBER_AVATAR,
-    ].map((v) => ({value: v, label: getResourceFileType(v)}));
+    const {types: resourceFileTypes} = useResourceFileTypes();
+    const fileTypeOptions = resourceFileTypes.map((d) => ({value: d.typeId, label: d.displayName}));
     const fields: FilterableField[] = [
         {field: 'fileType', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileType'), type: 'select', options: fileTypeOptions},
         {field: 'fileName', label: t('pages.storageProviderRoutingRuleManager.modal.conditionTree.fields.fileName'), type: 'text'},

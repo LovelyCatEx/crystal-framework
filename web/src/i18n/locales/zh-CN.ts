@@ -2347,9 +2347,9 @@ export const zhCN: I18nRules = {
         'module.message.tenantScopeEnabled': '启用租户内私聊',
         'module.message.tenantDeskEnabled': '启用租户服务台',
         'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
-        'resource.visibility.userAvatar': '用户头像可见性',
-        'resource.visibility.tenantIcon': '租户图标可见性',
-        'resource.visibility.tenantMemberAvatar': '租户成员头像可见性',
+        'resource.visibility.builtin_user_avatar': '用户头像可见性',
+        'resource.visibility.builtin_tenant_icon': '租户图标可见性',
+        'resource.visibility.builtin_tenant_member_avatar': '租户成员头像可见性',
       },
       groups: {
         'basic': '基本设置',
@@ -2390,27 +2390,6 @@ export const zhCN: I18nRules = {
           'SYSTEM_NAME': '系统名称',
           'USER_NAME': '用户名称',
           'CUSTOM': '自定义',
-        },
-        'resource.visibility.userAvatar': {
-          'PUBLIC': '公开（任何人可访问）',
-          'AUTHENTICATED': '已登录用户',
-          'SCOPE_MEMBER': '同租户成员',
-          'OWNER_ONLY': '仅上传者本人',
-          'SYSTEM_ADMIN': '仅系统管理员',
-        },
-        'resource.visibility.tenantIcon': {
-          'PUBLIC': '公开（任何人可访问）',
-          'AUTHENTICATED': '已登录用户',
-          'SCOPE_MEMBER': '同租户成员',
-          'OWNER_ONLY': '仅上传者本人',
-          'SYSTEM_ADMIN': '仅系统管理员',
-        },
-        'resource.visibility.tenantMemberAvatar': {
-          'PUBLIC': '公开（任何人可访问）',
-          'AUTHENTICATED': '已登录用户',
-          'SCOPE_MEMBER': '同租户成员',
-          'OWNER_ONLY': '仅上传者本人',
-          'SYSTEM_ADMIN': '仅系统管理员',
         },
       }
     },
@@ -4168,6 +4147,13 @@ export const zhCN: I18nRules = {
     },
     broadcastCategory: {
       0: '公告'
+    },
+    ResourceVisibility: {
+      PUBLIC: '公开（任何人可访问）',
+      AUTHENTICATED: '已登录用户',
+      SCOPE_MEMBER: '同租户成员',
+      OWNER_ONLY: '仅上传者本人',
+      SYSTEM_ADMIN: '仅系统管理员',
     }
   },
 

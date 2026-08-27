@@ -58,36 +58,10 @@ crystalframework:
     jwt:
       expiration: 7d
   resource:
-    avatar:
-      supported-content-types:
-        - image/png
-        - image/jpeg
-        - image/webp
-      supported-file-extensions:
-        - png
-        - jpg
-        - jpeg
-        - webp
-    tenant-icon:
-      supported-content-types:
-        - image/png
-        - image/jpeg
-        - image/webp
-      supported-file-extensions:
-        - png
-        - jpg
-        - jpeg
-        - webp
-    tenant-member-avatar:
-      supported-content-types:
-        - image/png
-        - image/jpeg
-        - image/webp
-      supported-file-extensions:
-        - png
-        - jpg
-        - jpeg
-        - webp
+    # Built-in file types' supportedContentTypes / supportedFileExtensions are declared on the
+    # ResourceFileType enum (crystal-resource). Operators may override them per file type key
+    # via file-type-overrides below; entries replace (not merge) the built-in whitelist.
+    file-type-overrides: {}
     signing-key: ${CRYSTAL_RESOURCE_SIGNING_KEY:zR7yq2N4bK8vXf1sJ0pWmC3hLd6tGuAe5oQnBiYxUkE=}
     signed-url-ttl-seconds: 300
   monitor:

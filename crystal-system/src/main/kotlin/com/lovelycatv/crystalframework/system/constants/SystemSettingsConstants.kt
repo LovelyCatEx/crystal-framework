@@ -504,31 +504,33 @@ object SystemSettingsConstants {
         }
 
         object Visibility {
-            private val VISIBILITY_ENUM_VALUES = ResourceVisibility.entries.map { it.name }
+            val ENUM_VALUES: List<String> = ResourceVisibility.entries.map { it.name }
 
-            val USER_AVATAR = SettingsItemDeclaration(
-                key = "resource.visibility.userAvatar",
-                valueType = SettingsItemValueType.ENUM_SINGLE,
-                defaultValue = ResourceVisibility.PUBLIC.name,
-                sort = 0,
-                enumValues = VISIBILITY_ENUM_VALUES
-            )
+            const val KEY_PREFIX: String = "resource.visibility."
 
-            val TENANT_ICON = SettingsItemDeclaration(
-                key = "resource.visibility.tenantIcon",
-                valueType = SettingsItemValueType.ENUM_SINGLE,
-                defaultValue = ResourceVisibility.PUBLIC.name,
-                sort = 1,
-                enumValues = VISIBILITY_ENUM_VALUES
-            )
+            /**
+             * Builds the [SettingsItemDeclaration] carrying the visibility override for a
+             * given file-type declaration key. Registered dynamically at startup — one per
+             * declaration in [com.lovelycatv.crystalframework.sdk.resource.file.ResourceFileTypeRegistry]
+             * — so third-party file types get their own visibility setting without touching
+             * this file.
+             */
+            const val ENUM_TYPE_KEY: String = "ResourceVisibility"
 
-            val TENANT_MEMBER_AVATAR = SettingsItemDeclaration(
-                key = "resource.visibility.tenantMemberAvatar",
-                valueType = SettingsItemValueType.ENUM_SINGLE,
-                defaultValue = ResourceVisibility.SCOPE_MEMBER.name,
-                sort = 2,
-                enumValues = VISIBILITY_ENUM_VALUES
-            )
+            fun declarationFor(
+                fileTypeKey: String,
+                defaultVisibility: ResourceVisibility,
+                sort: Int,
+            ): SettingsItemDeclaration {
+                return SettingsItemDeclaration(
+                    key = "$KEY_PREFIX$fileTypeKey",
+                    valueType = SettingsItemValueType.ENUM_SINGLE,
+                    defaultValue = defaultVisibility.name,
+                    sort = sort,
+                    enumValues = ENUM_VALUES,
+                    enumTypeKey = ENUM_TYPE_KEY,
+                )
+            }
         }
     }
 }

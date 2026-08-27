@@ -95,9 +95,9 @@ export function useSettingsKeyToTranslationMap(): Map<string, string> {
         ['module.message.tenantScopeEnabled', t('pages.systemSettingsManager.keys.module.message.tenantScopeEnabled')],
         ['module.message.tenantDeskEnabled', t('pages.systemSettingsManager.keys.module.message.tenantDeskEnabled')],
         ['resource.signedUrl.ttlSeconds', t('pages.systemSettingsManager.keys.resource.signedUrl.ttlSeconds')],
-        ['resource.visibility.userAvatar', t('pages.systemSettingsManager.keys.resource.visibility.userAvatar')],
-        ['resource.visibility.tenantIcon', t('pages.systemSettingsManager.keys.resource.visibility.tenantIcon')],
-        ['resource.visibility.tenantMemberAvatar', t('pages.systemSettingsManager.keys.resource.visibility.tenantMemberAvatar')],
+        ['resource.visibility.builtin_user_avatar', t('pages.systemSettingsManager.keys.resource.visibility.builtin_user_avatar')],
+        ['resource.visibility.builtin_tenant_icon', t('pages.systemSettingsManager.keys.resource.visibility.builtin_tenant_icon')],
+        ['resource.visibility.builtin_tenant_member_avatar', t('pages.systemSettingsManager.keys.resource.visibility.builtin_tenant_member_avatar')],
     ]);
 
     for (const key of pluginKeys) {

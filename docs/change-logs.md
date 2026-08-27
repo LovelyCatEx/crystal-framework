@@ -7,6 +7,25 @@
 2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
 :::
 
+## v1.14.3
+
+2026-08-27
+
+### 新功能
++ feat(resource): 使存储提供商类型可通过 SDK 扩展。
++ feat(resource): 使资源文件类型可通过 SDK Registry 扩展。
++ feat(resource): 通过 SDK Registry 暴露资源文件类型扩展能力。
++ feat(resource): 使存储提供商与资源文件类型支持 SDK 扩展。
+
+### Bug 修复
++ fix(resource): 在管理器筛选器和弹窗中显示本地化的资源文件类型标签。
+
+### 其他
++ build(backend): 新增 dependency-check 与 git-commit-id 插件，并丰富启动横幅信息。
++ build(backend): 引入 detekt 静态分析与 enforcer 规则。
+
+---
+
 ## v1.14.2
 
 2026-08-20

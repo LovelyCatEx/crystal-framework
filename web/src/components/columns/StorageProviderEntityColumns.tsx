@@ -2,13 +2,21 @@ import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
-import {getStorageProviderType} from "@/i18n/enum-helpers.ts";
+import {useStorageProviderTypes} from "@/compositions/use-storage-provider-types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 
+const BUILTIN_TYPE_COLORS: Record<number, string> = {
+    0: 'blue',
+    1: 'orange',
+    2: 'green',
+    3: 'purple',
+};
+
 export function useStorageProviderTableColumns(): EntityTableColumns<StorageProvider> {
     const { t } = useTranslation();
-    
+    const { getLabel } = useStorageProviderTypes();
+
     return [
         {
             title: t('components.columns.storageProvider.name'),
@@ -30,14 +38,10 @@ export function useStorageProviderTableColumns(): EntityTableColumns<StorageProv
             dataIndex: "type",
             key: "type",
             render: function (_: unknown, row: StorageProvider): React.ReactNode | JSX.Element {
-                const typeColors: Record<number, string> = {
-                    0: 'blue',
-                    1: 'orange',
-                    2: 'green'
-                };
+                const label = getLabel(row.type);
                 return <Space orientation='vertical' size={0}>
-                    <CopyableToolTip title={getStorageProviderType(row.type)}>
-                        <Tag color={typeColors[row.type] || 'default'} className="text-xs font-mono">{getStorageProviderType(row.type)}</Tag>
+                    <CopyableToolTip title={label}>
+                        <Tag color={BUILTIN_TYPE_COLORS[row.type] || 'default'} className="text-xs font-mono">{label}</Tag>
                     </CopyableToolTip>
                 </Space>
             }

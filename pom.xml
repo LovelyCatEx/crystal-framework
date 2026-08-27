@@ -67,7 +67,10 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.14.2</revision>
+        <revision>1.14.3</revision>
+        <crystalframework.basedir>${maven.multiModuleProjectDirectory}</crystalframework.basedir>
+        <verification.detekt.skip>false</verification.detekt.skip>
+        <verification.dependency-check.skip>false</verification.dependency-check.skip>
     </properties>
 
     <dependencyManagement>
@@ -352,14 +355,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -543,6 +538,122 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-rules</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>17</version>
+                                    <message>JDK 17 or higher is required!</message>
+                                </requireJavaVersion>
+
+                                <requireMavenVersion>
+                                    <version>3.8</version>
+                                    <message>Maven 3.8 or higher is required!</message>
+                                </requireMavenVersion>
+
+                                <banDuplicatePomDependencyVersions />
+
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>log4j:log4j</exclude>
+                                        <exclude>*:*-SNAPSHOT</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+
+                                <requireReleaseDeps />
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.ozsie</groupId>
+                <artifactId>detekt-maven-plugin</artifactId>
+                <version>1.23.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${verification.detekt.skip}</skip>
+                    <config>${crystalframework.basedir}/detekt/detekt.yml</config>
+                    <baseline>${crystalframework.basedir}/detekt/baseline-${project.name}.xml</baseline>
+                    <report>html:${project.build.directory}/detekt-report.html</report>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>11.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${verification.dependency-check.skip}</skip>
+                    <!--
+                        NVD API key is resolved from the `nvd.api.key` Maven property.
+                        Do NOT hardcode the key here (it would leak into git history).
+
+                        Configure it in ~/.m2/settings.xml as an always-on profile:
+
+                            <profiles>
+                                <profile>
+                                    <id>nvd</id>
+                                    <properties>
+                                        <nvd.api.key>YOUR_NVD_API_KEY</nvd.api.key>
+                                    </properties>
+                                </profile>
+                            </profiles>
+                            <activeProfiles>
+                                <activeProfile>nvd</activeProfile>
+                            </activeProfiles>
+
+                        Request a key at https://nvd.nist.gov/developers/request-an-api-key.
+                        In CI, pass it via `-Dnvd.api.key=$NVD_API_KEY` instead.
+                    -->
+                    <nvdApiKey>${nvd.api.key}</nvdApiKey>
+                    <failBuildOnCVSS>11</failBuildOnCVSS>
+                    <failOnError>false</failOnError>
+                    <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.2.0</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                </configuration>
             </plugin>
         </plugins>
     </build>
