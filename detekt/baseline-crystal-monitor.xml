@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:DashboardServiceImpl.kt$DashboardServiceImpl$override suspend fun getBusinessStats(timeRange: String): BusinessStatsVO</ID>
+    <ID>CyclomaticComplexMethod:DashboardServiceImpl.kt$DashboardServiceImpl$override suspend fun getSystemMetrics(): SystemMetricsVO</ID>
+    <ID>LongMethod:DashboardServiceImpl.kt$DashboardServiceImpl$override suspend fun getBusinessStats(timeRange: String): BusinessStatsVO</ID>
+    <ID>LongMethod:DashboardServiceImpl.kt$DashboardServiceImpl$override suspend fun getSystemMetrics(): SystemMetricsVO</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$10</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$100</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$100.0</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$1000</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$1000L</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$14</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$180</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$24</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$3</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$30</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$365</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$5</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$60</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$7</ID>
+    <ID>MagicNumber:DashboardServiceImpl.kt$DashboardServiceImpl$90</ID>
+    <ID>MagicNumber:MonitorDataCleanupTask.kt$MonitorDataCleanupTask$14</ID>
+    <ID>MagicNumber:TimeUtils.kt$TimeUtils$3600_000L</ID>
+    <ID>MagicNumber:TimeUtils.kt$TimeUtils$60_000L</ID>
+    <ID>MagicNumber:TimeUtils.kt$TimeUtils$86400_000L</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$?:</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$currentCount = statsProvider.countTenantInvitationRecords(currentStartTime, now).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countFileResources(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countMailSent(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countOAuthAccounts(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countTenantInvitationRecords(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countTenantInvitations(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:DashboardServiceImpl.kt$DashboardServiceImpl$previousCount = statsProvider.countTenantMembers(previousStartTime, currentStartTime).awaitSingleOrNull() ?: 0</ID>
+    <ID>MaxLineLength:MonitorDataCleanupTask.kt$MonitorDataCleanupTask$@ScheduledTaskMetadata(name = "MonitorDataCleanupTask", description = "Clean up monitor metrics older than 14 days at 1:00 AM daily", group = "monitor")</ID>
+    <ID>MaxLineLength:SystemMetricsCollectTask.kt$SystemMetricsCollectTask$@ScheduledTaskMetadata(name = "SystemMetricsCollectTask", description = "Collect system metrics every second", group = "system")</ID>
+    <ID>SwallowedException:DashboardServiceImpl.kt$DashboardServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:DashboardServiceImpl.kt$DashboardServiceImpl$e: Exception</ID>
+    <ID>WildcardImport:DashboardServiceImpl.kt$import com.lovelycatv.crystalframework.monitor.controller.vo.*</ID>
+    <ID>WildcardImport:ManagerSystemMetricsController.kt$import org.springframework.web.bind.annotation.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

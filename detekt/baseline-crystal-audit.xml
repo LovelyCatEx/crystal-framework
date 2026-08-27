@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>FunctionOnlyReturningConstant:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$@Audit( action = AuditAction.READ, resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, ) private fun synchronousEndpoint( userAuthentication: UserAuthentication, request: TestRequest, ): String</ID>
+    <ID>LongMethod:SessionMonitorServiceImpl.kt$SessionMonitorServiceImpl$override suspend fun getSessions( page: Int, pageSize: Int, sessionId: String?, type: Int?, ): PaginatedResponseData&lt;SessionDescription&gt;</ID>
+    <ID>LongParameterList:AuditLogEntity.kt$AuditLogEntity$( id: Long = 0, @Column("user_id") val userId: Long = 0, @Column("username") val username: String = "", @Column("tenant_id") val tenantId: Long? = null, @Column("action") val action: Int = 0, @Column("resource_type") val resourceType: String = "", @Column("resource_ids") val resourceIds: String? = null, @Column("request_id") val requestId: Long? = null, @Column("http_method") val httpMethod: String? = null, @Column("path") val path: String? = null, @Column("remote_ip") val remoteIp: String? = null, @Column("user_agent") val userAgent: String? = null, @Column("success") val success: Boolean = true, @Column("error_message") val errorMessage: String? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:AuditLogRecorder.kt$AuditLogRecorder$( userAuthentication: UserAuthentication, auditRequestInfo: AuditRequestInfo?, action: AuditAction, resourceType: String, resourceIds: List&lt;Long&gt;?, success: Boolean, errorMessage: String?, )</ID>
+    <ID>LongParameterList:AuditLogService.kt$AuditLogService$( userAuthentication: UserAuthentication, auditRequestInfo: AuditRequestInfo?, action: AuditAction, resourceType: String, resourceIds: List&lt;Long&gt;?, success: Boolean, errorMessage: String? )</ID>
+    <ID>MagicNumber:AuditAction.kt$AuditAction.DELETE$4</ID>
+    <ID>MagicNumber:AuditAction.kt$AuditAction.UPDATE$3</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, listOf(42L), 10L, false, "boom"))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, listOf(42L), 10L, true, null))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, listOf(42L), null, false, "boom"))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, listOf(42L), null, true, null))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, null, null, false, "boom"))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$listOf(RecordedAudit(AuditAction.READ, TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, null, null, true, null))</ID>
+    <ID>MaxLineLength:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$val aspect = AnnotatedControllerAuditAspect(AuditLogRecorder(recordingService(mutableListOf(), CountDownLatch(1))))</ID>
+    <ID>MaxLineLength:ManagerControllerAuditAspect.kt$ManagerControllerAuditAspect$auditLogRecorder.record(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, false, error.message)</ID>
+    <ID>MaxLineLength:ManagerControllerAuditAspect.kt$ManagerControllerAuditAspect$auditLogRecorder.record(userAuthentication, auditRequestInfo, action, resourceType, resourceIds, true, null)</ID>
+    <ID>NewLineAtEndOfFile:AuditRequestInfo.kt$com.lovelycatv.crystalframework.audit.context.AuditRequestInfo.kt</ID>
+    <ID>NewLineAtEndOfFile:SessionMonitorService.kt$com.lovelycatv.crystalframework.audit.service.SessionMonitorService.kt</ID>
+    <ID>NewLineAtEndOfFile:SessionMonitorServiceImpl.kt$com.lovelycatv.crystalframework.audit.service.impl.SessionMonitorServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:SessionsMonitorController.kt$com.lovelycatv.crystalframework.audit.controller.manager.session.SessionsMonitorController.kt</ID>
+    <ID>ReturnCount:AnnotatedControllerAuditAspect.kt$AnnotatedControllerAuditAspect$@Around("@annotation(com.lovelycatv.crystalframework.audit.annotations.Audit)") fun audit(joinPoint: ProceedingJoinPoint): Any?</ID>
+    <ID>ReturnCount:AuditRequestContextFilter.kt$AuditRequestContextFilter$private fun resolveRemoteIp(exchange: ServerWebExchange): String?</ID>
+    <ID>ReturnCount:ManagerControllerAuditAspect.kt$ManagerControllerAuditAspect$@Around("execution(* com.lovelycatv.crystalframework.shared.controller.AbstractManagerController+.*(..))") fun audit(joinPoint: ProceedingJoinPoint): Any?</ID>
+    <ID>ReturnCount:SessionMonitorServiceImpl.kt$SessionMonitorServiceImpl$override suspend fun getSessions( page: Int, pageSize: Int, sessionId: String?, type: Int?, ): PaginatedResponseData&lt;SessionDescription&gt;</ID>
+    <ID>TooGenericExceptionCaught:AnnotatedControllerAuditAspect.kt$AnnotatedControllerAuditAspect$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:AuditLogRecorder.kt$AuditLogRecorder$e: Exception</ID>
+    <ID>UnusedParameter:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$request: TestRequest</ID>
+    <ID>UnusedParameter:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$userAuthentication: UserAuthentication</ID>
+    <ID>UnusedPrivateMember:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$@Audit( action = AuditAction.READ, resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, ) private fun synchronousEndpoint( userAuthentication: UserAuthentication, request: TestRequest, ): String</ID>
+    <ID>UnusedPrivateMember:AnnotatedControllerAuditAspectTest.kt$AnnotatedControllerAuditAspectTest$@Audit( action = AuditAction.READ, resourceType = TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES, resourceIds = "#request.invalidResourceIds", ) private fun invalidCollectionEndpoint( userAuthentication: UserAuthentication, request: TestRequest, ): Mono&lt;String&gt;</ID>
+  </CurrentIssues>
+</SmellBaseline>

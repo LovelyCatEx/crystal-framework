@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:SpringCronTaskAdapter.kt$SpringCronTaskAdapter$logger.error("[SpringCron] Task ${definition.name} failed: ${result.message}", result.exception)</ID>
+    <ID>MaxLineLength:SpringCronTaskAdapter.kt$SpringCronTaskAdapter$logger.info("[SpringCron] Task ${definition.name} executed successfully: ${result.message}")</ID>
+    <ID>NewLineAtEndOfFile:CronTaskExecutor.kt$com.lovelycatv.crystalframework.schedule.annotations.CronTaskExecutor.kt</ID>
+    <ID>NewLineAtEndOfFile:ScheduleConfig.kt$com.lovelycatv.crystalframework.schedule.config.ScheduleConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:ScheduledTaskMetadata.kt$com.lovelycatv.crystalframework.schedule.annotations.ScheduledTaskMetadata.kt</ID>
+    <ID>NewLineAtEndOfFile:SnailTaskExecutionContext.kt$com.lovelycatv.crystalframework.schedule.api.context.SnailTaskExecutionContext.kt</ID>
+    <ID>NewLineAtEndOfFile:SpringCronTaskAdapter.kt$com.lovelycatv.crystalframework.schedule.adapter.spring.SpringCronTaskAdapter.kt</ID>
+    <ID>NewLineAtEndOfFile:TaskExecutionContext.kt$com.lovelycatv.crystalframework.schedule.api.context.TaskExecutionContext.kt</ID>
+    <ID>NewLineAtEndOfFile:TaskRegisteredEvent.kt$com.lovelycatv.crystalframework.schedule.event.TaskRegisteredEvent.kt</ID>
+    <ID>NewLineAtEndOfFile:TaskRegistryInitializer.kt$com.lovelycatv.crystalframework.schedule.registry.TaskRegistryInitializer.kt</ID>
+    <ID>ReturnCount:SpringCronTaskAdapter.kt$SpringCronTaskAdapter$@EventListener fun onTaskRegistered(event: TaskRegisteredEvent)</ID>
+    <ID>TooGenericExceptionCaught:SnailJobTaskAdapter.kt$SnailJobTaskAdapter$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SpringCronTaskAdapter.kt$SpringCronTaskAdapter$e: Exception</ID>
+    <ID>UnusedPrivateProperty:SnailTaskExecutionContext.kt$SnailTaskExecutionContext$private val originalJobArgs: JobArgs</ID>
+  </CurrentIssues>
+</SmellBaseline>

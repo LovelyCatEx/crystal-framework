@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 class COSFileResourceServiceFactory(
     private val fileResourceService: FileResourceService,
 ) : FileResourceServiceFactory<COSFileResourceServiceImpl> {
-    override fun getStorageProviderType(): StorageProviderType {
-        return StorageProviderType.TENCENT_COS
+    override fun getStorageProviderTypeId(): Int {
+        return StorageProviderType.TENCENT_COS.typeId
     }
 
     override fun build(storageProvider: StorageProviderEntity): COSFileResourceServiceImpl {

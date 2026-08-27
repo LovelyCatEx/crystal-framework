@@ -78,9 +78,6 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED,
                 SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED,
                 SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS,
-                SystemSettingsConstants.Resource.Visibility.USER_AVATAR,
-                SystemSettingsConstants.Resource.Visibility.TENANT_ICON,
-                SystemSettingsConstants.Resource.Visibility.TENANT_MEMBER_AVATAR,
             )
         )
     }

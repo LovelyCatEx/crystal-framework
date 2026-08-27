@@ -4,7 +4,7 @@ import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
 import com.lovelycatv.crystalframework.resource.entity.StorageProviderEntity
 import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.AbstractFileResourceService
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.resource.utils.ResourceUrlSigner
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -28,6 +28,10 @@ class LocalFileResourceServiceImpl(
 ) : AbstractFileResourceService(storageProvider, fileResourceService) {
     private val logger = logger()
 
+    // Files are served by our own LocalFileResourceController: PUBLIC gets a stable URL,
+    // non-PUBLIC gets an HMAC-signed short-lived URL. See AbstractFileResourceService.usesVendorSignedUrl.
+    override val usesVendorSignedUrl: Boolean get() = false
+
     private val baseDirectory: Path by lazy {
         Paths.get(basePath).toAbsolutePath().normalize()
     }
@@ -41,7 +45,7 @@ class LocalFileResourceServiceImpl(
     }
 
     override suspend fun doUploadFile(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         fileLength: Long,
         fileContentType: String,
         fileNameWithExtension: String,

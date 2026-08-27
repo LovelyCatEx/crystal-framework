@@ -58,7 +58,7 @@ class LocalFileResourceController(
 
         val storageProvider = storageProviderService.getByIdOrThrow(fileResourceEntity.storageProviderId)
 
-        if (storageProvider.getRealStorageProviderType() != StorageProviderType.LOCAL_FILE_SYSTEM) {
+        if (storageProvider.type != StorageProviderType.LOCAL_FILE_SYSTEM.typeId) {
             throw BusinessException("This endpoint only supports local file system storage")
         }
 

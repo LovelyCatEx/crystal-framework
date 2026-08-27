@@ -9,8 +9,7 @@ import type {
     RuleEvaluationTraceVO,
     SimulationResultVO,
 } from "@/types/resource/storage-provider-routing-rule.types.ts";
-import {ResourceFileType} from "@/types/resource/file-resource.types.ts";
-import {getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {useResourceFileTypes} from "@/compositions/use-resource-file-types.ts";
 import {UserIdSelector} from "./selector/UserIdSelector.tsx";
 
 interface SimulateFormValues {
@@ -134,6 +133,7 @@ function SimulationResultPanel({result, t}: { result: SimulationResultVO; t: (ke
 
 export function SimulateRoutingButton() {
     const {t} = useTranslation();
+    const {types: resourceFileTypes} = useResourceFileTypes();
     const [open, setOpen] = useState(false);
     const [running, setRunning] = useState(false);
     const [result, setResult] = useState<SimulationResultVO | null>(null);
@@ -183,11 +183,7 @@ export function SimulateRoutingButton() {
             .catch(() => {});
     };
 
-    const fileTypeOptions = [
-        ResourceFileType.USER_AVATAR,
-        ResourceFileType.TENANT_ICON,
-        ResourceFileType.TENANT_MEMBER_AVATAR,
-    ].map((v) => ({value: v, label: getResourceFileType(v)}));
+    const fileTypeOptions = resourceFileTypes.map((d) => ({value: d.typeId, label: d.displayName}));
 
     return (
         <>

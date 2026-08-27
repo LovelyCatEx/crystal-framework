@@ -1,7 +1,7 @@
 package com.lovelycatv.crystalframework.resource.service
 
 import com.lovelycatv.crystalframework.resource.entity.FileResourceEntity
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.types.UserAuthentication
 import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 
@@ -9,8 +9,8 @@ import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
  * Central authority for deciding whether a viewer may read a given file resource.
  *
  * The decision is a pure function of three inputs:
- *  1. the resource's [ResourceFileType] → its configured [ResourceVisibility]
- *     (system-admin-configurable via system settings),
+ *  1. the resource's [ResourceFileTypeDeclaration] → its configured [ResourceVisibility]
+ *     (system-admin-configurable via system settings, per-type),
  *  2. the resource's own `scope` / `scopeId` ([FileResourceEntity] extends `BaseScopedEntity`),
  *  3. the viewer's [UserAuthentication] (null for anonymous requests).
  *
@@ -19,8 +19,10 @@ import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 interface ResourceAccessService {
     /**
      * Resolves the configured visibility policy for [fileType] from the cached system settings.
+     * Lookup order: `Resource.visibility.overrides[fileType.key]` first, then
+     * [ResourceFileTypeDeclaration.defaultVisibility] as fallback.
      */
-    fun resolveVisibility(fileType: ResourceFileType): ResourceVisibility
+    fun resolveVisibility(fileType: ResourceFileTypeDeclaration): ResourceVisibility
 
     /**
      * Resolves the validity window (in seconds) for signed download URLs from the cached system settings.

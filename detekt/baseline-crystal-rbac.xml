@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:TenantPermissionEntity.kt$TenantPermissionEntity$( id: Long = 0, @Column(value = "name") var name: String = "", @Column(value = "description") var description: String? = null, @Column(value = "type") var type: Int = TenantPermissionType.ACTION.typeId, @Column(value = "path") var path: String? = null, @Column(value = "preserved_1") var preserved1: Int? = null, @Column(value = "preserved_2") var preserved2: Int? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:TenantRoleEntity.kt$TenantRoleEntity$( id: Long = 0, tenantId: Long = 0, @Column(value = "name") var name: String = "", @Column(value = "description") var description: String? = null, @Column(value = "parent_id") @get:JsonSerialize(using = ToStringSerializer::class) var parentId: Long? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:TenantRoleManagerServiceImpl.kt$TenantRoleManagerServiceImpl$( private val tenantRoleRepository: TenantRoleRepository, private val snowIdGenerator: SnowIdGenerator, private val reactiveRedisService: ReactiveRedisService, override val eventPublisher: ApplicationEventPublisher, private val tenantRolePermissionRelationService: TenantRolePermissionRelationService, private val tenantRoleService: TenantRoleService, private val tenantMemberRoleRelationService: TenantMemberRoleRelationService, private val r2dbcEntityTemplate: R2dbcEntityTemplate, )</ID>
+    <ID>LongParameterList:UserPermissionEntity.kt$UserPermissionEntity$( id: Long = 0, @Column(value = "name") var name: String = "", @Column(value = "description") var description: String? = null, @Column(value = "type") var type: Int = PermissionType.ACTION.typeId, @Column(value = "path") var path: String? = null, @Column(value = "preserved_1") var preserved1: Int? = null, @Column(value = "preserved_2") var preserved2: Int? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
+    <ID>LongParameterList:UserRoleManagerServiceImpl.kt$UserRoleManagerServiceImpl$( private val userRoleRepository: UserRoleRepository, private val snowIdGenerator: SnowIdGenerator, private val reactiveRedisService: ReactiveRedisService, override val eventPublisher: ApplicationEventPublisher, private val userRoleRelationService: UserRoleRelationService, private val userRolePermissionRelationService: UserRolePermissionRelationService, private val r2dbcEntityTemplate: R2dbcEntityTemplate, )</ID>
+    <ID>MaxLineLength:CheckAndClearUnrelatedPermissionsTask.kt$CheckAndClearUnrelatedPermissionsTask$logger.debug("√ ${permission.name} is related to these roles: ${related.map { it.roleId }.joinToString()}")</ID>
+    <ID>MaxLineLength:ManagerTenantRolePermissionRelationController.kt$ManagerTenantRolePermissionRelationController$context = ForbiddenContext(reason = ForbiddenReason.SCOPE_MISMATCH, scope = ResourceScope.TENANT)</ID>
+    <ID>MaxLineLength:TenantMemberRoleRelationService.kt$TenantMemberRoleRelationService$interface</ID>
+    <ID>MaxLineLength:TenantPermissionManagerServiceImpl.kt$TenantPermissionManagerServiceImpl$override suspend</ID>
+    <ID>MaxLineLength:TenantRoleManagerServiceImpl.kt$TenantRoleManagerServiceImpl$override suspend</ID>
+    <ID>MaxLineLength:TenantRolePermissionRelationService.kt$TenantRolePermissionRelationService$interface</ID>
+    <ID>MaxLineLength:UserRbacQueryServiceImpl.kt$UserRbacQueryServiceImpl$override suspend</ID>
+    <ID>MaxLineLength:UserRolePermissionRelationService.kt$UserRolePermissionRelationService$interface</ID>
+    <ID>MaxLineLength:UserRolePermissionRelationServiceImpl.kt$UserRolePermissionRelationServiceImpl$context = ForbiddenContext(reason = ForbiddenReason.PERMISSION_ESCALATION, scope = ResourceScope.SYSTEM)</ID>
+    <ID>NestedBlockDepth:TenantPermissionManagerServiceImpl.kt$TenantPermissionManagerServiceImpl$override suspend fun applyDTOToEntity(dto: ManagerUpdateTenantPermissionDTO, original: TenantPermissionEntity): TenantPermissionEntity</ID>
+    <ID>NewLineAtEndOfFile:ManagerUpdatePermissionDTO.kt$com.lovelycatv.crystalframework.rbac.user.controller.manager.permission.dto.ManagerUpdatePermissionDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerUserRolePermissionController.kt$com.lovelycatv.crystalframework.rbac.user.controller.manager.permission.ManagerUserRolePermissionController.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerUserRoleRelationController.kt$com.lovelycatv.crystalframework.rbac.user.controller.manager.role.ManagerUserRoleRelationController.kt</ID>
+    <ID>NewLineAtEndOfFile:SetMemberRolesDTO.kt$com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.SetMemberRolesDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:SetRolePermissionsDTO.kt$com.lovelycatv.crystalframework.rbac.tenant.controller.manager.permission.dto.SetRolePermissionsDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:SetRolePermissionsDTO.kt$com.lovelycatv.crystalframework.rbac.user.controller.manager.permission.dto.SetRolePermissionsDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:SetUserRolesDTO.kt$com.lovelycatv.crystalframework.rbac.user.controller.manager.role.dto.SetUserRolesDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantMemberRoleRelationServiceImpl.kt$com.lovelycatv.crystalframework.rbac.tenant.service.manager.impl.TenantMemberRoleRelationServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:TenantRole.kt$com.lovelycatv.crystalframework.rbac.tenant.constants.TenantRole.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAccessibleMenuController.kt$com.lovelycatv.crystalframework.rbac.user.controller.UserAccessibleMenuController.kt</ID>
+    <ID>NewLineAtEndOfFile:UserAccessibleResourceVO.kt$com.lovelycatv.crystalframework.rbac.user.controller.vo.UserAccessibleResourceVO.kt</ID>
+    <ID>NewLineAtEndOfFile:UserPermissionManagerServiceImpl.kt$com.lovelycatv.crystalframework.rbac.user.service.impl.UserPermissionManagerServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserPermissionService.kt$com.lovelycatv.crystalframework.rbac.user.service.UserPermissionService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserPermissionServiceImpl.kt$com.lovelycatv.crystalframework.rbac.user.service.impl.UserPermissionServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRbacQueryResult.kt$com.lovelycatv.crystalframework.rbac.user.service.result.UserRbacQueryResult.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRbacQueryService.kt$com.lovelycatv.crystalframework.rbac.user.service.UserRbacQueryService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRbacQueryServiceImpl.kt$com.lovelycatv.crystalframework.rbac.user.service.impl.UserRbacQueryServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRolePermissionRelationEntity.kt$com.lovelycatv.crystalframework.rbac.user.entity.UserRolePermissionRelationEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRolePermissionRelationRepository.kt$com.lovelycatv.crystalframework.rbac.user.repository.UserRolePermissionRelationRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRolePermissionRelationService.kt$com.lovelycatv.crystalframework.rbac.user.service.UserRolePermissionRelationService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleRelationEntity.kt$com.lovelycatv.crystalframework.rbac.user.entity.UserRoleRelationEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleRelationRepository.kt$com.lovelycatv.crystalframework.rbac.user.repository.UserRoleRelationRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleRelationService.kt$com.lovelycatv.crystalframework.rbac.user.service.UserRoleRelationService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleRelationServiceImpl.kt$com.lovelycatv.crystalframework.rbac.user.service.impl.UserRoleRelationServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleService.kt$com.lovelycatv.crystalframework.rbac.user.service.UserRoleService.kt</ID>
+    <ID>NewLineAtEndOfFile:UserRoleServiceImpl.kt$com.lovelycatv.crystalframework.rbac.user.service.impl.UserRoleServiceImpl.kt</ID>
+    <ID>NewLineAtEndOfFile:UserTenantRbacQueryResult.kt$com.lovelycatv.crystalframework.rbac.user.service.result.UserTenantRbacQueryResult.kt</ID>
+    <ID>SpreadOperator:ManagerTenantPermissionController.kt$ManagerTenantPermissionController$(*required)</ID>
+    <ID>SpreadOperator:UserRbacQueryServiceImpl.kt$UserRbacQueryServiceImpl$(*(sliceKeys + indexKey).toTypedArray())</ID>
+    <ID>ThrowsCount:ManagerTenantRolePermissionRelationController.kt$ManagerTenantRolePermissionRelationController$@Audit( action = AuditAction.UPDATE, resourceType = TableConstants.TABLE_TENANT_ROLE_PERMISSION_RELATIONS, resourceIds = "#dto.roleId", ) @PostMapping("/set", version = "1") suspend fun setRolePermissions( userAuthentication: UserAuthentication, @RequestBody @Valid dto: SetRolePermissionsDTO ): ApiResponse&lt;*&gt;</ID>
+    <ID>TooGenericExceptionThrown:TenantPermissionManagerServiceImpl.kt$TenantPermissionManagerServiceImpl$throw RuntimeException("Could not create tenant permission")</ID>
+    <ID>TooGenericExceptionThrown:TenantRoleManagerServiceImpl.kt$TenantRoleManagerServiceImpl$throw RuntimeException("Could not create tenant role")</ID>
+    <ID>TooGenericExceptionThrown:UserRoleManagerServiceImpl.kt$UserRoleManagerServiceImpl$throw RuntimeException("Could not create role")</ID>
+    <ID>UnusedParameter:ManagerUserRolePermissionController.kt$ManagerUserRolePermissionController$userAuthentication: UserAuthentication</ID>
+    <ID>UnusedParameter:ManagerUserRoleRelationController.kt$ManagerUserRoleRelationController$userAuthentication: UserAuthentication</ID>
+    <ID>WildcardImport:ManagerTenantRolePermissionRelationController.kt$import org.springframework.web.bind.annotation.*</ID>
+    <ID>WildcardImport:ManagerUserRolePermissionController.kt$import org.springframework.web.bind.annotation.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

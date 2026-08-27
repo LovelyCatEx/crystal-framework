@@ -21,10 +21,14 @@ data class SystemSettings(
             val ttlSeconds: Long,
         )
 
+        /**
+         * Visibility overrides keyed by [com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration.key].
+         * Every registered file type contributes one entry at startup; runtime lookup is
+         * `overrides[decl.key] ?: decl.defaultVisibility`, so third-party types are honored on
+         * equal footing with the built-ins without hardcoding names here.
+         */
         data class Visibility(
-            val userAvatar: ResourceVisibility,
-            val tenantIcon: ResourceVisibility,
-            val tenantMemberAvatar: ResourceVisibility,
+            val overrides: Map<String, ResourceVisibility>,
         )
     }
 

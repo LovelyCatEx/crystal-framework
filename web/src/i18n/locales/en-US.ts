@@ -2350,9 +2350,9 @@ export const enUS: I18nRules = {
         'module.message.tenantScopeEnabled': 'Enable Tenant-Scope Messaging',
         'module.message.tenantDeskEnabled': 'Enable Tenant Service Desk',
         'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
-        'resource.visibility.userAvatar': 'User Avatar Visibility',
-        'resource.visibility.tenantIcon': 'Tenant Icon Visibility',
-        'resource.visibility.tenantMemberAvatar': 'Tenant Member Avatar Visibility',
+        'resource.visibility.builtin_user_avatar': 'User Avatar Visibility',
+        'resource.visibility.builtin_tenant_icon': 'Tenant Icon Visibility',
+        'resource.visibility.builtin_tenant_member_avatar': 'Tenant Member Avatar Visibility',
       },
       groups: {
         'basic': 'Basic Settings',
@@ -2393,27 +2393,6 @@ export const enUS: I18nRules = {
           'SYSTEM_NAME': 'System Name',
           'USER_NAME': 'User Name',
           'CUSTOM': 'Custom',
-        },
-        'resource.visibility.userAvatar': {
-          'PUBLIC': 'Public (anyone)',
-          'AUTHENTICATED': 'Authenticated users',
-          'SCOPE_MEMBER': 'Same-tenant members',
-          'OWNER_ONLY': 'Uploader only',
-          'SYSTEM_ADMIN': 'System admin only',
-        },
-        'resource.visibility.tenantIcon': {
-          'PUBLIC': 'Public (anyone)',
-          'AUTHENTICATED': 'Authenticated users',
-          'SCOPE_MEMBER': 'Same-tenant members',
-          'OWNER_ONLY': 'Uploader only',
-          'SYSTEM_ADMIN': 'System admin only',
-        },
-        'resource.visibility.tenantMemberAvatar': {
-          'PUBLIC': 'Public (anyone)',
-          'AUTHENTICATED': 'Authenticated users',
-          'SCOPE_MEMBER': 'Same-tenant members',
-          'OWNER_ONLY': 'Uploader only',
-          'SYSTEM_ADMIN': 'System admin only',
         },
       }
     },
@@ -4170,6 +4149,13 @@ export const enUS: I18nRules = {
     },
     broadcastCategory: {
       0: 'Announcement'
+    },
+    ResourceVisibility: {
+      PUBLIC: 'Public (anyone)',
+      AUTHENTICATED: 'Authenticated users',
+      SCOPE_MEMBER: 'Same-tenant members',
+      OWNER_ONLY: 'Uploader only',
+      SYSTEM_ADMIN: 'System admin only',
     }
   },
 

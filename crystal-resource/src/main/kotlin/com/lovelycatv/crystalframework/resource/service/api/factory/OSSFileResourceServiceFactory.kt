@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 class OSSFileResourceServiceFactory(
     private val fileResourceService: FileResourceService,
 ) : FileResourceServiceFactory<OSSFileResourceServiceImpl> {
-    override fun getStorageProviderType(): StorageProviderType {
-        return StorageProviderType.ALIYUN_OSS
+    override fun getStorageProviderTypeId(): Int {
+        return StorageProviderType.ALIYUN_OSS.typeId
     }
 
     override fun build(storageProvider: StorageProviderEntity): OSSFileResourceServiceImpl {

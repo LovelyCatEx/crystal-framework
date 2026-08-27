@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:SystemSettingsBuiltinConfigurer.kt$SystemSettingsBuiltinConfigurer$override fun configure(registry: SystemSettingsRegistry)</ID>
+    <ID>LongMethod:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$override suspend fun updateSystemSettings(settings: SystemSettings)</ID>
+    <ID>LongParameterList:AnnouncementEntity.kt$AnnouncementEntity$( id: Long = 0, @Column("title") var title: String = "", @Column("content") var content: String = "", @Column("status") var status: Int = 0, @Column("target") var target: Int = 2, @Column("priority") var priority: Int = 0, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null, )</ID>
+    <ID>LongParameterList:DashboardStatsProviderImpl.kt$DashboardStatsProviderImpl$( private val userRepository: UserRepository, private val tenantRepository: TenantRepository, private val tenantMemberRepository: TenantMemberRepository, private val fileResourceRepository: FileResourceRepository, private val tenantInvitationRepository: TenantInvitationRepository, private val tenantInvitationRecordRepository: TenantInvitationRecordRepository, private val oAuthAccountRepository: OAuthAccountRepository, private val mailSendLogRepository: MailSendLogRepository, )</ID>
+    <ID>LongParameterList:ManagerSystemSettingsController.kt$ManagerSystemSettingsController$( private val systemSettingsService: SystemSettingsService, private val systemSettingsRegistry: SystemSettingsRegistry, private val mailService: MailService, private val messageChannelService: MessageChannelService, private val systemChannelConfigProvider: SystemChannelConfigProvider, private val jsonMapper: JsonMapper, private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration, )</ID>
+    <ID>LongParameterList:SystemInitializeService.kt$SystemInitializeService$( initializationToken: String?, username: String, password: String, email: String, smtpHost: String, smtpPort: Int, smtpUsername: String, smtpPassword: String, fromEmail: String, fromName: String )</ID>
+    <ID>LongParameterList:SystemInitializeTransactionService.kt$SystemInitializeTransactionService$( username: String, password: String, email: String, smtpHost: String, smtpPort: Int, smtpUsername: String, smtpPassword: String, fromEmail: String, fromName: String, )</ID>
+    <ID>LongParameterList:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$( private val systemSettingsRepository: SystemSettingsRepository, private val snowIdGenerator: SnowIdGenerator, private val reactiveRedisService: ReactiveRedisService, private val reactiveRedisTemplate: ReactiveRedisTemplate&lt;String, Any&gt;, private val redisMessageListenerContainer: ReactiveRedisMessageListenerContainer, private val systemSettingsRegistry: SystemSettingsRegistry, private val resourceFileTypeRegistry: ResourceFileTypeRegistry, override val eventPublisher: ApplicationEventPublisher, )</ID>
+    <ID>MagicNumber:ResourceVisibilitySystemSettingsConfigurer.kt$ResourceVisibilitySystemSettingsConfigurer$100</ID>
+    <ID>MagicNumber:SystemInitializeConstants.kt$SystemInitializeConstants$5</ID>
+    <ID>MaxLineLength:ManagerTestSendMessageDTO.kt$ManagerTestSendMessageDTO$*</ID>
+    <ID>MaxLineLength:ManagerTestSendMessageResultVO.kt$ManagerTestSendMessageResultVO$*</ID>
+    <ID>MaxLineLength:SystemInitializeDTO.kt$SystemInitializeDTO$@field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "Password must be at least 8 characters and contain both letters and numbers")</ID>
+    <ID>MaxLineLength:SystemSettingsConstants.kt$SystemSettingsConstants.Security.Outbound$defaultValue = """["*.gmail.com","*.googlemail.com","*.outlook.com","*.office365.com","*.yahoo.com","*.qq.com","*.163.com","*.126.com","*.sina.com","*.aliyun.com","*.zoho.com","*.me.com"]"""</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockBaseSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockMaxSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockThreshold = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerAccount = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerIp = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxPerEmail = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$securityLevel = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA, settings.bootstrap.autoCheckRbacTableData.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED, settings.module.messageSystemPeerEnabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED, settings.module.messageTenantDeskEnabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED, settings.module.messageTenantScopeEnabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS, settings.resource.signedUrl.ttlSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.ENABLED, settings.security.emailCodeRateLimit.enabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL, settings.security.emailCodeRateLimit.maxGlobal.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL, settings.security.emailCodeRateLimit.maxPerEmail.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP, settings.security.emailCodeRateLimit.maxPerIp.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS, settings.security.emailCodeRateLimit.windowSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.ENABLED, settings.security.loginRateLimit.enabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS, settings.security.loginRateLimit.lockBaseSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS, settings.security.loginRateLimit.lockMaxSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD, settings.security.loginRateLimit.lockThreshold.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT, settings.security.loginRateLimit.maxAttemptsPerAccount.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP, settings.security.loginRateLimit.maxAttemptsPerIp.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS, settings.security.loginRateLimit.windowSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS, settings.security.outbound.allowedHosts.toJSONString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS, settings.security.outbound.allowedSmtpHosts.toJSONString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$windowSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$windowSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS)!!.toInt()</ID>
+    <ID>NewLineAtEndOfFile:AuditConfig.kt$com.lovelycatv.crystalframework.system.config.AuditConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:LivenessController.kt$com.lovelycatv.crystalframework.system.controller.LivenessController.kt</ID>
+    <ID>NewLineAtEndOfFile:ManagerSystemSettingsController.kt$com.lovelycatv.crystalframework.system.controller.manager.ManagerSystemSettingsController.kt</ID>
+    <ID>NewLineAtEndOfFile:ReadinessController.kt$com.lovelycatv.crystalframework.system.controller.ReadinessController.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemInitializeController.kt$com.lovelycatv.crystalframework.system.controller.SystemInitializeController.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemInitializeDTO.kt$com.lovelycatv.crystalframework.system.controller.dto.SystemInitializeDTO.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemInitializeService.kt$com.lovelycatv.crystalframework.system.service.SystemInitializeService.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemIntegratedInfoController.kt$com.lovelycatv.crystalframework.system.controller.SystemIntegratedInfoController.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemMaintenanceGuardFilter.kt$com.lovelycatv.crystalframework.system.filter.SystemMaintenanceGuardFilter.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettingsConstants.kt$com.lovelycatv.crystalframework.system.constants.SystemSettingsConstants.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettingsEntity.kt$com.lovelycatv.crystalframework.system.entity.SystemSettingsEntity.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettingsRepository.kt$com.lovelycatv.crystalframework.system.repository.SystemSettingsRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettingsService.kt$com.lovelycatv.crystalframework.system.service.SystemSettingsService.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemSettingsServiceImpl.kt$com.lovelycatv.crystalframework.system.service.impl.SystemSettingsServiceImpl.kt</ID>
+    <ID>ReturnCount:ManagerSystemSettingsController.kt$ManagerSystemSettingsController$@Audit(action = AuditAction.READ, resourceType = TableConstants.TABLE_SYSTEM_SETTINGS) @RequiresAuthority(anyOf = ["system.settings.test.sendMessage"], scope = ResourceScope.SYSTEM) @PostMapping("/test-send-message") suspend fun testSendMessage( userAuthentication: UserAuthentication, @RequestBody @Valid dto: ManagerTestSendMessageDTO, ): ApiResponse&lt;ManagerTestSendMessageResultVO&gt;</ID>
+    <ID>TooGenericExceptionCaught:ManagerSystemSettingsController.kt$ManagerSystemSettingsController$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SystemInitializeServiceImpl.kt$SystemInitializeServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:SystemInitializeTransactionServiceImpl.kt$SystemInitializeTransactionServiceImpl$throw RuntimeException("Could not create root user")</ID>
+    <ID>TooManyFunctions:SystemSettingsService.kt$SystemSettingsService : CachedBaseService</ID>
+    <ID>TooManyFunctions:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl : SystemSettingsService</ID>
+    <ID>UnusedParameter:ManagerSystemSettingsController.kt$ManagerSystemSettingsController$userAuthentication: UserAuthentication</ID>
+    <ID>WildcardImport:ManagerSystemSettingsController.kt$import org.springframework.web.bind.annotation.*</ID>
+    <ID>WildcardImport:ReadinessController.kt$import org.springframework.web.bind.annotation.*</ID>
+    <ID>WildcardImport:SystemInitializeController.kt$import org.springframework.web.bind.annotation.*</ID>
+    <ID>WildcardImport:SystemInitializeDTO.kt$import jakarta.validation.constraints.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -16,8 +16,8 @@ class LocalFileResourceServiceFactory(
     private val systemModuleClient: SystemModuleClient,
     private val resourceUrlSigner: ResourceUrlSigner,
 ) : FileResourceServiceFactory<LocalFileResourceServiceImpl> {
-    override fun getStorageProviderType(): StorageProviderType {
-        return StorageProviderType.LOCAL_FILE_SYSTEM
+    override fun getStorageProviderTypeId(): Int {
+        return StorageProviderType.LOCAL_FILE_SYSTEM.typeId
     }
 
     override fun build(storageProvider: StorageProviderEntity): LocalFileResourceServiceImpl {

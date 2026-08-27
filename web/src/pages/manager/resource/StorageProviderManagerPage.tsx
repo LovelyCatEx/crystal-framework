@@ -5,10 +5,11 @@ import {
     type ManagerReadStorageProviderDTO,
     StorageProviderManagerController
 } from "@/api/resource/storage-provider.api.ts";
-import React, {useEffect, useRef} from "react";
-import {type StorageProvider, StorageProviderType} from "@/types/resource/storage-provider.types.ts";
+import React, {useEffect, useMemo, useRef} from "react";
+import type {StorageProvider} from "@/types/resource/storage-provider.types.ts";
 import {StorageProviderConfigEditor} from "@/components/editor/StorageProviderConfigEditor.tsx";
 import {useStorageProviderTableColumns} from "@/components/columns/StorageProviderEntityColumns.tsx";
+import {useStorageProviderTypes} from "@/compositions/use-storage-provider-types.ts";
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
 
@@ -19,6 +20,12 @@ export default function StorageProviderManagerPage() {
     });
     const {t} = useTranslation();
     const baseColumns = useStorageProviderTableColumns();
+    const {types, getLabel} = useStorageProviderTypes();
+
+    const typeOptions = useMemo(
+        () => types.map(decl => ({value: decl.typeId, label: getLabel(decl.typeId)})),
+        [types, getLabel],
+    );
 
     useEffect(() => {
         pageRef?.current?.refreshData?.({ resetPage: true })
@@ -59,12 +66,7 @@ export default function StorageProviderManagerPage() {
                     value={value !== undefined ? String(value) : undefined}
                     allowClear
                     placeholder={t('pages.storageProviderManager.filter.all')}
-                    options={[
-                        { value: String(StorageProviderType.LOCAL_FILE_SYSTEM), label: t('pages.storageProviderManager.modal.type.localFileSystem') },
-                        { value: String(StorageProviderType.ALIYUN_OSS), label: t('pages.storageProviderManager.modal.type.aliyunOss') },
-                        { value: String(StorageProviderType.TENCENT_COS), label: t('pages.storageProviderManager.modal.type.tencentCos') },
-                        { value: String(StorageProviderType.VOLCENGINE_TOS), label: t('pages.storageProviderManager.modal.type.volcEngineTos') },
-                    ]}
+                    options={typeOptions.map(o => ({ value: String(o.value), label: o.label }))}
                     onChange={(v) => onChange(v !== undefined ? Number(v) : undefined)}
                 />
             ),
@@ -99,24 +101,7 @@ export default function StorageProviderManagerPage() {
                                 <Select
                                     className="w-full rounded-lg h-10 flex items-center"
                                     placeholder={t('pages.storageProviderManager.modal.type.placeholder')}
-                                    options={[
-                                        {
-                                            label: t('pages.storageProviderManager.modal.type.localFileSystem'),
-                                            value: StorageProviderType.LOCAL_FILE_SYSTEM,
-                                        },
-                                        {
-                                            label: t('pages.storageProviderManager.modal.type.aliyunOss'),
-                                            value: StorageProviderType.ALIYUN_OSS,
-                                        },
-                                        {
-                                            label: t('pages.storageProviderManager.modal.type.tencentCos'),
-                                            value: StorageProviderType.TENCENT_COS,
-                                        },
-                                        {
-                                            label: t('pages.storageProviderManager.modal.type.volcEngineTos'),
-                                            value: StorageProviderType.VOLCENGINE_TOS,
-                                        }
-                                    ]}
+                                    options={typeOptions}
                                 />
                             </Form.Item>
                         </Col>
@@ -163,22 +148,7 @@ export default function StorageProviderManagerPage() {
                         style={{ width: 120 }}
                         options={[
                             { value: '-1', label: t('pages.storageProviderManager.filter.all') },
-                            {
-                                label: t('pages.storageProviderManager.modal.type.localFileSystem'),
-                                value: StorageProviderType.LOCAL_FILE_SYSTEM,
-                            },
-                            {
-                                label: t('pages.storageProviderManager.modal.type.aliyunOss'),
-                                value: StorageProviderType.ALIYUN_OSS,
-                            },
-                            {
-                                label: t('pages.storageProviderManager.modal.type.tencentCos'),
-                                value: StorageProviderType.TENCENT_COS,
-                            },
-                            {
-                                label: t('pages.storageProviderManager.modal.type.volcEngineTos'),
-                                value: StorageProviderType.VOLCENGINE_TOS,
-                            }
+                            ...typeOptions.map(o => ({ value: String(o.value), label: o.label })),
                         ]}
                         onChange={(value) => setFilter('type', value === '-1' ? undefined : Number.parseInt(value))}
                     />,

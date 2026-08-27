@@ -6,8 +6,8 @@ import com.lovelycatv.crystalframework.resource.service.FileResourceService
 import com.lovelycatv.crystalframework.resource.service.api.result.FileUploadResult
 import com.lovelycatv.crystalframework.resource.types.FileResourceServiceProperties
 import com.lovelycatv.crystalframework.resource.types.FileResourceStatus
-import com.lovelycatv.crystalframework.resource.types.ResourceFileType
 import com.lovelycatv.crystalframework.resource.types.StorageProviderType
+import com.lovelycatv.crystalframework.sdk.resource.file.types.ResourceFileTypeDeclaration
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.types.common.ResourceVisibility
 import com.lovelycatv.crystalframework.shared.utils.FileMD5Utils
@@ -38,8 +38,22 @@ abstract class AbstractFileResourceService(
         return this.storageProvider.getRealStorageProviderType()
     }
 
-    open fun buildObjectKey(fileType: ResourceFileType, fileNameWithExtension: String): String {
-        val key = "${fileType.name.lowercase()}$OBJECT_KEY_SEPARATOR$fileNameWithExtension"
+    /**
+     * Whether this provider mints its own short-lived credentialed URL (a vendor pre-signed GET URL)
+     * for non-public resources. Cloud storage impls (OSS/COS/TOS) return `true` — we forward every
+     * non-PUBLIC read through their pre-signed URL for defense-in-depth even if the bucket/CDN would
+     * allow anonymous reads. Impls that serve files through our own controller (the local filesystem,
+     * see [com.lovelycatv.crystalframework.resource.service.api.impl.LocalFileResourceServiceImpl])
+     * override this to `false` so PUBLIC resources keep a stable cacheable URL and only non-PUBLIC
+     * reads get an HMAC signature.
+     *
+     * Override hook (see CLAUDE.md 最小影响面原则): keeps the visibility branching centralized in
+     * [buildDownloadUrl] here while letting each impl decide how to serve public resources.
+     */
+    protected open val usesVendorSignedUrl: Boolean get() = true
+
+    open fun buildObjectKey(fileType: ResourceFileTypeDeclaration, fileNameWithExtension: String): String {
+        val key = "${fileType.objectKeyPrefix}$OBJECT_KEY_SEPARATOR$fileNameWithExtension"
         val prefix = this.basePath.trim().trim(OBJECT_KEY_SEPARATOR)
         return if (prefix.isEmpty()) key else "$prefix$OBJECT_KEY_SEPARATOR$key"
     }
@@ -79,19 +93,20 @@ abstract class AbstractFileResourceService(
         visibility: ResourceVisibility,
         signedUrlTtlSeconds: Long,
     ): String {
-        return if (this.storageProvider.getRealStorageProviderType() == StorageProviderType.LOCAL_FILE_SYSTEM) {
-            when (visibility) {
-                ResourceVisibility.PUBLIC ->
-                    buildPublicDownloadUrl(entity)
-                ResourceVisibility.AUTHENTICATED,
-                ResourceVisibility.SCOPE_MEMBER,
-                ResourceVisibility.OWNER_ONLY,
-                ResourceVisibility.SYSTEM_ADMIN ->
-                    buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
-            }
-        } else {
-            // For safety, force using presigned s3 url
-            buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+        // Vendor-signing impls force every read (public included) through a pre-signed URL —
+        // defense-in-depth against a misconfigured bucket/CDN. Controller-served impls (local
+        // filesystem) split by visibility instead so PUBLIC keeps a stable cacheable URL.
+        if (this.usesVendorSignedUrl) {
+            return buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
+        }
+        return when (visibility) {
+            ResourceVisibility.PUBLIC ->
+                buildPublicDownloadUrl(entity)
+            ResourceVisibility.AUTHENTICATED,
+            ResourceVisibility.SCOPE_MEMBER,
+            ResourceVisibility.OWNER_ONLY,
+            ResourceVisibility.SYSTEM_ADMIN ->
+                buildSignedDownloadUrl(entity, signedUrlTtlSeconds)
         }
     }
 
@@ -113,7 +128,7 @@ abstract class AbstractFileResourceService(
         userId: Long,
         scope: ResourceScope,
         scopeId: Long,
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         filePart: FilePart,
         targetFileName: String,
         progressReporter: ((Int) -> Unit)? = null
@@ -136,7 +151,7 @@ abstract class AbstractFileResourceService(
         userId: Long,
         scope: ResourceScope,
         scopeId: Long,
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         fileNameWithExtension: String,
         fileLength: Long,
         inputStream: InputStream,
@@ -246,7 +261,7 @@ abstract class AbstractFileResourceService(
     abstract suspend fun deleteObject(objectKey: String): Exception?
 
     protected abstract suspend fun doUploadFile(
-        fileType: ResourceFileType,
+        fileType: ResourceFileTypeDeclaration,
         fileLength: Long,
         fileContentType: String,
         fileNameWithExtension: String,

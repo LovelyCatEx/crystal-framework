@@ -1,5 +1,5 @@
 import {BaseManagerController} from "../BaseManagerController.ts";
-import type {FileResource} from "@/types/resource/file-resource.types.ts";
+import type {FileResource, ResourceFileTypeDeclaration} from "@/types/resource/file-resource.types.ts";
 import type {BaseManagerReadScopedDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import {doGet} from "../system-request.ts";
 
@@ -40,4 +40,9 @@ export interface ManagerReadFileResourceDTO extends BaseManagerReadScopedDTO {
 
 export function getResourceFileDownloadUrlById(fileEntityId: string) {
     return doGet<string | null>('/api/file-resource/downloadUrl', { id: fileEntityId });
+}
+
+export function getResourceFileTypes(): Promise<ResourceFileTypeDeclaration[]> {
+    return doGet<ResourceFileTypeDeclaration[]>('/api/manager/file-resource/types')
+        .then(r => r.data ?? []);
 }

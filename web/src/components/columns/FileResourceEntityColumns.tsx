@@ -2,7 +2,8 @@ import React, {type JSX} from "react";
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {FileResource} from "@/types/resource/file-resource.types.ts";
-import {getFileResourceStatus, getResourceFileType} from "@/i18n/enum-helpers.ts";
+import {getFileResourceStatus} from "@/i18n/enum-helpers.ts";
+import {useResourceFileTypes} from "@/compositions/use-resource-file-types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useSWRComposition} from "@/compositions/use-swr.ts";
 import {StorageProviderManagerController} from "@/api/resource/storage-provider.api.ts";
@@ -90,6 +91,7 @@ function UserCell({ userId }: { userId: string }) {
 
 export function useFileResourceTableColumns(): EntityTableColumns<FileResource> {
     const { t } = useTranslation();
+    const { getLabel: getResourceFileType } = useResourceFileTypes();
 
     return [
         {

@@ -18,6 +18,7 @@ suspend fun buildSettingsSchemaResponse(
             "value" to exposedValue,
             "defaultValue" to exposedDefaultValue,
             "enumValues" to d.enumValues,
+            "enumTypeKey" to d.enumTypeKey,
             "isSecret" to d.isSecret,
             "hasValue" to hasValue,
             "tab" to d.key.takeIf { "." in it }?.substringBefore("."),

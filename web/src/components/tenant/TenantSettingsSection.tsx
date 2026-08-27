@@ -143,8 +143,10 @@ export function TenantSettingsSection() {
                 tabTranslationMap={tenantSettingsTabToTranslationMap}
                 groupTranslationMap={tenantSettingsGroupToTranslationMap}
                 keyTranslationMap={tenantSettingsKeyToTranslationMap}
-                enumTranslator={(key, value) =>
-                    t(`pages.tenantSettingsManager.enums.${key}.${value}`)
+                enumTranslator={(key, value, enumTypeKey) =>
+                    enumTypeKey
+                        ? t(`enums.${enumTypeKey}.${value}` as never) as string
+                        : t(`pages.tenantSettingsManager.enums.${key}.${value}`)
                 }
                 itemRenderers={itemRenderers}
                 groupExtraRenderers={groupExtraRenderers}
