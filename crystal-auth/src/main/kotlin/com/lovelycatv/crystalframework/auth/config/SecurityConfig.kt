@@ -27,6 +27,7 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
@@ -58,7 +59,7 @@ class SecurityConfig(
     @Order(1)
     fun managementSecurityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         return http
-            .securityMatcher(org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher("/actuator/**"))
+            .securityMatcher(PathPatternParserServerWebExchangeMatcher("/actuator/**"))
             .csrf { it.disable() }
             .authorizeExchange { it.anyExchange().permitAll() }
             .build()
