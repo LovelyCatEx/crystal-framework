@@ -150,5 +150,6 @@ data class SystemSettings(
         val messageSystemPeerEnabled: Boolean,
         val messageTenantScopeEnabled: Boolean,
         val messageTenantDeskEnabled: Boolean,
+        val webSocketEnabled: Boolean,
     )
 }

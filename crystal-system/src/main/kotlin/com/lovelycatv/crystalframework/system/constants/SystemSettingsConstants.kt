@@ -491,6 +491,13 @@ object SystemSettingsConstants {
             defaultValue = true.toString(),
             sort = 4
         )
+
+        val WEBSOCKET_ENABLED = SettingsItemDeclaration(
+            key = "module.webSocket.enabled",
+            valueType = SettingsItemValueType.BOOLEAN,
+            defaultValue = true.toString(),
+            sort = 5
+        )
     }
 
     object Resource {

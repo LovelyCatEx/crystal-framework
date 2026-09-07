@@ -77,6 +77,7 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED,
                 SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED,
                 SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED,
+                SystemSettingsConstants.Module.WEBSOCKET_ENABLED,
                 SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS,
             )
         )

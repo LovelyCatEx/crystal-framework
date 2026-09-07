@@ -30,7 +30,8 @@ import kotlin.math.log
 class WebSocketGatewayHandler(
     private val handlerProvider: ObjectProvider<WebSocketChannelHandler>,
     private val objectMapper: ObjectMapper,
-    private val jwtSignKeyProvider: JWTSignKeyProvider
+    private val jwtSignKeyProvider: JWTSignKeyProvider,
+    private val systemSettingsServiceProvider: ObjectProvider<Any>
 ) : WebSocketHandler {
 
     private val logger = logger()
@@ -45,6 +46,30 @@ class WebSocketGatewayHandler(
     }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
+        // Check if WebSocket is enabled via system settings
+        return Mono.fromCallable {
+            try {
+                val systemSettingsService = systemSettingsServiceProvider.getObject()
+                val getSystemModuleSettingsMethod = systemSettingsService.javaClass.getMethod("getSystemModuleSettings")
+                val moduleSettings = getSystemModuleSettingsMethod.invoke(systemSettingsService)
+                val webSocketEnabledField = moduleSettings.javaClass.getDeclaredField("webSocketEnabled")
+                webSocketEnabledField.isAccessible = true
+                webSocketEnabledField.getBoolean(moduleSettings)
+            } catch (e: Exception) {
+                logger.warn("Failed to check WebSocket enabled status, allowing connection by default: ${e.message}")
+                true // Fallback: allow connection if check fails
+            }
+        }.flatMap { webSocketEnabled ->
+            if (!webSocketEnabled) {
+                logger.warn("WebSocket connection rejected: WebSocket is disabled in system settings")
+                sendErrorAndClose(session, "WebSocket service is disabled")
+            } else {
+                handleWebSocketSession(session)
+            }
+        }
+    }
+
+    private fun handleWebSocketSession(session: WebSocketSession): Mono<Void> {
         // Try to extract token from query param (may be empty)
         val token = session.handshakeInfo.uri.rawQuery
             ?.split("&")
