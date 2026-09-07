@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getAccessToken } from '@/utils/token';
+import { getUserAuthentication } from '@/utils/token.utils';
 
 /**
  * WebSocket message structure
@@ -74,9 +74,9 @@ export function useWebSocketConnection(
 
     // Anonymous mode does not pass token
     if (!options?.anonymous) {
-      const token = getAccessToken();
-      if (token) {
-        url += `?token=${encodeURIComponent(token)}`;
+      const auth = getUserAuthentication();
+      if (auth?.token) {
+        url += `?token=${encodeURIComponent(auth.token)}`;
       }
     }
 
