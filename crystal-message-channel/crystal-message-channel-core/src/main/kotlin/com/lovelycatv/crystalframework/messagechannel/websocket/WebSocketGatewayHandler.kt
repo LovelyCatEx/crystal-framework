@@ -4,34 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsAuthContext
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsInboundMessage
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsOutboundMessage
+import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.auth.JWTSignKeyProvider
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.vertex.log.logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
-import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.WebSocketSession
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import kotlin.math.log
 
 /**
  * WebSocket Gateway unified entry point
  *
  * Responsibilities:
- * 1. Decide whether to authenticate based on Handler's requiresAuth
- * 2. Parse messages and route to corresponding Handler
- * 3. Handle errors and return structured error messages
+ * 1. Check if WebSocket is enabled via system settings
+ * 2. Decide whether to authenticate based on Handler's requiresAuth
+ * 3. Parse messages and route to corresponding Handler
+ * 4. Handle errors and return structured error messages
  */
 @Component
 class WebSocketGatewayHandler(
-    private val handlerProvider: ObjectProvider<WebSocketChannelHandler>,
+    handlerProvider: ObjectProvider<WebSocketChannelHandler>,
     private val objectMapper: ObjectMapper,
     private val jwtSignKeyProvider: JWTSignKeyProvider,
-    private val systemSettingsServiceProvider: ObjectProvider<Any>
+    private val systemModuleClient: SystemModuleClient,
 ) : WebSocketHandler {
 
     private val logger = logger()
@@ -47,29 +45,12 @@ class WebSocketGatewayHandler(
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         // Check if WebSocket is enabled via system settings
-        return Mono.fromCallable {
-            try {
-                val systemSettingsService = systemSettingsServiceProvider.getObject()
-                val getSystemModuleSettingsMethod = systemSettingsService.javaClass.getMethod("getSystemModuleSettings")
-                val moduleSettings = getSystemModuleSettingsMethod.invoke(systemSettingsService)
-                val webSocketEnabledField = moduleSettings.javaClass.getDeclaredField("webSocketEnabled")
-                webSocketEnabledField.isAccessible = true
-                webSocketEnabledField.getBoolean(moduleSettings)
-            } catch (e: Exception) {
-                logger.warn("Failed to check WebSocket enabled status, allowing connection by default: ${e.message}")
-                true // Fallback: allow connection if check fails
-            }
-        }.flatMap { webSocketEnabled ->
-            if (!webSocketEnabled) {
-                logger.warn("WebSocket connection rejected: WebSocket is disabled in system settings")
-                sendErrorAndClose(session, "WebSocket service is disabled")
-            } else {
-                handleWebSocketSession(session)
-            }
+        val systemSettings = systemModuleClient.getSystemSettings()
+        if (systemSettings?.module?.webSocketEnabled == false) {
+            logger.warn("WebSocket connection rejected: WebSocket is disabled in system settings")
+            return sendErrorAndClose(session, "WebSocket service is currently disabled")
         }
-    }
 
-    private fun handleWebSocketSession(session: WebSocketSession): Mono<Void> {
         // Try to extract token from query param (may be empty)
         val token = session.handshakeInfo.uri.rawQuery
             ?.split("&")
