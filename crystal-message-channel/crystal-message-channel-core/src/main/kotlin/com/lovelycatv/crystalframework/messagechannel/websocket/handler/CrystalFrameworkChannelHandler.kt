@@ -4,6 +4,7 @@ import com.lovelycatv.crystalframework.messagechannel.websocket.WebSocketChannel
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsAuthContext
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsInboundMessage
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsOutboundMessage
+import com.lovelycatv.crystalframework.shared.constants.WebSocketChannelConstants
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -15,7 +16,7 @@ import reactor.core.publisher.Mono
 @Component
 class CrystalFrameworkChannelHandler : WebSocketChannelHandler {
 
-    override val channelName = "crystal-framework"
+    override val channelName = WebSocketChannelConstants.CRYSTAL_FRAMEWORK
     override val requiresAuth = true
 
     override fun handle(authContext: WsAuthContext?, message: WsInboundMessage): Mono<WsOutboundMessage> {

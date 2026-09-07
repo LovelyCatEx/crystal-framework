@@ -21,6 +21,12 @@ export interface UseWebSocketConnectionOptions {
   anonymous?: boolean;
 
   /**
+   * Whether to enable the connection
+   * @default true
+   */
+  enabled?: boolean;
+
+  /**
    * Callback when connected
    */
   onConnected?: () => void;
@@ -60,20 +66,41 @@ export function useWebSocketConnection(
   const wsRef = useRef<WebSocket | null>(null);
   const channelNameRef = useRef(channelName);
 
+  // Extract stable values from options
+  const enabled = options?.enabled;
+  const anonymous = options?.anonymous;
+
+  // Use refs for callbacks to avoid re-creating WebSocket on callback changes
+  const onConnectedRef = useRef(options?.onConnected);
+  const onDisconnectedRef = useRef(options?.onDisconnected);
+  const onErrorRef = useRef(options?.onError);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onConnectedRef.current = options?.onConnected;
+    onDisconnectedRef.current = options?.onDisconnected;
+    onErrorRef.current = options?.onError;
+  }, [options?.onConnected, options?.onDisconnected, options?.onError]);
+
   // Update channelName ref
   useEffect(() => {
     channelNameRef.current = channelName;
   }, [channelName]);
 
   useEffect(() => {
+    // Only connect if enabled
+    if (enabled === false) {
+      return;
+    }
+
     // Build WebSocket URL
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
 
-    let url = `${protocol}//${host}/api/v1/ws`;
+    let url = `${protocol}//${host}/ws`;
 
     // Anonymous mode does not pass token
-    if (!options?.anonymous) {
+    if (!anonymous) {
       const auth = getUserAuthentication();
       if (auth?.token) {
         url += `?token=${encodeURIComponent(auth.token)}`;
@@ -84,7 +111,7 @@ export function useWebSocketConnection(
 
     ws.onopen = () => {
       setConnected(true);
-      options?.onConnected?.();
+      onConnectedRef.current?.();
 
       // Auto subscribe to channel
       ws.send(JSON.stringify({
@@ -108,12 +135,12 @@ export function useWebSocketConnection(
 
     ws.onclose = () => {
       setConnected(false);
-      options?.onDisconnected?.();
+      onDisconnectedRef.current?.();
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      options?.onError?.(error);
+      onErrorRef.current?.(error);
       setConnected(false);
     };
 
@@ -129,7 +156,7 @@ export function useWebSocketConnection(
       }
       ws.close();
     };
-  }, [channelName, options?.anonymous]);
+  }, [channelName, enabled, anonymous]);
 
   /**
    * Send message to current channel
