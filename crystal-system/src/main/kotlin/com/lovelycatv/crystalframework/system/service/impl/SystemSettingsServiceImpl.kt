@@ -179,6 +179,15 @@ class SystemSettingsServiceImpl(
                 maxPerEmail = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt(),
                 maxGlobal = getSettings<Long>(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL)!!.toInt(),
             ),
+            webSocketAuthRateLimit = SystemSettings.Security.WebSocketAuthRateLimit(
+                enabled = getSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.ENABLED)!!,
+                windowSeconds = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.WINDOW_SECONDS)!!.toInt(),
+                maxAttemptsPerIp = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt(),
+                maxAttemptsPerAccount = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt(),
+                lockThreshold = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_THRESHOLD)!!.toInt(),
+                lockBaseSeconds = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_BASE_SECONDS)!!.toInt(),
+                lockMaxSeconds = getSettings<Long>(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_MAX_SECONDS)!!.toInt(),
+            ),
             outbound = SystemSettings.Security.Outbound(
                 allowedHosts = getSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS)!!,
                 allowedSmtpHosts = getSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS)!!,
@@ -294,6 +303,13 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_IP, settings.security.emailCodeRateLimit.maxPerIp.toString())
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL, settings.security.emailCodeRateLimit.maxPerEmail.toString())
         setSettings(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_GLOBAL, settings.security.emailCodeRateLimit.maxGlobal.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.ENABLED, settings.security.webSocketAuthRateLimit.enabled.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.WINDOW_SECONDS, settings.security.webSocketAuthRateLimit.windowSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_IP, settings.security.webSocketAuthRateLimit.maxAttemptsPerIp.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_ACCOUNT, settings.security.webSocketAuthRateLimit.maxAttemptsPerAccount.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_THRESHOLD, settings.security.webSocketAuthRateLimit.lockThreshold.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_BASE_SECONDS, settings.security.webSocketAuthRateLimit.lockBaseSeconds.toString())
+        setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_MAX_SECONDS, settings.security.webSocketAuthRateLimit.lockMaxSeconds.toString())
         setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS, settings.security.outbound.allowedHosts.toJSONString())
         setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS, settings.security.outbound.allowedSmtpHosts.toJSONString())
 

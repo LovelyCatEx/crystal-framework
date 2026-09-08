@@ -90,6 +90,7 @@ data class SystemSettings(
         val api: Api,
         val loginRateLimit: LoginRateLimit,
         val emailCodeRateLimit: EmailCodeRateLimit,
+        val webSocketAuthRateLimit: WebSocketAuthRateLimit,
         val outbound: Outbound,
     ) {
         data class Api(
@@ -118,6 +119,16 @@ data class SystemSettings(
             val maxPerIp: Int,
             val maxPerEmail: Int,
             val maxGlobal: Int,
+        )
+
+        data class WebSocketAuthRateLimit(
+            val enabled: Boolean,
+            val windowSeconds: Int,
+            val maxAttemptsPerIp: Int,
+            val maxAttemptsPerAccount: Int,
+            val lockThreshold: Int,
+            val lockBaseSeconds: Int,
+            val lockMaxSeconds: Int,
         )
 
         data class Outbound(

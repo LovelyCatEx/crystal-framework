@@ -1,13 +1,16 @@
 package com.lovelycatv.crystalframework.messagechannel.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.lovelycatv.crystalframework.messagechannel.websocket.service.WebSocketAuthRateLimitService
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsAuthContext
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsInboundMessage
 import com.lovelycatv.crystalframework.messagechannel.websocket.types.WsOutboundMessage
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.auth.JWTSignKeyProvider
+import com.lovelycatv.crystalframework.shared.exception.TooManyRequestsException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -30,6 +33,7 @@ class WebSocketGatewayHandler(
     private val objectMapper: ObjectMapper,
     private val jwtSignKeyProvider: JWTSignKeyProvider,
     private val systemModuleClient: SystemModuleClient,
+    private val webSocketAuthRateLimitService: WebSocketAuthRateLimitService,
 ) : WebSocketHandler {
 
     private val logger = logger()
@@ -107,8 +111,23 @@ class WebSocketGatewayHandler(
         session: WebSocketSession
     ): WsAuthContext? {
         if (handler.requiresAuth) {
+            // Extract IP for rate limiting
+            val ip = session.handshakeInfo.remoteAddress?.address?.hostAddress ?: "unknown"
+
             // Authentication required but token is invalid -> reject
             if (token.isNullOrBlank()) {
+                // Check IP-only rate limit (no account available)
+                try {
+                    runBlocking {
+                        webSocketAuthRateLimitService.checkAllowedIpOnly(ip)
+                    }
+                } catch (e: TooManyRequestsException) {
+                    val retryAfter = e.context?.retryAfterSeconds ?: 0
+                    sendErrorAndClose(session, "${e.message} (retry after ${retryAfter}s)").subscribe()
+                    logger.warn("WebSocket auth rate limit exceeded for IP $ip (no token)")
+                    return null
+                }
+
                 sendErrorAndClose(session, "Authentication required: token missing").subscribe()
                 logger.warn("WebSocket auth required for channel ${handler.channelName}, but no token provided")
                 return null
@@ -118,29 +137,86 @@ class WebSocketGatewayHandler(
                 val claims = JwtUtil.parseToken(jwtSignKeyProvider.getSignKey(), token)
 
                 val userId = claims["userId"]?.toString()?.toLongOrNull()
+                val username = claims.subject
+                val tenantId = claims["tenantId"]?.toString()?.toLongOrNull()
+
+                // Build account key early for rate limiting
+                val accountKey = buildAccountKey(username, tenantId)
+
                 if (userId == null) {
+                    // Record failure with known account
+                    runBlocking {
+                        webSocketAuthRateLimitService.recordFailure(accountKey)
+                    }
                     sendErrorAndClose(session, "Authentication failed: invalid userId").subscribe()
-                    logger.warn("WebSocket userId is missing or invalid")
+                    logger.warn("WebSocket userId is missing or invalid for account $accountKey")
                     return null
                 }
 
-                val tenantId = claims["tenantId"]?.toString()?.toLongOrNull()
                 val tenantMemberId = claims["tenantMemberId"]?.toString()?.toLongOrNull()
 
                 if ((tenantId != null && tenantMemberId == null) || (tenantId == null && tenantMemberId != null)) {
+                    // Record failure with known account
+                    runBlocking {
+                        webSocketAuthRateLimitService.recordFailure(accountKey)
+                    }
                     sendErrorAndClose(session, "Authentication failed: tenant mismatch").subscribe()
-                    logger.warn("WebSocket tenant authentication mismatch")
+                    logger.warn("WebSocket tenant authentication mismatch for account $accountKey")
                     return null
                 }
 
-                WsAuthContext(
+                // Check rate limit before allowing authentication
+                try {
+                    runBlocking {
+                        webSocketAuthRateLimitService.checkAllowed(ip, accountKey)
+                    }
+                } catch (e: TooManyRequestsException) {
+                    val retryAfter = e.context?.retryAfterSeconds ?: 0
+                    sendErrorAndClose(session, "${e.message} (retry after ${retryAfter}s)").subscribe()
+                    logger.warn("WebSocket auth rate limit exceeded for account $accountKey from IP $ip")
+                    return null
+                }
+
+                // Authentication successful
+                val authContext = WsAuthContext(
                     userId = userId,
-                    username = claims.subject,
+                    username = username,
                     tenantId = tenantId,
                     tenantMemberId = tenantMemberId,
                     tokenIssuedAt = claims.issuedAt?.time
                 )
+
+                // Record success to clear failure counters
+                runBlocking {
+                    webSocketAuthRateLimitService.recordSuccess(accountKey)
+                }
+
+                authContext
             } catch (e: Exception) {
+                // Token parsing failed - check IP-only rate limit (username might be unavailable)
+                try {
+                    runBlocking {
+                        webSocketAuthRateLimitService.checkAllowedIpOnly(ip)
+                    }
+                } catch (rateLimitEx: TooManyRequestsException) {
+                    val retryAfter = rateLimitEx.context?.retryAfterSeconds ?: 0
+                    sendErrorAndClose(session, "${rateLimitEx.message} (retry after ${retryAfter}s)").subscribe()
+                    logger.warn("WebSocket auth rate limit exceeded for IP $ip (token parse failed)")
+                    return null
+                }
+
+                // Try to extract username for recordFailure
+                val username = runCatching {
+                    JwtUtil.parseToken(jwtSignKeyProvider.getSignKey(), token).subject
+                }.getOrNull()
+
+                if (username != null) {
+                    val accountKey = buildAccountKey(username, null)
+                    runBlocking {
+                        webSocketAuthRateLimitService.recordFailure(accountKey)
+                    }
+                }
+
                 sendErrorAndClose(session, "Authentication failed: ${e.message}").subscribe()
                 logger.warn("WebSocket token validation failed: ${e.message}")
                 null
@@ -168,6 +244,15 @@ class WebSocketGatewayHandler(
                 }
             }
         }
+    }
+
+    /**
+     * Builds the account rate-limit key `username:tenantId`.
+     * Uses "0" as tenant segment when tenantId is null (system-level auth).
+     */
+    private fun buildAccountKey(username: String, tenantId: Long?): String {
+        val tenantSegment = tenantId?.toString() ?: "0"
+        return "$username:$tenantSegment"
     }
 
     private fun parseMessage(payload: String): WsInboundMessage {
