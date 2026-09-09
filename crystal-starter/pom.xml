@@ -82,6 +82,10 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-ai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-resource</artifactId>
         </dependency>
         <dependency>

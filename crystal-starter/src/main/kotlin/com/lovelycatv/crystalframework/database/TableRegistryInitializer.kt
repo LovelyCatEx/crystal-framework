@@ -26,6 +26,11 @@ class TableRegistryInitializer(
     init {
         val registry = TableRegistry()
 
+        registry.register(TableConstants.TABLE_AI_PROVIDERS)
+        registry.register(TableConstants.TABLE_AI_MODELS)
+        registry.register(TableConstants.TABLE_AI_USER_GROUPS)
+        registry.register(TableConstants.TABLE_AI_USER_GROUP_MEMBERS)
+        registry.register(TableConstants.TABLE_AI_USER_GROUP_MODELS)
         registry.register(TableConstants.TABLE_USERS)
         registry.register(TableConstants.TABLE_TENANTS)
         registry.register(TableConstants.TABLE_TENANT_ROLES)

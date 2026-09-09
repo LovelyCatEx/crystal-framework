@@ -54,6 +54,7 @@
         <module>crystal-auth</module>
         <module>crystal-approval</module>
         <module>crystal-message</module>
+        <module>crystal-ai</module>
     </modules>
 
     <scm>
@@ -75,6 +76,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-ai</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared</artifactId>
