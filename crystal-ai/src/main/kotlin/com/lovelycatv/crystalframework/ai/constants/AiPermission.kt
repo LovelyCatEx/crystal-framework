@@ -18,6 +18,10 @@ object AiPermission {
     val ACTION_SYSTEM_AI_USER_GROUP_UPDATE = SystemRbacPermissionDeclaration.action("system.ai.user.group.update", "Update AI user groups")
     val ACTION_SYSTEM_AI_USER_GROUP_DELETE = SystemRbacPermissionDeclaration.action("system.ai.user.group.delete", "Delete AI user groups")
 
+    val MENU_SYSTEM_AI_PROVIDER = SystemRbacPermissionDeclaration.menu("system.ai.provider", "/manager/ai/provider", "AI Provider management menu")
+    val MENU_SYSTEM_AI_MODEL = SystemRbacPermissionDeclaration.menu("system.ai.model", "/manager/ai/model", "AI Model management menu")
+    val MENU_SYSTEM_AI_USER_GROUP = SystemRbacPermissionDeclaration.menu("system.ai.user.group", "/manager/ai/user-group", "AI User Group management menu")
+
     fun allPermissions(): List<SystemRbacPermissionDeclaration> = listOf(
         ACTION_SYSTEM_AI_PROVIDER_CREATE,
         ACTION_SYSTEM_AI_PROVIDER_READ,
@@ -31,5 +35,8 @@ object AiPermission {
         ACTION_SYSTEM_AI_USER_GROUP_READ,
         ACTION_SYSTEM_AI_USER_GROUP_UPDATE,
         ACTION_SYSTEM_AI_USER_GROUP_DELETE,
+        MENU_SYSTEM_AI_PROVIDER,
+        MENU_SYSTEM_AI_MODEL,
+        MENU_SYSTEM_AI_USER_GROUP,
     )
 }

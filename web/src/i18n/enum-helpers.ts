@@ -144,3 +144,11 @@ export function getAudienceType(type: number): string {
 export function getBroadcastCategory(category: number): string {
     return translateEnum('broadcastCategory', category);
 }
+
+export function getAiProviderProtocolType(type: number): string {
+    return translateEnum('aiProviderProtocolType', type);
+}
+
+export function getAiModelCapability(capability: number): string {
+    return translateEnum('aiModelCapability', capability);
+}

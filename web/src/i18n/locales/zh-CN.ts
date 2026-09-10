@@ -654,6 +654,180 @@ export const zhCN: I18nRules = {
         idPlaceholder: '输入账号 ID'
       }
     },
+    aiProviderManager: {
+      title: 'AI 提供商管理',
+      subtitle: '管理 AI 服务提供商配置',
+      modal: {
+        name: {
+          label: '名称',
+          required: '请输入提供商名称',
+          placeholder: '提供商名称'
+        },
+        key: {
+          label: '唯一标识',
+          required: '请输入唯一标识',
+          placeholder: '提供商标识（如 openai）'
+        },
+        description: {
+          label: '描述',
+          placeholder: '提供商描述'
+        },
+        protocolType: {
+          label: '协议类型',
+          required: '请选择协议类型',
+          placeholder: '选择协议类型'
+        },
+        baseUrl: {
+          label: '基础 URL',
+          required: '请输入基础 URL',
+          placeholder: 'https://api.example.com'
+        },
+        apiKey: {
+          label: 'API 密钥',
+          required: '请输入 API 密钥',
+          placeholder: 'API 密钥'
+        },
+        chatCompletionsPath: {
+          label: '对话完成路径',
+          placeholder: '/v1/chat/completions'
+        },
+        embeddingPath: {
+          label: '向量嵌入路径',
+          placeholder: '/v1/embeddings'
+        },
+        requestConfig: {
+          label: '请求配置',
+          placeholder: 'JSON 格式的请求配置'
+        },
+        responseConfig: {
+          label: '响应配置',
+          placeholder: 'JSON 格式的响应配置'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiModelManager: {
+      title: 'AI 模型管理',
+      subtitle: '管理 AI 模型配置与定价',
+      modal: {
+        providerId: {
+          label: '所属提供商',
+          required: '请选择提供商',
+          placeholder: '选择提供商'
+        },
+        key: {
+          label: '模型标识',
+          required: '请输入模型标识',
+          placeholder: '模型标识（如 gpt-4）'
+        },
+        modelName: {
+          label: '模型名称',
+          required: '请输入模型名称',
+          placeholder: '模型名称'
+        },
+        displayName: {
+          label: '显示名称',
+          required: '请输入显示名称',
+          placeholder: '显示名称'
+        },
+        description: {
+          label: '描述',
+          placeholder: '模型描述'
+        },
+        capabilities: {
+          label: '能力',
+          placeholder: '选择模型能力'
+        },
+        contextWindowTokens: {
+          label: '上下文窗口 Token 数',
+          required: '请输入上下文窗口 Token 数',
+          placeholder: '例如：8192'
+        },
+        maxOutputTokens: {
+          label: '最大输出 Token 数',
+          placeholder: '例如：4096'
+        },
+        inputPricePerMillion: {
+          label: '输入价格（每百万 Token）',
+          placeholder: '例如：0.50'
+        },
+        outputPricePerMillion: {
+          label: '输出价格（每百万 Token）',
+          placeholder: '例如：1.50'
+        },
+        cacheReadPricePerMillion: {
+          label: '缓存读取价格（每百万 Token）',
+          placeholder: '例如：0.10'
+        },
+        cacheWritePricePerMillion: {
+          label: '缓存写入价格（每百万 Token）',
+          placeholder: '例如：0.25'
+        },
+        currency: {
+          label: '货币',
+          required: '请输入货币',
+          placeholder: '例如：USD'
+        },
+        requestConfig: {
+          label: '请求配置',
+          placeholder: 'JSON 格式的请求配置'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiUserGroupManager: {
+      title: 'AI 用户组管理',
+      subtitle: '管理 AI 用户组与计费倍率',
+      modal: {
+        name: {
+          label: '组名',
+          required: '请输入组名',
+          placeholder: '用户组名称'
+        },
+        key: {
+          label: '唯一标识',
+          required: '请输入唯一标识',
+          placeholder: '用户组标识'
+        },
+        description: {
+          label: '描述',
+          placeholder: '用户组描述'
+        },
+        billingMultiplier: {
+          label: '计费倍率',
+          required: '请输入计费倍率',
+          placeholder: '例如：1.0'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        isDefault: {
+          label: '默认组'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
     tenantManager: {
       title: '租户管理',
       subtitle: '管理系统租户信息',
@@ -1001,6 +1175,9 @@ export const zhCN: I18nRules = {
         'system.approval.flow.definition': '审批流程定义菜单',
         'system.dict.type': '系统字典类型菜单',
         'system.dict.item': '系统字典项菜单',
+        'system.ai.provider': 'AI 提供商管理菜单',
+        'system.ai.model': 'AI 模型管理菜单',
+        'system.ai.user.group': 'AI 用户组管理菜单',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': '租户部门菜单',
         'tenant.role': '租户角色菜单',
@@ -1080,6 +1257,19 @@ export const zhCN: I18nRules = {
         'system.mail.template.read': '读取邮件模板',
         'system.mail.template.update': '更新邮件模板',
         'system.mail.template.delete': '删除邮件模板',
+        // AI provider / model / user group (system layer)
+        'system.ai.provider.create': '创建 AI 提供商',
+        'system.ai.provider.read': '读取 AI 提供商',
+        'system.ai.provider.update': '更新 AI 提供商',
+        'system.ai.provider.delete': '删除 AI 提供商',
+        'system.ai.model.create': '创建 AI 模型',
+        'system.ai.model.read': '读取 AI 模型',
+        'system.ai.model.update': '更新 AI 模型',
+        'system.ai.model.delete': '删除 AI 模型',
+        'system.ai.user.group.create': '创建 AI 用户组',
+        'system.ai.user.group.read': '读取 AI 用户组',
+        'system.ai.user.group.update': '更新 AI 用户组',
+        'system.ai.user.group.delete': '删除 AI 用户组',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': '创建租户',
         'system.tenant.read': '读取租户',
@@ -4190,6 +4380,21 @@ export const zhCN: I18nRules = {
       SCOPE_MEMBER: '同租户成员',
       OWNER_ONLY: '仅上传者本人',
       SYSTEM_ADMIN: '仅系统管理员',
+    },
+    aiProviderProtocolType: {
+      0: 'OpenAI 兼容',
+      1: 'Anthropic Messages',
+      2: '通用 HTTP'
+    },
+    aiModelCapability: {
+      0: '对话',
+      1: '文本生成',
+      2: '视觉理解',
+      3: '向量嵌入',
+      4: '工具调用',
+      5: '结构化输出',
+      6: '音频输入',
+      7: '音频输出'
     }
   },
 
@@ -4228,7 +4433,10 @@ export const zhCN: I18nRules = {
     tenantDictItem: '字典项',
     approvalFlowDefinition: '审批流程定义',
     approvalFlowInstance: '审批申请',
-    approvalFlowTask: '审批任务'
+    approvalFlowTask: '审批任务',
+    aiProvider: 'AI 提供商',
+    aiModel: 'AI 模型',
+    aiUserGroup: 'AI 用户组'
   },
 
   menu: {
@@ -4299,7 +4507,10 @@ export const zhCN: I18nRules = {
       tenantApprovalFlowDefinitions: '租户流程定义管理',
       tenantApprovalFlowInstances: '租户审批管理',
       systemDictTypes: '系统字典类型',
-      systemDictItems: '系统字典项'
+      systemDictItems: '系统字典项',
+      aiProvider: '提供商管理',
+      aiModel: '模型管理',
+      aiUserGroup: '用户组管理'
     },
 
     // 菜单分组
@@ -4312,7 +4523,8 @@ export const zhCN: I18nRules = {
       i_tenant: '组织管理',
       approval: '审批管理',
       logs: '日志管理',
-      monitor: '系统监控'
+      monitor: '系统监控',
+      ai: 'AI 管理'
     }
   },
 };

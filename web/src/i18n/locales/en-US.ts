@@ -657,6 +657,180 @@ export const enUS: I18nRules = {
         idPlaceholder: 'Enter account ID',
       }
     },
+    aiProviderManager: {
+      title: 'AI Provider Management',
+      subtitle: 'Manage AI service provider configurations',
+      modal: {
+        name: {
+          label: 'Name',
+          required: 'Please enter provider name',
+          placeholder: 'Provider name'
+        },
+        key: {
+          label: 'Key',
+          required: 'Please enter unique key',
+          placeholder: 'Provider key (e.g. openai)'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Provider description'
+        },
+        protocolType: {
+          label: 'Protocol Type',
+          required: 'Please select protocol type',
+          placeholder: 'Select protocol type'
+        },
+        baseUrl: {
+          label: 'Base URL',
+          required: 'Please enter base URL',
+          placeholder: 'https://api.example.com'
+        },
+        apiKey: {
+          label: 'API Key',
+          required: 'Please enter API key',
+          placeholder: 'API key'
+        },
+        chatCompletionsPath: {
+          label: 'Chat Completions Path',
+          placeholder: '/v1/chat/completions'
+        },
+        embeddingPath: {
+          label: 'Embedding Path',
+          placeholder: '/v1/embeddings'
+        },
+        requestConfig: {
+          label: 'Request Config',
+          placeholder: 'JSON format request config'
+        },
+        responseConfig: {
+          label: 'Response Config',
+          placeholder: 'JSON format response config'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiModelManager: {
+      title: 'AI Model Management',
+      subtitle: 'Manage AI model configurations and pricing',
+      modal: {
+        providerId: {
+          label: 'Provider',
+          required: 'Please select provider',
+          placeholder: 'Select provider'
+        },
+        key: {
+          label: 'Model Key',
+          required: 'Please enter model key',
+          placeholder: 'Model key (e.g. gpt-4)'
+        },
+        modelName: {
+          label: 'Model Name',
+          required: 'Please enter model name',
+          placeholder: 'Model name'
+        },
+        displayName: {
+          label: 'Display Name',
+          required: 'Please enter display name',
+          placeholder: 'Display name'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Model description'
+        },
+        capabilities: {
+          label: 'Capabilities',
+          placeholder: 'Select model capabilities'
+        },
+        contextWindowTokens: {
+          label: 'Context Window Tokens',
+          required: 'Please enter context window tokens',
+          placeholder: 'e.g.: 8192'
+        },
+        maxOutputTokens: {
+          label: 'Max Output Tokens',
+          placeholder: 'e.g.: 4096'
+        },
+        inputPricePerMillion: {
+          label: 'Input Price (per million tokens)',
+          placeholder: 'e.g.: 0.50'
+        },
+        outputPricePerMillion: {
+          label: 'Output Price (per million tokens)',
+          placeholder: 'e.g.: 1.50'
+        },
+        cacheReadPricePerMillion: {
+          label: 'Cache Read Price (per million tokens)',
+          placeholder: 'e.g.: 0.10'
+        },
+        cacheWritePricePerMillion: {
+          label: 'Cache Write Price (per million tokens)',
+          placeholder: 'e.g.: 0.25'
+        },
+        currency: {
+          label: 'Currency',
+          required: 'Please enter currency',
+          placeholder: 'e.g.: USD'
+        },
+        requestConfig: {
+          label: 'Request Config',
+          placeholder: 'JSON format request config'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiUserGroupManager: {
+      title: 'AI User Group Management',
+      subtitle: 'Manage AI user groups and billing multipliers',
+      modal: {
+        name: {
+          label: 'Group Name',
+          required: 'Please enter group name',
+          placeholder: 'User group name'
+        },
+        key: {
+          label: 'Key',
+          required: 'Please enter unique key',
+          placeholder: 'User group key'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'User group description'
+        },
+        billingMultiplier: {
+          label: 'Billing Multiplier',
+          required: 'Please enter billing multiplier',
+          placeholder: 'e.g.: 1.0'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        isDefault: {
+          label: 'Default Group'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
     tenantManager: {
       title: 'Tenant Management',
       subtitle: 'Manage system tenant information',
@@ -1004,6 +1178,9 @@ export const enUS: I18nRules = {
         'system.approval.flow.definition': 'Manage approval flow definitions menu',
         'system.dict.type': 'Manage system dictionary types menu',
         'system.dict.item': 'Manage system dictionary items menu',
+        'system.ai.provider': 'AI Provider management menu',
+        'system.ai.model': 'AI Model management menu',
+        'system.ai.user.group': 'AI User Group management menu',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': 'Manage tenant departments menu',
         'tenant.role': 'Manage tenant roles menu',
@@ -1083,6 +1260,19 @@ export const enUS: I18nRules = {
         'system.mail.template.read': 'Read mail templates',
         'system.mail.template.update': 'Update mail templates',
         'system.mail.template.delete': 'Delete mail templates',
+        // AI provider / model / user group (system layer)
+        'system.ai.provider.create': 'Create AI providers',
+        'system.ai.provider.read': 'Read AI providers',
+        'system.ai.provider.update': 'Update AI providers',
+        'system.ai.provider.delete': 'Delete AI providers',
+        'system.ai.model.create': 'Create AI models',
+        'system.ai.model.read': 'Read AI models',
+        'system.ai.model.update': 'Update AI models',
+        'system.ai.model.delete': 'Delete AI models',
+        'system.ai.user.group.create': 'Create AI user groups',
+        'system.ai.user.group.read': 'Read AI user groups',
+        'system.ai.user.group.update': 'Update AI user groups',
+        'system.ai.user.group.delete': 'Delete AI user groups',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': 'Create tenants',
         'system.tenant.read': 'Read tenants',
@@ -4192,6 +4382,21 @@ export const enUS: I18nRules = {
       SCOPE_MEMBER: 'Same-tenant members',
       OWNER_ONLY: 'Uploader only',
       SYSTEM_ADMIN: 'System admin only',
+    },
+    aiProviderProtocolType: {
+      0: 'OpenAI Compatible',
+      1: 'Anthropic Messages',
+      2: 'Generic HTTP'
+    },
+    aiModelCapability: {
+      0: 'Chat',
+      1: 'Text Generation',
+      2: 'Vision',
+      3: 'Embedding',
+      4: 'Tool Calling',
+      5: 'Structured Output',
+      6: 'Audio Input',
+      7: 'Audio Output'
     }
   },
 
@@ -4230,7 +4435,10 @@ export const enUS: I18nRules = {
     tenantDictItem: 'Dictionary Item',
     approvalFlowDefinition: 'Approval Flow Definition',
     approvalFlowInstance: 'Approval Request',
-    approvalFlowTask: 'Approval Task'
+    approvalFlowTask: 'Approval Task',
+    aiProvider: 'AI Provider',
+    aiModel: 'AI Model',
+    aiUserGroup: 'AI User Group'
   },
 
   menu: {
@@ -4301,7 +4509,10 @@ export const enUS: I18nRules = {
       tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
       tenantApprovalFlowInstances: 'Tenant Approval Management',
       systemDictTypes: 'System Dictionary Types',
-      systemDictItems: 'System Dictionary Items'
+      systemDictItems: 'System Dictionary Items',
+      aiProvider: 'Provider Management',
+      aiModel: 'Model Management',
+      aiUserGroup: 'User Group Management'
     },
 
     // Menu groups
@@ -4314,7 +4525,8 @@ export const enUS: I18nRules = {
       i_tenant: 'Organization Management',
       approval: 'Approval Management',
       logs: 'Log Management',
-      monitor: 'System Monitor'
+      monitor: 'System Monitor',
+      ai: 'AI Management'
     }
   }
 };

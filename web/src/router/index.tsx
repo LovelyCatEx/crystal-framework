@@ -15,6 +15,7 @@ import {
     MessageOutlined,
     MonitorOutlined,
     NotificationOutlined,
+    RobotOutlined,
     SafetyOutlined,
     SettingOutlined,
     ShopOutlined,
@@ -85,6 +86,9 @@ const ApprovalTaskHandlePage = lazy(() => import("@/pages/manager/approval/Appro
 const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
 const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
 const ApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowInstanceManagerPage.tsx"));
+const AiProviderManagerPage = lazy(() => import("@/pages/manager/ai/AiProviderManagerPage.tsx"));
+const AiModelManagerPage = lazy(() => import("@/pages/manager/ai/AiModelManagerPage.tsx"));
+const AiUserGroupManagerPage = lazy(() => import("@/pages/manager/ai/AiUserGroupManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -151,6 +155,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'monitor',
             icon: <LineChartOutlined />,
             label: t('menu.groups.monitor'),
+        },
+        {
+            name: 'ai',
+            icon: <RobotOutlined />,
+            label: t('menu.groups.ai'),
         },
         ...toTranslatedMenuGroups(t),
     ];
@@ -642,6 +651,30 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <BookOutlined />,
             label: t('menu.admin.systemDictItems'),
             page: <SystemDictItemManagerPage />,
+        },
+        {
+            key: '/manager/ai/provider',
+            path: '/manager/ai/provider',
+            icon: <CloudOutlined />,
+            label: t('menu.admin.aiProvider'),
+            page: <AiProviderManagerPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/model',
+            path: '/manager/ai/model',
+            icon: <DatabaseOutlined />,
+            label: t('menu.admin.aiModel'),
+            page: <AiModelManagerPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/user-group',
+            path: '/manager/ai/user-group',
+            icon: <TeamOutlined />,
+            label: t('menu.admin.aiUserGroup'),
+            page: <AiUserGroupManagerPage />,
+            group: 'ai'
         },
         {
             key: '/manager/approval-flow-definitions',
