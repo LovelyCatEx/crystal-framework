@@ -116,6 +116,22 @@ export default function AiModelManagerPage() {
                     <Form.Item
                         name="capabilities"
                         label={t('pages.aiModelManager.modal.capabilities.label')}
+                        normalize={(value) => {
+                            // When submitting, convert array to JSON string
+                            return Array.isArray(value) ? JSON.stringify(value) : value;
+                        }}
+                        getValueFromEvent={(value) => value}
+                        getValueProps={(value) => {
+                            // When displaying, parse JSON string to array
+                            if (typeof value === 'string') {
+                                try {
+                                    return { value: JSON.parse(value) };
+                                } catch {
+                                    return { value: [] };
+                                }
+                            }
+                            return { value: value || [] };
+                        }}
                     >
                         <Select
                             mode="multiple"
