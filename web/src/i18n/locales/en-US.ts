@@ -759,6 +759,12 @@ export const enUS: I18nRules = {
     aiModelManager: {
       title: 'AI Model Management',
       subtitle: 'Manage AI model configurations and pricing',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: 'Enter model ID'
+        }
+      },
       modal: {
         providerId: {
           label: 'Provider',
@@ -836,6 +842,12 @@ export const enUS: I18nRules = {
     aiUserGroupManager: {
       title: 'AI User Group Management',
       subtitle: 'Manage AI user groups and billing multipliers',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: 'Enter user group ID'
+        }
+      },
       modal: {
         name: {
           label: 'Group Name',

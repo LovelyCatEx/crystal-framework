@@ -35,10 +35,10 @@ export default function AiUserGroupManagerPage() {
             ]}
             tableActions={[
                 {
-                    label: <span>ID</span>,
+                    label: <span>{t('pages.aiUserGroupManager.tableActions.idFilter.label')}</span>,
                     children: <Input
                         className="rounded-xl"
-                        placeholder="Enter user group ID"
+                        placeholder={t('pages.aiUserGroupManager.tableActions.idFilter.placeholder')}
                         defaultValue={filters.id}
                         allowClear
                         onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}

@@ -756,6 +756,12 @@ export const zhCN: I18nRules = {
     aiModelManager: {
       title: 'AI 模型管理',
       subtitle: '管理 AI 模型配置与定价',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: '输入模型 ID'
+        }
+      },
       modal: {
         providerId: {
           label: '所属提供商',
@@ -833,6 +839,12 @@ export const zhCN: I18nRules = {
     aiUserGroupManager: {
       title: 'AI 用户组管理',
       subtitle: '管理 AI 用户组与计费倍率',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: '输入用户组 ID'
+        }
+      },
       modal: {
         name: {
           label: '组名',

@@ -195,6 +195,24 @@
 **在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
 **在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
 
+## Git Commit Message 规范
+
+**格式：`<type>(<scope>): <subject>`（一句英文）**
+
+**强制要求：**
+- **type 只能是**：`feat` / `fix` / `refactor` / `test` / `ci`
+- **scope 只能是**：
+  - 前端改动：`web`（只能是 web 不能是 frontend / react / ui 等）
+  - 后端改动：完整模块名（如 `crystal-shared` / `crystal-ai`，不能缩写）
+- **subject**：动词开头、小写、无句号
+
+**正确示例：**
+- `feat(web): add ai model management page`
+- `fix(crystal-shared): resolve rate limiter issue`
+
+**多模块修改必须分别提交。**
+
+
 **禁止以任何理由使用面向过程的冗余传递代码，必须以最少的代码、最高的可读性、最强的可维护性完成任务。重复逻辑必须提取为公共模块，禁止在多个位置维护同一份逻辑。**
 
 **编码过程中遇到编译错误、测试失败、工具报错或实现问题时，禁止回滚全部代码或丢弃整批已完成改动。必须保留用户原有改动和本轮仍然有效的改动，立即读取错误位置、定位根因并逐项修复；每修复一个独立问题就重新执行最小范围验证，确认通过后再继续下一项。只有明确确认某个具体改动不可用时，才允许撤销该具体改动，禁止用整体回滚代替排查和修复。**

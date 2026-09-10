@@ -60,10 +60,10 @@ export default function AiModelManagerPage() {
             ]}
             tableActions={[
                 {
-                    label: <span>ID</span>,
+                    label: <span>{t('pages.aiModelManager.tableActions.idFilter.label')}</span>,
                     children: <Input
                         className="rounded-xl"
-                        placeholder="Enter model ID"
+                        placeholder={t('pages.aiModelManager.tableActions.idFilter.placeholder')}
                         defaultValue={filters.id}
                         allowClear
                         onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
