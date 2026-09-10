@@ -676,6 +676,11 @@ export const zhCN: I18nRules = {
           label: '描述',
           placeholder: '提供商描述'
         },
+        tabs: {
+          basic: '配置',
+          advanced: '高级',
+          noBasicConfig: '暂无基础配置'
+        },
         configTemplate: {
           label: '配置模板',
           custom: '自定义（空白）',
@@ -3935,6 +3940,7 @@ export const zhCN: I18nRules = {
       aiModel: {
         name: '模型名称',
         providerId: '所属提供商',
+        capabilities: '能力',
         maxOutputTokens: '最大 Token 数',
         pricing: '价格',
         enabled: '启用状态',

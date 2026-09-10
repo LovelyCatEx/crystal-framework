@@ -679,6 +679,11 @@ export const enUS: I18nRules = {
           label: 'Description',
           placeholder: 'Provider description'
         },
+        tabs: {
+          basic: 'Configuration',
+          advanced: 'Advanced',
+          noBasicConfig: 'No basic configuration available'
+        },
         configTemplate: {
           label: 'Configuration Template',
           custom: 'Custom (Empty)',
@@ -3937,6 +3942,7 @@ export const enUS: I18nRules = {
       aiModel: {
         name: 'Model Name',
         providerId: 'Provider',
+        capabilities: 'Capabilities',
         maxOutputTokens: 'Max Tokens',
         pricing: 'Pricing',
         enabled: 'Status',

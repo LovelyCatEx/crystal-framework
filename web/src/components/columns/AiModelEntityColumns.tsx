@@ -1,10 +1,11 @@
 import React, {type JSX, useEffect, useState} from "react";
-import {Space, Spin, Tag} from "antd";
+import {Flex, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {AiModelEntity} from "@/types/ai/ai.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
+import {getAiModelCapability} from "@/i18n/enum-helpers.ts";
 
 function ProviderInfoDisplay({ providerId }: { providerId: string }): JSX.Element {
     const [providerName, setProviderName] = useState<string | null>(null);
@@ -68,6 +69,28 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             width: 180,
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
                 return <ProviderInfoDisplay providerId={row.providerId} />
+            }
+        },
+        {
+            title: t('components.columns.aiModel.capabilities'),
+            dataIndex: "capabilities",
+            key: "capabilities",
+            width: 200,
+            render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
+                try {
+                    const capabilities: number[] = JSON.parse(row.capabilities);
+                    return (
+                        <Flex gap={4} wrap style={{ maxWidth: '100%' }}>
+                            {capabilities.map((capability, index) => (
+                                <Tag key={index} color="blue" className="text-xs m-0">
+                                    {getAiModelCapability(capability)}
+                                </Tag>
+                            ))}
+                        </Flex>
+                    );
+                } catch {
+                    return <Tag color="red" className="text-xs">Invalid</Tag>;
+                }
             }
         },
         {

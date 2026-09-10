@@ -309,7 +309,13 @@ Assistant: 编译通过。现在逐条对照 CLAUDE.md 检查合规：
 - `cd web && pnpm dev` — 启动 Vite 开发服务器
 - `cd web && pnpm build` — TypeScript 检查 + Vite 构建（`tsc -b && vite build`）
 - `cd web && pnpm lint` — ESLint 检查
-- `cd web && npx tsc --noEmit` — 仅 TypeScript 检查（不构建）
+- `cd web && pnpm type-check` — **唯一正确的 TypeScript 类型检查命令**
+
+**⚠️ 前端 TypeScript 检查强制规则：**
+- ✅ **必须使用**：`cd web && pnpm type-check`
+- ❌ **禁止使用**：`npx tsc --noEmit`、`npx tsc -b`、`tsc -b`、`tsc --noEmit` 或任何其他直接调用 tsc 的命令
+- ❌ **禁止手动执行** `tsc` 相关命令，必须通过 `pnpm type-check` 调用
+- 违反此规则=严重违规
 
 ### 后端（根目录）
 - `./mvnw clean install -DskipTests` — 构建所有模块
