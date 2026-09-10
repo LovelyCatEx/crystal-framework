@@ -174,24 +174,32 @@ export default function AiProviderManagerPage() {
                             key: 'advanced',
                             label: t('pages.aiProviderManager.modal.tabs.advanced'),
                             children: (
-                                <Form.Item
-                                    noStyle
-                                    shouldUpdate={(prevValues, currentValues) =>
-                                        prevValues.requestConfig !== currentValues.requestConfig ||
-                                        prevValues.responseConfig !== currentValues.responseConfig
-                                    }
-                                >
-                                    {({ getFieldValue, setFieldsValue }) => (
-                                        <AiProviderConfigForm
-                                            value={{
-                                                requestConfig: getFieldValue('requestConfig'),
-                                                responseConfig: getFieldValue('responseConfig')
-                                            }}
-                                            onChange={(value) => setFieldsValue(value)}
-                                            defaultConfigs={defaultConfigs}
-                                        />
-                                    )}
-                                </Form.Item>
+                                <>
+                                    <Form.Item name="requestConfig" hidden>
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item name="responseConfig" hidden>
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        noStyle
+                                        shouldUpdate={(prevValues, currentValues) =>
+                                            prevValues.requestConfig !== currentValues.requestConfig ||
+                                            prevValues.responseConfig !== currentValues.responseConfig
+                                        }
+                                    >
+                                        {({ getFieldValue, setFieldsValue }) => (
+                                            <AiProviderConfigForm
+                                                value={{
+                                                    requestConfig: getFieldValue('requestConfig'),
+                                                    responseConfig: getFieldValue('responseConfig')
+                                                }}
+                                                onChange={(value) => setFieldsValue(value)}
+                                                defaultConfigs={defaultConfigs}
+                                            />
+                                        )}
+                                    </Form.Item>
+                                </>
                             )
                         }
                     ]}
