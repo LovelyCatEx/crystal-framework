@@ -53,14 +53,14 @@ description: 为按 scope 区分且外部不允许写入的实体（如审批实
 
 ```kotlin
 permissions = PermissionMatrix.readonly(
-    superRead = SystemPermission.ACTION_XXX_READ,
-    systemRead = SystemPermission.ACTION_XXX_READ,        // SYSTEM 里读全部
-    tenantAdminRead = SystemPermission.ACTION_TENANT_XXX_READ,
-    tenantPemRead = TenantPermission.ACTION_TENANT_XXX_READ_PEM,
+    superRead = SystemPermission.ACTION_XXX_READ_NAME,
+    systemRead = SystemPermission.ACTION_XXX_READ_NAME,        // SYSTEM 里读全部
+    tenantAdminRead = SystemPermission.ACTION_TENANT_XXX_READ_NAME,
+    tenantPemRead = TenantPermission.ACTION_TENANT_XXX_READ_PEM_NAME,
 )
 ```
 
-其余 12 个槽位（create/update/delete 的 4 层）自动填 `NEVER_GRANTED`（不授予给任何角色的哨兵）。
+其余 12 个槽位（create/update/delete 的 4 层）自动填 `NEVER_GRANTED`（不授予给任何角色的哨兵）。**权限常量必须使用 `XXX_NAME` 形式（`const val`），而非 `.name` 属性**。
 
 ### 三种典型 override 模式
 

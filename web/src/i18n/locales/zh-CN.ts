@@ -657,6 +657,10 @@ export const zhCN: I18nRules = {
     aiProviderManager: {
       title: 'AI 提供商管理',
       subtitle: '管理 AI 服务提供商配置',
+      filter: {
+        id: 'ID',
+        idPlaceholder: '输入提供商 ID'
+      },
       modal: {
         name: {
           label: '名称',
@@ -671,6 +675,14 @@ export const zhCN: I18nRules = {
         description: {
           label: '描述',
           placeholder: '提供商描述'
+        },
+        configTemplate: {
+          label: '配置模板',
+          custom: '自定义（空白）',
+          openai: 'OpenAI 模板',
+          anthropic: 'Anthropic 模板',
+          confirmTitle: '确认覆盖配置',
+          confirmContent: '选择模板将覆盖当前的响应配置，是否继续？'
         },
         protocolType: {
           label: '协议类型',
@@ -697,11 +709,36 @@ export const zhCN: I18nRules = {
         },
         requestConfig: {
           label: '请求配置',
-          placeholder: 'JSON 格式的请求配置'
+          placeholder: 'JSON 格式的请求配置',
+          headers: '请求头',
+          addHeader: '添加请求头',
+          headerKey: '键',
+          headerValue: '值'
         },
         responseConfig: {
           label: '响应配置',
-          placeholder: 'JSON 格式的响应配置'
+          placeholder: 'JSON 格式的响应配置',
+          chatCompletions: '对话完成配置',
+          embedding: '向量嵌入配置',
+          contentPath: 'Content 路径',
+          contentPathPlaceholder: '$.choices[0].message.content',
+          finishReasonPath: 'Finish Reason 路径',
+          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
+          providerRequestIdPath: 'Provider Request ID 路径',
+          providerRequestIdPathPlaceholder: '$.id',
+          errorMessagePath: 'Error Message 路径',
+          errorMessagePathPlaceholder: '$.error.message',
+          usageTitle: 'Usage JSON Path 配置',
+          inputTokensPath: 'Input Tokens 路径',
+          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
+          outputTokensPath: 'Output Tokens 路径',
+          outputTokensPathPlaceholder: '$.usage.completion_tokens',
+          totalTokensPath: 'Total Tokens 路径',
+          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          cacheReadTokensPath: 'Cache Read Tokens 路径',
+          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheWriteTokensPath: 'Cache Write Tokens 路径',
+          cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
         },
         enabled: {
           label: '启用状态',

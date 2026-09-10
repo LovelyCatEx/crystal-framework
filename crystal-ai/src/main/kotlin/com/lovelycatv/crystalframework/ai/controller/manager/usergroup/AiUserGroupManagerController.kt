@@ -32,9 +32,9 @@ class AiUserGroupManagerController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_CREATE.name,
-        systemRead = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_READ.name,
-        systemUpdate = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_UPDATE.name,
-        systemDelete = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_DELETE.name,
+        systemCreate = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_CREATE_NAME,
+        systemRead = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_READ_NAME,
+        systemUpdate = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_UPDATE_NAME,
+        systemDelete = AiPermission.ACTION_SYSTEM_AI_USER_GROUP_DELETE_NAME,
     ),
 )

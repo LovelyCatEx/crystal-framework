@@ -2,25 +2,38 @@ import {Col, Form, Input, InputNumber, Row, Select, Switch} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
     AiProviderManagerController,
+    getDefaultProviderConfigs,
     type ManagerCreateAiProviderDTO,
     type ManagerReadAiProviderDTO
 } from "@/api/ai/ai-provider.api.ts";
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useAiProviderTableColumns} from "@/components/columns/AiProviderEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
-import {AiProviderProtocolType} from "@/types/ai/ai.types.ts";
+import {AiProviderProtocolType, type DefaultProviderConfigsVO} from "@/types/ai/ai.types.ts";
 import {getAiProviderProtocolType} from "@/i18n/enum-helpers.ts";
+import {AiProviderConfigForm} from "@/components/ai/AiProviderConfigForm.tsx";
 
 export default function AiProviderManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
     const { filters, setFilter, syncToUrl, initialQueryValues } = useManagerQueryParams({ schema: { id: 'string' } });
     const {t} = useTranslation();
     const columns = useAiProviderTableColumns();
+    const [defaultConfigs, setDefaultConfigs] = useState<DefaultProviderConfigsVO | null>(null);
 
     useEffect(() => {
         pageRef.current?.refreshData?.({ resetPage: true });
     }, [filters.id]);
+
+    useEffect(() => {
+        getDefaultProviderConfigs().then(res => {
+            if (res.data) {
+                setDefaultConfigs(res.data);
+            }
+        }).catch(() => {
+            // Silent fail
+        });
+    }, []);
 
     const protocolTypeOptions = [
         { label: getAiProviderProtocolType(AiProviderProtocolType.OPENAI), value: AiProviderProtocolType.OPENAI },
@@ -43,10 +56,10 @@ export default function AiProviderManagerPage() {
             ]}
             tableActions={[
                 {
-                    label: <span>ID</span>,
+                    label: <span>{t('pages.aiProviderManager.filter.id')}</span>,
                     children: <Input
                         className="rounded-xl"
-                        placeholder="Enter provider ID"
+                        placeholder={t('pages.aiProviderManager.filter.idPlaceholder')}
                         defaultValue={filters.id}
                         allowClear
                         onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
@@ -124,26 +137,26 @@ export default function AiProviderManagerPage() {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Form.Item
-                        name="requestConfig"
-                        label={t('pages.aiProviderManager.modal.requestConfig.label')}
-                    >
-                        <Input.TextArea
-                            rows={3}
-                            placeholder={t('pages.aiProviderManager.modal.requestConfig.placeholder')}
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        name="responseConfig"
-                        label={t('pages.aiProviderManager.modal.responseConfig.label')}
-                    >
-                        <Input.TextArea
-                            rows={3}
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.placeholder')}
-                        />
-                    </Form.Item>
                     <Form.Item name="description" label={t('pages.aiProviderManager.modal.description.label')}>
                         <Input.TextArea rows={2} placeholder={t('pages.aiProviderManager.modal.description.placeholder')} />
+                    </Form.Item>
+                    <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.requestConfig !== currentValues.requestConfig ||
+                            prevValues.responseConfig !== currentValues.responseConfig
+                        }
+                    >
+                        {({ getFieldValue, setFieldsValue }) => (
+                            <AiProviderConfigForm
+                                value={{
+                                    requestConfig: getFieldValue('requestConfig'),
+                                    responseConfig: getFieldValue('responseConfig')
+                                }}
+                                onChange={(value) => setFieldsValue(value)}
+                                defaultConfigs={defaultConfigs}
+                            />
+                        )}
                     </Form.Item>
                     <Row gutter={24}>
                         <Col span={12}>

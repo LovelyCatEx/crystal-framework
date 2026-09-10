@@ -67,18 +67,19 @@ DTO 必须是 `data class`。
 
 ```kotlin
 permissions = PermissionMatrix.systemOnly(
-    systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
-    systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
-    systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
-    systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+    systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE_NAME,
+    systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ_NAME,
+    systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE_NAME,
+    systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE_NAME,
     // 可选：跨 scope 超级管理员
-    // superCreate = SystemPermission.ACTION_XXX_CREATE,
-    // superRead   = SystemPermission.ACTION_XXX_READ,
+    // superCreate = SystemPermission.ACTION_XXX_CREATE_NAME,
+    // superRead   = SystemPermission.ACTION_XXX_READ_NAME,
     // ...
 )
 ```
 
 - 4 个 `system*` 参数必填，authority 必须以 `system.` 前缀命名（前缀违规启动 emit warn）
+- **权限常量必须使用 `XXX_NAME` 形式（`const val`），而非 `.name` 属性**
 - 4 个 `super*` 可选，默认 `NOT_APPLICABLE`；`super` 无前缀
 - tenant 层由工厂自动填 `NOT_APPLICABLE`
 - 前端 `layersFor(SYSTEM, op)` 过滤 `NOT_APPLICABLE`，OR 匹配剩余 authority
@@ -139,10 +140,10 @@ class ManagerXxxController(...)
    >(
        managerService,
        permissions = PermissionMatrix.systemOnly(
-           systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE,
-           systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ,
-           systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE,
-           systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE,
+           systemCreate = SystemPermission.ACTION_SYSTEM_XXX_CREATE_NAME,
+           systemRead   = SystemPermission.ACTION_SYSTEM_XXX_READ_NAME,
+           systemUpdate = SystemPermission.ACTION_SYSTEM_XXX_UPDATE_NAME,
+           systemDelete = SystemPermission.ACTION_SYSTEM_XXX_DELETE_NAME,
        ),
    )
    ```

@@ -88,11 +88,25 @@ suspend fun register(...): ApiResponse<*> { ... }
 ```
 
 **RBAC 精细控制**：
-- 简单授权：Spring Security 原生 `@PreAuthorize("hasAnyAuthority('${SystemPermission.ACTION_XXX}')")`
+- 简单授权：使用 `@RequiresAuthority(anyOf = ["..."], scope = ResourceScope.SYSTEM/TENANT)` 注解（**`@PreAuthorize` 已被禁用**）
 - 端点级：方法内手动调 `RbacUtils.hasAuthority(...)` 或 `RbacUtils.hasAnyAuthority(...)` 判断
 - Scoped 授权：直接注入 `UserAuthentication` 参数，手写规则；若需要 Manager 家族的 4 层权限逻辑（super / system / tenantAdmin / tenantPem），走标准/Scoped/Tenant Controller，别复制 `PermissionMatrix` 到普通端点
 
-> Manager Controller 家族的权限声明规则（必须用 `permissions = PermissionMatrix.systemOnly(...) / of { ... } / tenantOnly(...) / systemOnlyReadonly(...) / readonly(...)`）仅对继承 `StandardManagerController` / `StandardScopedManagerController` / `StandardTenantManagerController` / 其只读变体的 5 个标准 CRUD 端点生效。普通端点走 `@PreAuthorize` + `RbacUtils`。
+`@RequiresAuthority` 示例：
+```kotlin
+@GetMapping("/query/batch")
+@RequiresAuthority(
+    anyOf = [
+        SystemPermission.ACTION_SYSTEM_CLEANUP_READ_NAME
+    ],
+    scope = ResourceScope.SYSTEM
+)
+suspend fun batchQuery(...): ApiResponse<*> { ... }
+```
+
+**注意**：`@RequiresAuthority` 的 `anyOf`/`allOf` 只接受编译期字符串常量，必须使用 `XXX_NAME` 常量（`const val`），不能用 `.name` 属性。
+
+> Manager Controller 家族的权限声明规则（必须用 `permissions = PermissionMatrix.systemOnly(...) / of { ... } / tenantOnly(...) / systemOnlyReadonly(...) / readonly(...)`）仅对继承 `StandardManagerController` / `StandardScopedManagerController` / `StandardTenantManagerController` / 其只读变体的 5 个标准 CRUD 端点生效。普通端点走 `@RequiresAuthority` + `RbacUtils`。
 
 ### `UserAuthentication` 注入
 
@@ -209,13 +223,14 @@ suspend fun register(@ModelAttribute @Valid dto: RegisterDTO): ApiResponse<*> {
 **登录后 JSON body + 权限**：
 ```kotlin
 @PostMapping("/start", version = "1")
+@RequiresAuthority(
+    anyOf = [SystemPermission.ACTION_XXX_START_NAME],
+    scope = ResourceScope.SYSTEM
+)
 suspend fun start(
     userAuthentication: UserAuthentication,
     @Valid @RequestBody dto: StartDTO,
 ): ApiResponse<*> {
-    if (!RbacUtils.hasAuthority(SystemPermission.ACTION_XXX_START)) {
-        throw ForbiddenException()
-    }
     val result = xxxService.start(userAuthentication.userId, dto)
     return ApiResponse.success(result)
 }

@@ -59,22 +59,29 @@ Tenant 侧同理：`TenantPermissionDeclaration(name, description, type, path)`�
 
 **第一步**：在对应文件中按业务域找到分区（或新建分区），添加 Declaration val
 
+**⚠️ 权限常量命名规则（强制）：每个权限必须先定义 `const val XXX_NAME = "string"`，再定义 `val XXX = Declaration(XXX_NAME, ...)`，两者必须紧挨着，禁止分开放。**
+
 ```kotlin
 // crystal-shared/.../shared/constants/SystemPermission.kt
 
 // ============================================================
 //   Cleanup  (system)     <- 新增分区示例
 // ============================================================
+const val ACTION_SYSTEM_CLEANUP_READ_NAME = "system.cleanup.read"
 val ACTION_SYSTEM_CLEANUP_READ = SystemRbacPermissionDeclaration.action(
-    name = "system.cleanup.read",
+    name = ACTION_SYSTEM_CLEANUP_READ_NAME,
     description = "Read cleanup status"
 )
+
+const val ACTION_SYSTEM_CLEANUP_UPDATE_NAME = "system.cleanup.update"
 val ACTION_SYSTEM_CLEANUP_UPDATE = SystemRbacPermissionDeclaration.action(
-    name = "system.cleanup.update",
+    name = ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
     description = "Trigger cleanup"
 )
+
+const val MENU_SYSTEM_CLEANUP_MANAGER_NAME = "system.cleanup"
 val MENU_SYSTEM_CLEANUP_MANAGER = SystemRbacPermissionDeclaration.menu(
-    name = "system.cleanup",
+    name = MENU_SYSTEM_CLEANUP_MANAGER_NAME,
     path = "/manager/cleanup",
     description = "Cleanup management menu"
 )
@@ -88,8 +95,9 @@ val MENU_SYSTEM_CLEANUP_MANAGER = SystemRbacPermissionDeclaration.menu(
 // ============================================================
 //   Cleanup
 // ============================================================
+const val ACTION_CLEANUP_READ_NAME = "i.tenant.cleanup.read"
 val ACTION_CLEANUP_READ = TenantPermissionDeclaration(
-    name = "i.tenant.cleanup.read",
+    name = ACTION_CLEANUP_READ_NAME,
     description = "Read own tenant cleanup status",
     type = TenantPermissionType.ACTION,
 )
@@ -116,12 +124,15 @@ SystemRole.ROLE_ADMIN to listOf(
 ```kotlin
 // crystal-mymodule/.../constants/MyModulePermission.kt
 object MyModulePermission {
+    const val ACTION_SYSTEM_MYMODULE_READ_NAME = "system.mymodule.read"
     val ACTION_SYSTEM_MYMODULE_READ = SystemRbacPermissionDeclaration.action(
-        name = "system.mymodule.read",
+        name = ACTION_SYSTEM_MYMODULE_READ_NAME,
         description = "Read mymodule data"
     )
+    
+    const val MENU_SYSTEM_MYMODULE_NAME = "system.mymodule"
     val MENU_SYSTEM_MYMODULE = SystemRbacPermissionDeclaration.menu(
-        name = "system.mymodule",
+        name = MENU_SYSTEM_MYMODULE_NAME,
         path = "/manager/mymodule",
         description = "MyModule management menu"
     )
@@ -151,16 +162,16 @@ class MyModulePermissionConfigurer : SystemRbacConfigurer {
 
 #### 用 `PermissionMatrix`（推荐，绝大多数场景）
 
-Manager Controller 家族统一走 `PermissionMatrix`（不同基类对应不同便捷工厂），构造参数用 `.name` 取字符串：
+Manager Controller 家族统一走 `PermissionMatrix`（不同基类对应不同便捷工厂），构造参数用 NAME 常量：
 
 ```kotlin
 class ManagerCleanupController(...) : StandardManagerController<...>(
     ...,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
-        systemRead   = SystemPermission.ACTION_SYSTEM_CLEANUP_READ.name,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
-        systemDelete = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
+        systemCreate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
+        systemRead   = SystemPermission.ACTION_SYSTEM_CLEANUP_READ_NAME,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
+        systemDelete = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
     ),
 )
 ```

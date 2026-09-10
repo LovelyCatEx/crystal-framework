@@ -127,8 +127,8 @@ throw ForbiddenException(
     context = ForbiddenContext(
         reason = ForbiddenReason.MISSING_PERMISSION,
         requiredPermissions = listOf(
-            SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ.name,
-            TenantPermission.ACTION_MEMBER_ROLE_READ.name,
+            SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ_NAME,
+            TenantPermission.ACTION_MEMBER_ROLE_READ_NAME,
         ),
         scope = ResourceScope.TENANT,
     )
@@ -137,7 +137,7 @@ throw ForbiddenException(
 
 **禁止**:
 
-- ❌ `requiredPermissions = listOf("tenant.role.create")` —— 违反禁止魔法值规则,必须走 `TenantPermission.ACTION_XXX.name`
+- ❌ `requiredPermissions = listOf("tenant.role.create")` —— 违反禁止魔法值规则,必须走 `TenantPermission.ACTION_XXX_NAME` 常量
 - ❌ 把权限拼进 `message` 字符串 —— 前端只读结构化字段
 - ❌ 忘了过滤 `NEVER_GRANTED` —— 前端 Tag 会显示 `!!never_granted!!`
 

@@ -32,9 +32,9 @@ class AiModelManagerController(
 >(
     managerService,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = AiPermission.ACTION_SYSTEM_AI_MODEL_CREATE.name,
-        systemRead = AiPermission.ACTION_SYSTEM_AI_MODEL_READ.name,
-        systemUpdate = AiPermission.ACTION_SYSTEM_AI_MODEL_UPDATE.name,
-        systemDelete = AiPermission.ACTION_SYSTEM_AI_MODEL_DELETE.name,
+        systemCreate = AiPermission.ACTION_SYSTEM_AI_MODEL_CREATE_NAME,
+        systemRead = AiPermission.ACTION_SYSTEM_AI_MODEL_READ_NAME,
+        systemUpdate = AiPermission.ACTION_SYSTEM_AI_MODEL_UPDATE_NAME,
+        systemDelete = AiPermission.ACTION_SYSTEM_AI_MODEL_DELETE_NAME,
     ),
 )

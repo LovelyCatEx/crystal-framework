@@ -660,6 +660,10 @@ export const enUS: I18nRules = {
     aiProviderManager: {
       title: 'AI Provider Management',
       subtitle: 'Manage AI service provider configurations',
+      filter: {
+        id: 'ID',
+        idPlaceholder: 'Enter provider ID'
+      },
       modal: {
         name: {
           label: 'Name',
@@ -674,6 +678,14 @@ export const enUS: I18nRules = {
         description: {
           label: 'Description',
           placeholder: 'Provider description'
+        },
+        configTemplate: {
+          label: 'Configuration Template',
+          custom: 'Custom (Empty)',
+          openai: 'OpenAI Template',
+          anthropic: 'Anthropic Template',
+          confirmTitle: 'Confirm Overwrite Configuration',
+          confirmContent: 'Selecting a template will overwrite the current response configuration. Continue?'
         },
         protocolType: {
           label: 'Protocol Type',
@@ -700,11 +712,36 @@ export const enUS: I18nRules = {
         },
         requestConfig: {
           label: 'Request Config',
-          placeholder: 'JSON format request config'
+          placeholder: 'JSON format request config',
+          headers: 'Request Headers',
+          addHeader: 'Add Header',
+          headerKey: 'Key',
+          headerValue: 'Value'
         },
         responseConfig: {
           label: 'Response Config',
-          placeholder: 'JSON format response config'
+          placeholder: 'JSON format response config',
+          chatCompletions: 'Chat Completions Configuration',
+          embedding: 'Embedding Configuration',
+          contentPath: 'Content Path',
+          contentPathPlaceholder: '$.choices[0].message.content',
+          finishReasonPath: 'Finish Reason Path',
+          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
+          providerRequestIdPath: 'Provider Request ID Path',
+          providerRequestIdPathPlaceholder: '$.id',
+          errorMessagePath: 'Error Message Path',
+          errorMessagePathPlaceholder: '$.error.message',
+          usageTitle: 'Usage JSON Path Configuration',
+          inputTokensPath: 'Input Tokens Path',
+          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
+          outputTokensPath: 'Output Tokens Path',
+          outputTokensPathPlaceholder: '$.usage.completion_tokens',
+          totalTokensPath: 'Total Tokens Path',
+          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          cacheReadTokensPath: 'Cache Read Tokens Path',
+          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheWriteTokensPath: 'Cache Write Tokens Path',
+          cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
         },
         enabled: {
           label: 'Enabled',
