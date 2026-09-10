@@ -754,7 +754,51 @@ class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUp
 
 语言文件在 `locales` 文件夹中，文件命名必须是语言标准全名，例如 `en-US` / `zh-CN` 等。
 
-语言文件导出的对象必须使用 `i18n-rules.ts` 中的类型，严格遵守类型规范。
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
+**I18n 编写的唯一合法流程（违反=严重违规）：**
+
+1. **必须先阅读 `i18n-rules.ts` 中的 `I18nRules` 类型定义，确认允许的字段结构**
+2. **只能在类型定义允许的位置添加翻译文本**
+3. **禁止添加类型定义之外的任何字段**
+4. **禁止创建 `common` 等通用顶层字段**
+5. **所有翻译必须放在其对应的页面/组件路径下**
+6. **必须同步修改所有语言文件（zh-CN.ts、en-US.ts）**
+
+**I18n 字段归属的唯一规则（违反=严重违规）：**
+
+- **页面专用文本** → 必须放在 `pages.xxxPage.xxx`
+  - 例：`pages.aiProviderManager.modal.requestConfig.headerKey`
+  - 例：`pages.tenantMemberRoleManager.columns.unknownUser`
+- **组件专用文本** → 必须放在 `components.xxxComponent.xxx`
+  - 例：`components.popCard.mailTemplateType.yes`
+  - 例：`components.approvalEditor.toolbar.undo`
+- **枚举翻译** → 必须放在 `enums.XxxEnum`，同时在 `enum-helpers.ts` 中注册
+- **实体名称** → 必须放在 `entityNames.xxx`
+- **菜单项** → 必须放在 `menu.pub` / `menu.admin` / `menu.myTenant`
+- **API 错误信息** → 必须放在 `api.xxx`
+
+**绝对禁止的行为（违反=立即停止）：**
+
+- ❌ **修改 `i18n-rules.ts` 中的 `I18nRules` 类型定义**
+- ❌ **在语言文件中添加类型定义之外的字段**
+- ❌ **创建 `common` 顶层字段或任何"通用"字段**
+- ❌ **将多个页面/组件共用的文本放在一个地方**（每个页面/组件必须有自己的完整翻译）
+- ❌ **跨页面/组件复用 i18n 路径**（如 `pages.xxx` 被 `components.yyy` 引用）
+- ❌ **在不确定字段位置时猜测或自作主张**
+
+**强制执行流程：**
+
+每次编写 i18n 前必须：
+1. 读取 `i18n-rules.ts` 确认类型定义
+2. 确认要添加的字段在类型定义的哪个位置
+3. 在所有语言文件中同步添加
+4. 说不出对应的类型定义位置 = 禁止动手
+
+**违反 I18n 规范=严重违规，必须立即停止所有工作并修正。**
 
 如遇枚举类型需要翻译，必须写入 `enum-helpers.ts` 中，且 i18n 文件也必须遵守该规则。
 

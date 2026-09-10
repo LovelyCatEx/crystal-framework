@@ -88,12 +88,24 @@ interface TenantBenefitService {
 
 ### 6. 前端 i18n 位置
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
 `web/src/i18n/locales/zh-CN.ts` 与 `en-US.ts` 的 `pages.tenantTireBenefitValueManager` 节点下：
-- `keys.{featureKey}.name`：权益名称
-- `keys.{featureKey}.description`：权益说明
-- `groups.{groupName}`：group 分组名（仅一级 group，如 `invitation` / `member`）
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 pages.tenantTireBenefitValueManager 的结构**
+2. **只能在以下位置添加翻译：**
+   - `keys.{featureKey}.name`：权益名称
+   - `keys.{featureKey}.description`：权益说明
+   - `groups.{groupName}`：group 分组名（仅一级 group，如 `invitation` / `member`）
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+5. **必须在 `web/src/i18n/tenant-benefit.tsx` 中同步添加映射条目**
 
 `enums.tenantBenefitType` 已完整覆盖 BOOLEAN / LIMIT / ENUM 三种，**新增权益不需要动**（除非引入新的 `TenantBenefitType`，那属于扩改枚举本身，不在本 Skill 范围）。
+
+**违反 I18n 规范=严重违规，必须立即停止所有工作。**
 
 ### 7. 不需要改的模块（明确列出，避免多余改动）
 

@@ -297,11 +297,20 @@ const tabs = [
 
 ### 第 6 步：添加 i18n 提示文本（必须，如果有禁用提示）
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
 **文件：**
 - `web/src/i18n/locales/zh-CN.ts`
 - `web/src/i18n/locales/en-US.ts`
 
-**必须操作：** 在相关命名空间下添加功能禁用时的提示文本
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义**
+2. **只能在类型定义允许的位置添加翻译**（如 `pages.systemSettingsManager.keys`、`components.xxx`）
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **绝对禁止创建 `common` 等通用字段**
+5. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+6. **每个组件/页面的翻译必须放在对应路径下，禁止跨组件复用**
 
 **示例：**
 ```typescript
@@ -309,7 +318,7 @@ const tabs = [
 export default {
     // ...
     components: {
-        yourFeature: {
+        yourFeature: {  // 必须确认 components 下的 [key: string]: object 允许添加 yourFeature
             title: '您的功能',
             disabled: '该功能已被管理员禁用',
             description: '请联系系统管理员启用此功能',
@@ -329,6 +338,8 @@ export default {
     },
 };
 ```
+
+**违反 I18n 规范=严重违规，必须立即停止所有工作。**
 
 ---
 

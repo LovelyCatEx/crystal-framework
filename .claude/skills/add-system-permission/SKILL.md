@@ -249,6 +249,16 @@ key 就是权限的 `name` 字符串，value 是面向用户的简短描述（�
 7. 若涉及 Controller，`PermissionMatrix` 槽用 `SystemPermission.XXX.name` 传入；非 CRUD 端点用 `@RequiresAuthority(anyOf = ["<literal>"], scope = ...)`
 8. **在 `web/src/i18n/locales/en-US.ts` 和 `zh-CN.ts` 的 `pages.permissionCatalog.byName` 中添加对应翻译**（en/zh 必须同步）
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 pages.permissionCatalog 的结构**
+2. **只能在 `pages.permissionCatalog.byName` 下添加翻译**
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+5. **key 必须与后端 Declaration 的 name 完全一致**
+
 ### 路径 B（子模块 Configurer）
 
 1. 确认模块内是否已有 `XxxPermission` 常量文件；有则追加，无则新建

@@ -685,7 +685,9 @@ export const enUS: I18nRules = {
           openai: 'OpenAI Template',
           anthropic: 'Anthropic Template',
           confirmTitle: 'Confirm Overwrite Configuration',
-          confirmContent: 'Selecting a template will overwrite the current response configuration. Continue?'
+          confirmContent: 'Selecting a template will overwrite the current response configuration. Continue?',
+          confirmButton: 'Confirm',
+          cancelButton: 'Cancel'
         },
         protocolType: {
           label: 'Protocol Type',
@@ -1756,7 +1758,8 @@ export const enUS: I18nRules = {
         username: 'Username',
         email: 'Email',
         status: 'Status',
-        action: 'Action'
+        action: 'Action',
+        unknownUser: 'Unknown User'
       },
       action: {
         assignRole: 'Assign Roles'
@@ -1842,7 +1845,8 @@ export const enUS: I18nRules = {
         username: 'Username',
         email: 'Email',
         status: 'Status',
-        action: 'Action'
+        action: 'Action',
+        unknownUser: 'Unknown User'
       },
       action: {
         assignRole: 'Assign Role'
@@ -3917,6 +3921,17 @@ export const enUS: I18nRules = {
         unknownFlow: 'Flow deleted',
         unknownNode: 'Node deleted',
         unknownInitiator: 'Initiator deleted'
+      },
+      aiModel: {
+        name: 'Model Name',
+        providerId: 'Provider',
+        maxTokens: 'Max Tokens',
+        inputPricePerMillion: 'Input Price (Per Million Tokens)',
+        enabled: 'Status',
+        enabledStatus: {
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        }
       }
     },
     entityTable: {
@@ -4068,7 +4083,9 @@ export const enUS: I18nRules = {
         notFound: 'Template type information not found',
         description: 'Description',
         allowMultiple: 'Allow Multiple Templates',
-        variables: 'Variables'
+        variables: 'Variables',
+        yes: 'Yes',
+        no: 'No'
       },
       templateVariablesTag: {
         copySuccess: 'Copied {{variable}} to clipboard'

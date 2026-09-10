@@ -64,8 +64,8 @@ export function AiProviderConfigForm({ value, onChange, defaultConfigs }: AiProv
                 title: t('pages.aiProviderManager.modal.configTemplate.confirmTitle'),
                 icon: <ExclamationCircleOutlined />,
                 content: t('pages.aiProviderManager.modal.configTemplate.confirmContent'),
-                okText: t('common.confirm'),
-                cancelText: t('common.cancel'),
+                okText: t('pages.aiProviderManager.modal.configTemplate.confirmButton'),
+                cancelText: t('pages.aiProviderManager.modal.configTemplate.cancelButton'),
                 onOk: () => {
                     applyTemplate(template);
                 }

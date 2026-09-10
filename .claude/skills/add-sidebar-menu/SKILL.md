@@ -92,6 +92,17 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
 
 **4. i18n**：在 `menu.admin` / `menu.myTenant` / `menu.pub` 中添加翻译 key（zh-CN + en-US 同步）
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 menu 字段的结构**
+2. **只能在 `menu.admin`、`menu.myTenant`、`menu.pub`、`menu.groups` 下添加翻译**
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **绝对禁止创建 `common` 等通用字段**
+5. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+6. **菜单翻译必须放在对应的 menu 节点下，禁止放在其他位置**
+
 ### 添加新的菜单分组 + 菜单项
 
 **1-4 同上**

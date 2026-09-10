@@ -46,7 +46,7 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
 
     return [
         {
-            title: t('pages.aiModelManager.modal.name.label'),
+            title: t('components.columns.aiModel.name'),
             dataIndex: "name",
             key: "name",
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
@@ -62,7 +62,7 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             }
         },
         {
-            title: t('pages.aiModelManager.modal.providerId.label'),
+            title: t('components.columns.aiModel.providerId'),
             dataIndex: "providerId",
             key: "providerId",
             width: 180,
@@ -71,7 +71,7 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             }
         },
         {
-            title: t('pages.aiModelManager.modal.maxTokens.label'),
+            title: t('components.columns.aiModel.maxTokens'),
             dataIndex: "maxTokens",
             key: "maxTokens",
             width: 120,
@@ -80,7 +80,7 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             }
         },
         {
-            title: t('pages.aiModelManager.modal.inputPricePerMillion.label'),
+            title: t('components.columns.aiModel.inputPricePerMillion'),
             dataIndex: "inputPricePerMillion",
             key: "inputPricePerMillion",
             width: 120,
@@ -89,14 +89,14 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             }
         },
         {
-            title: t('pages.aiModelManager.modal.enabled.label'),
+            title: t('components.columns.aiModel.enabled'),
             dataIndex: "enabled",
             key: "enabled",
             width: 100,
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
                 return row.enabled
-                    ? <Tag color="green">{t('pages.aiModelManager.modal.enabled.enabled')}</Tag>
-                    : <Tag color="red">{t('pages.aiModelManager.modal.enabled.disabled')}</Tag>
+                    ? <Tag color="green">{t('components.columns.aiModel.enabledStatus.enabled')}</Tag>
+                    : <Tag color="red">{t('components.columns.aiModel.enabledStatus.disabled')}</Tag>
             }
         }
     ];

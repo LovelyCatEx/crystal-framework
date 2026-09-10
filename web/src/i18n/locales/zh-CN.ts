@@ -682,7 +682,9 @@ export const zhCN: I18nRules = {
           openai: 'OpenAI 模板',
           anthropic: 'Anthropic 模板',
           confirmTitle: '确认覆盖配置',
-          confirmContent: '选择模板将覆盖当前的响应配置，是否继续？'
+          confirmContent: '选择模板将覆盖当前的响应配置，是否继续？',
+          confirmButton: '确认',
+          cancelButton: '取消'
         },
         protocolType: {
           label: '协议类型',
@@ -1753,7 +1755,8 @@ export const zhCN: I18nRules = {
         username: '用户名',
         email: '邮箱',
         status: '状态',
-        action: '操作'
+        action: '操作',
+        unknownUser: '未知用户'
       },
       action: {
         assignRole: '分配角色'
@@ -1839,7 +1842,8 @@ export const zhCN: I18nRules = {
         username: '用户名',
         email: '邮箱',
         status: '状态',
-        action: '操作'
+        action: '操作',
+        unknownUser: '未知用户'
       },
       action: {
         assignRole: '分配角色'
@@ -3915,6 +3919,17 @@ export const zhCN: I18nRules = {
         unknownFlow: '流程已删除',
         unknownNode: '节点已删除',
         unknownInitiator: '发起人已删除'
+      },
+      aiModel: {
+        name: '模型名称',
+        providerId: '所属提供商',
+        maxTokens: '最大 Token 数',
+        inputPricePerMillion: '输入价格（每百万 Token）',
+        enabled: '启用状态',
+        enabledStatus: {
+          enabled: '已启用',
+          disabled: '已禁用'
+        }
       }
     },
     entityTable: {
@@ -4066,7 +4081,9 @@ export const zhCN: I18nRules = {
         notFound: '未找到类型信息',
         description: '描述',
         allowMultiple: '允许多模板',
-        variables: '变量'
+        variables: '变量',
+        yes: '是',
+        no: '否'
       },
       templateVariablesTag: {
         copySuccess: '已复制 {{variable}} 到剪切板'

@@ -63,7 +63,7 @@ export function MailTemplateTypeCard({ typeId }: MailTemplateTypeCardProps) {
                 </Descriptions.Item>
                 <Descriptions.Item label={t('components.popCard.mailTemplateType.allowMultiple')}>
                     <Tag color={templateType.allowMultiple ? "green" : "orange"} className="text-xs">
-                        {templateType.allowMultiple ? t('common.yes') : t('common.no')}
+                        {templateType.allowMultiple ? t('components.popCard.mailTemplateType.yes') : t('components.popCard.mailTemplateType.no')}
                     </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label={t('components.popCard.mailTemplateType.variables')}>

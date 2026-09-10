@@ -36,6 +36,7 @@ class FlywayConfig {
                 .locations("classpath:db/migration")
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
+                .outOfOrder(true)
                 .load()
 
             val result = flyway.migrate()
