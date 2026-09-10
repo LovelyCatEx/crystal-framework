@@ -853,8 +853,8 @@ export const zhCN: I18nRules = {
       }
     },
     aiUserGroupManager: {
-      title: 'AI 用户组管理',
-      subtitle: '管理 AI 用户组与计费倍率',
+      title: '用户组管理',
+      subtitle: '管理用户组与计费倍率',
       tableActions: {
         idFilter: {
           label: 'ID',
@@ -892,6 +892,38 @@ export const zhCN: I18nRules = {
         sort: {
           label: '排序',
           placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiUserGroupModelManager: {
+      title: '用户组模型关联',
+      subtitle: '管理用户组与模型的关联关系',
+      modal: {
+        userGroupId: {
+          label: '用户组 ID',
+          required: '请输入用户组 ID',
+          placeholder: '输入用户组 ID'
+        },
+        modelId: {
+          label: '模型 ID',
+          required: '请输入模型 ID',
+          placeholder: '输入模型 ID'
+        }
+      }
+    },
+    aiUserGroupMemberManager: {
+      title: '用户组成员关联',
+      subtitle: '管理用户组与用户的关联关系',
+      modal: {
+        userGroupId: {
+          label: '用户组 ID',
+          required: '请输入用户组 ID',
+          placeholder: '输入用户组 ID'
+        },
+        userId: {
+          label: '用户 ID',
+          required: '请输入用户 ID',
+          placeholder: '输入用户 ID'
         }
       }
     },
@@ -1337,6 +1369,14 @@ export const zhCN: I18nRules = {
         'system.ai.user.group.read': '读取 AI 用户组',
         'system.ai.user.group.update': '更新 AI 用户组',
         'system.ai.user.group.delete': '删除 AI 用户组',
+        'system.ai.user.group.model.create': '创建 AI 用户组模型关联',
+        'system.ai.user.group.model.read': '读取 AI 用户组模型关联',
+        'system.ai.user.group.model.update': '更新 AI 用户组模型关联',
+        'system.ai.user.group.model.delete': '删除 AI 用户组模型关联',
+        'system.ai.user.group.member.create': '创建 AI 用户组成员关联',
+        'system.ai.user.group.member.read': '读取 AI 用户组成员关联',
+        'system.ai.user.group.member.update': '更新 AI 用户组成员关联',
+        'system.ai.user.group.member.delete': '删除 AI 用户组成员关联',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': '创建租户',
         'system.tenant.read': '读取租户',
@@ -3640,6 +3680,19 @@ export const zhCN: I18nRules = {
     },
 
     columns: {
+      aiUserGroupModel: {
+        recordId: '记录 ID',
+        provider: '供应商',
+        model: '模型',
+        modelKey: '模型标识',
+        modelStatus: '模型状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
+      aiUserGroupMember: {
+        recordId: '记录 ID',
+        user: '用户'
+      },
       fileResource: {
         preview: '预览',
         fileInfo: '文件信息',
@@ -4106,6 +4159,28 @@ export const zhCN: I18nRules = {
         aliyunOSS: '阿里云OSS',
         tencentCOS: '腾讯云COS'
       },
+      aiModel: {
+        notFound: '模型不存在',
+        description: '描述',
+        contextWindow: '上下文窗口',
+        maxOutput: '最大输出',
+        pricing: '定价',
+        input: '输入',
+        cacheInput: '缓存输入',
+        output: '输出',
+        cacheWrite: '缓存写入',
+        status: '状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
+      aiProvider: {
+        notFound: '供应商不存在',
+        description: '描述',
+        baseUrl: '基础 URL',
+        status: '状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
       mailTemplateType: {
         notFound: '未找到类型信息',
         description: '描述',
@@ -4517,9 +4592,11 @@ export const zhCN: I18nRules = {
     approvalFlowDefinition: '审批流程定义',
     approvalFlowInstance: '审批申请',
     approvalFlowTask: '审批任务',
-    aiProvider: 'AI 提供商',
-    aiModel: 'AI 模型',
-    aiUserGroup: 'AI 用户组'
+    aiProvider: '提供商',
+    aiModel: '模型',
+    aiUserGroup: '用户组',
+    aiUserGroupModel: '用户组模型',
+    aiUserGroupMember: '用户组成员'
   },
 
   menu: {

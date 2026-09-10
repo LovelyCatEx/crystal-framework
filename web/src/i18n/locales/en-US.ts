@@ -856,8 +856,8 @@ export const enUS: I18nRules = {
       }
     },
     aiUserGroupManager: {
-      title: 'AI User Group Management',
-      subtitle: 'Manage AI user groups and billing multipliers',
+      title: 'User Group Management',
+      subtitle: 'Manage user groups and billing multipliers',
       tableActions: {
         idFilter: {
           label: 'ID',
@@ -895,6 +895,38 @@ export const enUS: I18nRules = {
         sort: {
           label: 'Sort',
           placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiUserGroupModelManager: {
+      title: 'User Group Model Associations',
+      subtitle: 'Manage associations between user groups and models',
+      modal: {
+        userGroupId: {
+          label: 'User Group ID',
+          required: 'Please enter user group ID',
+          placeholder: 'Enter user group ID'
+        },
+        modelId: {
+          label: 'Model ID',
+          required: 'Please enter model ID',
+          placeholder: 'Enter model ID'
+        }
+      }
+    },
+    aiUserGroupMemberManager: {
+      title: 'User Group Member Associations',
+      subtitle: 'Manage associations between user groups and users',
+      modal: {
+        userGroupId: {
+          label: 'User Group ID',
+          required: 'Please enter user group ID',
+          placeholder: 'Enter user group ID'
+        },
+        userId: {
+          label: 'User ID',
+          required: 'Please enter user ID',
+          placeholder: 'Enter user ID'
         }
       }
     },
@@ -1340,6 +1372,14 @@ export const enUS: I18nRules = {
         'system.ai.user.group.read': 'Read AI user groups',
         'system.ai.user.group.update': 'Update AI user groups',
         'system.ai.user.group.delete': 'Delete AI user groups',
+        'system.ai.user.group.model.create': 'Create AI user group model associations',
+        'system.ai.user.group.model.read': 'Read AI user group model associations',
+        'system.ai.user.group.model.update': 'Update AI user group model associations',
+        'system.ai.user.group.model.delete': 'Delete AI user group model associations',
+        'system.ai.user.group.member.create': 'Create AI user group member associations',
+        'system.ai.user.group.member.read': 'Read AI user group member associations',
+        'system.ai.user.group.member.update': 'Update AI user group member associations',
+        'system.ai.user.group.member.delete': 'Delete AI user group member associations',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': 'Create tenants',
         'system.tenant.read': 'Read tenants',
@@ -3642,6 +3682,19 @@ export const enUS: I18nRules = {
     },
 
     columns: {
+      aiUserGroupModel: {
+        recordId: 'Record ID',
+        provider: 'Provider',
+        model: 'Model',
+        modelKey: 'Model Key',
+        modelStatus: 'Model Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
+      aiUserGroupMember: {
+        recordId: 'Record ID',
+        user: 'User'
+      },
       fileResource: {
         preview: 'Preview',
         fileInfo: 'File Info',
@@ -4108,6 +4161,28 @@ export const enUS: I18nRules = {
         aliyunOSS: 'Aliyun OSS',
         tencentCOS: 'Tencent COS'
       },
+      aiModel: {
+        notFound: 'Model not found',
+        description: 'Description',
+        contextWindow: 'Context Window',
+        maxOutput: 'Max Output',
+        pricing: 'Pricing',
+        input: 'Input',
+        cacheInput: 'Cache Input',
+        output: 'Output',
+        cacheWrite: 'Cache Write',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
+      aiProvider: {
+        notFound: 'Provider not found',
+        description: 'Description',
+        baseUrl: 'Base URL',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
       mailTemplateType: {
         notFound: 'Template type information not found',
         description: 'Description',
@@ -4519,9 +4594,11 @@ export const enUS: I18nRules = {
     approvalFlowDefinition: 'Approval Flow Definition',
     approvalFlowInstance: 'Approval Request',
     approvalFlowTask: 'Approval Task',
-    aiProvider: 'AI Provider',
-    aiModel: 'AI Model',
-    aiUserGroup: 'AI User Group'
+    aiProvider: 'Provider',
+    aiModel: 'Model',
+    aiUserGroup: 'User Group',
+    aiUserGroupModel: 'User Group Model',
+    aiUserGroupMember: 'User Group Member'
   },
 
   menu: {

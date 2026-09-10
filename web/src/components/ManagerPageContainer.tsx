@@ -37,8 +37,8 @@ export interface ManagerPageContainerBatchAction<ENTITY extends BaseEntity> {
 }
 
 export interface ManagerPageContainerProps<ENTITY extends BaseEntity> extends ActionBarComponentProps, EntityTableProps<ENTITY>, DivHTMLAttributes {
-    delete: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
-    update: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
+    delete?: <T extends BaseManagerDeleteDTO>(props: T) => Promise<unknown>;
+    update?: <T extends BaseManagerUpdateDTO>(props: T) => Promise<unknown>;
     create: <T extends object>(props: T) => Promise<unknown>;
     editModalFormChildren?: React.ReactNode | JSX.Element | ((editingItem: ENTITY | null) => React.ReactNode | JSX.Element);
     editModalInitialValues?: object;
@@ -106,15 +106,15 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     }, [modal, selectedEntities]);
 
     const builtinBatchActions = useMemo<ManagerPageContainerBatchAction<ENTITY>[]>(() => [
-        {
+        ...(props.delete !== undefined ? [{
             key: 'delete',
             label: t('components.managerPageContainer.batchDelete'),
             confirmTitle: t('components.managerPageContainer.batchDeleteTitle'),
             confirmContent: t('components.managerPageContainer.batchDeleteConfirm'),
             successMessage: t('components.managerPageContainer.batchDeleteSuccess'),
             failedMessage: t('components.managerPageContainer.batchDeleteFailed'),
-            handler: (entities) => props.delete({ ids: entities.map((entity) => entity.id) }),
-        },
+            handler: (entities) => props.delete!({ ids: entities.map((entity) => entity.id) }),
+        } as ManagerPageContainerBatchAction<ENTITY>] : []),
         ...(props.extraBatchActions ?? []),
     ], [t, props]);
 
@@ -140,7 +140,11 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
     };
 
     const deleteModel = (id: string) => {
-        props.delete({ ids: [id] })
+        if (!props.delete) {
+            return;
+        }
+
+        props.delete!({ ids: [id] })
             .then(() => {
                 void message.success(t('components.managerPageContainer.deleteSuccess', { entityName: props.entityName }));
                 setSelectedEntities((prev) => prev.filter((it) => it.id !== id));
@@ -154,7 +158,10 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
 
     const handleAddOrUpdateEdit = (values: ENTITY) => {
         const isEditing = !!editingItem;
-        const action = isEditing ? props.update(values) : props.create(values);
+        if (isEditing && !props.update) {
+            return;
+        }
+        const action = isEditing ? props.update!(values) : props.create(values);
 
         setSubmitting(true);
         action.then(() => {
@@ -261,15 +268,15 @@ function ManagerPageContainerInner<ENTITY extends BaseEntity>(
                         <Space>
                             {props.tableRowActionsRender?.(record)}
                             {!readonlyMode && <>
-                                <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                                <Popconfirm
+                                {props.update && <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />}
+                                {props.delete && <Popconfirm
                                     title={t('components.managerPageContainer.deleteConfirm', { entityName: props.entityName })}
                                     onConfirm={() => deleteModel(record.id)}
                                     okText={t('components.managerPageContainer.confirm')}
                                     cancelText={t('components.managerPageContainer.cancel')}
                                 >
                                     <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-                                </Popconfirm>
+                                </Popconfirm>}
                             </>}
                         </Space>
                     ) : undefined}
