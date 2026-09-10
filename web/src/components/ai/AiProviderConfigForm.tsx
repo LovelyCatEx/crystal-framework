@@ -119,13 +119,17 @@ export function AiProviderConfigForm({ value, onChange, defaultConfigs }: AiProv
 
 function RequestConfigForm({ value, onChange }: { value: AiProviderRequestConfig; onChange: (v: AiProviderRequestConfig) => void }) {
     const { t } = useTranslation();
-    const [headers, setHeaders] = useState<Array<{ key: string; value: string }>>(
+    const [headers, setHeaders] = useState<Array<{ key: string; value: string }>>(() =>
         Object.entries(value.headers || {}).map(([key, value]) => ({ key, value }))
     );
+    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
-        setHeaders(Object.entries(value.headers || {}).map(([key, val]) => ({ key, value: val })));
-    }, [value]);
+        if (!isInitialized && value.headers && Object.keys(value.headers).length > 0) {
+            setHeaders(Object.entries(value.headers).map(([key, val]) => ({ key, value: val })));
+            setIsInitialized(true);
+        }
+    }, [value.headers, isInitialized]);
 
     const handleHeadersChange = (newHeaders: Array<{ key: string; value: string }>) => {
         setHeaders(newHeaders);
