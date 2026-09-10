@@ -7,6 +7,8 @@ export interface AiProviderEntity extends BaseEntity {
     protocolType: number;
     baseUrl: string;
     apiKey: string;
+    chatCompletionsPath: string | null;
+    embeddingPath: string | null;
     requestConfig: string;
     responseConfig: string;
     enabled: boolean;
@@ -15,13 +17,19 @@ export interface AiProviderEntity extends BaseEntity {
 
 export interface AiModelEntity extends BaseEntity {
     providerId: string;
-    name: string;
     key: string;
+    modelName: string;
+    displayName: string;
     description: string | null;
     capabilities: string;
+    contextWindowTokens: string;
+    maxOutputTokens: string | null;
     inputPricePerMillion: string;
     outputPricePerMillion: string;
-    maxTokens: number | null;
+    cacheReadPricePerMillion: string | null;
+    cacheWritePricePerMillion: string | null;
+    currency: string;
+    requestConfig: string;
     enabled: boolean;
     sort: number;
 }

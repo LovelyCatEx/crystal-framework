@@ -3937,8 +3937,8 @@ export const enUS: I18nRules = {
       aiModel: {
         name: 'Model Name',
         providerId: 'Provider',
-        maxTokens: 'Max Tokens',
-        inputPricePerMillion: 'Input Price (Per Million Tokens)',
+        maxOutputTokens: 'Max Tokens',
+        pricing: 'Pricing',
         enabled: 'Status',
         enabledStatus: {
           enabled: 'Enabled',

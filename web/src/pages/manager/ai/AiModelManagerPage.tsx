@@ -3,7 +3,7 @@ import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/M
 import {
     AiModelManagerController,
     type ManagerCreateAiModelDTO,
-    type ManagerReadAiModelDTO
+    type ManagerReadAiModelDTO, type ManagerUpdateAiModelDTO
 } from "@/api/ai/ai-model.api.ts";
 import {useEffect, useRef, useState} from "react";
 import {useAiModelTableColumns} from "@/components/columns/AiModelEntityColumns.tsx";
@@ -227,10 +227,18 @@ export default function AiModelManagerPage() {
             delete={async (props) => {
                 return (await AiModelManagerController.delete(props)).data!
             }}
-            update={async (props) => {
+            update={async (props: ManagerUpdateAiModelDTO) => {
+                // Convert capabilities array to JSON string
+                if (Array.isArray(props.capabilities)) {
+                    props.capabilities = JSON.stringify(props.capabilities);
+                }
                 return (await AiModelManagerController.update(props)).data!
             }}
             create={async (props) => {
+                // Convert capabilities array to JSON string
+                if (Array.isArray((props as ManagerCreateAiModelDTO).capabilities)) {
+                    (props as ManagerCreateAiModelDTO).capabilities = JSON.stringify((props as ManagerCreateAiModelDTO).capabilities);
+                }
                 return (await AiModelManagerController.create(props as ManagerCreateAiModelDTO)).data!
             }}
         >

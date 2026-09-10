@@ -47,11 +47,11 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
     return [
         {
             title: t('components.columns.aiModel.name'),
-            dataIndex: "name",
-            key: "name",
+            dataIndex: "displayName",
+            key: "displayName",
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
                 return <Space direction="vertical" size={0}>
-                    <span className="text-sm font-medium">{row.name}</span>
+                    <span className="text-sm font-medium">{row.displayName}</span>
                     <CopyableToolTip title={row.key}>
                         <span className="text-xs text-gray-500 font-mono">{row.key}</span>
                     </CopyableToolTip>
@@ -71,21 +71,42 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             }
         },
         {
-            title: t('components.columns.aiModel.maxTokens'),
-            dataIndex: "maxTokens",
-            key: "maxTokens",
+            title: t('components.columns.aiModel.maxOutputTokens'),
+            dataIndex: "maxOutputTokens",
+            key: "maxOutputTokens",
             width: 120,
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
-                return <span className="text-xs font-mono">{row.maxTokens ?? 'N/A'}</span>
+                return <span className="text-xs font-mono">{row.maxOutputTokens ?? 'N/A'}</span>
             }
         },
         {
-            title: t('components.columns.aiModel.inputPricePerMillion'),
+            title: t('components.columns.aiModel.pricing'),
             dataIndex: "inputPricePerMillion",
-            key: "inputPricePerMillion",
-            width: 120,
+            key: "pricing",
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
-                return <span className="text-xs">{row.inputPricePerMillion}</span>
+                const formatPrice = (price: string | null | undefined): string => {
+                    if (!price) return '0.00';
+                    return parseFloat(price).toFixed(2);
+                };
+
+                return <div className="text-xs font-mono">
+                    <div className="flex gap-2">
+                        <span className="w-16">输入</span>
+                        <span>{formatPrice(row.inputPricePerMillion)} {row.currency}/M</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <span className="w-16">缓存输入</span>
+                        <span>{formatPrice(row.cacheReadPricePerMillion)} {row.currency}/M</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <span className="w-16">输出</span>
+                        <span>{formatPrice(row.outputPricePerMillion)} {row.currency}/M</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <span className="w-16">缓存写入</span>
+                        <span>{formatPrice(row.cacheWritePricePerMillion)} {row.currency}/M</span>
+                    </div>
+                </div>
             }
         },
         {

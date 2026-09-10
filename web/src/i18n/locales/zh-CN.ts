@@ -3935,8 +3935,8 @@ export const zhCN: I18nRules = {
       aiModel: {
         name: '模型名称',
         providerId: '所属提供商',
-        maxTokens: '最大 Token 数',
-        inputPricePerMillion: '输入价格（每百万 Token）',
+        maxOutputTokens: '最大 Token 数',
+        pricing: '价格',
         enabled: '启用状态',
         enabledStatus: {
           enabled: '已启用',
