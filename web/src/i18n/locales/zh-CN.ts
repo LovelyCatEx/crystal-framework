@@ -768,6 +768,11 @@ export const zhCN: I18nRules = {
         }
       },
       modal: {
+        tabs: {
+          basic: '配置',
+          pricing: '价格',
+          advanced: '高级'
+        },
         providerId: {
           label: '所属提供商',
           required: '请选择提供商',
@@ -828,7 +833,13 @@ export const zhCN: I18nRules = {
         },
         requestConfig: {
           label: '请求配置',
-          placeholder: 'JSON 格式的请求配置'
+          placeholder: 'JSON 格式的请求配置',
+          temperature: 'Temperature',
+          maxOutputTokens: '最大输出 Token 数',
+          additionalBody: '额外请求体参数',
+          additionalBodyKey: '键',
+          additionalBodyValue: '值',
+          addAdditionalBody: '添加参数'
         },
         enabled: {
           label: '启用状态',

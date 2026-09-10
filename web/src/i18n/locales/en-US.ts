@@ -771,6 +771,11 @@ export const enUS: I18nRules = {
         }
       },
       modal: {
+        tabs: {
+          basic: 'Configuration',
+          pricing: 'Pricing',
+          advanced: 'Advanced'
+        },
         providerId: {
           label: 'Provider',
           required: 'Please select provider',
@@ -831,7 +836,13 @@ export const enUS: I18nRules = {
         },
         requestConfig: {
           label: 'Request Config',
-          placeholder: 'JSON format request config'
+          placeholder: 'JSON format request config',
+          temperature: 'Temperature',
+          maxOutputTokens: 'Max Output Tokens',
+          additionalBody: 'Additional Body Parameters',
+          additionalBodyKey: 'Key',
+          additionalBodyValue: 'Value',
+          addAdditionalBody: 'Add Parameter'
         },
         enabled: {
           label: 'Enabled',
