@@ -3,6 +3,7 @@ import {doPost} from "@/api/system-request.ts";
 export interface AiPlaygroundMessage {
     role: "system" | "user" | "assistant";
     content: string;
+    reasoningContent?: string;
 }
 
 export interface AiPlaygroundChatDTO {
@@ -12,6 +13,7 @@ export interface AiPlaygroundChatDTO {
 
 export interface AiPlaygroundChatVO {
     content: string;
+    reasoningContent?: string;
 }
 
 export function chat(dto: AiPlaygroundChatDTO) {

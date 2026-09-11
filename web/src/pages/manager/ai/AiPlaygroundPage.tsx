@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import {Button, Card, Empty, Input, message, Spin, Typography} from "antd";
-import {SendOutlined} from "@ant-design/icons";
+import {BulbOutlined, DownOutlined, SendOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
@@ -19,6 +19,7 @@ export default function AiPlaygroundPage() {
     const [models, setModels] = useState<AiModelEntity[]>([]);
     const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
     const [messageList, setMessageList] = useState<AiPlaygroundMessage[]>([]);
+    const [expandedThinking, setExpandedThinking] = useState<Set<number>>(new Set());
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
@@ -70,6 +71,7 @@ export default function AiPlaygroundPage() {
         const modelId = key.substring("model:".length);
         setSelectedModelId(modelId);
         setMessageList([]);
+        setExpandedThinking(new Set());
         setInput("");
     };
 
@@ -82,15 +84,34 @@ export default function AiPlaygroundPage() {
         setInput("");
         setSending(true);
         try {
-            const response = await chat({modelId: selectedModelId, messages: nextMessages});
+            const response = await chat({
+                modelId: selectedModelId,
+                messages: nextMessages.map(({role, content}) => ({role, content})),
+            });
             if (response.data) {
-                setMessageList([...nextMessages, {role: "assistant", content: response.data.content}]);
+                setMessageList([...nextMessages, {
+                    role: "assistant",
+                    content: response.data.content,
+                    reasoningContent: response.data.reasoningContent,
+                }]);
             }
         } catch {
             void message.error(t("pages.aiPlayground.messages.chatFailed"));
         } finally {
             setSending(false);
         }
+    };
+
+    const toggleThinking = (index: number) => {
+        setExpandedThinking(prev => {
+            const next = new Set(prev);
+            if (next.has(index)) {
+                next.delete(index);
+            } else {
+                next.add(index);
+            }
+            return next;
+        });
     };
 
     return (
@@ -127,6 +148,27 @@ export default function AiPlaygroundPage() {
                                         className={`mb-3 flex ${messageItem.role === "user" ? "justify-end" : "justify-start"}`}
                                     >
                                         <div className="max-w-[75%] whitespace-pre-wrap rounded-xl px-3 py-2" style={{background: messageItem.role === "user" ? "var(--ant-color-primary)" : "var(--ant-color-fill-secondary)", color: messageItem.role === "user" ? "white" : "inherit"}}>
+                                            {messageItem.reasoningContent ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleThinking(index)}
+                                                        className="mb-1 flex items-center gap-1.5"
+                                                        style={{color: "var(--ant-color-text-secondary)", cursor: "pointer", background: "transparent", border: "none", padding: 0}}
+                                                    >
+                                                        <BulbOutlined />
+                                                        <span>{t("pages.aiPlayground.thinking")}</span>
+                                                        <DownOutlined
+                                                            style={{transition: "transform 0.2s", transform: expandedThinking.has(index) ? "rotate(180deg)" : "none"}}
+                                                        />
+                                                    </button>
+                                                    {expandedThinking.has(index) && (
+                                                        <div className="mb-2 border-l-2 pl-2" style={{color: "var(--ant-color-text-secondary)", borderColor: "var(--ant-color-border-secondary)"}}>
+                                                            {messageItem.reasoningContent}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : null}
                                             {messageItem.content}
                                         </div>
                                     </div>

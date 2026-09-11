@@ -936,6 +936,7 @@ export const zhCN: I18nRules = {
       emptyConversation: '开始一段新的对话',
       inputPlaceholder: '输入消息，按 Enter 发送，按 Shift+Enter 换行',
       send: '发送',
+      thinking: '已完成思考',
       messages: {
         loadFailed: '加载 AI 模型失败',
         chatFailed: '发送消息失败'

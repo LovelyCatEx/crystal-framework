@@ -939,6 +939,7 @@ export const enUS: I18nRules = {
       emptyConversation: 'Start a new conversation',
       inputPlaceholder: 'Enter a message. Press Enter to send and Shift+Enter for a new line',
       send: 'Send',
+      thinking: 'Thought complete',
       messages: {
         loadFailed: 'Failed to load AI models',
         chatFailed: 'Failed to send message'

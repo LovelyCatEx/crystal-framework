@@ -27,6 +27,10 @@ import org.springframework.web.bind.annotation.RestController
 class ManagerAiPlaygroundController(
     private val aiChatService: AiChatService,
 ) {
+    companion object {
+        private const val REASONING_CONTENT_METADATA_KEY = "reasoningContent"
+    }
+
     @PostMapping("/chat", version = "1")
     @RequiresAuthority(
         anyOf = [AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME],
@@ -39,9 +43,11 @@ class ManagerAiPlaygroundController(
             ?: throw BusinessException("Invalid AI model ID")
         val messages = dto.messages.map(::toMessage)
         val response = aiChatService.chatCompletionSync(modelId, messages)
-        val content = response.result?.output?.text ?: ""
+        val assistantMessage = response.result?.output
+        val content = assistantMessage?.text ?: ""
+        val reasoningContent = assistantMessage?.metadata?.get(REASONING_CONTENT_METADATA_KEY) as? String
 
-        return ApiResponse.success(ManagerAiPlaygroundChatVO(content))
+        return ApiResponse.success(ManagerAiPlaygroundChatVO(content, reasoningContent))
     }
 
     private fun toMessage(dto: ManagerAiPlaygroundMessageDTO): Message = when (dto.role.lowercase()) {
