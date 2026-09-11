@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.ai.types.AiProviderRequestConfig
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
 import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,8 +24,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.springframework.ai.anthropic.AnthropicChatModel
+import org.springframework.ai.anthropic.AnthropicChatOptions
 import org.springframework.ai.chat.messages.Message
+import org.springframework.ai.chat.model.ChatModel
 import org.springframework.ai.chat.model.ChatResponse
+import org.springframework.ai.chat.prompt.ChatOptions
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
@@ -38,17 +43,16 @@ class AiChatServiceImpl(
     private val aiProviderManagerService: AiProviderManagerService,
     private val invocationRecordService: AiModelInvocationRecordService,
 ) : AiChatService {
+    private val logger = logger()
+
     private val recordScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     override suspend fun chatCompletionSync(
         modelId: Long,
         messages: List<Message>
     ): ChatResponse {
         val startTime = System.currentTimeMillis()
         val (model, provider) = getModelAndProvider(modelId)
-
-        if (provider.getRealProtocolType() != AiProviderProtocolType.OPENAI_COMPATIBLE) {
-            throw BusinessException("Only OpenAI compatible providers are currently supported")
-        }
 
         val rawRequestBodyHolder = AtomicReference<String?>()
         val rawResponseBodyHolder = AtomicReference<String?>()
@@ -126,10 +130,6 @@ class AiChatServiceImpl(
         var lastResponse: ChatResponse? = null
 
         val (model, provider) = getModelAndProvider(modelId)
-
-        if (provider.getRealProtocolType() != AiProviderProtocolType.OPENAI_COMPATIBLE) {
-            throw BusinessException("Only OpenAI compatible providers are currently supported")
-        }
 
         val rawRequestBodyHolder = AtomicReference<String?>()
         val rawResponseBodyHolder = AtomicReference<String?>()
@@ -246,18 +246,36 @@ class AiChatServiceImpl(
         provider: AiProviderEntity,
         rawRequestBodyHolder: AtomicReference<String?>,
         rawResponseBodyHolder: AtomicReference<String?>
-    ): OpenAiChatModel {
+    ): ChatModel {
+        val protocolType = provider.getRealProtocolType()
         val providerRequestConfig = provider.getRequestConfigObject<AiProviderRequestConfig>()
         val modelRequestConfig = model.getRequestConfigObject<AiModelRequestConfig>()
 
-        val chatOptionsBuilder = OpenAiChatOptions.builder()
-            .model(model.key)
-            .baseUrl(provider.baseUrl)
-            .apiKey(provider.apiKey)
+
+        val chatOptionsBuilder: ChatOptions.Builder<*> = when (protocolType) {
+            AiProviderProtocolType.OPENAI_COMPATIBLE -> OpenAiChatOptions.builder()
+                .model(model.key)
+                .baseUrl(provider.baseUrl)
+                .apiKey(provider.apiKey)
+
+            AiProviderProtocolType.ANTHROPIC_MESSAGES -> AnthropicChatOptions.builder()
+                .model(model.key)
+                .baseUrl(provider.baseUrl)
+                .apiKey(provider.apiKey)
+
+        }
 
         // Apply provider headers
         if (providerRequestConfig.headers.isNotEmpty()) {
-            chatOptionsBuilder.customHeaders(providerRequestConfig.headers)
+            when (protocolType) {
+                AiProviderProtocolType.OPENAI_COMPATIBLE -> {
+                    (chatOptionsBuilder as OpenAiChatOptions.Builder).customHeaders(providerRequestConfig.headers)
+                }
+                AiProviderProtocolType.ANTHROPIC_MESSAGES -> {
+                    (chatOptionsBuilder as AnthropicChatOptions.Builder).customHeaders(providerRequestConfig.headers)
+                }
+            }
+
         }
 
         // Apply model temperature
@@ -271,22 +289,48 @@ class AiChatServiceImpl(
             if (it > Int.MAX_VALUE) {
                 throw BusinessException("AI model max output tokens exceed supported range")
             }
-            chatOptionsBuilder.maxCompletionTokens(it.toInt())
+            when (protocolType) {
+                AiProviderProtocolType.OPENAI_COMPATIBLE -> {
+                    (chatOptionsBuilder as OpenAiChatOptions.Builder).maxCompletionTokens(it.toInt())
+                }
+                AiProviderProtocolType.ANTHROPIC_MESSAGES -> {
+                    // Not support
+                }
+            }
+
         }
 
         if (modelRequestConfig.additionalBody.isNotEmpty()) {
-            chatOptionsBuilder.extraBody(modelRequestConfig.additionalBody.mapNotNull { (key, value) ->
-                value?.let { key to it }
-            }.toMap())
+            when (protocolType) {
+                AiProviderProtocolType.OPENAI_COMPATIBLE -> {
+                    (chatOptionsBuilder as OpenAiChatOptions.Builder).extraBody(
+                        modelRequestConfig.additionalBody.mapNotNull { (key, value) ->
+                            value?.let { key to it }
+                        }.toMap()
+                    )
+                }
+                AiProviderProtocolType.ANTHROPIC_MESSAGES -> {
+                    // Not support
+                }
+            }
+
         }
 
         val chatOptions = chatOptionsBuilder.build()
 
-        return OpenAiChatModel.builder()
-            .options(chatOptions)
-            .httpClientBuilderCustomizer { httpClientBuilder ->
-                httpClientBuilder.interceptor(RawResponseCapturingInterceptor(rawRequestBodyHolder, rawResponseBodyHolder))
-            }
-            .build()
+        return when (protocolType) {
+            AiProviderProtocolType.OPENAI_COMPATIBLE -> OpenAiChatModel.builder()
+                .options(chatOptions as OpenAiChatOptions)
+                .httpClientBuilderCustomizer { httpClientBuilder ->
+                    httpClientBuilder.interceptor(RawResponseCapturingInterceptor(rawRequestBodyHolder, rawResponseBodyHolder))
+                }
+                .build()
+            AiProviderProtocolType.ANTHROPIC_MESSAGES -> AnthropicChatModel.builder()
+                .options(chatOptions as AnthropicChatOptions)
+                .httpClientBuilderCustomizer { httpClientBuilder ->
+                    httpClientBuilder.interceptor(RawResponseCapturingInterceptor(rawRequestBodyHolder, rawResponseBodyHolder))
+                }
+                .build()
+        }
     }
 }
