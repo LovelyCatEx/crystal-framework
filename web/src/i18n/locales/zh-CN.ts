@@ -927,6 +927,20 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    aiPlayground: {
+      title: 'AI 训练场',
+      subtitle: '使用已配置的 AI 模型进行对话测试',
+      modelTree: '模型列表',
+      emptyModels: '暂无可用模型',
+      selectModelHint: '请先从左侧选择一个模型',
+      emptyConversation: '开始一段新的对话',
+      inputPlaceholder: '输入消息，按 Enter 发送，按 Shift+Enter 换行',
+      send: '发送',
+      messages: {
+        loadFailed: '加载 AI 模型失败',
+        chatFailed: '发送消息失败'
+      }
+    },
     tenantManager: {
       title: '租户管理',
       subtitle: '管理系统租户信息',
@@ -1277,6 +1291,7 @@ export const zhCN: I18nRules = {
         'system.ai.provider': 'AI 提供商管理菜单',
         'system.ai.model': 'AI 模型管理菜单',
         'system.ai.user.group': 'AI 用户组管理菜单',
+        'system.ai.playground': 'AI 训练场菜单',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': '租户部门菜单',
         'tenant.role': '租户角色菜单',
@@ -1377,6 +1392,7 @@ export const zhCN: I18nRules = {
         'system.ai.user.group.member.read': '读取 AI 用户组成员关联',
         'system.ai.user.group.member.update': '更新 AI 用户组成员关联',
         'system.ai.user.group.member.delete': '删除 AI 用户组成员关联',
+        'system.ai.playground.chat': '使用 AI 训练场',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': '创建租户',
         'system.tenant.read': '读取租户',
@@ -4670,7 +4686,8 @@ export const zhCN: I18nRules = {
       systemDictItems: '系统字典项',
       aiProvider: '提供商管理',
       aiModel: '模型管理',
-      aiUserGroup: '用户组管理'
+      aiUserGroup: '用户组管理',
+      aiPlayground: 'AI 训练场'
     },
 
     // 菜单分组

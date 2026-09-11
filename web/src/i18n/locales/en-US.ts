@@ -930,6 +930,20 @@ export const enUS: I18nRules = {
         }
       }
     },
+    aiPlayground: {
+      title: 'AI Playground',
+      subtitle: 'Test conversations with configured AI models',
+      modelTree: 'Models',
+      emptyModels: 'No available models',
+      selectModelHint: 'Select a model from the left to begin',
+      emptyConversation: 'Start a new conversation',
+      inputPlaceholder: 'Enter a message. Press Enter to send and Shift+Enter for a new line',
+      send: 'Send',
+      messages: {
+        loadFailed: 'Failed to load AI models',
+        chatFailed: 'Failed to send message'
+      }
+    },
     tenantManager: {
       title: 'Tenant Management',
       subtitle: 'Manage system tenant information',
@@ -1280,6 +1294,7 @@ export const enUS: I18nRules = {
         'system.ai.provider': 'AI Provider management menu',
         'system.ai.model': 'AI Model management menu',
         'system.ai.user.group': 'AI User Group management menu',
+        'system.ai.playground': 'AI Playground menu',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': 'Manage tenant departments menu',
         'tenant.role': 'Manage tenant roles menu',
@@ -1380,6 +1395,7 @@ export const enUS: I18nRules = {
         'system.ai.user.group.member.read': 'Read AI user group member associations',
         'system.ai.user.group.member.update': 'Update AI user group member associations',
         'system.ai.user.group.member.delete': 'Delete AI user group member associations',
+        'system.ai.playground.chat': 'Use AI Playground',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': 'Create tenants',
         'system.tenant.read': 'Read tenants',
@@ -4672,7 +4688,8 @@ export const enUS: I18nRules = {
       systemDictItems: 'System Dictionary Items',
       aiProvider: 'Provider Management',
       aiModel: 'Model Management',
-      aiUserGroup: 'User Group Management'
+      aiUserGroup: 'User Group Management',
+      aiPlayground: 'AI Playground'
     },
 
     // Menu groups

@@ -63,9 +63,14 @@ object AiPermission {
     const val ACTION_SYSTEM_AI_USER_GROUP_MEMBER_DELETE_NAME = "system.ai.user.group.member.delete"
     val ACTION_SYSTEM_AI_USER_GROUP_MEMBER_DELETE = SystemRbacPermissionDeclaration.action(ACTION_SYSTEM_AI_USER_GROUP_MEMBER_DELETE_NAME, "Delete AI user group member associations")
 
+    const val ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME = "system.ai.playground.chat"
+    val ACTION_SYSTEM_AI_PLAYGROUND_CHAT = SystemRbacPermissionDeclaration.action(ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME, "Use AI playground")
+
     val MENU_SYSTEM_AI_PROVIDER = SystemRbacPermissionDeclaration.menu("system.ai.provider", "/manager/ai/provider", "AI Provider management menu")
     val MENU_SYSTEM_AI_MODEL = SystemRbacPermissionDeclaration.menu("system.ai.model", "/manager/ai/model", "AI Model management menu")
     val MENU_SYSTEM_AI_USER_GROUP = SystemRbacPermissionDeclaration.menu("system.ai.user.group", "/manager/ai/user-group", "AI User Group management menu")
+
+    val MENU_SYSTEM_AI_PLAYGROUND = SystemRbacPermissionDeclaration.menu("system.ai.playground", "/manager/ai/playground", "AI Playground menu")
 
     fun allPermissions(): List<SystemRbacPermissionDeclaration> = listOf(
         ACTION_SYSTEM_AI_PROVIDER_CREATE,
@@ -88,8 +93,10 @@ object AiPermission {
         ACTION_SYSTEM_AI_USER_GROUP_MEMBER_READ,
         // ACTION_SYSTEM_AI_USER_GROUP_MEMBER_UPDATE,
         ACTION_SYSTEM_AI_USER_GROUP_MEMBER_DELETE,
+        ACTION_SYSTEM_AI_PLAYGROUND_CHAT,
         MENU_SYSTEM_AI_PROVIDER,
         MENU_SYSTEM_AI_MODEL,
         MENU_SYSTEM_AI_USER_GROUP,
+        MENU_SYSTEM_AI_PLAYGROUND,
     )
 }

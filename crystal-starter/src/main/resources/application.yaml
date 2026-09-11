@@ -53,6 +53,9 @@ spring:
       enabled: true
   main:
     allow-circular-references: true
+  ai:
+    openai:
+      api-key: disabled
 crystalframework:
   auth:
     jwt:

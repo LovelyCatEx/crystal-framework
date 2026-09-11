@@ -23,6 +23,10 @@ export class BaseManagerController<
         return records.length > 0 ? records[0] : null
     }
 
+    readAll(queryParams: Record<string, string> = {}) {
+        return this.list(queryParams);
+    }
+
     list(queryParams: Record<string, string> = {}) {
         const queryString = new URLSearchParams(queryParams).toString();
         const url = queryString ? `/api${this.baseUrl}/list?${queryString}` : `/api${this.baseUrl}/list`;

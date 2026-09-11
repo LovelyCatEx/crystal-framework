@@ -66,4 +66,7 @@ class AiModelEntity(
         }
         return values.toSet()
     }
+
+    @JsonIgnore
+    inline fun <reified T> getRequestConfigObject(): T = requestConfig.parseObject()
 }

@@ -67,5 +67,10 @@
             <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-rbac</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
     </dependencies>
 </project>
