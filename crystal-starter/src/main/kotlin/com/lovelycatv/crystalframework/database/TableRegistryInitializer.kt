@@ -28,6 +28,7 @@ class TableRegistryInitializer(
 
         registry.register(TableConstants.TABLE_AI_PROVIDERS)
         registry.register(TableConstants.TABLE_AI_MODELS)
+        registry.register(TableConstants.TABLE_AI_MODEL_INVOCATION_RECORDS)
         registry.register(TableConstants.TABLE_AI_USER_GROUPS)
         registry.register(TableConstants.TABLE_AI_USER_GROUP_MEMBERS)
         registry.register(TableConstants.TABLE_AI_USER_GROUP_MODELS)

@@ -3,6 +3,7 @@ package com.lovelycatv.crystalframework.shared.constants
 object TableConstants {
     const val TABLE_AI_PROVIDERS = "ai_providers"
     const val TABLE_AI_MODELS = "ai_models"
+    const val TABLE_AI_MODEL_INVOCATION_RECORDS = "ai_model_invocation_records"
     const val TABLE_AI_USER_GROUPS = "ai_user_groups"
     const val TABLE_AI_USER_GROUP_MEMBERS = "ai_user_group_members"
     const val TABLE_AI_USER_GROUP_MODELS = "ai_user_group_models"
