@@ -7,10 +7,12 @@ import com.lovelycatv.crystalframework.ai.entity.AiProviderEntity
 import com.lovelycatv.crystalframework.ai.repository.AiModelInvocationRecordRepository
 import com.lovelycatv.crystalframework.ai.service.AiModelInvocationRecordService
 import com.lovelycatv.crystalframework.ai.types.AiEndpointResponseConfig
+import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiModelInvocationStatus
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
 import com.lovelycatv.crystalframework.ai.types.AiProviderResponseConfig
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.openai.models.completions.CompletionUsage
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.ai.chat.messages.Message
 import org.springframework.ai.chat.model.ChatResponse
@@ -25,7 +27,7 @@ class AiModelInvocationRecordServiceImpl(
     private val objectMapper: ObjectMapper,
 ) : AiModelInvocationRecordService {
 
-    override suspend fun recordSyncInvocation(
+    override suspend fun recordInvocation(
         userId: Long,
         tenantId: Long?,
         model: AiModelEntity,
@@ -33,6 +35,10 @@ class AiModelInvocationRecordServiceImpl(
         messages: List<Message>,
         response: ChatResponse,
         durationMs: Long,
+        isStreaming: Boolean,
+        timeToFirstTokenMs: Long?,
+        rawRequestBody: String?,
+        rawResponseBody: String?,
     ) {
         val responseConfig = provider.getResponseConfigObject<AiProviderResponseConfig>()
         val chatConfig = responseConfig.chatCompletions
@@ -45,39 +51,96 @@ class AiModelInvocationRecordServiceImpl(
             messages = messages,
             response = response,
             durationMs = durationMs,
-            isStreaming = false,
-            timeToFirstTokenMs = null,
+            isStreaming = isStreaming,
+            timeToFirstTokenMs = timeToFirstTokenMs,
             responseConfig = chatConfig,
+            rawRequestBody = rawRequestBody,
+            rawResponseBody = rawResponseBody,
         )
 
         repository.save(entity).awaitFirstOrNull()
     }
 
-    override suspend fun recordStreamInvocation(
-        userId: Long,
-        tenantId: Long?,
+    override suspend fun recordInvocationFromContext(
+        context: AiInvocationContext,
         model: AiModelEntity,
         provider: AiProviderEntity,
-        messages: List<Message>,
-        response: ChatResponse,
-        durationMs: Long,
-        timeToFirstTokenMs: Long,
     ) {
         val responseConfig = provider.getResponseConfigObject<AiProviderResponseConfig>()
         val chatConfig = responseConfig.chatCompletions
 
-        val entity = buildBaseRecord(
-            userId = userId,
-            tenantId = tenantId,
-            model = model,
-            provider = provider,
-            messages = messages,
-            response = response,
-            durationMs = durationMs,
-            isStreaming = true,
-            timeToFirstTokenMs = timeToFirstTokenMs,
-            responseConfig = chatConfig,
+        val promptTokens = extractTokenCount(context.rawResponseBody, chatConfig?.usage?.inputTokensPath, "$.usage.prompt_tokens")
+        val completionTokens = extractTokenCount(context.rawResponseBody, chatConfig?.usage?.outputTokensPath, "$.usage.completion_tokens")
+        val cachedPromptTokens = extractTokenCount(context.rawResponseBody, chatConfig?.usage?.cacheReadTokensPath, "$.usage.prompt_tokens_details.cached_tokens")
+        val cacheCreationTokens = extractTokenCount(context.rawResponseBody, chatConfig?.usage?.cacheWriteTokensPath, "$.usage.prompt_tokens_details.cache_creation_input_tokens")
+        val reasoningTokens = extractTokenCount(context.rawResponseBody, null, "$.usage.completion_tokens_details.reasoning_tokens")
+        val stopReason = extractStopReason(context.rawResponseBody, chatConfig?.finishReasonPath)
+        val queueWaitMs = extractLongValue(context.rawResponseBody, "$.usage.queue_time")
+
+        val requestSizeBytes = context.rawRequestBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
+        val responseSizeBytes = context.rawResponseBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
+
+        val promptPrice = model.inputPricePerMillion.toDouble()
+        val completionPrice = model.outputPricePerMillion.toDouble()
+        val cacheReadPrice = model.cacheReadPricePerMillion?.toDouble() ?: 0.0
+        val cacheWritePrice = model.cacheWritePricePerMillion?.toDouble() ?: 0.0
+
+        val rawCost = calculateCost(
+            promptTokens = promptTokens,
+            completionTokens = completionTokens,
+            cachedPromptTokens = cachedPromptTokens,
+            cacheCreationTokens = cacheCreationTokens,
+            promptPrice = promptPrice,
+            completionPrice = completionPrice,
+            cacheReadPrice = cacheReadPrice,
+            cacheWritePrice = cacheWritePrice,
         )
+
+        val tokensPerSecond = if (context.durationMs > 0) {
+            (completionTokens.toDouble() / context.durationMs) * 1000
+        } else null
+
+        val modelRequestConfig = model.getRequestConfigObject<AiModelRequestConfig>()
+        val temperature = modelRequestConfig.temperature?.toDouble()
+        val topP = 0.0
+        val maxTokens = (modelRequestConfig.maxOutputTokens ?: model.maxOutputTokens)?.toInt()
+
+        val entity = AiModelInvocationRecordEntity(
+            id = snowIdGenerator.nextId(),
+            requestId = context.responseMetadataId,
+            userId = context.userId,
+            tenantId = context.tenantId,
+            providerId = context.providerId,
+            modelId = context.modelId,
+            promptTokens = promptTokens,
+            cachedPromptTokens = cachedPromptTokens,
+            completionTokens = completionTokens,
+            reasoningTokens = reasoningTokens,
+            cacheCreationTokens = cacheCreationTokens,
+            toolCallsCount = 0, // Context 中没有 toolCalls 信息
+            messageCount = context.messageCount,
+            isStreaming = context.isStreaming,
+            timeToFirstTokenMs = context.timeToFirstTokenMs ?: 0,
+            totalDurationMs = context.durationMs,
+            queueWaitMs = queueWaitMs,
+            tokensPerSecond = tokensPerSecond,
+            requestSizeBytes = requestSizeBytes,
+            responseSizeBytes = responseSizeBytes,
+            promptUnitPrice = promptPrice,
+            completionUnitPrice = completionPrice,
+            cacheReadUnitPrice = cacheReadPrice,
+            cacheWriteUnitPrice = cacheWritePrice,
+            rawCost = rawCost,
+            finalCost = rawCost,
+            currency = model.currency,
+            temperature = temperature,
+            topP = topP,
+            maxTokens = maxTokens,
+            status = AiModelInvocationStatus.SUCCESS.typeId,
+            stopReason = stopReason,
+        ).apply {
+            newEntity()
+        }
 
         repository.save(entity).awaitFirstOrNull()
     }
@@ -122,20 +185,26 @@ class AiModelInvocationRecordServiceImpl(
         isStreaming: Boolean,
         timeToFirstTokenMs: Long?,
         responseConfig: AiEndpointResponseConfig?,
+        rawRequestBody: String?,
+        rawResponseBody: String?,
     ): AiModelInvocationRecordEntity {
-        val metadata = response.metadata
-        val additionalProperties = metadata["_additionalProperties"] as? Map<*, *>
+        val promptTokens = extractTokenCount(rawResponseBody, responseConfig?.usage?.inputTokensPath, "$.usage.prompt_tokens")
+        val completionTokens = extractTokenCount(rawResponseBody, responseConfig?.usage?.outputTokensPath, "$.usage.completion_tokens")
+        val cachedPromptTokens = extractTokenCount(rawResponseBody, responseConfig?.usage?.cacheReadTokensPath, "$.usage.prompt_tokens_details.cached_tokens")
+        val cacheCreationTokens = extractTokenCount(rawResponseBody, responseConfig?.usage?.cacheWriteTokensPath, "$.usage.prompt_tokens_details.cache_creation_input_tokens")
 
-        val promptTokens = extractTokenCount(additionalProperties, responseConfig?.usage?.inputTokensPath, "prompt_tokens")
-        val completionTokens = extractTokenCount(additionalProperties, responseConfig?.usage?.outputTokensPath, "completion_tokens")
-        val cachedPromptTokens = extractTokenCount(additionalProperties, responseConfig?.usage?.cacheReadTokensPath, "cached_tokens")
-        val cacheCreationTokens = extractTokenCount(additionalProperties, responseConfig?.usage?.cacheWriteTokensPath, "cache_creation_input_tokens")
-
-        val reasoningTokens = (additionalProperties?.get("reasoning_tokens") as? Number)?.toInt() ?: 0
+        val reasoningTokens = extractTokenCount(rawResponseBody, null, "$.usage.completion_tokens_details.reasoning_tokens")
 
         val toolCallsCount = response.result?.output?.toolCalls?.size ?: 0
 
-        val stopReason = extractStopReason(additionalProperties, responseConfig?.finishReasonPath)
+        val stopReason = extractStopReason(rawResponseBody, responseConfig?.finishReasonPath)
+
+        // Extract queue wait time from raw response if available
+        val queueWaitMs = extractLongValue(rawResponseBody, "$.usage.queue_time")
+
+        // Calculate request and response sizes from raw bodies
+        val requestSizeBytes = rawRequestBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
+        val responseSizeBytes = rawResponseBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
 
         val promptPrice = model.inputPricePerMillion.toDouble()
         val completionPrice = model.outputPricePerMillion.toDouble()
@@ -179,7 +248,10 @@ class AiModelInvocationRecordServiceImpl(
             isStreaming = isStreaming,
             timeToFirstTokenMs = timeToFirstTokenMs ?: 0,
             totalDurationMs = durationMs,
+            queueWaitMs = queueWaitMs,
             tokensPerSecond = tokensPerSecond,
+            requestSizeBytes = requestSizeBytes,
+            responseSizeBytes = responseSizeBytes,
             promptUnitPrice = promptPrice,
             completionUnitPrice = completionPrice,
             cacheReadUnitPrice = cacheReadPrice,
@@ -198,42 +270,60 @@ class AiModelInvocationRecordServiceImpl(
     }
 
     private fun extractTokenCount(
-        additionalProperties: Map<*, *>?,
+        rawResponseBody: String?,
         jsonPath: String?,
-        fallbackKey: String,
+        fallbackPath: String,
     ): Int {
-        if (additionalProperties == null) return 0
+        if (rawResponseBody.isNullOrBlank()) return 0
 
-        if (!jsonPath.isNullOrBlank()) {
-            try {
-                val json = objectMapper.writeValueAsString(additionalProperties)
-                val value = JsonPath.read<Any>(json, jsonPath)
-                return (value as? Number)?.toInt() ?: 0
-            } catch (e: Exception) {
-                // Fall back to direct map access
-            }
+        val pathToUse = jsonPath ?: fallbackPath
+
+        return try {
+            val value = JsonPath.read<Any>(rawResponseBody, pathToUse)
+            (value as? Number)?.toInt() ?: 0
+        } catch (e: Exception) {
+            0
         }
-
-        return (additionalProperties[fallbackKey] as? Number)?.toInt() ?: 0
     }
 
     private fun extractStopReason(
-        additionalProperties: Map<*, *>?,
+        rawResponseBody: String?,
         jsonPath: String?,
     ): String? {
-        if (additionalProperties == null) return null
+        if (rawResponseBody.isNullOrBlank()) return null
 
         if (!jsonPath.isNullOrBlank()) {
             try {
-                val json = objectMapper.writeValueAsString(additionalProperties)
-                return JsonPath.read<String>(json, jsonPath)
+                return JsonPath.read<String>(rawResponseBody, jsonPath)
             } catch (e: Exception) {
                 // Ignore
             }
         }
 
-        return (additionalProperties["finish_reason"] as? String)
-            ?: (additionalProperties["stop_reason"] as? String)
+        // Fallback: try common paths
+        return try {
+            JsonPath.read<String>(rawResponseBody, "$.choices[0].finish_reason")
+        } catch (e: Exception) {
+            try {
+                JsonPath.read<String>(rawResponseBody, "$.choices[0].stop_reason")
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    private fun extractLongValue(
+        rawResponseBody: String?,
+        jsonPath: String,
+    ): Long? {
+        if (rawResponseBody.isNullOrBlank()) return null
+
+        return try {
+            val value = JsonPath.read<Any>(rawResponseBody, jsonPath)
+            (value as? Number)?.toLong()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun calculateCost(

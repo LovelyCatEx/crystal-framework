@@ -2,17 +2,21 @@ package com.lovelycatv.crystalframework.ai.service.impl
 
 import com.lovelycatv.crystalframework.ai.entity.AiModelEntity
 import com.lovelycatv.crystalframework.ai.entity.AiProviderEntity
+import com.lovelycatv.crystalframework.ai.interceptor.RawResponseCapturingInterceptor
 import com.lovelycatv.crystalframework.ai.service.AiChatService
 import com.lovelycatv.crystalframework.ai.service.AiModelInvocationRecordService
 import com.lovelycatv.crystalframework.ai.service.manager.AiModelManagerService
 import com.lovelycatv.crystalframework.ai.service.manager.AiProviderManagerService
+import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
 import com.lovelycatv.crystalframework.ai.types.AiProviderProtocolType
 import com.lovelycatv.crystalframework.ai.types.AiProviderRequestConfig
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
 import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -25,6 +29,7 @@ import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
 import org.springframework.stereotype.Service
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resume
 
 @Service
@@ -33,7 +38,7 @@ class AiChatServiceImpl(
     private val aiProviderManagerService: AiProviderManagerService,
     private val invocationRecordService: AiModelInvocationRecordService,
 ) : AiChatService {
-
+    private val recordScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     override suspend fun chatCompletionSync(
         modelId: Long,
         messages: List<Message>
@@ -45,7 +50,9 @@ class AiChatServiceImpl(
             throw BusinessException("Only OpenAI compatible providers are currently supported")
         }
 
-        val chatModel = buildChatModel(model, provider)
+        val rawRequestBodyHolder = AtomicReference<String?>()
+        val rawResponseBodyHolder = AtomicReference<String?>()
+        val chatModel = buildChatModel(model, provider, rawRequestBodyHolder, rawResponseBodyHolder)
         val prompt = Prompt(messages)
 
         return try {
@@ -53,17 +60,29 @@ class AiChatServiceImpl(
                 continuation.resume(chatModel.call(prompt))
             }
             val duration = System.currentTimeMillis() - startTime
+            val rawRequestBody = rawRequestBodyHolder.getAndSet(null)
+            val rawResponseBody = rawResponseBodyHolder.getAndSet(null)
 
-            GlobalScope.launch {
+            recordScope.launch {
                 try {
-                    invocationRecordService.recordSyncInvocation(
+                    val context = AiInvocationContext.fromInvocation(
                         userId = CurrentUserId.current() ?: 0,
                         tenantId = CurrentTenantId.current(),
-                        model = model,
-                        provider = provider,
+                        modelId = model.id,
+                        providerId = provider.id,
                         messages = messages,
                         response = response,
                         durationMs = duration,
+                        isStreaming = false,
+                        timeToFirstTokenMs = null,
+                        rawRequestBody = rawRequestBody,
+                        rawResponseBody = rawResponseBody,
+                    )
+
+                    invocationRecordService.recordInvocationFromContext(
+                        context = context,
+                        model = model,
+                        provider = provider,
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -72,9 +91,11 @@ class AiChatServiceImpl(
 
             response
         } catch (e: Exception) {
+            rawRequestBodyHolder.set(null)
+            rawResponseBodyHolder.set(null)
             val duration = System.currentTimeMillis() - startTime
 
-            GlobalScope.launch {
+            recordScope.launch {
                 try {
                     invocationRecordService.recordFailedInvocation(
                         userId = CurrentUserId.current() ?: 0,
@@ -110,7 +131,9 @@ class AiChatServiceImpl(
             throw BusinessException("Only OpenAI compatible providers are currently supported")
         }
 
-        val chatModel = buildChatModel(model, provider)
+        val rawRequestBodyHolder = AtomicReference<String?>()
+        val rawResponseBodyHolder = AtomicReference<String?>()
+        val chatModel = buildChatModel(model, provider, rawRequestBodyHolder, rawResponseBodyHolder)
         val prompt = Prompt(messages)
 
         return try {
@@ -124,26 +147,37 @@ class AiChatServiceImpl(
                 .onCompletion { cause ->
                     val duration = System.currentTimeMillis() - startTime
                     val timeToFirst = firstTokenTime?.let { it - startTime } ?: 0L
+                    val rawRequestBody = rawRequestBodyHolder.getAndSet(null)
+                    val rawResponseBody = rawResponseBodyHolder.getAndSet(null)
 
                     if (cause == null && lastResponse != null) {
-                        GlobalScope.launch {
+                        recordScope.launch {
                             try {
-                                invocationRecordService.recordStreamInvocation(
+                                val context = AiInvocationContext.fromInvocation(
                                     userId = CurrentUserId.current() ?: 0,
                                     tenantId = CurrentTenantId.current(),
+                                    modelId = model.id,
+                                    providerId = provider.id,
+                                    messages = messages,
+                                    response = lastResponse,
+                                    durationMs = duration,
+                                    isStreaming = true,
+                                    timeToFirstTokenMs = timeToFirst,
+                                    rawRequestBody = rawRequestBody,
+                                    rawResponseBody = rawResponseBody,
+                                )
+
+                                invocationRecordService.recordInvocationFromContext(
+                                    context = context,
                                     model = model,
                                     provider = provider,
-                                    messages = messages,
-                                    response = lastResponse!!,
-                                    durationMs = duration,
-                                    timeToFirstTokenMs = timeToFirst,
                                 )
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
                         }
                     } else if (cause != null) {
-                        GlobalScope.launch {
+                        recordScope.launch {
                             try {
                                 invocationRecordService.recordFailedInvocation(
                                     userId = CurrentUserId.current() ?: 0,
@@ -163,9 +197,11 @@ class AiChatServiceImpl(
                     }
                 }
         } catch (e: Exception) {
+            rawRequestBodyHolder.set(null)
+            rawResponseBodyHolder.set(null)
             val duration = System.currentTimeMillis() - startTime
 
-            GlobalScope.launch {
+            recordScope.launch {
                 try {
                     invocationRecordService.recordFailedInvocation(
                         userId = CurrentUserId.current() ?: 0,
@@ -207,7 +243,9 @@ class AiChatServiceImpl(
 
     private fun buildChatModel(
         model: AiModelEntity,
-        provider: AiProviderEntity
+        provider: AiProviderEntity,
+        rawRequestBodyHolder: AtomicReference<String?>,
+        rawResponseBodyHolder: AtomicReference<String?>
     ): OpenAiChatModel {
         val providerRequestConfig = provider.getRequestConfigObject<AiProviderRequestConfig>()
         val modelRequestConfig = model.getRequestConfigObject<AiModelRequestConfig>()
@@ -246,6 +284,9 @@ class AiChatServiceImpl(
 
         return OpenAiChatModel.builder()
             .options(chatOptions)
+            .httpClientBuilderCustomizer { httpClientBuilder ->
+                httpClientBuilder.interceptor(RawResponseCapturingInterceptor(rawRequestBodyHolder, rawResponseBodyHolder))
+            }
             .build()
     }
 }

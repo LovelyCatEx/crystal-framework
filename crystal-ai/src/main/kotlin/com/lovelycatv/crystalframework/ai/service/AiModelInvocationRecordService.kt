@@ -2,11 +2,12 @@ package com.lovelycatv.crystalframework.ai.service
 
 import com.lovelycatv.crystalframework.ai.entity.AiModelEntity
 import com.lovelycatv.crystalframework.ai.entity.AiProviderEntity
+import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import org.springframework.ai.chat.messages.Message
 import org.springframework.ai.chat.model.ChatResponse
 
 interface AiModelInvocationRecordService {
-    suspend fun recordSyncInvocation(
+    suspend fun recordInvocation(
         userId: Long,
         tenantId: Long?,
         model: AiModelEntity,
@@ -14,17 +15,16 @@ interface AiModelInvocationRecordService {
         messages: List<Message>,
         response: ChatResponse,
         durationMs: Long,
+        isStreaming: Boolean,
+        timeToFirstTokenMs: Long?,
+        rawRequestBody: String?,
+        rawResponseBody: String?,
     )
 
-    suspend fun recordStreamInvocation(
-        userId: Long,
-        tenantId: Long?,
+    suspend fun recordInvocationFromContext(
+        context: AiInvocationContext,
         model: AiModelEntity,
         provider: AiProviderEntity,
-        messages: List<Message>,
-        response: ChatResponse,
-        durationMs: Long,
-        timeToFirstTokenMs: Long,
     )
 
     suspend fun recordFailedInvocation(

@@ -89,10 +89,36 @@
 
 ## 核心禁止行为
 
-- **破坏性 Git 命令**（commit/push/merge）- 只提供 Commit Message 让用户自行提交
+- **破坏性 Git 命令** - 绝对禁止任何修改 Git 状态的命令，只能提供 Commit Message 让用户自行提交
 - **整体回滚代码** - 必须保留有效改动，逐项修复
 - **魔法值** - 必须用 constants 包的常量
 - **单文件多定义** - 一个文件只能有一个类/接口/枚举
+
+### Git 操作规则
+
+**✅ 允许（只读命令）：**
+- `git status` - 查看状态
+- `git log` - 查看历史
+- `git diff` - 查看差异
+- `git branch` - 查看分支
+- `git show` - 查看提交
+- 其他不修改状态的只读命令
+
+**❌ 绝对禁止（写操作）：**
+- `git add`
+- `git commit`
+- `git push`
+- `git pull`
+- `git merge`
+- `git rebase`
+- `git reset`
+- `git stash`
+- `git checkout`（切换分支/文件）
+- `git cherry-pick`
+- `git revert`
+- 任何其他修改 Git 状态的命令
+
+**唯一允许：** 提供格式化的 Commit Message 文本，由用户自行执行 git 操作。
 
 ## 任务完成标准
 
