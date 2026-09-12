@@ -654,6 +654,294 @@ export const zhCN: I18nRules = {
         idPlaceholder: '输入账号 ID'
       }
     },
+    aiProviderManager: {
+      title: 'AI 提供商管理',
+      subtitle: '管理 AI 服务提供商配置',
+      filter: {
+        id: 'ID',
+        idPlaceholder: '输入提供商 ID'
+      },
+      modal: {
+        name: {
+          label: '名称',
+          required: '请输入提供商名称',
+          placeholder: '提供商名称'
+        },
+        key: {
+          label: '唯一标识',
+          required: '请输入唯一标识',
+          placeholder: '提供商标识（如 openai）'
+        },
+        description: {
+          label: '描述',
+          placeholder: '提供商描述'
+        },
+        tabs: {
+          basic: '配置',
+          advanced: '高级',
+          noBasicConfig: '暂无基础配置'
+        },
+        configTemplate: {
+          label: '配置模板',
+          custom: '自定义（空白）',
+          openai: 'OpenAI 模板',
+          anthropic: 'Anthropic 模板',
+          confirmTitle: '确认覆盖配置',
+          confirmContent: '选择模板将覆盖当前的响应配置，是否继续？',
+          confirmButton: '确认',
+          cancelButton: '取消'
+        },
+        protocolType: {
+          label: '协议类型',
+          required: '请选择协议类型',
+          placeholder: '选择协议类型'
+        },
+        baseUrl: {
+          label: '基础 URL',
+          required: '请输入基础 URL',
+          placeholder: 'https://api.example.com'
+        },
+        apiKey: {
+          label: 'API 密钥',
+          required: '请输入 API 密钥',
+          placeholder: 'API 密钥'
+        },
+        chatCompletionsPath: {
+          label: '对话完成路径',
+          placeholder: '/v1/chat/completions'
+        },
+        embeddingPath: {
+          label: '向量嵌入路径',
+          placeholder: '/v1/embeddings'
+        },
+        requestConfig: {
+          label: '请求配置',
+          placeholder: 'JSON 格式的请求配置',
+          headers: '请求头',
+          addHeader: '添加请求头',
+          headerKey: '键',
+          headerValue: '值'
+        },
+        responseConfig: {
+          label: '响应配置',
+          placeholder: 'JSON 格式的响应配置',
+          chatCompletions: '对话完成配置',
+          embedding: '向量嵌入配置',
+          contentPath: 'Content 路径',
+          contentPathPlaceholder: '$.choices[0].message.content',
+          finishReasonPath: 'Finish Reason 路径',
+          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
+          providerRequestIdPath: 'Provider Request ID 路径',
+          providerRequestIdPathPlaceholder: '$.id',
+          errorMessagePath: 'Error Message 路径',
+          errorMessagePathPlaceholder: '$.error.message',
+          usageTitle: 'Usage JSON Path 配置',
+          inputTokensPath: 'Input Tokens 路径',
+          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
+          outputTokensPath: 'Output Tokens 路径',
+          outputTokensPathPlaceholder: '$.usage.completion_tokens',
+          totalTokensPath: 'Total Tokens 路径',
+          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          cacheReadTokensPath: 'Cache Read Tokens 路径',
+          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheWriteTokensPath: 'Cache Write Tokens 路径',
+          cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiModelManager: {
+      title: 'AI 模型管理',
+      subtitle: '管理 AI 模型配置与定价',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: '输入模型 ID'
+        }
+      },
+      modal: {
+        tabs: {
+          basic: '配置',
+          pricing: '价格',
+          advanced: '高级'
+        },
+        providerId: {
+          label: '所属提供商',
+          required: '请选择提供商',
+          placeholder: '选择提供商'
+        },
+        key: {
+          label: '模型标识',
+          required: '请输入模型标识',
+          placeholder: '模型标识（如 gpt-4）'
+        },
+        modelName: {
+          label: '模型名称',
+          required: '请输入模型名称',
+          placeholder: '模型名称'
+        },
+        displayName: {
+          label: '显示名称',
+          required: '请输入显示名称',
+          placeholder: '显示名称'
+        },
+        description: {
+          label: '描述',
+          placeholder: '模型描述'
+        },
+        capabilities: {
+          label: '能力',
+          placeholder: '选择模型能力'
+        },
+        contextWindowTokens: {
+          label: '上下文窗口 Token 数',
+          required: '请输入上下文窗口 Token 数',
+          placeholder: '例如：8192'
+        },
+        maxOutputTokens: {
+          label: '最大输出 Token 数',
+          placeholder: '例如：4096'
+        },
+        inputPricePerMillion: {
+          label: '输入价格（每百万 Token）',
+          placeholder: '例如：0.50'
+        },
+        outputPricePerMillion: {
+          label: '输出价格（每百万 Token）',
+          placeholder: '例如：1.50'
+        },
+        cacheReadPricePerMillion: {
+          label: '缓存读取价格（每百万 Token）',
+          placeholder: '例如：0.10'
+        },
+        cacheWritePricePerMillion: {
+          label: '缓存写入价格（每百万 Token）',
+          placeholder: '例如：0.25'
+        },
+        currency: {
+          label: '货币',
+          required: '请输入货币',
+          placeholder: '例如：USD'
+        },
+        requestConfig: {
+          label: '请求配置',
+          placeholder: 'JSON 格式的请求配置',
+          temperature: 'Temperature',
+          maxOutputTokens: '最大输出 Token 数',
+          additionalBody: '额外请求体参数',
+          additionalBodyKey: '键',
+          additionalBodyValue: '值',
+          addAdditionalBody: '添加参数'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiUserGroupManager: {
+      title: '用户组管理',
+      subtitle: '管理用户组与计费倍率',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: '输入用户组 ID'
+        }
+      },
+      modal: {
+        name: {
+          label: '组名',
+          required: '请输入组名',
+          placeholder: '用户组名称'
+        },
+        key: {
+          label: '唯一标识',
+          required: '请输入唯一标识',
+          placeholder: '用户组标识'
+        },
+        description: {
+          label: '描述',
+          placeholder: '用户组描述'
+        },
+        billingMultiplier: {
+          label: '计费倍率',
+          required: '请输入计费倍率',
+          placeholder: '例如：1.0'
+        },
+        enabled: {
+          label: '启用状态',
+          enabled: '已启用',
+          disabled: '已禁用'
+        },
+        isDefault: {
+          label: '默认组'
+        },
+        sort: {
+          label: '排序',
+          placeholder: '排序值（数字）'
+        }
+      }
+    },
+    aiUserGroupModelManager: {
+      title: '用户组模型关联',
+      subtitle: '管理用户组与模型的关联关系',
+      modal: {
+        userGroupId: {
+          label: '用户组 ID',
+          required: '请输入用户组 ID',
+          placeholder: '输入用户组 ID'
+        },
+        modelId: {
+          label: '模型 ID',
+          required: '请输入模型 ID',
+          placeholder: '输入模型 ID'
+        }
+      }
+    },
+    aiUserGroupMemberManager: {
+      title: '用户组成员关联',
+      subtitle: '管理用户组与用户的关联关系',
+      modal: {
+        userGroupId: {
+          label: '用户组 ID',
+          required: '请输入用户组 ID',
+          placeholder: '输入用户组 ID'
+        },
+        userId: {
+          label: '用户 ID',
+          required: '请输入用户 ID',
+          placeholder: '输入用户 ID'
+        }
+      }
+    },
+    aiPlayground: {
+      title: 'AI 训练场',
+      subtitle: '使用已配置的 AI 模型进行对话测试',
+      modelTree: '模型列表',
+      emptyModels: '暂无可用模型',
+      selectModelHint: '请先从左侧选择一个模型',
+      emptyConversation: '开始一段新的对话',
+      inputPlaceholder: '输入消息，按 Enter 发送，按 Shift+Enter 换行',
+      send: '发送',
+      thinking: '已完成思考',
+      messages: {
+        loadFailed: '加载 AI 模型失败',
+        chatFailed: '发送消息失败'
+      }
+    },
     tenantManager: {
       title: '租户管理',
       subtitle: '管理系统租户信息',
@@ -997,10 +1285,13 @@ export const zhCN: I18nRules = {
         'system.user.login.log': '用户登录日志菜单',
         'system.monitor.sessions': '会话监控菜单',
         'system.announcement': '公告菜单',
-        'system.broadcast': '站内信公告菜单',
         'system.approval.flow.definition': '审批流程定义菜单',
         'system.dict.type': '系统字典类型菜单',
         'system.dict.item': '系统字典项菜单',
+        'system.ai.provider': 'AI 提供商管理菜单',
+        'system.ai.model': 'AI 模型管理菜单',
+        'system.ai.user.group': 'AI 用户组管理菜单',
+        'system.ai.playground': 'AI 训练场菜单',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': '租户部门菜单',
         'tenant.role': '租户角色菜单',
@@ -1080,6 +1371,28 @@ export const zhCN: I18nRules = {
         'system.mail.template.read': '读取邮件模板',
         'system.mail.template.update': '更新邮件模板',
         'system.mail.template.delete': '删除邮件模板',
+        // AI provider / model / user group (system layer)
+        'system.ai.provider.create': '创建 AI 提供商',
+        'system.ai.provider.read': '读取 AI 提供商',
+        'system.ai.provider.update': '更新 AI 提供商',
+        'system.ai.provider.delete': '删除 AI 提供商',
+        'system.ai.model.create': '创建 AI 模型',
+        'system.ai.model.read': '读取 AI 模型',
+        'system.ai.model.update': '更新 AI 模型',
+        'system.ai.model.delete': '删除 AI 模型',
+        'system.ai.user.group.create': '创建 AI 用户组',
+        'system.ai.user.group.read': '读取 AI 用户组',
+        'system.ai.user.group.update': '更新 AI 用户组',
+        'system.ai.user.group.delete': '删除 AI 用户组',
+        'system.ai.user.group.model.create': '创建 AI 用户组模型关联',
+        'system.ai.user.group.model.read': '读取 AI 用户组模型关联',
+        'system.ai.user.group.model.update': '更新 AI 用户组模型关联',
+        'system.ai.user.group.model.delete': '删除 AI 用户组模型关联',
+        'system.ai.user.group.member.create': '创建 AI 用户组成员关联',
+        'system.ai.user.group.member.read': '读取 AI 用户组成员关联',
+        'system.ai.user.group.member.update': '更新 AI 用户组成员关联',
+        'system.ai.user.group.member.delete': '删除 AI 用户组成员关联',
+        'system.ai.playground.chat': '使用 AI 训练场',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': '创建租户',
         'system.tenant.read': '读取租户',
@@ -1203,18 +1516,6 @@ export const zhCN: I18nRules = {
         'tenant.dict.item.read': '跨租户读取租户级字典项',
         'tenant.dict.item.update': '跨租户更新租户级字典项',
         'tenant.dict.item.delete': '跨租户删除租户级字典项',
-        'x.broadcast.create': '在任意作用域创建广播',
-        'x.broadcast.read': '在任意作用域读取广播',
-        'x.broadcast.update': '在任意作用域更新广播',
-        'x.broadcast.delete': '在任意作用域删除广播',
-        'system.broadcast.create': '创建系统级广播',
-        'system.broadcast.read': '读取系统级广播',
-        'system.broadcast.update': '更新系统级广播',
-        'system.broadcast.delete': '删除系统级广播',
-        'tenant.broadcast.create': '跨租户创建租户级广播',
-        'tenant.broadcast.read': '跨租户读取租户级广播',
-        'tenant.broadcast.update': '跨租户更新租户级广播',
-        'tenant.broadcast.delete': '跨租户删除租户级广播',
         'tenant.file.resource.create': '跨租户创建租户级文件资源',
         'tenant.file.resource.read': '跨租户读取租户级文件资源',
         'tenant.file.resource.update': '跨租户更新租户级文件资源',
@@ -1278,15 +1579,10 @@ export const zhCN: I18nRules = {
         'i.tenant.dict.item.read': '读取本租户字典项',
         'i.tenant.dict.item.update': '更新本租户字典项',
         'i.tenant.dict.item.delete': '删除本租户字典项',
-        'i.tenant.broadcast.create': '创建本租户广播',
-        'i.tenant.broadcast.read': '读取本租户广播',
-        'i.tenant.broadcast.update': '更新本租户广播',
-        'i.tenant.broadcast.delete': '删除本租户广播',
         'i.tenant.file.resource.create': '创建本租户文件资源',
         'i.tenant.file.resource.read': '读取本租户文件资源',
         'i.tenant.file.resource.update': '更新本租户文件资源',
         'i.tenant.file.resource.delete': '删除本租户文件资源',
-        'i.tenant.message.reception.handle': '查看并回复用户发给本租户的客服会话',
         'i.tenant.approval.flow.definition.create': '创建本租户审批流程定义',
         'i.tenant.approval.flow.definition.read': '读取本租户审批流程定义',
         'i.tenant.approval.flow.definition.update': '更新本租户审批流程定义',
@@ -1526,7 +1822,8 @@ export const zhCN: I18nRules = {
         username: '用户名',
         email: '邮箱',
         status: '状态',
-        action: '操作'
+        action: '操作',
+        unknownUser: '未知用户'
       },
       action: {
         assignRole: '分配角色'
@@ -1612,7 +1909,8 @@ export const zhCN: I18nRules = {
         username: '用户名',
         email: '邮箱',
         status: '状态',
-        action: '操作'
+        action: '操作',
+        unknownUser: '未知用户'
       },
       action: {
         assignRole: '分配角色'
@@ -2281,6 +2579,32 @@ export const zhCN: I18nRules = {
         sendSuccess: '飞书测试消息发送成功',
         sendFailed: '飞书测试消息发送失败',
       },
+      testSendWebSocket: {
+        button: '发送 WebSocket 测试消息',
+        modalTitle: '发送 WebSocket 测试消息',
+        requiresAuthLabel: '需要认证',
+        channelLabel: 'Channel 名称',
+        channelPlaceholder: '请选择或输入 Channel 名称',
+        channelRequired: '请输入 Channel 名称',
+        typeLabel: 'Action 类型',
+        typePlaceholder: '请输入 Action 类型',
+        typeRequired: '请输入 Action 类型',
+        payloadLabel: 'Payload（JSON）',
+        payloadPlaceholder: '请输入 JSON 格式的 Payload',
+        connect: '连接',
+        connecting: '连接中...',
+        connected: '已连接',
+        disconnect: '断开连接',
+        disconnected: '已断开',
+        connectionLost: '连接已断开',
+        connectionError: '连接出错',
+        send: '发送',
+        sendHint: 'Ctrl/Cmd + Enter 快速发送',
+        noMessages: '暂无消息',
+        notConnected: 'WebSocket 未连接',
+        fillRequired: '请填写必填项',
+        invalidJson: 'Payload 必须是有效的 JSON 格式',
+      },
       keys: {
         'basic.baseUrl': 'API 基本地址',
         'basic.frontendBaseUrl': '前端基本地址',
@@ -2313,6 +2637,13 @@ export const zhCN: I18nRules = {
         'security.emailCodeRateLimit.maxPerIp': '单 IP 窗口内最大发送次数',
         'security.emailCodeRateLimit.maxPerEmail': '单邮箱窗口内最大发送次数',
         'security.emailCodeRateLimit.maxGlobal': '全局窗口内最大发送次数',
+        'security.webSocketAuthRateLimit.enabled': '是否启用',
+        'security.webSocketAuthRateLimit.windowSeconds': '滑动窗口时长（秒）',
+        'security.webSocketAuthRateLimit.maxAttemptsPerIp': '单 IP 窗口内最大尝试次数',
+        'security.webSocketAuthRateLimit.maxAttemptsPerAccount': '单账号窗口内最大尝试次数',
+        'security.webSocketAuthRateLimit.lockThreshold': '触发锁定的连续失败次数',
+        'security.webSocketAuthRateLimit.lockBaseSeconds': '锁定基础时长（秒）',
+        'security.webSocketAuthRateLimit.lockMaxSeconds': '锁定最大时长（秒）',
         'security.outbound.allowedHosts': '允许的出站域名',
         'security.outbound.allowedSmtpHosts': '允许的 SMTP 出站主机',
         'oauth.github.enabled': '启用',
@@ -2343,9 +2674,7 @@ export const zhCN: I18nRules = {
         'oauth.oicq.scope': '授权范围',
         'module.tenant.enabled': '启用租户模块',
         'module.approval.enabled': '启用审批模块',
-        'module.message.systemPeerEnabled': '启用系统用户私聊',
-        'module.message.tenantScopeEnabled': '启用租户内私聊',
-        'module.message.tenantDeskEnabled': '启用租户服务台',
+        'module.webSocket.enabled': '启用 WebSocket',
         'resource.signedUrl.ttlSeconds': '签名 URL 有效期（秒）',
         'resource.visibility.builtin_user_avatar': '用户头像可见性',
         'resource.visibility.builtin_tenant_icon': '租户图标可见性',
@@ -2360,13 +2689,14 @@ export const zhCN: I18nRules = {
         'security.api.encrypt': 'Api 安全设置',
         'security.loginRateLimit': '登录限流与锁定',
         'security.emailCodeRateLimit': '邮件验证码限流',
+        'security.webSocketAuthRateLimit': 'WebSocket 认证限流与锁定',
         'security.outbound': '出站请求',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': '租户模块',
         'module.approval': '审批模块',
-        'module.message': '消息模块',
+        'module.webSocket': 'WebSocket',
         'resource.signedUrl': '签名 URL',
         'resource.visibility': '资源访问权限',
       },
@@ -2511,38 +2841,6 @@ export const zhCN: I18nRules = {
       messages: {
         statusUpdateSuccess: '状态更新成功',
         statusUpdateFailed: '状态更新失败',
-      },
-    },
-    broadcastManager: {
-      title: '广播管理',
-      subtitle: '管理系统范围的广播（系统公告）',
-      modal: {
-        title: {
-          label: '标题',
-          required: '请输入标题',
-          maxLength: '标题不能超过 256 个字符',
-        },
-        content: {
-          label: '内容',
-          required: '请输入内容',
-        },
-        category: {
-          label: '分类',
-        },
-        audienceType: {
-          label: '受众',
-          required: '请选择受众',
-        },
-        publishTime: {
-          label: '发布时间',
-          placeholder: '留空则立即发布',
-          help: '到达该时间后用户才可见，留空表示立即发布',
-        },
-        expireTime: {
-          label: '过期时间',
-          placeholder: '留空则永不过期',
-          help: '到达该时间后自动下架，留空表示永不过期',
-        },
       },
     },
     managerContainer: {
@@ -3057,54 +3355,6 @@ export const zhCN: I18nRules = {
       emptyNearby: '附近暂无可选地址',
       loading: '正在搜索附近地址...'
     },
-    notification: {
-      // NotificationBell / NotificationCenter
-      title: '消息中心',
-      emptyHistory: '暂无公告',
-      expired: '已过期',
-      noMore: '没有更多了',
-      conversations: {
-        title: '会话',
-        systemBroadcast: '系统公告',
-        personal: '个人',
-        organizationTag: '组织',
-        deskTag: '客服台',
-        external: '外部',
-        systemTab: '系统用户',
-        deskContactTag: '联系的客服台',
-        membersTag: '成员',
-        externalTag: '外部'
-      },
-      startConversation: {
-        start: '发起会话',
-        title: '发起会话',
-        userTab: '用户',
-        tenantTab: '租户',
-        tenantMemberTab: '组织成员',
-        tenantScopeDisabled: '租户会话功能已被管理员禁用',
-        allFeaturesDisabled: '会话功能已被管理员禁用'
-      },
-      contactUser: {
-        searchPlaceholder: '输入完整用户名或邮箱',
-        hint: '输入完整的用户名或邮箱以发起会话',
-        empty: '未找到匹配的用户'
-      },
-      tenantChat: {
-        title: '选择组织成员',
-        tenantPlaceholder: '选择组织',
-        empty: '该组织暂无成员'
-      },
-      contact: {
-        start: '发起会话',
-        title: '选择租户',
-        searchPlaceholder: '搜索租户名称',
-        empty: '暂无可联系的租户',
-        draftTag: '草稿',
-        startHint: '发送第一条消息以开始会话',
-        composerPlaceholder: '输入消息，Enter 发送，Shift+Enter 换行',
-        send: '发送'
-      }
-    },
     dashboard: {
       // DashboardPage
       greeting: {
@@ -3345,6 +3595,19 @@ export const zhCN: I18nRules = {
     },
 
     columns: {
+      aiUserGroupModel: {
+        recordId: '记录 ID',
+        provider: '供应商',
+        model: '模型',
+        modelKey: '模型标识',
+        modelStatus: '模型状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
+      aiUserGroupMember: {
+        recordId: '记录 ID',
+        user: '用户'
+      },
       fileResource: {
         preview: '预览',
         fileInfo: '文件信息',
@@ -3536,19 +3799,6 @@ export const zhCN: I18nRules = {
         userInfo: '用户信息',
         noAvatar: '无头像'
       },
-      broadcast: {
-        title: '标题',
-        content: '内容',
-        category: '分类',
-        scopeType: '范围',
-        audience: '受众',
-        sender: '发送方',
-        publishTime: '发布时间',
-        expireTime: '过期时间',
-        systemSender: '系统',
-        audienceRef: '引用',
-        unknown: '未知'
-      },
       mailTemplate: {
         name: '名称',
         type: '类型',
@@ -3652,6 +3902,18 @@ export const zhCN: I18nRules = {
         unknownFlow: '流程已删除',
         unknownNode: '节点已删除',
         unknownInitiator: '发起人已删除'
+      },
+      aiModel: {
+        name: '模型名称',
+        providerId: '所属提供商',
+        capabilities: '能力',
+        maxOutputTokens: '最大 Token 数',
+        pricing: '价格',
+        enabled: '启用状态',
+        enabledStatus: {
+          enabled: '已启用',
+          disabled: '已禁用'
+        }
       }
     },
     entityTable: {
@@ -3799,11 +4061,35 @@ export const zhCN: I18nRules = {
         aliyunOSS: '阿里云OSS',
         tencentCOS: '腾讯云COS'
       },
+      aiModel: {
+        notFound: '模型不存在',
+        description: '描述',
+        contextWindow: '上下文窗口',
+        maxOutput: '最大输出',
+        pricing: '定价',
+        input: '输入',
+        cacheInput: '缓存输入',
+        output: '输出',
+        cacheWrite: '缓存写入',
+        status: '状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
+      aiProvider: {
+        notFound: '供应商不存在',
+        description: '描述',
+        baseUrl: '基础 URL',
+        status: '状态',
+        enabled: '已启用',
+        disabled: '已禁用'
+      },
       mailTemplateType: {
         notFound: '未找到类型信息',
         description: '描述',
         allowMultiple: '允许多模板',
-        variables: '变量'
+        variables: '变量',
+        yes: '是',
+        no: '否'
       },
       templateVariablesTag: {
         copySuccess: '已复制 {{variable}} 到剪切板'
@@ -4131,29 +4417,27 @@ export const zhCN: I18nRules = {
       SYSTEM: '系统',
       TENANT: '租户'
     },
-    scopeType: {
-      0: '系统',
-      1: '租户'
-    },
-    partyType: {
-      0: '用户',
-      1: '系统',
-      2: '租户'
-    },
-    audienceType: {
-      0: '全体用户',
-      1: '租户成员',
-      2: '人群分组'
-    },
-    broadcastCategory: {
-      0: '公告'
-    },
     ResourceVisibility: {
       PUBLIC: '公开（任何人可访问）',
       AUTHENTICATED: '已登录用户',
       SCOPE_MEMBER: '同租户成员',
       OWNER_ONLY: '仅上传者本人',
       SYSTEM_ADMIN: '仅系统管理员',
+    },
+    aiProviderProtocolType: {
+      0: 'OpenAI 兼容',
+      1: 'Anthropic Messages',
+      2: '通用 HTTP'
+    },
+    aiModelCapability: {
+      0: '对话',
+      1: '文本生成',
+      2: '视觉理解',
+      3: '向量嵌入',
+      4: '工具调用',
+      5: '结构化输出',
+      6: '音频输入',
+      7: '音频输出'
     }
   },
 
@@ -4187,12 +4471,16 @@ export const zhCN: I18nRules = {
     userLoginLog: '用户登录日志',
     sessionMonitor: '会话',
     announcement: '公告',
-    broadcast: '广播',
     tenantDictType: '字典类型',
     tenantDictItem: '字典项',
     approvalFlowDefinition: '审批流程定义',
     approvalFlowInstance: '审批申请',
-    approvalFlowTask: '审批任务'
+    approvalFlowTask: '审批任务',
+    aiProvider: '提供商',
+    aiModel: '模型',
+    aiUserGroup: '用户组',
+    aiUserGroupModel: '用户组模型',
+    aiUserGroupMember: '用户组成员'
   },
 
   menu: {
@@ -4200,7 +4488,6 @@ export const zhCN: I18nRules = {
     pub: {
       dashboard: '仪表盘',
       profile: '个人中心',
-      messageCenter: '消息中心',
       initiableApprovalFlows: '发起审批',
       myApprovalFlows: '我的审批',
       approvalTaskHandle: '审批处理'
@@ -4255,7 +4542,6 @@ export const zhCN: I18nRules = {
       sessions: '在线会话',
       systemMonitor: '系统监控',
       announcements: '公告管理',
-      broadcasts: '广播管理',
       tenantDictTypes: '字典类型管理',
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',
@@ -4263,7 +4549,11 @@ export const zhCN: I18nRules = {
       tenantApprovalFlowDefinitions: '租户流程定义管理',
       tenantApprovalFlowInstances: '租户审批管理',
       systemDictTypes: '系统字典类型',
-      systemDictItems: '系统字典项'
+      systemDictItems: '系统字典项',
+      aiProvider: '提供商管理',
+      aiModel: '模型管理',
+      aiUserGroup: '用户组管理',
+      aiPlayground: 'AI 训练场'
     },
 
     // 菜单分组
@@ -4276,7 +4566,8 @@ export const zhCN: I18nRules = {
       i_tenant: '组织管理',
       approval: '审批管理',
       logs: '日志管理',
-      monitor: '系统监控'
+      monitor: '系统监控',
+      ai: 'AI 管理'
     }
   },
 };

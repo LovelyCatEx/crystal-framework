@@ -53,7 +53,7 @@
         <module>crystal-tenant</module>
         <module>crystal-auth</module>
         <module>crystal-approval</module>
-        <module>crystal-message</module>
+        <module>crystal-ai</module>
     </modules>
 
     <scm>
@@ -67,14 +67,20 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.14.3</revision>
+        <revision>1.15.0</revision>
         <crystalframework.basedir>${maven.multiModuleProjectDirectory}</crystalframework.basedir>
         <verification.detekt.skip>false</verification.detekt.skip>
         <verification.dependency-check.skip>false</verification.dependency-check.skip>
+        <spring-ai.version>2.0.1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-ai</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-shared</artifactId>
@@ -127,11 +133,6 @@
             </dependency>
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
-                <artifactId>crystal-message</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-message-channel-api</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -169,6 +170,13 @@
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-approval</artifactId>
                 <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

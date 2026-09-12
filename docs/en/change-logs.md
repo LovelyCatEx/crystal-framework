@@ -5,7 +5,34 @@
 ::: danger
 1. Versions v1.5.* ~ v1.9.* contain critical security vulnerabilities. Do not use them. See v1.10.0 change log for details.
 2. Starting from v1.13.0, the permission matrix model replaces the original permission system. Migrating to this version is a breaking operation.
+3. Starting from v1.15.0, the crystal-message module is completely removed. Existing data tables will not be deleted.
 :::
+
+## v1.15.0
+
+2026-09-13
+
+### Features
++ feat(ai): Add AI provider, model, and user group management with visual config forms, capability tags, and model config tabs.
++ feat(ai): Add AI invocation records with raw request/response capture and Anthropic Message protocol support.
++ feat(ai): Add an AI playground chat interface with reasoning content display.
++ feat(message-channel): Add a WebSocket channel handler framework with authentication, including connection auth rate limiting and a system settings toggle.
++ feat(shared): Add a composable general rate-limit service with sliding-window and exponential-backoff layers.
++ feat(web): Add a WebSocket connection test UI with manual connection control and proxy config.
++ feat: Add compliance checker agents and coding rules.
+
+### Bug Fixes
++ fix(web): Fix AI provider request headers not rendering and the add button not working.
++ fix(web): Fix request/response config collection and capabilities parsing in the AI provider form.
++ fix(web): Correct and enforce strict i18n type constraints and translation definitions.
++ fix(web): Fix the token utility import path in the WebSocket connection.
++ fix(message-channel): Replace reflection with SystemModuleClient for the settings check.
+
+### Others
++ refactor(message): Remove the crystal-message module.
++ chore: Update readme.
+
+---
 
 ## v1.14.3
 

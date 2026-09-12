@@ -657,6 +657,294 @@ export const enUS: I18nRules = {
         idPlaceholder: 'Enter account ID',
       }
     },
+    aiProviderManager: {
+      title: 'AI Provider Management',
+      subtitle: 'Manage AI service provider configurations',
+      filter: {
+        id: 'ID',
+        idPlaceholder: 'Enter provider ID'
+      },
+      modal: {
+        name: {
+          label: 'Name',
+          required: 'Please enter provider name',
+          placeholder: 'Provider name'
+        },
+        key: {
+          label: 'Key',
+          required: 'Please enter unique key',
+          placeholder: 'Provider key (e.g. openai)'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Provider description'
+        },
+        tabs: {
+          basic: 'Configuration',
+          advanced: 'Advanced',
+          noBasicConfig: 'No basic configuration available'
+        },
+        configTemplate: {
+          label: 'Configuration Template',
+          custom: 'Custom (Empty)',
+          openai: 'OpenAI Template',
+          anthropic: 'Anthropic Template',
+          confirmTitle: 'Confirm Overwrite Configuration',
+          confirmContent: 'Selecting a template will overwrite the current response configuration. Continue?',
+          confirmButton: 'Confirm',
+          cancelButton: 'Cancel'
+        },
+        protocolType: {
+          label: 'Protocol Type',
+          required: 'Please select protocol type',
+          placeholder: 'Select protocol type'
+        },
+        baseUrl: {
+          label: 'Base URL',
+          required: 'Please enter base URL',
+          placeholder: 'https://api.example.com'
+        },
+        apiKey: {
+          label: 'API Key',
+          required: 'Please enter API key',
+          placeholder: 'API key'
+        },
+        chatCompletionsPath: {
+          label: 'Chat Completions Path',
+          placeholder: '/v1/chat/completions'
+        },
+        embeddingPath: {
+          label: 'Embedding Path',
+          placeholder: '/v1/embeddings'
+        },
+        requestConfig: {
+          label: 'Request Config',
+          placeholder: 'JSON format request config',
+          headers: 'Request Headers',
+          addHeader: 'Add Header',
+          headerKey: 'Key',
+          headerValue: 'Value'
+        },
+        responseConfig: {
+          label: 'Response Config',
+          placeholder: 'JSON format response config',
+          chatCompletions: 'Chat Completions Configuration',
+          embedding: 'Embedding Configuration',
+          contentPath: 'Content Path',
+          contentPathPlaceholder: '$.choices[0].message.content',
+          finishReasonPath: 'Finish Reason Path',
+          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
+          providerRequestIdPath: 'Provider Request ID Path',
+          providerRequestIdPathPlaceholder: '$.id',
+          errorMessagePath: 'Error Message Path',
+          errorMessagePathPlaceholder: '$.error.message',
+          usageTitle: 'Usage JSON Path Configuration',
+          inputTokensPath: 'Input Tokens Path',
+          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
+          outputTokensPath: 'Output Tokens Path',
+          outputTokensPathPlaceholder: '$.usage.completion_tokens',
+          totalTokensPath: 'Total Tokens Path',
+          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          cacheReadTokensPath: 'Cache Read Tokens Path',
+          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheWriteTokensPath: 'Cache Write Tokens Path',
+          cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiModelManager: {
+      title: 'AI Model Management',
+      subtitle: 'Manage AI model configurations and pricing',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: 'Enter model ID'
+        }
+      },
+      modal: {
+        tabs: {
+          basic: 'Configuration',
+          pricing: 'Pricing',
+          advanced: 'Advanced'
+        },
+        providerId: {
+          label: 'Provider',
+          required: 'Please select provider',
+          placeholder: 'Select provider'
+        },
+        key: {
+          label: 'Model Key',
+          required: 'Please enter model key',
+          placeholder: 'Model key (e.g. gpt-4)'
+        },
+        modelName: {
+          label: 'Model Name',
+          required: 'Please enter model name',
+          placeholder: 'Model name'
+        },
+        displayName: {
+          label: 'Display Name',
+          required: 'Please enter display name',
+          placeholder: 'Display name'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Model description'
+        },
+        capabilities: {
+          label: 'Capabilities',
+          placeholder: 'Select model capabilities'
+        },
+        contextWindowTokens: {
+          label: 'Context Window Tokens',
+          required: 'Please enter context window tokens',
+          placeholder: 'e.g.: 8192'
+        },
+        maxOutputTokens: {
+          label: 'Max Output Tokens',
+          placeholder: 'e.g.: 4096'
+        },
+        inputPricePerMillion: {
+          label: 'Input Price (per million tokens)',
+          placeholder: 'e.g.: 0.50'
+        },
+        outputPricePerMillion: {
+          label: 'Output Price (per million tokens)',
+          placeholder: 'e.g.: 1.50'
+        },
+        cacheReadPricePerMillion: {
+          label: 'Cache Read Price (per million tokens)',
+          placeholder: 'e.g.: 0.10'
+        },
+        cacheWritePricePerMillion: {
+          label: 'Cache Write Price (per million tokens)',
+          placeholder: 'e.g.: 0.25'
+        },
+        currency: {
+          label: 'Currency',
+          required: 'Please enter currency',
+          placeholder: 'e.g.: USD'
+        },
+        requestConfig: {
+          label: 'Request Config',
+          placeholder: 'JSON format request config',
+          temperature: 'Temperature',
+          maxOutputTokens: 'Max Output Tokens',
+          additionalBody: 'Additional Body Parameters',
+          additionalBodyKey: 'Key',
+          additionalBodyValue: 'Value',
+          addAdditionalBody: 'Add Parameter'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiUserGroupManager: {
+      title: 'User Group Management',
+      subtitle: 'Manage user groups and billing multipliers',
+      tableActions: {
+        idFilter: {
+          label: 'ID',
+          placeholder: 'Enter user group ID'
+        }
+      },
+      modal: {
+        name: {
+          label: 'Group Name',
+          required: 'Please enter group name',
+          placeholder: 'User group name'
+        },
+        key: {
+          label: 'Key',
+          required: 'Please enter unique key',
+          placeholder: 'User group key'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'User group description'
+        },
+        billingMultiplier: {
+          label: 'Billing Multiplier',
+          required: 'Please enter billing multiplier',
+          placeholder: 'e.g.: 1.0'
+        },
+        enabled: {
+          label: 'Enabled',
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        },
+        isDefault: {
+          label: 'Default Group'
+        },
+        sort: {
+          label: 'Sort',
+          placeholder: 'Sort value (number)'
+        }
+      }
+    },
+    aiUserGroupModelManager: {
+      title: 'User Group Model Associations',
+      subtitle: 'Manage associations between user groups and models',
+      modal: {
+        userGroupId: {
+          label: 'User Group ID',
+          required: 'Please enter user group ID',
+          placeholder: 'Enter user group ID'
+        },
+        modelId: {
+          label: 'Model ID',
+          required: 'Please enter model ID',
+          placeholder: 'Enter model ID'
+        }
+      }
+    },
+    aiUserGroupMemberManager: {
+      title: 'User Group Member Associations',
+      subtitle: 'Manage associations between user groups and users',
+      modal: {
+        userGroupId: {
+          label: 'User Group ID',
+          required: 'Please enter user group ID',
+          placeholder: 'Enter user group ID'
+        },
+        userId: {
+          label: 'User ID',
+          required: 'Please enter user ID',
+          placeholder: 'Enter user ID'
+        }
+      }
+    },
+    aiPlayground: {
+      title: 'AI Playground',
+      subtitle: 'Test conversations with configured AI models',
+      modelTree: 'Models',
+      emptyModels: 'No available models',
+      selectModelHint: 'Select a model from the left to begin',
+      emptyConversation: 'Start a new conversation',
+      inputPlaceholder: 'Enter a message. Press Enter to send and Shift+Enter for a new line',
+      send: 'Send',
+      thinking: 'Thought complete',
+      messages: {
+        loadFailed: 'Failed to load AI models',
+        chatFailed: 'Failed to send message'
+      }
+    },
     tenantManager: {
       title: 'Tenant Management',
       subtitle: 'Manage system tenant information',
@@ -1000,10 +1288,13 @@ export const enUS: I18nRules = {
         'system.user.login.log': 'Manage user login logs menu',
         'system.monitor.sessions': 'Manage active sessions menu',
         'system.announcement': 'Manage announcements menu',
-        'system.broadcast': 'Broadcast management menu',
         'system.approval.flow.definition': 'Manage approval flow definitions menu',
         'system.dict.type': 'Manage system dictionary types menu',
         'system.dict.item': 'Manage system dictionary items menu',
+        'system.ai.provider': 'AI Provider management menu',
+        'system.ai.model': 'AI Model management menu',
+        'system.ai.user.group': 'AI User Group management menu',
+        'system.ai.playground': 'AI Playground menu',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': 'Manage tenant departments menu',
         'tenant.role': 'Manage tenant roles menu',
@@ -1083,6 +1374,28 @@ export const enUS: I18nRules = {
         'system.mail.template.read': 'Read mail templates',
         'system.mail.template.update': 'Update mail templates',
         'system.mail.template.delete': 'Delete mail templates',
+        // AI provider / model / user group (system layer)
+        'system.ai.provider.create': 'Create AI providers',
+        'system.ai.provider.read': 'Read AI providers',
+        'system.ai.provider.update': 'Update AI providers',
+        'system.ai.provider.delete': 'Delete AI providers',
+        'system.ai.model.create': 'Create AI models',
+        'system.ai.model.read': 'Read AI models',
+        'system.ai.model.update': 'Update AI models',
+        'system.ai.model.delete': 'Delete AI models',
+        'system.ai.user.group.create': 'Create AI user groups',
+        'system.ai.user.group.read': 'Read AI user groups',
+        'system.ai.user.group.update': 'Update AI user groups',
+        'system.ai.user.group.delete': 'Delete AI user groups',
+        'system.ai.user.group.model.create': 'Create AI user group model associations',
+        'system.ai.user.group.model.read': 'Read AI user group model associations',
+        'system.ai.user.group.model.update': 'Update AI user group model associations',
+        'system.ai.user.group.model.delete': 'Delete AI user group model associations',
+        'system.ai.user.group.member.create': 'Create AI user group member associations',
+        'system.ai.user.group.member.read': 'Read AI user group member associations',
+        'system.ai.user.group.member.update': 'Update AI user group member associations',
+        'system.ai.user.group.member.delete': 'Delete AI user group member associations',
+        'system.ai.playground.chat': 'Use AI Playground',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': 'Create tenants',
         'system.tenant.read': 'Read tenants',
@@ -1206,18 +1519,6 @@ export const enUS: I18nRules = {
         'tenant.dict.item.read': 'Read tenant-scope dictionary items across tenants',
         'tenant.dict.item.update': 'Update tenant-scope dictionary items across tenants',
         'tenant.dict.item.delete': 'Delete tenant-scope dictionary items across tenants',
-        'x.broadcast.create': 'Create broadcasts in any scope',
-        'x.broadcast.read': 'Read broadcasts in any scope',
-        'x.broadcast.update': 'Update broadcasts in any scope',
-        'x.broadcast.delete': 'Delete broadcasts in any scope',
-        'system.broadcast.create': 'Create system-scope broadcasts',
-        'system.broadcast.read': 'Read system-scope broadcasts',
-        'system.broadcast.update': 'Update system-scope broadcasts',
-        'system.broadcast.delete': 'Delete system-scope broadcasts',
-        'tenant.broadcast.create': 'Create tenant-scope broadcasts across tenants',
-        'tenant.broadcast.read': 'Read tenant-scope broadcasts across tenants',
-        'tenant.broadcast.update': 'Update tenant-scope broadcasts across tenants',
-        'tenant.broadcast.delete': 'Delete tenant-scope broadcasts across tenants',
         'tenant.file.resource.create': 'Create tenant-scope file resources across tenants',
         'tenant.file.resource.read': 'Read tenant-scope file resources across tenants',
         'tenant.file.resource.update': 'Update tenant-scope file resources across tenants',
@@ -1281,15 +1582,10 @@ export const enUS: I18nRules = {
         'i.tenant.dict.item.read': 'Read dictionary items within own tenant',
         'i.tenant.dict.item.update': 'Update dictionary items within own tenant',
         'i.tenant.dict.item.delete': 'Delete dictionary items within own tenant',
-        'i.tenant.broadcast.create': 'Create broadcasts within own tenant',
-        'i.tenant.broadcast.read': 'Read broadcasts within own tenant',
-        'i.tenant.broadcast.update': 'Update broadcasts within own tenant',
-        'i.tenant.broadcast.delete': 'Delete broadcasts within own tenant',
         'i.tenant.file.resource.create': 'Create file resources within own tenant',
         'i.tenant.file.resource.read': 'Read file resources within own tenant',
         'i.tenant.file.resource.update': 'Update file resources within own tenant',
         'i.tenant.file.resource.delete': 'Delete file resources within own tenant',
-        'i.tenant.message.reception.handle': 'See and reply to customer-service conversations initiated by users toward own tenant',
         'i.tenant.approval.flow.definition.create': 'Create approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.read': 'Read approval flow definitions within own tenant',
         'i.tenant.approval.flow.definition.update': 'Update approval flow definitions within own tenant',
@@ -1529,7 +1825,8 @@ export const enUS: I18nRules = {
         username: 'Username',
         email: 'Email',
         status: 'Status',
-        action: 'Action'
+        action: 'Action',
+        unknownUser: 'Unknown User'
       },
       action: {
         assignRole: 'Assign Roles'
@@ -1615,7 +1912,8 @@ export const enUS: I18nRules = {
         username: 'Username',
         email: 'Email',
         status: 'Status',
-        action: 'Action'
+        action: 'Action',
+        unknownUser: 'Unknown User'
       },
       action: {
         assignRole: 'Assign Role'
@@ -2284,6 +2582,32 @@ export const enUS: I18nRules = {
         sendSuccess: 'Lark test message sent successfully',
         sendFailed: 'Failed to send Lark test message',
       },
+      testSendWebSocket: {
+        button: 'Send WebSocket Test Message',
+        modalTitle: 'Send WebSocket Test Message',
+        requiresAuthLabel: 'Requires Authentication',
+        channelLabel: 'Channel Name',
+        channelPlaceholder: 'Select or enter channel name',
+        channelRequired: 'Channel name is required',
+        typeLabel: 'Action Type',
+        typePlaceholder: 'Enter action type',
+        typeRequired: 'Action type is required',
+        payloadLabel: 'Payload (JSON)',
+        payloadPlaceholder: 'Enter JSON payload',
+        connect: 'Connect',
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        disconnect: 'Disconnect',
+        disconnected: 'Disconnected',
+        connectionLost: 'Connection lost',
+        connectionError: 'Connection failed',
+        send: 'Send',
+        sendHint: 'Ctrl/Cmd + Enter to send',
+        noMessages: 'No messages yet',
+        notConnected: 'WebSocket not connected',
+        fillRequired: 'Please fill required fields',
+        invalidJson: 'Payload must be valid JSON',
+      },
       keys: {
         'basic.baseUrl': 'API Base URL',
         'basic.frontendBaseUrl': 'Frontend Base URL',
@@ -2316,6 +2640,13 @@ export const enUS: I18nRules = {
         'security.emailCodeRateLimit.maxPerIp': 'Max Sends Per IP (per window)',
         'security.emailCodeRateLimit.maxPerEmail': 'Max Sends Per Email (per window)',
         'security.emailCodeRateLimit.maxGlobal': 'Max Global Sends (per window)',
+        'security.webSocketAuthRateLimit.enabled': 'Enabled',
+        'security.webSocketAuthRateLimit.windowSeconds': 'Sliding Window (seconds)',
+        'security.webSocketAuthRateLimit.maxAttemptsPerIp': 'Max Attempts Per IP (per window)',
+        'security.webSocketAuthRateLimit.maxAttemptsPerAccount': 'Max Attempts Per Account (per window)',
+        'security.webSocketAuthRateLimit.lockThreshold': 'Consecutive Failures Before Lockout',
+        'security.webSocketAuthRateLimit.lockBaseSeconds': 'Base Lockout Duration (seconds)',
+        'security.webSocketAuthRateLimit.lockMaxSeconds': 'Max Lockout Duration (seconds)',
         'security.outbound.allowedHosts': 'Allowed Outbound Hosts',
         'security.outbound.allowedSmtpHosts': 'Allowed SMTP Outbound Hosts',
         'oauth.github.enabled': 'Enabled',
@@ -2346,9 +2677,7 @@ export const enUS: I18nRules = {
         'oauth.oicq.scope': 'Scope',
         'module.tenant.enabled': 'Enable Tenant Module',
         'module.approval.enabled': 'Enable Approval Module',
-        'module.message.systemPeerEnabled': 'Enable System Peer Messaging',
-        'module.message.tenantScopeEnabled': 'Enable Tenant-Scope Messaging',
-        'module.message.tenantDeskEnabled': 'Enable Tenant Service Desk',
+        'module.webSocket.enabled': 'Enable WebSocket',
         'resource.signedUrl.ttlSeconds': 'Signed URL TTL (seconds)',
         'resource.visibility.builtin_user_avatar': 'User Avatar Visibility',
         'resource.visibility.builtin_tenant_icon': 'Tenant Icon Visibility',
@@ -2363,13 +2692,14 @@ export const enUS: I18nRules = {
         'security.api.encrypt': 'Api Security',
         'security.loginRateLimit': 'Login Rate Limit & Lockout',
         'security.emailCodeRateLimit': 'Email Code Rate Limit',
+        'security.webSocketAuthRateLimit': 'WebSocket Auth Rate Limit & Lockout',
         'security.outbound': 'Outbound Requests',
         'oauth.github': 'GitHub',
         'oauth.google': 'Google',
         'oauth.oicq': 'QQ',
         'module.tenant': 'Tenant Module',
         'module.approval': 'Approval Module',
-        'module.message': 'Message Module',
+        'module.webSocket': 'WebSocket',
         'resource.signedUrl': 'Signed URL',
         'resource.visibility': 'Resource Access',
       },
@@ -2514,38 +2844,6 @@ export const enUS: I18nRules = {
       messages: {
         statusUpdateSuccess: 'Status updated successfully',
         statusUpdateFailed: 'Status update failed',
-      },
-    },
-    broadcastManager: {
-      title: 'Broadcast Management',
-      subtitle: 'Manage system-scope broadcasts (system announcements)',
-      modal: {
-        title: {
-          label: 'Title',
-          required: 'Please enter a title',
-          maxLength: 'Title cannot exceed 256 characters',
-        },
-        content: {
-          label: 'Content',
-          required: 'Please enter content',
-        },
-        category: {
-          label: 'Category',
-        },
-        audienceType: {
-          label: 'Audience',
-          required: 'Please select an audience',
-        },
-        publishTime: {
-          label: 'Publish time',
-          placeholder: 'Leave empty to publish immediately',
-          help: 'Visible to users only after this time; empty means publish immediately',
-        },
-        expireTime: {
-          label: 'Expire time',
-          placeholder: 'Leave empty to never expire',
-          help: 'Automatically taken down after this time; empty means never expire',
-        },
       },
     },
     managerContainer: {
@@ -3059,54 +3357,6 @@ export const enUS: I18nRules = {
       emptyNearby: 'No nearby addresses found',
       loading: 'Searching nearby addresses...'
     },
-    notification: {
-      // NotificationBell / NotificationCenter
-      title: 'Message Center',
-      emptyHistory: 'No announcements yet',
-      expired: 'Expired',
-      noMore: 'No more',
-      conversations: {
-        title: 'Conversations',
-        systemBroadcast: 'System Announcements',
-        personal: 'Personal',
-        organizationTag: 'Organization',
-        deskTag: 'Desk',
-        external: 'External',
-        systemTab: 'System User',
-        deskContactTag: 'Service Desks',
-        membersTag: 'Members',
-        externalTag: 'External'
-      },
-      startConversation: {
-        start: 'Start conversation',
-        title: 'Start conversation',
-        userTab: 'User',
-        tenantTab: 'Tenant',
-        tenantMemberTab: 'Organization Members',
-        tenantScopeDisabled: 'Tenant conversation feature has been disabled by administrator',
-        allFeaturesDisabled: 'Conversation feature has been disabled by administrator'
-      },
-      contactUser: {
-        searchPlaceholder: 'Enter exact username or email',
-        hint: 'Search by exact username or email to start a chat',
-        empty: 'No matching user found'
-      },
-      tenantChat: {
-        title: 'Select an organization member',
-        tenantPlaceholder: 'Select an organization',
-        empty: 'This organization has no members'
-      },
-      contact: {
-        start: 'New',
-        title: 'Select a tenant',
-        searchPlaceholder: 'Search tenant name',
-        empty: 'No contactable tenants',
-        draftTag: 'Draft',
-        startHint: 'Send the first message to start the conversation',
-        composerPlaceholder: 'Type a message. Enter to send, Shift+Enter for newline',
-        send: 'Send'
-      }
-    },
     dashboard: {
       // DashboardPage
       greeting: {
@@ -3347,6 +3597,19 @@ export const enUS: I18nRules = {
     },
 
     columns: {
+      aiUserGroupModel: {
+        recordId: 'Record ID',
+        provider: 'Provider',
+        model: 'Model',
+        modelKey: 'Model Key',
+        modelStatus: 'Model Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
+      aiUserGroupMember: {
+        recordId: 'Record ID',
+        user: 'User'
+      },
       fileResource: {
         preview: 'Preview',
         fileInfo: 'File Info',
@@ -3538,19 +3801,6 @@ export const enUS: I18nRules = {
         userId: 'User ID',
         noAvatar: 'No Avatar'
       },
-      broadcast: {
-        title: 'Title',
-        content: 'Content',
-        category: 'Category',
-        scopeType: 'Scope',
-        audience: 'Audience',
-        sender: 'Sender',
-        publishTime: 'Publish Time',
-        expireTime: 'Expire Time',
-        systemSender: 'System',
-        audienceRef: 'Ref',
-        unknown: 'Unknown'
-      },
       mailTemplate: {
         name: 'Name',
         type: 'Type',
@@ -3654,6 +3904,18 @@ export const enUS: I18nRules = {
         unknownFlow: 'Flow deleted',
         unknownNode: 'Node deleted',
         unknownInitiator: 'Initiator deleted'
+      },
+      aiModel: {
+        name: 'Model Name',
+        providerId: 'Provider',
+        capabilities: 'Capabilities',
+        maxOutputTokens: 'Max Tokens',
+        pricing: 'Pricing',
+        enabled: 'Status',
+        enabledStatus: {
+          enabled: 'Enabled',
+          disabled: 'Disabled'
+        }
       }
     },
     entityTable: {
@@ -3801,11 +4063,35 @@ export const enUS: I18nRules = {
         aliyunOSS: 'Aliyun OSS',
         tencentCOS: 'Tencent COS'
       },
+      aiModel: {
+        notFound: 'Model not found',
+        description: 'Description',
+        contextWindow: 'Context Window',
+        maxOutput: 'Max Output',
+        pricing: 'Pricing',
+        input: 'Input',
+        cacheInput: 'Cache Input',
+        output: 'Output',
+        cacheWrite: 'Cache Write',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
+      aiProvider: {
+        notFound: 'Provider not found',
+        description: 'Description',
+        baseUrl: 'Base URL',
+        status: 'Status',
+        enabled: 'Enabled',
+        disabled: 'Disabled'
+      },
       mailTemplateType: {
         notFound: 'Template type information not found',
         description: 'Description',
         allowMultiple: 'Allow Multiple Templates',
-        variables: 'Variables'
+        variables: 'Variables',
+        yes: 'Yes',
+        no: 'No'
       },
       templateVariablesTag: {
         copySuccess: 'Copied {{variable}} to clipboard'
@@ -4133,29 +4419,27 @@ export const enUS: I18nRules = {
       SYSTEM: 'System',
       TENANT: 'Tenant'
     },
-    scopeType: {
-      0: 'System',
-      1: 'Tenant'
-    },
-    partyType: {
-      0: 'User',
-      1: 'System',
-      2: 'Tenant'
-    },
-    audienceType: {
-      0: 'All Users',
-      1: 'Tenant Members',
-      2: 'Segment'
-    },
-    broadcastCategory: {
-      0: 'Announcement'
-    },
     ResourceVisibility: {
       PUBLIC: 'Public (anyone)',
       AUTHENTICATED: 'Authenticated users',
       SCOPE_MEMBER: 'Same-tenant members',
       OWNER_ONLY: 'Uploader only',
       SYSTEM_ADMIN: 'System admin only',
+    },
+    aiProviderProtocolType: {
+      0: 'OpenAI Compatible',
+      1: 'Anthropic Messages',
+      2: 'Generic HTTP'
+    },
+    aiModelCapability: {
+      0: 'Chat',
+      1: 'Text Generation',
+      2: 'Vision',
+      3: 'Embedding',
+      4: 'Tool Calling',
+      5: 'Structured Output',
+      6: 'Audio Input',
+      7: 'Audio Output'
     }
   },
 
@@ -4189,12 +4473,16 @@ export const enUS: I18nRules = {
     userLoginLog: 'User Login Log',
     sessionMonitor: 'Session',
     announcement: 'Announcement',
-    broadcast: 'Broadcast',
     tenantDictType: 'Dictionary Type',
     tenantDictItem: 'Dictionary Item',
     approvalFlowDefinition: 'Approval Flow Definition',
     approvalFlowInstance: 'Approval Request',
-    approvalFlowTask: 'Approval Task'
+    approvalFlowTask: 'Approval Task',
+    aiProvider: 'Provider',
+    aiModel: 'Model',
+    aiUserGroup: 'User Group',
+    aiUserGroupModel: 'User Group Model',
+    aiUserGroupMember: 'User Group Member'
   },
 
   menu: {
@@ -4202,7 +4490,6 @@ export const enUS: I18nRules = {
     pub: {
       dashboard: 'Dashboard',
       profile: 'Profile',
-      messageCenter: 'Message Center',
       initiableApprovalFlows: 'Initiate Approval',
       myApprovalFlows: 'My Approvals',
       approvalTaskHandle: 'Approval To-Do'
@@ -4257,7 +4544,6 @@ export const enUS: I18nRules = {
       sessions: 'Online Sessions',
       systemMonitor: 'System Monitor',
       announcements: 'Announcement Management',
-      broadcasts: 'Broadcast Management',
       tenantDictTypes: 'Dictionary Type Management',
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',
@@ -4265,7 +4551,11 @@ export const enUS: I18nRules = {
       tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
       tenantApprovalFlowInstances: 'Tenant Approval Management',
       systemDictTypes: 'System Dictionary Types',
-      systemDictItems: 'System Dictionary Items'
+      systemDictItems: 'System Dictionary Items',
+      aiProvider: 'Provider Management',
+      aiModel: 'Model Management',
+      aiUserGroup: 'User Group Management',
+      aiPlayground: 'AI Playground'
     },
 
     // Menu groups
@@ -4278,7 +4568,8 @@ export const enUS: I18nRules = {
       i_tenant: 'Organization Management',
       approval: 'Approval Management',
       logs: 'Log Management',
-      monitor: 'System Monitor'
+      monitor: 'System Monitor',
+      ai: 'AI Management'
     }
   }
 };

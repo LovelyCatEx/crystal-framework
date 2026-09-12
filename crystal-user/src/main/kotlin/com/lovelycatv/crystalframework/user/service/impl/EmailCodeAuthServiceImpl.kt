@@ -4,8 +4,9 @@ import com.lovelycatv.crystalframework.mail.service.MailService
 import com.lovelycatv.crystalframework.shared.api.system.SystemModuleClient
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.service.ratelimit.GeneralRateLimitService
+import com.lovelycatv.crystalframework.shared.service.ratelimit.RateLimitConfig
 import com.lovelycatv.crystalframework.shared.service.ratelimit.RateLimitDimension
-import com.lovelycatv.crystalframework.shared.service.ratelimit.SlidingWindowRateLimiter
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.user.constants.EmailCodeRateLimitConstants
 import com.lovelycatv.crystalframework.user.service.EmailCodeAuthService
@@ -24,7 +25,7 @@ private const val ATTEMPTS_KEY_SUFFIX = ":attempts"
 class EmailCodeAuthServiceImpl(
     private val redisService: ReactiveRedisService,
     private val mailService: MailService,
-    private val slidingWindowRateLimiter: SlidingWindowRateLimiter,
+    private val generalRateLimitService: GeneralRateLimitService,
     private val systemModuleClient: SystemModuleClient,
 ) : EmailCodeAuthService {
     private val secureRandom = SecureRandom()
@@ -100,19 +101,25 @@ class EmailCodeAuthServiceImpl(
      * disabled or its settings are unavailable (the limiter itself fails open on Redis errors).
      */
     private suspend fun checkSendRateLimit(ip: String, email: String) {
-        val config = systemModuleClient.getSystemSettings()?.security?.emailCodeRateLimit ?: return
-        if (!config.enabled) {
+        val settings = systemModuleClient.getSystemSettings()?.security?.emailCodeRateLimit ?: return
+        if (!settings.enabled) {
             return
         }
 
-        slidingWindowRateLimiter.checkAllowed(
-            windowSeconds = config.windowSeconds,
-            dimensions = listOf(
-                RateLimitDimension(RedisConstants.getMailCodeRateLimitIpKey(ip), config.maxPerIp),
-                RateLimitDimension(RedisConstants.getMailCodeRateLimitEmailKey(email), config.maxPerEmail),
-                RateLimitDimension(RedisConstants.MAIL_CODE_RATE_LIMIT_GLOBAL_KEY, config.maxGlobal),
+        val config = RateLimitConfig(
+            keyPrefix = "mail:code:lock:", // EmailCode doesn't use exponential backoff, but keyPrefix is required
+            slidingWindow = RateLimitConfig.SlidingWindowConfig(
+                windowSeconds = settings.windowSeconds,
+                dimensions = listOf(
+                    RateLimitDimension(RedisConstants.getMailCodeRateLimitIpKey(ip), settings.maxPerIp),
+                    RateLimitDimension(RedisConstants.getMailCodeRateLimitEmailKey(email), settings.maxPerEmail),
+                    RateLimitDimension(RedisConstants.MAIL_CODE_RATE_LIMIT_GLOBAL_KEY, settings.maxGlobal),
+                ),
             ),
-            message = EmailCodeRateLimitConstants.MESSAGE_TOO_MANY_SENDS,
+            exponentialBackoff = null, // EmailCode only uses sliding window, no exponential backoff
+            slidingWindowMessage = EmailCodeRateLimitConstants.MESSAGE_TOO_MANY_SENDS,
         )
+
+        generalRateLimitService.checkAllowed(config, ip, email)
     }
 }

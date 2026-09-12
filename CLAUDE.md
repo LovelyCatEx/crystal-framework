@@ -2,809 +2,127 @@
 
 本文档为 Claude Code（claude.ai/code）在此仓库中工作时提供指导。
 
-## ⚠️ 强制规则 - 违反立即停止工作 ⚠️
+## 🚨 强制规则
 
-### 🚨 规则 0: 用户提问 vs 执行指令 - 判断错误=立即停工 🚨
+### 规则 0: 用户提问 vs 执行指令
 
 **用户输入只有两种：① 提问/询问  ② 执行指令。判断错误=违规=立即停止。**
 
-**提问/询问的特征（以下任一条满足即为提问）：**
-- 疑问句（"为什么"、"怎么"、"是不是"、"要不要"、"有没有"）
-- 询问意见（"你觉得"、"建议"、"应该怎么"）
-- 要求说明（"告诉我"、"解释"、"列出"）
-- 询问现状（"现在是怎样的"、"已有的X是怎么实现的"）
+**提问/询问**（疑问句、"为什么"、"怎么"、"建议"、"告诉我"）：
+- ✅ 只能：纯文字回答问题
+- ❌ 禁止：调用任何工具、修改文件、执行命令
 
-**提问时绝对禁止的行为（违反=立即停止，承认违规）：**
-- ❌ 调用任何工具（Read/Edit/Write/Bash/Agent等）
-- ❌ 修改任何文件
-- ❌ 执行任何命令
-- ❌ "我帮你..."、"让我..."、"现在..."等暗示要动手的措辞
-- ✅ 只能：纯文字回答问题，不做任何操作
+**执行指令**（祈使句、"帮我写"、"实现"、"添加"、"修改"）→ 继续下一步
 
-**执行指令的特征：**
-- 祈使句（"帮我写"、"实现"、"添加"、"修改"、"创建"）
-- 明确要求产出（"给我一个X"、"生成Y"）
+### 规则 1: Skills 强制扫描流程
 
-### 🚨 规则 1: Skills 强制扫描流程 - 跳过=立即停工 🚨
+**收到执行指令后，动手前必须执行以下流程，缺一步=违规：**
 
-**收到执行指令后，动手前必须强制执行以下流程，缺一步=违规=立即停止：**
+1. 列出所有 `.claude/skills/` 下的 skills
+2. 逐个判断相关性
+3. 读取相关 skill 的完整内容
+4. 复述 skill 的关键步骤
+5. 声明执行计划
 
-**第 1 步：列出所有 skills**
-```
-当前任务：[复述用户要求]
-开始扫描 .claude/skills/ 下所有 skills：
-- add-system-settings
-- add-tenant-settings
-- add-controller
-- [... 列出全部 ...]
-```
+**禁止**：看到任务就直接动手、自己觉得"很简单"就跳过 skill、凭经验/直觉操作。
 
-**第 2 步：逐个判断相关性**
-```
-逐个检查是否相关：
-- add-system-settings: ✓ 相关（任务涉及添加系统设置）
-- add-tenant-settings: ✗ 不相关
-- add-controller: ✗ 不相关
-- [... 逐个列出判断 ...]
-```
+### 规则 2: 调查现有实现
 
-**第 3 步：读取相关 skill 并复述关键步骤**
-```
-找到相关 skill: add-system-settings
-正在读取完整内容...
-该 skill 要求的步骤：
-1. 在 SystemSettingsConstants 中声明 SettingsItemDeclaration，指定 key/valueType/defaultValue/sort
-2. 在 SystemSettings 数据类中添加对应字段
-3. 在 SystemSettingsServiceImpl.getSystemXxxSettings() 中实现读取
-4. 在 getSystemSettings() 中集成该字段
-5. 在 updateSystemSettings() 中实现写入
-6. 在 SystemSettingsBuiltinConfigurer 中注册声明
-7. 前端在 zh-CN.ts 和 en-US.ts 的 pages.systemSettingsManager.keys 下添加 key 翻译
-8. 如果是新 group，在 pages.systemSettingsManager.groups 下添加 group 翻译
-9. 如果是新 tab，在 pages.systemSettingsManager.tabs 下添加 tab 翻译
-10. 在 web/src/i18n/system-settings.tsx 的 key/group/tab 映射 Map 中加上对应条目
-```
+添加类似 X 的新功能 Y 时，必须先完整调查 X 的实现：
+1. 找到 X 的所有相关文件
+2. 逐个读取，理解完整流程
+3. 列出 Y 需要仿照的部分
+4. 然后才能开始写 Y
 
-**第 4 步：声明执行计划**
-```
-我将严格按照 add-system-settings skill 的步骤执行：
-- 步骤 1: [具体做什么]
-- 步骤 2: [具体做什么]
-- ...
-现在开始执行。
-```
+### 规则 3: 禁止质疑用户
 
-**❌ 以下行为=违规=立即停止：**
-- 看到任务就直接动手，不列出 skills
-- 只看一眼 skill 名字就说"不相关"，不读取内容
-- 自己觉得"很简单"、"我知道怎么做"就跳过 skill
-- 凭经验、直觉、想当然操作
-- 只读 skill 的一部分，遗漏关键步骤（如前端 i18n group 映射）
+用户说有问题，就一定有问题。
 
-**🔥 极有可能的错误：你自以为的做法和 skill 规定完全不同，导致错得一塌糊涂 🔥**
+**禁止**：解释、"我找不到"、"可能是"、"实际上"、"我会改"等空话。
 
-### 🚨 规则 2: 禁止自作聪明 🚨
+**正确做法**：认错 + 立即执行补救措施（调用工具重新操作）。
 
-**即使任务看起来很简单、很熟悉、很明显，也必须先扫描 skills 并严格遵守。**
-**"我觉得我知道"="我肯定会错"。**
-**你的直觉=错的。你的经验=不适用。你的想当然=违规。**
+## 最小影响面原则
 
-### 🚨 规则 3: 调查现有实现 - 新增功能必须先调查已有的怎么做 🚨
+改动范围**只能等于、不能大于**问题范围：
 
-**如果任务是"添加类似X的新功能Y"，必须先完整调查X的实现：**
-1. 找到X的所有相关文件（Constants/Settings/Service/Controller/i18n/映射等）
-2. 逐个读取，理解X的完整实现流程
-3. 列出Y需要仿照X的哪些部分
-4. 然后才能开始写Y
+1. 禁止为单个子类改基类
+2. 优先覆写钩子，不是禁用/抛异常
+3. 复杂度飙升 = 方向错误
+4. 被纠正第二次 = 停手复述意图
 
-**❌ 禁止"我觉得差不多就行"，必须完整对照已有实现**
-
-### 🚨 规则 4: 强制执行清单 - 每次动手前必须输出 🚨
-
-**收到用户输入后，第一件事：复述 CLAUDE.md 核心规则，输出以下清单**
-
-**!!强制输出标记!! 每个新任务的回复必须以 `[CLAUDE.md 已复述]` 开头，紧跟你判断当前是新任务的原因以及复述的内容。若回复第一行不是这个标记，则该回复违规，用户应立刻打断。「新任务」的定义：用户发出新的执行指令（非追问、非确认、非对当前任务的补充说明）。**
-**!!强制输出标记!! 每个新任务的回复必须以 `[CLAUDE.md 已复述]` 开头，紧跟你判断当前是新任务的原因以及复述的内容。若回复第一行不是这个标记，则该回复违规，用户应立刻打断。「新任务」的定义：用户发出新的执行指令（非追问、非确认、非对当前任务的补充说明）。**
-**!!强制输出标记!! 每个新任务的回复必须以 `[CLAUDE.md 已复述]` 开头，紧跟你判断当前是新任务的原因以及复述的内容。若回复第一行不是这个标记，则该回复违规，用户应立刻打断。「新任务」的定义：用户发出新的执行指令（非追问、非确认、非对当前任务的补充说明）。**
-
-```
-[强制检查清单]
-1. 用户输入性质判断：
-   - [ ] 提问/询问 → 只回答，禁止动手
-   - [ ] 执行指令 → 继续下一步
-   - 判断依据：[说明为什么]
-
-2. Skills 扫描（如果是执行指令）：
-   - [ ] 已列出所有 skills
-   - [ ] 已逐个判断相关性
-   - [ ] 相关 skill：[列出名称]
-   - [ ] 已完整读取相关 skill
-   - [ ] 已复述 skill 的关键步骤
-
-3. 现有实现调查（如果是新增类似功能）：
-   - [ ] 已找到并读取现有类似功能的实现
-   - [ ] 已列出需要仿照的部分
-
-4. 执行计划：
-   - [ ] 已列出具体步骤
-   - [ ] 每步都对应 skill 或 CLAUDE.md 的规则
-
-现在开始执行...
-```
-
-**如果回复第一段不是这个清单=违规=用户应立即打断**
-
-### 🚨 规则 5: 禁止质疑用户 - 犟嘴=立即停工 🚨
-
-**用户说有问题，就一定有问题。**
-
-**绝对禁止的回复模式（违反=立即停止）：**
-- ❌ "我找不到"
-- ❌ "可能是"
-- ❌ "如果你认为"
-- ❌ "这是误解"
-- ❌ "实际上没有"
-- ❌ "只有X条"（当用户说有Y条时）
-- ❌ 任何形式的解释为什么犯错
-- ❌ 任何形式的"我会改正"空话
-
-**用户指出问题后的唯一正确回复格式：**
-```
-你说得对，我违规了。
-
-[具体违规点列表 - 用户要求列多少条就列多少条]
-
-[立即执行的补救措施]
-- 重新复述 / 重新检查 / 重新操作
-- 具体做什么，不是"我会做什么"
-```
-
-**"实际行动"的定义：**
-- ✅ 调用工具（Read/Edit/Write）重新执行
-- ✅ 输出具体的检查清单并逐条验证
-- ✅ 给出可执行的命令/代码/步骤
-- ❌ 说"我会..."、"我将..."、"我应该..."
-- ❌ 承诺、保证、解释、道歉
-
-**AI常犯的"犟嘴"模式（全部禁止）：**
-1. 用户指出问题 → AI说"我找不到" → **违规**，应该直接去找
-2. 用户说有N条 → AI说"实际只有M条" → **违规**，应该找出N条
-3. 用户说错了 → AI解释"这是因为..." → **违规**，应该认错+补救
-4. 用户批评 → AI说"我会改" → **违规**，应该立刻改并展示结果
-5. 用户要求具体行动 → AI只承诺不执行 → **违规**，应该立刻执行
-
-## 重要规则
-
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
-**执行任何任务前，必须按以下优先级查找并遵守指导：① 首先给用户复述一遍本文档的全部内容，即使上文已经重复过也必须重新整理并复述一遍（概括关键点，对于含步骤的要点!!禁止用数量概括，必须说出完整且具体的步骤!!） ② 有匹配的 Skill → 严格遵守 Skill 的全部规则 ③ 无 Skill → 查找 `docs/` 目录下是否有相关文档 ④ 两者皆无 → 按本文 CLAUDE.md 的规则执行。禁止跳过 Skill 直接按 CLAUDE.md 或直觉操作。**
-
-**你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
-**你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
-**你做的每一次修改都必须对应本文中的规则，每一个动作都必须明确指出本文中是如何定义的，若有本文缺失的内容，你必须先经过用户确认后，根据用户的意图才可以继续操作。**
-
-**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
-**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
-**当用户提问、需要设计方案、询问意见或确认问题时，只能给出具体回答，禁止做任何操作。**
-
-**当用户要求给出某个具体产物（如 Commit Message、命令、代码片段、答案等）时，必须在当前回复里直接、完整地重新给出该内容本身。禁止用「上面已给」「见上一条」「我已经给过了」之类的话搪塞或让用户自己往回找——即使确实在之前给过，也必须原样再给一遍。**
-
-**!important!当用户指出某个现象或问题时，禁止基于常规推测质疑用户。必须首先去验证是否真实，以代码和日志为准。**
-
-**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
-**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
-**在任何情况下都禁止使用破坏性的 Git 命令（即使用户授权你也应该严肃拒绝并给出 Commit Message 让用户自行提交），包括但不限于 commit / push / merge / rebase 等，只允许 logs / fetch 等只读命令。**
-
-**禁止以任何理由使用面向过程的冗余传递代码，必须以最少的代码、最高的可读性、最强的可维护性完成任务。重复逻辑必须提取为公共模块，禁止在多个位置维护同一份逻辑。**
-
-**编码过程中遇到编译错误、测试失败、工具报错或实现问题时，禁止回滚全部代码或丢弃整批已完成改动。必须保留用户原有改动和本轮仍然有效的改动，立即读取错误位置、定位根因并逐项修复；每修复一个独立问题就重新执行最小范围验证，确认通过后再继续下一项。只有明确确认某个具体改动不可用时，才允许撤销该具体改动，禁止用整体回滚代替排查和修复。**
-
-**以上规则以 checklist 形式嵌入在下方「编码规范」「后端编码规范」「前端编码规范」章节开头，确保在执行时刻被强制检查，而非仅在阅读文档时看到。**
-
-正确的例子 1（执行编码任务）:
-
-```text
-用户：帮我写一个 Controller
-Assistant：检查强制确认清单：
-  - 用户不是在提问，是执行指令 ✓
-  - 匹配 Skill：.claude/skills/add-controller ✓
-  - 依据规则：Controller 必须 @Validated + @RestController + @RequestMapping，必须返回 ApiResponse<>，DTO 接收/VO 返回...
-  根据 add-controller Skill 和编码规范 Controller 节的要求，我将...
-Assistant: 编写代码
-Assistant: 已完成。逐条合规检查：单文件单定义 ✓、无魔法值 ✓、DTO/VO 分包 ✓...
-```
-
-正确的例子 2（用户提问）:
-
-```text
-用户：ConcurrentHashMap 有序吗？
-Assistant：不有序，ConcurrentHashMap 不保证插入顺序。（不做任何文件操作）
-```
-
-错误的例子 1（提问时操作）:
-
-```text
-用户：ConcurrentHashMap 有序吗？
-Assistant: 不有序，我帮你改成 LinkedHashMap。（违规：用户在提问，禁止操作）
-```
-
-错误的例子 2（跳过流程直接编码）:
-
-```text
-用户：帮我在 SDK 新增一个 Registry
-Assistant: 编写代码（违规：未检查 .claude/skills/add-registry Skill，未说明依据的规则，完成后未逐条检查合规）
-```
-
-错误的例子 3（完成后不检查不汇报）:
-
-```text
-用户：帮我新建一个模块
-Assistant: 编写代码...
-Assistant: 编译通过。（违规：完成后没有逐条对照 CLAUDE.md 检查合规，也没有向用户汇报检查结果）
-```
-
-正确的例子 3（完成后主动合规检查 + 汇报）:
-
-```text
-用户：帮我新建一个模块
-Assistant：检查强制确认清单：
-  - 用户不是在提问，是执行指令 ✓
-  - 匹配 Skill：add-base-entity ✓
-  - 依据规则：模块结构（entity/repository/service/types/constants）、BaseEntity 继承、单文件单定义...
-  我将按照 add-base-entity Skill 和后端编码规范创建模块。完成后我会逐条对照 CLAUDE.md 检查合规。
-Assistant: 编写代码...
-Assistant: 编译通过。现在逐条对照 CLAUDE.md 检查合规：
-  - 单文件单定义 ✓
-  - 禁止魔法值 ✓
-  - 枚举在 types 包、常量在 constants 包 ✓
-  - Entity 继承 BaseEntity、枚举字段 getRealXxx() ✓
-  - Repository 继承 BaseRepository ✓
-  - Service 继承 CachedBaseService ✓
-  - 删改实体必须用 withXXXContext ✓
-  - Long 字段 ToStringSerializer ✓
-  - Jackson 3 (tools.jackson) ✓
-  - TableConstants + TableRegistryInitializer 注册 ✓
-  全部通过，无违规。
-```
-
-**!!!以上流程是最低标准：每次任务完成后必须主动逐条检查并向用户汇报结果，不汇报视为未完成。!!!**
-**!!!以上流程是最低标准：每次任务完成后必须主动逐条检查并向用户汇报结果，不汇报视为未完成。!!!**
-**!!!以上流程是最低标准：每次任务完成后必须主动逐条检查并向用户汇报结果，不汇报视为未完成。!!!**
-
-## 最小影响面原则：改动范围必须等于问题范围
-
-改 bug 或改行为前，先划清「问题涉及哪些代码」，改动范围**只能等于、不能大于**它。违反下列任意一条属于严重违规。
-
-1. **禁止为了迁就单个子类去改动公共基类（父类 / 抽象类 / 接口）的行为或签名。** 公共基类是所有子类共享的契约，改一处即全局影响。「某个子类不需要 / 不适用某能力」绝不等于「基类要禁止该能力」——子类的特殊需求必须在**子类内部**用覆写钩子解决。只有当所有子类都需要该改动时才允许动基类，且必须先向用户确认。
-
-2. **优先用「覆写钩子」而非「禁用 / 删除 / 抛异常」。** 后者是影响面最大、最粗暴的手段；通常存在一个更小的语义化覆写（让它返回空、让它走不到、就地改写返回值）能只影响当前类。先找最小改动，不要一上来就抡大锤或删东西。
-
-3. **复杂度飙升是方向错误的信号。** 当一个修复开始需要「改签名 / 改基类 / 加参数 / 新增枚举 / 引入额外查询」才能自洽时，先停下来怀疑方向。正确的修复往往异常简单，若越改越复杂、越改越大，几乎一定是方向选错了，回到问题本身重想。
-
-4. **被用户纠正方向后，必须先理解意图再动手。** 同一个方向问题被纠正第二次，说明还没听懂——此时应完全停手，用自己的话复述用户的真实意图并确认，禁止带着旧思路换个姿势继续犯同类错误。
-
-（框架层面的具体约束——如「禁止 override 带 `@GetMapping`/`@PostMapping` 等映射注解的端点方法，只能覆写 `protected open` 钩子」——见对应基类的类注释。）
-
-## 构建与开发命令
+## 构建命令
 
 ### 前端（web/）
-- `cd web && pnpm dev` — 启动 Vite 开发服务器
-- `cd web && pnpm build` — TypeScript 检查 + Vite 构建（`tsc -b && vite build`）
-- `cd web && pnpm lint` — ESLint 检查
-- `cd web && npx tsc --noEmit` — 仅 TypeScript 检查（不构建）
+- `cd web && pnpm dev` - 启动开发服务器
+- `cd web && pnpm build` - TypeScript 检查 + 构建
+- `cd web && pnpm type-check` - 类型检查
 
 ### 后端（根目录）
-- `./mvnw clean install -DskipTests` — 构建所有模块
-- `./mvnw clean install -pl crystal-starter -am -DskipTests` — 构建 starter 及其依赖
-- 后端依赖：Java 17+、PostgreSQL、Redis
+- `./mvnw clean install -DskipTests` - 构建所有模块
+- `./mvnw clean install -pl crystal-starter -am -DskipTests` - 构建 starter
 
-## 项目架构
+## 技术栈
 
-CrystalFramework 是一个 Spring Boot 4 + React 19 企业级框架，支持多租户、RBAC、OAuth2 和基于插件的可扩展性。
-
-### 后端（Maven 多模块，Kotlin 2.3 + Java 17）
-
-| 模块                     | 用途                                          |
-|------------------------|---------------------------------------------|
-| `crystal-starter`      | Spring Boot 主应用 — 聚合所有模块、认证、RBAC、用户、租户、系统设置 |
-| `crystal-shared`       | 共享基础设施：基础实体、仓库、常量、响应封装、配置                   |
-| `crystal-shared-types` | 跨模块类型定义                                     |
-| `crystal-audit`        | 基于 AOP 的审计日志                                |
-| `crystal-schedule`     | 任务调度（Spring Cron + SnailJob）                |
-| `crystal-resource`     | 文件存储（本地、阿里云 OSS、腾讯 COS）                     |
-| `crystal-encrypt`      | RSA+AES API 加密                              |
-| `crystal-mail`         | 邮件模板与发送                                     |
-| `crystal-monitor`      | 系统监控                                        |
-| `crystal-sdk`          | 模块化 SDK，用于注册数据库表、RBAC 配置等                   |
-
-技术栈：Spring Boot 4.0、Spring WebFlux、R2DBC、PostgreSQL、Redis、Flyway、Spring Security、JJWT、SnailJob。
-
-### 消息模块 Scope 设计
-
-消息模块中的 `ScopeType.SYSTEM` 与 `ScopeType.TENANT` 是消息域范围；管理端使用 `ResourceScope`，通过 `MessageScopeMapping` 显式映射，禁止混用或直接比较两个枚举。
-
-`msg_broadcasts` 是直接 scoped 资源，采用固定存储约定：
-
-| scope_type | scope_id |
-|------------|----------|
-| SYSTEM     | `0`      |
-| TENANT     | 真实 `tenantId` |
-
-广播管理端的职责必须分层：`StandardScopedManagerController` 仅根据请求的 `scope/scopeId` 完成权限与 tenantPem 所有权校验；`BroadcastManagerServiceImpl.buildQueryCriteria()` 必须把同一范围固化为数据库条件，并与客户端 `QueryNode` 用 `AND` 合并。SYSTEM 查询必须限定 `scope_type = SYSTEM AND scope_id = 0`；TENANT 查询必须限定 `scope_type = TENANT AND scope_id = 请求的 tenantId`。禁止只校验 Controller 的 DTO scope 而让 Service 执行未带 scope 条件的查询。
-
-### 前端（web/，React 19 + TypeScript）
-
-| 目录                  | 用途                                                                                     |
-|---------------------|----------------------------------------------------------------------------------------|
-| `src/api/`          | Axios API 客户端 — `request.ts` 封装、各实体对应的 `.api.ts` 文件、`BaseManagerController.ts` 通用 CRUD |
-| `src/assets/`       | 静态资源（图片、字体等）                                                                           |
-| `src/components/`   | 可复用 UI 组件（`ContextMenu`、`Watermark` 等）                                                 |
-| `src/compositions/` | 自定义 React Hooks                                                                        |
-| `src/config/`       | 应用配置                                                                                   |
-| `src/contexts/`     | React Context 提供者（`SystemIntegratedContext`、`useLoggedUser`、`useUserTenants`）          |
-| `src/global/`       | 全局状态（用户、租户信息）                                                                          |
-| `src/i18n/`         | i18next + react-i18next — 完整的 en-US/zh-CN 覆盖                                           |
-| `src/pages/`        | 页面组件（`ManagerContainerPage`、登录等）                                                       |
-| `src/plugin/`       | 插件系统 — 插件可扩展菜单和路由                                                                      |
-| `src/router/`       | 路由定义（`react-router-dom` 7，`/manager/*` 为需要认证的管理后台）                                     |
-| `src/types/`        | TypeScript 类型定义                                                                        |
-| `src/utils/`        | 工具函数                                                                                   |
-
-技术栈：React 19、Ant Design 6、TailwindCSS 3、Vite 7、pnpm、SWR（无全局状态管理）、@dnd-kit。
-
-路径别名：`@/` → `src/`（定义在 `vite.config.ts` resolve.alias 和 `tsconfig.app.json` paths 中）。
-
-### 关键前端组件层级
-
-```
-main.tsx → BrowserRouter
-  ProtectedApp        — 启动时生成 RSA 密钥对
-    App               — antd ConfigProvider、SystemIntegratedProvider
-      ManagerContainerPage  — 布局：Header + Sider + Content
-        ManagerPageTabs     — 可拖拽/关闭的标签栏（持久化到 localStorage）
-        Watermark
-        Routes              — 每个菜单项渲染一个页面组件
-```
+- **后端**: Spring Boot 4 + Kotlin 2.3 + WebFlux + R2DBC + PostgreSQL + Redis
+- **前端**: React 19 + TypeScript + Ant Design 6 + Vite 7 + pnpm + SWR
 
 ## 编码规范
 
-### ⛔ 编码前强制确认（每次操作前必须逐项通过，任何一项未通过则禁止动手）
-
-| # | 检查项                              | 未通过时的动作           |
-|---|----------------------------------|-------------------|
-| 1 | 当前是否为用户提问/设计/确认场景？               | → 只回答，禁止任何文件操作    |
-| 2 | 是否有匹配的 Skill（`.claude/skills/`）？ | → 严格遵守 Skill 全部规则 |
-| 3 | 是否有 `docs/` 下的相关文档？              | → 遵守文档指导          |
-| 4 | 本次修改对应 CLAUDE.md 哪条规则？           | → 无对应规则：停下来问用户确认  |
-| 5 | 已向用户说明本次修改依据的规则了吗？               | → 没有：先说明再动手       |
-| 6 | 完成后是否会逐条对照本文档检查合规？               | → 承诺检查，否则不动手      |
-| 7 | 遇到错误时是否会保留已有改动并逐项修复，而不是整体回滚？ | → 禁止整体回滚，读取错误、修复具体问题并逐步验证 |
-
-**合规检查必须具体而全面，禁止使用简单的文字概括**
-
-**!!!Attention: 在进行任何文件创建、代码编写/修改之前，应当阅读下面的内容，严格遵守规则，若用户意图与以下任意一条规则冲突，必须告知用户并得到二次确认才可以继续，否则视为违规操作。!!!**
-**!!!Attention: 在遇到该文档中未能详细描述或缺失的问题，请前往项目根目录 `.claude` 目录中寻找相关说明，若无则以最小的代价且符合所有下述规则的前提下进行修改。!!!**
-**!!!Attention: 所有代码编写/修改任务完成后，必须再次对照本文档，逐条检查是否违反规则，若存在，请立刻修正，若不存在，必须告知用户你已经彻底检查代码与本文档的规范是否冲突，否则视为违规操作。!!!**
-
-### 后端编码规范
-
-> **⛔ 节点提醒：** 写后端代码前再确认一次 — ① 是否用户在提问（是→只回答）② 本次操作依据哪条规则（说不出来→停下来问用户）③ 完成后必须逐条合规检查
-
-后端采用模块化开发，现有结构请见上方的 Project Architecture 部分。
-
-一般的模块内部结构以下列包为基础：
-
-+ annotations: 存放自定义注解，用于标记特定行为、元数据或切点。
-+ aspect: 实现AOP切面逻辑，将横切关注点（如日志、鉴权、限流）与业务代码解耦。
-+ config: 负责模块的配置类，定义Bean、参数绑定、初始化设置等。
-+ controller: 接收并解析外部请求，调用服务层处理后返回响应（通常为API入口）。
-+ entity: 定义与数据库表映射的实体类，通常配合ORM框架使用。
-+ repository: 数据访问层接口，封装对数据库的CRUD操作（如JPA、MyBatis-Plus Mapper）。
-+ service: 业务逻辑接口层，定义核心业务操作契约。
-+ service/impl: 业务逻辑的具体实现类，实现service接口并处理事务、调用仓储等。
-+ types: 定义领域自定义类型、值对象或枚举，增强类型安全与业务语义。
-+ constants: 存放模块内通用的常量定义（如状态码、错误信息、配置键名）。
-+ event: 定义领域事件、事件监听器及发布逻辑，支持模块内或跨模块异步解耦。
-+ utils: 提供与业务无关的通用工具方法（如日期转换、加密、字符串处理）。
-
-模块的基础包名一般以 `com.lovelycatv.crystalframework` 开头，且子包名为本模块的名称。
-
-例如 mail 模块的包名为 `com.lovelycatv.crystalframework.mail`。
-
-#### 禁止单个文件多个定义
-
-**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
-**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
-**!!!禁止单个后端代码文件中存在多个类、接口、枚举定义!!!**
-
-#### 禁止魔法值
-
-**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
-**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
-**禁止魔法值，所有可命名的值必须优先使用 `constants` 包或对应常量类中的常量。例如 feature key `"member.max_count"` 必须写成 `TenantBenefit.MEMBER_MAX_COUNT.featureKey`。若常量不存在，先在对应常量类中定义再使用。**
-**此规则同样适用于测试代码中的 feature key、permission name、table name、setting key 等所有可枚举的字符串值。**
-
-#### 其他规则
-
-**系统/租户设置读取规则：禁止在业务代码中逐条调用 `getSettings(declaration)` / `getSettings(tenantId, declaration)` 读取多个设置项。必须通过 Service 层提供的聚合方法（如 `getSystemXxxSettings()` / `getTenantSettings(tenantId)`）一次性获取已缓存的设置对象，再从中取值。逐条 `getSettings()` 仅允许在 Service 实现类内部的聚合方法中使用。**
-
-**调用项目内部 Service/工具方法时，必须先阅读对应接口或类的方法签名，确认方法名、参数和返回值后再调用。禁止想当然编造不存在的方法名（如用 `delete` 代替实际的 `removeKey`）。**
-
-**前端枚举规则（后端 enum 必须前端对应）：所有后端定义的枚举类型必须在前端有对应 TypeScript 枚举定义，并按四步流程实现翻译：① `src/types/` 定义枚举常量 ② `locales/{locale}.ts` 的 `enums` 命名空间添加翻译键 ③ `enum-helpers.ts` 注册 `getXxx()` 函数 ④ 所有组件中通过 `getXxx(EnumType.VALUE)` 获取标签文本。禁止在组件中使用原始数字直接比较或分散的 `t('components.columns.xxx')` 键代替枚举翻译函数。详见 `docs/develop/frontend/i18n.md` 的枚举翻译章节。**
-
-**工具方法优先使用 Kotlin 扩展函数。编写前先在项目内搜索是否有现成的扩展函数可用（路径如 `shared/utils/`、`shared/extensions/` 或模块内的 `utils/` 包）禁止不搜索直接写。**
-
-**文档修改必须跨语言同步：修改 `docs/` 下某语言版本的文档时，必须同步更新其他语言版本（如 `docs/en/`）的对应文档。条目数量必须一一对应，禁止在翻译中额外添加原文没有的细节。**
-
-**后端枚举字段 Entity 规则：当实体字段对应枚举类型时，数据库存储枚举的 `typeId`（`Int`），Entity 中提供 `getRealXxx()` 方法转换为强类型枚举。详见 `docs/contribute/add-entity.md` 的「枚举字段」章节。**
-
-**枚举 when 必须穷尽所有分支，禁止 `else`：对枚举（`enum class`）进行 `when` 匹配时，必须显式列出该枚举的每一个分支，禁止使用 `else` 兜底。这样当枚举新增分支时编译器会强制报错提醒补全，避免遗漏。若某些分支确实无需处理，也必须显式写出这些分支并留空 / 抛异常 / 返回默认值，而不是用 `else` 一并吞掉。此规则仅针对枚举类型的 `when`，非枚举（如 `Int`、`String`、`sealed` 之外的开放类型）不受此限。**
-
-#### Controller
-
-一个 Controller 必须包含下面的所有注解：
-
-```kotlin
-@Validated
-@RestController
-@RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/dashboard")
-class DashboardController
-```
-
-**所有 Controller 的方法必须显式返回 `ApiResponse<>` 类型（使用 `ApiResponse.success()` / `ApiResponse.failed()` 包装），禁止返回裸实体或 List。前端 `doGet` / `doPost` 依赖 `ApiResponse` 结构解析。**
-
-普通 Controller 只需要放入 `controller` 包即可，对于 Manager 页面用到的 Controller 必须放入 `controller/manager` 中，并且类的命名与相关 DTO 文件必须以 `Manager` 开头。
-
-`controller` 包中一般情况只允许有普通 Controller 文件、`dto`、`vo`、`manager` 包，而 `manager` 包的结构同理。
-
-**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
-**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
-**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
-**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
-**!!!请注意，前端给后端传数据的类必须命名为 DTO，而后端传给前端的数据的类必须命名为 VO，并且必须分包存放。!!!**
-
-**Long 类型序列化规则：** 所有落在 `Long` 范围的字段（主键 `id`、外键 `xxxId`、时间戳 `xxxTime` 等）必须在 DTO / VO 中以 **字符串（`String`）** 传递，禁止在后端直接暴露 `Long` 类型的字段给前端。后端序列化时通过 `ToStringSerializer` 将 `Long` → `String`，前端对应类型为 `string`。
-
-**Jackson 版本：** 本项目使用 **Jackson 3（`tools.jackson` 包）** 进行 HTTP JSON 序列化/反序列化（全局配置注入 WebFlux codec）。所有 `@JsonSerialize`、`@JsonDeserialize` 等注解必须使用 `tools.jackson.databind.*` 下的版本，禁止使用 Jackson 2（`com.fasterxml.jackson.databind.*`）。可空 `Long?` 字段不受全局 `addSerializer(Long::class.java)` 覆盖（Kotlin module 的类型包装不匹配），必须手动加 `@get:JsonSerialize(using = ToStringSerializer::class)` 注解。参考 `BaseEntity` 中的写法。 
-
-**标准化 ManagerController**
-
-对于标准化 Controller 请见 `StandardManagerController` 的相关子类，此类型的 Controller 必须继承该类或该类的其他变种（按需）。
-
-示例请参考 `ManagerOAuthAccountController` 类。
-
-**DTO 使用规则：** `BaseManagerReadDTO`、`BaseManagerCreateDTO`、`BaseManagerUpdateDTO`、`BaseManagerDeleteDTO` 这四个标准 CRUD DTO **仅限标准化 Controller（即 `StandardManagerController` 的子类）使用**。自定义 Controller（非标准化 Controller、普通 Controller、自定义端点）禁止混用这些 DTO，应使用更轻量的基类如 `PageQuery`。
-
-**权限声明规则（强制）**
-
-**Manager Controller 家族的权限声明必须使用统一的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`），禁止使用旧的 `@ManagerPermissions` 类注解、`ScopedPermissionTriad`、`ScopedPermissionMatrix` 别名，或 `StandardTenantManagerController` 的 8 字符串构造参数。**
-**Manager Controller 家族的权限声明必须使用统一的 `PermissionMatrix`（`com.lovelycatv.crystalframework.shared.controller.PermissionMatrix`），禁止使用旧的 `@ManagerPermissions` 类注解、`ScopedPermissionTriad`、`ScopedPermissionMatrix` 别名，或 `StandardTenantManagerController` 的 8 字符串构造参数。**
-
-`PermissionMatrix` 有 4 个授权层：
-
-| 层             | authority 前缀     | 常量来源                | 语义                              |
-|---------------|-----------------|---------------------|---------------------------------|
-| `super`       | 无前缀             | `SystemPermission`  | 跨 SYSTEM + TENANT 的超级管理员         |
-| `system`      | `system.`       | `SystemPermission`  | 仅 SYSTEM scope                  |
-| `tenantAdmin` | `tenant.`       | `SystemPermission`  | TENANT scope 且跨租户（无 tenantId 匹配） |
-| `tenantPem`   | `i.tenant.`     | `TenantPermission`  | TENANT scope 且严格匹配 tenantId      |
-
-按基类选择对应的构造方式：
-
-- `StandardManagerController` 子类 → `permissions = PermissionMatrix.systemOnly(systemCreate = ..., systemRead = ..., systemUpdate = ..., systemDelete = ...)`
-- `StandardScopedManagerController` 子类 → `permissions = PermissionMatrix.of { \`super\` { ... }; system { ... }; tenantAdmin { ... }; tenantPem { ... } }`（`super` 是 Kotlin 关键字，DSL 调用必须反引号包裹）
-- `StandardTenantManagerController` 子类 → `permissions = PermissionMatrix.tenantOnly(tenantAdminCreate = ..., ..., tenantPemCreate = ..., ...)`
-- `ReadonlyManagerController` 子类 → `permissions = PermissionMatrix.systemOnlyReadonly(systemRead = ...)`
-- `ReadonlyScopedManagerController` 子类 → `permissions = PermissionMatrix.readonly(superRead = ..., systemRead = ..., tenantAdminRead = ..., tenantPemRead = ...)`
-
-哨兵值：不适用的层用 `PermissionMatrix.NOT_APPLICABLE`（`layersFor` 会过滤掉，不参与决策），显式禁用的层用 `PermissionMatrix.NEVER_GRANTED`（会参与决策但没有任何角色能匹配）。便捷工厂已经把默认值填好，通常无需手写。
-
-前缀约定由 `PermissionMatrix.init` 校验（当前 emit warn，未来会升级为 hard error），迁移步骤和常见坑详见 [权限模型迁移指南](docs/develop/controller/permission-migration.md)。
-
-**非标准化 Controller**
-
-默认情况下，所有接口都要求访问时携带合法 Token，但允许使用 `@Unauthorized` 注解表示无需任何授权即可访问的接口。
-
-本项目使用 SpringSecurity 进行权限校验，因此你可以使用任意该框架的权限校验注解，例如 `@PreAuthorize` 等。
-
-**Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
-**Controller 禁止直接注入 Repository，所有数据库操作必须通过 Service 层进行。**
-
-**请求参数绑定规则：**
-
-Controller 方法接收前端参数时只允许以下三种方式，前端据此选择对应的 Content-Type：
-
-| 后端注解              | 适用场景                          | 前端调用方式                                                    |
-|-------------------|-------------------------------|-----------------------------------------------------------|
-| `@RequestBody`    | JSON 请求体（POST/PUT）            | `doPost(url, body, {'Content-Type': 'application/json'})` |
-| `@ModelAttribute` | form-urlencoded / 查询参数绑定到 DTO | `doPost(url, body)` 默认行为                                  |
-| `@RequestParam`   | 单个查询参数（GET 为主）                | `doGet(url, { param: value })`                            |
-
-- `@RequestBody` 用于 `@PostMapping`，接收 JSON 格式的请求体
-- `@ModelAttribute` 用于 `@PostMapping`，接收 `application/x-www-form-urlencoded` 格式
-- `@RequestParam` 用于 `@GetMapping`，绑定 URL 查询参数
-
-**URL 命名规范：**
-
-Manager Controller 的 URL 结构为 `${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/<resource>/<action>`，三段一律 **kebab-case**（小写字母、数字、`-`）：
-
-- 资源段用**单数**：`user` / `oauth-account` / `mail-send-log`，禁止使用 `users` / `mail-send-logs` 之类的复数形式
-- 动作段沿用 base 类的 `list` / `create` / `query` / `update` / `delete`；自定义额外端点也必须 kebab-case（如 `/update-graph` / `/details-by-id`）
-- 单个单词的额外端点直接使用（`/my` / `/tree` / `/start` / `/handle`）
-- 禁止在 URL path 中出现大写字母、下划线、camelCase、PascalCase
-- 前端 `.api.ts` 的 `BaseManagerController` 构造参数、`doGet` / `doPost` 硬编码路径必须与后端一致
-- 详见 `docs/develop/controller/url-naming.md`，`crystal-starter` 的 `ControllerUrlConventionTest` 会自动扫描全部 `@RequestMapping` / `@XxxMapping` 拦截违规
-
-#### 实体类
-
-关于实体类请见项目根目录下的 `.claude` 文件夹中关于添加实体的技能。
-
-**后端 BaseEntity**（`crystal-shared` 模块）包含 4 个字段，序列化到前端时 `Long` 变为 String：
-
-| 字段             | Kotlin 类型 | 前端接收类型   | 说明                          |
-|----------------|-----------|----------|-----------------------------|
-| `id`           | `Long`    | `string` | 雪花算法主键，不可用自增                |
-| `createdTime`  | `Long`    | `string` | 创建时间戳（毫秒）                   |
-| `modifiedTime` | `Long`    | `string` | 修改时间戳（毫秒），`onUpdate()` 自动维护 |
-| `deletedTime`  | `Long?`   | —        | 软删除时间戳，SQL 拦截器自动过滤          |
-
-核心方法：`newEntity()` 标记为新记录、`onUpdate()` 刷新 `modifiedTime`、`softDelete()` / `restore()` / `isDeleted()` 管理软删除。
-
-**前端 BaseEntity**（`types/BaseEntity.ts`）：
-
-```typescript
-export interface BaseEntity {
-    id: string;          // 后端 Long 经 ToStringSerializer 序列化为 String
-    createdTime: string;
-    modifiedTime: string;
-}
-```
-
-#### Repository
-
-关于 Repository 接口必须继承 `BaseRepository`，特殊情况（非 BaseEntity 子类的实体类）除外。
-
-#### Service
-
-本项目使用 `service` / `service/impl` 的包结构。
-
-对于 ManagerController 对应的 Service，必须放入 `service/manager` 中，同样遵守 `service/manager/impl` 结构，且该类必须继承 CachedBaseManagerService，有实体从属关系的请见 `EntityRelationshipCheckService` 的相关用法。
-
-其他实体类对应的 Service 必须继承 `CachedBaseService` 以便使用实体对象缓存。
-
-对于实体的删改操作，请见 `CachedBaseService` 中的 `withUpdateEntityContext` / `withDeleteEntityContext` 等方法，**禁止直接删改实体对象**，必须用 `withXXXContext` 包裹相关对象的操作。
-
-#### Aspect
-
-所有 Aspect 必须有 `@Order` 注解，且优先级必须使用 `GlobalConstants.AspectPriority` 定义。
-
-#### Filter
-
-所有 Filter 必须有 `@Order` 注解，且优先级必须使用 `GlobalConstants.FilterPriority` 定义。
-
-### 前端编码规范
-
-> **⛔ 节点提醒：** 写前端代码前再确认一次 — ① 是否用户在提问（是→只回答）② 本次操作依据哪条规则（说不出来→停下来问用户）③ 完成后必须逐条合规检查
-
-以下规则均以 `web/` 作为工作目录，不再重复。
-
-#### 组件
-
-组件必须放入 `components` 文件夹，一般情况下组件是单个 tsx 文件并且直接放入该文件夹即可。
-
-特殊情况，例如 `columns` / `selector` / `card/pop` 等同类型有多个变种的情况，必须建立文件夹一起存放。
-
-**写组件之前先检查是否有类似的文件夹存放你要写的组件，若有必须放入对应位置，若没有请遵守上述规则。**
-
-对于组件中用到的类型/枚举，必须在 tsx 文件内的顶部（import 下方）使用 export 导出，对于组件内部的类型/枚举等不需要 export 导出。
-
-对于 Entity 选择（选择用户、租户、消息渠道等）必须参考 EntitySelector 实现组件/子组件，严禁 Query PageSize = 100 甚至 9999 条，单页最大只允许20条数据。
-
-#### 超高频通用组件速查（写页面/组件前必看，优先复用）
-
-下列组件几乎贯穿所有 Manager 页面，写新页面/组件前必须先确认能否复用，禁止重复造轮子。
-
-- **ManagerPageContainer**（`components/ManagerPageContainer.tsx`）：标准化 Manager 页面的顶层容器，组合了顶栏 + 表格 + 增删改弹窗的全套能力（props 见上文 ManagerPageContainer 核心 Props 表）。凡是「列表 + 增删改查」的标准后台页面一律用它，通过 `pageRef.current.refreshData()` 刷新数据。
-
-- **EntityTable**（`components/table/EntityTable.tsx`）：分页数据表格底座，被 ManagerPageContainer 内部使用。需要表格但不走标准 Manager 套路（如只读展示、嵌入式表格）时单独使用，提供 `query` 分页查询、列定义、行选择（`tableSelection`，`radio` 单选 / `checkbox` 多选）。
-
-- **EntitySelector / EntitySelectorModal**（`components/selector/`）：以表格弹窗形式选择实体。`EntityIdSelector` 为单选（`value: string`），多选直接用 `EntitySelectorModal type="checkbox"`。选用户/租户/角色/渠道等已有专用封装（`UserIdSelector`、`TenantRoleIdSelector` 等）直接复用，新实体照搬其写法，用 `additionalQueryParams` 注入额外查询条件。
-
-- **Columns**（`components/columns/XxxEntityColumns.tsx`）：每个实体一份表格列定义 Hook（`useXxxTableColumns`）。外键字段必须用 `XxxDisplay` 子组件异步展示关联实体名称（见 Columns 具象化展示节），禁止裸 ID。新实体表格必须新建对应 columns 文件。
-
-- **PopCard**（`components/card/pop/`）：鼠标悬浮/点击展示实体摘要信息的卡片（如 `UserCard`、`TenantDepartmentPopCard`），内部按 id 异步拉取 profile。在列表/详情中需要快速预览关联实体时复用，新实体照搬现有卡片写法。
-
-- **ActionBarComponent**（`components/ActionBarComponent.tsx`）：页面标题栏，提供 `title` / `subtitle` / `titleActions`（右侧操作区）。非标准化页面至少要有它作为页头；ManagerPageContainer 已内置。
-
-- **CopyableToolTip**（`components/CopyableToolTip.tsx`）：带一键复制的文本 Tooltip。展示 ID、长字符串、配置等需要复制的内容时统一用它包裹，columns 中尤其高频。
-
-- **StandardCard**（`components/card/StandardCard.tsx`）：统一圆角/边框/内边距风格的卡片容器。需要分块承载内容时用它替代裸 `div`/`Card`，保证视觉一致。
-
-#### 页面文件命名
-
-**页面文件即使放在子文件夹中，也必须保留完整的模块前缀。** 例如 `pages/manager/tenant/benefit/` 中的文件必须命名为 `TenantTireBenefitValueContainer.tsx`、`TenantTireBenefitValueOverviewPage.tsx`，不能省略为 `Container.tsx`。
-
-#### Columns 具象化展示
-
-**禁止在表格列中只显示裸 ID。** 凡是关联了其他实体的外键字段（如 `tireTypeId`、`featureId` 等），必须通过异步请求获取关联实体的名称并展示。
-
-参考 `TenantInvitationEntityColumns.tsx` 的 `MemberInfoDisplay` / `DepartmentInfoDisplay` 模式：
-- 在 columns 文件中定义 `XxxDisplay` React 组件（带 loading → 名称 tag + ID tag 兜底）
-- 加载中显示 `<Spin size="small" />`
-- 加载失败显示红色 "Unknown" tag
-- 加载完成后显示实体名称 + ID tag（小字号）
-
-**禁止**使用 `render: (_, row) => <span>{row.tireTypeId}</span>` 这种方式。
-
-#### Context
-
-所有需要创建并提供上下文的组件，必须放入 `context` 文件夹而非 `compositions` 中。
-
-#### Api
-
-所有 Api 文件必须放入 `api` 中的对应文件夹，必须按后端对应的模块/包进行分类，但 `request` / `system-request` 等特殊类型的 api 文件无需分类。
-
-**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
-**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
-**所有相关的 DTO 文件必须写在相应 api 文件的头部/尾部，但对于 VO 等返回类型必须放在 `types` 文件夹中，目录结构严格对应 `api` 文件夹，并且禁止一个类一个文件，请检查有没有相似的 type 定义文件。**
-
-**Long 类型接收规则：** 所有后端 `Long` 类型的字段（`id`、`xxxId`、`xxxTime` 等），前端 **只能用 `string` 类型来接**，禁止使用 `number`。后端序列化时用 `ToStringSerializer` 将 `Long` → `String` 再传给前端。详见后端 Controller 节的 Long 序列化规则。
-
-对于后端继承 BaseEntity 的实体类，前端对应也必须继承该类。
-
-对于后端的标准化的控制器（StandardManagerController）必须继承前端的 BaseManagerController，写法参照其他相关文件，若无特殊情况，均以 `export const` 的方式导出。
-
-**BaseManagerController**（`api/BaseManagerController.ts`）有 5 个泛型参数和 5 个方法：
-
-```typescript
-class BaseManagerController<ENTITY, C, R = BaseManagerReadDTO, U = BaseManagerUpdateDTO, D = BaseManagerDeleteDTO> {}
-```
-
-| 泛型参数     | 说明                                                                                       |
-|----------|------------------------------------------------------------------------------------------|
-| `ENTITY` | 实体类型（对应后端的实体类）                                                                           |
-| `C`      | Create DTO                                                                               |
-| `R`      | Read/Query DTO（默认 BaseManagerReadDTO，含 page、pageSize、id、searchKeyword、startTime、endTime） |
-| `U`      | Update DTO（默认 BaseManagerUpdateDTO，含 id）                                                 |
-| `D`      | Delete DTO（默认 BaseManagerDeleteDTO，含 ids: string[]）                                      |
-
-| 方法              | 请求方式     | URL 模式                       | 后端注解              | 前端 Content-Type                     | 说明                            |
-|-----------------|----------|------------------------------|-------------------|-------------------------------------|-------------------------------|
-| `create(dto)`   | POST     | `/api{baseUrl}/create`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 新增                            |
-| `query(dto)`    | POST     | `/api{baseUrl}/query`        | `@RequestBody`    | `application/json`                  | 分页查询，返回 PaginatedResponseData |
-| `update(dto)`   | POST     | `/api{baseUrl}/update`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 更新                            |
-| `delete(dto)`   | POST     | `/api{baseUrl}/delete`       | `@ModelAttribute` | `application/x-www-form-urlencoded` | 删除                            |
-| `list(params?)` | GET      | `/api{baseUrl}/list?xxx=yyy` | `@GetMapping`     | query params                        | 全量列表                          |
-| `getById(id)`   | 复用 query | —                            | —                 | —                                   | 按 ID 查单条                      |
-
-**请求路径拼接规则**：`/api` + `baseUrl`（即构造时传入的路径，如 `/manager/mail-send-logs`）+ 方法路径。开发环境下 Vite 代理将 `/api` 路径重写为 `/api/v1` 转发到后端。
-
-**请求 Content-Type 规则（前端）：**
-- **`@RequestBody` 后端** → 前端必须传 `{'Content-Type': 'application/json'}` 给 `doPost` / `doPut` / `doPatch`
-- **`@ModelAttribute` 后端** → 前端使用 `doPost` / `doPut` / `doDelete` 的默认行为（`application/x-www-form-urlencoded`）
-- **`@GetMapping` / `@RequestParam` 后端** → 前端使用 `doGet(url, queryParams)` 传查询参数
-- 禁止在 api 文件中直接使用 `axios` 实例、`URLSearchParams`、`qs` 等底层 API 手动构造请求体
-- `system-request.ts` 中的 `preProcessHeaders` 已默认对 POST/PUT/PATCH 设置 `application/x-www-form-urlencoded`，调用方只需在 `@RequestBody` 场景显式覆写
-
-调用 api 时，先判断该 api 是否有缓存的价值，本项目提供预设的 SWR-Composition 可用，位于 `compositions` 文件夹。内置多种方式，请按需使用。
-
-**禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
-**禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
-**禁止编造 API 调用，包括但不限于后端不存在的接口、不存在的请求类型、不存在的参数、不以后端 DTO 为准等。写接口必须先彻底阅读相关 Controller 接口以及对应参数/DTO 的源代码再动手。必须把新加的接口以及对应后端什么 Controller/DTO 完整的告知用户，否则视为违规代码。**
-
-**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
-**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
-**调用 Query Api 时，严禁使用 PageSize = 100 甚至更大的数获取完整列表，如有需要必须使用 readAll() 函数对应的获取全部记录。**
-
-#### Compositions
-
-所有自定义钩子函数必须放入 `compositions` 文件夹，文件名必须以 `use-` 开头，例如 `use-logged-user` 且内部函数名也应该同名且符合命名规范。
-
-#### SWR 数据缓存刷新规则
-
-本项目使用 SWR，全局默认 `revalidateOnFocus: false`（见 `App.tsx` 的 `<SWRConfig>`）。刷新时机有两类，**必须组合使用**：
-
-**（一）被动 revalidate（缓存的定义方负责，声明式）**
-
-对"数据源可能被其他页面 / 操作变更"的 SWR，定义方在 `useSWR(...)` 里用第三个参数覆盖全局默认值，声明它自己的自动 revalidate 时机：
-
-- `revalidateOnFocus: true`：tab / 窗口重新聚焦时刷新（覆盖全局 `false`）
-- `refreshInterval: N`：按毫秒周期轮询（例：`use-total-unread.ts` 的 30_000）
-- `revalidateOnMount: true`：每次组件挂载时刷新
-
-这一层是**保底**——用户切走再切回、或组件重挂载时都能拿到新数据，但**不能覆盖"同 tab 内改完立刻要生效"的场景**。
-
-**（二）主动 invalidate（缓存的写入方负责，命令式）**
-
-当一个 SWR 的数据源被某个明确的写入操作修改（如系统设置保存、维护模式切换），**写入方必须在成功回调里主动刷相关 SWR**，让订阅方立刻拿到新值。写法：
-
-1. **拥有该 SWR 的 hook / context 文件必须导出 SWR key 常量**，命名以 `SWR_KEY_` 前缀开头，例如：
-   ```typescript
-   // web/src/context/SystemIntegratedContext.tsx
-   export const SWR_KEY_SYSTEM_INTEGRATED_INFO = 'systemIntegratedInfo';
-   ```
-2. **写入方 import 该 key + swr 的 `mutate`，成功后按 key 刷**：
-   ```typescript
-   import {mutate as swrMutate} from "swr";
-   import {SWR_KEY_SYSTEM_INTEGRATED_INFO} from "@/context/SystemIntegratedContext.tsx";
-   ...
-   updateSystemSettings(props).then(() => {
-       void swrMutate(SWR_KEY_SYSTEM_INTEGRATED_INFO)
-   })
-   ```
-
-**规则细节：**
-
-- **禁止在业务代码里 hardcode SWR key 字符串**。所有 `mutate('xxx')` 的 key 都必须来自定义方 `export const SWR_KEY_XXX`。key 只有一处定义，所有权仍然属于定义它的 hook / context。
-- **禁止封装 `revalidateXxxInfo()` 之类的公共刷新函数**放在 hook / context 里让写入方调用。直接用 `swrMutate(SWR_KEY_XXX)` 即可，不需要一层无意义的封装。
-- **禁止只做被动 revalidate 而不做主动 invalidate**。像"改完系统设置立刻要生效"这类场景，光靠 `revalidateOnFocus` 拿不到最新值（用户没切走窗口），必须在写入回调里主动 `swrMutate(...)`。
-- **一个写入可能牵连多个 SWR**。例如系统设置保存同时影响 `SWR_KEY_SYSTEM_INTEGRATED_INFO`（模块开关、水印、OAuth 平台、维护标志）和 `SWR_KEY_SYSTEM_MAINTENANCE_STATUS`（维护状态端点），必须把关联的 key 全部刷一遍。写入方要清楚自己动了哪些数据源，一个都不能漏。
-
-**例外：** `use-total-unread.ts` / `use-broadcast-inbox.ts` 里 `globalMutate(自己的 KEY)` **仅用于让同文件内其他函数触发自身的 revalidate**（自己刷自己），不属于跨模块推刷新，允许。判断标准：`globalMutate` 的 key 必须是**同一个文件里定义的常量**，且刷的是同一个 hook 暴露出去的 SWR。
-
-#### Config
-
-配置文件位于 `config` 文件夹。
-
-如需添加环境变量，必须在 `config/env.ts` 同步添加，并在需要读取的地方使用 `currentEnvironment` 获取。
-
-#### I18N 国际化
-
-国际化文件在 `i18n` 文件夹中，接下来该部分均以 `web/i18n` 作为工作目录。
-
-语言文件在 `locales` 文件夹中，文件命名必须是语言标准全名，例如 `en-US` / `zh-CN` 等。
-
-语言文件导出的对象必须使用 `i18n-rules.ts` 中的类型，严格遵守类型规范。
-
-如遇枚举类型需要翻译，必须写入 `enum-helpers.ts` 中，且 i18n 文件也必须遵守该规则。
-
-关于系统设置的国际化，请看 `system-settings.tsx` 文件。
-
-#### 页面
-
-所有页面必须放入 `pages` 文件夹，且按照类型区分子目录。
-
-对于标准化的 Manager 页面请使用 `ManagerPageContainer` 组件，对于非标准化的页面可以按需使用组件，但一般情况下至少要有 `ActionBarComponent` 标题组件。
-
-**ManagerPageContainer 核心 Props**（`components/ManagerPageContainer.tsx`）：
-
-| Prop                    | 类型                                                   | 说明                                               |
-|-------------------------|------------------------------------------------------|--------------------------------------------------|
-| `entityName`            | `string`                                             | 实体名称（用于弹窗标题等，通常传 `t('entityNames.xxx')`）         |
-| `columns`               | `EntityTableColumns<ENTITY>`                         | 表格列定义                                            |
-| `query`                 | `(dto: R) => Promise<PaginatedResponseData<ENTITY>>` | 分页查询函数                                           |
-| `delete`                | `(dto) => Promise<unknown>`                          | 删除函数                                             |
-| `update`                | `(dto) => Promise<unknown>`                          | 更新函数                                             |
-| `create`                | `(dto) => Promise<unknown>`                          | 新增函数                                             |
-| `readonlyMode`          | `boolean`                                            | 只读模式（隐藏增删改按钮）                                    |
-| `showRowActions`        | `boolean`                                            | 是否显示行操作按钮（编辑/删除），默认 `true`，只读模式自动隐藏              |
-| `showActionBar`         | `boolean`                                            | 是否显示顶栏，默认 `true`                                 |
-| `tableActions`          | `array`                                              | 表格过滤栏操作项（每项含 label、children）                     |
-| `searchKeywords`        | `string[]`                                           | 全局搜索框的搜索字段，不传则不显示搜索框                             |
-| `simpleFilters`         | `array`                                              | 行内过滤条件，配合 `useManagerQueryParams` 的 `filters` 使用 |
-| `filterableFields`      | `FilterableField[]`                                  | FilterBuilder 可用字段，不传则不显示高级筛选                    |
-| `editModalFormChildren` | `ReactNode \| ((ENTITY) => ReactNode)`               | 新增/编辑弹窗的表单项                                      |
-| `showTimeRangeFilter`   | `boolean`                                            | 是否显示时间范围筛选器，默认 `true`                            |
-| `hideRecordTimeColumn`  | `boolean`                                            | 是否隐藏表格末尾自动追加的"记录时间"列，默认 `false`                  |
-
-筛选条件变化时需手动触发 `pageRef.current.refreshData({resetPage: true})`（见现有页面示例）。
-
-#### 插件
-
-前端插件相关代码在 `plugin` 文件夹中，若**非必要禁止修改**本文件夹中的任意文件。
-
-#### 路由
-
-Manager 页面侧边栏的路由文件位于 `router` 文件夹，并且只提供以下三种类型的目录：
-
-1. Public: 登录后无需权限即可访问的页面。
-2. Admin: 登录后需要相关权限才可访问的页面。
-3. Tenant: 以租户的身份登录后才可访问的页面。
-
-所有路由将会通过 `computeAccessibleMenus` 函数计算得出。
-
-若需要添加其他非 Manager 页面的路由，请见 `App.tsx` 中的 `<Routes>` 标签。
-
-#### 工具函数
-
-所有工具函数必须放入 `utils` 文件夹。
+详细规范见 `.claude/rules/`：
+
+### 后端规则
+@.claude/rules/backend-base.md
+@.claude/rules/backend-entity.md
+@.claude/rules/backend-service.md
+@.claude/rules/backend-controller.md
+
+### 前端规则
+@.claude/rules/frontend-base.md
+@.claude/rules/frontend-components.md
+@.claude/rules/frontend-api.md
+@.claude/rules/frontend-swr.md
+@.claude/rules/frontend-i18n.md
+
+### 跨端规则
+@.claude/rules/git.md
+
+## 核心禁止行为
+
+- **破坏性 Git 命令** - 绝对禁止任何修改 Git 状态的命令，只能提供 Commit Message 让用户自行提交
+- **整体回滚代码** - 必须保留有效改动，逐项修复
+- **魔法值** - 必须用 constants 包的常量
+- **单文件多定义** - 一个文件只能有一个类/接口/枚举
+
+### Git 操作规则
+
+**✅ 允许（只读命令）：**
+- `git status` - 查看状态
+- `git log` - 查看历史
+- `git diff` - 查看差异
+- `git branch` - 查看分支
+- `git show` - 查看提交
+- 其他不修改状态的只读命令
+
+**❌ 绝对禁止（写操作）：**
+- `git add`
+- `git commit`
+- `git push`
+- `git pull`
+- `git merge`
+- `git rebase`
+- `git reset`
+- `git stash`
+- `git checkout`（切换分支/文件）
+- `git cherry-pick`
+- `git revert`
+- 任何其他修改 Git 状态的命令
+
+**唯一允许：** 提供格式化的 Commit Message 文本，由用户自行执行 git 操作。
+
+## 任务完成标准
+
+每次任务完成后必须：
+1. 逐条对照 CLAUDE.md 和相关 rules 检查合规
+2. 向用户汇报检查结果
+3. 不汇报视为未完成

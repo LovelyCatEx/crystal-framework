@@ -12,9 +12,9 @@ import {
     KeyOutlined,
     LineChartOutlined,
     MailOutlined,
-    MessageOutlined,
     MonitorOutlined,
     NotificationOutlined,
+    RobotOutlined,
     SafetyOutlined,
     SettingOutlined,
     ShopOutlined,
@@ -34,7 +34,6 @@ const UserBanRecordManagerPage = lazy(() => import("../pages/manager/user/UserBa
 const UserRoleRelationManagerPage = lazy(() => import("../pages/manager/rbac/UserRoleRelationManagerPage.tsx"));
 const SystemSettingsManagerPage = lazy(() => import("../pages/manager/settings/SystemSettingsManagerPage.tsx"));
 const UserProfilePage = lazy(() => import("../pages/manager/profile/UserProfilePage.tsx"));
-const MessageCenterPage = lazy(() => import("../pages/manager/message/MessageCenterPage.tsx"));
 const OAuthAccountManagerPage = lazy(() => import("../pages/manager/user/OAuthAccountManagerPage.tsx"));
 const FileResourceManagerPage = lazy(() => import("../pages/manager/resource/FileResourceManagerPage.tsx"));
 const StorageProviderManagerPage = lazy(() => import("../pages/manager/resource/StorageProviderManagerPage.tsx"));
@@ -69,7 +68,6 @@ const UserLoginLogManagerPage = lazy(() => import("@/pages/manager/auth/UserLogi
 const SessionMonitorPage = lazy(() => import("@/pages/manager/monitor/SessionMonitorPage.tsx"));
 const SystemMonitorPage = lazy(() => import("@/pages/manager/monitor/SystemMonitorPage.tsx"));
 const AnnouncementManagerPage = lazy(() => import("@/pages/manager/system/AnnouncementManagerPage.tsx"));
-const BroadcastManagerPage = lazy(() => import("@/pages/manager/message/BroadcastManagerPage.tsx"));
 const TenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictTypeManagerPage.tsx"));
 const TenantDictItemManagerPage = lazy(() => import("@/pages/manager/tenant/dict/TenantDictItemManagerPage.tsx"));
 const MyTenantDictTypeManagerPage = lazy(() => import("@/pages/manager/tenant/dict/MyTenantDictTypeManagerPage.tsx"));
@@ -85,6 +83,10 @@ const ApprovalTaskHandlePage = lazy(() => import("@/pages/manager/approval/Appro
 const MyTenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/MyTenantApprovalFlowInstanceManagerPage.tsx"));
 const TenantApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/TenantApprovalFlowInstanceManagerPage.tsx"));
 const ApprovalFlowInstanceManagerPage = lazy(() => import("@/pages/manager/approval/ApprovalFlowInstanceManagerPage.tsx"));
+const AiProviderManagerPage = lazy(() => import("@/pages/manager/ai/AiProviderManagerPage.tsx"));
+const AiModelManagerPage = lazy(() => import("@/pages/manager/ai/AiModelManagerPage.tsx"));
+const AiUserGroupManagerPage = lazy(() => import("@/pages/manager/ai/AiUserGroupManagerPage.tsx"));
+const AiPlaygroundPage = lazy(() => import("@/pages/manager/ai/AiPlaygroundPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -98,7 +100,7 @@ import type {PluginRouteItem} from "@/plugin/types.ts";
 import i18n from "@/i18n";
 import type {MenuGroup, MenuItem} from "@/types/menu.types.ts";
 import type {MenuItemType} from "antd/lib/menu/interface";
-import {menuPathDashboard, menuPathMessageCenter, menuPathProfile} from "@/router/paths.ts";
+import {menuPathDashboard, menuPathProfile} from "@/router/paths.ts";
 import {resolveDisabledMenuPrefixes} from "@/router/system-module-menu-paths.ts";
 
 
@@ -152,6 +154,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             icon: <LineChartOutlined />,
             label: t('menu.groups.monitor'),
         },
+        {
+            name: 'ai',
+            icon: <RobotOutlined />,
+            label: t('menu.groups.ai'),
+        },
         ...toTranslatedMenuGroups(t),
     ];
 }
@@ -185,13 +192,6 @@ export function getPublicMenus(t: TFunction): RouteItem[] {
             icon: <UserOutlined />,
             label: t('menu.pub.profile'),
             page: <UserProfilePage />
-        },
-        {
-            key: menuPathMessageCenter,
-            path: menuPathMessageCenter,
-            icon: <MessageOutlined />,
-            label: t('menu.pub.messageCenter'),
-            page: <MessageCenterPage />
         },
         {
             key: '/manager/approval/initiate',
@@ -623,13 +623,6 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             page: <AnnouncementManagerPage />,
         },
         {
-            key: '/manager/broadcasts',
-            path: '/manager/broadcasts',
-            icon: <NotificationOutlined />,
-            label: t('menu.admin.broadcasts'),
-            page: <BroadcastManagerPage />,
-        },
-        {
             key: '/manager/system-dict-types',
             path: '/manager/system-dict-types',
             icon: <BookOutlined />,
@@ -642,6 +635,38 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <BookOutlined />,
             label: t('menu.admin.systemDictItems'),
             page: <SystemDictItemManagerPage />,
+        },
+        {
+            key: '/manager/ai/provider',
+            path: '/manager/ai/provider',
+            icon: <CloudOutlined />,
+            label: t('menu.admin.aiProvider'),
+            page: <AiProviderManagerPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/model',
+            path: '/manager/ai/model',
+            icon: <DatabaseOutlined />,
+            label: t('menu.admin.aiModel'),
+            page: <AiModelManagerPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/user-group',
+            path: '/manager/ai/user-group',
+            icon: <TeamOutlined />,
+            label: t('menu.admin.aiUserGroup'),
+            page: <AiUserGroupManagerPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/playground',
+            path: '/manager/ai/playground',
+            icon: <RobotOutlined />,
+            label: t('menu.admin.aiPlayground'),
+            page: <AiPlaygroundPage />,
+            group: 'ai'
         },
         {
             key: '/manager/approval-flow-definitions',

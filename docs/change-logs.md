@@ -5,7 +5,34 @@
 ::: danger
 1. v1.5.* ~ v1.9.* 版本存在严重的安全漏洞，请勿使用，详见 v1.10.0 更新日志。
 2. v1.13.0 开始使用权限矩阵模式代替原有权限，迁移到该版本是破坏性的操作。
+3. v1.15.0 开始彻底移除 crystal-message 模块，已有数据表不会被删除。
 :::
+
+## v1.15.0
+
+2026-09-13
+
+### 新功能
++ feat(ai): 新增 AI 提供商、模型与用户组管理模块，包含可视化配置表单、能力标签及模型配置页签。
++ feat(ai): 新增 AI 调用记录，支持捕获原始请求与响应，并支持 Anthropic Message 协议。
++ feat(ai): 新增 AI 演练场聊天界面，支持展示推理内容。
++ feat(message-channel): 新增 WebSocket 通道处理框架与认证机制，包含连接认证限流与系统设置开关。
++ feat(shared): 新增可组合的通用限流服务，支持滑动窗口与指数退避策略叠加。
++ feat(web): 新增 WebSocket 连接测试界面，支持手动控制连接与代理配置。
++ feat: 新增合规检查 agent 与编码规则。
+
+### Bug 修复
++ fix(web): 修复 AI 提供商请求头不显示及新增按钮失效的问题。
++ fix(web): 修复 AI 提供商表单中请求/响应配置的收集与 capabilities 解析问题。
++ fix(web): 修正并强化 i18n 类型约束与翻译定义。
++ fix(web): 修复 WebSocket 连接中 token 工具函数的引用路径。
++ fix(message-channel): 使用 SystemModuleClient 替代反射进行设置校验。
+
+### 其他
++ refactor(message): 移除 crystal-message 模块。
++ chore: 更新 readme。
+
+---
 
 ## v1.14.3
 

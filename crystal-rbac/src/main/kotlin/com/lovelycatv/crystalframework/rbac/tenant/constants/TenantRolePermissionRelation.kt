@@ -41,11 +41,6 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_DICT_ITEM_READ,
             TenantPermission.ACTION_DICT_ITEM_UPDATE,
             TenantPermission.ACTION_DICT_ITEM_DELETE,
-            // Broadcast (within own tenant)
-            TenantPermission.ACTION_BROADCAST_CREATE,
-            TenantPermission.ACTION_BROADCAST_READ,
-            TenantPermission.ACTION_BROADCAST_UPDATE,
-            TenantPermission.ACTION_BROADCAST_DELETE,
         ),
         TenantRole.ADMIN to listOf(
             // Profile
@@ -83,8 +78,6 @@ object TenantRolePermissionRelation {
             TenantPermission.ACTION_MESSAGE_CHANNEL_READ,
             TenantPermission.ACTION_MESSAGE_CHANNEL_UPDATE,
             TenantPermission.ACTION_MESSAGE_CHANNEL_DELETE,
-            // Message Reception (customer-service inbox) — inherited by super_admin / root
-            TenantPermission.ACTION_MESSAGE_RECEPTION_HANDLE,
             // File Resources
             TenantPermission.ACTION_FILE_RESOURCE_CREATE,
             TenantPermission.ACTION_FILE_RESOURCE_READ,

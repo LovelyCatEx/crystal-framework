@@ -1,6 +1,12 @@
 package com.lovelycatv.crystalframework.shared.constants
 
 object TableConstants {
+    const val TABLE_AI_PROVIDERS = "ai_providers"
+    const val TABLE_AI_MODELS = "ai_models"
+    const val TABLE_AI_MODEL_INVOCATION_RECORDS = "ai_model_invocation_records"
+    const val TABLE_AI_USER_GROUPS = "ai_user_groups"
+    const val TABLE_AI_USER_GROUP_MEMBERS = "ai_user_group_members"
+    const val TABLE_AI_USER_GROUP_MODELS = "ai_user_group_models"
     const val TABLE_USERS = "users"
     const val TABLE_TENANTS = "tenants"
     const val TABLE_TENANT_ROLES = "tenant_roles"
@@ -44,10 +50,4 @@ object TableConstants {
     const val TABLE_APPROVAL_FLOW_TOKEN = "approval_flow_token"
     const val TABLE_STORAGE_PROVIDER_ROUTING_RULES = "storage_provider_routing_rules"
     const val TABLE_USER_BAN_RECORDS = "user_ban_records"
-    const val TABLE_MSG_CONVERSATIONS = "msg_conversations"
-    const val TABLE_MSG_CONVERSATION_PARTIES = "msg_conversation_parties"
-    const val TABLE_MSG_CONVERSATION_MEMBERS = "msg_conversation_members"
-    const val TABLE_MSG_MESSAGES = "msg_messages"
-    const val TABLE_MSG_BROADCASTS = "msg_broadcasts"
-    const val TABLE_MSG_BROADCAST_READS = "msg_broadcast_reads"
 }

@@ -130,8 +130,8 @@ export default function TenantMemberRoleManagerPage() {
             key: "user",
             render: (_: unknown, row: TenantMemberVO) => (
                 <Space orientation='vertical' size={0}>
-                    <CopyableToolTip title={row.user?.nickname || t('common.unknownUser')}>
-                        <span className="text-xs font-mono">{row.user?.nickname || t('common.unknownUser')}</span>
+                    <CopyableToolTip title={row.user?.nickname || t('pages.tenantMemberRoleManager.columns.unknownUser')}>
+                        <span className="text-xs font-mono">{row.user?.nickname || t('pages.tenantMemberRoleManager.columns.unknownUser')}</span>
                     </CopyableToolTip>
                     <CopyableToolTip title={row.id}>
                         <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {row.id}</Tag>

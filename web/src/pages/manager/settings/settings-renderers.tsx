@@ -1,6 +1,7 @@
 import {ColorPickerInput} from "@/components/input/ColorPickerInput.tsx";
 import {TestSendEmailButton} from "@/components/TestSendEmailButton.tsx";
 import {TestSendLarkButton} from "@/components/TestSendLarkButton.tsx";
+import {TestSendWebSocketButton} from "@/components/TestSendWebSocketButton.tsx";
 import type {
     SettingsGroupExtraRenderer,
     SettingsItemRenderer,
@@ -19,6 +20,11 @@ export const settingsGroupExtraRenderers = new Map<string, SettingsGroupExtraRen
     ['messageChannel.lark', () => (
         <div className="flex justify-end">
             <TestSendLarkButton/>
+        </div>
+    )],
+    ['module.webSocket', () => (
+        <div className="flex justify-end">
+            <TestSendWebSocketButton/>
         </div>
     )],
 ]);
