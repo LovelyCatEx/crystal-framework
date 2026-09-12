@@ -67,7 +67,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.14.3</revision>
+        <revision>1.15.0</revision>
         <crystalframework.basedir>${maven.multiModuleProjectDirectory}</crystalframework.basedir>
         <verification.detekt.skip>false</verification.detekt.skip>
         <verification.dependency-check.skip>false</verification.dependency-check.skip>
