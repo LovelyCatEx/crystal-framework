@@ -63,6 +63,9 @@ object RedisConstants {
     /** Sliding-window counter of authentication attempts keyed by account (username:tenantId). */
     const val LOGIN_RATE_LIMIT_ACCOUNT_PREFIX = "auth:rl:acc:"
 
+    /** Exponential-backoff lockout prefix for login authentication (used with ExponentialBackoffLockout). */
+    const val LOGIN_LOCK_PREFIX = "auth:lock:"
+
     /** Consecutive-failure counter per account, used to drive exponential-backoff lockout. */
     const val LOGIN_LOCK_FAILURE_PREFIX = "auth:lock:fail:"
 
@@ -76,6 +79,29 @@ object RedisConstants {
     fun getLoginLockFailureKey(account: String) = "$LOGIN_LOCK_FAILURE_PREFIX$account"
 
     fun getLoginLockUntilKey(account: String) = "$LOGIN_LOCK_UNTIL_PREFIX$account"
+
+    /** Exponential-backoff lockout prefix for WebSocket authentication (used with ExponentialBackoffLockout). */
+    const val WS_AUTH_LOCK_PREFIX = "ws:auth:lock:"
+
+    /** Sliding-window counter of WebSocket authentication attempts keyed by client IP. */
+    const val WS_AUTH_RATE_LIMIT_IP_PREFIX = "ws:auth:rl:ip:"
+
+    /** Sliding-window counter of WebSocket authentication attempts keyed by account (username:tenantId). */
+    const val WS_AUTH_RATE_LIMIT_ACCOUNT_PREFIX = "ws:auth:rl:acc:"
+
+    /** Consecutive-failure counter per account for WebSocket auth, used to drive exponential-backoff lockout. */
+    const val WS_AUTH_LOCK_FAILURE_PREFIX = "ws:auth:lock:fail:"
+
+    /** Lockout marker per account for WebSocket auth; value is the epoch-millis the lockout expires at. */
+    const val WS_AUTH_LOCK_UNTIL_PREFIX = "ws:auth:lock:until:"
+
+    fun getWsAuthRateLimitIpKey(ip: String) = "$WS_AUTH_RATE_LIMIT_IP_PREFIX$ip"
+
+    fun getWsAuthRateLimitAccountKey(account: String) = "$WS_AUTH_RATE_LIMIT_ACCOUNT_PREFIX$account"
+
+    fun getWsAuthLockFailureKey(account: String) = "$WS_AUTH_LOCK_FAILURE_PREFIX$account"
+
+    fun getWsAuthLockUntilKey(account: String) = "$WS_AUTH_LOCK_UNTIL_PREFIX$account"
 
     /** Sliding-window counter of email-code sends keyed by client IP. */
     const val MAIL_CODE_RATE_LIMIT_IP_PREFIX = "mail:rl:ip:"

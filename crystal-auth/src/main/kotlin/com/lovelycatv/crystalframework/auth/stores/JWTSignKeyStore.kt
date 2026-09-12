@@ -1,5 +1,6 @@
 package com.lovelycatv.crystalframework.auth.stores
 
+import com.lovelycatv.crystalframework.shared.auth.JWTSignKeyProvider
 import com.lovelycatv.crystalframework.shared.constants.RedisConstants
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.vertex.log.logger
@@ -23,7 +24,7 @@ class JWTSignKeyStore(
     private val reactiveRedisService: ReactiveRedisService,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, Any>,
     private val reactiveRedisMessageListenerContainer: ReactiveRedisMessageListenerContainer,
-) {
+) : JWTSignKeyProvider {
     private val logger = logger()
 
     private val instanceId = UUID.randomUUID().toString()
@@ -55,7 +56,7 @@ class JWTSignKeyStore(
      * was invalidated by a refresh signal. The reload bridges with [runBlocking], but this path
      * is hit at most once per refresh, never per request under steady state.
      */
-    fun getSignKey(): String {
+    override fun getSignKey(): String {
         return cachedSignKey ?: runBlocking { loadOrInitSignKey() }
     }
 

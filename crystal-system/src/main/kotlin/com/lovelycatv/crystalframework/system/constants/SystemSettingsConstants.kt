@@ -440,6 +440,57 @@ object SystemSettingsConstants {
             )
         }
 
+        object WebSocketAuthRateLimit {
+            val ENABLED = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.enabled",
+                valueType = SettingsItemValueType.BOOLEAN,
+                defaultValue = true.toString(),
+                sort = 1
+            )
+
+            val WINDOW_SECONDS = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.windowSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 300.toString(),
+                sort = 2
+            )
+
+            val MAX_ATTEMPTS_PER_IP = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.maxAttemptsPerIp",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 30.toString(),
+                sort = 3
+            )
+
+            val MAX_ATTEMPTS_PER_ACCOUNT = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.maxAttemptsPerAccount",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 10.toString(),
+                sort = 4
+            )
+
+            val LOCK_THRESHOLD = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.lockThreshold",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 5.toString(),
+                sort = 5
+            )
+
+            val LOCK_BASE_SECONDS = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.lockBaseSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 60.toString(),
+                sort = 6
+            )
+
+            val LOCK_MAX_SECONDS = SettingsItemDeclaration(
+                key = "security.webSocketAuthRateLimit.lockMaxSeconds",
+                valueType = SettingsItemValueType.NUMBER,
+                defaultValue = 3600.toString(),
+                sort = 7
+            )
+        }
+
         object Outbound {
             val ALLOWED_HOSTS = SettingsItemDeclaration(
                 key = "security.outbound.allowedHosts",
@@ -471,25 +522,11 @@ object SystemSettingsConstants {
             sort = 1
         )
 
-        val MESSAGE_SYSTEM_PEER_ENABLED = SettingsItemDeclaration(
-            key = "module.message.systemPeerEnabled",
+        val WEBSOCKET_ENABLED = SettingsItemDeclaration(
+            key = "module.webSocket.enabled",
             valueType = SettingsItemValueType.BOOLEAN,
             defaultValue = true.toString(),
             sort = 2
-        )
-
-        val MESSAGE_TENANT_SCOPE_ENABLED = SettingsItemDeclaration(
-            key = "module.message.tenantScopeEnabled",
-            valueType = SettingsItemValueType.BOOLEAN,
-            defaultValue = true.toString(),
-            sort = 3
-        )
-
-        val MESSAGE_TENANT_DESK_ENABLED = SettingsItemDeclaration(
-            key = "module.message.tenantDeskEnabled",
-            valueType = SettingsItemValueType.BOOLEAN,
-            defaultValue = true.toString(),
-            sort = 4
         )
     }
 

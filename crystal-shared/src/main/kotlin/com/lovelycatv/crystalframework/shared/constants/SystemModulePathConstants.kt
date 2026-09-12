@@ -33,21 +33,4 @@ object SystemModulePathConstants {
             "/api/*/manager/approval-flow-**/**",
         )
     }
-
-    /**
-     * Message module keys for reporting disabled features to the frontend via SystemIntegratedInfo.
-     * These modules are enforced at the service layer (MessageServiceImpl.checkMessageFeatureEnabled),
-     * not via API path blocking, so they have no apiPathPatterns.
-     */
-    object MessageSystemPeer {
-        const val KEY = "message.systemPeer"
-    }
-
-    object MessageTenantScope {
-        const val KEY = "message.tenantScope"
-    }
-
-    object MessageTenantDesk {
-        const val KEY = "message.tenantDesk"
-    }
 }

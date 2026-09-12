@@ -107,34 +107,34 @@ class ManagerXxxController(
     managerService,
     permissions = PermissionMatrix.of {
         `super` {
-            create = SystemPermission.ACTION_XXX_CREATE
-            read   = SystemPermission.ACTION_XXX_READ
-            update = SystemPermission.ACTION_XXX_UPDATE
-            delete = SystemPermission.ACTION_XXX_DELETE
+            create = SystemPermission.ACTION_XXX_CREATE_NAME
+            read   = SystemPermission.ACTION_XXX_READ_NAME
+            update = SystemPermission.ACTION_XXX_UPDATE_NAME
+            delete = SystemPermission.ACTION_XXX_DELETE_NAME
         }
         system {
-            create = SystemPermission.ACTION_SYSTEM_XXX_CREATE
-            read   = SystemPermission.ACTION_SYSTEM_XXX_READ
-            update = SystemPermission.ACTION_SYSTEM_XXX_UPDATE
-            delete = SystemPermission.ACTION_SYSTEM_XXX_DELETE
+            create = SystemPermission.ACTION_SYSTEM_XXX_CREATE_NAME
+            read   = SystemPermission.ACTION_SYSTEM_XXX_READ_NAME
+            update = SystemPermission.ACTION_SYSTEM_XXX_UPDATE_NAME
+            delete = SystemPermission.ACTION_SYSTEM_XXX_DELETE_NAME
         }
         tenantAdmin {
-            create = SystemPermission.ACTION_TENANT_XXX_CREATE
-            read   = SystemPermission.ACTION_TENANT_XXX_READ
-            update = SystemPermission.ACTION_TENANT_XXX_UPDATE
-            delete = SystemPermission.ACTION_TENANT_XXX_DELETE
+            create = SystemPermission.ACTION_TENANT_XXX_CREATE_NAME
+            read   = SystemPermission.ACTION_TENANT_XXX_READ_NAME
+            update = SystemPermission.ACTION_TENANT_XXX_UPDATE_NAME
+            delete = SystemPermission.ACTION_TENANT_XXX_DELETE_NAME
         }
         tenantPem {
-            create = TenantPermission.ACTION_TENANT_XXX_CREATE_PEM
-            read   = TenantPermission.ACTION_TENANT_XXX_READ_PEM
-            update = TenantPermission.ACTION_TENANT_XXX_UPDATE_PEM
-            delete = TenantPermission.ACTION_TENANT_XXX_DELETE_PEM
+            create = TenantPermission.ACTION_TENANT_XXX_CREATE_PEM_NAME
+            read   = TenantPermission.ACTION_TENANT_XXX_READ_PEM_NAME
+            update = TenantPermission.ACTION_TENANT_XXX_UPDATE_PEM_NAME
+            delete = TenantPermission.ACTION_TENANT_XXX_DELETE_PEM_NAME
         }
     },
 )
 ```
 
-DSL 要点：`` `super` `` 是 Kotlin 关键字，必须反引号包裹。未打开的 layer 默认全部 `NOT_APPLICABLE`（不参与决策），无需显式写出。
+DSL 要点：`` `super` `` 是 Kotlin 关键字，必须反引号包裹。未打开的 layer 默认全部 `NOT_APPLICABLE`（不参与决策），无需显式写出。**权限常量必须使用 `XXX_NAME` 形式（`const val`），而非 `.name` 属性**。
 
 **派生 scoped**：额外 override 两个 DTO 解析 hook：
 

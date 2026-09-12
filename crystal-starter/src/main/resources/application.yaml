@@ -53,6 +53,9 @@ spring:
       enabled: true
   main:
     allow-circular-references: true
+  ai:
+    openai:
+      api-key: disabled
 crystalframework:
   auth:
     jwt:
@@ -120,6 +123,7 @@ logging:
     org.springframework.boot.actuate: info
     com.lovelycatv.crystalframework.shared.exception: info
     com.lovelycatv.crystalframework.shared.config.database.TransactionConnectionHolder: debug
+    com.lovelycatv.crystalframework.ai.interceptor.RawResponseCapturingInterceptor: debug
 server:
   reactive:
     session:

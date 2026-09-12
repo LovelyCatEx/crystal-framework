@@ -42,8 +42,12 @@ docker/.env
 .kiro/
 .claude/*
 !.claude/settings.json
+!.claude/agents/
+!.claude/agents/**
 !.claude/skills/
 !.claude/skills/**
+!.claude/rules/
+!.claude/rules/**
 .worktrees/
 .flattened-pom.xml
 /ext

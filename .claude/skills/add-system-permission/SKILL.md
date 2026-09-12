@@ -59,22 +59,29 @@ Tenant 侧同理：`TenantPermissionDeclaration(name, description, type, path)`�
 
 **第一步**：在对应文件中按业务域找到分区（或新建分区），添加 Declaration val
 
+**⚠️ 权限常量命名规则（强制）：每个权限必须先定义 `const val XXX_NAME = "string"`，再定义 `val XXX = Declaration(XXX_NAME, ...)`，两者必须紧挨着，禁止分开放。**
+
 ```kotlin
 // crystal-shared/.../shared/constants/SystemPermission.kt
 
 // ============================================================
 //   Cleanup  (system)     <- 新增分区示例
 // ============================================================
+const val ACTION_SYSTEM_CLEANUP_READ_NAME = "system.cleanup.read"
 val ACTION_SYSTEM_CLEANUP_READ = SystemRbacPermissionDeclaration.action(
-    name = "system.cleanup.read",
+    name = ACTION_SYSTEM_CLEANUP_READ_NAME,
     description = "Read cleanup status"
 )
+
+const val ACTION_SYSTEM_CLEANUP_UPDATE_NAME = "system.cleanup.update"
 val ACTION_SYSTEM_CLEANUP_UPDATE = SystemRbacPermissionDeclaration.action(
-    name = "system.cleanup.update",
+    name = ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
     description = "Trigger cleanup"
 )
+
+const val MENU_SYSTEM_CLEANUP_MANAGER_NAME = "system.cleanup"
 val MENU_SYSTEM_CLEANUP_MANAGER = SystemRbacPermissionDeclaration.menu(
-    name = "system.cleanup",
+    name = MENU_SYSTEM_CLEANUP_MANAGER_NAME,
     path = "/manager/cleanup",
     description = "Cleanup management menu"
 )
@@ -88,8 +95,9 @@ val MENU_SYSTEM_CLEANUP_MANAGER = SystemRbacPermissionDeclaration.menu(
 // ============================================================
 //   Cleanup
 // ============================================================
+const val ACTION_CLEANUP_READ_NAME = "i.tenant.cleanup.read"
 val ACTION_CLEANUP_READ = TenantPermissionDeclaration(
-    name = "i.tenant.cleanup.read",
+    name = ACTION_CLEANUP_READ_NAME,
     description = "Read own tenant cleanup status",
     type = TenantPermissionType.ACTION,
 )
@@ -116,12 +124,15 @@ SystemRole.ROLE_ADMIN to listOf(
 ```kotlin
 // crystal-mymodule/.../constants/MyModulePermission.kt
 object MyModulePermission {
+    const val ACTION_SYSTEM_MYMODULE_READ_NAME = "system.mymodule.read"
     val ACTION_SYSTEM_MYMODULE_READ = SystemRbacPermissionDeclaration.action(
-        name = "system.mymodule.read",
+        name = ACTION_SYSTEM_MYMODULE_READ_NAME,
         description = "Read mymodule data"
     )
+    
+    const val MENU_SYSTEM_MYMODULE_NAME = "system.mymodule"
     val MENU_SYSTEM_MYMODULE = SystemRbacPermissionDeclaration.menu(
-        name = "system.mymodule",
+        name = MENU_SYSTEM_MYMODULE_NAME,
         path = "/manager/mymodule",
         description = "MyModule management menu"
     )
@@ -151,16 +162,16 @@ class MyModulePermissionConfigurer : SystemRbacConfigurer {
 
 #### 用 `PermissionMatrix`（推荐，绝大多数场景）
 
-Manager Controller 家族统一走 `PermissionMatrix`（不同基类对应不同便捷工厂），构造参数用 `.name` 取字符串：
+Manager Controller 家族统一走 `PermissionMatrix`（不同基类对应不同便捷工厂），构造参数用 NAME 常量：
 
 ```kotlin
 class ManagerCleanupController(...) : StandardManagerController<...>(
     ...,
     permissions = PermissionMatrix.systemOnly(
-        systemCreate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
-        systemRead   = SystemPermission.ACTION_SYSTEM_CLEANUP_READ.name,
-        systemUpdate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
-        systemDelete = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE.name,
+        systemCreate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
+        systemRead   = SystemPermission.ACTION_SYSTEM_CLEANUP_READ_NAME,
+        systemUpdate = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
+        systemDelete = SystemPermission.ACTION_SYSTEM_CLEANUP_UPDATE_NAME,
     ),
 )
 ```
@@ -237,6 +248,16 @@ key 就是权限的 `name` 字符串，value 是面向用户的简短描述（�
 6. 在 `SystemRolePermissionRelation.kt` / `TenantRolePermissionRelation.kt` 对应角色列表中添加绑定（引用 Declaration val 本体，不是字符串）
 7. 若涉及 Controller，`PermissionMatrix` 槽用 `SystemPermission.XXX.name` 传入；非 CRUD 端点用 `@RequiresAuthority(anyOf = ["<literal>"], scope = ...)`
 8. **在 `web/src/i18n/locales/en-US.ts` 和 `zh-CN.ts` 的 `pages.permissionCatalog.byName` 中添加对应翻译**（en/zh 必须同步）
+
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 pages.permissionCatalog 的结构**
+2. **只能在 `pages.permissionCatalog.byName` 下添加翻译**
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+5. **key 必须与后端 Declaration 的 name 完全一致**
 
 ### 路径 B（子模块 Configurer）
 

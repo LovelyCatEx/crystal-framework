@@ -81,6 +81,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
+        '/ws': {
+          target: `${apiDomain}/ws/v1`,
+          changeOrigin: true,
+          ws: true,
+          rewrite: (path) => path.replace(/^\/ws/, ''),
+        },
         '/raw': {
           target: apiDomain,
           changeOrigin: true,

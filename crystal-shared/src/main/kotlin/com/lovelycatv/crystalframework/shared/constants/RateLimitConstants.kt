@@ -51,4 +51,43 @@ object RateLimitConstants {
 
         return '1:0'
     """.trimIndent()
+
+    /**
+     * Exponential-backoff lockout script for consecutive-failure tracking.
+     * Used by [com.lovelycatv.crystalframework.shared.service.ratelimit.ExponentialBackoffLockout].
+     *
+     * KEYS[1] = failCounter (INT, TTL-managed)
+     * KEYS[2] = lockUntil (epoch-millis string, PX-TTL equals lockout duration)
+     *
+     * ARGV[1] = nowMs
+     * ARGV[2] = lockThreshold (consecutive failures before lockout starts)
+     * ARGV[3] = lockBaseSeconds (first lockout duration)
+     * ARGV[4] = lockMaxSeconds (cap on escalation)
+     * ARGV[5] = failTtlSeconds (how long to retain the failure counter)
+     *
+     * Returns `"<applied>:<lockSeconds>"` where applied=1 if lockout was set, 0 otherwise.
+     */
+    val RECORD_FAILURE_SCRIPT = """
+        local now = tonumber(ARGV[1])
+        local threshold = tonumber(ARGV[2])
+        local baseSeconds = tonumber(ARGV[3])
+        local maxSeconds = tonumber(ARGV[4])
+        local failTtl = tonumber(ARGV[5])
+
+        local fails = redis.call('INCR', KEYS[1])
+        redis.call('EXPIRE', KEYS[1], failTtl)
+
+        if fails >= threshold then
+            local exponent = fails - threshold
+            local lockSeconds = baseSeconds * (2 ^ exponent)
+            if lockSeconds > maxSeconds then
+                lockSeconds = maxSeconds
+            end
+            lockSeconds = math.floor(lockSeconds)
+            redis.call('SET', KEYS[2], now + lockSeconds * 1000, 'PX', lockSeconds * 1000)
+            return '1:' .. lockSeconds
+        end
+
+        return '0:0'
+    """.trimIndent()
 }

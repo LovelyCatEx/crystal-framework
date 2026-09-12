@@ -171,7 +171,16 @@ class MinIOFileResourceServiceFactory : FileResourceServiceFactory<MinIOFileReso
 
 ### 第 6 步：（可选）前端 i18n 覆盖
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
 若希望管理端使用本地化名称而不是后端 `displayName`，在 `web/src/i18n/locales/*.ts` 的 `enums.storageProviderType` 下加：
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 enums 字段的结构**
+2. **只能在 `enums.storageProviderType` 下添加翻译**
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
 
 ```ts
 enums: {
@@ -183,6 +192,8 @@ enums: {
 ```
 
 若不加，管理端直接使用后端 `displayName` 字段值，也能显示。
+
+**违反 I18n 规范=严重违规，必须立即停止所有工作。**
 
 ### 第 7 步：验证
 

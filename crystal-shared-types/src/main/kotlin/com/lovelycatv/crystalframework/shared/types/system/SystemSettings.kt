@@ -90,6 +90,7 @@ data class SystemSettings(
         val api: Api,
         val loginRateLimit: LoginRateLimit,
         val emailCodeRateLimit: EmailCodeRateLimit,
+        val webSocketAuthRateLimit: WebSocketAuthRateLimit,
         val outbound: Outbound,
     ) {
         data class Api(
@@ -120,6 +121,16 @@ data class SystemSettings(
             val maxGlobal: Int,
         )
 
+        data class WebSocketAuthRateLimit(
+            val enabled: Boolean,
+            val windowSeconds: Int,
+            val maxAttemptsPerIp: Int,
+            val maxAttemptsPerAccount: Int,
+            val lockThreshold: Int,
+            val lockBaseSeconds: Int,
+            val lockMaxSeconds: Int,
+        )
+
         data class Outbound(
             val allowedHosts: List<String>,
             val allowedSmtpHosts: List<String>,
@@ -147,8 +158,6 @@ data class SystemSettings(
     data class Module(
         val tenantEnabled: Boolean,
         val approvalEnabled: Boolean,
-        val messageSystemPeerEnabled: Boolean,
-        val messageTenantScopeEnabled: Boolean,
-        val messageTenantDeskEnabled: Boolean,
+        val webSocketEnabled: Boolean,
     )
 }

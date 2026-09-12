@@ -127,8 +127,8 @@ throw ForbiddenException(
     context = ForbiddenContext(
         reason = ForbiddenReason.MISSING_PERMISSION,
         requiredPermissions = listOf(
-            SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ.name,
-            TenantPermission.ACTION_MEMBER_ROLE_READ.name,
+            SystemPermission.ACTION_TENANT_MEMBER_ROLE_RELATION_READ_NAME,
+            TenantPermission.ACTION_MEMBER_ROLE_READ_NAME,
         ),
         scope = ResourceScope.TENANT,
     )
@@ -137,7 +137,7 @@ throw ForbiddenException(
 
 **禁止**:
 
-- ❌ `requiredPermissions = listOf("tenant.role.create")` —— 违反禁止魔法值规则,必须走 `TenantPermission.ACTION_XXX.name`
+- ❌ `requiredPermissions = listOf("tenant.role.create")` —— 违反禁止魔法值规则,必须走 `TenantPermission.ACTION_XXX_NAME` 常量
 - ❌ 把权限拼进 `message` 字符串 —— 前端只读结构化字段
 - ❌ 忘了过滤 `NEVER_GRANTED` —— 前端 Tag 会显示 `!!never_granted!!`
 
@@ -281,7 +281,17 @@ export enum ForbiddenReason {
 
 ### 步骤 3 — 前端: 添加 i18n 翻译
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
 文件: `web/src/i18n/locales/en-US.ts` 和 `web/src/i18n/locales/zh-CN.ts` **必须同时改**,不允许只加一种语言 (违反"文档修改必须跨语言同步"规则)。
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 enums.forbiddenReason 的结构**
+2. **只能在 `enums.forbiddenReason` 下添加翻译**
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+5. **两个语言的条目数量必须严格一致**
 
 `en-US.ts` 的 `enums.forbiddenReason` 对象:
 
@@ -311,7 +321,7 @@ forbiddenReason: {
 },
 ```
 
-**注意**: 两个语言的条目数量必须严格一致,不允许中文写得更细,也不允许英文额外加原文没有的解释。
+**违反 I18n 规范=严重违规，必须立即停止所有工作。**
 
 ### 步骤 4 — 无需改 `enum-helpers.ts` 或 `ForbiddenModal.tsx`
 

@@ -58,11 +58,21 @@ key 命名规则（`tab.group.settingName`）与系统设置一致。但**租户
 
 ### 前端 i18n
 
+**!!!绝对禁止修改 i18n-rules.ts 中的 I18nRules 类型定义!!!**
+**!!!违反此规则=立即停止工作!!!**
+
 i18n 翻译位于 `web/src/i18n/locales/zh-CN.ts` 和 `en-US.ts`，节点为 `pages.tenantSettingsManager`（注意与系统设置的 `systemSettingsManager` 区分）：
-1. key: `pages.tenantSettingsManager.keys.${keyPath}`
-2. group: `pages.tenantSettingsManager.groups.${groupName}`
-3. tab: `pages.tenantSettingsManager.tabs.${tabName}`
-4. ENUM 枚举值: `pages.tenantSettingsManager.enums.${key}.${enumName}`
+
+**强制要求（违反=严重违规）：**
+1. **必须先阅读 `web/src/i18n/i18n-rules.ts` 确认 I18nRules 类型定义中 pages.tenantSettingsManager 的结构**
+2. **只能在以下位置添加翻译：**
+   - key: `pages.tenantSettingsManager.keys.${keyPath}`
+   - group: `pages.tenantSettingsManager.groups.${groupName}`
+   - tab: `pages.tenantSettingsManager.tabs.${tabName}`
+   - ENUM 枚举值: `pages.tenantSettingsManager.enums.${key}.${enumName}`
+3. **绝对禁止添加类型定义之外的任何字段**
+4. **必须同步修改 zh-CN.ts 和 en-US.ts 两个文件**
+5. **必须在 `web/src/i18n/tenant-settings.tsx` 中同步添加映射条目**
 
 ### 前端翻译映射文件
 

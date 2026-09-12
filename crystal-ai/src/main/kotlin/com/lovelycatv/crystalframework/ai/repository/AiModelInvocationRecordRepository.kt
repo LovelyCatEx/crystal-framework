@@ -1,0 +1,8 @@
+package com.lovelycatv.crystalframework.ai.repository
+
+import com.lovelycatv.crystalframework.ai.entity.AiModelInvocationRecordEntity
+import com.lovelycatv.crystalframework.shared.repository.BaseRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface AiModelInvocationRecordRepository : BaseRepository<AiModelInvocationRecordEntity>
