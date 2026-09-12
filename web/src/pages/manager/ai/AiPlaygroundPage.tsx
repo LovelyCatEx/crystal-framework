@@ -1,17 +1,21 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Empty, Input, message, Spin, Typography} from "antd";
+import {Button, Card, Empty, Input, message, Select, Spin, Typography} from "antd";
 import {BulbOutlined, DownOutlined, SendOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
 import {AiModelManagerController} from "@/api/ai/ai-model.api.ts";
 import {chat, type AiPlaygroundMessage} from "@/api/ai/ai-playground.api.ts";
-import type {AiModelEntity, AiProviderEntity} from "@/types/ai/ai.types.ts";
+import {ReasoningEffort, type AiModelEntity, type AiProviderEntity} from "@/types/ai/ai.types.ts";
+import {getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TreeDetailLayout} from "@/components/layouts/TreeDetailLayout.tsx";
 
 const {TextArea} = Input;
 const {Text} = Typography;
+
+/** Select value meaning "send nothing and let the provider's protocol choose". */
+const REASONING_EFFORT_PROTOCOL_DEFAULT = "";
 
 export default function AiPlaygroundPage() {
     const {t} = useTranslation();
@@ -23,6 +27,7 @@ export default function AiPlaygroundPage() {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort | undefined>(undefined);
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -66,6 +71,14 @@ export default function AiPlaygroundPage() {
 
     const selectedModel = models.find(model => model.id === selectedModelId) ?? null;
 
+    const reasoningEffortOptions = useMemo(() => [
+        {value: REASONING_EFFORT_PROTOCOL_DEFAULT, label: t("pages.aiPlayground.reasoningEffortDefault")},
+        ...Object.values(ReasoningEffort).map(effort => ({
+            value: effort,
+            label: getReasoningEffort(effort),
+        })),
+    ], [t]);
+
     const selectModel = (key: string | null) => {
         if (!key?.startsWith("model:")) return;
         const modelId = key.substring("model:".length);
@@ -87,6 +100,7 @@ export default function AiPlaygroundPage() {
             const response = await chat({
                 modelId: selectedModelId,
                 messages: nextMessages.map(({role, content}) => ({role, content})),
+                reasoningEffort,
             });
             if (response.data) {
                 setMessageList([...nextMessages, {
@@ -175,28 +189,48 @@ export default function AiPlaygroundPage() {
                                 ))}
                                 {sending && <Spin size="small" />}
                             </div>
-                            <div className="flex gap-2 border-t p-3">
-                                <TextArea
-                                    value={input}
-                                    disabled={sending}
-                                    autoSize={{minRows: 2, maxRows: 6}}
-                                    placeholder={t("pages.aiPlayground.inputPlaceholder")}
-                                    onChange={event => setInput(event.target.value)}
-                                    onPressEnter={event => {
-                                        if (!event.shiftKey) {
-                                            event.preventDefault();
-                                            void sendMessage();
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="primary"
-                                    icon={<SendOutlined />}
-                                    loading={sending}
-                                    onClick={() => void sendMessage()}
-                                >
-                                    {t("pages.aiPlayground.send")}
-                                </Button>
+                            <div className="border-t p-3">
+                                <div className="rounded-2xl border p-2" style={{borderColor: "var(--ant-color-border)"}}>
+                                    <TextArea
+                                        variant="borderless"
+                                        value={input}
+                                        disabled={sending}
+                                        autoSize={{minRows: 2, maxRows: 6}}
+                                        placeholder={t("pages.aiPlayground.inputPlaceholder")}
+                                        onChange={event => setInput(event.target.value)}
+                                        onPressEnter={event => {
+                                            if (!event.shiftKey) {
+                                                event.preventDefault();
+                                                void sendMessage();
+                                            }
+                                        }}
+                                    />
+                                    <div className="mt-1 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Text type="secondary">{t("pages.aiPlayground.reasoningEffort")}</Text>
+                                            <Select
+                                                size="small"
+                                                style={{width: 150}}
+                                                disabled={sending}
+                                                value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
+                                                options={reasoningEffortOptions}
+                                                onChange={value => setReasoningEffort(
+                                                    value === REASONING_EFFORT_PROTOCOL_DEFAULT
+                                                        ? undefined
+                                                        : value as ReasoningEffort
+                                                )}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="primary"
+                                            icon={<SendOutlined />}
+                                            loading={sending}
+                                            onClick={() => void sendMessage()}
+                                        >
+                                            {t("pages.aiPlayground.send")}
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </Card>
                     ),

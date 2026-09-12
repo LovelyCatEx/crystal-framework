@@ -2,11 +2,11 @@ import {useEffect, useState} from "react";
 import {Button, Col, Divider, Form, Input, Modal, Row, Select, Space} from "antd";
 import {DeleteOutlined, PlusOutlined, ExclamationCircleOutlined} from "@ant-design/icons";
 import type {
-    AiEndpointResponseConfig,
     AiProviderRequestConfig,
-    AiProviderResponseConfig,
-    AiUsageJsonPathConfig,
-    DefaultProviderConfigsVO
+    DefaultProviderConfigsVO,
+    LlmEndpointResponseConfig,
+    LlmResponseConfig,
+    LlmUsageResolverJsonPathConfig
 } from "@/types/ai/ai.types.ts";
 import {useTranslation} from "react-i18next";
 
@@ -22,7 +22,7 @@ interface AiProviderConfigFormProps {
 export function AiProviderConfigForm({ value, onChange, defaultConfigs }: AiProviderConfigFormProps) {
     const { t } = useTranslation();
     const [requestConfig, setRequestConfig] = useState<AiProviderRequestConfig>({ headers: {} });
-    const [responseConfig, setResponseConfig] = useState<AiProviderResponseConfig>({});
+    const [responseConfig, setResponseConfig] = useState<LlmResponseConfig>({});
     const [selectedTemplate, setSelectedTemplate] = useState<string>('custom');
 
     useEffect(() => {
@@ -50,7 +50,7 @@ export function AiProviderConfigForm({ value, onChange, defaultConfigs }: AiProv
         });
     };
 
-    const handleResponseChange = (newConfig: AiProviderResponseConfig) => {
+    const handleResponseChange = (newConfig: LlmResponseConfig) => {
         setResponseConfig(newConfig);
         onChange?.({
             requestConfig: value?.requestConfig || JSON.stringify(requestConfig),
@@ -195,7 +195,7 @@ function RequestConfigForm({ value, onChange }: { value: AiProviderRequestConfig
     );
 }
 
-function ResponseConfigForm({ value, onChange }: { value: AiProviderResponseConfig; onChange: (v: AiProviderResponseConfig) => void }) {
+function ResponseConfigForm({ value, onChange }: { value: LlmResponseConfig; onChange: (v: LlmResponseConfig) => void }) {
     const { t } = useTranslation();
 
     return (
@@ -212,7 +212,6 @@ function ResponseConfigForm({ value, onChange }: { value: AiProviderResponseConf
             <EndpointResponseConfigForm
                 value={value.embedding || {}}
                 onChange={(v) => onChange({ ...value, embedding: v })}
-                hideFinishReason
             />
         </>
     );
@@ -220,59 +219,22 @@ function ResponseConfigForm({ value, onChange }: { value: AiProviderResponseConf
 
 function EndpointResponseConfigForm({
     value,
-    onChange,
-    hideFinishReason
+    onChange
 }: {
-    value: AiEndpointResponseConfig;
-    onChange: (v: AiEndpointResponseConfig) => void;
-    hideFinishReason?: boolean;
+    value: LlmEndpointResponseConfig;
+    onChange: (v: LlmEndpointResponseConfig) => void;
 }) {
     const { t } = useTranslation();
 
     return (
         <Space direction="vertical" className="w-full" size="middle">
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.contentPath')} className="mb-0">
-                        <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.contentPathPlaceholder')}
-                            value={value.contentPath || ''}
-                            onChange={(e) => onChange({ ...value, contentPath: e.target.value || null })}
-                        />
-                    </Form.Item>
-                </Col>
-                {!hideFinishReason && (
-                    <Col span={12}>
-                        <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.finishReasonPath')} className="mb-0">
-                            <Input
-                                placeholder={t('pages.aiProviderManager.modal.responseConfig.finishReasonPathPlaceholder')}
-                                value={value.finishReasonPath || ''}
-                                onChange={(e) => onChange({ ...value, finishReasonPath: e.target.value || null })}
-                            />
-                        </Form.Item>
-                    </Col>
-                )}
-            </Row>
-            <Row gutter={16}>
-                <Col span={12}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.providerRequestIdPath')} className="mb-0">
-                        <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.providerRequestIdPathPlaceholder')}
-                            value={value.providerRequestIdPath || ''}
-                            onChange={(e) => onChange({ ...value, providerRequestIdPath: e.target.value || null })}
-                        />
-                    </Form.Item>
-                </Col>
-                <Col span={12}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.errorMessagePath')} className="mb-0">
-                        <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.errorMessagePathPlaceholder')}
-                            value={value.errorMessagePath || ''}
-                            onChange={(e) => onChange({ ...value, errorMessagePath: e.target.value || null })}
-                        />
-                    </Form.Item>
-                </Col>
-            </Row>
+            <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.errorMessageJsonPath')} className="mb-0">
+                <Input
+                    placeholder={t('pages.aiProviderManager.modal.responseConfig.errorMessageJsonPathPlaceholder')}
+                    value={value.errorMessageJsonPath || ''}
+                    onChange={(e) => onChange({ ...value, errorMessageJsonPath: e.target.value || null })}
+                />
+            </Form.Item>
 
             <div className="text-sm text-gray-600 mt-2">{t('pages.aiProviderManager.modal.responseConfig.usageTitle')}</div>
             <UsageConfigForm
@@ -283,36 +245,36 @@ function EndpointResponseConfigForm({
     );
 }
 
-function UsageConfigForm({ value, onChange }: { value: AiUsageJsonPathConfig; onChange: (v: AiUsageJsonPathConfig) => void }) {
+function UsageConfigForm({ value, onChange }: { value: LlmUsageResolverJsonPathConfig; onChange: (v: LlmUsageResolverJsonPathConfig) => void }) {
     const { t } = useTranslation();
 
     return (
         <Space direction="vertical" className="w-full" size="middle">
             <Row gutter={16}>
                 <Col span={8}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.inputTokensPath')} className="mb-0">
+                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.promptTokensPath')} className="mb-0">
                         <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.inputTokensPathPlaceholder')}
-                            value={value.inputTokensPath || ''}
-                            onChange={(e) => onChange({ ...value, inputTokensPath: e.target.value || null })}
+                            placeholder={t('pages.aiProviderManager.modal.responseConfig.promptTokensPathPlaceholder')}
+                            value={value.promptTokensPath || ''}
+                            onChange={(e) => onChange({ ...value, promptTokensPath: e.target.value || null })}
                         />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.outputTokensPath')} className="mb-0">
+                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.completionTokensPath')} className="mb-0">
                         <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.outputTokensPathPlaceholder')}
-                            value={value.outputTokensPath || ''}
-                            onChange={(e) => onChange({ ...value, outputTokensPath: e.target.value || null })}
+                            placeholder={t('pages.aiProviderManager.modal.responseConfig.completionTokensPathPlaceholder')}
+                            value={value.completionTokensPath || ''}
+                            onChange={(e) => onChange({ ...value, completionTokensPath: e.target.value || null })}
                         />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
-                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.totalTokensPath')} className="mb-0">
+                    <Form.Item label={t('pages.aiProviderManager.modal.responseConfig.reasoningTokensPath')} className="mb-0">
                         <Input
-                            placeholder={t('pages.aiProviderManager.modal.responseConfig.totalTokensPathPlaceholder')}
-                            value={value.totalTokensPath || ''}
-                            onChange={(e) => onChange({ ...value, totalTokensPath: e.target.value || null })}
+                            placeholder={t('pages.aiProviderManager.modal.responseConfig.reasoningTokensPathPlaceholder')}
+                            value={value.reasoningTokensPath || ''}
+                            onChange={(e) => onChange({ ...value, reasoningTokensPath: e.target.value || null })}
                         />
                     </Form.Item>
                 </Col>

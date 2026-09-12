@@ -1,7 +1,6 @@
 package com.lovelycatv.crystalframework.ai.controller.manager.provider
 
 import com.lovelycatv.crystalframework.ai.constants.AiPermission
-import com.lovelycatv.crystalframework.ai.constants.AiProviderResponseConfigs
 import com.lovelycatv.crystalframework.ai.controller.manager.provider.dto.ManagerCreateAiProviderDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.provider.dto.ManagerDeleteAiProviderDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.provider.dto.ManagerReadAiProviderDTO
@@ -17,6 +16,7 @@ import com.lovelycatv.crystalframework.shared.controller.StandardManagerControll
 import com.lovelycatv.crystalframework.shared.controller.systemOnly
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
+import com.lovelycatv.vertex.ai.llm.config.LLMResponseConfigDefaults
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -56,8 +56,8 @@ class AiProviderManagerController(
     suspend fun getDefaultConfigs(): ApiResponse<DefaultProviderConfigsVO> {
         return ApiResponse.success(
             DefaultProviderConfigsVO(
-                openai = AiProviderResponseConfigs.OPENAI,
-                anthropic = AiProviderResponseConfigs.ANTHROPIC,
+                openai = LLMResponseConfigDefaults.OPENAI,
+                anthropic = LLMResponseConfigDefaults.ANTHROPIC,
             )
         )
     }

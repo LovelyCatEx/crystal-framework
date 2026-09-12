@@ -61,46 +61,52 @@ export enum AiModelCapability {
     CODE_GENERATION = 7
 }
 
-export interface AiUsageJsonPathConfig {
-    inputTokensPath?: string | null;
-    outputTokensPath?: string | null;
-    totalTokensPath?: string | null;
+/**
+ * Corresponds to VertexLib's `ReasoningEffort` enum
+ * (VertexLib/ai/llm/ReasoningEffort.kt), which carries no numeric id, so it travels by name the
+ * same way `ForbiddenReason` does.
+ */
+export enum ReasoningEffort {
+    DISABLED = "DISABLED",
+    AUTO = "AUTO",
+    MINIMAL = "MINIMAL",
+    LOW = "LOW",
+    MEDIUM = "MEDIUM",
+    HIGH = "HIGH",
+    EXTRA_HIGH = "EXTRA_HIGH",
+    MAX = "MAX"
+}
+
+/**
+ * Mirrors VertexLib's `LLMUsageResolverJsonPathConfig` — the persisted `responseConfig` is parsed
+ * straight into that type on the backend, so these key names are not interchangeable with the
+ * earlier `inputTokensPath` / `outputTokensPath` spelling.
+ */
+export interface LlmUsageResolverJsonPathConfig {
+    promptTokensPath?: string | null;
+    completionTokensPath?: string | null;
+    reasoningTokensPath?: string | null;
     cacheReadTokensPath?: string | null;
     cacheWriteTokensPath?: string | null;
 }
 
-export interface AiEndpointResponseConfig {
-    contentPath?: string | null;
-    finishReasonPath?: string | null;
-    providerRequestIdPath?: string | null;
-    usage?: AiUsageJsonPathConfig | null;
-    errorMessagePath?: string | null;
+/** Mirrors VertexLib's `LLMEndpointResponseConfig`. */
+export interface LlmEndpointResponseConfig {
+    errorMessageJsonPath?: string | null;
+    usage?: LlmUsageResolverJsonPathConfig | null;
 }
 
-export interface AiProviderResponseConfig {
-    chatCompletions?: AiEndpointResponseConfig | null;
-    embedding?: AiEndpointResponseConfig | null;
+/** Mirrors VertexLib's `LLMResponseConfig`. */
+export interface LlmResponseConfig {
+    chatCompletions?: LlmEndpointResponseConfig | null;
+    embedding?: LlmEndpointResponseConfig | null;
 }
 
 export interface DefaultProviderConfigsVO {
-    openai: AiProviderResponseConfig;
-    anthropic: AiProviderResponseConfig;
-}
-
-export enum AiHttpMethod {
-    GET = 0,
-    POST = 1
-}
-
-export interface AiGenericHttpConfig {
-    method: AiHttpMethod;
-    path: string;
-    headers: Record<string, string>;
-    bodyTemplate: Record<string, any>;
-    response: AiEndpointResponseConfig;
+    openai: LlmResponseConfig;
+    anthropic: LlmResponseConfig;
 }
 
 export interface AiProviderRequestConfig {
     headers: Record<string, string>;
-    genericHttp?: AiGenericHttpConfig | null;
 }

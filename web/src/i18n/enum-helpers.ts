@@ -136,3 +136,7 @@ export function getAiProviderProtocolType(type: number): string {
 export function getAiModelCapability(capability: number): string {
     return translateEnum('aiModelCapability', capability);
 }
+
+export function getReasoningEffort(effort: string): string {
+    return translateEnum('reasoningEffort', effort);
+}

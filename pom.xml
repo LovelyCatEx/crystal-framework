@@ -71,7 +71,8 @@
         <crystalframework.basedir>${maven.multiModuleProjectDirectory}</crystalframework.basedir>
         <verification.detekt.skip>false</verification.detekt.skip>
         <verification.dependency-check.skip>false</verification.dependency-check.skip>
-        <spring-ai.version>2.0.1</spring-ai.version>
+        <jsonwebtoken.jjwt.version>0.12.6</jsonwebtoken.jjwt.version>
+        <vertexlib.version>1.0.2</vertexlib.version>
     </properties>
 
     <dependencyManagement>
@@ -171,13 +172,6 @@
                 <artifactId>crystal-approval</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -217,17 +211,17 @@
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>vertex-core</artifactId>
-            <version>1.0.0</version>
+            <version>${vertexlib.version}</version>
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>cache</artifactId>
-            <version>1.0.0</version>
+            <version>${vertexlib.version}</version>
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.vertex</groupId>
             <artifactId>ai</artifactId>
-            <version>1.0.0</version>
+            <version>${vertexlib.version}</version>
         </dependency>
         <dependency>
             <groupId>io.qdrant</groupId>
@@ -242,18 +236,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.12.6</version>
+            <version>${jsonwebtoken.jjwt.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.12.6</version>
+            <version>${jsonwebtoken.jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.6</version>
+            <version>${jsonwebtoken.jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
