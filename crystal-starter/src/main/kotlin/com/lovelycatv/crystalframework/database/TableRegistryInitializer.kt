@@ -75,12 +75,6 @@ class TableRegistryInitializer(
         registry.register(TableConstants.TABLE_APPROVAL_FLOW_TOKEN)
         registry.register(TableConstants.TABLE_STORAGE_PROVIDER_ROUTING_RULES)
         registry.register(TableConstants.TABLE_USER_BAN_RECORDS)
-        registry.register(TableConstants.TABLE_MSG_CONVERSATIONS)
-        registry.register(TableConstants.TABLE_MSG_CONVERSATION_PARTIES)
-        registry.register(TableConstants.TABLE_MSG_CONVERSATION_MEMBERS)
-        registry.register(TableConstants.TABLE_MSG_MESSAGES)
-        registry.register(TableConstants.TABLE_MSG_BROADCASTS)
-        registry.register(TableConstants.TABLE_MSG_BROADCAST_READS)
 
         configurers.forEach { it.configure(registry) }
 

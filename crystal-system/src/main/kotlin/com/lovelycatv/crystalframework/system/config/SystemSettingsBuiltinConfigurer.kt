@@ -81,9 +81,6 @@ class SystemSettingsBuiltinConfigurer : SystemSettingsConfigurer {
                 SystemSettingsConstants.OAuth.Oicq.SCOPE,
                 SystemSettingsConstants.Module.TENANT_ENABLED,
                 SystemSettingsConstants.Module.APPROVAL_ENABLED,
-                SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED,
-                SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED,
-                SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED,
                 SystemSettingsConstants.Module.WEBSOCKET_ENABLED,
                 SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS,
             )

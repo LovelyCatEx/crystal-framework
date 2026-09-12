@@ -106,10 +106,6 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
-            <artifactId>crystal-message</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-user</artifactId>
         </dependency>
         <dependency>

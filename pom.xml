@@ -53,7 +53,6 @@
         <module>crystal-tenant</module>
         <module>crystal-auth</module>
         <module>crystal-approval</module>
-        <module>crystal-message</module>
         <module>crystal-ai</module>
     </modules>
 
@@ -130,11 +129,6 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-monitor</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.lovelycatv.crystalframework</groupId>
-                <artifactId>crystal-message</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

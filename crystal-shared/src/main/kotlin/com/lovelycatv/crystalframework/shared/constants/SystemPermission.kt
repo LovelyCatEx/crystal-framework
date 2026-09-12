@@ -1083,63 +1083,6 @@ object SystemPermission {
         description = "Manage tenant dictionary items menu"
     )
 
-    // ============================================================
-    //   Broadcast  (super / system / tenantAdmin)
-    // ============================================================
-    val ACTION_X_BROADCAST_CREATE = SystemRbacPermissionDeclaration.action(
-        name = "x.broadcast.create",
-        description = "Create broadcasts in any scope"
-    )
-    val ACTION_X_BROADCAST_READ = SystemRbacPermissionDeclaration.action(
-        name = "x.broadcast.read",
-        description = "Read broadcasts in any scope"
-    )
-    val ACTION_X_BROADCAST_UPDATE = SystemRbacPermissionDeclaration.action(
-        name = "x.broadcast.update",
-        description = "Update broadcasts in any scope"
-    )
-    val ACTION_X_BROADCAST_DELETE = SystemRbacPermissionDeclaration.action(
-        name = "x.broadcast.delete",
-        description = "Delete broadcasts in any scope"
-    )
-    val ACTION_SYSTEM_BROADCAST_CREATE = SystemRbacPermissionDeclaration.action(
-        name = "system.broadcast.create",
-        description = "Create system-scope broadcasts (system announcements)"
-    )
-    val ACTION_SYSTEM_BROADCAST_READ = SystemRbacPermissionDeclaration.action(
-        name = "system.broadcast.read",
-        description = "Read system-scope broadcasts"
-    )
-    val ACTION_SYSTEM_BROADCAST_UPDATE = SystemRbacPermissionDeclaration.action(
-        name = "system.broadcast.update",
-        description = "Update system-scope broadcasts"
-    )
-    val ACTION_SYSTEM_BROADCAST_DELETE = SystemRbacPermissionDeclaration.action(
-        name = "system.broadcast.delete",
-        description = "Delete system-scope broadcasts"
-    )
-    val ACTION_TENANT_BROADCAST_CREATE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.broadcast.create",
-        description = "Create tenant-scope broadcasts across tenants"
-    )
-    val ACTION_TENANT_BROADCAST_READ = SystemRbacPermissionDeclaration.action(
-        name = "tenant.broadcast.read",
-        description = "Read tenant-scope broadcasts across tenants"
-    )
-    val ACTION_TENANT_BROADCAST_UPDATE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.broadcast.update",
-        description = "Update tenant-scope broadcasts across tenants"
-    )
-    val ACTION_TENANT_BROADCAST_DELETE = SystemRbacPermissionDeclaration.action(
-        name = "tenant.broadcast.delete",
-        description = "Delete tenant-scope broadcasts across tenants"
-    )
-    val MENU_SYSTEM_BROADCAST = SystemRbacPermissionDeclaration.menu(
-        name = "system.broadcast",
-        path = "/manager/broadcasts",
-        description = "Broadcast management menu"
-    )
-
     fun allPermissions(): List<SystemRbacPermissionDeclaration> =
         KotlinObjectClassUtils.extractAllValProperties(SystemPermission, false)
 }

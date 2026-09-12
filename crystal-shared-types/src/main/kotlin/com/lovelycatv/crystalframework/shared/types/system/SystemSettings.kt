@@ -158,9 +158,6 @@ data class SystemSettings(
     data class Module(
         val tenantEnabled: Boolean,
         val approvalEnabled: Boolean,
-        val messageSystemPeerEnabled: Boolean,
-        val messageTenantScopeEnabled: Boolean,
-        val messageTenantDeskEnabled: Boolean,
         val webSocketEnabled: Boolean,
     )
 }

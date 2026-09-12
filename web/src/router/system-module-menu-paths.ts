@@ -11,9 +11,6 @@
 export const SystemModuleKey = {
     TENANT: 'tenant',
     APPROVAL: 'approval',
-    MESSAGE_SYSTEM_PEER: 'message.systemPeer',
-    MESSAGE_TENANT_SCOPE: 'message.tenantScope',
-    MESSAGE_TENANT_DESK: 'message.tenantDesk',
 } as const;
 
 export type SystemModuleKeyValue = (typeof SystemModuleKey)[keyof typeof SystemModuleKey];

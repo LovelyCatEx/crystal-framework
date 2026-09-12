@@ -50,10 +50,4 @@ object TableConstants {
     const val TABLE_APPROVAL_FLOW_TOKEN = "approval_flow_token"
     const val TABLE_STORAGE_PROVIDER_ROUTING_RULES = "storage_provider_routing_rules"
     const val TABLE_USER_BAN_RECORDS = "user_ban_records"
-    const val TABLE_MSG_CONVERSATIONS = "msg_conversations"
-    const val TABLE_MSG_CONVERSATION_PARTIES = "msg_conversation_parties"
-    const val TABLE_MSG_CONVERSATION_MEMBERS = "msg_conversation_members"
-    const val TABLE_MSG_MESSAGES = "msg_messages"
-    const val TABLE_MSG_BROADCASTS = "msg_broadcasts"
-    const val TABLE_MSG_BROADCAST_READS = "msg_broadcast_reads"
 }

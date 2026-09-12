@@ -204,9 +204,6 @@ class SystemSettingsServiceImpl(
         return SystemSettings.Module(
             tenantEnabled = getSettings(SystemSettingsConstants.Module.TENANT_ENABLED)!!,
             approvalEnabled = getSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED)!!,
-            messageSystemPeerEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED)!!,
-            messageTenantScopeEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED)!!,
-            messageTenantDeskEnabled = getSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED)!!,
             webSocketEnabled = getSettings(SystemSettingsConstants.Module.WEBSOCKET_ENABLED)!!,
         )
     }
@@ -355,9 +352,6 @@ class SystemSettingsServiceImpl(
 
         setSettings(SystemSettingsConstants.Module.TENANT_ENABLED, settings.module.tenantEnabled.toString())
         setSettings(SystemSettingsConstants.Module.APPROVAL_ENABLED, settings.module.approvalEnabled.toString())
-        setSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED, settings.module.messageSystemPeerEnabled.toString())
-        setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED, settings.module.messageTenantScopeEnabled.toString())
-        setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED, settings.module.messageTenantDeskEnabled.toString())
         setSettings(SystemSettingsConstants.Module.WEBSOCKET_ENABLED, settings.module.webSocketEnabled.toString())
 
         this.refreshSystemSettings()
