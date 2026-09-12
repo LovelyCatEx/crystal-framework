@@ -1,11 +1,11 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Empty, Input, message, Select, Spin, Typography} from "antd";
+import {Button, Card, Empty, Input, message, Select, Spin, Switch, Typography} from "antd";
 import {BulbOutlined, DownOutlined, SendOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
 import {AiModelManagerController} from "@/api/ai/ai-model.api.ts";
-import {chat, type AiPlaygroundMessage} from "@/api/ai/ai-playground.api.ts";
+import {chat, chatStream, type AiPlaygroundChatDTO, type AiPlaygroundMessage} from "@/api/ai/ai-playground.api.ts";
 import {ReasoningEffort, type AiModelEntity, type AiProviderEntity} from "@/types/ai/ai.types.ts";
 import {getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
@@ -28,6 +28,7 @@ export default function AiPlaygroundPage() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort | undefined>(undefined);
+    const [streaming, setStreaming] = useState(true);
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -96,21 +97,51 @@ export default function AiPlaygroundPage() {
         setMessageList(nextMessages);
         setInput("");
         setSending(true);
+        const payload: AiPlaygroundChatDTO = {
+            modelId: selectedModelId,
+            messages: nextMessages.map(({role, content}) => ({role, content})),
+            reasoningEffort,
+        };
         try {
-            const response = await chat({
-                modelId: selectedModelId,
-                messages: nextMessages.map(({role, content}) => ({role, content})),
-                reasoningEffort,
-            });
-            if (response.data) {
-                setMessageList([...nextMessages, {
-                    role: "assistant",
-                    content: response.data.content,
-                    reasoningContent: response.data.reasoningContent,
-                }]);
+            if (streaming) {
+                setMessageList([...nextMessages, {role: "assistant", content: "", reasoningContent: ""}]);
+                try {
+                    await chatStream(payload, chunk => {
+                        setMessageList(prev => {
+                            const next = [...prev];
+                            const last = next[next.length - 1];
+                            next[next.length - 1] = {
+                                ...last,
+                                content: (last.content || "") + (chunk.content || ""),
+                                reasoningContent: (last.reasoningContent || "") + (chunk.reasoningContent || ""),
+                                usage: chunk.usage ?? last.usage,
+                            };
+                            return next;
+                        });
+                    });
+                } catch (streamError) {
+                    // Roll back the placeholder assistant message so a failed stream does not leave
+                    // an empty-content message behind — it would fail the next request's @NotBlank.
+                    setMessageList(nextMessages);
+                    throw streamError;
+                }
+            } else {
+                const response = await chat(payload);
+                if (response.data) {
+                    setMessageList(prev => [...prev, {
+                        role: "assistant",
+                        content: response.data!.content,
+                        reasoningContent: response.data!.reasoningContent,
+                        usage: response.data!.usage ?? undefined,
+                    }]);
+                }
             }
-        } catch {
-            void message.error(t("pages.aiPlayground.messages.chatFailed"));
+        } catch (error) {
+            void message.error(
+                error instanceof Error && error.message
+                    ? error.message
+                    : t("pages.aiPlayground.messages.chatFailed")
+            );
         } finally {
             setSending(false);
         }
@@ -127,6 +158,8 @@ export default function AiPlaygroundPage() {
             return next;
         });
     };
+
+    const isThinking = (index: number) => streaming && sending && index === messageList.length - 1;
 
     return (
         <div className="flex h-full flex-col">
@@ -170,8 +203,8 @@ export default function AiPlaygroundPage() {
                                                         className="mb-1 flex items-center gap-1.5"
                                                         style={{color: "var(--ant-color-text-secondary)", cursor: "pointer", background: "transparent", border: "none", padding: 0}}
                                                     >
-                                                        <BulbOutlined />
-                                                        <span>{t("pages.aiPlayground.thinking")}</span>
+                                                        {isThinking(index) ? <Spin size="small" /> : <BulbOutlined />}
+                                                        <span>{isThinking(index) ? t("pages.aiPlayground.thinking") : t("pages.aiPlayground.thoughtComplete")}</span>
                                                         <DownOutlined
                                                             style={{transition: "transform 0.2s", transform: expandedThinking.has(index) ? "rotate(180deg)" : "none"}}
                                                         />
@@ -184,6 +217,31 @@ export default function AiPlaygroundPage() {
                                                 </>
                                             ) : null}
                                             {messageItem.content}
+                                            {messageItem.usage ? (
+                                                <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs" style={{color: "var(--ant-color-text-tertiary)"}}>
+                                                    <span>{t("pages.aiPlayground.usagePromptTokens")} {messageItem.usage.promptTokens}</span>
+                                                    <span>·</span>
+                                                    <span>{t("pages.aiPlayground.usageCompletionTokens")} {messageItem.usage.completionTokens}</span>
+                                                    {messageItem.usage.reasoningTokens > 0 ? (
+                                                        <>
+                                                            <span>·</span>
+                                                            <span>{t("pages.aiPlayground.usageReasoningTokens")} {messageItem.usage.reasoningTokens}</span>
+                                                        </>
+                                                    ) : null}
+                                                    {messageItem.usage.cachedPromptTokens > 0 ? (
+                                                        <>
+                                                            <span>·</span>
+                                                            <span>{t("pages.aiPlayground.usageCachedTokens")} {messageItem.usage.cachedPromptTokens}</span>
+                                                        </>
+                                                    ) : null}
+                                                    {messageItem.usage.cacheCreationTokens > 0 ? (
+                                                        <>
+                                                            <span>·</span>
+                                                            <span>{t("pages.aiPlayground.usageCacheCreationTokens")} {messageItem.usage.cacheCreationTokens}</span>
+                                                        </>
+                                                    ) : null}
+                                                </div>
+                                            ) : null}
                                         </div>
                                     </div>
                                 ))}
@@ -206,20 +264,31 @@ export default function AiPlaygroundPage() {
                                         }}
                                     />
                                     <div className="mt-1 flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Text type="secondary">{t("pages.aiPlayground.reasoningEffort")}</Text>
-                                            <Select
-                                                size="small"
-                                                style={{width: 150}}
-                                                disabled={sending}
-                                                value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
-                                                options={reasoningEffortOptions}
-                                                onChange={value => setReasoningEffort(
-                                                    value === REASONING_EFFORT_PROTOCOL_DEFAULT
-                                                        ? undefined
-                                                        : value as ReasoningEffort
-                                                )}
-                                            />
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <Text type="secondary">{t("pages.aiPlayground.streaming")}</Text>
+                                                <Switch
+                                                    size="small"
+                                                    checked={streaming}
+                                                    disabled={sending}
+                                                    onChange={setStreaming}
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Text type="secondary">{t("pages.aiPlayground.reasoningEffort")}</Text>
+                                                <Select
+                                                    size="small"
+                                                    style={{width: 150}}
+                                                    disabled={sending}
+                                                    value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
+                                                    options={reasoningEffortOptions}
+                                                    onChange={value => setReasoningEffort(
+                                                        value === REASONING_EFFORT_PROTOCOL_DEFAULT
+                                                            ? undefined
+                                                            : value as ReasoningEffort
+                                                    )}
+                                                />
+                                            </div>
                                         </div>
                                         <Button
                                             type="primary"

@@ -1,10 +1,21 @@
 import {doPost} from "@/api/system-request.ts";
+import {sseRequest} from "@/api/request.ts";
+import {getUserAuthentication} from "@/utils/token.utils.ts";
 import type {ReasoningEffort} from "@/types/ai/ai.types.ts";
 
 export interface AiPlaygroundMessage {
     role: "system" | "user" | "assistant";
     content: string;
     reasoningContent?: string;
+    usage?: AiPlaygroundUsage;
+}
+
+export interface AiPlaygroundUsage {
+    promptTokens: number;
+    completionTokens: number;
+    reasoningTokens: number;
+    cachedPromptTokens: number;
+    cacheCreationTokens: number;
 }
 
 export interface AiPlaygroundChatDTO {
@@ -17,6 +28,14 @@ export interface AiPlaygroundChatDTO {
 export interface AiPlaygroundChatVO {
     content: string;
     reasoningContent?: string;
+    usage?: AiPlaygroundUsage | null;
+}
+
+export interface AiPlaygroundStreamChunk {
+    content: string | null;
+    reasoningContent: string | null;
+    finished: boolean;
+    usage?: AiPlaygroundUsage | null;
 }
 
 export function chat(dto: AiPlaygroundChatDTO) {
@@ -24,5 +43,29 @@ export function chat(dto: AiPlaygroundChatDTO) {
         "/api/manager/ai/playground/chat",
         dto,
         {"Content-Type": "application/json"},
+    );
+}
+
+/**
+ * Streams a chat completion, invoking [onChunk] for every SSE frame until the stream ends.
+ *
+ * The SSE reading/parsing lives in `sseRequest`; this only supplies the endpoint, the auth header
+ * and the chunk type.
+ */
+export async function chatStream(
+    dto: AiPlaygroundChatDTO,
+    onChunk: (chunk: AiPlaygroundStreamChunk) => void,
+): Promise<void> {
+    const headers: Record<string, string> = {};
+    const authentication = getUserAuthentication();
+    if (authentication && !authentication.expired) {
+        headers["Authorization"] = `Bearer ${authentication.token}`;
+    }
+
+    await sseRequest<AiPlaygroundStreamChunk>(
+        "/api/manager/ai/playground/chat-stream",
+        headers,
+        dto,
+        onChunk,
     );
 }

@@ -932,7 +932,14 @@ export const zhCN: I18nRules = {
       send: '发送',
       reasoningEffort: '推理强度',
       reasoningEffortDefault: '协议默认',
-      thinking: '已完成思考',
+      streaming: '流式输出',
+      thinking: '正在思考',
+      thoughtComplete: '已完成思考',
+      usagePromptTokens: '输入',
+      usageCompletionTokens: '输出',
+      usageReasoningTokens: '推理',
+      usageCachedTokens: '缓存读取',
+      usageCacheCreationTokens: '缓存写入',
       messages: {
         loadFailed: '加载 AI 模型失败',
         chatFailed: '发送消息失败'

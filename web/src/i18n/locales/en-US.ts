@@ -935,7 +935,14 @@ export const enUS: I18nRules = {
       send: 'Send',
       reasoningEffort: 'Reasoning Effort',
       reasoningEffortDefault: 'Protocol Default',
-      thinking: 'Thought complete',
+      streaming: 'Streaming',
+      thinking: 'Thinking',
+      thoughtComplete: 'Thought complete',
+      usagePromptTokens: 'Prompt',
+      usageCompletionTokens: 'Completion',
+      usageReasoningTokens: 'Reasoning',
+      usageCachedTokens: 'Cached read',
+      usageCacheCreationTokens: 'Cache write',
       messages: {
         loadFailed: 'Failed to load AI models',
         chatFailed: 'Failed to send message'
