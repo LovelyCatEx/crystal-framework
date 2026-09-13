@@ -937,6 +937,17 @@ export const enUS: I18nRules = {
       reasoningEffort: 'Reasoning Effort',
       reasoningEffortDefault: 'Protocol Default',
       streaming: 'Streaming',
+      group: 'Group',
+      groupDefault: 'Default',
+      modelInfo: 'Model Info',
+      modelKey: 'Model Key',
+      modelInputPrice: 'Input Price',
+      modelOutputPrice: 'Output Price',
+      modelCacheReadPrice: 'Cache Read Price',
+      modelCacheWritePrice: 'Cache Write Price',
+      modelContextWindow: 'Context Window',
+      modelCurrency: 'Currency',
+      modelCapabilities: 'Capabilities',
       thinking: 'Thinking',
       thoughtComplete: 'Thought complete',
       newSession: 'New Session',
@@ -949,7 +960,8 @@ export const enUS: I18nRules = {
       usageToolCalls: 'Tools',
       messages: {
         loadFailed: 'Failed to load AI models',
-        chatFailed: 'Failed to send message'
+        chatFailed: 'Failed to send message',
+        groupRequired: 'Please select a group'
       }
     },
     tenantManager: {

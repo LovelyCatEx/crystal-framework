@@ -934,6 +934,17 @@ export const zhCN: I18nRules = {
       reasoningEffort: '推理强度',
       reasoningEffortDefault: '协议默认',
       streaming: '流式输出',
+      group: '分组',
+      groupDefault: '默认',
+      modelInfo: '模型信息',
+      modelKey: '模型标识',
+      modelInputPrice: '输入价格',
+      modelOutputPrice: '输出价格',
+      modelCacheReadPrice: '缓存读价格',
+      modelCacheWritePrice: '缓存写价格',
+      modelContextWindow: '上下文窗口',
+      modelCurrency: '币种',
+      modelCapabilities: '能力',
       thinking: '正在思考',
       thoughtComplete: '已完成思考',
       newSession: '新会话',
@@ -946,7 +957,8 @@ export const zhCN: I18nRules = {
       usageToolCalls: '工具',
       messages: {
         loadFailed: '加载 AI 模型失败',
-        chatFailed: '发送消息失败'
+        chatFailed: '发送消息失败',
+        groupRequired: '请选择分组'
       }
     },
     tenantManager: {

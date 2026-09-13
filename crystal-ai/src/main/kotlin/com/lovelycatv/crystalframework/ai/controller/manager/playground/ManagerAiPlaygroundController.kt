@@ -4,12 +4,15 @@ import com.lovelycatv.crystalframework.ai.constants.AiPermission
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.dto.ManagerAiPlaygroundChatDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.dto.ManagerAiPlaygroundMessageDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundChatVO
+import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundDataVO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundStreamChunkVO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundUsageVO
 import com.lovelycatv.crystalframework.ai.service.AiChatService
+import com.lovelycatv.crystalframework.ai.service.AiPlaygroundDataService
 import com.lovelycatv.crystalframework.ai.types.AiChatStreamEvent
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
 import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
@@ -32,6 +35,7 @@ import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -43,7 +47,18 @@ import reactor.core.publisher.Flux
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/ai/playground")
 class ManagerAiPlaygroundController(
     private val aiChatService: AiChatService,
+    private val aiPlaygroundDataService: AiPlaygroundDataService,
 ) {
+    @GetMapping("/data", version = "1")
+    @RequiresAuthority(
+        anyOf = [AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME],
+        scope = ResourceScope.SYSTEM,
+    )
+    suspend fun getData(): ApiResponse<ManagerAiPlaygroundDataVO> {
+        val userId = CurrentUserId.current() ?: 0
+        return ApiResponse.success(aiPlaygroundDataService.getPlaygroundData(userId))
+    }
+
     @PostMapping("/chat", version = "1")
     @RequiresAuthority(
         anyOf = [AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME],
@@ -62,6 +77,7 @@ class ManagerAiPlaygroundController(
             sessionId = dto.sessionId,
             clientIp = exchange.request.resolveClientIp(),
             userAgent = exchange.request.headers.getFirst("User-Agent"),
+            groupId = dto.groupId.toLong(),
         )
         val assistantMessage = result.response.choices.firstOrNull()?.message
 
@@ -108,6 +124,7 @@ class ManagerAiPlaygroundController(
             sessionId = dto.sessionId,
             clientIp = exchange.request.resolveClientIp(),
             userAgent = exchange.request.headers.getFirst("User-Agent"),
+            groupId = dto.groupId.toLong(),
         )
             .scan<AiChatStreamEvent, StreamState?>(null) { acc, event ->
                 when (event) {

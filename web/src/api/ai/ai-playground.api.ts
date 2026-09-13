@@ -1,4 +1,4 @@
-import {doPost} from "@/api/system-request.ts";
+import {doGet, doPost} from "@/api/system-request.ts";
 import {sseRequest} from "@/api/request.ts";
 import {getUserAuthentication} from "@/utils/token.utils.ts";
 import type {ReasoningEffort} from "@/types/ai/ai.types.ts";
@@ -31,6 +31,7 @@ export interface AiPlaygroundChatDTO {
     /** Omitted to let the provider's protocol pick the level. */
     reasoningEffort?: ReasoningEffort;
     sessionId?: string;
+    groupId?: string;
 }
 
 export interface AiPlaygroundChatVO {
@@ -46,6 +47,39 @@ export interface AiPlaygroundStreamChunk {
     finished: boolean;
     usage?: AiPlaygroundUsage | null;
     toolCall?: AiPlaygroundToolCall | null;
+}
+
+export interface AiPlaygroundProvider {
+    name: string;
+    modelIds: string[];
+}
+
+export interface AiPlaygroundGroup {
+    name: string;
+    billingMultiplier: string;
+    modelIds: string[];
+}
+
+export interface AiPlaygroundModel {
+    displayName: string;
+    key: string;
+    inputPricePerMillion: string;
+    outputPricePerMillion: string;
+    cacheReadPricePerMillion: string | null;
+    cacheWritePricePerMillion: string | null;
+    capabilities: number[];
+    contextWindowTokens: string;
+    currency: string;
+}
+
+export interface AiPlaygroundData {
+    providers: Record<string, AiPlaygroundProvider>;
+    groups: Record<string, AiPlaygroundGroup>;
+    models: Record<string, AiPlaygroundModel>;
+}
+
+export function getPlaygroundData() {
+    return doGet<AiPlaygroundData>("/api/manager/ai/playground/data");
 }
 
 export function chat(dto: AiPlaygroundChatDTO) {

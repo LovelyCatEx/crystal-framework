@@ -51,14 +51,14 @@ export enum AiProviderProtocolType {
 }
 
 export enum AiModelCapability {
-    TEXT_GENERATION = 0,
-    IMAGE_GENERATION = 1,
-    AUDIO_GENERATION = 2,
-    VIDEO_GENERATION = 3,
-    VISION = 4,
-    AUDIO_TRANSCRIPTION = 5,
-    EMBEDDING = 6,
-    CODE_GENERATION = 7
+    CHAT = 0,
+    TEXT_GENERATION = 1,
+    VISION = 2,
+    EMBEDDING = 3,
+    TOOL_CALLING = 4,
+    STRUCTURED_OUTPUT = 5,
+    AUDIO_INPUT = 6,
+    AUDIO_OUTPUT = 7
 }
 
 /**

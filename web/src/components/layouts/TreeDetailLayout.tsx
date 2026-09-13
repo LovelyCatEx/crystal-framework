@@ -18,6 +18,8 @@ export interface TreeDetailLayoutTreeProps {
      * state hint plus a "create first item" call to action.
      */
     emptyContent?: ReactNode;
+    /** Rendered below the tree card (e.g. a details card for the currently selected node). */
+    footer?: ReactNode;
 }
 
 export interface TreeDetailLayoutDetailProps {
@@ -67,6 +69,7 @@ export function TreeDetailLayout(props: TreeDetailLayoutProps) {
                         />
                     ) : tree.emptyContent}
                 </Card>
+                {tree.footer}
             </Col>
             <Col xs={24} xl={rightSpan}>
                 {tree.selectedKey ? detail.content : (

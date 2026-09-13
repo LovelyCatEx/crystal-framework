@@ -1,15 +1,12 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Empty, Input, message, Popconfirm, Select, Spin, Switch, Typography} from "antd";
+import {Button, Card, Descriptions, Empty, Input, message, Popconfirm, Select, Spin, Switch, Tag, Tree, Typography} from "antd";
 import {BulbOutlined, DownOutlined, PlusOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
-import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
-import {AiModelManagerController} from "@/api/ai/ai-model.api.ts";
-import {chat, chatStream, type AiPlaygroundChatDTO, type AiPlaygroundMessage} from "@/api/ai/ai-playground.api.ts";
-import {ReasoningEffort, type AiModelEntity, type AiProviderEntity} from "@/types/ai/ai.types.ts";
-import {getReasoningEffort} from "@/i18n/enum-helpers.ts";
+import {chat, chatStream, getPlaygroundData, type AiPlaygroundChatDTO, type AiPlaygroundGroup, type AiPlaygroundMessage, type AiPlaygroundModel, type AiPlaygroundProvider} from "@/api/ai/ai-playground.api.ts";
+import {ReasoningEffort} from "@/types/ai/ai.types.ts";
+import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
-import {TreeDetailLayout} from "@/components/layouts/TreeDetailLayout.tsx";
 
 const {TextArea} = Input;
 const {Text} = Typography;
@@ -49,10 +46,24 @@ function saveStoredSession(modelId: string, sessionId: string, messages: AiPlayg
     }
 }
 
+/** Formats a billing multiplier as "1x", "1.5x", "1.25x" — at most two decimals, trailing zeros dropped. */
+function formatMultiplier(value: string): string {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return value;
+    return `${num.toFixed(2).replace(/\.?0+$/, "")}x`;
+}
+
+/** Formats a price as "2.00 CNY/M" — always two decimals, currency appended. */
+function formatPrice(value: string | null, currency: string): string {
+    if (value == null) return "-";
+    const num = Number(value);
+    return `${Number.isFinite(num) ? num.toFixed(2) : value} ${currency}/M`;
+}
+
 export default function AiPlaygroundPage() {
     const {t} = useTranslation();
-    const [providers, setProviders] = useState<AiProviderEntity[]>([]);
-    const [models, setModels] = useState<AiModelEntity[]>([]);
+    const [providers, setProviders] = useState<Record<string, AiPlaygroundProvider>>({});
+    const [models, setModels] = useState<Record<string, AiPlaygroundModel>>({});
     const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
     const [messageList, setMessageList] = useState<AiPlaygroundMessage[]>([]);
     const [expandedThinking, setExpandedThinking] = useState<Set<number>>(new Set());
@@ -63,18 +74,20 @@ export default function AiPlaygroundPage() {
     const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort | undefined>(undefined);
     const [streaming, setStreaming] = useState(true);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [groups, setGroups] = useState<Record<string, AiPlaygroundGroup>>({});
+    const [groupId, setGroupId] = useState<string | null>(null);
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         let active = true;
         setLoading(true);
-        Promise.all([
-            AiProviderManagerController.readAll(),
-            AiModelManagerController.readAll(),
-        ]).then(([providerResponse, modelResponse]) => {
+        getPlaygroundData().then(res => {
             if (!active) return;
-            setProviders(providerResponse.data ?? []);
-            setModels(modelResponse.data ?? []);
+            if (res.data) {
+                setProviders(res.data.providers);
+                setGroups(res.data.groups);
+                setModels(res.data.models);
+            }
         }).catch(() => {
             if (active) {
                 void message.error(t("pages.aiPlayground.messages.loadFailed"));
@@ -97,20 +110,54 @@ export default function AiPlaygroundPage() {
         }
     }, [selectedModelId, sessionId, messageList]);
 
-    const treeData = useMemo<DataNode[]>(() => providers.map(provider => ({
-        key: `provider:${provider.id}`,
+    const groupCountByModel = useMemo(() => {
+        const counts: Record<string, number> = {};
+        for (const group of Object.values(groups)) {
+            for (const modelId of group.modelIds) {
+                counts[modelId] = (counts[modelId] ?? 0) + 1;
+            }
+        }
+        return counts;
+    }, [groups]);
+
+    const treeData = useMemo<DataNode[]>(() => Object.entries(providers).map(([providerId, provider]) => ({
+        key: `provider:${providerId}`,
         title: provider.name,
         selectable: false,
-        children: models
-            .filter(model => model.providerId === provider.id && model.enabled)
-            .map(model => ({
-                key: `model:${model.id}`,
-                title: model.displayName,
+        children: provider.modelIds
+            .filter(modelId => models[modelId] != null)
+            .map(modelId => ({
+                key: `model:${modelId}`,
+                title: `${models[modelId].displayName} (${groupCountByModel[modelId] ?? 0})`,
                 isLeaf: true,
             })),
-    })), [models, providers]);
+    })), [models, providers, groupCountByModel]);
 
-    const selectedModel = models.find(model => model.id === selectedModelId) ?? null;
+    const selectedModel = selectedModelId ? (models[selectedModelId] ?? null) : null;
+
+    const modelInfoCard = useMemo(() => {
+        if (!selectedModel) return null;
+        return (
+            <div className="shrink-0 border-t p-4">
+                <Text strong className="mb-2 block">{t("pages.aiPlayground.modelInfo")}</Text>
+                <Descriptions column={1} size="small" colon={false}>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelKey")}>{selectedModel.key}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelInputPrice")}>{formatPrice(selectedModel.inputPricePerMillion, selectedModel.currency)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelOutputPrice")}>{formatPrice(selectedModel.outputPricePerMillion, selectedModel.currency)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheReadPrice")}>{formatPrice(selectedModel.cacheReadPricePerMillion, selectedModel.currency)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheWritePrice")}>{formatPrice(selectedModel.cacheWritePricePerMillion, selectedModel.currency)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelContextWindow")}>{selectedModel.contextWindowTokens}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelCapabilities")}>
+                        <div className="flex flex-wrap gap-1">
+                            {selectedModel.capabilities.map(cap => (
+                                <Tag key={cap}>{getAiModelCapability(cap)}</Tag>
+                            ))}
+                        </div>
+                    </Descriptions.Item>
+                </Descriptions>
+            </div>
+        );
+    }, [selectedModel, t]);
 
     const reasoningEffortOptions = useMemo(() => [
         {value: REASONING_EFFORT_PROTOCOL_DEFAULT, label: t("pages.aiPlayground.reasoningEffortDefault")},
@@ -119,6 +166,21 @@ export default function AiPlaygroundPage() {
             label: getReasoningEffort(effort),
         })),
     ], [t]);
+
+    const userGroupOptions = useMemo(() => {
+        const options: {value: string; label: string}[] = [];
+        if (selectedModelId) {
+            for (const [groupId, group] of Object.entries(groups)) {
+                if (group.modelIds.includes(selectedModelId)) {
+                    options.push({
+                        value: groupId,
+                        label: `${group.name} ${formatMultiplier(group.billingMultiplier)}`,
+                    });
+                }
+            }
+        }
+        return options;
+    }, [groups, selectedModelId, t]);
 
     const selectModel = (key: string | null) => {
         if (!key?.startsWith("model:")) return;
@@ -134,6 +196,9 @@ export default function AiPlaygroundPage() {
             setSessionId(crypto.randomUUID());
             setMessageList([]);
         }
+        setGroupId(
+            Object.entries(groups).find(([, group]) => group.modelIds.includes(modelId))?.[0] ?? null
+        );
     };
 
     const startNewSession = () => {
@@ -147,6 +212,10 @@ export default function AiPlaygroundPage() {
     const sendMessage = async () => {
         const content = input.trim();
         if (!selectedModelId || !content || sending) return;
+        if (!groupId) {
+            void message.error(t("pages.aiPlayground.messages.groupRequired"));
+            return;
+        }
         const currentSessionId = sessionId ?? crypto.randomUUID();
         setSessionId(currentSessionId);
         const userMessage: AiPlaygroundMessage = {role: "user", content};
@@ -159,6 +228,7 @@ export default function AiPlaygroundPage() {
             messages: nextMessages.map(({role, content}) => ({role, content})),
             reasoningEffort,
             sessionId: currentSessionId,
+            groupId,
         };
         try {
             if (streaming) {
@@ -234,40 +304,52 @@ export default function AiPlaygroundPage() {
     const isThinking = (index: number) => streaming && sending && index === messageList.length - 1;
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-[calc(100vh-158px)] flex-col">
             <ActionBarComponent
                 title={t("pages.aiPlayground.title")}
                 subtitle={t("pages.aiPlayground.subtitle")}
             />
-            <TreeDetailLayout
-                tree={{
-                    title: t("pages.aiPlayground.modelTree"),
-                    treeData,
-                    selectedKey: selectedModelId ? `model:${selectedModelId}` : null,
-                    loading,
-                    onSelect: selectModel,
-                    emptyContent: <Empty description={t("pages.aiPlayground.emptyModels")} />,
-                }}
-                detail={{
-                    emptyContent: <Empty description={t("pages.aiPlayground.selectModelHint")} />,
-                    content: (
-                        <Card
-                            title={selectedModel?.displayName}
-                            extra={
-                                <Popconfirm
-                                    title={t("pages.aiPlayground.newSessionConfirm")}
-                                    onConfirm={startNewSession}
-                                    okText={t("components.managerPageContainer.confirm")}
-                                    cancelText={t("components.managerPageContainer.cancel")}
-                                >
-                                    <Button size="small" icon={<PlusOutlined />}>
-                                        {t("pages.aiPlayground.newSession")}
-                                    </Button>
-                                </Popconfirm>
-                            }
-                            className="flex h-full min-h-96 flex-col border-none shadow-sm rounded-2xl overflow-hidden"
-                            styles={{body: {display: "flex", flex: 1, flexDirection: "column", minHeight: 0}}}
-                        >
+            <Card
+                className="flex flex-1 min-h-0 flex-col border-none shadow-sm rounded-2xl overflow-hidden"
+                styles={{body: {display: "flex", flex: 1, flexDirection: "column", minHeight: 0, padding: 0}}}
+            >
+                <div className="flex flex-1 min-h-0">
+                    <div className="flex w-72 shrink-0 flex-col border-r" style={{borderColor: "var(--ant-color-border)"}}>
+                        <div className="flex h-14 shrink-0 items-center border-b px-4">
+                            <Text strong>{t("pages.aiPlayground.modelTree")}</Text>
+                        </div>
+                        <div className="flex-1 min-h-0 overflow-auto p-4">
+                            {loading ? (
+                                <Spin />
+                            ) : treeData.length > 0 ? (
+                                <Tree
+                                    treeData={treeData}
+                                    onSelect={keys => selectModel((keys[0] as string | undefined) ?? null)}
+                                    selectedKeys={selectedModelId ? [`model:${selectedModelId}`] : []}
+                                    defaultExpandAll
+                                    blockNode
+                                    showLine
+                                />
+                            ) : (
+                                <Empty description={t("pages.aiPlayground.emptyModels")} />
+                            )}
+                        </div>
+                        {modelInfoCard}
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                        <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+                            <Text strong>{selectedModel?.displayName}</Text>
+                            <Popconfirm
+                                title={t("pages.aiPlayground.newSessionConfirm")}
+                                onConfirm={startNewSession}
+                                okText={t("components.managerPageContainer.confirm")}
+                                cancelText={t("components.managerPageContainer.cancel")}
+                            >
+                                <Button size="small" icon={<PlusOutlined />}>
+                                    {t("pages.aiPlayground.newSession")}
+                                </Button>
+                            </Popconfirm>
+                        </div>
                             <div ref={messageListRef} className="flex-1 overflow-auto p-4">
                                 {messageList.length === 0 ? (
                                     <div className="flex h-full items-center justify-center">
@@ -370,7 +452,7 @@ export default function AiPlaygroundPage() {
                                 ))}
                                 {sending && <Spin size="small" />}
                             </div>
-                            <div className="border-t p-3">
+                            <div className="shrink-0 border-t p-3">
                                 <div className="rounded-2xl border p-2" style={{borderColor: "var(--ant-color-border)"}}>
                                     <TextArea
                                         variant="borderless"
@@ -412,6 +494,17 @@ export default function AiPlaygroundPage() {
                                                     )}
                                                 />
                                             </div>
+                                            <div className="flex items-center gap-2">
+                                                <Text type="secondary">{t("pages.aiPlayground.group")}</Text>
+                                                <Select
+                                                    size="small"
+                                                    style={{width: 150}}
+                                                    disabled={sending}
+                                                    value={groupId ?? ""}
+                                                    options={userGroupOptions}
+                                                    onChange={value => setGroupId(value === "" ? null : value)}
+                                                />
+                                            </div>
                                         </div>
                                         <Button
                                             type="primary"
@@ -424,10 +517,9 @@ export default function AiPlaygroundPage() {
                                     </div>
                                 </div>
                             </div>
-                        </Card>
-                    ),
-                }}
-            />
+                    </div>
+                </div>
+            </Card>
         </div>
     );
 }

@@ -4,9 +4,11 @@ import com.lovelycatv.crystalframework.ai.entity.AiModelEntity
 import com.lovelycatv.crystalframework.ai.entity.AiProviderEntity
 import com.lovelycatv.crystalframework.ai.service.AiChatService
 import com.lovelycatv.crystalframework.ai.service.AiModelInvocationRecordService
+import com.lovelycatv.crystalframework.ai.repository.AiUserGroupModelRepository
 import com.lovelycatv.crystalframework.ai.service.factory.AiLlmClientFactory
 import com.lovelycatv.crystalframework.ai.service.manager.AiModelManagerService
 import com.lovelycatv.crystalframework.ai.service.manager.AiProviderManagerService
+import com.lovelycatv.crystalframework.ai.service.manager.AiUserGroupManagerService
 import com.lovelycatv.crystalframework.ai.tool.CommonAiTools
 import com.lovelycatv.crystalframework.ai.types.AiChatCompletionResult
 import com.lovelycatv.crystalframework.ai.types.AiChatStreamEvent
@@ -35,12 +37,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
 
 @Service
 class AiChatServiceImpl(
     private val aiModelManagerService: AiModelManagerService,
     private val aiProviderManagerService: AiProviderManagerService,
+    private val aiUserGroupManagerService: AiUserGroupManagerService,
+    private val aiUserGroupModelRepository: AiUserGroupModelRepository,
     private val invocationRecordService: AiModelInvocationRecordService,
     private val aiLlmClientFactory: AiLlmClientFactory,
 ) : AiChatService {
@@ -54,9 +59,10 @@ class AiChatServiceImpl(
         reasoningEffort: ReasoningEffort?,
         sessionId: String?,
         clientIp: String?,
-        userAgent: String?
+        userAgent: String?,
+        groupId: Long
     ): AiChatCompletionResult {
-        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent)
+        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent, groupId)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -126,6 +132,7 @@ class AiChatServiceImpl(
                     sessionId = subject.sessionId,
                     clientIp = subject.clientIp,
                     userAgent = subject.userAgent,
+                    groupId = subject.groupId,
                 ),
                 model = subject.model,
             )
@@ -151,9 +158,10 @@ class AiChatServiceImpl(
         reasoningEffort: ReasoningEffort?,
         sessionId: String?,
         clientIp: String?,
-        userAgent: String?
+        userAgent: String?,
+        groupId: Long
     ): Flow<AiChatStreamEvent> {
-        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent)
+        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent, groupId)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -245,6 +253,7 @@ class AiChatServiceImpl(
                         sessionId = subject.sessionId,
                         clientIp = subject.clientIp,
                         userAgent = subject.userAgent,
+                        groupId = subject.groupId,
                     ),
                     model = subject.model,
                 )
@@ -257,7 +266,8 @@ class AiChatServiceImpl(
         messageCount: Int,
         sessionId: String?,
         clientIp: String?,
-        userAgent: String?
+        userAgent: String?,
+        groupId: Long
     ): InvocationSubject {
         val startedAt = System.currentTimeMillis()
 
@@ -266,6 +276,15 @@ class AiChatServiceImpl(
 
         if (!model.enabled) {
             throw BusinessException("Model is disabled: ${model.displayName}")
+        }
+
+        aiUserGroupManagerService.getByIdOrNull(groupId)
+            ?: throw BusinessException("User group not found: $groupId")
+
+        val modelInGroup = aiUserGroupModelRepository.existsByUserGroupIdAndModelId(groupId, modelId)
+            .awaitFirstOrNull() ?: false
+        if (!modelInGroup) {
+            throw BusinessException("Model $modelId does not belong to user group $groupId")
         }
 
         val provider = aiProviderManagerService.getByIdOrNull(model.providerId)
@@ -287,6 +306,7 @@ class AiChatServiceImpl(
             sessionId = sessionId,
             clientIp = clientIp,
             userAgent = userAgent,
+            groupId = groupId,
         )
     }
 
@@ -390,6 +410,7 @@ class AiChatServiceImpl(
                 sessionId = subject.sessionId,
                 clientIp = subject.clientIp,
                 userAgent = subject.userAgent,
+                groupId = subject.groupId,
             )
         }
     }
@@ -437,6 +458,7 @@ class AiChatServiceImpl(
         val sessionId: String?,
         val clientIp: String?,
         val userAgent: String?,
+        val groupId: Long,
     ) {
         val durationMs: Long get() = System.currentTimeMillis() - startedAt
     }

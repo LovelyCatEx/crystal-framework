@@ -6,9 +6,11 @@ import com.lovelycatv.crystalframework.ai.entity.AiModelEntity
 import com.lovelycatv.crystalframework.ai.entity.AiModelInvocationRecordEntity
 import com.lovelycatv.crystalframework.ai.repository.AiModelInvocationRecordRepository
 import com.lovelycatv.crystalframework.ai.service.AiModelInvocationRecordService
+import com.lovelycatv.crystalframework.ai.service.manager.AiUserGroupManagerService
 import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiModelInvocationStatus
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
+import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.stereotype.Service
@@ -18,6 +20,7 @@ import java.util.UUID
 class AiModelInvocationRecordServiceImpl(
     private val repository: AiModelInvocationRecordRepository,
     private val snowIdGenerator: SnowIdGenerator,
+    private val aiUserGroupManagerService: AiUserGroupManagerService,
 ) : AiModelInvocationRecordService {
 
     override suspend fun recordInvocationFromContext(
@@ -56,6 +59,7 @@ class AiModelInvocationRecordServiceImpl(
         } else null
 
         val modelRequestConfig = model.getRequestConfigObject<AiModelRequestConfig>()
+        val groupMultiplier = resolveGroupMultiplier(context.groupId)
 
         val entity = AiModelInvocationRecordEntity(
             id = snowIdGenerator.nextId(),
@@ -83,7 +87,7 @@ class AiModelInvocationRecordServiceImpl(
             cacheReadUnitPrice = cacheReadPrice,
             cacheWriteUnitPrice = cacheWritePrice,
             rawCost = rawCost,
-            finalCost = rawCost,
+            finalCost = rawCost * groupMultiplier,
             currency = model.currency,
             temperature = modelRequestConfig.temperature?.toDouble(),
             topP = 0.0,
@@ -93,6 +97,8 @@ class AiModelInvocationRecordServiceImpl(
             sessionId = context.sessionId,
             clientIp = context.clientIp,
             userAgent = context.userAgent,
+            groupId = context.groupId,
+            groupMultiplier = groupMultiplier,
         ).apply {
             newEntity()
         }
@@ -113,6 +119,7 @@ class AiModelInvocationRecordServiceImpl(
         sessionId: String?,
         clientIp: String?,
         userAgent: String?,
+        groupId: Long,
     ) {
         val entity = AiModelInvocationRecordEntity(
             id = snowIdGenerator.nextId(),
@@ -130,9 +137,20 @@ class AiModelInvocationRecordServiceImpl(
             sessionId = sessionId,
             clientIp = clientIp,
             userAgent = userAgent,
+            groupId = groupId,
         )
 
         repository.save(entity).awaitFirstOrNull()
+    }
+
+    /**
+     * Resolves the billing multiplier for a user group. The group is required — there is no
+     * fallback to a 1x multiplier.
+     */
+    private suspend fun resolveGroupMultiplier(groupId: Long): Double {
+        val group = aiUserGroupManagerService.getByIdOrNull(groupId)
+            ?: throw BusinessException("User group not found: $groupId")
+        return group.billingMultiplier.toDouble()
     }
 
     /**

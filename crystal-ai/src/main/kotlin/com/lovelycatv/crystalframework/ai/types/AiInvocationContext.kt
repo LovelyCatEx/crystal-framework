@@ -31,4 +31,5 @@ data class AiInvocationContext(
     val sessionId: String?,
     val clientIp: String?,
     val userAgent: String?,
+    val groupId: Long,
 )

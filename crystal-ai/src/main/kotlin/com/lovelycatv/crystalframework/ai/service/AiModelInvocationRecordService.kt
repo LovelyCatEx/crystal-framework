@@ -22,5 +22,6 @@ interface AiModelInvocationRecordService {
         sessionId: String?,
         clientIp: String?,
         userAgent: String?,
+        groupId: Long,
     )
 }

@@ -19,4 +19,6 @@ data class ManagerAiPlaygroundChatDTO(
      */
     val reasoningEffort: ReasoningEffort? = null,
     val sessionId: String? = null,
+    @field:NotBlank(message = "Group ID is required")
+    val groupId: String,
 )
