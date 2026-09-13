@@ -13,9 +13,12 @@ import co.elastic.apm.api.Outcome
 import com.lovelycatv.crystalframework.audit.context.AuditRequestContext
 import com.lovelycatv.crystalframework.audit.context.AuditRequestInfo
 import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
+import com.lovelycatv.crystalframework.shared.context.CurrentClientIp
+import com.lovelycatv.crystalframework.shared.context.CurrentUserAgent
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
+import com.lovelycatv.crystalframework.shared.utils.resolveClientIp
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
@@ -78,6 +81,8 @@ class AuditRequestContextFilter(
             chain
                 .filter(exchange)
                 .contextWrite(AuditRequestContext.install(exchange, info))
+                .contextWrite(CurrentClientIp.install(request.resolveClientIp()))
+                .contextWrite(CurrentUserAgent.install(userAgent ?: ""))
         }
     }
 

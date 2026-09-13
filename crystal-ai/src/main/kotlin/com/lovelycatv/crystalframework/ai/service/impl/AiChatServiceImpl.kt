@@ -16,7 +16,9 @@ import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiToolCallResult
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
 import com.lovelycatv.crystalframework.ai.types.AiProviderProtocolType
+import com.lovelycatv.crystalframework.shared.context.CurrentClientIp
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
+import com.lovelycatv.crystalframework.shared.context.CurrentUserAgent
 import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.vertex.ai.llm.ChatRequest
@@ -58,11 +60,9 @@ class AiChatServiceImpl(
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort?,
         sessionId: String?,
-        clientIp: String?,
-        userAgent: String?,
         groupId: Long
     ): AiChatCompletionResult {
-        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent, groupId)
+        val subject = resolveSubject(modelId, messages.size, sessionId, groupId)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -157,11 +157,9 @@ class AiChatServiceImpl(
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort?,
         sessionId: String?,
-        clientIp: String?,
-        userAgent: String?,
         groupId: Long
     ): Flow<AiChatStreamEvent> {
-        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent, groupId)
+        val subject = resolveSubject(modelId, messages.size, sessionId, groupId)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -265,8 +263,6 @@ class AiChatServiceImpl(
         modelId: Long,
         messageCount: Int,
         sessionId: String?,
-        clientIp: String?,
-        userAgent: String?,
         groupId: Long
     ): InvocationSubject {
         val startedAt = System.currentTimeMillis()
@@ -304,8 +300,8 @@ class AiChatServiceImpl(
             messageCount = messageCount,
             startedAt = startedAt,
             sessionId = sessionId,
-            clientIp = clientIp,
-            userAgent = userAgent,
+            clientIp = CurrentClientIp.current(),
+            userAgent = CurrentUserAgent.current()?.takeIf { it.isNotEmpty() },
             groupId = groupId,
         )
     }

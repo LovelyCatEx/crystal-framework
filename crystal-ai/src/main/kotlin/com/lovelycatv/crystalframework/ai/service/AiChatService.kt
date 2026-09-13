@@ -28,8 +28,6 @@ interface AiChatService {
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort? = null,
         sessionId: String? = null,
-        clientIp: String? = null,
-        userAgent: String? = null,
         groupId: Long
     ): AiChatCompletionResult
 
@@ -50,8 +48,6 @@ interface AiChatService {
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort? = null,
         sessionId: String? = null,
-        clientIp: String? = null,
-        userAgent: String? = null,
         groupId: Long
     ): Flow<AiChatStreamEvent>
 }
