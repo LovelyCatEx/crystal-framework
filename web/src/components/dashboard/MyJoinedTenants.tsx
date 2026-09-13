@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Avatar, Button, Card, Col, Empty, Modal, Row, Spin, Tag, theme} from "antd";
 import {useTranslation} from "react-i18next";
 import {useUserTenants} from "@/compositions/use-tenant.ts";

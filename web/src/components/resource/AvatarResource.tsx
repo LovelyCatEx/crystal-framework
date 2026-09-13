@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Avatar} from "antd";
 import {emptyApiResponseAsync} from "../../api/system-request.ts";
 import {getResourceFileDownloadUrlById} from "../../api/resource/file-resource.api.ts";

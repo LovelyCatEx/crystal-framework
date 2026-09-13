@@ -1,9 +1,10 @@
-/**
- * Copyright 2025 lovelycat
+/*
+ * Copyright (c) 2026 lovelycat
  *
- * Use of this source code is governed by the Apache License, Version 2.0,
- * that can be found in the LICENSE file.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
+
 import type {BaseSchemes} from "rete";
 import { AreaPlugin } from "rete-area-plugin";
 import './background.css';

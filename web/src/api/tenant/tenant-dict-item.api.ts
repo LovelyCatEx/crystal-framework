@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {BaseManagerController} from "../BaseManagerController.ts";
 import type {BaseManagerDeleteDTO, BaseManagerUpdateDTO} from "@/types/api.types.ts";
 import type {TenantDictItem, TenantDictItemTreeNode} from "@/types/tenant/tenant-dict-item.types.ts";

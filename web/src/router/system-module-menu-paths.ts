@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /**
  * Frontend-owned mirror of backend `SystemModulePathConstants` module keys, mapped to the
  * sidebar menu path prefixes the frontend should hide when the corresponding module is

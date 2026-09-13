@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useEffect, useState} from "react";
 import {Button, Col, Divider, Form, Input, InputNumber, Row, Space} from "antd";
 import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";

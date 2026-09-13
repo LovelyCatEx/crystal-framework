@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 export const getQueryString = (name: string, url = window.location.search) => {
     const searchParams = new URLSearchParams(url);
     return searchParams.get(name);

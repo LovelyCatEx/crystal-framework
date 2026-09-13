@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Button, Card, Space, Typography} from "antd";
 import {EditOutlined, EyeOutlined} from "@ant-design/icons";
 import {useEffect, useState} from "react";

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /**
  * Approval form schema types. Persisted as JSON strings inside
  * `definition.formSchema` and `node.formSchema` (see backend `ApprovalFlowDefinitionEntity`

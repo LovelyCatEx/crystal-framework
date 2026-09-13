@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {I18nRules} from "@/i18n/i18n-rules.ts";
 
 export const zhCN: I18nRules = {

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {getUserAccessibleMenus} from "../api/user/user.api.ts";
 import {useSWRComposition} from "./use-swr.ts";
 import type {ApiResponse} from "@/api/system-request.ts";

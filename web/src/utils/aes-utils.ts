@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /**
  * AES-GCM Encryption Utilities
  * Compatible with backend AES.kt (AES/GCM/NoPadding, 256-bit key, 12-byte IV)

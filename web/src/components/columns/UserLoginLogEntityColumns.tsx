@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Popover, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {UserLoginLogEntity} from "@/types/user/user-login-log.types.ts";

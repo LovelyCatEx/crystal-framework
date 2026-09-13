@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useCallback, useState, type ReactNode} from 'react';
 import {Button, Select, Tag} from 'antd';
 import {DeleteOutlined, PlusOutlined, ApartmentOutlined, HolderOutlined} from '@ant-design/icons';
