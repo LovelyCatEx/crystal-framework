@@ -1,8 +1,10 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Descriptions, Empty, Input, message, Popconfirm, Select, Spin, Switch, Tag, Tree, Typography} from "antd";
-import {BulbOutlined, DownOutlined, PlusOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
+import {Button, Card, Descriptions, Empty, Input, message, Modal, Popconfirm, Popover, Progress, Select, Spin, Switch, Tag, Tree, Typography} from "antd";
+import {BulbOutlined, CopyOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
+import {Info, Sparkles} from "lucide-react";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
+import {useSearchParams} from "react-router-dom";
 import {chat, chatStream, getPlaygroundData, type AiPlaygroundChatDTO, type AiPlaygroundGroup, type AiPlaygroundMessage, type AiPlaygroundModel, type AiPlaygroundProvider} from "@/api/ai/ai-playground.api.ts";
 import {ReasoningEffort} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
@@ -15,6 +17,9 @@ const {Text} = Typography;
 const REASONING_EFFORT_PROTOCOL_DEFAULT = "";
 
 const SESSION_STORAGE_KEY_PREFIX = "ai_playground:";
+
+/** Context-window message count shown in the occupancy popover — hard-coded for now. */
+const CONTEXT_MESSAGE_LIMIT = 100;
 
 interface StoredSession {
     sessionId: string;
@@ -76,6 +81,9 @@ export default function AiPlaygroundPage() {
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [groups, setGroups] = useState<Record<string, AiPlaygroundGroup>>({});
     const [groupId, setGroupId] = useState<string | null>(null);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingContent, setEditingContent] = useState("");
+    const [, setSearchParams] = useSearchParams();
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -87,6 +95,10 @@ export default function AiPlaygroundPage() {
                 setProviders(res.data.providers);
                 setGroups(res.data.groups);
                 setModels(res.data.models);
+                const urlModelId = new URLSearchParams(window.location.search).get("modelId");
+                if (urlModelId && res.data.models[urlModelId]) {
+                    applySelectedModel(urlModelId, res.data.groups);
+                }
             }
         }).catch(() => {
             if (active) {
@@ -128,18 +140,49 @@ export default function AiPlaygroundPage() {
             .filter(modelId => models[modelId] != null)
             .map(modelId => ({
                 key: `model:${modelId}`,
-                title: `${models[modelId].displayName} (${groupCountByModel[modelId] ?? 0})`,
+                title: (
+                    <span className="flex w-full min-w-0 items-center gap-1">
+                        <span className="min-w-0 truncate">{models[modelId].displayName}</span>
+                        <span className="shrink-0">({groupCountByModel[modelId] ?? 0})</span>
+                    </span>
+                ),
                 isLeaf: true,
             })),
     })), [models, providers, groupCountByModel]);
 
     const selectedModel = selectedModelId ? (models[selectedModelId] ?? null) : null;
 
+    // Context-window occupancy, derived from the last assistant message's usage.
+    // "input + output - reasoning" counts reasoning tokens as part of the output, so they are
+    // subtracted to avoid double-counting them against the window.
+    const contextUsage = useMemo(() => {
+        const max = selectedModel ? Number(selectedModel.contextWindowTokens) : 0;
+        let used = 0;
+        let cached = 0;
+        for (let i = messageList.length - 1; i >= 0; i--) {
+            const messageItem = messageList[i];
+            if (messageItem.role === "assistant" && messageItem.usage) {
+                used = messageItem.usage.promptTokens + messageItem.usage.completionTokens - messageItem.usage.reasoningTokens;
+                cached = messageItem.usage.cachedPromptTokens;
+                break;
+            }
+        }
+        if (!max || used <= 0) {
+            return {max, used: 0, cached: 0, percent: 0, cacheHitRate: 0};
+        }
+        const percent = Math.round((used / max) * 1000) / 10;
+        const cacheHitRate = Math.min(100, Math.max(0, Math.round((cached / used) * 1000) / 10));
+        return {max, used, cached, percent, cacheHitRate};
+    }, [messageList, selectedModel]);
+
     const modelInfoCard = useMemo(() => {
         if (!selectedModel) return null;
         return (
             <div className="shrink-0 border-t p-4">
-                <Text strong className="mb-2 block">{t("pages.aiPlayground.modelInfo")}</Text>
+                <div className="mb-2 flex items-center gap-2">
+                    <Info className="text-gray-500" size={16} />
+                    <Text strong>{t("pages.aiPlayground.modelInfo")}</Text>
+                </div>
                 <Descriptions column={1} size="small" colon={false}>
                     <Descriptions.Item label={t("pages.aiPlayground.modelKey")}>{selectedModel.key}</Descriptions.Item>
                     <Descriptions.Item label={t("pages.aiPlayground.modelInputPrice")}>{formatPrice(selectedModel.inputPricePerMillion, selectedModel.currency)}</Descriptions.Item>
@@ -182,9 +225,7 @@ export default function AiPlaygroundPage() {
         return options;
     }, [groups, selectedModelId, t]);
 
-    const selectModel = (key: string | null) => {
-        if (!key?.startsWith("model:")) return;
-        const modelId = key.substring("model:".length);
+    const applySelectedModel = (modelId: string, availableGroups: Record<string, AiPlaygroundGroup>) => {
         setSelectedModelId(modelId);
         setExpandedThinking(new Set());
         setInput("");
@@ -197,8 +238,19 @@ export default function AiPlaygroundPage() {
             setMessageList([]);
         }
         setGroupId(
-            Object.entries(groups).find(([, group]) => group.modelIds.includes(modelId))?.[0] ?? null
+            Object.entries(availableGroups).find(([, group]) => group.modelIds.includes(modelId))?.[0] ?? null
         );
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set("modelId", modelId);
+            return next;
+        }, {replace: true});
+    };
+
+    const selectModel = (key: string | null) => {
+        if (!key?.startsWith("model:")) return;
+        const modelId = key.substring("model:".length);
+        applySelectedModel(modelId, groups);
     };
 
     const startNewSession = () => {
@@ -209,30 +261,19 @@ export default function AiPlaygroundPage() {
         setSessionId(crypto.randomUUID());
     };
 
-    const sendMessage = async () => {
-        const content = input.trim();
-        if (!selectedModelId || !content || sending) return;
-        if (!groupId) {
-            void message.error(t("pages.aiPlayground.messages.groupRequired"));
-            return;
-        }
-        const currentSessionId = sessionId ?? crypto.randomUUID();
-        setSessionId(currentSessionId);
-        const userMessage: AiPlaygroundMessage = {role: "user", content};
-        const nextMessages = [...messageList, userMessage];
-        setMessageList(nextMessages);
-        setInput("");
+    const performChat = async (baseMessages: AiPlaygroundMessage[], chatSessionId: string) => {
+        if (!selectedModelId || !groupId) return;
         setSending(true);
         const payload: AiPlaygroundChatDTO = {
             modelId: selectedModelId,
-            messages: nextMessages.map(({role, content}) => ({role, content})),
+            messages: baseMessages.slice(-CONTEXT_MESSAGE_LIMIT).map(({role, content}) => ({role, content})),
             reasoningEffort,
-            sessionId: currentSessionId,
+            sessionId: chatSessionId,
             groupId,
         };
         try {
             if (streaming) {
-                setMessageList([...nextMessages, {role: "assistant", content: "", reasoningContent: ""}]);
+                setMessageList([...baseMessages, {role: "assistant", content: "", reasoningContent: ""}]);
                 try {
                     await chatStream(payload, chunk => {
                         setMessageList(prev => {
@@ -251,13 +292,13 @@ export default function AiPlaygroundPage() {
                 } catch (streamError) {
                     // Roll back the placeholder assistant message so a failed stream does not leave
                     // an empty-content message behind — it would fail the next request's @NotBlank.
-                    setMessageList(nextMessages);
+                    setMessageList(baseMessages);
                     throw streamError;
                 }
             } else {
                 const response = await chat(payload);
                 if (response.data) {
-                    setMessageList(prev => [...prev, {
+                    setMessageList([...baseMessages, {
                         role: "assistant",
                         content: response.data!.content,
                         reasoningContent: response.data!.reasoningContent,
@@ -275,6 +316,55 @@ export default function AiPlaygroundPage() {
         } finally {
             setSending(false);
         }
+    };
+
+    const sendMessage = async () => {
+        const content = input.trim();
+        if (!selectedModelId || !content || sending) return;
+        if (!groupId) {
+            void message.error(t("pages.aiPlayground.messages.groupRequired"));
+            return;
+        }
+        const currentSessionId = sessionId ?? crypto.randomUUID();
+        setSessionId(currentSessionId);
+        const userMessage: AiPlaygroundMessage = {role: "user", content};
+        const nextMessages = [...messageList, userMessage];
+        setMessageList(nextMessages);
+        setInput("");
+        await performChat(nextMessages, currentSessionId);
+    };
+
+    const retryMessage = async (index: number) => {
+        if (sending) return;
+        const baseMessages = messageList.slice(0, index);
+        setMessageList(baseMessages);
+        const chatSessionId = sessionId ?? crypto.randomUUID();
+        setSessionId(chatSessionId);
+        await performChat(baseMessages, chatSessionId);
+    };
+
+    const copyMessage = async (content: string) => {
+        try {
+            await navigator.clipboard.writeText(content);
+            void message.success(t("pages.aiPlayground.copySuccess"));
+        } catch {
+            // Clipboard unavailable — ignore.
+        }
+    };
+
+    const startEdit = (index: number) => {
+        setEditingIndex(index);
+        setEditingContent(messageList[index]?.content ?? "");
+    };
+
+    const saveEdit = () => {
+        if (editingIndex == null) return;
+        setMessageList(prev => prev.map((m, i) => i === editingIndex ? {...m, content: editingContent} : m));
+        setEditingIndex(null);
+    };
+
+    const deleteMessage = (index: number) => {
+        setMessageList(prev => prev.filter((_, i) => i !== index));
     };
 
     const toggleThinking = (index: number) => {
@@ -316,6 +406,7 @@ export default function AiPlaygroundPage() {
                 <div className="flex flex-1 min-h-0">
                     <div className="flex w-72 shrink-0 flex-col border-r" style={{borderColor: "var(--ant-color-border)"}}>
                         <div className="flex h-14 shrink-0 items-center border-b px-4">
+                            <Sparkles className="mr-2 text-gray-500" size={16} />
                             <Text strong>{t("pages.aiPlayground.modelTree")}</Text>
                         </div>
                         <div className="flex-1 min-h-0 overflow-auto p-4">
@@ -358,7 +449,7 @@ export default function AiPlaygroundPage() {
                                 ) : messageList.map((messageItem, index) => (
                                     <div
                                         key={`${messageItem.role}-${index}`}
-                                        className={`mb-3 flex ${messageItem.role === "user" ? "justify-end" : "justify-start"}`}
+                                        className={`mb-3 flex flex-col ${messageItem.role === "user" ? "items-end" : "items-start"}`}
                                     >
                                         <div className="max-w-[75%] whitespace-pre-wrap rounded-xl px-3 py-2" style={{background: messageItem.role === "user" ? "var(--ant-color-primary)" : "var(--ant-color-fill-secondary)", color: messageItem.role === "user" ? "white" : "inherit"}}>
                                             {messageItem.reasoningContent ? (
@@ -448,6 +539,21 @@ export default function AiPlaygroundPage() {
                                                 </div>
                                             ) : null}
                                         </div>
+                                        <div className="mt-1 flex items-center gap-0.5">
+                                            {messageItem.role === "assistant" ? (
+                                                <Button type="text" size="small" icon={<ReloadOutlined />} title={t("pages.aiPlayground.retry")} disabled={sending} onClick={() => void retryMessage(index)} />
+                                            ) : null}
+                                            <Button type="text" size="small" icon={<CopyOutlined />} title={t("pages.aiPlayground.copy")} onClick={() => void copyMessage(messageItem.content)} />
+                                            <Button type="text" size="small" icon={<EditOutlined />} title={t("pages.aiPlayground.edit")} onClick={() => startEdit(index)} />
+                                            <Popconfirm
+                                                title={t("pages.aiPlayground.deleteConfirm")}
+                                                onConfirm={() => deleteMessage(index)}
+                                                okText={t("components.managerPageContainer.confirm")}
+                                                cancelText={t("components.managerPageContainer.cancel")}
+                                            >
+                                                <Button type="text" size="small" icon={<DeleteOutlined />} title={t("pages.aiPlayground.delete")} />
+                                            </Popconfirm>
+                                        </div>
                                     </div>
                                 ))}
                                 {sending && <Spin size="small" />}
@@ -506,20 +612,60 @@ export default function AiPlaygroundPage() {
                                                 />
                                             </div>
                                         </div>
-                                        <Button
-                                            type="primary"
-                                            icon={<SendOutlined />}
-                                            loading={sending}
-                                            onClick={() => void sendMessage()}
-                                        >
-                                            {t("pages.aiPlayground.send")}
-                                        </Button>
+                                        <div className="flex items-center gap-3">
+                                            <Popover
+                                                title={selectedModel?.displayName ?? "-"}
+                                                content={
+                                                    <div className="grid w-48 grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                                        <span className="text-left">{t("pages.aiPlayground.currentInput")}</span>
+                                                        <span className="text-right">{contextUsage.used.toLocaleString()} ({contextUsage.percent}%)</span>
+                                                        <span className="text-left">{t("pages.aiPlayground.estimatedCache")}</span>
+                                                        <span className="text-right">{contextUsage.cached.toLocaleString()}</span>
+                                                        <span className="text-left">{t("pages.aiPlayground.cacheHitRate")}</span>
+                                                        <span className="text-right">{contextUsage.cacheHitRate}%</span>
+                                                        <span className="text-left">{t("pages.aiPlayground.maxWindow")}</span>
+                                                        <span className="text-right">{contextUsage.max.toLocaleString()}</span>
+                                                        <span className="text-left">{t("pages.aiPlayground.messageCount")}</span>
+                                                        <span className="text-right">{messageList.length} / {CONTEXT_MESSAGE_LIMIT}</span>
+                                                    </div>
+                                                }
+                                            >
+                                                <Progress
+                                                    type="circle"
+                                                    percent={Math.min(100, contextUsage.percent)}
+                                                    size={22}
+                                                    showInfo={false}
+                                                />
+                                            </Popover>
+                                            <Button
+                                                type="primary"
+                                                icon={<SendOutlined />}
+                                                loading={sending}
+                                                onClick={() => void sendMessage()}
+                                            >
+                                                {t("pages.aiPlayground.send")}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                     </div>
                 </div>
             </Card>
+            <Modal
+                title={t("pages.aiPlayground.edit")}
+                open={editingIndex != null}
+                onOk={saveEdit}
+                onCancel={() => setEditingIndex(null)}
+                okText={t("components.managerPageContainer.confirm")}
+                cancelText={t("components.managerPageContainer.cancel")}
+            >
+                <TextArea
+                    value={editingContent}
+                    onChange={event => setEditingContent(event.target.value)}
+                    autoSize={{minRows: 3, maxRows: 10}}
+                />
+            </Modal>
         </div>
     );
 }
