@@ -90,6 +90,9 @@ class AiModelInvocationRecordServiceImpl(
             maxTokens = (modelRequestConfig.maxOutputTokens ?: model.maxOutputTokens)?.toInt(),
             status = AiModelInvocationStatus.SUCCESS.typeId,
             stopReason = context.stopReason,
+            sessionId = context.sessionId,
+            clientIp = context.clientIp,
+            userAgent = context.userAgent,
         ).apply {
             newEntity()
         }
@@ -107,6 +110,9 @@ class AiModelInvocationRecordServiceImpl(
         errorCode: String,
         errorMessage: String,
         isStreaming: Boolean,
+        sessionId: String?,
+        clientIp: String?,
+        userAgent: String?,
     ) {
         val entity = AiModelInvocationRecordEntity(
             id = snowIdGenerator.nextId(),
@@ -121,6 +127,9 @@ class AiModelInvocationRecordServiceImpl(
             status = AiModelInvocationStatus.FAILED.typeId,
             errorCode = errorCode,
             errorMessage = errorMessage,
+            sessionId = sessionId,
+            clientIp = clientIp,
+            userAgent = userAgent,
         )
 
         repository.save(entity).awaitFirstOrNull()

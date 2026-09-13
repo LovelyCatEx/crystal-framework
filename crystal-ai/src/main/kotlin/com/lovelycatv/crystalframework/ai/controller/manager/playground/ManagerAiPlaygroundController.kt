@@ -17,6 +17,7 @@ import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.crystalframework.shared.utils.resolveClientIp
 import com.lovelycatv.vertex.ai.llm.ChatResponse
 import com.lovelycatv.vertex.ai.llm.message.AssistantChatMessage
 import com.lovelycatv.vertex.ai.llm.message.ChatMessage
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.http.codec.ServerSentEvent
+import org.springframework.web.server.ServerWebExchange
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -49,12 +51,18 @@ class ManagerAiPlaygroundController(
     )
     suspend fun chat(
         @Valid @RequestBody dto: ManagerAiPlaygroundChatDTO,
+        exchange: ServerWebExchange,
     ): ApiResponse<ManagerAiPlaygroundChatVO> {
         val modelId = dto.modelId.toLongOrNull()?.takeIf { it > 0 }
             ?: throw BusinessException("Invalid AI model ID")
 
         val messages = dto.messages.map(::toMessage)
-        val result = aiChatService.chatCompletionSync(modelId, messages, dto.reasoningEffort)
+        val result = aiChatService.chatCompletionSync(
+            modelId, messages, dto.reasoningEffort,
+            sessionId = dto.sessionId,
+            clientIp = exchange.request.resolveClientIp(),
+            userAgent = exchange.request.headers.getFirst("User-Agent"),
+        )
         val assistantMessage = result.response.choices.firstOrNull()?.message
 
         return ApiResponse.success(
@@ -77,6 +85,7 @@ class ManagerAiPlaygroundController(
     @PostMapping("/chat-stream", version = "1")
     suspend fun chatStream(
         @Valid @RequestBody dto: ManagerAiPlaygroundChatDTO,
+        exchange: ServerWebExchange,
     ): Flux<ServerSentEvent<ManagerAiPlaygroundStreamChunkVO>> {
         val modelId = dto.modelId.toLongOrNull()?.takeIf { it > 0 }
             ?: throw BusinessException("Invalid AI model ID")
@@ -94,7 +103,12 @@ class ManagerAiPlaygroundController(
 
         val messages = dto.messages.map(::toMessage)
 
-        return aiChatService.chatCompletionAsync(modelId, messages, dto.reasoningEffort)
+        return aiChatService.chatCompletionAsync(
+            modelId, messages, dto.reasoningEffort,
+            sessionId = dto.sessionId,
+            clientIp = exchange.request.resolveClientIp(),
+            userAgent = exchange.request.headers.getFirst("User-Agent"),
+        )
             .scan<AiChatStreamEvent, StreamState?>(null) { acc, event ->
                 when (event) {
                     is AiChatStreamEvent.Chunk -> StreamState(event, mergeUsage(acc?.usage, event.chunk.usage))

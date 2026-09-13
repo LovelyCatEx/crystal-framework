@@ -51,9 +51,12 @@ class AiChatServiceImpl(
     override suspend fun chatCompletionSync(
         modelId: Long,
         messages: List<ChatMessage>,
-        reasoningEffort: ReasoningEffort?
+        reasoningEffort: ReasoningEffort?,
+        sessionId: String?,
+        clientIp: String?,
+        userAgent: String?
     ): AiChatCompletionResult {
-        val subject = resolveSubject(modelId, messages.size)
+        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -98,11 +101,7 @@ class AiChatServiceImpl(
             response ?: throw BusinessException("No response from model")
         } catch (expected: Exception) {
             recordFailure(subject, expected.javaClass.simpleName, describe(expected), isStreaming = false)
-            throw if (expected is BusinessException) {
-                expected
-            } else {
-                BusinessException(failureMessage(subject.provider, describe(expected)))
-            }
+            throw expected as? BusinessException ?: BusinessException(failureMessage(subject.provider, describe(expected)))
         }
 
         val assistantMessage = finalResponse.choices.firstOrNull()?.message
@@ -124,6 +123,9 @@ class AiChatServiceImpl(
                     stopReason = assistantMessage?.stopReasonString,
                     rawRequestBody = rawRequestBody,
                     rawResponseBody = finalResponse.originalResponse,
+                    sessionId = subject.sessionId,
+                    clientIp = subject.clientIp,
+                    userAgent = subject.userAgent,
                 ),
                 model = subject.model,
             )
@@ -146,9 +148,12 @@ class AiChatServiceImpl(
     override suspend fun chatCompletionAsync(
         modelId: Long,
         messages: List<ChatMessage>,
-        reasoningEffort: ReasoningEffort?
+        reasoningEffort: ReasoningEffort?,
+        sessionId: String?,
+        clientIp: String?,
+        userAgent: String?
     ): Flow<AiChatStreamEvent> {
-        val subject = resolveSubject(modelId, messages.size)
+        val subject = resolveSubject(modelId, messages.size, sessionId, clientIp, userAgent)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
         val tools = CommonAiTools.declarations
@@ -237,6 +242,9 @@ class AiChatServiceImpl(
                         stopReason = stopReason,
                         rawRequestBody = rawRequestBody,
                         rawResponseBody = rawResponseBody,
+                        sessionId = subject.sessionId,
+                        clientIp = subject.clientIp,
+                        userAgent = subject.userAgent,
                     ),
                     model = subject.model,
                 )
@@ -244,7 +252,13 @@ class AiChatServiceImpl(
         }
     }
 
-    private suspend fun resolveSubject(modelId: Long, messageCount: Int): InvocationSubject {
+    private suspend fun resolveSubject(
+        modelId: Long,
+        messageCount: Int,
+        sessionId: String?,
+        clientIp: String?,
+        userAgent: String?
+    ): InvocationSubject {
         val startedAt = System.currentTimeMillis()
 
         val model = aiModelManagerService.getByIdOrNull(modelId)
@@ -270,6 +284,9 @@ class AiChatServiceImpl(
             provider = provider,
             messageCount = messageCount,
             startedAt = startedAt,
+            sessionId = sessionId,
+            clientIp = clientIp,
+            userAgent = userAgent,
         )
     }
 
@@ -291,6 +308,7 @@ class AiChatServiceImpl(
             reasoningEffort = reasoningEffort ?: provider.getRealProtocolType().defaultReasoningEffort(),
             maxCompletionTokens = resolveMaxCompletionTokens(model, modelRequestConfig),
             temperature = modelRequestConfig.temperature?.toFloat(),
+            topP = modelRequestConfig.topP?.toFloat(),
             // Passed through untouched, nulls included: a null entry is VertexLib's way of dropping
             // the field from the body, which is how a provider that rejects a derived field is
             // configured.
@@ -369,6 +387,9 @@ class AiChatServiceImpl(
                 errorCode = errorCode,
                 errorMessage = errorMessage,
                 isStreaming = isStreaming,
+                sessionId = subject.sessionId,
+                clientIp = subject.clientIp,
+                userAgent = subject.userAgent,
             )
         }
     }
@@ -413,6 +434,9 @@ class AiChatServiceImpl(
         val provider: AiProviderEntity,
         val messageCount: Int,
         val startedAt: Long,
+        val sessionId: String?,
+        val clientIp: String?,
+        val userAgent: String?,
     ) {
         val durationMs: Long get() = System.currentTimeMillis() - startedAt
     }

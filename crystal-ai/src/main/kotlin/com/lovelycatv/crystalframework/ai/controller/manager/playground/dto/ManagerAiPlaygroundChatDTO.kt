@@ -18,4 +18,5 @@ data class ManagerAiPlaygroundChatDTO(
      * `typeId`, so it travels by name the way `ForbiddenReason` does.
      */
     val reasoningEffort: ReasoningEffort? = null,
+    val sessionId: String? = null,
 )

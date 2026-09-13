@@ -19,5 +19,8 @@ interface AiModelInvocationRecordService {
         errorCode: String,
         errorMessage: String,
         isStreaming: Boolean,
+        sessionId: String?,
+        clientIp: String?,
+        userAgent: String?,
     )
 }

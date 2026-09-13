@@ -28,4 +28,7 @@ data class AiInvocationContext(
     val stopReason: String?,
     val rawRequestBody: String?,
     val rawResponseBody: String?,
+    val sessionId: String?,
+    val clientIp: String?,
+    val userAgent: String?,
 )

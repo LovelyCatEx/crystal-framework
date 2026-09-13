@@ -6,6 +6,7 @@ import tools.jackson.databind.ser.std.ToStringSerializer
 
 data class AiModelRequestConfig(
     val temperature: BigDecimal? = null,
+    val topP: BigDecimal? = null,
     @get:JsonSerialize(using = ToStringSerializer::class)
     val maxOutputTokens: Long? = null,
     val additionalBody: Map<String, Any?> = emptyMap(),

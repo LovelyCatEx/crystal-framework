@@ -30,6 +30,7 @@ export interface AiPlaygroundChatDTO {
     messages: AiPlaygroundMessage[];
     /** Omitted to let the provider's protocol pick the level. */
     reasoningEffort?: ReasoningEffort;
+    sessionId?: string;
 }
 
 export interface AiPlaygroundChatVO {

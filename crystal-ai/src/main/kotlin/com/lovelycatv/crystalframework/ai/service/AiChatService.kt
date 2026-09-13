@@ -26,7 +26,10 @@ interface AiChatService {
     suspend fun chatCompletionSync(
         modelId: Long,
         messages: List<ChatMessage>,
-        reasoningEffort: ReasoningEffort? = null
+        reasoningEffort: ReasoningEffort? = null,
+        sessionId: String? = null,
+        clientIp: String? = null,
+        userAgent: String? = null
     ): AiChatCompletionResult
 
     /**
@@ -44,6 +47,9 @@ interface AiChatService {
     suspend fun chatCompletionAsync(
         modelId: Long,
         messages: List<ChatMessage>,
-        reasoningEffort: ReasoningEffort? = null
+        reasoningEffort: ReasoningEffort? = null,
+        sessionId: String? = null,
+        clientIp: String? = null,
+        userAgent: String? = null
     ): Flow<AiChatStreamEvent>
 }

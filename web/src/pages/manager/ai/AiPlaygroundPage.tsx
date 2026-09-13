@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Empty, Input, message, Select, Spin, Switch, Typography} from "antd";
-import {BulbOutlined, DownOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
+import {Button, Card, Empty, Input, message, Popconfirm, Select, Spin, Switch, Typography} from "antd";
+import {BulbOutlined, DownOutlined, PlusOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
@@ -17,6 +17,38 @@ const {Text} = Typography;
 /** Select value meaning "send nothing and let the provider's protocol choose". */
 const REASONING_EFFORT_PROTOCOL_DEFAULT = "";
 
+const SESSION_STORAGE_KEY_PREFIX = "ai_playground:";
+
+interface StoredSession {
+    sessionId: string;
+    messages: AiPlaygroundMessage[];
+}
+
+function loadStoredSession(modelId: string): StoredSession | null {
+    try {
+        const raw = localStorage.getItem(`${SESSION_STORAGE_KEY_PREFIX}${modelId}`);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw) as StoredSession;
+        if (parsed && typeof parsed.sessionId === "string" && Array.isArray(parsed.messages)) {
+            return parsed;
+        }
+    } catch {
+        // Ignore malformed entries.
+    }
+    return null;
+}
+
+function saveStoredSession(modelId: string, sessionId: string, messages: AiPlaygroundMessage[]): void {
+    try {
+        localStorage.setItem(
+            `${SESSION_STORAGE_KEY_PREFIX}${modelId}`,
+            JSON.stringify({sessionId, messages}),
+        );
+    } catch {
+        // Ignore quota / serialization errors.
+    }
+}
+
 export default function AiPlaygroundPage() {
     const {t} = useTranslation();
     const [providers, setProviders] = useState<AiProviderEntity[]>([]);
@@ -30,6 +62,7 @@ export default function AiPlaygroundPage() {
     const [sending, setSending] = useState(false);
     const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort | undefined>(undefined);
     const [streaming, setStreaming] = useState(true);
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -58,6 +91,12 @@ export default function AiPlaygroundPage() {
         messageListRef.current?.scrollTo({top: messageListRef.current.scrollHeight});
     }, [messageList]);
 
+    useEffect(() => {
+        if (selectedModelId && sessionId) {
+            saveStoredSession(selectedModelId, sessionId, messageList);
+        }
+    }, [selectedModelId, sessionId, messageList]);
+
     const treeData = useMemo<DataNode[]>(() => providers.map(provider => ({
         key: `provider:${provider.id}`,
         title: provider.name,
@@ -85,14 +124,31 @@ export default function AiPlaygroundPage() {
         if (!key?.startsWith("model:")) return;
         const modelId = key.substring("model:".length);
         setSelectedModelId(modelId);
-        setMessageList([]);
         setExpandedThinking(new Set());
         setInput("");
+        const stored = loadStoredSession(modelId);
+        if (stored) {
+            setSessionId(stored.sessionId);
+            setMessageList(stored.messages);
+        } else {
+            setSessionId(crypto.randomUUID());
+            setMessageList([]);
+        }
+    };
+
+    const startNewSession = () => {
+        setMessageList([]);
+        setExpandedThinking(new Set());
+        setExpandedToolCalls(new Set());
+        setInput("");
+        setSessionId(crypto.randomUUID());
     };
 
     const sendMessage = async () => {
         const content = input.trim();
         if (!selectedModelId || !content || sending) return;
+        const currentSessionId = sessionId ?? crypto.randomUUID();
+        setSessionId(currentSessionId);
         const userMessage: AiPlaygroundMessage = {role: "user", content};
         const nextMessages = [...messageList, userMessage];
         setMessageList(nextMessages);
@@ -102,6 +158,7 @@ export default function AiPlaygroundPage() {
             modelId: selectedModelId,
             messages: nextMessages.map(({role, content}) => ({role, content})),
             reasoningEffort,
+            sessionId: currentSessionId,
         };
         try {
             if (streaming) {
@@ -196,6 +253,18 @@ export default function AiPlaygroundPage() {
                     content: (
                         <Card
                             title={selectedModel?.displayName}
+                            extra={
+                                <Popconfirm
+                                    title={t("pages.aiPlayground.newSessionConfirm")}
+                                    onConfirm={startNewSession}
+                                    okText={t("components.managerPageContainer.confirm")}
+                                    cancelText={t("components.managerPageContainer.cancel")}
+                                >
+                                    <Button size="small" icon={<PlusOutlined />}>
+                                        {t("pages.aiPlayground.newSession")}
+                                    </Button>
+                                </Popconfirm>
+                            }
                             className="flex h-full min-h-96 flex-col border-none shadow-sm rounded-2xl overflow-hidden"
                             styles={{body: {display: "flex", flex: 1, flexDirection: "column", minHeight: 0}}}
                         >
