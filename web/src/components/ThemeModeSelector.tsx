@@ -1,6 +1,7 @@
-import {Segmented} from "antd";
+import {Button, Segmented} from "antd";
 import {MoonOutlined, SunOutlined} from "@ant-design/icons";
 import type {ThemeMode} from "@/types/theme.types.ts";
+import {useDeviceType} from "@/compositions/use-device-type.ts";
 
 interface ThemeModeSelectorProps {
     value: ThemeMode;
@@ -15,6 +16,18 @@ export function ThemeModeSelector({
     size = "middle",
     shape = "round",
 }: ThemeModeSelectorProps) {
+    const isMobile = useDeviceType() === "mobile";
+
+    if (isMobile) {
+        return (
+            <Button
+                type="text"
+                icon={value === "dark" ? <MoonOutlined /> : <SunOutlined />}
+                onClick={() => onChange(value === "dark" ? "light" : "dark")}
+            />
+        );
+    }
+
     return (
         <Segmented
             value={value}

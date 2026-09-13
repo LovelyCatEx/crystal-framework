@@ -65,7 +65,7 @@ export function LanguageSwitcher() {
         type="text"
         icon={<GlobalOutlined />}
       >
-        {currentLanguage.label}
+        <span className="hidden md:inline">{currentLanguage.label}</span>
       </Button>
     </Dropdown>
   );

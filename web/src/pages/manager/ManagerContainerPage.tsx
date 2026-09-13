@@ -709,8 +709,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             >
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <img src="/logo.svg" alt="Logo" className="w-8 h-8"/>
-                        <span className="text-2xl font-bold tracking-tight" style={{ color: token.colorTextHeading }}>
+                        <img src="/logo.svg" alt="Logo" className="w-8 h-8 shrink-0"/>
+                        <span className="text-2xl font-bold tracking-tight hidden md:inline" style={{ color: token.colorTextHeading }}>
                             {ProjectDisplayName}
                         </span>
                     </div>
