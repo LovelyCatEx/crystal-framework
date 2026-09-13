@@ -8,6 +8,7 @@ export interface AiPlaygroundMessage {
     content: string;
     reasoningContent?: string;
     usage?: AiPlaygroundUsage;
+    toolCalls?: AiPlaygroundToolCall[];
 }
 
 export interface AiPlaygroundUsage {
@@ -16,6 +17,12 @@ export interface AiPlaygroundUsage {
     reasoningTokens: number;
     cachedPromptTokens: number;
     cacheCreationTokens: number;
+}
+
+export interface AiPlaygroundToolCall {
+    toolName: string;
+    arguments: Record<string, any> | null;
+    result: string;
 }
 
 export interface AiPlaygroundChatDTO {
@@ -29,6 +36,7 @@ export interface AiPlaygroundChatVO {
     content: string;
     reasoningContent?: string;
     usage?: AiPlaygroundUsage | null;
+    toolCalls?: AiPlaygroundToolCall[] | null;
 }
 
 export interface AiPlaygroundStreamChunk {
@@ -36,6 +44,7 @@ export interface AiPlaygroundStreamChunk {
     reasoningContent: string | null;
     finished: boolean;
     usage?: AiPlaygroundUsage | null;
+    toolCall?: AiPlaygroundToolCall | null;
 }
 
 export function chat(dto: AiPlaygroundChatDTO) {

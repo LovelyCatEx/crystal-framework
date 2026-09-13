@@ -940,6 +940,7 @@ export const zhCN: I18nRules = {
       usageReasoningTokens: '推理',
       usageCachedTokens: '缓存读取',
       usageCacheCreationTokens: '缓存写入',
+      usageToolCalls: '工具',
       messages: {
         loadFailed: '加载 AI 模型失败',
         chatFailed: '发送消息失败'

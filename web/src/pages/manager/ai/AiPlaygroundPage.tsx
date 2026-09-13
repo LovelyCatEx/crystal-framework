@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from "react";
 import {Button, Card, Empty, Input, message, Select, Spin, Switch, Typography} from "antd";
-import {BulbOutlined, DownOutlined, SendOutlined} from "@ant-design/icons";
+import {BulbOutlined, DownOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
@@ -24,6 +24,7 @@ export default function AiPlaygroundPage() {
     const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
     const [messageList, setMessageList] = useState<AiPlaygroundMessage[]>([]);
     const [expandedThinking, setExpandedThinking] = useState<Set<number>>(new Set());
+    const [expandedToolCalls, setExpandedToolCalls] = useState<Set<string>>(new Set());
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
@@ -115,6 +116,7 @@ export default function AiPlaygroundPage() {
                                 content: (last.content || "") + (chunk.content || ""),
                                 reasoningContent: (last.reasoningContent || "") + (chunk.reasoningContent || ""),
                                 usage: chunk.usage ?? last.usage,
+                                toolCalls: chunk.toolCall ? [...(last.toolCalls || []), chunk.toolCall] : last.toolCalls,
                             };
                             return next;
                         });
@@ -133,6 +135,7 @@ export default function AiPlaygroundPage() {
                         content: response.data!.content,
                         reasoningContent: response.data!.reasoningContent,
                         usage: response.data!.usage ?? undefined,
+                        toolCalls: response.data!.toolCalls ?? undefined,
                     }]);
                 }
             }
@@ -154,6 +157,18 @@ export default function AiPlaygroundPage() {
                 next.delete(index);
             } else {
                 next.add(index);
+            }
+            return next;
+        });
+    };
+
+    const toggleToolCall = (key: string) => {
+        setExpandedToolCalls(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) {
+                next.delete(key);
+            } else {
+                next.add(key);
             }
             return next;
         });
@@ -216,6 +231,39 @@ export default function AiPlaygroundPage() {
                                                     )}
                                                 </>
                                             ) : null}
+                                            {messageItem.toolCalls && messageItem.toolCalls.length > 0 ? (
+                                                <div className="mb-2 flex flex-col gap-1">
+                                                    {messageItem.toolCalls.map((toolCall, toolIndex) => {
+                                                        const toolKey = `${index}-${toolIndex}`;
+                                                        const toolExpanded = expandedToolCalls.has(toolKey);
+                                                        const hasArguments = toolCall.arguments != null && Object.keys(toolCall.arguments).length > 0;
+                                                        return (
+                                                            <div key={toolIndex}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => hasArguments && toggleToolCall(toolKey)}
+                                                                    className="flex items-center gap-1.5 text-xs"
+                                                                    style={{color: "var(--ant-color-text-secondary)", cursor: hasArguments ? "pointer" : "default", background: "transparent", border: "none", padding: 0}}
+                                                                >
+                                                                    <ToolOutlined />
+                                                                    <span className="font-medium">{toolCall.toolName}</span>
+                                                                    {hasArguments ? <DownOutlined style={{transition: "transform 0.2s", transform: toolExpanded ? "rotate(180deg)" : "none"}} /> : null}
+                                                                    <span>→</span>
+                                                                    <span className="break-all">{toolCall.result}</span>
+                                                                </button>
+                                                                {toolExpanded && hasArguments ? (
+                                                                    <div className="mt-1 flex gap-1.5 text-xs">
+                                                                        <ToolOutlined style={{visibility: "hidden"}} />
+                                                                        <pre className="m-0 flex-1 whitespace-pre-wrap" style={{color: "var(--ant-color-text-secondary)"}}>
+                                                                            {JSON.stringify(toolCall.arguments, null, 2)}
+                                                                        </pre>
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : null}
                                             {messageItem.content}
                                             {messageItem.usage ? (
                                                 <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs" style={{color: "var(--ant-color-text-tertiary)"}}>
@@ -238,6 +286,12 @@ export default function AiPlaygroundPage() {
                                                         <>
                                                             <span>·</span>
                                                             <span>{t("pages.aiPlayground.usageCacheCreationTokens")} {messageItem.usage.cacheCreationTokens}</span>
+                                                        </>
+                                                    ) : null}
+                                                    {messageItem.toolCalls && messageItem.toolCalls.length > 0 ? (
+                                                        <>
+                                                            <span>·</span>
+                                                            <span>{t("pages.aiPlayground.usageToolCalls")} {messageItem.toolCalls.length}</span>
                                                         </>
                                                     ) : null}
                                                 </div>

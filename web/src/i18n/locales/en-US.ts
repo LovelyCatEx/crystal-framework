@@ -943,6 +943,7 @@ export const enUS: I18nRules = {
       usageReasoningTokens: 'Reasoning',
       usageCachedTokens: 'Cached read',
       usageCacheCreationTokens: 'Cache write',
+      usageToolCalls: 'Tools',
       messages: {
         loadFailed: 'Failed to load AI models',
         chatFailed: 'Failed to send message'

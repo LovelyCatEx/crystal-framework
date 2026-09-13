@@ -7,7 +7,11 @@ import com.lovelycatv.crystalframework.ai.service.AiModelInvocationRecordService
 import com.lovelycatv.crystalframework.ai.service.factory.AiLlmClientFactory
 import com.lovelycatv.crystalframework.ai.service.manager.AiModelManagerService
 import com.lovelycatv.crystalframework.ai.service.manager.AiProviderManagerService
+import com.lovelycatv.crystalframework.ai.tool.CommonAiTools
+import com.lovelycatv.crystalframework.ai.types.AiChatCompletionResult
+import com.lovelycatv.crystalframework.ai.types.AiChatStreamEvent
 import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
+import com.lovelycatv.crystalframework.ai.types.AiToolCallResult
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
 import com.lovelycatv.crystalframework.ai.types.AiProviderProtocolType
 import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
@@ -19,7 +23,11 @@ import com.lovelycatv.vertex.ai.llm.ErrorChatResponse
 import com.lovelycatv.vertex.ai.llm.ErrorStreamChatResponse
 import com.lovelycatv.vertex.ai.llm.ReasoningEffort
 import com.lovelycatv.vertex.ai.llm.StreamChatResponse
+import com.lovelycatv.vertex.ai.llm.message.AssistantChatMessage
 import com.lovelycatv.vertex.ai.llm.message.ChatMessage
+import com.lovelycatv.vertex.ai.llm.message.ToolCall
+import com.lovelycatv.vertex.ai.llm.message.ToolChatMessage
+import com.lovelycatv.vertex.ai.llm.tool.ToolDeclaration
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,27 +52,60 @@ class AiChatServiceImpl(
         modelId: Long,
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort?
-    ): ChatResponse {
+    ): AiChatCompletionResult {
         val subject = resolveSubject(modelId, messages.size)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
-        val chatRequest = buildChatRequest(subject.model, subject.provider, messages, false, reasoningEffort)
-        val rawRequestBody = client.transformRequestBody(chatRequest)
+        val tools = CommonAiTools.declarations
 
-        val response = try {
-            client.chatCompletion(chatRequest)
+        var currentMessages = messages
+        var accumulatedUsage = ChatResponse.Usage()
+        var totalToolCalls = 0
+        var rawRequestBody: String? = null
+        val toolCallResults = mutableListOf<AiToolCallResult>()
+
+        val finalResponse = try {
+            var response: ChatResponse? = null
+            var assistantMessage: AssistantChatMessage? = null
+
+            for (iteration in 0 until MAX_TOOL_ITERATIONS) {
+                val chatRequest = buildChatRequest(subject.model, subject.provider, currentMessages, false, reasoningEffort, tools)
+                rawRequestBody = client.transformRequestBody(chatRequest)
+
+                response = client.chatCompletion(chatRequest)
+
+                if (response is ErrorChatResponse) {
+                    throw BusinessException(failureMessage(subject.provider, response.errorMessage))
+                }
+
+                assistantMessage = response.choices.firstOrNull()?.message
+                accumulatedUsage += response.usage
+                totalToolCalls += assistantMessage?.toolCalls?.size ?: 0
+
+                if (assistantMessage == null || !assistantMessage.hasToolCall) {
+                    break
+                }
+
+                val executed = executeToolCalls(assistantMessage)
+                toolCallResults.addAll(executed.map { it.result })
+                currentMessages = currentMessages + assistantMessage + executed.map { it.toolMessage }
+            }
+
+            if (assistantMessage?.hasToolCall == true) {
+                throw BusinessException("Exceeded max tool iterations")
+            }
+
+            response ?: throw BusinessException("No response from model")
         } catch (expected: Exception) {
             recordFailure(subject, expected.javaClass.simpleName, describe(expected), isStreaming = false)
-            throw BusinessException(failureMessage(subject.provider, describe(expected)))
+            throw if (expected is BusinessException) {
+                expected
+            } else {
+                BusinessException(failureMessage(subject.provider, describe(expected)))
+            }
         }
 
-        // A refused call comes back as a well-formed error envelope rather than an exception.
-        if (response is ErrorChatResponse) {
-            recordFailure(subject, response.javaClass.simpleName, response.errorMessage, isStreaming = false)
-            throw BusinessException(failureMessage(subject.provider, response.errorMessage))
-        }
-
-        val assistantMessage = response.choices.firstOrNull()?.message
+        val assistantMessage = finalResponse.choices.firstOrNull()?.message
 
         launchRecording {
             invocationRecordService.recordInvocationFromContext(
@@ -74,65 +115,109 @@ class AiChatServiceImpl(
                     modelId = subject.model.id,
                     providerId = subject.provider.id,
                     messageCount = subject.messageCount,
-                    toolCallsCount = assistantMessage?.toolCalls?.size ?: 0,
-                    responseMetadataId = response.id,
+                    toolCallsCount = totalToolCalls,
+                    responseMetadataId = finalResponse.id,
                     durationMs = subject.durationMs,
                     isStreaming = false,
                     timeToFirstTokenMs = null,
-                    usage = response.usage,
+                    usage = accumulatedUsage,
                     stopReason = assistantMessage?.stopReasonString,
                     rawRequestBody = rawRequestBody,
-                    rawResponseBody = response.originalResponse,
+                    rawResponseBody = finalResponse.originalResponse,
                 ),
                 model = subject.model,
             )
         }
 
-        return response
+        return AiChatCompletionResult(
+            response = ChatResponse(
+                success = finalResponse.success,
+                id = finalResponse.id,
+                timestamp = finalResponse.timestamp,
+                model = finalResponse.model,
+                choices = finalResponse.choices,
+                usage = accumulatedUsage,
+                originalResponse = finalResponse.originalResponse,
+            ),
+            toolCalls = toolCallResults,
+        )
     }
 
     override suspend fun chatCompletionAsync(
         modelId: Long,
         messages: List<ChatMessage>,
         reasoningEffort: ReasoningEffort?
-    ): Flow<StreamChatResponse> {
+    ): Flow<AiChatStreamEvent> {
         val subject = resolveSubject(modelId, messages.size)
 
         val client = aiLlmClientFactory.getClient(subject.provider)
-        val chatRequest = buildChatRequest(subject.model, subject.provider, messages, true, reasoningEffort)
-        val rawRequestBody = client.transformRequestBody(chatRequest)
+        val tools = CommonAiTools.declarations
 
         return flow {
-            val merged = StreamingMerge()
+            var currentMessages = messages
+            var accumulatedUsage = ChatResponse.Usage()
+            var totalToolCalls = 0
             var firstTokenTime: Long? = null
+            var rawRequestBody: String? = null
+            var responseMetadataId = ""
+            var stopReason: String? = null
+            var rawResponseBody: String? = null
 
             try {
-                // Called here, inside the flow builder, and not before it: the client issues the HTTP
-                // request as soon as it is invoked, while only the flow it returns closes the
-                // response body. Calling it outside would leave an unconsumed body behind whenever
-                // the caller never collects.
-                client.chatCompletionAsync(chatRequest).collect { frame ->
-                    if (frame is ErrorStreamChatResponse) {
-                        throw BusinessException(frame.errorMessage)
+                var finalized = false
+
+                for (iteration in 0 until MAX_TOOL_ITERATIONS) {
+                    val chatRequest = buildChatRequest(subject.model, subject.provider, currentMessages, true, reasoningEffort, tools)
+                    rawRequestBody = client.transformRequestBody(chatRequest)
+
+                    val round = StreamingRound()
+                    // Called here, inside the flow builder, and not before it: the client issues the
+                    // HTTP request as soon as it is invoked, while only the flow it returns closes the
+                    // response body. Calling it outside would leave an unconsumed body behind whenever
+                    // the caller never collects.
+                    client.chatCompletionAsync(chatRequest).collect { frame ->
+                        if (frame is ErrorStreamChatResponse) {
+                            throw BusinessException(frame.errorMessage)
+                        }
+
+                        if (firstTokenTime == null) {
+                            firstTokenTime = System.currentTimeMillis()
+                        }
+
+                        round.accept(frame)
+                        emit(AiChatStreamEvent.Chunk(frame))
                     }
 
-                    if (firstTokenTime == null) {
-                        firstTokenTime = System.currentTimeMillis()
+                    // A rejected call carries no `data:` line at all — just a JSON or HTML error body —
+                    // so the reader runs out of input and the flow completes normally. Producing nothing
+                    // is therefore the only signal that it failed.
+                    if (!round.receivedAnyFrame) {
+                        throw BusinessException("provider returned no stream events")
                     }
 
-                    merged.accept(frame)
-                    emit(frame)
+                    accumulatedUsage += round.usage
+                    totalToolCalls += round.toolCalls.size
+
+                    if (!round.hasToolCall) {
+                        responseMetadataId = round.responseId.orEmpty()
+                        stopReason = round.stopReason
+                        rawResponseBody = round.rawResponseBody
+                        finalized = true
+                        break
+                    }
+
+                    val assistantMessage = round.toAssistantMessage()
+                    val executed = executeToolCalls(assistantMessage)
+                    executed.forEach { emit(AiChatStreamEvent.ToolCall(it.result)) }
+                    currentMessages = currentMessages + assistantMessage + executed.map { it.toolMessage }
                 }
 
-                // A rejected call carries no `data:` line at all — just a JSON or HTML error body —
-                // so the reader runs out of input and the flow completes normally. Producing nothing
-                // is therefore the only signal that it failed.
-                if (!merged.receivedAnyFrame) {
-                    throw BusinessException("provider returned no stream events")
+                if (!finalized) {
+                    throw BusinessException("Exceeded max tool iterations")
                 }
             } catch (expected: Exception) {
                 recordFailure(subject, expected.javaClass.simpleName, describe(expected), isStreaming = true)
-                throw BusinessException(failureMessage(subject.provider, describe(expected)))
+                throw expected as? BusinessException ?: BusinessException(failureMessage(subject.provider, describe(expected)))
             }
 
             launchRecording {
@@ -143,15 +228,15 @@ class AiChatServiceImpl(
                         modelId = subject.model.id,
                         providerId = subject.provider.id,
                         messageCount = subject.messageCount,
-                        toolCallsCount = merged.toolCallsCount,
-                        responseMetadataId = merged.responseId.orEmpty(),
+                        toolCallsCount = totalToolCalls,
+                        responseMetadataId = responseMetadataId,
                         durationMs = subject.durationMs,
                         isStreaming = true,
                         timeToFirstTokenMs = firstTokenTime?.let { it - subject.startedAt },
-                        usage = merged.usage,
-                        stopReason = merged.stopReason,
+                        usage = accumulatedUsage,
+                        stopReason = stopReason,
                         rawRequestBody = rawRequestBody,
-                        rawResponseBody = merged.rawResponseBody,
+                        rawResponseBody = rawResponseBody,
                     ),
                     model = subject.model,
                 )
@@ -193,7 +278,8 @@ class AiChatServiceImpl(
         provider: AiProviderEntity,
         messages: List<ChatMessage>,
         stream: Boolean,
-        reasoningEffort: ReasoningEffort?
+        reasoningEffort: ReasoningEffort?,
+        tools: List<ToolDeclaration>?
     ): ChatRequest {
         val modelRequestConfig = model.getRequestConfigObject<AiModelRequestConfig>()
 
@@ -201,6 +287,7 @@ class AiChatServiceImpl(
             model = model.key,
             messages = messages,
             stream = stream,
+            tools = tools,
             reasoningEffort = reasoningEffort ?: provider.getRealProtocolType().defaultReasoningEffort(),
             maxCompletionTokens = resolveMaxCompletionTokens(model, modelRequestConfig),
             temperature = modelRequestConfig.temperature?.toFloat(),
@@ -223,6 +310,30 @@ class AiChatServiceImpl(
 
         return maxOutputTokens.toInt()
     }
+
+    /**
+     * Runs each tool call the model produced, feeding the result back as a [ToolChatMessage]. A tool
+     * that throws is turned into an error result instead of aborting the loop, so the model can see
+     * the failure and correct itself.
+     */
+    private fun executeToolCalls(message: AssistantChatMessage): List<ExecutedTool> {
+        return message.toolCalls.orEmpty().map { call ->
+            val result = try {
+                CommonAiTools.execute(call.toolName, call.arguments)
+            } catch (expected: Exception) {
+                "Error: ${expected.message}"
+            }
+            ExecutedTool(
+                toolMessage = ToolChatMessage(call.id, result),
+                result = AiToolCallResult(call.toolName, call.arguments, result),
+            )
+        }
+    }
+
+    private data class ExecutedTool(
+        val toolMessage: ToolChatMessage,
+        val result: AiToolCallResult,
+    )
 
     /**
      * The effort level a caller did not ask for, picked so it changes the least about what the
@@ -281,6 +392,16 @@ class AiChatServiceImpl(
         return "AI provider '${provider.name}' call failed: $reason"
     }
 
+    private operator fun ChatResponse.Usage.plus(other: ChatResponse.Usage): ChatResponse.Usage {
+        return ChatResponse.Usage(
+            promptTokens = promptTokens + other.promptTokens,
+            completionTokens = completionTokens + other.completionTokens,
+            reasoningTokens = reasoningTokens + other.reasoningTokens,
+            cachedPromptTokens = cachedPromptTokens + other.cachedPromptTokens,
+            cacheCreationTokens = cacheCreationTokens + other.cacheCreationTokens,
+        )
+    }
+
     /**
      * Which invocation is being recorded — the part that is identical whether the call succeeds or
      * fails, resolved once up front.
@@ -297,15 +418,17 @@ class AiChatServiceImpl(
     }
 
     /**
-     * Folds a stream into the single set of numbers an audit record needs.
+     * Folds one stream round into the shape a tool-calling loop needs: the concatenated text and
+     * the finalized tool calls. Frames are forwarded to the caller as they arrive rather than
+     * buffered here, so the stream stays live across tool-calling rounds.
      *
-     * Each field is taken from the last frame that actually carries a value, not from the last
-     * frame outright: a stream ends on `message_stop`, which has no delta and no usage, and
-     * Anthropic splits usage across `message_start` (prompt) and `message_delta` (completion).
-     * These counters are running totals, so keeping the largest value seen lands on the final one
-     * without having to know which event type reports which field.
+     * Each usage field is a running total within the round, so the merged value is the largest seen
+     * for that field — Anthropic splits usage across `message_start` (prompt) and `message_delta`
+     * (completion), OpenAI reports everything on the final frame.
      */
-    private class StreamingMerge {
+    private class StreamingRound {
+        val toolCalls = mutableListOf<ToolCall>()
+
         var receivedAnyFrame: Boolean = false
             private set
 
@@ -318,13 +441,13 @@ class AiChatServiceImpl(
         var rawResponseBody: String? = null
             private set
 
-        var toolCallsCount: Int = 0
-            private set
-
         var usage: ChatResponse.Usage = ChatResponse.Usage()
             private set
 
-        private val completedToolCallKeys = mutableSetOf<String>()
+        private val contentBuilder = StringBuilder()
+        private val reasoningBuilder = StringBuilder()
+
+        val hasToolCall: Boolean get() = toolCalls.isNotEmpty()
 
         fun accept(frame: StreamChatResponse) {
             receivedAnyFrame = true
@@ -347,15 +470,29 @@ class AiChatServiceImpl(
 
             val message = frame.choices.firstOrNull()?.message ?: return
 
+            message.content?.let { contentBuilder.append(it) }
+            message.reasoningContent?.let { reasoningBuilder.append(it) }
             message.stopReasonString?.let { stopReason = it }
 
-            // A tool call only counts once its arguments have finished streaming, keyed by id so the
-            // frames carrying its remaining deltas do not count it again.
+            // Only a finalized (non-streaming) tool call has complete arguments; the frames carrying
+            // its partial deltas are skipped.
             message.toolCalls
                 ?.filter { !it.streaming }
-                ?.forEach { completedToolCallKeys += it.id.ifBlank { "index-${it.index}" } }
-
-            toolCallsCount = completedToolCallKeys.size
+                ?.forEach { toolCalls += it }
         }
+
+        fun toAssistantMessage(): AssistantChatMessage {
+            return AssistantChatMessage(
+                content = contentBuilder.toString().ifEmpty { null },
+                reasoningContent = reasoningBuilder.toString().ifEmpty { null },
+                toolCalls = toolCalls.ifEmpty { null },
+                stopReason = null,
+                stopReasonString = null,
+            )
+        }
+    }
+
+    companion object {
+        private const val MAX_TOOL_ITERATIONS = 5
     }
 }

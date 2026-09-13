@@ -7,6 +7,7 @@ import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.Manag
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundStreamChunkVO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundUsageVO
 import com.lovelycatv.crystalframework.ai.service.AiChatService
+import com.lovelycatv.crystalframework.ai.types.AiChatStreamEvent
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
@@ -17,7 +18,6 @@ import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.RbacUtils
 import com.lovelycatv.vertex.ai.llm.ChatResponse
-import com.lovelycatv.vertex.ai.llm.StreamChatResponse
 import com.lovelycatv.vertex.ai.llm.message.AssistantChatMessage
 import com.lovelycatv.vertex.ai.llm.message.ChatMessage
 import com.lovelycatv.vertex.ai.llm.message.ChatMessageType
@@ -54,14 +54,15 @@ class ManagerAiPlaygroundController(
             ?: throw BusinessException("Invalid AI model ID")
 
         val messages = dto.messages.map(::toMessage)
-        val response = aiChatService.chatCompletionSync(modelId, messages, dto.reasoningEffort)
-        val assistantMessage = response.choices.firstOrNull()?.message
+        val result = aiChatService.chatCompletionSync(modelId, messages, dto.reasoningEffort)
+        val assistantMessage = result.response.choices.firstOrNull()?.message
 
         return ApiResponse.success(
             ManagerAiPlaygroundChatVO(
                 content = assistantMessage?.content ?: "",
                 reasoningContent = assistantMessage?.reasoningContent,
-                usage = response.usage.toUsageVO(),
+                usage = result.response.usage.toUsageVO(),
+                toolCalls = result.toolCalls.ifEmpty { null },
             )
         )
     }
@@ -94,20 +95,39 @@ class ManagerAiPlaygroundController(
         val messages = dto.messages.map(::toMessage)
 
         return aiChatService.chatCompletionAsync(modelId, messages, dto.reasoningEffort)
-            .scan<StreamChatResponse, StreamFrame?>(null) { acc, chunk ->
-                StreamFrame(chunk, mergeUsage(acc?.usage, chunk.usage))
+            .scan<AiChatStreamEvent, StreamState?>(null) { acc, event ->
+                when (event) {
+                    is AiChatStreamEvent.Chunk -> StreamState(event, mergeUsage(acc?.usage, event.chunk.usage))
+                    is AiChatStreamEvent.ToolCall -> StreamState(event, acc?.usage ?: ChatResponse.Usage())
+                }
             }
             .filterNotNull()
-            .map { frame ->
-                val message = frame.chunk.choices.firstOrNull()?.message
-                ServerSentEvent.builder(
-                    ManagerAiPlaygroundStreamChunkVO(
-                        content = message?.content,
-                        reasoningContent = message?.reasoningContent,
-                        finished = frame.chunk.finished,
-                        usage = frame.usage.toUsageVO(),
-                    )
-                ).build()
+            .map { state ->
+                when (val event = state.event) {
+                    is AiChatStreamEvent.Chunk -> {
+                        val message = event.chunk.choices.firstOrNull()?.message
+                        ServerSentEvent.builder(
+                            ManagerAiPlaygroundStreamChunkVO(
+                                content = message?.content,
+                                reasoningContent = message?.reasoningContent,
+                                finished = event.chunk.finished,
+                                usage = state.usage.toUsageVO(),
+                            )
+                        ).build()
+                    }
+
+                    is AiChatStreamEvent.ToolCall -> {
+                        ServerSentEvent.builder(
+                            ManagerAiPlaygroundStreamChunkVO(
+                                content = null,
+                                reasoningContent = null,
+                                finished = false,
+                                usage = null,
+                                toolCall = event.result,
+                            )
+                        ).build()
+                    }
+                }
             }
             .asFlux()
     }
@@ -158,8 +178,8 @@ class ManagerAiPlaygroundController(
         )
     }
 
-    private data class StreamFrame(
-        val chunk: StreamChatResponse,
+    private data class StreamState(
+        val event: AiChatStreamEvent,
         val usage: ChatResponse.Usage,
     )
 }
