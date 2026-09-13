@@ -13,6 +13,7 @@
     <ID>FunctionOnlyReturningConstant:StandardTenantManagerController.kt$StandardTenantManagerController$protected suspend fun customUpdate( userAuthentication: UserAuthentication, dto: UPDATE_DTO ): ApiResponse&lt;*&gt;?</ID>
     <ID>LargeClass:SystemPermission.kt$SystemPermission</ID>
     <ID>LongParameterList:AbstractManagerController.kt$AbstractManagerController$( action: ManagerAction, userAuthentication: UserAuthentication, createDto: CREATE_DTO? = null, readDto: READ_DTO? = null, updateDto: UPDATE_DTO? = null, deleteDto: DELETE_DTO? = null, )</ID>
+    <ID>LongParameterList:ExponentialBackoffLockout.kt$ExponentialBackoffLockout$( keyPrefix: String, identity: String, threshold: Int, baseSeconds: Int, maxSeconds: Int, windowSeconds: Int, )</ID>
     <ID>LongParameterList:PermissionMatrixBuilder.kt$( systemCreate: String, systemRead: String, systemUpdate: String, systemDelete: String, superCreate: String = PermissionMatrix.NOT_APPLICABLE, superRead: String = PermissionMatrix.NOT_APPLICABLE, superUpdate: String = PermissionMatrix.NOT_APPLICABLE, superDelete: String = PermissionMatrix.NOT_APPLICABLE, )</ID>
     <ID>LongParameterList:PermissionMatrixBuilder.kt$( tenantAdminCreate: String, tenantAdminRead: String, tenantAdminUpdate: String, tenantAdminDelete: String, tenantPemCreate: String, tenantPemRead: String, tenantPemUpdate: String, tenantPemDelete: String, superCreate: String = PermissionMatrix.NOT_APPLICABLE, superRead: String = PermissionMatrix.NOT_APPLICABLE, superUpdate: String = PermissionMatrix.NOT_APPLICABLE, superDelete: String = PermissionMatrix.NOT_APPLICABLE, systemCreate: String = PermissionMatrix.NOT_APPLICABLE, systemRead: String = PermissionMatrix.NOT_APPLICABLE, systemUpdate: String = PermissionMatrix.NOT_APPLICABLE, systemDelete: String = PermissionMatrix.NOT_APPLICABLE, )</ID>
     <ID>LongParameterList:SnowIdGenerator.kt$SnowIdGenerator$( private val startPoint: Long, private val timestampLength: Int, private val dataCenterIdLength: Int, private val workerIdLength: Int, private val sequenceIdLength: Int, private val geneIdLength: Int, private val nodeLease: SnowflakeNodeLease, )</ID>
@@ -28,6 +29,8 @@
     <ID>MagicNumber:CachedBaseService.kt$CachedBaseService$8</ID>
     <ID>MagicNumber:DistributedLock.kt$10</ID>
     <ID>MagicNumber:DistributedLock.kt$3</ID>
+    <ID>MagicNumber:ExponentialBackoffLockoutImpl.kt$ExponentialBackoffLockoutImpl$1000L</ID>
+    <ID>MagicNumber:ExponentialBackoffLockoutImpl.kt$ExponentialBackoffLockoutImpl$999L</ID>
     <ID>MagicNumber:FileMD5Utils.kt$FileMD5Utils$8192</ID>
     <ID>MagicNumber:GlobalErrorWebExceptionHandler.kt$GlobalErrorWebExceptionHandler$2</ID>
     <ID>MagicNumber:KotlinReactiveExtensions.kt$10000</ID>
@@ -49,6 +52,7 @@
     <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "GTE requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
     <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "LT requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
     <ID>MaxLineLength:CrystalDatabaseExtensions.kt$val v = coerceNumericString(requireNotNull(node.value) { "LTE requires a value for field '${node.field}'" }) as Comparable&lt;Any&gt;</ID>
+    <ID>MaxLineLength:GeneralRateLimitService.kt$GeneralRateLimitService$*</ID>
     <ID>MaxLineLength:JSONExtensions.kt$fun</ID>
     <ID>MaxLineLength:JSONExtensions.kt$inline</ID>
     <ID>MaxLineLength:JacksonConfig.kt$JacksonConfig$addSerializer(Long::class.javaPrimitiveType, com.fasterxml.jackson.databind.ser.std.ToStringSerializer.instance)</ID>
@@ -126,12 +130,15 @@
     <ID>ReturnCount:ServerHttpRequestExtensions.kt$fun ServerHttpRequest.resolveClientIp(): String</ID>
     <ID>ReturnCount:SlidingWindowRateLimiterImpl.kt$SlidingWindowRateLimiterImpl$override suspend fun checkAllowed( windowSeconds: Int, dimensions: List&lt;RateLimitDimension&gt;, message: String, )</ID>
     <ID>ReturnCount:SpringSecurityAnnotationBanBeanFactoryPostProcessor.kt$SpringSecurityAnnotationBanBeanFactoryPostProcessor$private fun resolveBeanClass( beanFactory: ConfigurableListableBeanFactory, beanName: String, ): Class&lt;*&gt;?</ID>
+    <ID>SpreadOperator:GeneralRateLimitServiceImpl.kt$GeneralRateLimitServiceImpl$(*accountKeys.toTypedArray())</ID>
     <ID>SpreadOperator:PermissionMatrix.kt$PermissionMatrix$(*crossTenantLayersFor(operation))</ID>
     <ID>SpreadOperator:PermissionMatrix.kt$PermissionMatrix$(*layersFor(scope, operation))</ID>
     <ID>SpreadOperator:StandardManagerController.kt$StandardManagerController$(*required)</ID>
     <ID>SwallowedException:OutboundUrlGuard.kt$OutboundUrlGuard$e: Exception</ID>
     <ID>ThrowsCount:OutboundUrlGuard.kt$OutboundUrlGuard$fun assertAllowed(rawUrl: String, allowedHostSuffixes: List&lt;String&gt;)</ID>
     <ID>TooGenericExceptionCaught:ApmWebfluxSpanTraceAspect.kt$ApmWebfluxSpanTraceAspect$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:ExponentialBackoffLockoutImpl.kt$ExponentialBackoffLockoutImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GeneralRateLimitServiceImpl.kt$GeneralRateLimitServiceImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:OutboundUrlGuard.kt$OutboundUrlGuard$e: Exception</ID>
     <ID>TooGenericExceptionCaught:SlidingWindowRateLimiterImpl.kt$SlidingWindowRateLimiterImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:SystemModuleClient.kt$SystemModuleClient$e: Exception</ID>

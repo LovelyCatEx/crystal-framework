@@ -17,16 +17,18 @@
     <ID>MaxLineLength:SystemInitializeDTO.kt$SystemInitializeDTO$@field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "Password must be at least 8 characters and contain both letters and numbers")</ID>
     <ID>MaxLineLength:SystemSettingsConstants.kt$SystemSettingsConstants.Security.Outbound$defaultValue = """["*.gmail.com","*.googlemail.com","*.outlook.com","*.office365.com","*.yahoo.com","*.qq.com","*.163.com","*.126.com","*.sina.com","*.aliyun.com","*.zoho.com","*.me.com"]"""</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockBaseSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_BASE_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockBaseSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_BASE_SECONDS)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockMaxSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_MAX_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockMaxSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_MAX_SECONDS)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockThreshold = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.LOCK_THRESHOLD)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$lockThreshold = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_THRESHOLD)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerAccount = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerAccount = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_ACCOUNT)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerIp = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxAttemptsPerIp = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_IP)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$maxPerEmail = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.EmailCodeRateLimit.MAX_PER_EMAIL)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$securityLevel = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Bootstrap.AUTO_CHECK_RBAC_TABLE_DATA, settings.bootstrap.autoCheckRbacTableData.toString())</ID>
-    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_SYSTEM_PEER_ENABLED, settings.module.messageSystemPeerEnabled.toString())</ID>
-    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_DESK_ENABLED, settings.module.messageTenantDeskEnabled.toString())</ID>
-    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Module.MESSAGE_TENANT_SCOPE_ENABLED, settings.module.messageTenantScopeEnabled.toString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Resource.SignedUrl.TTL_SECONDS, settings.resource.signedUrl.ttlSeconds.toString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Api.Encrypt.ENABLE, settings.security.api.encrypt.enabled.toString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Api.Encrypt.SECURITY_LEVEL, settings.security.api.encrypt.securityLevel.toString())</ID>
@@ -44,8 +46,16 @@
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS, settings.security.loginRateLimit.windowSeconds.toString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_HOSTS, settings.security.outbound.allowedHosts.toJSONString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.Outbound.ALLOWED_SMTP_HOSTS, settings.security.outbound.allowedSmtpHosts.toJSONString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.ENABLED, settings.security.webSocketAuthRateLimit.enabled.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_BASE_SECONDS, settings.security.webSocketAuthRateLimit.lockBaseSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_MAX_SECONDS, settings.security.webSocketAuthRateLimit.lockMaxSeconds.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.LOCK_THRESHOLD, settings.security.webSocketAuthRateLimit.lockThreshold.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_ACCOUNT, settings.security.webSocketAuthRateLimit.maxAttemptsPerAccount.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.MAX_ATTEMPTS_PER_IP, settings.security.webSocketAuthRateLimit.maxAttemptsPerIp.toString())</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$setSettings(SystemSettingsConstants.Security.WebSocketAuthRateLimit.WINDOW_SECONDS, settings.security.webSocketAuthRateLimit.windowSeconds.toString())</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$windowSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.EmailCodeRateLimit.WINDOW_SECONDS)!!.toInt()</ID>
     <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$windowSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.LoginRateLimit.WINDOW_SECONDS)!!.toInt()</ID>
+    <ID>MaxLineLength:SystemSettingsServiceImpl.kt$SystemSettingsServiceImpl$windowSeconds = getSettings&lt;Long&gt;(SystemSettingsConstants.Security.WebSocketAuthRateLimit.WINDOW_SECONDS)!!.toInt()</ID>
     <ID>NewLineAtEndOfFile:AuditConfig.kt$com.lovelycatv.crystalframework.system.config.AuditConfig.kt</ID>
     <ID>NewLineAtEndOfFile:LivenessController.kt$com.lovelycatv.crystalframework.system.controller.LivenessController.kt</ID>
     <ID>NewLineAtEndOfFile:ManagerSystemSettingsController.kt$com.lovelycatv.crystalframework.system.controller.manager.ManagerSystemSettingsController.kt</ID>
