@@ -8,6 +8,7 @@
 package com.lovelycatv.crystalframework.permission
 
 import com.lovelycatv.crystalframework.CrystalFrameworkApplicationTests
+import com.lovelycatv.crystalframework.ai.constants.AiPermission
 import com.lovelycatv.crystalframework.rbac.tenant.constants.TenantPermission
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.SystemPermission
@@ -119,6 +120,12 @@ class RequiresAuthorityCoverageTest(
     }
 
     companion object {
-        private val SUBORDINATE_PERMISSION_CLASSES = emptyList<String>()
+        // Module-level permission constant classes (path B in add-system-permission) that are
+        // registered via a SystemRbacConfigurer instead of living in SystemPermission/TenantPermission.
+        // Each entry must be a Kotlin `object` whose `const val ..._NAME` fields hold the permission
+        // name strings (e.g. AiPermission in crystal-ai).
+        private val SUBORDINATE_PERMISSION_CLASSES = listOf(
+            AiPermission::class.qualifiedName,
+        )
     }
 }

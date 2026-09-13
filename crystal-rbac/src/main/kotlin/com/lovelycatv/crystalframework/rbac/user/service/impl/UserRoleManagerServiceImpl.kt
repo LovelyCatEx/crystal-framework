@@ -62,10 +62,12 @@ class UserRoleManagerServiceImpl(
         }
     }
 
-    override suspend fun update(dto: ManagerUpdateRoleDTO): UserRoleEntity? {
-        return super.update(dto)?.also {
-            eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(it.id))
-        }
+    override suspend fun afterUpdate(
+        dto: ManagerUpdateRoleDTO,
+        original: UserRoleEntity,
+        updated: UserRoleEntity,
+    ) {
+        eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(updated.id))
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateRoleDTO, original: UserRoleEntity): UserRoleEntity {

@@ -76,19 +76,14 @@ class TenantRoleManagerServiceImpl(
             ?: throw RuntimeException("Could not create tenant role")
     }
 
-    override suspend fun update(dto: ManagerUpdateTenantRoleDTO): TenantRoleEntity? {
-        val original = getByIdOrNull(dto.id) ?: return null
-        val affectedRoleIds = if (dto.parentId != null && dto.parentId != original.parentId) {
-            (listOf(original) + tenantRoleService.getChildren(original.id))
-                .map { it.id }
-                .toSet()
-        } else {
-            emptySet()
-        }
-
-        return super.update(dto)?.also {
-            affectedRoleIds.forEach { roleId ->
-                eventPublisher.publishEvent(TenantRoleAuthoritiesInvalidationEvent(roleId))
+    override suspend fun afterUpdate(
+        dto: ManagerUpdateTenantRoleDTO,
+        original: TenantRoleEntity,
+        updated: TenantRoleEntity,
+    ) {
+        if (dto.parentId != null && dto.parentId != original.parentId) {
+            (listOf(original) + tenantRoleService.getChildren(original.id)).forEach { role ->
+                eventPublisher.publishEvent(TenantRoleAuthoritiesInvalidationEvent(role.id))
             }
         }
     }
