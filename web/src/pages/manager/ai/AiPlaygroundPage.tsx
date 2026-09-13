@@ -9,6 +9,7 @@ import {chat, chatStream, getPlaygroundData, type AiPlaygroundChatDTO, type AiPl
 import {ReasoningEffort} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {useDeviceType} from "@/compositions/use-device-type.ts";
+import {MarkdownContent} from "@/components/MarkdownContent.tsx";
 
 const {TextArea} = Input;
 const {Text} = Typography;
@@ -440,7 +441,7 @@ export default function AiPlaygroundPage() {
                             {modelInfoCard}
                         </div>
                     )}
-                    <div className="flex flex-1 flex-col">
+                    <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex h-14 shrink-0 items-center justify-between border-b px-4" style={{borderColor: token.colorBorder}}>
                             <Text strong>{selectedModel?.displayName}</Text>
                             <Popconfirm
@@ -465,7 +466,7 @@ export default function AiPlaygroundPage() {
                                         key={`${messageItem.role}-${index}`}
                                         className={`mb-3 flex flex-col ${messageItem.role === "user" ? "items-end" : "items-start"}`}
                                     >
-                                        <div className="max-w-[75%] whitespace-pre-wrap rounded-xl px-3 py-2" style={{background: messageItem.role === "user" ? "var(--ant-color-primary)" : "var(--ant-color-fill-secondary)", color: messageItem.role === "user" ? "white" : "inherit"}}>
+                                        <div className="max-w-[75%] min-w-0 overflow-hidden rounded-xl px-3 py-2" style={{background: messageItem.role === "user" ? "var(--ant-color-primary)" : "var(--ant-color-fill-secondary)", color: messageItem.role === "user" ? "white" : "inherit"}}>
                                             {messageItem.reasoningContent ? (
                                                 <>
                                                     <button
@@ -481,7 +482,7 @@ export default function AiPlaygroundPage() {
                                                         />
                                                     </button>
                                                     {expandedThinking.has(index) && (
-                                                        <div className="mb-2 border-l-2 pl-2" style={{color: "var(--ant-color-text-secondary)", borderColor: "var(--ant-color-border-secondary)"}}>
+                                                        <div className="mb-2 border-l-2 pl-2 whitespace-pre-wrap" style={{color: "var(--ant-color-text-secondary)", borderColor: "var(--ant-color-border-secondary)"}}>
                                                             {messageItem.reasoningContent}
                                                         </div>
                                                     )}
@@ -520,7 +521,7 @@ export default function AiPlaygroundPage() {
                                                     })}
                                                 </div>
                                             ) : null}
-                                            {messageItem.content}
+                                            <MarkdownContent content={messageItem.content} />
                                             {messageItem.usage ? (
                                                 <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs" style={{color: "var(--ant-color-text-tertiary)"}}>
                                                     <span>{t("pages.aiPlayground.usagePromptTokens")} {messageItem.usage.promptTokens}</span>
