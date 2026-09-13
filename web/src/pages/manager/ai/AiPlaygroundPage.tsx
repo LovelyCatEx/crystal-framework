@@ -1,6 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Button, Card, Descriptions, Empty, Input, message, Modal, Popconfirm, Popover, Progress, Select, Spin, Switch, Tag, Tree, Typography} from "antd";
-import {BulbOutlined, CopyOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SendOutlined, ToolOutlined} from "@ant-design/icons";
+import {Button, Descriptions, Empty, Input, message, Modal, Popconfirm, Popover, Progress, Select, Spin, Switch, Tag, Tree, Typography, theme} from "antd";
+import {BulbOutlined, CloseOutlined, CopyOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, SendOutlined, SettingOutlined, ToolOutlined} from "@ant-design/icons";
 import {Info, Sparkles} from "lucide-react";
 import type {DataNode} from "antd/es/tree";
 import {useTranslation} from "react-i18next";
@@ -8,7 +8,7 @@ import {useSearchParams} from "react-router-dom";
 import {chat, chatStream, getPlaygroundData, type AiPlaygroundChatDTO, type AiPlaygroundGroup, type AiPlaygroundMessage, type AiPlaygroundModel, type AiPlaygroundProvider} from "@/api/ai/ai-playground.api.ts";
 import {ReasoningEffort} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
-import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
+import {useDeviceType} from "@/compositions/use-device-type.ts";
 
 const {TextArea} = Input;
 const {Text} = Typography;
@@ -67,6 +67,7 @@ function formatPrice(value: string | null, currency: string): string {
 
 export default function AiPlaygroundPage() {
     const {t} = useTranslation();
+    const {token} = theme.useToken();
     const [providers, setProviders] = useState<Record<string, AiPlaygroundProvider>>({});
     const [models, setModels] = useState<Record<string, AiPlaygroundModel>>({});
     const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
@@ -84,6 +85,11 @@ export default function AiPlaygroundPage() {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingContent, setEditingContent] = useState("");
     const [, setSearchParams] = useSearchParams();
+    const deviceType = useDeviceType();
+    const isMobile = deviceType === "mobile";
+    const isTablet = deviceType === "tablet";
+    const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
+    const [chatSettingsOpen, setChatSettingsOpen] = useState(false);
     const messageListRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -178,7 +184,7 @@ export default function AiPlaygroundPage() {
     const modelInfoCard = useMemo(() => {
         if (!selectedModel) return null;
         return (
-            <div className="shrink-0 border-t p-4">
+            <div className="shrink-0 border-t p-4" style={{borderColor: token.colorBorder}}>
                 <div className="mb-2 flex items-center gap-2">
                     <Info className="text-gray-500" size={16} />
                     <Text strong>{t("pages.aiPlayground.modelInfo")}</Text>
@@ -251,6 +257,7 @@ export default function AiPlaygroundPage() {
         if (!key?.startsWith("model:")) return;
         const modelId = key.substring("model:".length);
         applySelectedModel(modelId, groups);
+        setMobileSettingsOpen(false);
     };
 
     const startNewSession = () => {
@@ -393,42 +400,48 @@ export default function AiPlaygroundPage() {
 
     const isThinking = (index: number) => streaming && sending && index === messageList.length - 1;
 
+    const modelTreeHeader = (withClose: boolean) => (
+        <div className="flex h-14 shrink-0 items-center border-b px-4" style={{borderColor: token.colorBorder}}>
+            <Sparkles className="mr-2 text-gray-500" size={16} />
+            <Text strong>{t("pages.aiPlayground.modelTree")}</Text>
+            {withClose ? (
+                <Button type="text" size="small" className="ml-auto" icon={<CloseOutlined />} onClick={() => setMobileSettingsOpen(false)} />
+            ) : null}
+        </div>
+    );
+
+    const modelTreeBody = (
+        <div className="flex-1 min-h-0 overflow-auto p-4">
+            {loading ? (
+                <Spin />
+            ) : treeData.length > 0 ? (
+                <Tree
+                    treeData={treeData}
+                    onSelect={keys => selectModel((keys[0] as string | undefined) ?? null)}
+                    selectedKeys={selectedModelId ? [`model:${selectedModelId}`] : []}
+                    defaultExpandAll
+                    blockNode
+                    showLine
+                />
+            ) : (
+                <Empty description={t("pages.aiPlayground.emptyModels")} />
+            )}
+        </div>
+    );
+
     return (
-        <div className="flex h-[calc(100vh-158px)] flex-col">
-            <ActionBarComponent
-                title={t("pages.aiPlayground.title")}
-                subtitle={t("pages.aiPlayground.subtitle")}
-            />
-            <Card
-                className="flex flex-1 min-h-0 flex-col border-none shadow-sm rounded-2xl overflow-hidden"
-                styles={{body: {display: "flex", flex: 1, flexDirection: "column", minHeight: 0, padding: 0}}}
-            >
+        <div className="-m-6 flex h-[calc(100vh-110px)] flex-col" style={{background: token.colorBgContainer}}>
+            <div className="flex flex-1 min-h-0 flex-col">
                 <div className="flex flex-1 min-h-0">
-                    <div className="flex w-72 shrink-0 flex-col border-r" style={{borderColor: "var(--ant-color-border)"}}>
-                        <div className="flex h-14 shrink-0 items-center border-b px-4">
-                            <Sparkles className="mr-2 text-gray-500" size={16} />
-                            <Text strong>{t("pages.aiPlayground.modelTree")}</Text>
+                    {!isMobile && (
+                        <div className="flex w-72 shrink-0 flex-col border-r" style={{borderColor: token.colorBorder}}>
+                            {modelTreeHeader(false)}
+                            {modelTreeBody}
+                            {modelInfoCard}
                         </div>
-                        <div className="flex-1 min-h-0 overflow-auto p-4">
-                            {loading ? (
-                                <Spin />
-                            ) : treeData.length > 0 ? (
-                                <Tree
-                                    treeData={treeData}
-                                    onSelect={keys => selectModel((keys[0] as string | undefined) ?? null)}
-                                    selectedKeys={selectedModelId ? [`model:${selectedModelId}`] : []}
-                                    defaultExpandAll
-                                    blockNode
-                                    showLine
-                                />
-                            ) : (
-                                <Empty description={t("pages.aiPlayground.emptyModels")} />
-                            )}
-                        </div>
-                        {modelInfoCard}
-                    </div>
+                    )}
                     <div className="flex flex-1 flex-col">
-                        <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+                        <div className="flex h-14 shrink-0 items-center justify-between border-b px-4" style={{borderColor: token.colorBorder}}>
                             <Text strong>{selectedModel?.displayName}</Text>
                             <Popconfirm
                                 title={t("pages.aiPlayground.newSessionConfirm")}
@@ -441,7 +454,8 @@ export default function AiPlaygroundPage() {
                                 </Button>
                             </Popconfirm>
                         </div>
-                            <div ref={messageListRef} className="flex-1 overflow-auto p-4">
+                            <div className="relative flex-1 min-h-0">
+                                <div ref={messageListRef} className="h-full overflow-auto p-4">
                                 {messageList.length === 0 ? (
                                     <div className="flex h-full items-center justify-center">
                                         <Text type="secondary">{t("pages.aiPlayground.emptyConversation")}</Text>
@@ -557,9 +571,19 @@ export default function AiPlaygroundPage() {
                                     </div>
                                 ))}
                                 {sending && <Spin size="small" />}
+                                </div>
+                                {isMobile && (
+                                    <Button
+                                        className="absolute bottom-4 right-4 z-10"
+                                        type="default"
+                                        shape="circle"
+                                        icon={<Sparkles size={16} />}
+                                        onClick={() => setMobileSettingsOpen(true)}
+                                    />
+                                )}
                             </div>
-                            <div className="shrink-0 border-t p-3">
-                                <div className="rounded-2xl border p-2" style={{borderColor: "var(--ant-color-border)"}}>
+                            <div className="shrink-0 border-t p-3" style={{borderColor: token.colorBorder}}>
+                                <div className="rounded-2xl border p-2" style={{borderColor: token.colorBorder}}>
                                     <TextArea
                                         variant="borderless"
                                         value={input}
@@ -576,41 +600,53 @@ export default function AiPlaygroundPage() {
                                     />
                                     <div className="mt-1 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <Text type="secondary">{t("pages.aiPlayground.streaming")}</Text>
-                                                <Switch
+                                            {isMobile || isTablet ? (
+                                                <Button
+                                                    type="text"
                                                     size="small"
-                                                    checked={streaming}
-                                                    disabled={sending}
-                                                    onChange={setStreaming}
+                                                    icon={<SettingOutlined />}
+                                                    title={t("pages.aiPlayground.chatSettings")}
+                                                    onClick={() => setChatSettingsOpen(true)}
                                                 />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Text type="secondary">{t("pages.aiPlayground.reasoningEffort")}</Text>
-                                                <Select
-                                                    size="small"
-                                                    style={{width: 150}}
-                                                    disabled={sending}
-                                                    value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
-                                                    options={reasoningEffortOptions}
-                                                    onChange={value => setReasoningEffort(
-                                                        value === REASONING_EFFORT_PROTOCOL_DEFAULT
-                                                            ? undefined
-                                                            : value as ReasoningEffort
-                                                    )}
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Text type="secondary">{t("pages.aiPlayground.group")}</Text>
-                                                <Select
-                                                    size="small"
-                                                    style={{width: 150}}
-                                                    disabled={sending}
-                                                    value={groupId ?? ""}
-                                                    options={userGroupOptions}
-                                                    onChange={value => setGroupId(value === "" ? null : value)}
-                                                />
-                                            </div>
+                                            ) : (
+                                                <>
+                                                    <div className="flex items-center gap-2">
+                                                        <Text type="secondary">{t("pages.aiPlayground.streaming")}</Text>
+                                                        <Switch
+                                                            size="small"
+                                                            checked={streaming}
+                                                            disabled={sending}
+                                                            onChange={setStreaming}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Text type="secondary">{t("pages.aiPlayground.reasoningEffort")}</Text>
+                                                        <Select
+                                                            size="small"
+                                                            style={{width: 150}}
+                                                            disabled={sending}
+                                                            value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
+                                                            options={reasoningEffortOptions}
+                                                            onChange={value => setReasoningEffort(
+                                                                value === REASONING_EFFORT_PROTOCOL_DEFAULT
+                                                                    ? undefined
+                                                                    : value as ReasoningEffort
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Text type="secondary">{t("pages.aiPlayground.group")}</Text>
+                                                        <Select
+                                                            size="small"
+                                                            style={{width: 150}}
+                                                            disabled={sending}
+                                                            value={groupId ?? ""}
+                                                            options={userGroupOptions}
+                                                            onChange={value => setGroupId(value === "" ? null : value)}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Popover
@@ -635,6 +671,7 @@ export default function AiPlaygroundPage() {
                                                     percent={Math.min(100, contextUsage.percent)}
                                                     size={22}
                                                     showInfo={false}
+                                                    strokeColor={token.colorPrimary}
                                                 />
                                             </Popover>
                                             <Button
@@ -651,7 +688,14 @@ export default function AiPlaygroundPage() {
                             </div>
                     </div>
                 </div>
-            </Card>
+            </div>
+            {isMobile && mobileSettingsOpen && (
+                <div className="fixed inset-x-0 top-16 bottom-0 z-[999] flex flex-col" style={{background: token.colorBgContainer}}>
+                    {modelTreeHeader(true)}
+                    {modelTreeBody}
+                    {modelInfoCard}
+                </div>
+            )}
             <Modal
                 title={t("pages.aiPlayground.edit")}
                 open={editingIndex != null}
@@ -665,6 +709,43 @@ export default function AiPlaygroundPage() {
                     onChange={event => setEditingContent(event.target.value)}
                     autoSize={{minRows: 3, maxRows: 10}}
                 />
+            </Modal>
+            <Modal
+                title={t("pages.aiPlayground.chatSettings")}
+                open={chatSettingsOpen}
+                onCancel={() => setChatSettingsOpen(false)}
+                footer={null}
+            >
+                <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <Text>{t("pages.aiPlayground.streaming")}</Text>
+                        <Switch size="small" checked={streaming} disabled={sending} onChange={setStreaming} />
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                        <Text>{t("pages.aiPlayground.reasoningEffort")}</Text>
+                        <Select
+                            style={{width: 180}}
+                            disabled={sending}
+                            value={reasoningEffort ?? REASONING_EFFORT_PROTOCOL_DEFAULT}
+                            options={reasoningEffortOptions}
+                            onChange={value => setReasoningEffort(
+                                value === REASONING_EFFORT_PROTOCOL_DEFAULT
+                                    ? undefined
+                                    : value as ReasoningEffort
+                            )}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                        <Text>{t("pages.aiPlayground.group")}</Text>
+                        <Select
+                            style={{width: 180}}
+                            disabled={sending}
+                            value={groupId ?? ""}
+                            options={userGroupOptions}
+                            onChange={value => setGroupId(value === "" ? null : value)}
+                        />
+                    </div>
+                </div>
             </Modal>
         </div>
     );

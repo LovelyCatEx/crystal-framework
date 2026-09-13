@@ -939,6 +939,7 @@ export const enUS: I18nRules = {
       streaming: 'Streaming',
       group: 'Group',
       groupDefault: 'Default',
+      chatSettings: 'Settings',
       modelInfo: 'Model Info',
       modelKey: 'Model Key',
       modelInputPrice: 'Input Price',

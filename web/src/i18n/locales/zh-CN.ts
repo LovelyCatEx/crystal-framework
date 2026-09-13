@@ -936,6 +936,7 @@ export const zhCN: I18nRules = {
       streaming: '流式输出',
       group: '分组',
       groupDefault: '默认',
+      chatSettings: '设置',
       modelInfo: '模型信息',
       modelKey: '模型标识',
       modelInputPrice: '输入价格',
