@@ -982,6 +982,22 @@ export const enUS: I18nRules = {
         groupRequired: 'Please select a group'
       }
     },
+    aiModelInvocationRecordManager: {
+      title: 'AI Model Invocation Records',
+      subtitle: 'View AI model invocation and cost records',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        requestId: 'Request ID',
+        requestIdPlaceholder: 'Enter request ID',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        modelId: 'Model ID',
+        modelIdPlaceholder: 'Enter model ID',
+        status: 'Status',
+        all: 'All'
+      }
+    },
     tenantManager: {
       title: 'Tenant Management',
       subtitle: 'Manage system tenant information',
@@ -3953,6 +3969,27 @@ export const enUS: I18nRules = {
           enabled: 'Enabled',
           disabled: 'Disabled'
         }
+      },
+      aiModelInvocationRecord: {
+        record: 'Record',
+        user: 'User',
+        group: 'Group',
+        status: 'Status',
+        model: 'Model',
+        performance: 'Performance',
+        duration: 'Duration',
+        firstToken: 'TTFT',
+        streaming: 'Streaming',
+        inputTokens: 'Input Tokens',
+        outputTokens: 'Output Tokens',
+        cache: 'Cache',
+        reasoningTokens: 'Reasoning Tokens',
+        cost: 'Cost',
+        pricing: 'Model Pricing',
+        input: 'Input',
+        output: 'Output',
+        cacheRead: 'Cache Read',
+        cacheWrite: 'Cache Write'
       }
     },
     entityTable: {
@@ -4487,6 +4524,10 @@ export const enUS: I18nRules = {
       HIGH: 'High',
       EXTRA_HIGH: 'Extra High',
       MAX: 'Max'
+    },
+    aiModelInvocationStatus: {
+      0: 'Failed',
+      1: 'Success'
     }
   },
 
@@ -4529,7 +4570,8 @@ export const enUS: I18nRules = {
     aiModel: 'Model',
     aiUserGroup: 'User Group',
     aiUserGroupModel: 'User Group Model',
-    aiUserGroupMember: 'User Group Member'
+    aiUserGroupMember: 'User Group Member',
+    aiModelInvocationRecord: 'AI Model Invocation Record'
   },
 
   menu: {
@@ -4602,7 +4644,8 @@ export const enUS: I18nRules = {
       aiProvider: 'Provider Management',
       aiModel: 'Model Management',
       aiUserGroup: 'User Group Management',
-      aiPlayground: 'AI Playground'
+      aiPlayground: 'AI Playground',
+      aiInvocationRecord: 'Invocation Records'
     },
 
     // Menu groups

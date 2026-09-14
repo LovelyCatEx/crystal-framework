@@ -45,7 +45,7 @@ export function useSWRState<T>(
     const { data, isLoading, mutate } = useSWRComposition<ApiResponse<T>>(key, func, onError, options);
 
     const [value, setValue] = useState<T | null>(null);
-    const [syncedData, setSyncedData] = useState(data);
+    const [syncedData, setSyncedData] = useState<ApiResponse<T> | undefined>(undefined);
     if (data !== syncedData) {
         setSyncedData(data);
         if (data?.data) {

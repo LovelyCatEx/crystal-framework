@@ -979,6 +979,22 @@ export const zhCN: I18nRules = {
         groupRequired: '请选择分组'
       }
     },
+    aiModelInvocationRecordManager: {
+      title: 'AI 模型调用记录',
+      subtitle: '查看 AI 模型调用与成本记录',
+      filter: {
+        id: '记录ID',
+        idPlaceholder: '输入记录 ID',
+        requestId: '请求ID',
+        requestIdPlaceholder: '输入请求 ID',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户 ID',
+        modelId: '模型ID',
+        modelIdPlaceholder: '输入模型 ID',
+        status: '状态',
+        all: '全部'
+      }
+    },
     tenantManager: {
       title: '租户管理',
       subtitle: '管理系统租户信息',
@@ -3951,6 +3967,27 @@ export const zhCN: I18nRules = {
           enabled: '已启用',
           disabled: '已禁用'
         }
+      },
+      aiModelInvocationRecord: {
+        record: '记录',
+        user: '用户',
+        group: '分组',
+        status: '状态',
+        model: '模型',
+        performance: '性能',
+        duration: '耗时',
+        firstToken: '首字',
+        streaming: '流式',
+        inputTokens: '输入 Token',
+        outputTokens: '输出 Token',
+        cache: '缓存',
+        reasoningTokens: '推理 Token',
+        cost: '花费',
+        pricing: '模型定价',
+        input: '输入',
+        output: '输出',
+        cacheRead: '缓存读取',
+        cacheWrite: '缓存写入'
       }
     },
     entityTable: {
@@ -4485,6 +4522,10 @@ export const zhCN: I18nRules = {
       HIGH: '高',
       EXTRA_HIGH: '极高',
       MAX: '最高'
+    },
+    aiModelInvocationStatus: {
+      0: '失败',
+      1: '成功'
     }
   },
 
@@ -4527,7 +4568,8 @@ export const zhCN: I18nRules = {
     aiModel: '模型',
     aiUserGroup: '用户组',
     aiUserGroupModel: '用户组模型',
-    aiUserGroupMember: '用户组成员'
+    aiUserGroupMember: '用户组成员',
+    aiModelInvocationRecord: 'AI 模型调用记录'
   },
 
   menu: {
@@ -4600,7 +4642,8 @@ export const zhCN: I18nRules = {
       aiProvider: '提供商管理',
       aiModel: '模型管理',
       aiUserGroup: '用户组管理',
-      aiPlayground: 'AI 训练场'
+      aiPlayground: 'AI 训练场',
+      aiInvocationRecord: '调用记录'
     },
 
     // 菜单分组

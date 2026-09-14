@@ -51,6 +51,47 @@ export interface AiUserGroupEntity extends BaseEntity {
     sort: number;
 }
 
+export interface AiModelInvocationRecordEntity extends BaseEntity {
+    requestId: string;
+    userId: string;
+    tenantId: string | null;
+    sessionId: string | null;
+    providerId: string;
+    modelId: string;
+    promptTokens: number;
+    cachedPromptTokens: number;
+    completionTokens: number;
+    reasoningTokens: number;
+    cacheCreationTokens: number;
+    toolCallsCount: number;
+    messageCount: number;
+    isStreaming: boolean;
+    timeToFirstTokenMs: string;
+    totalDurationMs: string;
+    queueWaitMs: string | null;
+    tokensPerSecond: number | null;
+    promptUnitPrice: number;
+    completionUnitPrice: number;
+    cacheReadUnitPrice: number;
+    cacheWriteUnitPrice: number;
+    groupId: string | null;
+    groupMultiplier: number;
+    rawCost: number;
+    finalCost: number;
+    currency: string;
+    temperature: number | null;
+    topP: number | null;
+    maxTokens: number | null;
+    status: number;
+    errorCode: string | null;
+    errorMessage: string | null;
+    stopReason: string | null;
+    clientIp: string | null;
+    userAgent: string | null;
+    requestSizeBytes: string | null;
+    responseSizeBytes: string | null;
+}
+
 export enum AiProviderProtocolType {
     OPENAI = 0,
     GEMINI = 1,
@@ -82,6 +123,11 @@ export enum ReasoningEffort {
     HIGH = "HIGH",
     EXTRA_HIGH = "EXTRA_HIGH",
     MAX = "MAX"
+}
+
+export enum AiModelInvocationStatus {
+    FAILED = 0,
+    SUCCESS = 1
 }
 
 /**

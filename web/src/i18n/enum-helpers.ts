@@ -147,3 +147,7 @@ export function getAiModelCapability(capability: number): string {
 export function getReasoningEffort(effort: string): string {
     return translateEnum('reasoningEffort', effort);
 }
+
+export function getAiModelInvocationStatus(status: number): string {
+    return translateEnum('aiModelInvocationStatus', status);
+}

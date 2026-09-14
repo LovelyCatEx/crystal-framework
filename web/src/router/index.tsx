@@ -94,6 +94,7 @@ const AiProviderManagerPage = lazy(() => import("@/pages/manager/ai/AiProviderMa
 const AiModelManagerPage = lazy(() => import("@/pages/manager/ai/AiModelManagerPage.tsx"));
 const AiUserGroupManagerPage = lazy(() => import("@/pages/manager/ai/AiUserGroupManagerPage.tsx"));
 const AiPlaygroundPage = lazy(() => import("@/pages/manager/ai/AiPlaygroundPage.tsx"));
+const AiModelInvocationRecordManagerPage = lazy(() => import("@/pages/manager/ai/AiModelInvocationRecordManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -673,6 +674,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <RobotOutlined />,
             label: t('menu.admin.aiPlayground'),
             page: <AiPlaygroundPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/invocation-record',
+            path: '/manager/ai/invocation-record',
+            icon: <LineChartOutlined />,
+            label: t('menu.admin.aiInvocationRecord'),
+            page: <AiModelInvocationRecordManagerPage />,
             group: 'ai'
         },
         {
