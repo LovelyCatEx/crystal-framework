@@ -10,7 +10,7 @@ package com.lovelycatv.crystalframework.shared.constants
 import org.springframework.core.Ordered
 
 object GlobalConstants {
-    const val APP_VERSION = "1.15.0"
+    const val APP_VERSION = "1.15.1"
 
     const val REQUEST_MAPPING_PREFIX = "/api/{version}"
     const val WEBSOCKET_MAPPING_PREFIX = "/ws/{version}"
