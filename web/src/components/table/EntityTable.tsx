@@ -82,6 +82,11 @@ export interface EntityTableProps<ENTITY extends BaseEntity> {
     showTimeRangeFilter?: boolean;
     hideRecordTimeColumn?: boolean;
     tableRowActionsRender?: (record: ENTITY) => ReactNode;
+    /**
+     * Optional renderer for expandable sub-rows. When provided, each row becomes
+     * expandable and this renderer decides the content of the expanded panel.
+     */
+    expandedRowRender?: (record: ENTITY) => ReactNode;
     columns: EntityTableColumns<ENTITY>;
     query: <T extends BaseManagerReadDTO>(props: T) => Promise<PaginatedResponseData<ENTITY>>;
     tableSelection?: {
@@ -694,6 +699,9 @@ function EntityTableInner<ENTITY extends BaseEntity>(
                 dataSource={data}
                 rowKey="id"
                 scroll={{ x: 1200 }}
+                expandable={props.expandedRowRender
+                    ? { expandedRowRender: (record) => props.expandedRowRender!(record) }
+                    : undefined}
                 pagination={{
                     showSizeChanger: true,
                     defaultPageSize: 20,

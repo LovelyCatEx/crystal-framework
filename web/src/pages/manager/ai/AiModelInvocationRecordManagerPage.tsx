@@ -1,13 +1,143 @@
-import {Input, Select} from "antd";
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import {Descriptions, Input, Select} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {AiModelInvocationRecordManagerController, type ManagerReadAiModelInvocationRecordDTO} from "@/api/ai/ai-model-invocation-record.api.ts";
 import {useEffect, useRef} from "react";
+import type {JSX} from "react";
 import {useAiModelInvocationRecordTableColumns} from "@/components/columns/AiModelInvocationRecordEntityColumns.tsx";
 import {useTranslation} from "react-i18next";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts";
-import {AiModelInvocationStatus} from "@/types/ai/ai.types.ts";
+import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/types/ai/ai.types.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
+import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+
+function formatMoney(value: number): string {
+    return value.toFixed(6);
+}
+
+function formatUnitPrice(value: number): string {
+    if (!value) return '0';
+    return value.toFixed(4).replace(/\.?0+$/, '');
+}
+
+function formatBytes(value: string | null | undefined): string {
+    if (!value) return '—';
+    const bytes = Number(value);
+    if (Number.isNaN(bytes)) return '—';
+    if (bytes < 1024) return `${bytes} B (${bytes} Bytes)`;
+    const units = ['KB', 'MB', 'GB', 'TB'];
+    let v = bytes;
+    let i = -1;
+    do {
+        v /= 1024;
+        i++;
+    } while (v >= 1024 && i < units.length - 1);
+    return `${v.toFixed(1).replace(/\.0$/, '')} ${units[i]} (${bytes} Bytes)`;
+}
+
+function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntity }): JSX.Element {
+    const {t} = useTranslation();
+
+    const show = (value: string | null | undefined): string => (value ? value : '—');
+    const showNum = (value: number | null | undefined): string => (value !== null && value !== undefined ? String(value) : '—');
+
+    const tokenSegments: string[] = [
+        `${record.promptTokens} × ${formatUnitPrice(record.promptUnitPrice)} ${record.currency}/M`,
+        `${record.completionTokens} × ${formatUnitPrice(record.completionUnitPrice)} ${record.currency}/M`,
+    ];
+    if (record.cachedPromptTokens > 0) {
+        tokenSegments.push(`${record.cachedPromptTokens} × ${formatUnitPrice(record.cacheReadUnitPrice)} ${record.currency}/M`);
+    }
+    if (record.cacheCreationTokens > 0) {
+        tokenSegments.push(`${record.cacheCreationTokens} × ${formatUnitPrice(record.cacheWriteUnitPrice)} ${record.currency}/M`);
+    }
+    const substitution = `(${tokenSegments.join(' + ')}) × ${record.groupMultiplier}`;
+
+    return (
+        <div className="px-6 py-2">
+            <Descriptions column={2} size="small" className="text-xs">
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.requestId')} span={2}>
+                    <CopyableToolTip title={record.requestId}>
+                        <span className="font-mono">{record.requestId}</span>
+                    </CopyableToolTip>
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.sessionId')}>
+                    {show(record.sessionId)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.tenantId')}>
+                    {show(record.tenantId)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.providerId')}>
+                    {show(record.providerId)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.modelId')}>
+                    {show(record.modelId)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.stopReason')}>
+                    {show(record.stopReason)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.errorCode')}>
+                    {show(record.errorCode)}
+                </Descriptions.Item>
+                {record.errorMessage && (
+                    <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.errorMessage')} span={2}>
+                        <span className="text-red-500">{record.errorMessage}</span>
+                    </Descriptions.Item>
+                )}
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.clientIp')} span={2}>
+                    {show(record.clientIp)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.userAgent')} span={2}>
+                    {show(record.userAgent)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.requestSize')}>
+                    {formatBytes(record.requestSizeBytes)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.responseSize')}>
+                    {formatBytes(record.responseSizeBytes)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.temperature')}>
+                    {showNum(record.temperature)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.topP')}>
+                    {showNum(record.topP)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.maxTokens')}>
+                    {showNum(record.maxTokens)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.toolCalls')}>
+                    {record.toolCallsCount}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.messageCount')}>
+                    {record.messageCount}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.queueWait')}>
+                    {show(record.queueWaitMs)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.tokensPerSecond')} span={2}>
+                    {showNum(record.tokensPerSecond)}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.billing')} span={2}>
+                    <div className="font-mono text-xs grid gap-y-1 gap-x-2" style={{gridTemplateColumns: 'auto 1fr'}}>
+                        <span>{t('pages.aiModelInvocationRecordManager.detail.actualCost')}</span>
+                        <span>= ({t('pages.aiModelInvocationRecordManager.detail.input')} × {t('pages.aiModelInvocationRecordManager.detail.inputPrice')} + {t('pages.aiModelInvocationRecordManager.detail.output')} × {t('pages.aiModelInvocationRecordManager.detail.outputPrice')} + {t('pages.aiModelInvocationRecordManager.detail.cacheRead')} × {t('pages.aiModelInvocationRecordManager.detail.cacheReadPrice')} + {t('pages.aiModelInvocationRecordManager.detail.cacheWrite')} × {t('pages.aiModelInvocationRecordManager.detail.cacheWritePrice')}) × {t('pages.aiModelInvocationRecordManager.detail.groupMultiplier')}</span>
+                        <span />
+                        <span>= {substitution}</span>
+                        <span />
+                        <span>= {formatMoney(record.finalCost)} {record.currency}</span>
+                    </div>
+                </Descriptions.Item>
+            </Descriptions>
+        </div>
+    );
+}
 
 export default function AiModelInvocationRecordManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -68,6 +198,7 @@ export default function AiModelInvocationRecordManagerPage() {
                 showRowActions={false}
                 hideRecordTimeColumn={true}
                 columns={columns}
+                expandedRowRender={(record) => <InvocationRecordDetail record={record} />}
                 editModalFormChildren={<></>}
                 filterableFields={filterableFields}
                 queryParamsSync={syncToUrl}
