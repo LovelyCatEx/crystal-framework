@@ -1345,6 +1345,54 @@ export const enUS: I18nRules = {
         }
       }
     },
+    currencyManager: {
+      title: 'Currency Management',
+      subtitle: 'Define the units of value supported by the system',
+      modal: {
+        code: { label: 'Code', required: 'Please enter the currency code', placeholder: 'e.g. USD / POINT' },
+        name: { label: 'Name', required: 'Please enter the name', placeholder: 'e.g. US Dollar / Points' },
+        symbol: { label: 'Symbol', required: 'Please enter the symbol', placeholder: 'e.g. $ / P' },
+        precision: { label: 'Precision (decimal places)', placeholder: '0-8' },
+        symbolPosition: { label: 'Symbol position', placeholder: '0 prefix / 1 suffix / 2 replace decimal' },
+        decimalSeparator: { label: 'Decimal separator', placeholder: 'e.g. . or ,' },
+        thousandsSeparator: { label: 'Thousands separator', placeholder: 'e.g. , or .' },
+        description: { label: 'Description', placeholder: 'Enter description (optional)' },
+        enabled: { label: 'Enabled' },
+        sort: { label: 'Sort', placeholder: 'Sort order' }
+      }
+    },
+    walletManager: {
+      title: 'Wallet Management',
+      subtitle: 'View system user balances across currencies',
+      action: { adjust: 'Adjust Balance' },
+      messages: { adjustSuccess: 'Adjusted successfully' },
+      adjust: {
+        userId: 'User',
+        userIdRequired: 'Please select a user',
+        currency: 'Currency',
+        currencyRequired: 'Please select a currency',
+        currencyPlaceholder: 'Select a currency',
+        amount: 'Amount (positive to credit, negative to deduct)',
+        amountRequired: 'Please enter the amount',
+        amountPlaceholder: 'e.g. 100 / -50',
+        type: 'Type',
+        typeRequired: 'Please select the type',
+        remark: 'Remark',
+        remarkPlaceholder: 'Enter remark (optional)'
+      }
+    },
+    transactionManager: {
+      title: 'Transactions',
+      subtitle: 'View all balance movements'
+    },
+    tenantWalletManager: {
+      title: 'Tenant Wallet Management',
+      subtitle: 'View balances of the selected tenant across currencies'
+    },
+    tenantTransactionManager: {
+      title: 'Tenant Transactions',
+      subtitle: 'View balance movements of the selected tenant'
+    },
     permissionCatalog: {
       source: {
         db: 'DB description',
@@ -1381,6 +1429,11 @@ export const enUS: I18nRules = {
         'system.ai.model': 'AI Model management menu',
         'system.ai.user.group': 'AI User Group management menu',
         'system.ai.playground': 'AI Playground menu',
+        'system.economy.currency': 'Currency management menu',
+        'system.economy.wallet': 'Wallet management menu',
+        'system.economy.transaction': 'Transaction menu',
+        'tenant.economy.wallet': 'Tenant wallet management menu',
+        'tenant.economy.transaction': 'Tenant transaction menu',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': 'Manage tenant departments menu',
         'tenant.role': 'Manage tenant roles menu',
@@ -1482,6 +1535,19 @@ export const enUS: I18nRules = {
         'system.ai.user.group.member.update': 'Update AI user group member associations',
         'system.ai.user.group.member.delete': 'Delete AI user group member associations',
         'system.ai.playground.chat': 'Use AI Playground',
+        'system.economy.currency.create': 'Create currencies',
+        'system.economy.currency.read': 'Read currencies',
+        'system.economy.currency.update': 'Update currencies',
+        'system.economy.currency.delete': 'Delete currencies',
+        'system.economy.wallet.read': 'Read wallets',
+        'system.economy.wallet.adjust': 'Adjust wallet balances',
+        'system.economy.transaction.read': 'Read transactions',
+        'x.economy.wallet.read': 'Read wallets in any scope',
+        'tenant.economy.wallet.read': 'Read wallets across tenants',
+        'i.tenant.economy.wallet.read': 'Read wallets within own tenant',
+        'x.economy.transaction.read': 'Read transactions in any scope',
+        'tenant.economy.transaction.read': 'Read transactions across tenants',
+        'i.tenant.economy.transaction.read': 'Read transactions within own tenant',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': 'Create tenants',
         'system.tenant.read': 'Read tenants',
@@ -4023,6 +4089,32 @@ export const enUS: I18nRules = {
         output: 'Output',
         cacheRead: 'Cache Read',
         cacheWrite: 'Cache Write'
+      },
+      currency: {
+        code: 'Currency',
+        symbol: 'Symbol',
+        precision: 'Precision',
+        description: 'Description',
+        enabled: 'Enabled',
+        enabledYes: 'Enabled',
+        enabledNo: 'Disabled',
+        sort: 'Sort'
+      },
+      wallet: {
+        id: 'Record ID',
+        ownerId: 'Owner',
+        currency: 'Currency',
+        balance: 'Balance'
+      },
+      transaction: {
+        requestId: 'Request ID',
+        type: 'Type',
+        ownerId: 'Owner',
+        currency: 'Currency',
+        amount: 'Amount',
+        balance: 'Balance',
+        reference: 'Reference',
+        remark: 'Remark'
       }
     },
     entityTable: {
@@ -4561,6 +4653,23 @@ export const enUS: I18nRules = {
     aiModelInvocationStatus: {
       0: 'Failed',
       1: 'Success'
+    },
+    walletScope: {
+      0: 'User',
+      1: 'Tenant'
+    },
+    economyTransactionType: {
+      0: 'Recharge',
+      1: 'Deduct'
+    },
+    economyReferenceType: {
+      0: 'None',
+      1: 'AI Invocation'
+    },
+    currencySymbolPosition: {
+      0: 'Prefix',
+      1: 'Suffix',
+      2: 'Replace decimal point'
     }
   },
 
@@ -4604,7 +4713,10 @@ export const enUS: I18nRules = {
     aiUserGroup: 'User Group',
     aiUserGroupModel: 'User Group Model',
     aiUserGroupMember: 'User Group Member',
-    aiModelInvocationRecord: 'AI Model Invocation Record'
+    aiModelInvocationRecord: 'AI Model Invocation Record',
+    currency: 'Currency',
+    wallet: 'Wallet',
+    transaction: 'Transaction'
   },
 
   menu: {
@@ -4670,15 +4782,20 @@ export const enUS: I18nRules = {
       tenantDictItems: 'Dictionary Item Management',
       approvalFlowDefinitions: 'Flow Definition Management',
       approvalFlowInstances: 'User Approval Management',
-      tenantApprovalFlowDefinitions: 'Tenant Flow Definition Management',
-      tenantApprovalFlowInstances: 'Tenant Approval Management',
+      tenantApprovalFlowDefinitions: 'Flow Definition Management',
+      tenantApprovalFlowInstances: 'Approval Management',
       systemDictTypes: 'System Dictionary Types',
       systemDictItems: 'System Dictionary Items',
       aiProvider: 'Provider Management',
       aiModel: 'Model Management',
       aiUserGroup: 'User Group Management',
       aiPlayground: 'AI Playground',
-      aiInvocationRecord: 'Invocation Records'
+      aiInvocationRecord: 'Invocation Records',
+      currency: 'Currency Management',
+      wallet: 'Wallet Management',
+      transaction: 'Transactions',
+      tenantWallet: 'Tenant Wallet Management',
+      tenantTransaction: 'Tenant Transactions'
     },
 
     // Menu groups
@@ -4692,7 +4809,8 @@ export const enUS: I18nRules = {
       approval: 'Approval Management',
       logs: 'Log Management',
       monitor: 'System Monitor',
-      ai: 'AI Management'
+      ai: 'AI Management',
+      economy: 'Economy'
     }
   }
 };

@@ -44,6 +44,7 @@ class FlywayConfig {
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
                 .outOfOrder(true)
+                .ignoreMigrationPatterns("*:missing")
                 .load()
 
             val result = flyway.migrate()

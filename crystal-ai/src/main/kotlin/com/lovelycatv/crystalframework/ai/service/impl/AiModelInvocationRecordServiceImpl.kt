@@ -17,10 +17,15 @@ import com.lovelycatv.crystalframework.ai.service.manager.AiUserGroupManagerServ
 import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiModelInvocationStatus
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
+import com.lovelycatv.crystalframework.economy.service.EconomyWalletService
+import com.lovelycatv.crystalframework.economy.types.EconomyChargeResult
+import com.lovelycatv.crystalframework.economy.types.EconomyReferenceType
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.util.UUID
 
 @Service
@@ -28,7 +33,11 @@ class AiModelInvocationRecordServiceImpl(
     private val repository: AiModelInvocationRecordRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val aiUserGroupManagerService: AiUserGroupManagerService,
+    private val economyWalletService: EconomyWalletService,
 ) : AiModelInvocationRecordService {
+    companion object {
+        private val logger = LoggerFactory.getLogger(AiModelInvocationRecordServiceImpl::class.java)
+    }
 
     override suspend fun recordInvocationFromContext(
         context: AiInvocationContext,
@@ -111,6 +120,8 @@ class AiModelInvocationRecordServiceImpl(
         }
 
         repository.save(entity).awaitFirstOrNull()
+
+        chargeForInvocation(entity, model)
     }
 
     override suspend fun recordFailedInvocation(
@@ -148,6 +159,27 @@ class AiModelInvocationRecordServiceImpl(
         )
 
         repository.save(entity).awaitFirstOrNull()
+    }
+
+    private suspend fun chargeForInvocation(entity: AiModelInvocationRecordEntity, model: AiModelEntity) {
+        if (entity.finalCost <= 0.0 || model.currency.isBlank()) return
+
+        try {
+            val result = economyWalletService.charge(
+                userId = entity.userId,
+                tenantId = entity.tenantId,
+                currencyCode = model.currency,
+                amount = BigDecimal.valueOf(entity.finalCost),
+                referenceType = EconomyReferenceType.AI_INVOCATION.typeId,
+                referenceId = entity.id,
+                requestId = entity.requestId,
+            )
+            if (result != EconomyChargeResult.CHARGED) {
+                logger.warn("Wallet charge for AI invocation {} returned {}", entity.requestId, result)
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to charge wallet for AI invocation {}", entity.requestId, e)
+        }
     }
 
     /**

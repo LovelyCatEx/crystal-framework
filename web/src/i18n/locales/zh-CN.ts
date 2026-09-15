@@ -1342,6 +1342,54 @@ export const zhCN: I18nRules = {
         }
       }
     },
+    currencyManager: {
+      title: '货币管理',
+      subtitle: '定义系统支持的价值单位',
+      modal: {
+        code: { label: '货币编码', required: '请输入货币编码', placeholder: '如 USD / POINT' },
+        name: { label: '名称', required: '请输入名称', placeholder: '如 美元 / 积分' },
+        symbol: { label: '符号', required: '请输入符号', placeholder: '如 $ / P' },
+        precision: { label: '精度（小数位）', placeholder: '0-8' },
+        symbolPosition: { label: '符号位置', placeholder: '0 前 / 1 后 / 2 代替小数点' },
+        decimalSeparator: { label: '小数点符号', placeholder: '如 . 或 ,' },
+        thousandsSeparator: { label: '千分位符号', placeholder: '如 , 或 .' },
+        description: { label: '描述', placeholder: '输入描述（可选）' },
+        enabled: { label: '启用' },
+        sort: { label: '排序', placeholder: '排序值' }
+      }
+    },
+    walletManager: {
+      title: '钱包管理',
+      subtitle: '查看系统用户在各货币下的余额',
+      action: { adjust: '调整余额' },
+      messages: { adjustSuccess: '调整成功' },
+      adjust: {
+        userId: '用户',
+        userIdRequired: '请选择用户',
+        currency: '货币',
+        currencyRequired: '请选择货币',
+        currencyPlaceholder: '选择货币',
+        amount: '金额（正数增加，负数扣减）',
+        amountRequired: '请输入金额',
+        amountPlaceholder: '如 100 / -50',
+        type: '类型',
+        typeRequired: '请选择类型',
+        remark: '备注',
+        remarkPlaceholder: '输入备注（可选）'
+      }
+    },
+    transactionManager: {
+      title: '交易流水',
+      subtitle: '查看所有资金变动记录'
+    },
+    tenantWalletManager: {
+      title: '租户钱包管理',
+      subtitle: '查看所选租户在各货币下的余额'
+    },
+    tenantTransactionManager: {
+      title: '租户交易流水',
+      subtitle: '查看所选租户的资金变动记录'
+    },
     permissionCatalog: {
       source: {
         db: '数据库描述',
@@ -1378,6 +1426,11 @@ export const zhCN: I18nRules = {
         'system.ai.model': 'AI 模型管理菜单',
         'system.ai.user.group': 'AI 用户组管理菜单',
         'system.ai.playground': 'AI 训练场菜单',
+        'system.economy.currency': '货币管理菜单',
+        'system.economy.wallet': '钱包管理菜单',
+        'system.economy.transaction': '交易流水菜单',
+        'tenant.economy.wallet': '租户钱包管理菜单',
+        'tenant.economy.transaction': '租户交易流水菜单',
         // System permissions - Menus (tenantAdmin layer, cross-tenant)
         'tenant.department': '租户部门菜单',
         'tenant.role': '租户角色菜单',
@@ -1479,6 +1532,19 @@ export const zhCN: I18nRules = {
         'system.ai.user.group.member.update': '更新 AI 用户组成员关联',
         'system.ai.user.group.member.delete': '删除 AI 用户组成员关联',
         'system.ai.playground.chat': '使用 AI 训练场',
+        'system.economy.currency.create': '创建货币',
+        'system.economy.currency.read': '读取货币',
+        'system.economy.currency.update': '更新货币',
+        'system.economy.currency.delete': '删除货币',
+        'system.economy.wallet.read': '读取钱包',
+        'system.economy.wallet.adjust': '调整钱包余额',
+        'system.economy.transaction.read': '读取交易流水',
+        'x.economy.wallet.read': '读取任意作用域钱包',
+        'tenant.economy.wallet.read': '跨租户读取钱包',
+        'i.tenant.economy.wallet.read': '读取本租户钱包',
+        'x.economy.transaction.read': '读取任意作用域交易流水',
+        'tenant.economy.transaction.read': '跨租户读取交易流水',
+        'i.tenant.economy.transaction.read': '读取本租户交易流水',
         // Tenant top-level (system layer, manages tenants themselves)
         'system.tenant.create': '创建租户',
         'system.tenant.read': '读取租户',
@@ -4021,6 +4087,32 @@ export const zhCN: I18nRules = {
         output: '输出',
         cacheRead: '缓存读取',
         cacheWrite: '缓存写入'
+      },
+      currency: {
+        code: '货币',
+        symbol: '符号',
+        precision: '精度',
+        description: '描述',
+        enabled: '启用状态',
+        enabledYes: '已启用',
+        enabledNo: '已禁用',
+        sort: '排序'
+      },
+      wallet: {
+        id: '记录 ID',
+        ownerId: '归属者',
+        currency: '货币',
+        balance: '余额'
+      },
+      transaction: {
+        requestId: '请求 ID',
+        type: '类型',
+        ownerId: '归属者',
+        currency: '货币',
+        amount: '金额',
+        balance: '余额',
+        reference: '关联',
+        remark: '备注'
       }
     },
     entityTable: {
@@ -4559,6 +4651,23 @@ export const zhCN: I18nRules = {
     aiModelInvocationStatus: {
       0: '失败',
       1: '成功'
+    },
+    walletScope: {
+      0: '用户',
+      1: '租户'
+    },
+    economyTransactionType: {
+      0: '充值',
+      1: '扣减'
+    },
+    economyReferenceType: {
+      0: '无',
+      1: 'AI 调用'
+    },
+    currencySymbolPosition: {
+      0: '前',
+      1: '后',
+      2: '代替小数点'
     }
   },
 
@@ -4602,7 +4711,10 @@ export const zhCN: I18nRules = {
     aiUserGroup: '用户组',
     aiUserGroupModel: '用户组模型',
     aiUserGroupMember: '用户组成员',
-    aiModelInvocationRecord: 'AI 模型调用记录'
+    aiModelInvocationRecord: 'AI 模型调用记录',
+    currency: '货币',
+    wallet: '钱包',
+    transaction: '交易流水'
   },
 
   menu: {
@@ -4668,15 +4780,20 @@ export const zhCN: I18nRules = {
       tenantDictItems: '字典项管理',
       approvalFlowDefinitions: '流程定义管理',
       approvalFlowInstances: '用户审批管理',
-      tenantApprovalFlowDefinitions: '租户流程定义管理',
-      tenantApprovalFlowInstances: '租户审批管理',
+      tenantApprovalFlowDefinitions: '流程定义管理',
+      tenantApprovalFlowInstances: '审批管理',
       systemDictTypes: '系统字典类型',
       systemDictItems: '系统字典项',
       aiProvider: '提供商管理',
       aiModel: '模型管理',
       aiUserGroup: '用户组管理',
       aiPlayground: 'AI 训练场',
-      aiInvocationRecord: '调用记录'
+      aiInvocationRecord: '调用记录',
+      currency: '货币管理',
+      wallet: '钱包管理',
+      transaction: '交易流水',
+      tenantWallet: '租户钱包管理',
+      tenantTransaction: '租户交易流水'
     },
 
     // 菜单分组
@@ -4690,7 +4807,8 @@ export const zhCN: I18nRules = {
       approval: '审批管理',
       logs: '日志管理',
       monitor: '系统监控',
-      ai: 'AI 管理'
+      ai: 'AI 管理',
+      economy: '经济管理'
     }
   },
 };

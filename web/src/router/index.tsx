@@ -29,7 +29,10 @@ import {
     TagsOutlined,
     TeamOutlined,
     UserOutlined,
-    UserSwitchOutlined
+    UserSwitchOutlined,
+    WalletOutlined,
+    DollarOutlined,
+    AccountBookOutlined
 } from '@ant-design/icons';
 import { lazy } from 'react';
 
@@ -95,6 +98,11 @@ const AiModelManagerPage = lazy(() => import("@/pages/manager/ai/AiModelManagerP
 const AiUserGroupManagerPage = lazy(() => import("@/pages/manager/ai/AiUserGroupManagerPage.tsx"));
 const AiPlaygroundPage = lazy(() => import("@/pages/manager/ai/AiPlaygroundPage.tsx"));
 const AiModelInvocationRecordManagerPage = lazy(() => import("@/pages/manager/ai/AiModelInvocationRecordManagerPage.tsx"));
+const CurrencyManagerPage = lazy(() => import("@/pages/manager/economy/CurrencyManagerPage.tsx"));
+const WalletManagerPage = lazy(() => import("@/pages/manager/economy/WalletManagerPage.tsx"));
+const EconomyTransactionManagerPage = lazy(() => import("@/pages/manager/economy/EconomyTransactionManagerPage.tsx"));
+const TenantWalletManagerPage = lazy(() => import("@/pages/manager/economy/TenantWalletManagerPage.tsx"));
+const TenantEconomyTransactionManagerPage = lazy(() => import("@/pages/manager/economy/TenantEconomyTransactionManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -166,6 +174,11 @@ export function getMenuGroups(t: TFunction): MenuGroup[] {
             name: 'ai',
             icon: <RobotOutlined />,
             label: t('menu.groups.ai'),
+        },
+        {
+            name: 'economy',
+            icon: <DollarOutlined />,
+            label: t('menu.groups.economy'),
         },
         ...toTranslatedMenuGroups(t),
     ];
@@ -527,6 +540,22 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             group: 'tenant'
         },
         {
+            key: '/manager/tenant/wallet',
+            path: '/manager/tenant/wallet',
+            icon: <WalletOutlined />,
+            label: t('menu.admin.tenantWallet'),
+            page: <TenantWalletManagerPage />,
+            group: 'tenant'
+        },
+        {
+            key: '/manager/tenant/transaction',
+            path: '/manager/tenant/transaction',
+            icon: <AccountBookOutlined />,
+            label: t('menu.admin.tenantTransaction'),
+            page: <TenantEconomyTransactionManagerPage />,
+            group: 'tenant'
+        },
+        {
             key: '/manager/file-resources',
             path: '/manager/file-resources',
             icon: <FileOutlined />,
@@ -683,6 +712,30 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             label: t('menu.admin.aiInvocationRecord'),
             page: <AiModelInvocationRecordManagerPage />,
             group: 'ai'
+        },
+        {
+            key: '/manager/economy/currency',
+            path: '/manager/economy/currency',
+            icon: <DollarOutlined />,
+            label: t('menu.admin.currency'),
+            page: <CurrencyManagerPage />,
+            group: 'economy'
+        },
+        {
+            key: '/manager/economy/wallet',
+            path: '/manager/economy/wallet',
+            icon: <WalletOutlined />,
+            label: t('menu.admin.wallet'),
+            page: <WalletManagerPage />,
+            group: 'economy'
+        },
+        {
+            key: '/manager/economy/transaction',
+            path: '/manager/economy/transaction',
+            icon: <AccountBookOutlined />,
+            label: t('menu.admin.transaction'),
+            page: <EconomyTransactionManagerPage />,
+            group: 'economy'
         },
         {
             key: '/manager/approval-flow-definitions',

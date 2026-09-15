@@ -54,6 +54,7 @@
         <module>crystal-auth</module>
         <module>crystal-approval</module>
         <module>crystal-ai</module>
+        <module>crystal-economy</module>
     </modules>
 
     <scm>
@@ -80,6 +81,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-ai</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-economy</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
