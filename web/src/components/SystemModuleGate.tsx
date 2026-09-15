@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {ReactNode} from "react";
 import {useSystemIntegrated} from "@/context/SystemIntegratedContext.tsx";
 import {isModuleDisabled, type SystemModuleKeyValue} from "@/router/system-module-menu-paths.ts";

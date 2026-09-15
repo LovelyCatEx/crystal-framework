@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {
     ApartmentOutlined,
     AuditOutlined,
@@ -87,6 +94,7 @@ const AiProviderManagerPage = lazy(() => import("@/pages/manager/ai/AiProviderMa
 const AiModelManagerPage = lazy(() => import("@/pages/manager/ai/AiModelManagerPage.tsx"));
 const AiUserGroupManagerPage = lazy(() => import("@/pages/manager/ai/AiUserGroupManagerPage.tsx"));
 const AiPlaygroundPage = lazy(() => import("@/pages/manager/ai/AiPlaygroundPage.tsx"));
+const AiModelInvocationRecordManagerPage = lazy(() => import("@/pages/manager/ai/AiModelInvocationRecordManagerPage.tsx"));
 
 import {ProtectedControllerWarningWrapper} from "@/components/base/ProtectedControllerWarningWrapper.tsx";
 import {UserPermissionManagerController} from "@/api/user/rbac/user-permission.api.ts";
@@ -666,6 +674,14 @@ export function getAdminMenus(t: TFunction): RouteItem[] {
             icon: <RobotOutlined />,
             label: t('menu.admin.aiPlayground'),
             page: <AiPlaygroundPage />,
+            group: 'ai'
+        },
+        {
+            key: '/manager/ai/invocation-record',
+            path: '/manager/ai/invocation-record',
+            icon: <LineChartOutlined />,
+            label: t('menu.admin.aiInvocationRecord'),
+            page: <AiModelInvocationRecordManagerPage />,
             group: 'ai'
         },
         {

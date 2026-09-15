@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.shared.aspect
 
 import co.elastic.apm.api.ElasticApm
@@ -167,15 +174,25 @@ class ApmWebfluxSpanTraceAspect {
         if (ctx.hasKey(ApmParentSpan::class.java)) ctx.get(ApmParentSpan::class.java).span
         else ElasticApm.currentSpan()
 
-    // Kotlin suspend methods: let the proxy handle the coroutine<->reactive adaptation. Spring's
-    // JdkDynamicAopProxy / CglibAopProxy detect the suspending function, run the whole advice chain
-    // (including TransactionInterceptor) in Mono form, then await it back to a Continuation for the
-    // caller. So pjp.proceed() here already returns the Mono produced by the proxied invocation with
-    // the transaction context intact — we only wrap it for the span. Re-invoking pjp.target directly
-    // (the previous approach) bypassed the proxy chain and silently skipped @Transactional.
-    @Suppress("UNCHECKED_CAST")
-    private fun traceSuspend(pjp: ProceedingJoinPoint, name: String): Any? =
-        wrapMono(pjp.proceed() as Mono<Any>, name)
+    // Kotlin suspend methods: let the proxy handle the coroutine<->reactive adaptation. Spring
+    // bridges a suspending function to `Mono` when its declared return type is not a `Publisher`,
+    // but returns a `Flux` directly when the function is declared to return one — so `pjp.proceed()`
+    // may yield either. Route by the runtime value rather than assuming `Mono`.
+    private fun traceSuspend(pjp: ProceedingJoinPoint, name: String): Any? {
+        return when (val result = pjp.proceed()) {
+            is Mono<*> -> {
+                @Suppress("UNCHECKED_CAST")
+                wrapMono(result as Mono<Any>, name)
+            }
+
+            is Flux<*> -> {
+                @Suppress("UNCHECKED_CAST")
+                wrapFlux(result as Flux<Any>, name)
+            }
+
+            else -> result
+        }
+    }
 
     private fun emitLog(name: String, startNanos: Long) {
         if (!log.isDebugEnabled) return

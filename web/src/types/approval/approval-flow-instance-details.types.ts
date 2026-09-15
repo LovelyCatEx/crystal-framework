@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {ApprovalFlowInstance} from "@/types/approval/approval-flow-instance.types.ts";
 import type {ApprovalFlowDefinition} from "@/types/approval/approval-flow-definition.types.ts";
 import type {ApprovalFlowNode} from "@/types/approval/approval-flow-node.types.ts";

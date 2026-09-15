@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {I18nRules} from "@/i18n/i18n-rules.ts";
 
 export const zhCN: I18nRules = {
@@ -727,23 +734,17 @@ export const zhCN: I18nRules = {
           placeholder: 'JSON 格式的响应配置',
           chatCompletions: '对话完成配置',
           embedding: '向量嵌入配置',
-          contentPath: 'Content 路径',
-          contentPathPlaceholder: '$.choices[0].message.content',
-          finishReasonPath: 'Finish Reason 路径',
-          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
-          providerRequestIdPath: 'Provider Request ID 路径',
-          providerRequestIdPathPlaceholder: '$.id',
-          errorMessagePath: 'Error Message 路径',
-          errorMessagePathPlaceholder: '$.error.message',
+          errorMessageJsonPath: 'Error Message 路径',
+          errorMessageJsonPathPlaceholder: '$.error.message',
           usageTitle: 'Usage JSON Path 配置',
-          inputTokensPath: 'Input Tokens 路径',
-          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
-          outputTokensPath: 'Output Tokens 路径',
-          outputTokensPathPlaceholder: '$.usage.completion_tokens',
-          totalTokensPath: 'Total Tokens 路径',
-          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          promptTokensPath: 'Prompt Tokens 路径',
+          promptTokensPathPlaceholder: '$.usage.prompt_tokens',
+          completionTokensPath: 'Completion Tokens 路径',
+          completionTokensPathPlaceholder: '$.usage.completion_tokens',
+          reasoningTokensPath: 'Reasoning Tokens 路径',
+          reasoningTokensPathPlaceholder: '$.usage.completion_tokens_details.reasoning_tokens',
           cacheReadTokensPath: 'Cache Read Tokens 路径',
-          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheReadTokensPathPlaceholder: '$.usage.prompt_tokens_details.cached_tokens',
           cacheWriteTokensPath: 'Cache Write Tokens 路径',
           cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
         },
@@ -835,6 +836,7 @@ export const zhCN: I18nRules = {
           label: '请求配置',
           placeholder: 'JSON 格式的请求配置',
           temperature: 'Temperature',
+          topP: 'Top P',
           maxOutputTokens: '最大输出 Token 数',
           additionalBody: '额外请求体参数',
           additionalBodyKey: '键',
@@ -936,10 +938,94 @@ export const zhCN: I18nRules = {
       emptyConversation: '开始一段新的对话',
       inputPlaceholder: '输入消息，按 Enter 发送，按 Shift+Enter 换行',
       send: '发送',
-      thinking: '已完成思考',
+      reasoningEffort: '推理强度',
+      reasoningEffortDefault: '协议默认',
+      streaming: '流式输出',
+      group: '分组',
+      groupDefault: '默认',
+      chatSettings: '设置',
+      modelInfo: '模型信息',
+      modelKey: '模型标识',
+      modelInputPrice: '输入价格',
+      modelOutputPrice: '输出价格',
+      modelCacheReadPrice: '缓存读价格',
+      modelCacheWritePrice: '缓存写价格',
+      modelContextWindow: '上下文窗口',
+      modelCapabilities: '能力',
+      thinking: '正在思考',
+      thoughtComplete: '已完成思考',
+      newSession: '新会话',
+      newSessionConfirm: '开始新会话？当前对话将被清空。',
+      usagePromptTokens: '输入',
+      usageCompletionTokens: '输出',
+      usageReasoningTokens: '推理',
+      usageCachedTokens: '缓存读取',
+      usageCacheCreationTokens: '缓存写入',
+      usageToolCalls: '工具',
+      currentInput: '当前输入',
+      estimatedCache: '预估缓存',
+      cacheHitRate: '缓存命中率',
+      maxWindow: '最大窗口',
+      messageCount: '消息数',
+      retry: '重试',
+      copy: '复制',
+      edit: '编辑',
+      delete: '删除',
+      copySuccess: '已复制',
+      deleteConfirm: '删除这条消息？',
       messages: {
         loadFailed: '加载 AI 模型失败',
-        chatFailed: '发送消息失败'
+        chatFailed: '发送消息失败',
+        groupRequired: '请选择分组'
+      }
+    },
+    aiModelInvocationRecordManager: {
+      title: 'AI 模型调用记录',
+      subtitle: '查看 AI 模型调用与成本记录',
+      filter: {
+        id: '记录ID',
+        idPlaceholder: '输入记录 ID',
+        requestId: '请求ID',
+        requestIdPlaceholder: '输入请求 ID',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户 ID',
+        modelId: '模型ID',
+        modelIdPlaceholder: '输入模型 ID',
+        status: '状态',
+        all: '全部'
+      },
+      detail: {
+        requestId: '请求 ID',
+        sessionId: '会话 ID',
+        tenantId: '租户 ID',
+        providerId: '提供商 ID',
+        userId: '用户 ID',
+        modelId: '模型 ID',
+        errorCode: '错误码',
+        errorMessage: '错误信息',
+        stopReason: '停止原因',
+        clientIp: '客户端 IP',
+        userAgent: 'User-Agent',
+        requestSize: '请求大小',
+        responseSize: '响应大小',
+        temperature: '温度',
+        topP: 'Top P',
+        maxTokens: '最大 Token',
+        toolCalls: '工具调用',
+        messageCount: '消息数',
+        queueWait: '排队等待',
+        tokensPerSecond: 'Token/秒',
+        billing: '计费计算过程',
+        input: '输入',
+        inputPrice: '输入价格',
+        output: '输出',
+        outputPrice: '输出价格',
+        cacheRead: '缓存读取',
+        cacheReadPrice: '缓存读取价格',
+        cacheWrite: '缓存写入',
+        cacheWritePrice: '缓存写入价格',
+        groupMultiplier: '分组倍率',
+        actualCost: '实际花费'
       }
     },
     tenantManager: {
@@ -3914,6 +4000,27 @@ export const zhCN: I18nRules = {
           enabled: '已启用',
           disabled: '已禁用'
         }
+      },
+      aiModelInvocationRecord: {
+        record: '记录',
+        user: '用户',
+        group: '分组',
+        status: '状态',
+        model: '模型',
+        performance: '性能',
+        duration: '耗时',
+        firstToken: '首字',
+        streaming: '流式',
+        inputTokens: '输入 Token',
+        outputTokens: '输出 Token',
+        cache: '缓存',
+        reasoningTokens: '推理 Token',
+        cost: '花费',
+        pricing: '模型定价',
+        input: '输入',
+        output: '输出',
+        cacheRead: '缓存读取',
+        cacheWrite: '缓存写入'
       }
     },
     entityTable: {
@@ -4438,6 +4545,20 @@ export const zhCN: I18nRules = {
       5: '结构化输出',
       6: '音频输入',
       7: '音频输出'
+    },
+    reasoningEffort: {
+      DISABLED: '关闭',
+      AUTO: '自动',
+      MINIMAL: '最低',
+      LOW: '低',
+      MEDIUM: '中',
+      HIGH: '高',
+      EXTRA_HIGH: '极高',
+      MAX: '最高'
+    },
+    aiModelInvocationStatus: {
+      0: '失败',
+      1: '成功'
     }
   },
 
@@ -4480,7 +4601,8 @@ export const zhCN: I18nRules = {
     aiModel: '模型',
     aiUserGroup: '用户组',
     aiUserGroupModel: '用户组模型',
-    aiUserGroupMember: '用户组成员'
+    aiUserGroupMember: '用户组成员',
+    aiModelInvocationRecord: 'AI 模型调用记录'
   },
 
   menu: {
@@ -4553,7 +4675,8 @@ export const zhCN: I18nRules = {
       aiProvider: '提供商管理',
       aiModel: '模型管理',
       aiUserGroup: '用户组管理',
-      aiPlayground: 'AI 训练场'
+      aiPlayground: 'AI 训练场',
+      aiInvocationRecord: '调用记录'
     },
 
     // 菜单分组

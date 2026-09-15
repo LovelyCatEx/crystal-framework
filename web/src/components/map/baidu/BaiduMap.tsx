@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {forwardRef, type HTMLProps, useEffect, useImperativeHandle, useRef} from "react";
 import * as mapvthree from '@baidumap/mapv-three';
 import type {GenericLatLngPoint} from "@/components/map/generic-map-types.ts";

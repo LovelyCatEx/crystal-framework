@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /**
  * Approval flow node config types. These are the payload shapes persisted inside
  * `ApprovalFlowNodeEntity.config` as JSON — kept in strict sync with the backend

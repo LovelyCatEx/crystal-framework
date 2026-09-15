@@ -1,9 +1,10 @@
 /*
- * Copyright 2025 lovelycat
+ * Copyright (c) 2026 lovelycat
  *
- * Use of this source code is governed by the Apache License, Version 2.0,
- * that can be found in the LICENSE file.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
+
 import * as React from "react";
 import {forwardRef} from "react";
 import type {Item} from "rete-react-plugin/_types/presets/context-menu/types";

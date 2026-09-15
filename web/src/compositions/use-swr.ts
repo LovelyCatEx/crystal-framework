@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {ApiResponse} from "../api/system-request.ts";
 import React, {useEffect, useState} from "react";
 import {message} from "antd";
@@ -38,7 +45,7 @@ export function useSWRState<T>(
     const { data, isLoading, mutate } = useSWRComposition<ApiResponse<T>>(key, func, onError, options);
 
     const [value, setValue] = useState<T | null>(null);
-    const [syncedData, setSyncedData] = useState(data);
+    const [syncedData, setSyncedData] = useState<ApiResponse<T> | undefined>(undefined);
     if (data !== syncedData) {
         setSyncedData(data);
         if (data?.data) {

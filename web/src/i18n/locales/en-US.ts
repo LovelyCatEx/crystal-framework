@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {I18nRules} from "@/i18n/i18n-rules.ts";
 
 export const enUS: I18nRules = {
@@ -730,23 +737,17 @@ export const enUS: I18nRules = {
           placeholder: 'JSON format response config',
           chatCompletions: 'Chat Completions Configuration',
           embedding: 'Embedding Configuration',
-          contentPath: 'Content Path',
-          contentPathPlaceholder: '$.choices[0].message.content',
-          finishReasonPath: 'Finish Reason Path',
-          finishReasonPathPlaceholder: '$.choices[0].finish_reason',
-          providerRequestIdPath: 'Provider Request ID Path',
-          providerRequestIdPathPlaceholder: '$.id',
-          errorMessagePath: 'Error Message Path',
-          errorMessagePathPlaceholder: '$.error.message',
+          errorMessageJsonPath: 'Error Message Path',
+          errorMessageJsonPathPlaceholder: '$.error.message',
           usageTitle: 'Usage JSON Path Configuration',
-          inputTokensPath: 'Input Tokens Path',
-          inputTokensPathPlaceholder: '$.usage.prompt_tokens',
-          outputTokensPath: 'Output Tokens Path',
-          outputTokensPathPlaceholder: '$.usage.completion_tokens',
-          totalTokensPath: 'Total Tokens Path',
-          totalTokensPathPlaceholder: '$.usage.total_tokens',
+          promptTokensPath: 'Prompt Tokens Path',
+          promptTokensPathPlaceholder: '$.usage.prompt_tokens',
+          completionTokensPath: 'Completion Tokens Path',
+          completionTokensPathPlaceholder: '$.usage.completion_tokens',
+          reasoningTokensPath: 'Reasoning Tokens Path',
+          reasoningTokensPathPlaceholder: '$.usage.completion_tokens_details.reasoning_tokens',
           cacheReadTokensPath: 'Cache Read Tokens Path',
-          cacheReadTokensPathPlaceholder: '$.usage.cache_read_input_tokens',
+          cacheReadTokensPathPlaceholder: '$.usage.prompt_tokens_details.cached_tokens',
           cacheWriteTokensPath: 'Cache Write Tokens Path',
           cacheWriteTokensPathPlaceholder: '$.usage.cache_creation_input_tokens'
         },
@@ -838,6 +839,7 @@ export const enUS: I18nRules = {
           label: 'Request Config',
           placeholder: 'JSON format request config',
           temperature: 'Temperature',
+          topP: 'Top P',
           maxOutputTokens: 'Max Output Tokens',
           additionalBody: 'Additional Body Parameters',
           additionalBodyKey: 'Key',
@@ -939,10 +941,94 @@ export const enUS: I18nRules = {
       emptyConversation: 'Start a new conversation',
       inputPlaceholder: 'Enter a message. Press Enter to send and Shift+Enter for a new line',
       send: 'Send',
-      thinking: 'Thought complete',
+      reasoningEffort: 'Reasoning Effort',
+      reasoningEffortDefault: 'Protocol Default',
+      streaming: 'Streaming',
+      group: 'Group',
+      groupDefault: 'Default',
+      chatSettings: 'Settings',
+      modelInfo: 'Model Info',
+      modelKey: 'Model Key',
+      modelInputPrice: 'Input Price',
+      modelOutputPrice: 'Output Price',
+      modelCacheReadPrice: 'Cache Read Price',
+      modelCacheWritePrice: 'Cache Write Price',
+      modelContextWindow: 'Context Window',
+      modelCapabilities: 'Capabilities',
+      thinking: 'Thinking',
+      thoughtComplete: 'Thought complete',
+      newSession: 'New Session',
+      newSessionConfirm: 'Start a new session? The current conversation will be cleared.',
+      usagePromptTokens: 'Prompt',
+      usageCompletionTokens: 'Completion',
+      usageReasoningTokens: 'Reasoning',
+      usageCachedTokens: 'Cached read',
+      usageCacheCreationTokens: 'Cache write',
+      usageToolCalls: 'Tools',
+      currentInput: 'Current input',
+      estimatedCache: 'Estimated cache',
+      cacheHitRate: 'Cache hit rate',
+      maxWindow: 'Max window',
+      messageCount: 'Message count',
+      retry: 'Retry',
+      copy: 'Copy',
+      edit: 'Edit',
+      delete: 'Delete',
+      copySuccess: 'Copied',
+      deleteConfirm: 'Delete this message?',
       messages: {
         loadFailed: 'Failed to load AI models',
-        chatFailed: 'Failed to send message'
+        chatFailed: 'Failed to send message',
+        groupRequired: 'Please select a group'
+      }
+    },
+    aiModelInvocationRecordManager: {
+      title: 'AI Model Invocation Records',
+      subtitle: 'View AI model invocation and cost records',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        requestId: 'Request ID',
+        requestIdPlaceholder: 'Enter request ID',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        modelId: 'Model ID',
+        modelIdPlaceholder: 'Enter model ID',
+        status: 'Status',
+        all: 'All'
+      },
+      detail: {
+        requestId: 'Request ID',
+        sessionId: 'Session ID',
+        tenantId: 'Tenant ID',
+        providerId: 'Provider ID',
+        userId: 'User ID',
+        modelId: 'Model ID',
+        errorCode: 'Error Code',
+        errorMessage: 'Error Message',
+        stopReason: 'Stop Reason',
+        clientIp: 'Client IP',
+        userAgent: 'User-Agent',
+        requestSize: 'Request Size',
+        responseSize: 'Response Size',
+        temperature: 'Temperature',
+        topP: 'Top P',
+        maxTokens: 'Max Tokens',
+        toolCalls: 'Tool Calls',
+        messageCount: 'Messages',
+        queueWait: 'Queue Wait',
+        tokensPerSecond: 'Tokens/s',
+        billing: 'Billing Calculation',
+        input: 'Input',
+        inputPrice: 'Input Price',
+        output: 'Output',
+        outputPrice: 'Output Price',
+        cacheRead: 'Cache Read',
+        cacheReadPrice: 'Cache Read Price',
+        cacheWrite: 'Cache Write',
+        cacheWritePrice: 'Cache Write Price',
+        groupMultiplier: 'Group Multiplier',
+        actualCost: 'Actual Cost'
       }
     },
     tenantManager: {
@@ -3916,6 +4002,27 @@ export const enUS: I18nRules = {
           enabled: 'Enabled',
           disabled: 'Disabled'
         }
+      },
+      aiModelInvocationRecord: {
+        record: 'Record',
+        user: 'User',
+        group: 'Group',
+        status: 'Status',
+        model: 'Model',
+        performance: 'Performance',
+        duration: 'Duration',
+        firstToken: 'TTFT',
+        streaming: 'Streaming',
+        inputTokens: 'Input Tokens',
+        outputTokens: 'Output Tokens',
+        cache: 'Cache',
+        reasoningTokens: 'Reasoning Tokens',
+        cost: 'Cost',
+        pricing: 'Model Pricing',
+        input: 'Input',
+        output: 'Output',
+        cacheRead: 'Cache Read',
+        cacheWrite: 'Cache Write'
       }
     },
     entityTable: {
@@ -4440,6 +4547,20 @@ export const enUS: I18nRules = {
       5: 'Structured Output',
       6: 'Audio Input',
       7: 'Audio Output'
+    },
+    reasoningEffort: {
+      DISABLED: 'Disabled',
+      AUTO: 'Auto',
+      MINIMAL: 'Minimal',
+      LOW: 'Low',
+      MEDIUM: 'Medium',
+      HIGH: 'High',
+      EXTRA_HIGH: 'Extra High',
+      MAX: 'Max'
+    },
+    aiModelInvocationStatus: {
+      0: 'Failed',
+      1: 'Success'
     }
   },
 
@@ -4482,7 +4603,8 @@ export const enUS: I18nRules = {
     aiModel: 'Model',
     aiUserGroup: 'User Group',
     aiUserGroupModel: 'User Group Model',
-    aiUserGroupMember: 'User Group Member'
+    aiUserGroupMember: 'User Group Member',
+    aiModelInvocationRecord: 'AI Model Invocation Record'
   },
 
   menu: {
@@ -4555,7 +4677,8 @@ export const enUS: I18nRules = {
       aiProvider: 'Provider Management',
       aiModel: 'Model Management',
       aiUserGroup: 'User Group Management',
-      aiPlayground: 'AI Playground'
+      aiPlayground: 'AI Playground',
+      aiInvocationRecord: 'Invocation Records'
     },
 
     // Menu groups

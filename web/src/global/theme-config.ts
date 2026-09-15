@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {PageAnimationType, ThemeColor, ThemeConfig, ThemeMode} from "@/types/theme.types.ts";
 
 export const THEME_STORAGE_KEY = 'app-theme-color';

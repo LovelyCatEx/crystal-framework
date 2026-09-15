@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 export function setUserAuthentication(token: string, expiresIn: number) {
     localStorage.setItem('access_token', token);
     localStorage.setItem('expires', String(new Date().getTime() + expiresIn));

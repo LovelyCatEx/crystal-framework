@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {MessageSegmentNode} from "@/components/message-chain-editor/types.ts";
 
 const SUPPORTED_TAGS = new Set(['at', 'image', 'link', 'br']);

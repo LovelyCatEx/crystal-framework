@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 export function sortByMapOrder<T extends string>(arr: T[], map: Map<T, any>): T[] {
     const orderMap = new Map<T, number>();
     Array.from(map.keys()).forEach((key, index) => {

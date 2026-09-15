@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.ai.constants
 
 import com.lovelycatv.crystalframework.shared.types.rbac.system.SystemRbacPermissionDeclaration
@@ -66,11 +73,16 @@ object AiPermission {
     const val ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME = "system.ai.playground.chat"
     val ACTION_SYSTEM_AI_PLAYGROUND_CHAT = SystemRbacPermissionDeclaration.action(ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME, "Use AI playground")
 
+    const val ACTION_SYSTEM_AI_INVOCATION_RECORD_READ_NAME = "system.ai.invocation.record.read"
+    val ACTION_SYSTEM_AI_INVOCATION_RECORD_READ = SystemRbacPermissionDeclaration.action(ACTION_SYSTEM_AI_INVOCATION_RECORD_READ_NAME, "Read AI model invocation records")
+
     val MENU_SYSTEM_AI_PROVIDER = SystemRbacPermissionDeclaration.menu("system.ai.provider", "/manager/ai/provider", "AI Provider management menu")
     val MENU_SYSTEM_AI_MODEL = SystemRbacPermissionDeclaration.menu("system.ai.model", "/manager/ai/model", "AI Model management menu")
     val MENU_SYSTEM_AI_USER_GROUP = SystemRbacPermissionDeclaration.menu("system.ai.user.group", "/manager/ai/user-group", "AI User Group management menu")
 
     val MENU_SYSTEM_AI_PLAYGROUND = SystemRbacPermissionDeclaration.menu("system.ai.playground", "/manager/ai/playground", "AI Playground menu")
+
+    val MENU_SYSTEM_AI_INVOCATION_RECORD = SystemRbacPermissionDeclaration.menu("system.ai.invocation.record", "/manager/ai/invocation-record", "AI Model Invocation Record menu")
 
     fun allPermissions(): List<SystemRbacPermissionDeclaration> = listOf(
         ACTION_SYSTEM_AI_PROVIDER_CREATE,
@@ -94,9 +106,11 @@ object AiPermission {
         // ACTION_SYSTEM_AI_USER_GROUP_MEMBER_UPDATE,
         ACTION_SYSTEM_AI_USER_GROUP_MEMBER_DELETE,
         ACTION_SYSTEM_AI_PLAYGROUND_CHAT,
+        ACTION_SYSTEM_AI_INVOCATION_RECORD_READ,
         MENU_SYSTEM_AI_PROVIDER,
         MENU_SYSTEM_AI_MODEL,
         MENU_SYSTEM_AI_USER_GROUP,
         MENU_SYSTEM_AI_PLAYGROUND,
+        MENU_SYSTEM_AI_INVOCATION_RECORD,
     )
 }

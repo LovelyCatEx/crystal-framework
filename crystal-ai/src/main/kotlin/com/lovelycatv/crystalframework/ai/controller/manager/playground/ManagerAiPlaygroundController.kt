@@ -1,43 +1,67 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.ai.controller.manager.playground
 
-import com.jayway.jsonpath.JsonPath
 import com.lovelycatv.crystalframework.ai.constants.AiPermission
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.dto.ManagerAiPlaygroundChatDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.dto.ManagerAiPlaygroundMessageDTO
 import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundChatVO
+import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundDataVO
+import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundStreamChunkVO
+import com.lovelycatv.crystalframework.ai.controller.manager.playground.vo.ManagerAiPlaygroundUsageVO
 import com.lovelycatv.crystalframework.ai.service.AiChatService
-import com.lovelycatv.crystalframework.ai.service.manager.AiModelManagerService
-import com.lovelycatv.crystalframework.ai.service.manager.AiProviderManagerService
-import com.lovelycatv.crystalframework.ai.types.AiProviderProtocolType
+import com.lovelycatv.crystalframework.ai.service.AiPlaygroundDataService
+import com.lovelycatv.crystalframework.ai.types.AiChatStreamEvent
 import com.lovelycatv.crystalframework.shared.annotations.RequiresAuthority
 import com.lovelycatv.crystalframework.shared.constants.GlobalConstants
+import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenContext
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenException
+import com.lovelycatv.crystalframework.shared.exception.ForbiddenReason
 import com.lovelycatv.crystalframework.shared.response.ApiResponse
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
-import com.lovelycatv.crystalframework.shared.utils.parseObject
-import com.lovelycatv.crystalframework.shared.utils.toJSONString
+import com.lovelycatv.crystalframework.shared.utils.RbacUtils
+import com.lovelycatv.vertex.ai.llm.ChatResponse
+import com.lovelycatv.vertex.ai.llm.message.AssistantChatMessage
+import com.lovelycatv.vertex.ai.llm.message.ChatMessage
+import com.lovelycatv.vertex.ai.llm.message.ChatMessageType
+import com.lovelycatv.vertex.ai.llm.message.SystemChatMessage
+import com.lovelycatv.vertex.ai.llm.message.UserChatMessage
 import jakarta.validation.Valid
-import org.springframework.ai.anthropic.AnthropicChatModel
-import org.springframework.ai.chat.messages.AssistantMessage
-import org.springframework.ai.chat.messages.Message
-import org.springframework.ai.chat.messages.SystemMessage
-import org.springframework.ai.chat.messages.UserMessage
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.reactor.asFlux
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
 
 @Validated
 @RestController
 @RequestMapping("${GlobalConstants.REQUEST_MAPPING_PREFIX}/manager/ai/playground")
 class ManagerAiPlaygroundController(
     private val aiChatService: AiChatService,
-    private val aiModelManagerService: AiModelManagerService,
-    private val aiProviderManagerService: AiProviderManagerService,
+    private val aiPlaygroundDataService: AiPlaygroundDataService,
 ) {
-    companion object {
-        private const val REASONING_CONTENT_METADATA_KEY = "reasoningContent"
+    @GetMapping("/data", version = "1")
+    @RequiresAuthority(
+        anyOf = [AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME],
+        scope = ResourceScope.SYSTEM,
+    )
+    suspend fun getData(): ApiResponse<ManagerAiPlaygroundDataVO> {
+        val userId = CurrentUserId.current() ?: 0
+        return ApiResponse.success(aiPlaygroundDataService.getPlaygroundData(userId))
     }
 
     @PostMapping("/chat", version = "1")
@@ -51,51 +75,141 @@ class ManagerAiPlaygroundController(
         val modelId = dto.modelId.toLongOrNull()?.takeIf { it > 0 }
             ?: throw BusinessException("Invalid AI model ID")
 
-        val model = aiModelManagerService.getByIdOrNull(modelId)
-            ?: throw BusinessException("Model not found")
-        val provider = aiProviderManagerService.getByIdOrNull(model.providerId)
-            ?: throw BusinessException("Provider not found")
-
         val messages = dto.messages.map(::toMessage)
-        val response = aiChatService.chatCompletionSync(modelId, messages)
+        val result = aiChatService.chatCompletionSync(
+            modelId, messages, dto.reasoningEffort,
+            sessionId = dto.sessionId,
+            groupId = dto.groupId.toLong(),
+        )
+        val assistantMessage = result.response.choices.firstOrNull()?.message
 
-        val (content, reasoningContent) = when (provider.getRealProtocolType()) {
-            AiProviderProtocolType.OPENAI_COMPATIBLE -> {
-                val assistantMessage = response.result?.output
-                val content = assistantMessage?.text ?: ""
-                val reasoningContent = assistantMessage?.metadata?.get(REASONING_CONTENT_METADATA_KEY) as? String
-                content to reasoningContent
-            }
+        return ApiResponse.success(
+            ManagerAiPlaygroundChatVO(
+                content = assistantMessage?.content ?: "",
+                reasoningContent = assistantMessage?.reasoningContent,
+                usage = result.response.usage.toUsageVO(),
+                toolCalls = result.toolCalls.ifEmpty { null },
+            )
+        )
+    }
 
-            AiProviderProtocolType.ANTHROPIC_MESSAGES -> {
-                val assistantMessages = response.results
-                if (assistantMessages.size > 1) {
-                    val json = assistantMessages[1].toJSONString()
-                    val jsonPath = JsonPath.parse(json)
+    /**
+     * Streams the same chat as [chat], one SSE frame per chunk.
+     *
+     * Authorisation is checked in-method rather than through [RequiresAuthority]: the
+     * `RequiresAuthorityAspect` casts every intercepted return value to `Mono`, so an endpoint
+     * returning a `Flux` would fail there with a `ClassCastException`.
+     */
+    @PostMapping("/chat-stream", version = "1")
+    suspend fun chatStream(
+        @Valid @RequestBody dto: ManagerAiPlaygroundChatDTO,
+    ): Flux<ServerSentEvent<ManagerAiPlaygroundStreamChunkVO>> {
+        val modelId = dto.modelId.toLongOrNull()?.takeIf { it > 0 }
+            ?: throw BusinessException("Invalid AI model ID")
 
-                    val content = jsonPath
-                        .read<String?>("$.output.metadata.anthropicThinkingContents[0].thinking")
-                        ?: ""
-
-                    val reasoningContent = jsonPath
-                        .read<String?>("$.output.text")
-                        ?: ""
-
-                    content to reasoningContent
-                } else {
-                    val content = assistantMessages.firstOrNull()?.output?.text ?: ""
-                    content to ""
-                }
-            }
+        if (!RbacUtils.hasAnyAuthority(AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME)) {
+            throw ForbiddenException(
+                "Access denied",
+                context = ForbiddenContext(
+                    reason = ForbiddenReason.MISSING_PERMISSION,
+                    requiredPermissions = listOf(AiPermission.ACTION_SYSTEM_AI_PLAYGROUND_CHAT_NAME),
+                    scope = ResourceScope.SYSTEM,
+                ),
+            )
         }
 
-        return ApiResponse.success(ManagerAiPlaygroundChatVO(content, reasoningContent))
+        val messages = dto.messages.map(::toMessage)
+
+        return aiChatService.chatCompletionAsync(
+            modelId, messages, dto.reasoningEffort,
+            sessionId = dto.sessionId,
+            groupId = dto.groupId.toLong(),
+        )
+            .scan<AiChatStreamEvent, StreamState?>(null) { acc, event ->
+                when (event) {
+                    is AiChatStreamEvent.Chunk -> StreamState(event, mergeUsage(acc?.usage, event.chunk.usage))
+                    is AiChatStreamEvent.ToolCall -> StreamState(event, acc?.usage ?: ChatResponse.Usage())
+                }
+            }
+            .filterNotNull()
+            .map { state ->
+                when (val event = state.event) {
+                    is AiChatStreamEvent.Chunk -> {
+                        val message = event.chunk.choices.firstOrNull()?.message
+                        ServerSentEvent.builder(
+                            ManagerAiPlaygroundStreamChunkVO(
+                                content = message?.content,
+                                reasoningContent = message?.reasoningContent,
+                                finished = event.chunk.finished,
+                                usage = state.usage.toUsageVO(),
+                            )
+                        ).build()
+                    }
+
+                    is AiChatStreamEvent.ToolCall -> {
+                        ServerSentEvent.builder(
+                            ManagerAiPlaygroundStreamChunkVO(
+                                content = null,
+                                reasoningContent = null,
+                                finished = false,
+                                usage = null,
+                                toolCall = event.result,
+                            )
+                        ).build()
+                    }
+                }
+            }
+            .asFlux()
     }
 
-    private fun toMessage(dto: ManagerAiPlaygroundMessageDTO): Message = when (dto.role.lowercase()) {
-        "system" -> SystemMessage(dto.content)
-        "user" -> UserMessage(dto.content)
-        "assistant" -> AssistantMessage(dto.content)
-        else -> throw BusinessException("Unsupported AI message role: ${dto.role}")
+    private fun toMessage(dto: ManagerAiPlaygroundMessageDTO): ChatMessage {
+        val type = ChatMessageType.entries.firstOrNull { it.name.equals(dto.role, ignoreCase = true) }
+            ?: throw BusinessException("Unsupported AI message role: ${dto.role}")
+
+        return when (type) {
+            ChatMessageType.SYSTEM -> SystemChatMessage(dto.content)
+
+            ChatMessageType.USER -> UserChatMessage(dto.content)
+
+            ChatMessageType.ASSISTANT -> AssistantChatMessage(
+                content = dto.content,
+                reasoningContent = null,
+                toolCalls = null,
+                stopReason = null,
+                stopReasonString = null,
+            )
+
+            // Tool results belong to a request the caller is building from a model's tool call, not
+            // to a message a person typed into the playground.
+            ChatMessageType.TOOL -> throw BusinessException("Unsupported AI message role: ${dto.role}")
+        }
     }
+
+    private fun ChatResponse.Usage.toUsageVO() = ManagerAiPlaygroundUsageVO(
+        promptTokens = promptTokens,
+        completionTokens = completionTokens,
+        reasoningTokens = reasoningTokens,
+        cachedPromptTokens = cachedPromptTokens,
+        cacheCreationTokens = cacheCreationTokens,
+    )
+
+    /**
+     * Streaming usage is split across frames (Anthropic reports prompt on `message_start` and
+     * completion on `message_delta`; OpenAI reports everything on the final frame). Each field is a
+     * running total, so the merged value is the largest seen for that field.
+     */
+    private fun mergeUsage(acc: ChatResponse.Usage?, current: ChatResponse.Usage): ChatResponse.Usage {
+        return ChatResponse.Usage(
+            promptTokens = maxOf(acc?.promptTokens ?: 0, current.promptTokens),
+            completionTokens = maxOf(acc?.completionTokens ?: 0, current.completionTokens),
+            reasoningTokens = maxOf(acc?.reasoningTokens ?: 0, current.reasoningTokens),
+            cachedPromptTokens = maxOf(acc?.cachedPromptTokens ?: 0, current.cachedPromptTokens),
+            cacheCreationTokens = maxOf(acc?.cacheCreationTokens ?: 0, current.cacheCreationTokens),
+        )
+    }
+
+    private data class StreamState(
+        val event: AiChatStreamEvent,
+        val usage: ChatResponse.Usage,
+    )
 }

@@ -14,8 +14,6 @@
     <ID>LongParameterList:UserAuthorizationServiceImpl.kt$UserAuthorizationServiceImpl$( private val userService: UserService, private val oAuthAccountService: OAuthAccountService, private val oAuthBindingTokenService: OAuthBindingTokenService, private val jwtSignKeyStore: JWTSignKeyStore, private val userRbacQueryService: UserRbacQueryService, private val crystalFrameworkConfiguration: CrystalFrameworkConfiguration, private val userBanRecordManagerService: UserBanRecordManagerService, )</ID>
     <ID>LongParameterList:UserLoginEvent.kt$UserLoginEvent$( source: Any, val userId: Long?, val username: String?, val tenantId: Long?, val loginMethod: Int, val oauth2Type: Int?, val oauth2Username: String?, val oauth2AccountId: Long?, val success: Boolean, val errorMessage: String?, val remoteIp: String?, val userAgent: String? )</ID>
     <ID>LongParameterList:UserLoginLogEntity.kt$UserLoginLogEntity$( id: Long = 0, @Column("user_id") val userId: Long? = null, @Column("username") val username: String? = null, @Column("tenant_id") val tenantId: Long? = null, @Column("login_method") val loginMethod: Int = 0, @Column("oauth2_type") val oauth2Type: Int? = null, @Column("oauth2_username") val oauth2Username: String? = null, @Column("oauth2_account_id") val oauth2AccountId: Long? = null, @Column("success") val success: Boolean = true, @Column("error_message") val errorMessage: String? = null, @Column("remote_ip") val remoteIp: String? = null, @Column("user_agent") val userAgent: String? = null, createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null )</ID>
-    <ID>MagicNumber:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$1000L</ID>
-    <ID>MagicNumber:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$999L</ID>
     <ID>MagicNumber:UserAuthoritiesCacheInvalidator.kt$UserAuthoritiesCacheInvalidator$4</ID>
     <ID>MaxLineLength:BindOAuthAccountDTO.kt$BindOAuthAccountDTO$@field:Pattern(regexp = "^[a-zA-Z0-9_@.-]+$", message = "Username can only contain letters, numbers, underscores, hyphens, dots, and @")</ID>
     <ID>MaxLineLength:CustomAuthFilter.kt$CustomAuthFilter$val getUserAuthorities: suspend (userId: Long, tenantId: Long?, tenantMemberId: Long?) -&gt; Collection&lt;GrantedAuthority&gt;</ID>
@@ -57,13 +55,13 @@
     <ID>NewLineAtEndOfFile:UserLoginLogServiceImpl.kt$com.lovelycatv.crystalframework.auth.service.impl.UserLoginLogServiceImpl.kt</ID>
     <ID>NewLineAtEndOfFile:UserOAuthAccountVO.kt$com.lovelycatv.crystalframework.auth.controller.vo.UserOAuthAccountVO.kt</ID>
     <ID>NewLineAtEndOfFile:WebFluxConfig.kt$com.lovelycatv.crystalframework.auth.config.WebFluxConfig.kt</ID>
+    <ID>ReturnCount:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$private fun buildConfig(ip: String, account: String): RateLimitConfig?</ID>
     <ID>ReturnCount:WebFluxConfig.kt$WebFluxConfig.&lt;no name provided&gt;$override fun resolveArgument( parameter: MethodParameter, bindingContext: BindingContext, exchange: ServerWebExchange, ): Mono&lt;Any&gt;</ID>
     <ID>SpreadOperator:SecurityConfig.kt$SecurityConfig$(*(listOf("/login/oauth2/code/**") + unauthorizedPathPatterns.map { it.patternString }).toTypedArray())</ID>
     <ID>ThrowsCount:OAuthAccountController.kt$OAuthAccountController$@PostMapping("/bindByAccountId") suspend fun bindOAuthByAccountId( userAuthentication: UserAuthentication, @ModelAttribute @Valid dto: BindOAuthByAccountIdDTO ): ApiResponse&lt;*&gt;</ID>
     <ID>ThrowsCount:OAuthAccountController.kt$OAuthAccountController$@Unauthorized @PostMapping("/bindOAuthAccount") suspend fun bindOAuthAccount( userAuthentication: UserAuthentication?, request: ServerHttpRequest, @ModelAttribute @Valid dto: BindOAuthAccountDTO ): ApiResponse&lt;*&gt;</ID>
     <ID>TooGenericExceptionCaught:CustomAuthFilter.kt$CustomAuthFilter$e: Exception</ID>
     <ID>TooGenericExceptionCaught:CustomAuthFilter.kt$CustomAuthFilter$e: Throwable</ID>
-    <ID>TooGenericExceptionCaught:LoginRateLimitServiceImpl.kt$LoginRateLimitServiceImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:OAuthAccountController.kt$OAuthAccountController$e: Exception</ID>
     <ID>TooGenericExceptionCaught:WebFluxConfig.kt$WebFluxConfig.&lt;no name provided&gt;$e: Exception</ID>
     <ID>WildcardImport:OAuthAccountController.kt$import org.springframework.web.bind.annotation.*</ID>

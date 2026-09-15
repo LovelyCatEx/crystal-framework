@@ -8,6 +8,31 @@
 3. v1.15.0 开始彻底移除 crystal-message 模块，已有数据表不会被删除。
 :::
 
+## v1.15.1
+
+2026-09-14
+
+### 新功能
++ feat(web): 实体表格新增可展开子行。
++ feat(ai & web): 新增 AI 模型调用记录只读管理页面。
++ feat(ai & web): AI 演练场聊天支持流式输出与 token 用量统计。
++ feat(ai): AI 演练场新增工具调用、会话追踪与 top-p 参数。
++ feat(ai): AI 演练场聊天应用用户组计费倍率，并新增按组隔离的演练场数据端点。
++ feat(web): AI 演练场新增上下文计量、消息操作、Markdown 渲染与代码高亮。
++ feat(web): 新增设备类型检测并适配移动端头部，AI 演练场适配移动端。
+
+### Bug 修复
++ fix(shared): 新增 afterUpdate 钩子，避免 suspend 桥接方法破坏代理更新。
++ fix(shared): 修复 APM span 追踪中 flux 返回型 suspend 函数的路由。
+
+### 其他
++ refactor(ai): 在请求上下文中注入客户端 IP 与 User-Agent。
++ refactor(ai): 使用 vertexlib LLM 客户端替换 spring ai。
++ refactor: 为所有源码文件添加 MIT 版权头。
++ chore: 更新 detekt 基线文件。
+
+---
+
 ## v1.15.0
 
 2026-09-13

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.shared.service
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerDeleteDTO
@@ -123,10 +130,22 @@ interface BaseManagerService<
             } newEntity false
         ).awaitFirstOrNull() ?: throw BusinessException("Could not update resource")
 
+        this.afterUpdate(dto, existing, result)
+
         return result
     }
 
     suspend fun applyDTOToEntity(dto: UPDATE_DTO, original: ENTITY): ENTITY
+
+    /**
+     * Post-update hook, invoked after the entity has been persisted within [update].
+     *
+     * Concrete services override this to run post-write side effects (publish cache-invalidation
+     * events, force-logout a deactivated member, ...) instead of overriding [update]. Overriding
+     * [update] with a concrete DTO type generates a Kotlin bridge method that Spring AOP's
+     * suspend-function invocation cannot resolve, breaking every proxied call to [update].
+     */
+    suspend fun afterUpdate(dto: UPDATE_DTO, original: ENTITY, updated: ENTITY) {}
 
     suspend fun batchDelete(ids: List<Long>) {
         try {

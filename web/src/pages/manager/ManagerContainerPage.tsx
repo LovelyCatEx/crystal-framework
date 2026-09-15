@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Avatar, Button, Dropdown, Layout, Menu, message, Space, Spin, Tabs, theme, Watermark} from "antd";
 import {
@@ -709,8 +716,8 @@ export function ManagerContainerPage({ parentPath }: { parentPath: string }) {
             >
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <img src="/logo.svg" alt="Logo" className="w-8 h-8"/>
-                        <span className="text-2xl font-bold tracking-tight" style={{ color: token.colorTextHeading }}>
+                        <img src="/logo.svg" alt="Logo" className="w-8 h-8 shrink-0"/>
+                        <span className="text-2xl font-bold tracking-tight hidden md:inline" style={{ color: token.colorTextHeading }}>
                             {ProjectDisplayName}
                         </span>
                     </div>
