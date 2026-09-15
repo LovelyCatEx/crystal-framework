@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Card, Descriptions, Popover, Spin, Tag} from "antd";
 import type {TenantDepartment} from "@/types/tenant/tenant-department.types.ts";
 import {useSWRComposition} from "@/compositions/use-swr.ts";

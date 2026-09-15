@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Col, Form, Input, InputNumber, Row, Select, Switch, Tabs} from "antd";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";
 import {
@@ -36,14 +43,14 @@ export default function AiModelManagerPage() {
     }, [filters.id]);
 
     const capabilityOptions = [
+        { label: getAiModelCapability(AiModelCapability.CHAT), value: AiModelCapability.CHAT },
         { label: getAiModelCapability(AiModelCapability.TEXT_GENERATION), value: AiModelCapability.TEXT_GENERATION },
-        { label: getAiModelCapability(AiModelCapability.IMAGE_GENERATION), value: AiModelCapability.IMAGE_GENERATION },
-        { label: getAiModelCapability(AiModelCapability.AUDIO_GENERATION), value: AiModelCapability.AUDIO_GENERATION },
-        { label: getAiModelCapability(AiModelCapability.VIDEO_GENERATION), value: AiModelCapability.VIDEO_GENERATION },
         { label: getAiModelCapability(AiModelCapability.VISION), value: AiModelCapability.VISION },
-        { label: getAiModelCapability(AiModelCapability.AUDIO_TRANSCRIPTION), value: AiModelCapability.AUDIO_TRANSCRIPTION },
         { label: getAiModelCapability(AiModelCapability.EMBEDDING), value: AiModelCapability.EMBEDDING },
-        { label: getAiModelCapability(AiModelCapability.CODE_GENERATION), value: AiModelCapability.CODE_GENERATION },
+        { label: getAiModelCapability(AiModelCapability.TOOL_CALLING), value: AiModelCapability.TOOL_CALLING },
+        { label: getAiModelCapability(AiModelCapability.STRUCTURED_OUTPUT), value: AiModelCapability.STRUCTURED_OUTPUT },
+        { label: getAiModelCapability(AiModelCapability.AUDIO_INPUT), value: AiModelCapability.AUDIO_INPUT },
+        { label: getAiModelCapability(AiModelCapability.AUDIO_OUTPUT), value: AiModelCapability.AUDIO_OUTPUT },
     ];
 
     return (

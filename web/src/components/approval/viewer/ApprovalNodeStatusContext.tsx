@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {createContext, type ReactNode, useContext} from "react";
 import type {ApprovalNodeStateVO} from "@/types/approval/approval-flow-instance-details.types.ts";
 

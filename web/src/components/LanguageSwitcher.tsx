@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useEffect, useState} from 'react';
 import {Button, Dropdown} from 'antd';
 import {CheckOutlined, GlobalOutlined} from '@ant-design/icons';
@@ -65,7 +72,7 @@ export function LanguageSwitcher() {
         type="text"
         icon={<GlobalOutlined />}
       >
-        {currentLanguage.label}
+        <span className="hidden md:inline">{currentLanguage.label}</span>
       </Button>
     </Dropdown>
   );

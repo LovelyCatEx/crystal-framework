@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Button, Col, DatePicker, Form, Input, message, Modal, Popconfirm, Row, Switch, Tooltip} from "antd";
 import {LogoutOutlined, ReloadOutlined, StopOutlined, UnlockOutlined} from "@ant-design/icons";
 import {ManagerPageContainer, type ManagerPageContainerRef} from "@/components/ManagerPageContainer.tsx";

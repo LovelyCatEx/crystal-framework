@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.rbac.tenant.service.manager.impl
 
 import com.lovelycatv.crystalframework.rbac.tenant.controller.manager.role.dto.ManagerCreateTenantRoleDTO
@@ -69,19 +76,14 @@ class TenantRoleManagerServiceImpl(
             ?: throw RuntimeException("Could not create tenant role")
     }
 
-    override suspend fun update(dto: ManagerUpdateTenantRoleDTO): TenantRoleEntity? {
-        val original = getByIdOrNull(dto.id) ?: return null
-        val affectedRoleIds = if (dto.parentId != null && dto.parentId != original.parentId) {
-            (listOf(original) + tenantRoleService.getChildren(original.id))
-                .map { it.id }
-                .toSet()
-        } else {
-            emptySet()
-        }
-
-        return super.update(dto)?.also {
-            affectedRoleIds.forEach { roleId ->
-                eventPublisher.publishEvent(TenantRoleAuthoritiesInvalidationEvent(roleId))
+    override suspend fun afterUpdate(
+        dto: ManagerUpdateTenantRoleDTO,
+        original: TenantRoleEntity,
+        updated: TenantRoleEntity,
+    ) {
+        if (dto.parentId != null && dto.parentId != original.parentId) {
+            (listOf(original) + tenantRoleService.getChildren(original.id)).forEach { role ->
+                eventPublisher.publishEvent(TenantRoleAuthoritiesInvalidationEvent(role.id))
             }
         }
     }

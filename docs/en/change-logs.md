@@ -8,6 +8,31 @@
 3. Starting from v1.15.0, the crystal-message module is completely removed. Existing data tables will not be deleted.
 :::
 
+## v1.15.1
+
+2026-09-14
+
+### Features
++ feat(web): Add expandable sub-rows to the entity table.
++ feat(ai & web): Add a read-only management page for AI model invocation records.
++ feat(ai & web): Stream playground chat with token usage statistics.
++ feat(ai): Add tool calling, session tracking, and a top-p parameter to the AI playground.
++ feat(ai): Apply the user-group billing multiplier to playground chat and add a group-scoped playground data endpoint.
++ feat(web): Add a context meter, message actions, Markdown rendering, and code highlighting to the AI playground.
++ feat(web): Add device type detection with a mobile-adapted header, and adapt the AI playground for mobile.
+
+### Bug Fixes
++ fix(shared): Add an afterUpdate hook to avoid the suspend bridge method breaking proxied updates.
++ fix(shared): Route flux-returning suspend functions in APM span tracing.
+
+### Others
++ refactor(ai): Inject the client IP and User-Agent into the request context.
++ refactor(ai): Replace Spring AI with the vertexlib LLM client.
++ refactor: Add the MIT license header to all source files.
++ chore: Update detekt baseline files.
+
+---
+
 ## v1.15.0
 
 2026-09-13

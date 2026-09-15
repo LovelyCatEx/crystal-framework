@@ -15,7 +15,11 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
+!.idea/copyright/
+!.idea/copyright/**
+!.idea/scopes/
+!.idea/scopes/**
 *.iws
 *.iml
 *.ipr

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {AiUserGroupMemberEntity} from "@/api/ai/ai-user-group-member.api.ts";
 import {useTranslation} from "react-i18next";

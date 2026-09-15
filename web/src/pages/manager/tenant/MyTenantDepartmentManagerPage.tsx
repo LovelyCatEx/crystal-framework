@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {Button, Card, Col, Form, Input, message, Modal, Popover, Row, Space, Spin, Table, Tag, theme} from "antd";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {TenantDepartmentIdSelector} from "@/components/selector/TenantDepartmentIdSelector.tsx";

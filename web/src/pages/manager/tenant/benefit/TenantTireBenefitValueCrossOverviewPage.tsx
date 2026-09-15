@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {CheckCircleOutlined, CloseCircleOutlined} from "@ant-design/icons";
 import {Space, Switch, Table, Tag, Typography} from "antd";
 import {useEffect, useMemo, useState} from "react";

@@ -42,6 +42,31 @@
 
 **正确做法**：认错 + 立即执行补救措施（调用工具重新操作）。
 
+### 规则 4: 文件版权头强制
+
+**所有代码文件必须在文件顶部包含统一的 MIT 版权头，缺少即为违规。**
+
+适用代码文件（`/* */` 块注释语言）：
+- 后端：`.kt`、`.java`
+- 前端：`.ts`、`.tsx`、`.css`
+- 其他：`.mts` 等
+
+```text
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+```
+
+头部要求：
+1. 位于文件第一行，后跟一个空行，再是原文件内容（`package` / `import` 等之前）
+2. 已存在旧版权头（如 2025 Apache 头）时，必须替换为新头，禁止叠加重复头
+3. 新建或修改代码文件时，若缺少此头必须补齐
+
+**排除项**：构建产物（`build/`、`target/`、`dist/`）、依赖（`node_modules/`）、缓存等生成文件无需添加。
+
 ## 最小影响面原则
 
 改动范围**只能等于、不能大于**问题范围：

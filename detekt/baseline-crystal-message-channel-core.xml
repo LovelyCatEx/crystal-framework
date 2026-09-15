@@ -2,8 +2,11 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>ComplexCondition:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$(tenantId != null &amp;&amp; tenantMemberId == null) || (tenantId == null &amp;&amp; tenantMemberId != null)</ID>
     <ID>CyclomaticComplexMethod:ChainToLarkPostRenderer.kt$ChainToLarkPostRenderer$suspend fun render( title: String?, chain: MessageChain, atResolver: LarkAtResolver?, ): Map&lt;String, Any?&gt;</ID>
+    <ID>CyclomaticComplexMethod:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$private fun authenticateIfRequired( handler: WebSocketChannelHandler, token: String?, session: WebSocketSession ): WsAuthContext?</ID>
     <ID>LongMethod:LarkChannelProvider.kt$LarkChannelProvider$override suspend fun send( config: ChannelConfig, recipient: MessageRecipient, message: ChainMessage, options: SendOptions, ): SendResult</ID>
+    <ID>LongMethod:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$private fun authenticateIfRequired( handler: WebSocketChannelHandler, token: String?, session: WebSocketSession ): WsAuthContext?</ID>
     <ID>LongParameterList:LarkApiClient.kt$LarkApiClient$( accessToken: String, baseUrl: String, receiveIdType: String, receiveId: String, msgType: String, content: String, )</ID>
     <ID>LongParameterList:MessageChannelEntity.kt$MessageChannelEntity$( id: Long = 0, scope: Int = 0, scopeId: Long = 0, @Column("channel_type") var channelType: Int = 0, @Column("name") var name: String = "", @Column("enabled") var enabled: Boolean = true, @Column("config") var config: String = "{}", createdTime: Long = System.currentTimeMillis(), modifiedTime: Long = System.currentTimeMillis(), deletedTime: Long? = null, )</ID>
     <ID>LongParameterList:MessageChannelManagerServiceImpl.kt$MessageChannelManagerServiceImpl$( private val messageChannelRepository: MessageChannelRepository, private val channelConfigCodec: ChannelConfigCodec, private val snowIdGenerator: SnowIdGenerator, private val reactiveRedisService: ReactiveRedisService, override val eventPublisher: ApplicationEventPublisher, private val r2dbcEntityTemplate: R2dbcEntityTemplate, private val systemModuleClient: SystemModuleClient, )</ID>
@@ -21,6 +24,9 @@
     <ID>MaxLineLength:MessageChainTest.kt$MessageChainTest$val xml = """Hello &lt;at user="123" tenant="456" name="Zhang San"/&gt;, see &lt;image src="https://example.com/a.png"/&gt;&lt;br/&gt;&lt;link href="https://example.com" title="home"/&gt;"""</ID>
     <ID>MaxLineLength:MessageChannelManagerServiceImpl.kt$MessageChannelManagerServiceImpl$.</ID>
     <ID>MaxLineLength:MessageGatewayImpl.kt$MessageGatewayImpl$?:</ID>
+    <ID>MaxLineLength:WebSocketAuthRateLimitServiceImpl.kt$WebSocketAuthRateLimitServiceImpl.Companion$const val MESSAGE_ACCOUNT_LOCKED = "Account temporarily locked due to repeated WebSocket authentication failures, please try again later"</ID>
+    <ID>MaxLineLength:WebSocketChannelRegistryConfiguration.kt$WebSocketChannelRegistryConfiguration$*</ID>
+    <ID>MaxLineLength:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$*</ID>
     <ID>NestedBlockDepth:ChainToLarkPostRenderer.kt$ChainToLarkPostRenderer$suspend fun render( title: String?, chain: MessageChain, atResolver: LarkAtResolver?, ): Map&lt;String, Any?&gt;</ID>
     <ID>ReturnCount:ChainToHtmlRenderer.kt$ChainToHtmlRenderer$private fun renderImage(segment: ImageSegment): String</ID>
     <ID>ReturnCount:DefaultMessageChannelService.kt$DefaultMessageChannelService$override suspend fun send( config: ChannelConfig, recipient: MessageRecipient, message: ChainMessage, options: SendOptions, ): SendResult</ID>
@@ -28,10 +34,14 @@
     <ID>ReturnCount:LarkApiClient.kt$LarkApiClient$suspend fun sendMessage( accessToken: String, baseUrl: String, receiveIdType: String, receiveId: String, msgType: String, content: String, ): LarkSendMessageResult</ID>
     <ID>ReturnCount:LarkChannelProvider.kt$LarkChannelProvider$override suspend fun send( config: ChannelConfig, recipient: MessageRecipient, message: ChainMessage, options: SendOptions, ): SendResult</ID>
     <ID>ReturnCount:LarkChannelProvider.kt$LarkChannelProvider$private fun resolveReceiveId(recipient: LarkRecipient): ResolvedReceive?</ID>
+    <ID>ReturnCount:WebSocketAuthRateLimitServiceImpl.kt$WebSocketAuthRateLimitServiceImpl$private fun buildConfig(ip: String, account: String): RateLimitConfig?</ID>
+    <ID>ReturnCount:WebSocketAuthRateLimitServiceImpl.kt$WebSocketAuthRateLimitServiceImpl$private fun buildIpOnlyConfig(ip: String): RateLimitConfig?</ID>
+    <ID>ReturnCount:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$private fun authenticateIfRequired( handler: WebSocketChannelHandler, token: String?, session: WebSocketSession ): WsAuthContext?</ID>
     <ID>SwallowedException:MessageChannelManagerServiceImpl.kt$MessageChannelManagerServiceImpl$e: Exception</ID>
     <ID>TooGenericExceptionCaught:EmailChannelProvider.kt$EmailChannelProvider$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LarkChannelProvider.kt$LarkChannelProvider$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MessageChannelManagerServiceImpl.kt$MessageChannelManagerServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WebSocketGatewayHandler.kt$WebSocketGatewayHandler$e: Exception</ID>
     <ID>UseCheckOrError:LarkApiClient.kt$LarkApiClient$throw IllegalStateException("Lark response missing tenant_access_token")</ID>
     <ID>UseCheckOrError:LarkApiClient.kt$LarkApiClient$throw IllegalStateException("Lark tenant_access_token endpoint returned empty body")</ID>
     <ID>UseCheckOrError:MessageGatewayImpl.kt$MessageGatewayImpl$throw IllegalStateException("ChannelConfigResolver is not available. Provide a ChannelConfigResolver bean to use sendByChannelId/broadcastByChannelId.")</ID>

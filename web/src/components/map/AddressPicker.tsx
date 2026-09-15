@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {forwardRef, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {List, Spin, theme} from "antd";
 import {EnvironmentFilled} from "@ant-design/icons";

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import i18n from "./index.ts";
 
 function translateEnum(namespace: string, value: string | number): string {
@@ -135,4 +142,12 @@ export function getAiProviderProtocolType(type: number): string {
 
 export function getAiModelCapability(capability: number): string {
     return translateEnum('aiModelCapability', capability);
+}
+
+export function getReasoningEffort(effort: string): string {
+    return translateEnum('reasoningEffort', effort);
+}
+
+export function getAiModelInvocationStatus(status: number): string {
+    return translateEnum('aiModelInvocationStatus', status);
 }

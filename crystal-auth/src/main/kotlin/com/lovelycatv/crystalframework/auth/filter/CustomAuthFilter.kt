@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.auth.filter
 
 import co.elastic.apm.api.ElasticApm
@@ -5,6 +12,8 @@ import co.elastic.apm.api.Outcome
 import co.elastic.apm.api.Span
 import com.lovelycatv.crystalframework.shared.config.observability.ApmSpanConstants
 import com.lovelycatv.crystalframework.shared.constants.SessionConstants
+import com.lovelycatv.crystalframework.shared.context.CurrentTenantId
+import com.lovelycatv.crystalframework.shared.context.CurrentUserId
 import com.lovelycatv.crystalframework.shared.exception.UnauthorizedException
 import com.lovelycatv.crystalframework.shared.utils.JwtUtil
 import com.lovelycatv.crystalframework.shared.utils.reactor.contextMerge
@@ -162,9 +171,13 @@ class CustomAuthFilter(
                             it
                         )
 
-                        chain.filter(exchange).contextMerge(
-                            ReactiveSecurityContextHolder.withAuthentication(token)
-                        )
+                        var context = ReactiveSecurityContextHolder.withAuthentication(token)
+                        context = CurrentUserId.install(userId)(context)
+                        if (tenantId != null) {
+                            context = CurrentTenantId.install(tenantId)(context)
+                        }
+
+                        chain.filter(exchange).contextMerge(context)
                     }
             } else {
                 endSpan()

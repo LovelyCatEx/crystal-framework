@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useTranslation} from "react-i18next";
 import {ToolOutlined} from "@ant-design/icons";
 import {useMaintenanceStatus} from "@/compositions/use-maintenance.ts";

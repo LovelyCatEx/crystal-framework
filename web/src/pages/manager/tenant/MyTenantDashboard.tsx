@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useUserTenants} from "@/compositions/use-tenant.ts";
 import {ActionBarComponent} from "@/components/ActionBarComponent.tsx";
 import {Avatar, Card, Col, Divider, Empty, Row, Spin, Tag, theme, Tooltip, Typography} from "antd";

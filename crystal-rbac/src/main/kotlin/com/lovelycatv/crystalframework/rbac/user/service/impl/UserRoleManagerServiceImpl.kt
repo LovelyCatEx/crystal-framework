@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 package com.lovelycatv.crystalframework.rbac.user.service.impl
 
 import com.lovelycatv.crystalframework.rbac.user.controller.manager.role.dto.ManagerCreateRoleDTO
@@ -55,10 +62,12 @@ class UserRoleManagerServiceImpl(
         }
     }
 
-    override suspend fun update(dto: ManagerUpdateRoleDTO): UserRoleEntity? {
-        return super.update(dto)?.also {
-            eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(it.id))
-        }
+    override suspend fun afterUpdate(
+        dto: ManagerUpdateRoleDTO,
+        original: UserRoleEntity,
+        updated: UserRoleEntity,
+    ) {
+        eventPublisher.publishEvent(SystemRoleAuthoritiesInvalidationEvent(updated.id))
     }
 
     override suspend fun applyDTOToEntity(dto: ManagerUpdateRoleDTO, original: UserRoleEntity): UserRoleEntity {

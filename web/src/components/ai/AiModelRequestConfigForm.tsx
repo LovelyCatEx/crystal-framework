@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026 lovelycat
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {useEffect, useState} from "react";
 import {Button, Col, Divider, Form, Input, InputNumber, Row, Space} from "antd";
 import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";
@@ -5,6 +12,7 @@ import {useTranslation} from "react-i18next";
 
 interface AiModelRequestConfig {
     temperature?: number | null;
+    topP?: number | null;
     maxOutputTokens?: number | null;
     additionalBody?: Record<string, any>;
 }
@@ -18,6 +26,7 @@ export function AiModelRequestConfigForm({ value, onChange }: AiModelRequestConf
     const { t } = useTranslation();
     const [config, setConfig] = useState<AiModelRequestConfig>({
         temperature: null,
+        topP: null,
         maxOutputTokens: null,
         additionalBody: {}
     });
@@ -37,7 +46,7 @@ export function AiModelRequestConfigForm({ value, onChange }: AiModelRequestConf
                     );
                 }
             } catch {
-                setConfig({ temperature: null, maxOutputTokens: null, additionalBody: {} });
+                setConfig({ temperature: null, topP: null, maxOutputTokens: null, additionalBody: {} });
                 setAdditionalBodyEntries([]);
             }
         }
@@ -50,6 +59,10 @@ export function AiModelRequestConfigForm({ value, onChange }: AiModelRequestConf
 
     const handleTemperatureChange = (val: number | null) => {
         handleConfigChange({ ...config, temperature: val });
+    };
+
+    const handleTopPChange = (val: number | null) => {
+        handleConfigChange({ ...config, topP: val });
     };
 
     const handleMaxOutputTokensChange = (val: number | null) => {
@@ -78,7 +91,7 @@ export function AiModelRequestConfigForm({ value, onChange }: AiModelRequestConf
     return (
         <Space direction="vertical" className="w-full" size="middle">
             <Row gutter={16}>
-                <Col span={12}>
+                <Col span={8}>
                     <Form.Item label={t('pages.aiModelManager.modal.requestConfig.temperature')}>
                         <InputNumber
                             className="w-full"
@@ -91,7 +104,20 @@ export function AiModelRequestConfigForm({ value, onChange }: AiModelRequestConf
                         />
                     </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={8}>
+                    <Form.Item label={t('pages.aiModelManager.modal.requestConfig.topP')}>
+                        <InputNumber
+                            className="w-full"
+                            value={config.topP}
+                            onChange={handleTopPChange}
+                            placeholder="1"
+                            min={0}
+                            max={1}
+                            step={0.1}
+                        />
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
                     <Form.Item label={t('pages.aiModelManager.modal.requestConfig.maxOutputTokens')}>
                         <InputNumber
                             className="w-full"
