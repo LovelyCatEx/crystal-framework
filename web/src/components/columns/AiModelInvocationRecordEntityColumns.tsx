@@ -33,7 +33,7 @@ function GroupInfoDisplay({ groupId, groupMultiplier }: { groupId: string | null
         {group
             ? <span className="text-xs">{group.name}</span>
             : <Tag color="red">Unknown</Tag>}
-        <span className="text-xs text-gray-500">×{groupMultiplier}</span>
+        <Tag color="blue" className="m-0">×{groupMultiplier}</Tag>
     </Space>;
 }
 
@@ -109,7 +109,7 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
                         <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.duration')}: {row.totalDurationMs}ms</span>
                         <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.firstToken')}: {row.timeToFirstTokenMs}ms</span>
                         {row.isStreaming && (
-                            <Tag color="cyan" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{t('components.columns.aiModelInvocationRecord.streaming')}</Tag>
+                            <Tag color="cyan" className="m-0">{t('components.columns.aiModelInvocationRecord.streaming')}</Tag>
                         )}
                     </Space>
                 );

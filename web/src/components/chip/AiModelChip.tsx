@@ -11,30 +11,35 @@ import {useAiModel} from "@/compositions/use-ai-model.ts";
 
 interface AiModelChipProps {
     modelId: string;
+    variant?: 'chip' | 'text';
 }
 
-export function AiModelChip({ modelId }: AiModelChipProps) {
+export function AiModelChip({ modelId, variant = 'chip' }: AiModelChipProps) {
     const {model, isLoading} = useAiModel(modelId);
 
     if (isLoading) {
         return <Spin size="small" />;
     }
 
-    const chip = (
-        <Tag
-            color="blue"
-            className="cursor-pointer transition hover:opacity-80"
-            style={{
-                borderRadius: '4px',
-            }}
-        >
-            {model?.displayName || modelId} ({model?.modelName})
-        </Tag>
-    );
+    const label = model?.displayName || modelId;
+
+    const trigger = variant === 'text'
+        ? <span className="cursor-pointer">{label}</span>
+        : (
+            <Tag
+                color="blue"
+                className="cursor-pointer transition hover:opacity-80"
+                style={{
+                    borderRadius: '4px',
+                }}
+            >
+                {label}
+            </Tag>
+        );
 
     return (
         <Popover content={<AiModelCard modelId={modelId} />} trigger="click" placement="bottomLeft">
-            {chip}
+            {trigger}
         </Popover>
     );
 }

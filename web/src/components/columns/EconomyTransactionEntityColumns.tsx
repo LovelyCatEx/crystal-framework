@@ -7,8 +7,9 @@
 
 import React, {type JSX} from "react";
 import {Space, Tag} from "antd";
+import {Link} from "react-router-dom";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
-import type {EconomyTransactionEntity} from "@/types/economy/economy.types.ts";
+import {EconomyReferenceType, type EconomyTransactionEntity} from "@/types/economy/economy.types.ts";
 import {ResourceScope} from "@/types/BaseScopedEntity.ts";
 import {ScopedUserDisplay} from "@/components/ScopedUserDisplay.tsx";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
@@ -16,6 +17,16 @@ import {CurrencyCodeDisplay} from "../economy/CurrencyCodeDisplay.tsx";
 import {CurrencyAmountDisplay} from "../economy/CurrencyAmountDisplay.tsx";
 import {useTranslation} from "react-i18next";
 import {getEconomyReferenceType, getEconomyTransactionType} from "@/i18n/enum-helpers.ts";
+
+function getReferenceLink(referenceType: number, referenceId: string): string | null {
+    if (!referenceId) return null;
+    switch (referenceType) {
+        case EconomyReferenceType.AI_INVOCATION:
+            return `/manager/ai/invocation-record?page=1&pageSize=20&id=${referenceId}`;
+        default:
+            return null;
+    }
+}
 
 export function useEconomyTransactionTableColumns(): EntityTableColumns<EconomyTransactionEntity> {
     const { t } = useTranslation();
@@ -94,11 +105,14 @@ export function useEconomyTransactionTableColumns(): EntityTableColumns<EconomyT
             width: 200,
             render: function (_: unknown, row: EconomyTransactionEntity): React.ReactNode | JSX.Element {
                 if (!row.referenceId && row.referenceType === 0) return <span className="text-gray-400">—</span>;
+                const link = getReferenceLink(row.referenceType, row.referenceId ?? '');
                 return <Space direction="vertical" size={0}>
                     {row.referenceType !== 0 && <Tag color="cyan" className="m-0">{getEconomyReferenceType(row.referenceType)}</Tag>}
-                    {row.referenceId && <CopyableToolTip title={row.referenceId}>
-                        <span className="font-mono text-xs text-gray-500">{row.referenceId}</span>
-                    </CopyableToolTip>}
+                    {row.referenceId && (link
+                        ? <Link to={link} className="font-mono text-xs text-blue-500 hover:underline">{row.referenceId}</Link>
+                        : <CopyableToolTip title={row.referenceId}>
+                            <span className="font-mono text-xs text-gray-500">{row.referenceId}</span>
+                        </CopyableToolTip>)}
                 </Space>
             }
         },

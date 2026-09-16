@@ -18,6 +18,9 @@ import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/typ
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
 import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
+import {AiModelChip} from "@/components/chip/AiModelChip.tsx";
+import {AiProviderChip} from "@/components/chip/AiProviderChip.tsx";
+import {TenantDisplay} from "@/components/tenant/TenantDisplay.tsx";
 
 function formatBytes(value: string | null | undefined): string {
     if (!value) return '—';
@@ -71,13 +74,13 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
                     {show(record.sessionId)}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.tenantId')}>
-                    {show(record.tenantId)}
+                    <TenantDisplay tenantId={record.tenantId} variant="icon-text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.providerId')}>
-                    {show(record.providerId)}
+                    <AiProviderChip providerId={record.providerId} variant="text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.modelId')}>
-                    {show(record.modelId)}
+                    <AiModelChip modelId={record.modelId} variant="text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.stopReason')}>
                     {show(record.stopReason)}
@@ -217,6 +220,19 @@ export default function AiModelInvocationRecordManagerPage() {
                 update={async () => null}
                 create={async () => null}
                 tableActions={[
+                    {
+                        label: <span>{t('pages.aiModelInvocationRecordManager.filter.id')}</span>,
+                        children: <Input
+                            style={{width: 180}}
+                            placeholder={t('pages.aiModelInvocationRecordManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => {
+                                if (e.target.value === '') setFilter('id', undefined);
+                            }}
+                        />,
+                    },
                     {
                         label: <span>{t('pages.aiModelInvocationRecordManager.filter.requestId')}</span>,
                         children: <Input
