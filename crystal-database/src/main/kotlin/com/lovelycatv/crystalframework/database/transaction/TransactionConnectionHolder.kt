@@ -12,6 +12,7 @@ import co.elastic.apm.api.Outcome
 import co.elastic.apm.api.Span
 import co.elastic.apm.api.Transaction
 import com.lovelycatv.crystalframework.database.R2dbcConnectionPoolRegistry
+import com.lovelycatv.crystalframework.shared.config.observability.ApmParentTransaction
 import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Connection
 import org.slf4j.LoggerFactory
@@ -54,6 +55,7 @@ class TransactionConnectionHolder(
     private val traceHeaders: Map<String, String>,
     private val transactionLabel: DistributedTransactionLabel,
     private val apmParentSpan: Span?,
+    private val apmParentTransaction: ApmParentTransaction,
 ) {
     private val connections = mutableMapOf<String, Connection>()
     private val preparedTransactions = mutableMapOf<String, String>()  // dataSource -> xid
@@ -99,6 +101,7 @@ class TransactionConnectionHolder(
             .setType(APM_TRANSACTION_TYPE)
             .addLabel(APM_LABEL_GLOBAL_TRANSACTION_ID, gid)
             .also { txn -> transactionLabel.labels.forEach { (k, v) -> txn.addLabel(k, v) } }
+        apmParentTransaction.transaction = apmTransaction
 
         requestSummarySpan = (apmParentSpan ?: ElasticApm.currentSpan())
             .startSpan(APM_SUMMARY_SPAN_TYPE, APM_SUMMARY_SPAN_SUBTYPE, APM_SUMMARY_SPAN_ACTION)

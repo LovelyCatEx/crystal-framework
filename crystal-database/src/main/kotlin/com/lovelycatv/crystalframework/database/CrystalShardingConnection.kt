@@ -12,6 +12,7 @@ import com.lovelycatv.crystalframework.database.utils.CrystalFrameworkSQLModifie
 import com.lovelycatv.crystalframework.database.constants.R2dbcDataSourceConstants
 import com.lovelycatv.crystalframework.database.transaction.TransactionConnectionHolder
 import com.lovelycatv.crystalframework.database.sharding.R2dbcShardingRuleRegistry
+import com.lovelycatv.crystalframework.shared.config.observability.ApmParentTransaction
 import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Batch
 import io.r2dbc.spi.Connection
@@ -52,6 +53,7 @@ class CrystalShardingConnection(
     private val traceHeaders: Map<String, String>,
     private val transactionLabel: DistributedTransactionLabel,
     private val apmParentSpan: Span?,
+    private val apmParentTransaction: ApmParentTransaction,
 ) : Connection {
 
     @Volatile
@@ -59,7 +61,7 @@ class CrystalShardingConnection(
 
     override fun beginTransaction(): Publisher<Void> {
         return Mono.fromRunnable {
-            val holder = TransactionConnectionHolder(poolRegistry, traceHeaders, transactionLabel, apmParentSpan)
+            val holder = TransactionConnectionHolder(poolRegistry, traceHeaders, transactionLabel, apmParentSpan, apmParentTransaction)
             holder.markTransactionStart()
             transactionHolder = holder
         }
