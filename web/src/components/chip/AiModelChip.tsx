@@ -7,31 +7,14 @@
 
 import {Popover, Spin, Tag} from "antd";
 import {AiModelCard} from "@/components/card/pop/AiModelCard.tsx";
-import {useEffect, useState} from "react";
-import {AiModelManagerController} from "@/api/ai/ai-model.api.ts";
-import type {AiModelEntity} from "@/types/ai/ai.types.ts";
+import {useAiModel} from "@/compositions/use-ai-model.ts";
 
 interface AiModelChipProps {
     modelId: string;
 }
 
 export function AiModelChip({ modelId }: AiModelChipProps) {
-    const [model, setModel] = useState<AiModelEntity | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        AiModelManagerController.getById(modelId)
-            .then((response) => {
-                setModel(response || null);
-            })
-            .catch((error) => {
-                console.error('Failed to load model:', error);
-                setModel(null);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, [modelId]);
+    const {model, isLoading} = useAiModel(modelId);
 
     if (isLoading) {
         return <Spin size="small" />;

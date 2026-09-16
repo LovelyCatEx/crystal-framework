@@ -6,33 +6,12 @@
  */
 
 import {Spin, Tag} from "antd";
-import {useEffect, useState} from "react";
-import {CurrencyManagerController} from "@/api/economy/currency.api.ts";
-import type {CurrencyEntity} from "@/types/economy/economy.types.ts";
+import {useCurrency} from "@/compositions/use-currency.ts";
 
 export function CurrencyCodeDisplay({currencyId}: { currencyId: string }) {
-    const [currency, setCurrency] = useState<CurrencyEntity | null>(null);
-    const [loading, setLoading] = useState(true);
+    const {currency, isLoading} = useCurrency(currencyId);
 
-    useEffect(() => {
-        let mounted = true;
-        setLoading(true);
-        CurrencyManagerController.getById(currencyId)
-            .then((c) => {
-                if (mounted) {
-                    setCurrency(c);
-                    setLoading(false);
-                }
-            })
-            .catch(() => {
-                if (mounted) setLoading(false);
-            });
-        return () => {
-            mounted = false;
-        };
-    }, [currencyId]);
-
-    if (loading) return <Spin size="small" />;
+    if (isLoading) return <Spin size="small" />;
     if (!currency) return <Tag color="red">Unknown</Tag>;
 
     return (

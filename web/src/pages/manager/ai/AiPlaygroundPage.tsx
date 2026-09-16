@@ -17,7 +17,7 @@ import {ReasoningEffort} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {useDeviceType} from "@/compositions/use-device-type.ts";
 import {MarkdownContent} from "@/components/MarkdownContent.tsx";
-import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
 
 const {TextArea} = Input;
 const {Text} = Typography;
@@ -67,12 +67,10 @@ function formatMultiplier(value: string): string {
     return `${num.toFixed(2).replace(/\.?0+$/, "")}x`;
 }
 
-/** Formats a per-million price as "2.00 $USD/M" — always two decimals, currency appended. */
+/** Formats a per-million price using the currency's configured symbol, position, separators and precision. */
 function formatPrice(value: string | null, currencyId: string) {
     if (value == null) return <>-</>;
-    const num = Number(value);
-    const text = Number.isFinite(num) ? num.toFixed(2) : value;
-    return <>{text} <CurrencyCodeDisplay currencyId={currencyId} />/M</>;
+    return <><CurrencyAmountCodeDisplay currencyId={currencyId} amount={value} />/M</>;
 }
 
 export default function AiPlaygroundPage() {

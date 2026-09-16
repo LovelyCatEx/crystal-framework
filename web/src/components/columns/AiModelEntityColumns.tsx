@@ -5,45 +5,29 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, {type JSX, useEffect, useState} from "react";
+import React, {type JSX} from "react";
 import {Flex, Space, Spin, Tag} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import type {AiModelEntity} from "@/types/ai/ai.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
-import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
+import {useAiProvider} from "@/compositions/use-ai-provider.ts";
 import {getAiModelCapability} from "@/i18n/enum-helpers.ts";
-import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
 
 function ProviderInfoDisplay({ providerId }: { providerId: string }): JSX.Element {
-    const [providerName, setProviderName] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const {provider, isLoading} = useAiProvider(providerId);
 
-    useEffect(() => {
-        AiProviderManagerController.getById(providerId)
-            .then(res => {
-                if (res) {
-                    setProviderName(res.name);
-                }
-            })
-            .catch(() => {
-                setProviderName(null);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [providerId]);
-
-    if (loading) {
+    if (isLoading) {
         return <Spin size="small" />;
     }
 
-    if (!providerName) {
+    if (!provider) {
         return <Tag color="red">Unknown</Tag>;
     }
 
     return <Space direction="vertical" size={0}>
-        <span className="text-xs">{providerName}</span>
+        <span className="text-xs">{provider.name}</span>
         <CopyableToolTip title={providerId}>
             <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {providerId}</Tag>
         </CopyableToolTip>
@@ -115,28 +99,22 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
             dataIndex: "inputPricePerMillion",
             key: "pricing",
             render: function (_: unknown, row: AiModelEntity): React.ReactNode | JSX.Element {
-                const formatPrice = (price: string | null | undefined): string => {
-                    if (!price) return '0.00';
-                    return parseFloat(price).toFixed(2);
-                };
-                const currency = <CurrencyCodeDisplay currencyId={row.currencyId} />;
-
                 return <div className="text-xs font-mono">
                     <div className="flex gap-2">
                         <span className="w-16">{t('components.columns.aiModel.input')}</span>
-                        <span>{formatPrice(row.inputPricePerMillion)} {currency}/M</span>
+                        <span><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.inputPricePerMillion} />/M</span>
                     </div>
                     <div className="flex gap-2">
                         <span className="w-16">{t('components.columns.aiModel.cacheInput')}</span>
-                        <span>{formatPrice(row.cacheReadPricePerMillion)} {currency}/M</span>
+                        <span><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.cacheReadPricePerMillion} />/M</span>
                     </div>
                     <div className="flex gap-2">
                         <span className="w-16">{t('components.columns.aiModel.output')}</span>
-                        <span>{formatPrice(row.outputPricePerMillion)} {currency}/M</span>
+                        <span><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.outputPricePerMillion} />/M</span>
                     </div>
                     <div className="flex gap-2">
                         <span className="w-16">{t('components.columns.aiModel.cacheWrite')}</span>
-                        <span>{formatPrice(row.cacheWritePricePerMillion)} {currency}/M</span>
+                        <span><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.cacheWritePricePerMillion} />/M</span>
                     </div>
                 </div>
             }

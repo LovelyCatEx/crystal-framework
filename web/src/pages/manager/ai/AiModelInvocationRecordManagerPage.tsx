@@ -17,16 +17,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/types/ai/ai.types.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
-
-function formatMoney(value: number): string {
-    return value.toFixed(6);
-}
-
-function formatUnitPrice(value: number): string {
-    if (!value) return '0';
-    return value.toFixed(4).replace(/\.?0+$/, '');
-}
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
 
 function formatBytes(value: string | null | undefined): string {
     if (!value) return '—';
@@ -49,16 +40,15 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
     const show = (value: string | null | undefined): string => (value ? value : '—');
     const showNum = (value: number | null | undefined): string => (value !== null && value !== undefined ? String(value) : '—');
 
-    const currencyCode = <CurrencyCodeDisplay currencyId={record.currencyId} />;
     const tokenSegments: JSX.Element[] = [
-        <>{record.promptTokens} × {formatUnitPrice(record.promptUnitPrice)} {currencyCode}/M</>,
-        <>{record.completionTokens} × {formatUnitPrice(record.completionUnitPrice)} {currencyCode}/M</>,
+        <>{record.promptTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.promptUnitPrice} />/M</>,
+        <>{record.completionTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.completionUnitPrice} />/M</>,
     ];
     if (record.cachedPromptTokens > 0) {
-        tokenSegments.push(<>{record.cachedPromptTokens} × {formatUnitPrice(record.cacheReadUnitPrice)} {currencyCode}/M</>);
+        tokenSegments.push(<>{record.cachedPromptTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.cacheReadUnitPrice} />/M</>);
     }
     if (record.cacheCreationTokens > 0) {
-        tokenSegments.push(<>{record.cacheCreationTokens} × {formatUnitPrice(record.cacheWriteUnitPrice)} {currencyCode}/M</>);
+        tokenSegments.push(<>{record.cacheCreationTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.cacheWriteUnitPrice} />/M</>);
     }
     const substitution = (
         <>
@@ -140,7 +130,7 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
                         <span />
                         <span>= {substitution}</span>
                         <span />
-                        <span>= {formatMoney(record.finalCost)} <CurrencyCodeDisplay currencyId={record.currencyId} /></span>
+                        <span>= <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.finalCost} /></span>
                     </div>
                 </Descriptions.Item>
             </Descriptions>
