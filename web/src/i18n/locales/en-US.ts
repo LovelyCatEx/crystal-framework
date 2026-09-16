@@ -4063,6 +4063,10 @@ export const enUS: I18nRules = {
         capabilities: 'Capabilities',
         maxOutputTokens: 'Max Tokens',
         pricing: 'Pricing',
+        input: 'Input',
+        cacheInput: 'Cache Input',
+        output: 'Output',
+        cacheWrite: 'Cache Write',
         enabled: 'Status',
         enabledStatus: {
           enabled: 'Enabled',

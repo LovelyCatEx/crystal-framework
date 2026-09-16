@@ -11,26 +11,38 @@ import type {BaseManagerReadDTO, BaseManagerUpdateDTO} from "@/types/api.types.t
 
 export interface ManagerCreateAiModelDTO {
     providerId: string;
-    name: string;
     key: string;
+    modelName: string;
+    displayName: string;
     description: string | null;
     capabilities: string;
+    contextWindowTokens: string;
+    maxOutputTokens: string | null;
     inputPricePerMillion: string;
     outputPricePerMillion: string;
-    maxTokens: number | null;
+    cacheReadPricePerMillion: string | null;
+    cacheWritePricePerMillion: string | null;
+    currencyId: string;
+    requestConfig: string;
     enabled: boolean;
     sort: number;
 }
 
 export interface ManagerUpdateAiModelDTO extends BaseManagerUpdateDTO {
     providerId?: string | null;
-    name?: string | null;
     key?: string | null;
+    modelName?: string | null;
+    displayName?: string | null;
     description?: string | null;
     capabilities?: string | null;
+    contextWindowTokens?: string | null;
+    maxOutputTokens?: string | null;
     inputPricePerMillion?: string | null;
     outputPricePerMillion?: string | null;
-    maxTokens?: number | null;
+    cacheReadPricePerMillion?: string | null;
+    cacheWritePricePerMillion?: string | null;
+    currencyId?: string | null;
+    requestConfig?: string | null;
     enabled?: boolean | null;
     sort?: number | null;
 }

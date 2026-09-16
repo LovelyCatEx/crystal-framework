@@ -37,6 +37,10 @@ class EconomyWalletServiceTest(
     @Autowired private val applicationContext: ApplicationContext,
 ) : CrystalFrameworkApplicationTests() {
 
+    companion object {
+        private const val NON_EXISTENT_CURRENCY_ID = -1L
+    }
+
     private val currencyServiceTest: CurrencyManagerServiceTest by lazy { getTestClassInstance(applicationContext) }
 
     private suspend fun mockMember(tenantId: Long, userId: Long): TenantMemberEntity {
@@ -109,7 +113,7 @@ class EconomyWalletServiceTest(
             economyWalletService.adjust(ResourceScope.TENANT, tenantId, member.id, currency.id, BigDecimal("60"), EconomyTransactionType.RECHARGE.typeId, "req-tenant-credit")
             economyWalletService.adjust(ResourceScope.SYSTEM, 0, userId, currency.id, BigDecimal("100"), EconomyTransactionType.RECHARGE.typeId, "req-user-credit")
 
-            val result = economyWalletService.charge(userId, tenantId, currency.code, BigDecimal("80"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-1")
+            val result = economyWalletService.charge(userId, tenantId, currency.id, BigDecimal("80"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-1")
             assertEquals(EconomyChargeResult.CHARGED, result)
 
             assertEquals(0, economyWalletService.getBalance(ResourceScope.TENANT, tenantId, member.id, currency.id).compareTo(BigDecimal("0")))
@@ -125,7 +129,7 @@ class EconomyWalletServiceTest(
             val tenantId = 30002L
             economyWalletService.adjust(ResourceScope.SYSTEM, 0, userId, currency.id, BigDecimal("50"), EconomyTransactionType.RECHARGE.typeId, "req-user-credit-2")
 
-            val result = economyWalletService.charge(userId, tenantId, currency.code, BigDecimal("80"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-2")
+            val result = economyWalletService.charge(userId, tenantId, currency.id, BigDecimal("80"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-2")
             assertEquals(EconomyChargeResult.INSUFFICIENT_BALANCE, result)
 
             assertEquals(0, economyWalletService.getBalance(ResourceScope.SYSTEM, 0, userId, currency.id).compareTo(BigDecimal("50")))
@@ -135,7 +139,7 @@ class EconomyWalletServiceTest(
     @Test
     fun chargeUnknownCurrencyReturnsNotFound() {
         withTransactionalRollback("economy-charge-unknown-currency") {
-            val result = economyWalletService.charge(20003L, 30003L, "NO_SUCH_CURRENCY", BigDecimal("10"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-3")
+            val result = economyWalletService.charge(20003L, 30003L, NON_EXISTENT_CURRENCY_ID, BigDecimal("10"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-3")
             assertEquals(EconomyChargeResult.CURRENCY_NOT_FOUND, result)
         }
     }
@@ -148,8 +152,8 @@ class EconomyWalletServiceTest(
             val tenantId = 30004L
             economyWalletService.adjust(ResourceScope.SYSTEM, 0, userId, currency.id, BigDecimal("100"), EconomyTransactionType.RECHARGE.typeId, "req-user-credit-3")
 
-            economyWalletService.charge(userId, tenantId, currency.code, BigDecimal("30"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-4")
-            economyWalletService.charge(userId, tenantId, currency.code, BigDecimal("30"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-4")
+            economyWalletService.charge(userId, tenantId, currency.id, BigDecimal("30"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-4")
+            economyWalletService.charge(userId, tenantId, currency.id, BigDecimal("30"), EconomyReferenceType.AI_INVOCATION.typeId, null, "req-charge-4")
 
             assertEquals(0, economyWalletService.getBalance(ResourceScope.SYSTEM, 0, userId, currency.id).compareTo(BigDecimal("70")))
         }

@@ -110,7 +110,7 @@ class EconomyWalletServiceImpl(
     override suspend fun charge(
         userId: Long,
         tenantId: Long?,
-        currencyCode: String,
+        currencyId: Long,
         amount: BigDecimal,
         referenceType: Int,
         referenceId: Long?,
@@ -118,7 +118,7 @@ class EconomyWalletServiceImpl(
     ): EconomyChargeResult {
         if (amount.signum() <= 0) return EconomyChargeResult.CHARGED
 
-        val currency = currencyRepository.findByCode(currencyCode).awaitFirstOrNull()
+        val currency = currencyRepository.findById(currencyId).awaitFirstOrNull()
             ?: return EconomyChargeResult.CURRENCY_NOT_FOUND
         val units = toUnits(amount, currency.precision)
         if (units <= 0) return EconomyChargeResult.CHARGED

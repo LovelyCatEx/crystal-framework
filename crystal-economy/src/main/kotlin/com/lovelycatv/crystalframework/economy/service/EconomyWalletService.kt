@@ -33,7 +33,7 @@ interface EconomyWalletService {
     suspend fun charge(
         userId: Long,
         tenantId: Long?,
-        currencyCode: String,
+        currencyId: Long,
         amount: BigDecimal,
         referenceType: Int,
         referenceId: Long?,

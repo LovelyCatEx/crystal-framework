@@ -17,6 +17,7 @@ import com.lovelycatv.crystalframework.ai.service.manager.AiUserGroupManagerServ
 import com.lovelycatv.crystalframework.ai.types.AiInvocationContext
 import com.lovelycatv.crystalframework.ai.types.AiModelInvocationStatus
 import com.lovelycatv.crystalframework.ai.types.AiModelRequestConfig
+import com.lovelycatv.crystalframework.economy.constants.CurrencyConstants
 import com.lovelycatv.crystalframework.economy.service.EconomyWalletService
 import com.lovelycatv.crystalframework.economy.types.EconomyChargeResult
 import com.lovelycatv.crystalframework.economy.types.EconomyReferenceType
@@ -104,7 +105,7 @@ class AiModelInvocationRecordServiceImpl(
             cacheWriteUnitPrice = cacheWritePrice,
             rawCost = rawCost,
             finalCost = rawCost * groupMultiplier,
-            currency = model.currency,
+            currencyId = model.currencyId,
             temperature = modelRequestConfig.temperature?.toDouble(),
             topP = 0.0,
             maxTokens = (modelRequestConfig.maxOutputTokens ?: model.maxOutputTokens)?.toInt(),
@@ -162,13 +163,13 @@ class AiModelInvocationRecordServiceImpl(
     }
 
     private suspend fun chargeForInvocation(entity: AiModelInvocationRecordEntity, model: AiModelEntity) {
-        if (entity.finalCost <= 0.0 || model.currency.isBlank()) return
+        if (entity.finalCost <= 0.0 || model.currencyId <= CurrencyConstants.NO_CURRENCY_ID) return
 
         try {
             val result = economyWalletService.charge(
                 userId = entity.userId,
                 tenantId = entity.tenantId,
-                currencyCode = model.currency,
+                currencyId = model.currencyId,
                 amount = BigDecimal.valueOf(entity.finalCost),
                 referenceType = EconomyReferenceType.AI_INVOCATION.typeId,
                 referenceId = entity.id,

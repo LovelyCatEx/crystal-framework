@@ -35,7 +35,7 @@ export interface AiModelEntity extends BaseEntity {
     outputPricePerMillion: string;
     cacheReadPricePerMillion: string | null;
     cacheWritePricePerMillion: string | null;
-    currency: string;
+    currencyId: string;
     requestConfig: string;
     enabled: boolean;
     sort: number;
@@ -78,7 +78,7 @@ export interface AiModelInvocationRecordEntity extends BaseEntity {
     groupMultiplier: number;
     rawCost: number;
     finalCost: number;
-    currency: string;
+    currencyId: string;
     temperature: number | null;
     topP: number | null;
     maxTokens: number | null;

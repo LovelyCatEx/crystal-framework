@@ -4061,6 +4061,10 @@ export const zhCN: I18nRules = {
         capabilities: '能力',
         maxOutputTokens: '最大 Token 数',
         pricing: '价格',
+        input: '输入',
+        cacheInput: '缓存输入',
+        output: '输出',
+        cacheWrite: '缓存写入',
         enabled: '启用状态',
         enabledStatus: {
           enabled: '已启用',

@@ -9,6 +9,7 @@ import {Card, Descriptions, Spin, Tag} from "antd";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
 import {useEffect, useState} from "react";
 import {AiModelManagerController} from "@/api/ai/ai-model.api.ts";
+import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
 import type {AiModelEntity} from "@/types/ai/ai.types.ts";
 import {useTranslation} from "react-i18next";
 
@@ -103,19 +104,19 @@ export function AiModelCard({ modelId }: AiModelCardProps) {
                     <div className="flex flex-col gap-1 text-xs font-mono">
                         <div className="flex gap-2">
                             <span className="w-16">{t('components.popCard.aiModel.input')}</span>
-                            <span>{parseFloat(model.inputPricePerMillion || '0').toFixed(2)} {model.currency}/M</span>
+                            <span>{parseFloat(model.inputPricePerMillion || '0').toFixed(2)} <CurrencyCodeDisplay currencyId={model.currencyId} />/M</span>
                         </div>
                         <div className="flex gap-2">
                             <span className="w-16">{t('components.popCard.aiModel.cacheInput')}</span>
-                            <span>{parseFloat(model.cacheReadPricePerMillion || '0').toFixed(2)} {model.currency}/M</span>
+                            <span>{parseFloat(model.cacheReadPricePerMillion || '0').toFixed(2)} <CurrencyCodeDisplay currencyId={model.currencyId} />/M</span>
                         </div>
                         <div className="flex gap-2">
                             <span className="w-16">{t('components.popCard.aiModel.output')}</span>
-                            <span>{parseFloat(model.outputPricePerMillion || '0').toFixed(2)} {model.currency}/M</span>
+                            <span>{parseFloat(model.outputPricePerMillion || '0').toFixed(2)} <CurrencyCodeDisplay currencyId={model.currencyId} />/M</span>
                         </div>
                         <div className="flex gap-2">
                             <span className="w-16">{t('components.popCard.aiModel.cacheWrite')}</span>
-                            <span>{parseFloat(model.cacheWritePricePerMillion || '0').toFixed(2)} {model.currency}/M</span>
+                            <span>{parseFloat(model.cacheWritePricePerMillion || '0').toFixed(2)} <CurrencyCodeDisplay currencyId={model.currencyId} />/M</span>
                         </div>
                     </div>
                 </Descriptions.Item>

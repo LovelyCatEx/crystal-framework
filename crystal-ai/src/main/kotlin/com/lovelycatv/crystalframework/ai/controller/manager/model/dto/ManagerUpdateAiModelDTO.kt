@@ -9,6 +9,7 @@ package com.lovelycatv.crystalframework.ai.controller.manager.model.dto
 
 import com.lovelycatv.crystalframework.shared.controller.dto.BaseManagerUpdateDTO
 import jakarta.validation.constraints.DecimalMin
+import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 import jakarta.validation.constraints.Size
 import java.math.BigDecimal
@@ -37,8 +38,8 @@ data class ManagerUpdateAiModelDTO(
     val cacheReadPricePerMillion: BigDecimal? = null,
     @field:DecimalMin(value = "0.0", inclusive = true)
     val cacheWritePricePerMillion: BigDecimal? = null,
-    @field:Size(max = 16, message = "Currency length cannot exceed 16 characters")
-    val currency: String? = null,
+    @field:Positive(message = "Currency id must be positive")
+    val currencyId: Long? = null,
     val requestConfig: String? = null,
     val enabled: Boolean? = null,
     val sort: Int? = null,

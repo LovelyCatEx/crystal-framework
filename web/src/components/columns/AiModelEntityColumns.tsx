@@ -13,6 +13,7 @@ import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {useTranslation} from "react-i18next";
 import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
 import {getAiModelCapability} from "@/i18n/enum-helpers.ts";
+import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
 
 function ProviderInfoDisplay({ providerId }: { providerId: string }): JSX.Element {
     const [providerName, setProviderName] = useState<string | null>(null);
@@ -118,23 +119,24 @@ export function useAiModelTableColumns(): EntityTableColumns<AiModelEntity> {
                     if (!price) return '0.00';
                     return parseFloat(price).toFixed(2);
                 };
+                const currency = <CurrencyCodeDisplay currencyId={row.currencyId} />;
 
                 return <div className="text-xs font-mono">
                     <div className="flex gap-2">
-                        <span className="w-16">输入</span>
-                        <span>{formatPrice(row.inputPricePerMillion)} {row.currency}/M</span>
+                        <span className="w-16">{t('components.columns.aiModel.input')}</span>
+                        <span>{formatPrice(row.inputPricePerMillion)} {currency}/M</span>
                     </div>
                     <div className="flex gap-2">
-                        <span className="w-16">缓存输入</span>
-                        <span>{formatPrice(row.cacheReadPricePerMillion)} {row.currency}/M</span>
+                        <span className="w-16">{t('components.columns.aiModel.cacheInput')}</span>
+                        <span>{formatPrice(row.cacheReadPricePerMillion)} {currency}/M</span>
                     </div>
                     <div className="flex gap-2">
-                        <span className="w-16">输出</span>
-                        <span>{formatPrice(row.outputPricePerMillion)} {row.currency}/M</span>
+                        <span className="w-16">{t('components.columns.aiModel.output')}</span>
+                        <span>{formatPrice(row.outputPricePerMillion)} {currency}/M</span>
                     </div>
                     <div className="flex gap-2">
-                        <span className="w-16">缓存写入</span>
-                        <span>{formatPrice(row.cacheWritePricePerMillion)} {row.currency}/M</span>
+                        <span className="w-16">{t('components.columns.aiModel.cacheWrite')}</span>
+                        <span>{formatPrice(row.cacheWritePricePerMillion)} {currency}/M</span>
                     </div>
                 </div>
             }

@@ -12,6 +12,7 @@ import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/typ
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {UserChipById} from "@/components/chip/UserChipById.tsx";
 import {AiModelChip} from "@/components/chip/AiModelChip.tsx";
+import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
 import {AiUserGroupManagerController} from "@/api/ai/ai-user-group.api.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
@@ -180,8 +181,8 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
             render: function (_: unknown, row: AiModelInvocationRecordEntity): React.ReactNode | JSX.Element {
                 return (
                     <Space direction="vertical" size={0}>
-                        <span className="text-xs font-mono">{row.finalCost.toFixed(6)} {row.currency}</span>
-                        <span className="text-xs text-gray-400 line-through">{row.rawCost.toFixed(6)} {row.currency}</span>
+                        <span className="text-xs font-mono">{row.finalCost.toFixed(6)} <CurrencyCodeDisplay currencyId={row.currencyId} /></span>
+                        <span className="text-xs text-gray-400 line-through">{row.rawCost.toFixed(6)} <CurrencyCodeDisplay currencyId={row.currencyId} /></span>
                     </Space>
                 );
             }
@@ -192,7 +193,7 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
             key: "pricing",
             width: 150,
             render: function (_: unknown, row: AiModelInvocationRecordEntity): React.ReactNode | JSX.Element {
-                const unit = `${row.currency}/M`;
+                const unit = <><CurrencyCodeDisplay currencyId={row.currencyId} />/M</>;
                 return (
                     <Tooltip title={
                         <div>

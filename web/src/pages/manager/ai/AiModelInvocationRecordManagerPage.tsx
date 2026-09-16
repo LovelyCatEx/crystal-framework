@@ -17,6 +17,7 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/types/ai/ai.types.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
+import {CurrencyCodeDisplay} from "@/components/economy/CurrencyCodeDisplay.tsx";
 
 function formatMoney(value: number): string {
     return value.toFixed(6);
@@ -48,17 +49,25 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
     const show = (value: string | null | undefined): string => (value ? value : '—');
     const showNum = (value: number | null | undefined): string => (value !== null && value !== undefined ? String(value) : '—');
 
-    const tokenSegments: string[] = [
-        `${record.promptTokens} × ${formatUnitPrice(record.promptUnitPrice)} ${record.currency}/M`,
-        `${record.completionTokens} × ${formatUnitPrice(record.completionUnitPrice)} ${record.currency}/M`,
+    const currencyCode = <CurrencyCodeDisplay currencyId={record.currencyId} />;
+    const tokenSegments: JSX.Element[] = [
+        <>{record.promptTokens} × {formatUnitPrice(record.promptUnitPrice)} {currencyCode}/M</>,
+        <>{record.completionTokens} × {formatUnitPrice(record.completionUnitPrice)} {currencyCode}/M</>,
     ];
     if (record.cachedPromptTokens > 0) {
-        tokenSegments.push(`${record.cachedPromptTokens} × ${formatUnitPrice(record.cacheReadUnitPrice)} ${record.currency}/M`);
+        tokenSegments.push(<>{record.cachedPromptTokens} × {formatUnitPrice(record.cacheReadUnitPrice)} {currencyCode}/M</>);
     }
     if (record.cacheCreationTokens > 0) {
-        tokenSegments.push(`${record.cacheCreationTokens} × ${formatUnitPrice(record.cacheWriteUnitPrice)} ${record.currency}/M`);
+        tokenSegments.push(<>{record.cacheCreationTokens} × {formatUnitPrice(record.cacheWriteUnitPrice)} {currencyCode}/M</>);
     }
-    const substitution = `(${tokenSegments.join(' + ')}) × ${record.groupMultiplier}`;
+    const substitution = (
+        <>
+            ({tokenSegments.map((segment, index) => (
+                <span key={index}>{index > 0 ? ' + ' : ''}{segment}</span>
+            ))})
+            {' '}× {record.groupMultiplier}
+        </>
+    );
 
     return (
         <div className="px-6 py-2">
@@ -131,7 +140,7 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
                         <span />
                         <span>= {substitution}</span>
                         <span />
-                        <span>= {formatMoney(record.finalCost)} {record.currency}</span>
+                        <span>= {formatMoney(record.finalCost)} <CurrencyCodeDisplay currencyId={record.currencyId} /></span>
                     </div>
                 </Descriptions.Item>
             </Descriptions>
