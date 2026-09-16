@@ -1363,6 +1363,14 @@ export const zhCN: I18nRules = {
       subtitle: '查看系统用户在各货币下的余额',
       action: { adjust: '调整余额' },
       messages: { adjustSuccess: '调整成功' },
+      filter: {
+        id: '钱包ID',
+        idPlaceholder: '输入钱包ID',
+        userId: '用户ID',
+        userIdPlaceholder: '输入用户ID',
+        currencyId: '货币ID',
+        balance: '余额'
+      },
       adjust: {
         userId: '用户',
         userIdRequired: '请选择用户',
@@ -1380,15 +1388,60 @@ export const zhCN: I18nRules = {
     },
     transactionManager: {
       title: '交易流水',
-      subtitle: '查看所有资金变动记录'
+      subtitle: '查看所有资金变动记录',
+      filter: {
+        id: '记录ID',
+        idPlaceholder: '输入记录ID',
+        requestId: '请求ID',
+        requestIdPlaceholder: '输入请求ID',
+        type: '类型',
+        typePlaceholder: '选择类型',
+        ownerId: '用户',
+        ownerIdPlaceholder: '输入用户ID',
+        currencyId: '货币',
+        currencyPlaceholder: '选择货币',
+        referenceType: '关联类型',
+        referenceTypePlaceholder: '选择关联类型',
+        referenceId: '关联ID',
+        referenceIdPlaceholder: '输入关联ID',
+        remark: '备注',
+        remarkPlaceholder: '输入备注'
+      }
     },
     tenantWalletManager: {
       title: '租户钱包管理',
-      subtitle: '查看所选租户在各货币下的余额'
+      subtitle: '查看所选租户在各货币下的余额',
+      filter: {
+        id: '钱包ID',
+        idPlaceholder: '输入钱包ID',
+        memberId: '成员',
+        memberIdPlaceholder: '输入成员ID',
+        currencyId: '货币',
+        currencyPlaceholder: '选择货币',
+        balance: '余额'
+      }
     },
     tenantTransactionManager: {
       title: '租户交易流水',
-      subtitle: '查看所选租户的资金变动记录'
+      subtitle: '查看所选租户的资金变动记录',
+      filter: {
+        id: '记录ID',
+        idPlaceholder: '输入记录ID',
+        requestId: '请求ID',
+        requestIdPlaceholder: '输入请求ID',
+        type: '类型',
+        typePlaceholder: '选择类型',
+        memberId: '成员',
+        memberIdPlaceholder: '输入成员ID',
+        currencyId: '货币',
+        currencyPlaceholder: '选择货币',
+        referenceType: '关联类型',
+        referenceTypePlaceholder: '选择关联类型',
+        referenceId: '关联ID',
+        referenceIdPlaceholder: '输入关联ID',
+        remark: '备注',
+        remarkPlaceholder: '输入备注'
+      }
     },
     permissionCatalog: {
       source: {

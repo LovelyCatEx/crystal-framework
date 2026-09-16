@@ -1366,6 +1366,14 @@ export const enUS: I18nRules = {
       subtitle: 'View system user balances across currencies',
       action: { adjust: 'Adjust Balance' },
       messages: { adjustSuccess: 'Adjusted successfully' },
+      filter: {
+        id: 'Wallet ID',
+        idPlaceholder: 'Enter wallet ID',
+        userId: 'User ID',
+        userIdPlaceholder: 'Enter user ID',
+        currencyId: 'Currency ID',
+        balance: 'Balance'
+      },
       adjust: {
         userId: 'User',
         userIdRequired: 'Please select a user',
@@ -1383,15 +1391,60 @@ export const enUS: I18nRules = {
     },
     transactionManager: {
       title: 'Transactions',
-      subtitle: 'View all balance movements'
+      subtitle: 'View all balance movements',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        requestId: 'Request ID',
+        requestIdPlaceholder: 'Enter request ID',
+        type: 'Type',
+        typePlaceholder: 'Select type',
+        ownerId: 'User',
+        ownerIdPlaceholder: 'Enter user ID',
+        currencyId: 'Currency',
+        currencyPlaceholder: 'Select currency',
+        referenceType: 'Reference type',
+        referenceTypePlaceholder: 'Select reference type',
+        referenceId: 'Reference ID',
+        referenceIdPlaceholder: 'Enter reference ID',
+        remark: 'Remark',
+        remarkPlaceholder: 'Enter remark'
+      }
     },
     tenantWalletManager: {
       title: 'Tenant Wallet Management',
-      subtitle: 'View balances of the selected tenant across currencies'
+      subtitle: 'View balances of the selected tenant across currencies',
+      filter: {
+        id: 'Wallet ID',
+        idPlaceholder: 'Enter wallet ID',
+        memberId: 'Member',
+        memberIdPlaceholder: 'Enter member ID',
+        currencyId: 'Currency',
+        currencyPlaceholder: 'Select currency',
+        balance: 'Balance'
+      }
     },
     tenantTransactionManager: {
       title: 'Tenant Transactions',
-      subtitle: 'View balance movements of the selected tenant'
+      subtitle: 'View balance movements of the selected tenant',
+      filter: {
+        id: 'Record ID',
+        idPlaceholder: 'Enter record ID',
+        requestId: 'Request ID',
+        requestIdPlaceholder: 'Enter request ID',
+        type: 'Type',
+        typePlaceholder: 'Select type',
+        memberId: 'Member',
+        memberIdPlaceholder: 'Enter member ID',
+        currencyId: 'Currency',
+        currencyPlaceholder: 'Select currency',
+        referenceType: 'Reference type',
+        referenceTypePlaceholder: 'Select reference type',
+        referenceId: 'Reference ID',
+        referenceIdPlaceholder: 'Enter reference ID',
+        remark: 'Remark',
+        remarkPlaceholder: 'Enter remark'
+      }
     },
     permissionCatalog: {
       source: {
