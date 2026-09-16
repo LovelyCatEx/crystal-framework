@@ -53,7 +53,8 @@ class AiModelInvocationRecordServiceImpl(
         val queueWaitMs = extractQueueWaitMs(context.rawResponseBody)
 
         val requestSizeBytes = context.rawRequestBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
-        val responseSizeBytes = context.rawResponseBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
+        val responseSizeBytes = context.responseSizeBytes
+            ?: context.rawResponseBody?.toByteArray(Charsets.UTF_8)?.size?.toLong()
 
         val promptPrice = model.inputPricePerMillion.toDouble()
         val completionPrice = model.outputPricePerMillion.toDouble()

@@ -180,6 +180,7 @@ class AiChatServiceImpl(
             var responseMetadataId = ""
             var stopReason: String? = null
             var rawResponseBody: String? = null
+            var totalResponseSizeBytes = 0L
 
             try {
                 var finalized = false
@@ -215,6 +216,7 @@ class AiChatServiceImpl(
 
                     accumulatedUsage += round.usage
                     totalToolCalls += round.toolCalls.size
+                    totalResponseSizeBytes += round.responseSizeBytes
 
                     if (!round.hasToolCall) {
                         responseMetadataId = round.responseId.orEmpty()
@@ -255,6 +257,7 @@ class AiChatServiceImpl(
                         stopReason = stopReason,
                         rawRequestBody = rawRequestBody,
                         rawResponseBody = rawResponseBody,
+                        responseSizeBytes = totalResponseSizeBytes,
                         sessionId = subject.sessionId,
                         clientIp = subject.clientIp,
                         userAgent = subject.userAgent,
@@ -490,6 +493,9 @@ class AiChatServiceImpl(
         var rawResponseBody: String? = null
             private set
 
+        var responseSizeBytes: Long = 0L
+            private set
+
         var usage: ChatResponse.Usage = ChatResponse.Usage()
             private set
 
@@ -507,6 +513,7 @@ class AiChatServiceImpl(
 
             if (frame.originalResponse.isNotBlank()) {
                 rawResponseBody = frame.originalResponse
+                responseSizeBytes += frame.originalResponse.toByteArray(Charsets.UTF_8).size.toLong()
             }
 
             usage = ChatResponse.Usage(
