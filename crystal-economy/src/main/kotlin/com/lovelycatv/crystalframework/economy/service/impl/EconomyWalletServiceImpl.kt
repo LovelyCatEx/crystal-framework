@@ -20,6 +20,7 @@ import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.common.ResourceScope
 import com.lovelycatv.crystalframework.shared.utils.SnowIdGenerator
 import com.lovelycatv.crystalframework.shared.utils.lockRowForUpdate
+import com.lovelycatv.crystalframework.shared.utils.reactor.withDistributedTransactionName
 import com.lovelycatv.crystalframework.sdk.economy.TenantMemberIdResolver
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.context.annotation.Lazy
@@ -72,38 +73,40 @@ class EconomyWalletServiceImpl(
 
         val wallet = getOrCreateWallet(scope, scopeId, ownerId, currencyId)
 
-        return transactionalOperator.executeAndAwait {
-            r2dbcEntityTemplate.lockRowForUpdate(TableConstants.TABLE_ECONOMY_WALLETS, wallet.id)
-            val current = walletRepository.findById(wallet.id).awaitFirstOrNull()
-                ?: throw BusinessException("Wallet not found: ${wallet.id}")
+        return withDistributedTransactionName("AdjustWallet") {
+            transactionalOperator.executeAndAwait {
+                r2dbcEntityTemplate.lockRowForUpdate(TableConstants.TABLE_ECONOMY_WALLETS, wallet.id)
+                val current = walletRepository.findById(wallet.id).awaitFirstOrNull()
+                    ?: throw BusinessException("Wallet not found: ${wallet.id}")
 
-            val before = current.balance
-            val after = before + units
-            if (units < 0 && after < 0) {
-                throw BusinessException("Insufficient balance: required ${-units}, available $before")
+                val before = current.balance
+                val after = before + units
+                if (units < 0 && after < 0) {
+                    throw BusinessException("Insufficient balance: required ${-units}, available $before")
+                }
+
+                current.balance = after
+                current.onUpdate()
+                walletRepository.save(current).awaitFirstOrNull()
+
+                val transaction = EconomyTransactionEntity(
+                    id = snowIdGenerator.nextId(),
+                    scope = scope.typeId,
+                    scopeId = scopeId,
+                    ownerId = ownerId,
+                    requestId = requestId,
+                    type = type,
+                    currencyId = currencyId,
+                    amount = units,
+                    balanceBefore = before,
+                    balanceAfter = after,
+                    referenceType = referenceType,
+                    referenceId = referenceId,
+                    remark = remark,
+                ).apply { newEntity() }
+                transactionRepository.save(transaction).awaitFirstOrNull()
+                    ?: throw BusinessException("Could not create economy transaction")
             }
-
-            current.balance = after
-            current.onUpdate()
-            walletRepository.save(current).awaitFirstOrNull()
-
-            val transaction = EconomyTransactionEntity(
-                id = snowIdGenerator.nextId(),
-                scope = scope.typeId,
-                scopeId = scopeId,
-                ownerId = ownerId,
-                requestId = requestId,
-                type = type,
-                currencyId = currencyId,
-                amount = units,
-                balanceBefore = before,
-                balanceAfter = after,
-                referenceType = referenceType,
-                referenceId = referenceId,
-                remark = remark,
-            ).apply { newEntity() }
-            transactionRepository.save(transaction).awaitFirstOrNull()
-                ?: throw BusinessException("Could not create economy transaction")
         }
     }
 
@@ -129,23 +132,25 @@ class EconomyWalletServiceImpl(
             ?.let { return EconomyChargeResult.CHARGED }
 
         return try {
-            transactionalOperator.executeAndAwait {
-                var remaining = units
-                if (tenantId != null) {
-                    val memberId = tenantMemberIdResolver?.resolveMemberId(tenantId, userId)
-                    if (memberId != null) {
-                        val tenantWallet = getOrCreateWallet(ResourceScope.TENANT, tenantId, memberId, currency.id)
-                        remaining = deductFromWallet(tenantWallet, currency.id, remaining, referenceType, referenceId, "$requestId:${ResourceScope.TENANT.name.lowercase()}")
+            withDistributedTransactionName("ChargeWallet") {
+                transactionalOperator.executeAndAwait {
+                    var remaining = units
+                    if (tenantId != null) {
+                        val memberId = tenantMemberIdResolver?.resolveMemberId(tenantId, userId)
+                        if (memberId != null) {
+                            val tenantWallet = getOrCreateWallet(ResourceScope.TENANT, tenantId, memberId, currency.id)
+                            remaining = deductFromWallet(tenantWallet, currency.id, remaining, referenceType, referenceId, "$requestId:${ResourceScope.TENANT.name.lowercase()}")
+                        }
                     }
+                    if (remaining > 0) {
+                        val userWallet = getOrCreateWallet(ResourceScope.SYSTEM, 0, userId, currency.id)
+                        remaining = deductFromWallet(userWallet, currency.id, remaining, referenceType, referenceId, "$requestId:${ResourceScope.SYSTEM.name.lowercase()}")
+                    }
+                    if (remaining > 0) {
+                        throw InsufficientBalanceException()
+                    }
+                    EconomyChargeResult.CHARGED
                 }
-                if (remaining > 0) {
-                    val userWallet = getOrCreateWallet(ResourceScope.SYSTEM, 0, userId, currency.id)
-                    remaining = deductFromWallet(userWallet, currency.id, remaining, referenceType, referenceId, "$requestId:${ResourceScope.SYSTEM.name.lowercase()}")
-                }
-                if (remaining > 0) {
-                    throw InsufficientBalanceException()
-                }
-                EconomyChargeResult.CHARGED
             }
         } catch (_: InsufficientBalanceException) {
             EconomyChargeResult.INSUFFICIENT_BALANCE
