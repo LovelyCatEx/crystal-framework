@@ -86,6 +86,10 @@
         </dependency>
         <dependency>
             <groupId>com.lovelycatv.crystalframework</groupId>
+            <artifactId>crystal-economy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lovelycatv.crystalframework</groupId>
             <artifactId>crystal-resource</artifactId>
         </dependency>
         <dependency>

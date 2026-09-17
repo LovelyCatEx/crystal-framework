@@ -14,6 +14,7 @@ import com.lovelycatv.crystalframework.ai.repository.AiModelRepository
 import com.lovelycatv.crystalframework.ai.repository.AiProviderRepository
 import com.lovelycatv.crystalframework.ai.repository.AiUserGroupModelRepository
 import com.lovelycatv.crystalframework.ai.service.manager.AiModelManagerService
+import com.lovelycatv.crystalframework.economy.service.manager.CurrencyManagerService
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.service.redis.ReactiveRedisService
 import com.lovelycatv.crystalframework.shared.store.ReactiveExpiringKVStore
@@ -30,6 +31,7 @@ class AiModelManagerServiceImpl(
     private val repository: AiModelRepository,
     private val providerRepository: AiProviderRepository,
     private val userGroupModelRepository: AiUserGroupModelRepository,
+    private val currencyManagerService: CurrencyManagerService,
     private val snowIdGenerator: SnowIdGenerator,
     private val reactiveRedisService: ReactiveRedisService,
     override val eventPublisher: ApplicationEventPublisher,
@@ -48,6 +50,8 @@ class AiModelManagerServiceImpl(
     override suspend fun create(dto: ManagerCreateAiModelDTO): AiModelEntity {
         providerRepository.findById(dto.providerId).awaitFirstOrNull()
             ?: throw BusinessException("AI provider ${dto.providerId} not found")
+        currencyManagerService.getByIdOrNull(dto.currencyId)
+            ?: throw BusinessException("Currency ${dto.currencyId} not found")
         repository.findByProviderIdAndKey(dto.providerId, dto.key).awaitFirstOrNull()?.let {
             throw BusinessException("AI model key '${dto.key}' is already taken for provider ${dto.providerId}")
         }
@@ -65,7 +69,7 @@ class AiModelManagerServiceImpl(
             outputPricePerMillion = dto.outputPricePerMillion,
             cacheReadPricePerMillion = dto.cacheReadPricePerMillion,
             cacheWritePricePerMillion = dto.cacheWritePricePerMillion,
-            currency = dto.currency,
+            currencyId = dto.currencyId,
             requestConfig = dto.requestConfig,
             enabled = dto.enabled,
             sort = dto.sort,
@@ -100,6 +104,10 @@ class AiModelManagerServiceImpl(
         dto.capabilities?.let {
             AiModelEntity(capabilities = it).getRealCapabilities()
         }
+        dto.currencyId?.let { currencyId ->
+            currencyManagerService.getByIdOrNull(currencyId)
+                ?: throw BusinessException("Currency $currencyId not found")
+        }
         return original.apply {
             this.providerId = providerId
             this.key = key
@@ -113,7 +121,7 @@ class AiModelManagerServiceImpl(
             dto.outputPricePerMillion?.let { outputPricePerMillion = it }
             dto.cacheReadPricePerMillion?.let { cacheReadPricePerMillion = it }
             dto.cacheWritePricePerMillion?.let { cacheWritePricePerMillion = it }
-            dto.currency?.let { currency = it }
+            dto.currencyId?.let { currencyId = it }
             dto.requestConfig?.let { requestConfig = it }
             dto.enabled?.let { enabled = it }
             dto.sort?.let { sort = it }

@@ -11,7 +11,7 @@ import java.math.BigDecimal
 
 /**
  * A model as shown in the playground: display name, key, the four prices, capabilities, context
- * window and currency. Anything else (internal id, description, max output tokens, request config)
+ * window and currency id. Anything else (internal id, description, max output tokens, request config)
  * is deliberately not exposed.
  */
 data class ManagerAiPlaygroundModelVO(
@@ -23,5 +23,5 @@ data class ManagerAiPlaygroundModelVO(
     val cacheWritePricePerMillion: BigDecimal?,
     val capabilities: Set<Int>,
     val contextWindowTokens: Long,
-    val currency: String,
+    val currencyId: Long,
 )

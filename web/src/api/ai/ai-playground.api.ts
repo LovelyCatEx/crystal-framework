@@ -76,7 +76,7 @@ export interface AiPlaygroundModel {
     cacheWritePricePerMillion: string | null;
     capabilities: number[];
     contextWindowTokens: string;
-    currency: string;
+    currencyId: string;
 }
 
 export interface AiPlaygroundData {

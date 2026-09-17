@@ -151,3 +151,19 @@ export function getReasoningEffort(effort: string): string {
 export function getAiModelInvocationStatus(status: number): string {
     return translateEnum('aiModelInvocationStatus', status);
 }
+
+export function getWalletScope(scope: number): string {
+    return translateEnum('walletScope', scope);
+}
+
+export function getEconomyTransactionType(type: number): string {
+    return translateEnum('economyTransactionType', type);
+}
+
+export function getEconomyReferenceType(type: number): string {
+    return translateEnum('economyReferenceType', type);
+}
+
+export function getCurrencySymbolPosition(position: number): string {
+    return translateEnum('currencySymbolPosition', position);
+}

@@ -41,9 +41,9 @@ data class ManagerCreateAiModelDTO(
     val cacheReadPricePerMillion: BigDecimal? = null,
     @field:DecimalMin(value = "0.0", inclusive = true)
     val cacheWritePricePerMillion: BigDecimal? = null,
-    @field:NotBlank(message = "Currency is required")
-    @field:Size(max = 16, message = "Currency length cannot exceed 16 characters")
-    val currency: String,
+    @field:NotNull(message = "Currency id is required")
+    @field:Positive(message = "Currency id must be positive")
+    val currencyId: Long,
     @field:NotBlank(message = "Request config is required")
     val requestConfig: String = "{}",
     val enabled: Boolean = true,

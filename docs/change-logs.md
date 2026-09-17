@@ -8,6 +8,26 @@
 3. v1.15.0 开始彻底移除 crystal-message 模块，已有数据表不会被删除。
 :::
 
+## v1.16.0
+
+2026-09-17
+
+### 新功能
++ feat(economy): 新增 economy 经济模块。
++ feat(web): economy 钱包与交易页面新增筛选。
++ feat(web): AI 页面展示实体名称与引用链接。
++ feat(database): 嵌套 APM 段传播分布式事务。
+
+### Bug 修复
++ fix(economy): 命名钱包充值并调整分布式事务。
++ fix(ai): 跨帧累计流式响应大小。
++ fix(web): 格式化 AI 金额并用 swr 缓存实体查找。
+
+### 其他
++ refactor(ai): 按 id 关联 AI 模型与调用记录到币种。
+
+---
+
 ## v1.15.1
 
 2026-09-14

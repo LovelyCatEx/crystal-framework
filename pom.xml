@@ -54,6 +54,7 @@
         <module>crystal-auth</module>
         <module>crystal-approval</module>
         <module>crystal-ai</module>
+        <module>crystal-economy</module>
     </modules>
 
     <scm>
@@ -67,7 +68,7 @@
         <java.version>17</java.version>
         <kotlin.version>2.3.21</kotlin.version>
         <snailjob.version>1.10.0</snailjob.version>
-        <revision>1.15.1</revision>
+        <revision>1.16.0</revision>
         <crystalframework.basedir>${maven.multiModuleProjectDirectory}</crystalframework.basedir>
         <verification.detekt.skip>false</verification.detekt.skip>
         <verification.dependency-check.skip>false</verification.dependency-check.skip>
@@ -80,6 +81,11 @@
             <dependency>
                 <groupId>com.lovelycatv.crystalframework</groupId>
                 <artifactId>crystal-ai</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lovelycatv.crystalframework</groupId>
+                <artifactId>crystal-economy</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

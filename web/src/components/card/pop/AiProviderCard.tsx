@@ -7,9 +7,7 @@
 
 import {Card, Descriptions, Spin, Tag} from "antd";
 import {CopyableToolTip} from "../../CopyableToolTip.tsx";
-import {useEffect, useState} from "react";
-import {AiProviderManagerController} from "@/api/ai/ai-provider.api.ts";
-import type {AiProviderEntity} from "@/types/ai/ai.types.ts";
+import {useAiProvider} from "@/compositions/use-ai-provider.ts";
 import {useTranslation} from "react-i18next";
 
 interface AiProviderCardProps {
@@ -18,28 +16,7 @@ interface AiProviderCardProps {
 
 export function AiProviderCard({ providerId }: AiProviderCardProps) {
     const { t } = useTranslation();
-    const [provider, setProvider] = useState<AiProviderEntity | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        if (!providerId) {
-            setIsLoading(false);
-            return;
-        }
-
-        setIsLoading(true);
-        AiProviderManagerController.getById(providerId)
-            .then((response) => {
-                setProvider(response || null);
-            })
-            .catch((error) => {
-                console.error('Failed to load provider:', error);
-                setProvider(null);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, [providerId]);
+    const {provider, isLoading} = useAiProvider(providerId);
 
     if (isLoading) {
         return (

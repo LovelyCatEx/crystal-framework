@@ -10,6 +10,7 @@ package com.lovelycatv.crystalframework.database
 import com.lovelycatv.crystalframework.database.constants.R2dbcDataSourceConstants
 import com.lovelycatv.crystalframework.database.sharding.R2dbcShardingRuleRegistry
 import com.lovelycatv.crystalframework.shared.config.observability.ApmParentSpan
+import com.lovelycatv.crystalframework.shared.config.observability.ApmParentTransaction
 import com.lovelycatv.crystalframework.shared.config.observability.ApmTraceHeaders
 import com.lovelycatv.crystalframework.shared.config.observability.DistributedTransactionLabel
 import io.r2dbc.spi.Connection
@@ -48,6 +49,7 @@ class CrystalShardingConnectionFactory(
                     apmParentSpan = if (context.hasKey(ApmParentSpan::class.java))
                         context.get<ApmParentSpan>(ApmParentSpan::class.java).span
                     else null,
+                    apmParentTransaction = context.getOrDefault(ApmParentTransaction::class.java, ApmParentTransaction())!!,
                 )
             )
         }

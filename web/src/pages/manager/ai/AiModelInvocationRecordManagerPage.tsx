@@ -17,15 +17,10 @@ import {useManagerQueryParams} from "@/compositions/use-manager-query-params.ts"
 import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/types/ai/ai.types.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {CopyableToolTip} from "@/components/CopyableToolTip.tsx";
-
-function formatMoney(value: number): string {
-    return value.toFixed(6);
-}
-
-function formatUnitPrice(value: number): string {
-    if (!value) return '0';
-    return value.toFixed(4).replace(/\.?0+$/, '');
-}
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
+import {AiModelChip} from "@/components/chip/AiModelChip.tsx";
+import {AiProviderChip} from "@/components/chip/AiProviderChip.tsx";
+import {TenantDisplay} from "@/components/tenant/TenantDisplay.tsx";
 
 function formatBytes(value: string | null | undefined): string {
     if (!value) return '—';
@@ -48,17 +43,24 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
     const show = (value: string | null | undefined): string => (value ? value : '—');
     const showNum = (value: number | null | undefined): string => (value !== null && value !== undefined ? String(value) : '—');
 
-    const tokenSegments: string[] = [
-        `${record.promptTokens} × ${formatUnitPrice(record.promptUnitPrice)} ${record.currency}/M`,
-        `${record.completionTokens} × ${formatUnitPrice(record.completionUnitPrice)} ${record.currency}/M`,
+    const tokenSegments: JSX.Element[] = [
+        <>{record.promptTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.promptUnitPrice} />/M</>,
+        <>{record.completionTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.completionUnitPrice} />/M</>,
     ];
     if (record.cachedPromptTokens > 0) {
-        tokenSegments.push(`${record.cachedPromptTokens} × ${formatUnitPrice(record.cacheReadUnitPrice)} ${record.currency}/M`);
+        tokenSegments.push(<>{record.cachedPromptTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.cacheReadUnitPrice} />/M</>);
     }
     if (record.cacheCreationTokens > 0) {
-        tokenSegments.push(`${record.cacheCreationTokens} × ${formatUnitPrice(record.cacheWriteUnitPrice)} ${record.currency}/M`);
+        tokenSegments.push(<>{record.cacheCreationTokens} × <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.cacheWriteUnitPrice} />/M</>);
     }
-    const substitution = `(${tokenSegments.join(' + ')}) × ${record.groupMultiplier}`;
+    const substitution = (
+        <>
+            ({tokenSegments.map((segment, index) => (
+                <span key={index}>{index > 0 ? ' + ' : ''}{segment}</span>
+            ))})
+            {' '}× {record.groupMultiplier}
+        </>
+    );
 
     return (
         <div className="px-6 py-2">
@@ -72,13 +74,13 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
                     {show(record.sessionId)}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.tenantId')}>
-                    {show(record.tenantId)}
+                    <TenantDisplay tenantId={record.tenantId} variant="icon-text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.providerId')}>
-                    {show(record.providerId)}
+                    <AiProviderChip providerId={record.providerId} variant="text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.modelId')}>
-                    {show(record.modelId)}
+                    <AiModelChip modelId={record.modelId} variant="text" />
                 </Descriptions.Item>
                 <Descriptions.Item label={t('pages.aiModelInvocationRecordManager.detail.stopReason')}>
                     {show(record.stopReason)}
@@ -131,7 +133,7 @@ function InvocationRecordDetail({record}: { record: AiModelInvocationRecordEntit
                         <span />
                         <span>= {substitution}</span>
                         <span />
-                        <span>= {formatMoney(record.finalCost)} {record.currency}</span>
+                        <span>= <CurrencyAmountCodeDisplay currencyId={record.currencyId} amount={record.finalCost} /></span>
                     </div>
                 </Descriptions.Item>
             </Descriptions>
@@ -218,6 +220,19 @@ export default function AiModelInvocationRecordManagerPage() {
                 update={async () => null}
                 create={async () => null}
                 tableActions={[
+                    {
+                        label: <span>{t('pages.aiModelInvocationRecordManager.filter.id')}</span>,
+                        children: <Input
+                            style={{width: 180}}
+                            placeholder={t('pages.aiModelInvocationRecordManager.filter.idPlaceholder')}
+                            defaultValue={filters.id}
+                            allowClear
+                            onPressEnter={(e) => setFilter('id', (e.target as HTMLInputElement).value || undefined)}
+                            onChange={(e) => {
+                                if (e.target.value === '') setFilter('id', undefined);
+                            }}
+                        />,
+                    },
                     {
                         label: <span>{t('pages.aiModelInvocationRecordManager.filter.requestId')}</span>,
                         children: <Input
