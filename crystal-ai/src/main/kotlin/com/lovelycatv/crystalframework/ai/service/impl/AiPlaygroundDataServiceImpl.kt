@@ -104,6 +104,6 @@ class AiPlaygroundDataServiceImpl(
         cacheWritePricePerMillion = cacheWritePricePerMillion,
         capabilities = getRealCapabilities().map { it.typeId }.toSet(),
         contextWindowTokens = contextWindowTokens,
-        currency = currency,
+        currencyId = currencyId,
     )
 }

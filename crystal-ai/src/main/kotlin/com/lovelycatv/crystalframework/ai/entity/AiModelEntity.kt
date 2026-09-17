@@ -9,6 +9,7 @@ package com.lovelycatv.crystalframework.ai.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.ai.types.AiModelCapability
+import com.lovelycatv.crystalframework.economy.constants.CurrencyConstants
 import com.lovelycatv.crystalframework.shared.annotations.NotQueryable
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
@@ -48,8 +49,9 @@ class AiModelEntity(
     var cacheReadPricePerMillion: BigDecimal? = null,
     @Column("cache_write_price_per_million")
     var cacheWritePricePerMillion: BigDecimal? = null,
-    @Column("currency")
-    var currency: String = "",
+    @Column("currency_id")
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    var currencyId: Long = CurrencyConstants.NO_CURRENCY_ID,
     @Column("request_config")
     @field:NotQueryable
     var requestConfig: String = "{}",

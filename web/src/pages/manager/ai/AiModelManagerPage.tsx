@@ -21,6 +21,8 @@ import type {AiProviderEntity} from "@/types/ai/ai.types.ts";
 import {AiModelCapability} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability} from "@/i18n/enum-helpers.ts";
 import {AiModelRequestConfigForm} from "@/components/ai/AiModelRequestConfigForm.tsx";
+import {CurrencyManagerController} from "@/api/economy/currency.api.ts";
+import type {CurrencyEntity} from "@/types/economy/economy.types.ts";
 
 export default function AiModelManagerPage() {
     const pageRef = useRef<ManagerPageContainerRef | null>(null);
@@ -28,12 +30,22 @@ export default function AiModelManagerPage() {
     const {t} = useTranslation();
     const columns = useAiModelTableColumns();
     const [providers, setProviders] = useState<AiProviderEntity[]>([]);
+    const [currencies, setCurrencies] = useState<CurrencyEntity[]>([]);
 
     useEffect(() => {
         // Load all providers for the dropdown
         AiProviderManagerController.list().then(res => {
             if (res.data) {
                 setProviders(res.data);
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        // Load all currencies for the dropdown
+        CurrencyManagerController.list().then(res => {
+            if (res.data) {
+                setCurrencies(res.data);
             }
         });
     }, []);
@@ -238,12 +250,14 @@ export default function AiModelManagerPage() {
                                         </Col>
                                     </Row>
                                     <Form.Item
-                                        name="currency"
+                                        name="currencyId"
                                         label={t('pages.aiModelManager.modal.currency.label')}
                                         rules={[{ required: true, message: t('pages.aiModelManager.modal.currency.required') }]}
-                                        initialValue="USD"
                                     >
-                                        <Input placeholder={t('pages.aiModelManager.modal.currency.placeholder')} />
+                                        <Select
+                                            placeholder={t('pages.aiModelManager.modal.currency.placeholder')}
+                                            options={currencies.map(c => ({ value: c.id, label: `${c.code} (${c.symbol})` }))}
+                                        />
                                     </Form.Item>
                                 </>
                             )

@@ -9,6 +9,7 @@ package com.lovelycatv.crystalframework.ai.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.lovelycatv.crystalframework.ai.types.AiModelInvocationStatus
+import com.lovelycatv.crystalframework.economy.constants.CurrencyConstants
 import com.lovelycatv.crystalframework.shared.exception.BusinessException
 import com.lovelycatv.crystalframework.shared.types.entity.BaseEntity
 import org.springframework.data.relational.core.mapping.Column
@@ -84,8 +85,9 @@ class AiModelInvocationRecordEntity(
     var rawCost: Double = 0.0,
     @Column("final_cost")
     var finalCost: Double = 0.0,
-    @Column("currency")
-    var currency: String = "USD",
+    @Column("currency_id")
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    var currencyId: Long = CurrencyConstants.NO_CURRENCY_ID,
 
     @Column("temperature")
     var temperature: Double? = null,

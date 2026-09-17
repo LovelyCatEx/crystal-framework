@@ -5,45 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, {type JSX, useEffect, useState} from "react";
+import React, {type JSX} from "react";
 import {Space, Spin, Tag, Tooltip} from "antd";
 import type {EntityTableColumns} from "../table/entity-table.types.ts";
 import {AiModelInvocationStatus, type AiModelInvocationRecordEntity} from "@/types/ai/ai.types.ts";
 import {CopyableToolTip} from "../CopyableToolTip.tsx";
 import {UserChipById} from "@/components/chip/UserChipById.tsx";
 import {AiModelChip} from "@/components/chip/AiModelChip.tsx";
-import {AiUserGroupManagerController} from "@/api/ai/ai-user-group.api.ts";
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
+import {useAiUserGroup} from "@/compositions/use-ai-user-group.ts";
 import {getAiModelInvocationStatus} from "@/i18n/enum-helpers.ts";
 import {formatTimestamp} from "@/utils/datetime.utils.ts";
 import {useTranslation} from "react-i18next";
 
-function formatUnitPrice(price: number): string {
-    if (!price) return '0';
-    return price.toFixed(4).replace(/\.?0+$/, '');
-}
-
 function GroupInfoDisplay({ groupId, groupMultiplier }: { groupId: string | null; groupMultiplier: number }): JSX.Element {
-    const [groupName, setGroupName] = useState<string | null>(null);
-    const [loading, setLoading] = useState(groupId !== null);
+    const {group, isLoading} = useAiUserGroup(groupId);
 
-    useEffect(() => {
-        if (!groupId) {
-            setLoading(false);
-            return;
-        }
-        AiUserGroupManagerController.getById(groupId)
-            .then(res => {
-                if (res) {
-                    setGroupName(res.name);
-                }
-            })
-            .catch(() => {
-                setGroupName(null);
-            })
-            .finally(() => setLoading(false));
-    }, [groupId]);
-
-    if (loading) {
+    if (isLoading) {
         return <Spin size="small" />;
     }
 
@@ -52,10 +30,10 @@ function GroupInfoDisplay({ groupId, groupMultiplier }: { groupId: string | null
     }
 
     return <Space direction="vertical" size={0}>
-        {groupName
-            ? <span className="text-xs">{groupName}</span>
+        {group
+            ? <span className="text-xs">{group.name}</span>
             : <Tag color="red">Unknown</Tag>}
-        <span className="text-xs text-gray-500">×{groupMultiplier}</span>
+        <Tag color="blue" className="m-0">×{groupMultiplier}</Tag>
     </Space>;
 }
 
@@ -131,7 +109,7 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
                         <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.duration')}: {row.totalDurationMs}ms</span>
                         <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.firstToken')}: {row.timeToFirstTokenMs}ms</span>
                         {row.isStreaming && (
-                            <Tag color="cyan" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{t('components.columns.aiModelInvocationRecord.streaming')}</Tag>
+                            <Tag color="cyan" className="m-0">{t('components.columns.aiModelInvocationRecord.streaming')}</Tag>
                         )}
                     </Space>
                 );
@@ -180,8 +158,8 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
             render: function (_: unknown, row: AiModelInvocationRecordEntity): React.ReactNode | JSX.Element {
                 return (
                     <Space direction="vertical" size={0}>
-                        <span className="text-xs font-mono">{row.finalCost.toFixed(6)} {row.currency}</span>
-                        <span className="text-xs text-gray-400 line-through">{row.rawCost.toFixed(6)} {row.currency}</span>
+                        <span className="text-xs font-mono"><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.finalCost} /></span>
+                        <span className="text-xs text-gray-400 line-through"><CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.rawCost} /></span>
                     </Space>
                 );
             }
@@ -192,22 +170,21 @@ export function useAiModelInvocationRecordTableColumns(): EntityTableColumns<AiM
             key: "pricing",
             width: 150,
             render: function (_: unknown, row: AiModelInvocationRecordEntity): React.ReactNode | JSX.Element {
-                const unit = `${row.currency}/M`;
                 return (
                     <Tooltip title={
                         <div>
-                            {t('components.columns.aiModelInvocationRecord.input')}: {formatUnitPrice(row.promptUnitPrice)} {unit}
+                            {t('components.columns.aiModelInvocationRecord.input')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.promptUnitPrice} />/M
                             <br />
-                            {t('components.columns.aiModelInvocationRecord.output')}: {formatUnitPrice(row.completionUnitPrice)} {unit}
+                            {t('components.columns.aiModelInvocationRecord.output')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.completionUnitPrice} />/M
                             <br />
-                            {t('components.columns.aiModelInvocationRecord.cacheRead')}: {formatUnitPrice(row.cacheReadUnitPrice)} {unit}
+                            {t('components.columns.aiModelInvocationRecord.cacheRead')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.cacheReadUnitPrice} />/M
                             <br />
-                            {t('components.columns.aiModelInvocationRecord.cacheWrite')}: {formatUnitPrice(row.cacheWriteUnitPrice)} {unit}
+                            {t('components.columns.aiModelInvocationRecord.cacheWrite')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.cacheWriteUnitPrice} />/M
                         </div>
                     }>
                         <Space direction="vertical" size={0}>
-                            <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.input')}: {formatUnitPrice(row.promptUnitPrice)} {unit}</span>
-                            <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.output')}: {formatUnitPrice(row.completionUnitPrice)} {unit}</span>
+                            <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.input')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.promptUnitPrice} />/M</span>
+                            <span className="text-xs font-mono">{t('components.columns.aiModelInvocationRecord.output')}: <CurrencyAmountCodeDisplay currencyId={row.currencyId} amount={row.completionUnitPrice} />/M</span>
                         </Space>
                     </Tooltip>
                 );

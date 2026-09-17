@@ -17,6 +17,7 @@ import {ReasoningEffort} from "@/types/ai/ai.types.ts";
 import {getAiModelCapability, getReasoningEffort} from "@/i18n/enum-helpers.ts";
 import {useDeviceType} from "@/compositions/use-device-type.ts";
 import {MarkdownContent} from "@/components/MarkdownContent.tsx";
+import {CurrencyAmountCodeDisplay} from "@/components/economy/CurrencyAmountCodeDisplay.tsx";
 
 const {TextArea} = Input;
 const {Text} = Typography;
@@ -66,11 +67,10 @@ function formatMultiplier(value: string): string {
     return `${num.toFixed(2).replace(/\.?0+$/, "")}x`;
 }
 
-/** Formats a price as "2.00 CNY/M" — always two decimals, currency appended. */
-function formatPrice(value: string | null, currency: string): string {
-    if (value == null) return "-";
-    const num = Number(value);
-    return `${Number.isFinite(num) ? num.toFixed(2) : value} ${currency}/M`;
+/** Formats a per-million price using the currency's configured symbol, position, separators and precision. */
+function formatPrice(value: string | null, currencyId: string) {
+    if (value == null) return <>-</>;
+    return <><CurrencyAmountCodeDisplay currencyId={currencyId} amount={value} />/M</>;
 }
 
 export default function AiPlaygroundPage() {
@@ -199,10 +199,10 @@ export default function AiPlaygroundPage() {
                 </div>
                 <Descriptions column={1} size="small" colon={false}>
                     <Descriptions.Item label={t("pages.aiPlayground.modelKey")}>{selectedModel.key}</Descriptions.Item>
-                    <Descriptions.Item label={t("pages.aiPlayground.modelInputPrice")}>{formatPrice(selectedModel.inputPricePerMillion, selectedModel.currency)}</Descriptions.Item>
-                    <Descriptions.Item label={t("pages.aiPlayground.modelOutputPrice")}>{formatPrice(selectedModel.outputPricePerMillion, selectedModel.currency)}</Descriptions.Item>
-                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheReadPrice")}>{formatPrice(selectedModel.cacheReadPricePerMillion, selectedModel.currency)}</Descriptions.Item>
-                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheWritePrice")}>{formatPrice(selectedModel.cacheWritePricePerMillion, selectedModel.currency)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelInputPrice")}>{formatPrice(selectedModel.inputPricePerMillion, selectedModel.currencyId)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelOutputPrice")}>{formatPrice(selectedModel.outputPricePerMillion, selectedModel.currencyId)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheReadPrice")}>{formatPrice(selectedModel.cacheReadPricePerMillion, selectedModel.currencyId)}</Descriptions.Item>
+                    <Descriptions.Item label={t("pages.aiPlayground.modelCacheWritePrice")}>{formatPrice(selectedModel.cacheWritePricePerMillion, selectedModel.currencyId)}</Descriptions.Item>
                     <Descriptions.Item label={t("pages.aiPlayground.modelContextWindow")}>{selectedModel.contextWindowTokens}</Descriptions.Item>
                     <Descriptions.Item label={t("pages.aiPlayground.modelCapabilities")}>
                         <div className="flex flex-wrap gap-1">
