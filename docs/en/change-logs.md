@@ -8,6 +8,26 @@
 3. Starting from v1.15.0, the crystal-message module is completely removed. Existing data tables will not be deleted.
 :::
 
+## v1.16.0
+
+2026-09-17
+
+### Features
++ feat(economy): Add the economy module.
++ feat(web): Add filters to the economy wallet and transaction pages.
++ feat(web): Show entity names and reference links in AI pages.
++ feat(database): Propagate distributed transactions for nested APM segments.
+
+### Bug Fixes
++ fix(economy): Name the wallet charge and adjust distributed transactions.
++ fix(ai): Accumulate the streaming response size across frames.
++ fix(web): Format AI currency amounts and cache entity lookups with swr.
+
+### Others
++ refactor(ai): Link AI models and invocation records to currency by id.
+
+---
+
 ## v1.15.1
 
 2026-09-14
