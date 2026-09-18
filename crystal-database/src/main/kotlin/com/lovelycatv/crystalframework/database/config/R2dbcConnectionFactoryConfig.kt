@@ -10,6 +10,7 @@ package com.lovelycatv.crystalframework.database.config
 import com.lovelycatv.crystalframework.database.CrystalShardingConnectionFactory
 import com.lovelycatv.crystalframework.database.R2dbcConnectionPoolRegistry
 import com.lovelycatv.crystalframework.database.sharding.R2dbcShardingRuleRegistry
+import com.lovelycatv.crystalframework.shared.config.CrystalFrameworkConfiguration
 import io.r2dbc.spi.ConnectionFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,10 +23,12 @@ class R2dbcConnectionFactoryConfig {
     fun connectionFactory(
         poolRegistry: R2dbcConnectionPoolRegistry,
         shardingRuleRegistry: R2dbcShardingRuleRegistry,
+        configuration: CrystalFrameworkConfiguration,
     ): ConnectionFactory {
         return CrystalShardingConnectionFactory(
             poolRegistry,
             shardingRuleRegistry,
+            configuration.database.sqlAudit.enabled,
         )
     }
 }

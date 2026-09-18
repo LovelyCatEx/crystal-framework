@@ -115,6 +115,8 @@ crystalframework:
     data-sources: []
     routing:
       log-decisions: true
+    sql-audit:
+      enabled: false
   test:
     smtp:
       subject: Crystal Framework SMTP Test

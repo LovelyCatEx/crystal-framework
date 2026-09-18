@@ -28,6 +28,7 @@ import net.sf.jsqlparser.statement.insert.Insert
 import net.sf.jsqlparser.statement.select.PlainSelect
 import net.sf.jsqlparser.statement.update.Update
 import org.reactivestreams.Publisher
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Mono
 import java.time.Duration
 
@@ -54,7 +55,12 @@ class CrystalShardingConnection(
     private val transactionLabel: DistributedTransactionLabel,
     private val apmParentSpan: Span?,
     private val apmParentTransaction: ApmParentTransaction,
+    private val sqlAuditEnabled: Boolean,
 ) : Connection {
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(CrystalShardingConnection::class.java)
+    }
 
     @Volatile
     private var transactionHolder: TransactionConnectionHolder? = null
@@ -110,6 +116,10 @@ class CrystalShardingConnection(
             ?: return delegateToDataSource(R2dbcDataSourceConstants.DEFAULT_DATA_SOURCE_NAME, processedSql)
 
         val logicalTable = stripQuotes(tableNode.name).lowercase()
+
+        if (sqlAuditEnabled) {
+            logger.info("[sql-audit] traceId={} table={} sql={}", apmParentSpan?.traceId ?: "", logicalTable, processedSql)
+        }
 
         // 4. Query sharding rule
         val rule = shardingRuleRegistry.find(logicalTable)?.rule

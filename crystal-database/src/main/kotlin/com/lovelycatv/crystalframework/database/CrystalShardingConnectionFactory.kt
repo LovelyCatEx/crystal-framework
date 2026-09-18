@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono
 class CrystalShardingConnectionFactory(
     private val poolRegistry: R2dbcConnectionPoolRegistry,
     private val shardingRuleRegistry: R2dbcShardingRuleRegistry,
+    private val sqlAuditEnabled: Boolean = false,
 ) : ConnectionFactory {
 
     override fun create(): Publisher<Connection> {
@@ -41,6 +42,7 @@ class CrystalShardingConnectionFactory(
                 CrystalShardingConnection(
                     poolRegistry = poolRegistry,
                     shardingRuleRegistry = shardingRuleRegistry,
+                    sqlAuditEnabled = sqlAuditEnabled,
                     traceHeaders = context.getOrDefault(ApmTraceHeaders::class.java, ApmTraceHeaders(emptyMap()))!!.values,
                     transactionLabel = context.getOrDefault(
                         DistributedTransactionLabel::class.java,

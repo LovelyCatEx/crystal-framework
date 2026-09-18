@@ -232,6 +232,7 @@ public class CrystalFrameworkConfiguration {
         private String defaultDataSource = "primary";
         private DataSource[] dataSources = new DataSource[0];
         private Routing routing = new Routing();
+        private SqlAudit sqlAudit = new SqlAudit();
 
         public String getDefaultDataSource() { return defaultDataSource; }
         public void setDefaultDataSource(String defaultDataSource) { this.defaultDataSource = defaultDataSource; }
@@ -241,6 +242,9 @@ public class CrystalFrameworkConfiguration {
 
         public Routing getRouting() { return routing; }
         public void setRouting(Routing routing) { this.routing = routing; }
+
+        public SqlAudit getSqlAudit() { return sqlAudit; }
+        public void setSqlAudit(SqlAudit sqlAudit) { this.sqlAudit = sqlAudit; }
 
         public static class DataSource {
             private String name = "";
@@ -321,6 +325,18 @@ public class CrystalFrameworkConfiguration {
 
             public boolean isLogDecisions() { return logDecisions; }
             public void setLogDecisions(boolean logDecisions) { this.logDecisions = logDecisions; }
+        }
+
+        /**
+         * Whether outbound business SQL is audited (traceId + table + statement) to the log, which the
+         * Elastic APM agent's log_sending then ships to Elasticsearch for trace-correlated search.
+         * Off by default to avoid flooding logs at high query volume.
+         */
+        public static class SqlAudit {
+            private boolean enabled = false;
+
+            public boolean getEnabled() { return enabled; }
+            public void setEnabled(boolean enabled) { this.enabled = enabled; }
         }
     }
 
